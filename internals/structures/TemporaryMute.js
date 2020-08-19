@@ -2,7 +2,7 @@ const { scheduleJob } = require('node-schedule')
 
 class TemporaryMute {
     /**
-     * @param {import('../Fracture')} self
+     * @param {import('../Lacuna')} self
      * @param {import('../Typings').TemporaryMuteConstructor} data
      */
     constructor(self, data) {
@@ -104,7 +104,7 @@ class TemporaryMute {
     }
 
     /**
-     * @param {import('../Fracture')} self
+     * @param {import('../Lacuna')} self
      */
     static async AddEntries(self) {
         let servers = await self.db.servers.findSome({ 'moderation.tempmutes.0': { $exists: true } })

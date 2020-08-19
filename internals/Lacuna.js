@@ -2,18 +2,23 @@ const { Client, Collection } = require('discord.js')
 const { connect } = require('mongoose')
 const fs = require('fs-extra')
 
-const Logger = require('./Logger')
+const Command = require('./structures/Command')
+const Subcommand = require('./structures/Subcommand')
+const logger = require('./Logger')
 const DatabaseManager = require('../database/DatabaseManager')
 const Player = require('./structures/Player')
 const Translator = require('./locale/Translator')
 
-class Fracture extends Client {
+class Lacuna extends Client {
     /**
      * @param {import('discord.js').ClientOptions} [options]
      */
     constructor(options = {}) {
         super(options)
 
+        /**
+         * @type {Collection<String, Command}
+         */
         this.commands = new Collection()
 
         /**
@@ -28,7 +33,7 @@ class Fracture extends Client {
 
         this.player = new Player(this, { user: process.env.CLIENT_ID, shards: process.env.CLIENT_MAX_SHARDS })
 
-        this.logger = Logger
+        this.logger = logger
 
         this.db = DatabaseManager
 
@@ -37,13 +42,20 @@ class Fracture extends Client {
         this.start()
     }
 
+    get _emojis() {
+        return {
+            OK: '<:check:314349398811475968>',
+            ERROR: '<:xmark:314349398824058880>'
+        }
+    }
+
     async start() {
-        connect(process.env.DB_URL, { useNewUrlParser: true })
+        await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
 
-        this.login(process.env.CLIENT_TOKEN)
+        await this.login(process.env.CLIENT_TOKEN)
 
-        this.LoadCommands()
-        this.LoadEvents()
+        this.loadcommands()
+        this.loadevents()
 
         process.on('unhandledRejection', err => {
             if (err.name != 'DiscordAPIError') {
@@ -57,7 +69,7 @@ class Fracture extends Client {
         return Date.now()
     }
 
-    LoadCommands() {
+    loadcommands() {
         fs.readdir("./commands", async (err, files) => {
             if (err) {
                 logger.error(err)
@@ -86,9 +98,16 @@ class Fracture extends Client {
             
 
                     js.forEach(file => {
-                        const command = require(`../commands/${dir}/${file}`)
+                        const command_config = require(`../commands/${dir}/${file}`)
 
-                        new Command(this, command.config)
+                        const command = new Command(this, command_config)
+
+                        if (command_config.subcommands) {
+                            for (const subcommand of command_config.subcommands) {
+                                new Subcommand(command, subcommand)
+                            }
+                        }
+
                         delete require.cache[require.resolve(`../commands/${dir}/${file}`)]
                     })
         
@@ -99,7 +118,7 @@ class Fracture extends Client {
         })
     }
 
-    LoadEvents() {
+    loadevents() {
         fs.readdir('./events', async (err, files) => {
             if (err) {
                 logger.error(err)
@@ -112,7 +131,7 @@ class Fracture extends Client {
             let progress = 0
 
             dirs.forEach(dir => {
-                fs.readdir(`./commands/${dir}`, (err, _files) => {
+                fs.readdir(`./events/${dir}`, (err, _files) => {
                     if (err) {
                         logger.error(err)
         
@@ -128,9 +147,8 @@ class Fracture extends Client {
         
                     js.forEach(file => {
                         const event = require(`../events/${dir}/${file}`)
-                        const event_name = event.config.name
         
-                        this.on(event_name, event.bind(null, this))
+                        this.on(event.name, event.fn.bind(null, this))
                         delete require.cache[require.resolve(`../events/${dir}/${file}`)]
                     })
 
@@ -142,4 +160,4 @@ class Fracture extends Client {
     }
 }
 
-module.exports = Fracture
+module.exports = Lacuna

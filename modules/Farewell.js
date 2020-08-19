@@ -1,0 +1,60 @@
+class Farewell {
+    /**
+     * Отправляет прощальное сообщение
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').GuildMember} member
+     */
+    static async Handle(self, server, member) {
+        if (member.user.bot) return false
+
+        if (server.modules.farewell.active) {
+            const message = server.modules.farewell.message
+
+            if (message) {
+                if (server.modules.farewell.format == 'DM') {
+                    try {
+                        await member.send(null, { content: message.content })
+                    } catch (err) {
+                        
+                    }
+                }
+
+                if (server.modules.farewell.format == 'CHANNEL') {
+                    const channel = member.guild.channels.cache.get(server.modules.farewell.channel_id)
+
+                    if (channel) await channel.send(null, { content: message.content })
+                }
+            }
+        }
+
+        if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
+            const data = server.modules.restoring.data.find(i => i.user_id == member.id)
+
+            if (!data) {
+                await self.db.servers.update({ _id: member.guild.id }, {
+                    $push: {
+                        'modules.restoring.data': {
+                            user_id: member.id,
+                            roles: member.roles.cache.filter(r => r.id != member.guild.id).map(r => r.id),
+                            nickname: member.nickname,
+                            timestamp: Date.now()
+                        }
+                    }
+                })
+            }
+
+            else {
+                await self.db.servers.update({ _id: member.guild.id, 'members.modules.restoring.data.user_id': member.id }, {
+                    $set: {
+                        'members.restoring.data.$.roles': member.roles.cache.filter(r => r.id != member.guild.id).map(r => r.id),
+                        'members.restoring.data.$.nickname': member.nickname
+                    }
+                })
+            }
+        }
+    }
+}
+
+module.exports = Farewell

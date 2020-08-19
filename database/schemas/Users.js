@@ -11,8 +11,13 @@ const User = new Schema({
         views: { type: Number, default: 0 },
         upvoters: { type: Array, default: [] }
     },
-    balance: { type: Number, default: 0 },
-    created_at: { type: Number, default: 0 }
+    boost: {
+        available: { type: Boolean, default: false },
+        tier: { type: Number, default: 0 },
+        boosted_guilds: { type: Array, default: [] }
+    },
+    created_at: { type: Number, default: Date.now() },
+    modified_at: { type: Number, default: 0 }
 })
 
 module.exports = model('Users', User)

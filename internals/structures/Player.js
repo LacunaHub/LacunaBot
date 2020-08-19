@@ -1,19 +1,19 @@
 const { Manager } = require('@lavacord/discord.js')
 const { Collection } = require('discord.js')
-const request = require('node-superfetch')
 const { URLSearchParams } = require('url')
 const schedule = require('node-schedule')
+const request = require('node-fetch')
 
 class Player {
     /**
-     * @param {import('../Rexana')} self
+     * @param {import('../Lacuna')} self
      * @param {import('@lavacord/discord.js').ManagerOptions} options 
      */
     constructor(self, options) {
         this.self = self
 
         this.nodes = [
-            { id: 'Luana', host: process.env.MUSICNODE1_HOST, port: Number(process.env.MUSICNODE1_PORT), password: process.env.MUSICNODE1_PASSWORD, reconnectInterval: 180000 }
+            { id: 'Winter', host: process.env.WINTER_HOST, port: Number(process.env.WINTER_PORT), password: process.env.WINTER_PASSWORD, reconnectInterval: 180000 }
         ]
 
         this.options = options
@@ -36,6 +36,9 @@ class Player {
         this.connect()
     }
 
+    /**
+     * Получает информацию и статистику о музыкальных плеерах
+     */
     get stats() {
         const nodes = [ ...this.manager.nodes.values() ]
 
@@ -61,6 +64,9 @@ class Player {
         })
     }
 
+    /**
+     * Возвращает оптимальный музыкальный плеер для воспроизведения треков
+     */
     get optimalNode() {
         const nodes = this.manager.idealNodes
 
@@ -69,6 +75,9 @@ class Player {
         })[0]
     }
 
+    /**
+     * Выполняет подключение ко всем музыкальным плеерам
+     */
     async connect() {
         this.manager.on('error', (err, node) => {
             this.self.logger.error(`(Player#${node.id}):`, err)
@@ -78,6 +87,8 @@ class Player {
     }
 
     /**
+     * Выполняет поиск по указанным параметрам
+     * 
      * @param {String} params
      * @returns {import('@lavacord/discord.js').TrackResponse}
      */
@@ -90,16 +101,20 @@ class Player {
         const query = new URLSearchParams()
         query.append('identifier', search)
 
-        const result = await request.get(`http://${node.host}:${node.port}/loadtracks?${query}`, {
+        const result = await request(`http://${node.host}:${node.port}/loadtracks?${query}`, {
+            method: "GET",
             headers: {
                 Authorization: node.password
             }
         })
 
-        return result.body
+        return result.json()
     }
 
     /**
+     * Останавливает воспроизведение на 30 минут, когда в голосовом канале никого нет,
+     * после чего закрывает соединение и возобновляет его, когда кто-то присоединяется к соединению
+     * 
      * @param {String} id
      * @param {Boolean} state
      */
@@ -132,6 +147,8 @@ class Player {
     }
 
     /**
+     * Закрывает воспроизведение
+     * 
      * @param {String} id
      */
     async destroy(id) {

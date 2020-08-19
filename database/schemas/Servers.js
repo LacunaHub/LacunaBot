@@ -31,11 +31,108 @@ const Server = new Schema({
             channel_id: { type: String, default: '' }
         },
         logs: {
-            member_add: {
+            webhooks: { type: Array, default: [] },
+            channel_create: {
                 active: { type: Boolean, default: false },
                 channel_id: { type: String, default: '' }
             },
-            member_remove: {
+            channel_delete: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            channel_update: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            guild_ban_add: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            guild_ban_remove: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            guild_member_add: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            guild_member_remove: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            guild_member_update: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            invite_create: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            invite_delete: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            message_delete: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            message_delete_bulk: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            message_update: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            role_add: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            role_create: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            role_delete: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            role_remove: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            role_update: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            user_update: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            voice_connect: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            voice_disconnect: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            voice_move: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            voice_server_mute: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            voice_server_unmute: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            voice_server_deaf: {
+                active: { type: Boolean, default: false },
+                channel_id: { type: String, default: '' }
+            },
+            voice_server_undeaf: {
                 active: { type: Boolean, default: false },
                 channel_id: { type: String, default: '' }
             }
@@ -68,15 +165,19 @@ const Server = new Schema({
     modules: {
         welcome: {
             active: { type: Boolean, default: false },
-            format: { type: Number, default: 0 },
+            format: { type: String, default: 'DM' },
             channel_id: { type: String, default: '' },
             message: {
                 content: { type: String, default: '' }
+            },
+            initial_roles: {
+                active: { type: Boolean, default: false },
+                roles: { type: Array, default: [] }
             }
         },
         farewell: {
             active: { type: Boolean, default: false },
-            format: { type: Number, default: 0 },
+            format: { type: String, default: 'DM' },
             channel_id: { type: String, default: '' },
             message: {
                 content: { type: String, default: '' }
@@ -107,7 +208,7 @@ const Server = new Schema({
         },
         voice_manager: {
             voice_roles: { type: Array, default: [] },
-            temporary_voice_channels: {
+            temp_voice_channels: {
                 triggers: { type: Array, default: [] }
             }
         },
@@ -118,7 +219,9 @@ const Server = new Schema({
             data: { type: Array, default: [] }
         }
     },
-    created_at: { type: Number, default: 0 }
+    created_at: { type: Number, default: Date.now() },
+    modified_at: { type: Number, default: 0 },
+    activity_ping_at: { type: Number, default: Date.now() }
 }, { versionKey: false })
 
 module.exports = model('Servers', Server)

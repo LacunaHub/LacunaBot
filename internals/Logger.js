@@ -13,8 +13,15 @@ class Logger {
      * @param {String} command
      * @param {import('discord.js').Message} message
      */
-    static logCommand(command, message, ...args) {
-        console.log(`[LOG] – [${moment().format()}]: (Command: ${command}): [g: (${message.guild.name}:${message.guild.id}), c: (${message.channel.name}:${message.channel.id}), a: (${message.author.tag}:${message.author.id})]`, ...args)
+    static logc(command, message, ...args) {
+        console.log(`[LOG] – [${moment().format()}]: (Command: ${command}): (${message.guild.name}:${message.guild.id}) (${message.channel.name}:${message.channel.id}) (${message.author.tag}:${message.author.id})`, ...args)
+    }
+
+    /**
+     * @param {import('../internals/Typings').ModuleExecutionData} data
+     */
+    static logm(data) {
+        console.log(`[LOG] – [${moment().format()}]: (Module: ${data.module}): (${data.guild.name}:${data.guild.id}) (${data.target.name}:${data.target.id})`)
     }
 
     static dir(message, ...args) {

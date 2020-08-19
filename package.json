@@ -1,24 +1,24 @@
 {
-  "name": "fracture",
-  "version": "1.0.0",
+  "name": "lacuna",
+  "version": "0.1.0",
   "description": "A Discord bot",
   "main": "start.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node start.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/blastyourstuff/Fracture.git"
+    "url": "git+https://github.com/LacunaHub/Discord.git"
   },
   "author": "Daniyar Kurmangaliiev",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/blastyourstuff/Fracture/issues"
+    "url": "https://github.com/LacunaHub/Discord/issues"
   },
-  "homepage": "https://github.com/blastyourstuff/Fracture#readme",
+  "homepage": "https://github.com/LacunaHub/Discord#readme",
   "dependencies": {
     "@lavacord/discord.js": "0.0.7",
-    "discord.js": "^12.2.0",
+    "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
     "fs-extra": "^9.0.1",
     "moment": "^2.27.0",

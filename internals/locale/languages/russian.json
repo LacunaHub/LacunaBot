@@ -1,1 +1,486 @@
-{}
+{
+    "commands": {
+        "common": {
+            "texts": {
+                "none": "Нет",
+                "at": "в",
+                "missing_permissions": "{0} отсутствуют нужные разрешения: {1}",
+                "premium_only": "{0} команда доступна только бонусным серверам"
+            },
+            "permissions": {
+                "ADMINISTRATOR": "Администратор",
+                "CREATE_INSTANT_INVITE": "Создавать приглашение",
+                "KICK_MEMBERS": "Выгнать участников",
+                "BAN_MEMBERS": "Банить участников",
+                "MANAGE_CHANNELS": "Управление каналами",
+                "MANAGE_GUILD": "Управление сервером",
+                "ADD_REACTIONS": "Добавлять реакции",
+                "VIEW_AUDIT_LOG": "Просмотр журнала аудита",
+                "PRIORITY_SPEAKER": "Приоритетный говорящий",
+                "STREAM": "Видео",
+                "VIEW_CHANNEL": "Видеть канал",
+                "SEND_MESSAGES": "Отправлять сообщения",
+                "SEND_TTS_MESSAGES": "Отправлять TTS-сообщения",
+                "MANAGE_MESSAGES": "Управление сообщениями",
+                "EMBED_LINKS": "Встраивать ссылки",
+                "ATTACH_FILES": "Прикреплять файлы",
+                "READ_MESSAGE_HISTORY": "Читать историю сообщений",
+                "MENTION_EVERYONE": "Упомянуть всех",
+                "USE_EXTERNAL_EMOJIS": "Использовать внешние эмоджи",
+                "VIEW_GUILD_INSIGHTS": "Просмотр аналитики сервера",
+                "CONNECT": "Подключиться",
+                "SPEAK": "Говорить",
+                "MUTE_MEMBERS": "Отключать голос участникам",
+                "DEAFEN_MEMBERS": "Отключать звук участникам",
+                "MOVE_MEMBERS": "Переместить участников",
+                "USE_VAD": "Использовать режим активации по голосу",
+                "CHANGE_NICKNAME": "Изменить никнейм",
+                "MANAGE_NICKNAMES": "Управление никнеймами",
+                "MANAGE_ROLES": "Управление ролями",
+                "MANAGE_WEBHOOKS": "Управление веб-крючками",
+                "MANAGE_EMOJIS": "Управление эмоджи"
+            },
+            "case_log": {
+                "cases": {
+                    "BAN_ADD": "Блокировка выдана",
+                    "BAN_REMOVE": "Блокировка убрана",
+                    "KICK": "Участник выгнан",
+                    "MUTE_ADD": "Заглушение выдано",
+                    "MUTE_REMOVE": "Заглушение убрано",
+                    "PRUNE": "Очистка сообщений",
+                    "WARN_ADD": "Предупреждение выдано",
+                    "WARN_REMOVE": "Предупреждение убрано"
+                },
+                "case": "Случай #{0}",
+                "target": "Пользователь",
+                "executor": "Модератор",
+                "reason": "Причина",
+                "duration": "Длительность"
+            },
+            "args_types": {
+                "MENTION": "Упоминание",
+                "NUMBER": "Числовой",
+                "SNOWFLAKE": "Snowflake",
+                "STRING": "Строковый"
+            }
+        },
+        "help": {
+            "description": "Выводит список доступных команд",
+            "arguments": [
+                {
+                    "name": "команда",
+                    "description": "Выведет дополнительную информацию об указанной команде",
+                    "required": false,
+                    "types": ["STRING"]
+                }
+            ],
+            "texts": {
+                "title": "Список команд",
+                "description": "Используйте {0} в качестве префикса для команд",
+                "categories": {
+                    "general": "Общее",
+                    "moderation": "Модерация",
+                    "music": "Музыка",
+                    "utility": "Полезное"
+                },
+                "usage": "Использование",
+                "args": "Аргументы",
+                "subcommands": "Подкоманды",
+                "required": "Обязательный",
+                "optional": "Необязательный",
+                "type": "Тип: {0}",
+                "permissions": {
+                    "title": "Необходимые разрешения",
+                    "self": "Бот",
+                    "user": "Автор команды"
+                }
+            }
+        },
+        "server": {
+            "description": "Выводит информацию о сервере",
+            "texts": {
+                "owner": "Владелец",
+                "id": "ID сервера",
+                "region": "Регион",
+                "regions": {
+                    "brazil": "Бразилия",
+                    "europe": "Европа",
+                    "hongkong": "Гонконг",
+                    "india": "Индия",
+                    "japan": "Япония",
+                    "russia": "Россия",
+                    "singapore": "Сингапур",
+                    "southafrica": "Южная Африка",
+                    "sydney": "Сидней",
+                    "us-central": "США",
+                    "us-east": "США",
+                    "us-south": "США",
+                    "us-west": "США"
+                },
+                "members": {
+                    "title": "Участники",
+                    "online": "в сети",
+                    "total": "всего"
+                },
+                "channels": {
+                    "title": "Каналы",
+                    "text": "текстовые",
+                    "voice": "голосовые"
+                },
+                "verification_level": "Уровень проверки",
+                "verification_levels": {
+                    "NONE": "Отсутствует",
+                    "LOW": "Низкий",
+                    "MEDIUM": "Средний",
+                    "HIGH": "Высокий",
+                    "VERY_HIGH": "Очень высокий"
+                },
+                "afk_channel": "Канал простоя",
+                "roles": "Ролей",
+                "emojis": "Эмоджи",
+                "footer": {
+                    "server_created": "Сервер создан",
+                    "at": "в"
+                }
+            }
+        },
+        "user": {
+            "description": "Выводит информацию о пользователе",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Выведет информацию об указанном пользователе",
+                    "required": false,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                }
+            ],
+            "texts": {
+                "account_created": "Дата регистрации",
+                "member_joined": "Дата вступления",
+                "roles": "Роли",
+                "statuses": {
+                    "online": "В сети",
+                    "idle": "Не активен",
+                    "dnd": "Не беспокоить",
+                    "offline": "Не в сети"
+                },
+                "presence": {
+                    "playing": "Играет в",
+                    "streaming": "Стримит",
+                    "listening_to": "Слушает",
+                    "watching": "Смотрит"
+                },
+                "permissions": "Разрешения"
+            }
+        },
+        "ban": {
+            "description": "Выдаёт блокировку пользователю",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Выдаст блокировку указанному пользователю",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                },
+                {
+                    "name": "причина",
+                    "description": "Причина для журнала случаев",
+                    "required": false,
+                    "types": ["STRING"]
+                }
+            ],
+            "texts": {
+                "user_not_found": "{0}, пользователь не был указан или не найден",
+                "user_has_moder_permission": "{0}, я не могу заблокировать этого пользователя, потому что у него есть разрешения модератора",
+                "cant_ban_user": "{0}, невозможно заблокировать этого пользователя",
+                "dm_message_description": "Выдана блокировка на сервере {0}"
+            }
+        },
+        "kick": {
+            "description": "Выгоняет пользователя с сервера",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Выгонит указанного пользователя с сервера",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                },
+                {
+                    "name": "причина",
+                    "description": "Причина для журнала случаев",
+                    "required": false,
+                    "types": ["STRING"]
+                }
+            ],
+            "texts": {
+                "user_not_found": "{0}, пользователь не был указан или не найден",
+                "user_has_moder_permission": "{0}, я не могу выгнать этого пользователя, потому что у него есть разрешения модератора",
+                "cant_kick_user": "{0}, невозможно выгнать этого пользователя",
+                "dm_message_description": "Исключение с сервера {0}"
+            }
+        },
+        "mute": {
+            "description": "Выдаёт заглушение пользователю",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Выдаст заглушение указанному пользователю",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                },
+                {
+                    "name": "причина",
+                    "description": "Причина для журнала случаев",
+                    "required": false,
+                    "types": ["STRING"]
+                }
+            ],
+            "texts": {
+                "user_not_found": "{0}, пользователь не был указан или не найден",
+                "user_has_moder_permission": "{0}, я не могу заглушить этого пользователя, потому что у него есть разрешения модератора",
+                "cant_mute_user": "{0}, невозможно заглушить этого пользователя",
+                "user_already_muted": "{0}, пользователю уже было выдано заглушение",
+                "dm_message_description": "Выдано заглушение на сервере {0}"
+            }
+        },
+        "prune": {
+            "description": "Очищает сообщения в канале",
+            "arguments": [
+                {
+                    "name": "количество",
+                    "description": "Очистит указанное количество сообщений",
+                    "required": true,
+                    "types": ["NUMBER"]
+                },
+                {
+                    "name": "пользователь",
+                    "description": "Очистит указанное количество сообщений от указанного пользователя",
+                    "required": false,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                }
+            ],          
+            "texts": {
+                "no_amount_argument": "{0}, необходимо указать количество сообщений",
+                "messages_pruned": "{0}, cообщения успешно очищены ({1})"
+            }
+        },
+        "tempban": {
+            "description": "Выдаёт временную блокировку пользователю",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Выдаст временную блокировку указанному пользователю",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                },
+                {
+                    "name": "длительность",
+                    "description": "Длительность временной блокировки",
+                    "required": true,
+                    "types": ["STRING", "NUMBER"] 
+                },
+                {
+                    "name": "причина",
+                    "description": "Причина для журнала случаев",
+                    "required": false,
+                    "types": ["STRING"]
+                }
+            ],
+            "texts": {
+                "user_not_found": "{0}, пользователь не был указан или не найден",
+                "user_has_moder_permission": "{0}, я не могу заблокировать этого пользователя, потому что у него есть разрешения модератора",
+                "cant_ban_user": "{0}, невозможно заблокировать этого пользователя",
+                "no_timer_argument": "{0}, необходимо указать время блокировки",
+                "invalid_timer_argument": "{0}, аргумент времени блокировки указан неверно",
+                "dm_message_description": "Выдана временная блокировка на сервере {0}"
+            }
+        },
+        "tempmute": {
+            "description": "Выдаёт временное заглушение пользователю",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Выдаст временное заглушение указанному пользователю",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                },
+                {
+                    "name": "длительность",
+                    "description": "Длительность временного заглушения",
+                    "required": true,
+                    "types": ["STRING", "NUMBER"] 
+                },
+                {
+                    "name": "причина",
+                    "description": "Причина для журнала случаев",
+                    "required": false,
+                    "types": ["STRING"]
+                }
+            ],
+            "texts": {
+                "user_not_found": "{0}, пользователь не был указан или не найден",
+                "user_has_moder_permission": "{0}, я не могу заглушить этого пользователя, потому что у него есть разрешения модератора",
+                "cant_mute_user": "{0}, невозможно заглушить этого пользователя",
+                "user_already_muted": "{0}, пользователю уже было выдано заглушение",
+                "no_timer_argument": "{0}, необходимо указать время заглушения",
+                "invalid_timer_argument": "{0}, аргумент времени заглушения указан неверно",
+                "dm_message_description": "Выдано временное заглушение на сервере {0}"
+            }
+        },
+        "unmute": {
+            "description": "Снимает заглушение у пользователя",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Снимет заглушение указанному пользователю",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                },
+                {
+                    "name": "причина",
+                    "description": "Причина для журнала случаев",
+                    "required": false,
+                    "types": ["STRING"]
+                }
+            ],
+            "texts": {
+                "user_not_found": "{0}, пользователь не был указан или не найден",
+                "cant_remove_role": "{0}, я не могу убрать роль заглушения у этого пользователя",
+                "user_not_muted": "{0}, пользователь не был заглушен"
+            }
+        },
+        "reactions": {
+            "description": "Управление элементами меню реакций",
+            "add": {
+                "description": "Добавляет элемент реакции на сообщение",
+                "arguments": [
+                    {
+                        "name": "канал",
+                        "description": "Канал в котором находится сообщение",
+                        "required": true,
+                        "types": ["MENTION", "SNOWFLAKE"]
+                    },
+                    {
+                        "name": "сообщение",
+                        "description": "Идентификатор сообщения на которое будет добавлена реакция",
+                        "required": true,
+                        "types": ["SNOWFLAKE"]
+                    },
+                    {
+                        "name": "эмоджи",
+                        "description": "Реакция, которая будет добавлена",
+                        "required": true,
+                        "types": ["STRING"]
+                    },
+                    {
+                        "name": "направление",
+                        "description": "Канал или роль, которые будут привязаны к реакции",
+                        "required": true,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ]
+            },
+            "remove": {
+                "description": "Удаляет элемент реакции с сообщения",
+                "arguments": [
+                    {
+                        "name": "id",
+                        "description": "Идентификатор элемента реакции или сообщения",
+                        "required": true,
+                        "types": ["SNOWFLAKE", "STRING"]
+                    }
+                ]
+            },
+            "reverse": {
+                "description": "Включает/отключает реверсивный режим элементов реакций",
+                "arguments": [
+                    {
+                        "name": "id",
+                        "description": "Идентификатор элемента реакции или сообщения",
+                        "required": true,
+                        "types": ["SNOWFLAKE", "STRING"]
+                    }
+                ]
+            },
+            "single": {
+                "description": "Включает/отключает одиночный режим элементов реакций",
+                "arguments": [
+                    {
+                        "name": "id",
+                        "description": "Идентификатор элемента реакции или сообщения",
+                        "required": true,
+                        "types": ["SNOWFLAKE", "STRING"]
+                    }
+                ]
+            }
+        }
+    },
+    "modules": {
+        "logs": {
+            "common": {
+                "sender": "Отправитель",
+                "channel": "Канал",
+                "user": "Пользователь",
+                "bot": "Бот",
+                "message_id": "id сообщения",
+                "webhook_create_reason": "Логи: создание веб-крючка для события \"{0}\"",
+                "members": "Участников",
+                "account_created": "Дата регистрации"
+            },
+            "guild_member_add": {
+                "title": "Пользователь присоединился к серверу",
+                "bot_add": "Бот добавлен"
+            },
+            "guild_member_remove": {
+                "title": "Пользователь покинул сервер",
+                "bot_remove": "Бот удалён"
+            },
+            "message_delete": {
+                "title": "Сообщение удалено",
+                "content": "Содержимое"
+            },
+            "message_delete_bulk": {
+                "title": "Массовое удаление сообщений",
+                "amount": "Количество"
+            },
+            "message_update": {
+                "title": "Сообщение изменено",
+                "content_before_update": "Содержимое до изменение",
+                "content_after_update": "Содержимое после изменения"
+            },
+            "voice_connect": {
+                "title": "Голосовое подключение"
+            },
+            "voice_disconnect": {
+                "title": "Голосовое отключение"
+            },
+            "voice_move": {
+                "title": "Голосовое перемещение",
+                "old_channel": "Старый канал",
+                "new_channel": "Новый канал"
+            },
+            "voice_server_mute": {
+                "title": "Отключение микрофона"
+            },
+            "voice_server_unmute": {
+                "title": "Включение микрофона"
+            },
+            "voice_server_deaf": {
+                "title": "Отключение звука"
+            },
+            "voice_server_undeaf": {
+                "title": "Включение звука"
+            }
+        },
+        "reactions": {
+            "add_roles_reason": "Реакции: Добавить роли",
+            "remove_roles_reason": "Реакции: Убрать роли",
+            "show_channels_reason": "Реакции: Показать каналы",
+            "hide_channels_reason": "Реакции: Скрыть каналы"
+        },
+        "voice_manager": {
+            "voice_add_roles_reason": "Голосовые каналы: Добавить привязанные роли",
+            "voice_remove_roles_reason": "Голосовые каналы: Убрать привязанные роли"
+        }
+    }
+}

@@ -29,11 +29,108 @@ export interface ServerDocument {
             channel_id: String
         }
         logs: {
-            member_add: {
+            webhooks: Array<LogsWebhook>
+            channel_create: {
                 active: Boolean
                 channel_id: String
             }
-            member_remove: {
+            channel_delete: {
+                active: Boolean
+                channel_id: String
+            }
+            channel_update: {
+                active: Boolean
+                channel_id: String
+            }
+            guild_ban_add: {
+                active: Boolean
+                channel_id: String
+            }
+            guild_ban_remove: {
+                active: Boolean
+                channel_id: String
+            }
+            guild_member_add: {
+                active: Boolean
+                channel_id: String
+            }
+            guild_member_remove: {
+                active: Boolean
+                channel_id: String
+            }
+            guild_member_update: {
+                active: Boolean
+                channel_id: String
+            }
+            invite_create: {
+                active: Boolean
+                channel_id: String
+            }
+            invite_delete: {
+                active: Boolean
+                channel_id: String
+            }
+            message_delete: {
+                active: Boolean
+                channel_id: String
+            }
+            message_delete_bulk: {
+                active: Boolean
+                channel_id: String
+            }
+            message_update: {
+                active: Boolean
+                channel_id: String
+            }
+            role_add: {
+                active: Boolean
+                channel_id: String
+            },
+            role_create: {
+                active: Boolean,
+                channel_id: String
+            }
+            role_delete: {
+                active: Boolean
+                channel_id: String
+            }
+            role_remove: {
+                active: Boolean
+                channel_id: String
+            }
+            role_update: {
+                active: Boolean
+                channel_id: String
+            }
+            user_update: {
+                active: Boolean
+                channel_id: String
+            }
+            voice_connect: {
+                active: Boolean
+                channel_id: String
+            }
+            voice_disconnect: {
+                active: Boolean
+                channel_id: String
+            }
+            voice_move: {
+                active: Boolean
+                channel_id: String
+            }
+            voice_server_mute: {
+                active: Boolean
+                channel_id: String
+            }
+            voice_server_unmute: {
+                active: Boolean
+                channel_id: String
+            }
+            voice_server_deaf: {
+                active: Boolean
+                channel_id: String
+            }
+            voice_server_undeaf: {
                 active: Boolean
                 channel_id: String
             }
@@ -66,15 +163,19 @@ export interface ServerDocument {
     modules: {
         welcome: {
             active: Boolean
-            format: Number
+            format: 'DM' | 'CHANNEL'
             channel_id: String
             message: {
                 content: String
             }
+            initial_roles: {
+                active: Boolean
+                roles: Array<String>
+            }
         },
         farewell: {
             active: Boolean
-            format: Number
+            format: 'DM' | 'CHANNEL'
             channel_id: String
             message: {
                 content: String
@@ -105,7 +206,7 @@ export interface ServerDocument {
         },
         voice_manager: {
             voice_roles: Array<VoiceRole>
-            temporary_voice_channels: {
+            temp_voice_channels: {
                 triggers: Array<VoiceChannelTrigger>
             }
         },
@@ -117,13 +218,15 @@ export interface ServerDocument {
         }
     }
     created_at: Number
+    modified_at: Number
+    activity_ping_at: Number
 }
 
 export interface SystemCommandOptions {
     name: String
     active: Boolean
     throttle: {
-        type: 0 | 1 | 2
+        type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
         usages: Number
         duration: Number
     }
@@ -149,7 +252,7 @@ export interface CustomCommandOptions {
     name: String
     active: Boolean
     throttle: {
-        type: 0 | 1 | 2
+        type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
         usages: Number
         duration: Number
     }
@@ -199,6 +302,12 @@ export interface ModerationCase {
     }
 }
 
+export interface LogsWebhook {
+    id: String
+    token: String
+    channel_id: String
+}
+
 export interface WarnPenalty {
     amount: Number
     action: Number
@@ -240,7 +349,7 @@ export interface TemporaryMuteConstructor {
 
 export interface ReactionElement {
     id: String
-    type: Number
+    type: 'CHANNEL' | 'ROLE'
     element: {
         single: Boolean
         global_single: Boolean
@@ -306,8 +415,18 @@ export interface UserDocument {
         views: Number
         upvoters: Array<String>
     }
-    balance: Number
+    boost: {
+        available: Boolean
+        tier: Number
+        boosted_guilds: Array<BoostedGuild>
+    }
     created_at: Number
+    modified_at: Number
+}
+
+export interface BoostedGuild {
+    id: String
+    timestamp: Number
 }
 
 export interface CommandInfo {
@@ -330,6 +449,17 @@ export interface CommandInfo {
     user_permissions: import('discord.js').PermissionResolvable | null
 }
 
+export interface SubcommandInfo {
+    fn: Function
+    name: String
+    parent: import('./structures/Command')
+    description: String | null
+    aliases: Array<String> | null
+    premium_only: Boolean
+    private: Boolean
+    nsfw: Boolean
+}
+
 interface CommandThrottlingOptions {
     usages: Number
     duration: Number
@@ -340,4 +470,25 @@ interface CommandThrottledUser {
     throttled: Boolean
     timeout: any
     expires: Number
+}
+
+export interface CommandExecutionData {
+    command: {
+        name: String
+        uses: Number
+    },
+    message: import('discord.js').Message
+    args: Array<String>
+}
+
+export interface ModuleExecutionData {
+    module: String
+    guild: {
+        id: String
+        name: String
+    }
+    target: {
+        id: String
+        name: String
+    }
 }
