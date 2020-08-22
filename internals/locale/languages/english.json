@@ -3,168 +3,167 @@
         "common": {
             "texts": {
                 "none": "None",
-                "at": "в",
-                "missing_permissions": "{0} отсутствуют нужные разрешения: {1}",
-                "premium_only": "{0} команда доступна только бонусным серверам"
+                "at": "at",
+                "missing_permissions": "{0}, missing required permissions: {1}",
+                "premium_only": "{0}, this command is available only for bonus servers"
             },
             "permissions": {
-                "ADMINISTRATOR": "Администратор",
-                "CREATE_INSTANT_INVITE": "Создавать приглашение",
-                "KICK_MEMBERS": "Выгнать участников",
-                "BAN_MEMBERS": "Банить участников",
-                "MANAGE_CHANNELS": "Управление каналами",
-                "MANAGE_GUILD": "Управление сервером",
-                "ADD_REACTIONS": "Добавлять реакции",
-                "VIEW_AUDIT_LOG": "Просмотр журнала аудита",
-                "PRIORITY_SPEAKER": "Приоритетный говорящий",
-                "STREAM": "Видео",
-                "VIEW_CHANNEL": "Видеть канал",
-                "SEND_MESSAGES": "Отправлять сообщения",
-                "SEND_TTS_MESSAGES": "Отправлять TTS-сообщения",
-                "MANAGE_MESSAGES": "Управление сообщениями",
-                "EMBED_LINKS": "Встраивать ссылки",
-                "ATTACH_FILES": "Прикреплять файлы",
-                "READ_MESSAGE_HISTORY": "Читать историю сообщений",
-                "MENTION_EVERYONE": "Упомянуть всех",
-                "USE_EXTERNAL_EMOJIS": "Использовать внешние эмоджи",
-                "VIEW_GUILD_INSIGHTS": "Просмотр аналитики сервера",
-                "CONNECT": "Подключиться",
-                "SPEAK": "Говорить",
-                "MUTE_MEMBERS": "Отключать голос участникам",
-                "DEAFEN_MEMBERS": "Отключать звук участникам",
-                "MOVE_MEMBERS": "Переместить участников",
-                "USE_VAD": "Использовать режим активации по голосу",
-                "CHANGE_NICKNAME": "Изменить никнейм",
-                "MANAGE_NICKNAMES": "Управление никнеймами",
-                "MANAGE_ROLES": "Управление ролями",
-                "MANAGE_WEBHOOKS": "Управление веб-крючками",
-                "MANAGE_EMOJIS": "Управление эмоджи"
+                "ADMINISTRATOR": "Administrator",
+                "CREATE_INSTANT_INVITE": "Create invites",
+                "KICK_MEMBERS": "Kick members",
+                "BAN_MEMBERS": "Ban members",
+                "MANAGE_CHANNELS": "Manage channels",
+                "MANAGE_GUILD": "Manage guild",
+                "ADD_REACTIONS": "Add reactions",
+                "VIEW_AUDIT_LOG": "View audit log",
+                "PRIORITY_SPEAKER": "Priority speaker",
+                "STREAM": "Video",
+                "VIEW_CHANNEL": "View channel",
+                "SEND_MESSAGES": "Send messages",
+                "SEND_TTS_MESSAGES": "Send TTS messages",
+                "MANAGE_MESSAGES": "Manage messages",
+                "EMBED_LINKS": "Embed links",
+                "ATTACH_FILES": "Attach files",
+                "READ_MESSAGE_HISTORY": "Read message history",
+                "MENTION_EVERYONE": "Mention everyone",
+                "USE_EXTERNAL_EMOJIS": "Use external emojis",
+                "VIEW_GUILD_INSIGHTS": "View guild insights",
+                "CONNECT": "Connect",
+                "SPEAK": "Speak",
+                "MUTE_MEMBERS": "Mute members",
+                "DEAFEN_MEMBERS": "Deafen members",
+                "MOVE_MEMBERS": "Move members",
+                "USE_VAD": "Use VAD",
+                "CHANGE_NICKNAME": "Change nickname",
+                "MANAGE_NICKNAMES": "Manage nicknames",
+                "MANAGE_ROLES": "Manage roles",
+                "MANAGE_WEBHOOKS": "Manage webhooks",
+                "MANAGE_EMOJIS": "Manage emojis"
             },
             "case_log": {
                 "cases": {
-                    "BAN_ADD": "Блокировка выдана",
-                    "BAN_REMOVE": "Блокировка убрана",
-                    "KICK": "Участник выгнан",
-                    "MUTE_ADD": "Заглушение выдано",
-                    "MUTE_REMOVE": "Заглушение убрано",
-                    "PRUNE": "Очистка сообщений",
-                    "WARN_ADD": "Предупреждение выдано",
-                    "WARN_REMOVE": "Предупреждение убрано"
+                    "BAN_ADD": "Ban add",
+                    "BAN_REMOVE": "Ban remove",
+                    "KICK": "Kick",
+                    "MUTE_ADD": "Mute add",
+                    "MUTE_REMOVE": "Mute remove",
+                    "PRUNE": "Pruning messages",
+                    "WARN_ADD": "Warn add",
+                    "WARN_REMOVE": "Warn remove"
                 },
-                "case": "Случай #{0}",
-                "target": "Пользователь",
-                "executor": "Модератор",
-                "reason": "Причина",
-                "duration": "Длительность"
+                "case": "Case #{0}",
+                "target": "User",
+                "executor": "Executor",
+                "reason": "Reason",
+                "duration": "Duration"
             },
             "args_types": {
-                "MENTION": "Упоминание",
-                "NUMBER": "Числовой",
+                "MENTION": "Mention",
+                "NUMBER": "Integer",
                 "SNOWFLAKE": "Snowflake",
-                "STRING": "Строковый"
+                "STRING": "String"
             }
         },
         "help": {
-            "description": "Выводит список доступных команд",
+            "description": "Shows list of commands",
             "arguments": [
                 {
-                    "name": "команда",
-                    "description": "Выведет дополнительную информацию об указанной команде",
+                    "name": "command",
+                    "description": "Will display additional information about specified command",
                     "required": false,
                     "types": ["STRING"]
                 }
             ],
             "texts": {
-                "title": "Список команд",
-                "description": "Используйте {0} в качестве префикса для команд",
+                "title": "Command list",
+                "description": "Use {0} as a server prefix",
                 "categories": {
-                    "general": "Общее",
-                    "moderation": "Модерация",
-                    "music": "Музыка",
-                    "utility": "Полезное"
+                    "general": "General",
+                    "moderation": "Moderation",
+                    "music": "Music",
+                    "utility": "Utility"
                 },
-                "usage": "Использование",
-                "args": "Аргументы",
-                "subcommands": "Подкоманды",
-                "required": "Обязательный",
-                "optional": "Необязательный",
-                "type": "Тип: {0}",
+                "usage": "Usage",
+                "args": "Arguments",
+                "subcommands": "Subcommands",
+                "required": "Required",
+                "optional": "Optional",
+                "type": "Type: {0}",
                 "permissions": {
-                    "title": "Необходимые разрешения",
-                    "self": "Разрешения бота",
-                    "user": "Разрешения автора команды"
+                    "title": "Required permissions",
+                    "self": "Bot",
+                    "user": "Command author"
                 }
             }
         },
         "server": {
-            "description": "Выводит информацию о сервере",
+            "description": "Shows information about server",
             "texts": {
-                "owner": "Владелец",
-                "id": "ID сервера",
-                "region": "Регион",
+                "owner": "Owner",
+                "id": "Server ID",
+                "region": "Region",
                 "regions": {
-                    "brazil": "Бразилия",
-                    "europe": "Европа",
-                    "hongkong": "Гонконг",
-                    "india": "Индия",
-                    "japan": "Япония",
-                    "russia": "Россия",
-                    "singapore": "Сингапур",
-                    "southafrica": "Южная Африка",
-                    "sydney": "Сидней",
-                    "us-central": "США",
-                    "us-east": "США",
-                    "us-south": "США",
-                    "us-west": "США"
+                    "brazil": "Brazil",
+                    "europe": "Europe",
+                    "hongkong": "Hong Kong",
+                    "india": "India",
+                    "japan": "Japan",
+                    "russia": "Russia",
+                    "singapore": "Singapore",
+                    "southafrica": "South Africa",
+                    "sydney": "Sydney",
+                    "us-central": "US central",
+                    "us-east": "US east",
+                    "us-south": "US south",
+                    "us-west": "US west"
                 },
                 "members": {
-                    "title": "Участники",
-                    "online": "В сети {0}",
-                    "total": "Всего {0}"
+                    "title": "Members",
+                    "online": "Online {0}",
+                    "total": "Total {0}"
                 },
                 "channels": {
-                    "title": "Каналы",
-                    "text": "Текстовые: {0}",
-                    "voice": "Голосовые: {0}"
+                    "title": "Channels",
+                    "text": "Text: {0}",
+                    "voice": "Voice: {0}"
                 },
-                "verification_level": "Уровень проверки",
-                "verification_levels": ["Отсутствует", "Низкий", "Средний", "Высокий", "Очень высокий"],
-                "afk_channel": "Канал простоя",
-                "roles": "Ролей",
-                "emojis": "Эмоджи",
+                "verification_level": "Verification level",
+                "verification_levels": ["None", "Low", "Medium", "High", "Very high"],
+                "afk_channel": "AFK channel",
+                "roles": "Roles",
+                "emojis": "Emojis",
                 "footer": {
-                    "server_created": "Сервер создан",
-                    "at": "в"
+                    "server_created": "Server was created"
                 }
             }
         },
         "user": {
-            "description": "Выводит информацию о пользователе",
+            "description": "Shows information about user",
             "arguments": [
                 {
-                    "name": "пользователь",
-                    "description": "Выведет информацию об указанном пользователе",
+                    "name": "user",
+                    "description": "Will display information about specified user",
                     "required": false,
                     "types": ["MENTION", "SNOWFLAKE"]
                 }
             ],
             "texts": {
-                "account_created": "Дата регистрации",
-                "member_joined": "Дата вступления",
-                "roles": "Роли",
+                "account_created": "Register date",
+                "member_joined": "Join date",
+                "roles": "Roles",
                 "statuses": {
-                    "online": "В сети",
-                    "idle": "Не активен",
-                    "dnd": "Не беспокоить",
-                    "offline": "Не в сети"
+                    "online": "Online",
+                    "idle": "Idle",
+                    "dnd": "Do not disturb",
+                    "offline": "Offline"
                 },
                 "presence": {
-                    "playing": "Играет в",
-                    "streaming": "Стримит",
-                    "listening_to": "Слушает",
-                    "watching": "Смотрит"
+                    "playing": "Playing",
+                    "streaming": "Streaming",
+                    "listening_to": "Listening to",
+                    "watching": "Watching"
                 },
-                "permissions": "Разрешения"
+                "permissions": "Permissions"
             }
         },
         "ban": {

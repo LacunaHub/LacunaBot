@@ -23,7 +23,7 @@ const execute = async (self, server, message, args) => {
         .addField(locale.server.texts.afk_channel, message.guild.afkChannel ? message.guild.afkChannel.name : locale.common.texts.none, true)
         .addField(locale.server.texts.roles, message.guild.roles.cache.size, true)
         .addField(locale.server.texts.emojis, message.guild.emojis.cache.size, true)
-        .setFooter(`${locale.server.texts.footer.server_created} ${moment(message.guild.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.server.texts.footer.at}] HH:mm`)} (${(moment(message.guild.createdTimestamp).locale(server.locale).fromNow())})`)
+        .setFooter(`${locale.server.texts.footer.server_created} ${moment(message.guild.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)} (${(moment(message.guild.createdTimestamp).locale(server.locale).fromNow())})`)
         .setColor()
     
     await message.channel.send(embed)
