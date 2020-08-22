@@ -44,8 +44,8 @@ class Lacuna extends Client {
 
     get _emojis() {
         return {
-            OK: '<:check:314349398811475968>',
-            ERROR: '<:xmark:314349398824058880>'
+            OK: '<:OK:746635543042981898>',
+            ERROR: '<:ERROR:746635499355242577>'
         }
     }
 

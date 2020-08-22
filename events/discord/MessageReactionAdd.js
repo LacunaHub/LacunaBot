@@ -6,6 +6,8 @@ const { ReactionMenuAdd } = require('../../modules/Reactions')
  * @param {import('discord.js').User} user
  */
 const execute = async (self, reaction, user) => {
+    if (self.user.id === user.id) return false
+
     let partial = false
 
     if (reaction.partial) {

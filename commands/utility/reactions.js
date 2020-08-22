@@ -10,8 +10,6 @@ const help = require('../general/help')
  * @param {String[]} args
  */
 const execute = async (self, server, message, args) => {
-    const locale = self.translator.locale(server.locale).commands
-
     await help.fn(self, server, message, ['reactions'])
 
     return true
@@ -28,13 +26,13 @@ const add = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
     if (server.modules.reactions.length >= 100 && !server.server.premium.available) {
-        await message.channel.send()
+        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reactions_limit_reached_no_premium, `**${message.author.username}**`)}`)
 
         return false
     }
 
     if (server.modules.reactions.length >= 250) {
-        await message.channel.send()
+        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reactions_limit_reached, `**${message.author.username}**`)}`)
 
         return false
     }
@@ -45,13 +43,13 @@ const add = async (self, server, message, args) => {
         const element = server.modules.reactions.find(r => r.id == uid)
 
         if (!element) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.reaction_element_not_found, `**${message.author.username}**`)}`)
 
             return false
         }
 
-        if (element.references >= 3) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+        if (element.references.length >= 3) {
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reaction_references_limit_reached, `**${message.author.username}**`)}`)
 
             return false
         }
@@ -60,13 +58,13 @@ const add = async (self, server, message, args) => {
         const reference = message.mentions.channels.first() || message.guild.channels.cache.get(arg) || message.mentions.roles.first() || message.guild.roles.cache.find(r => r.id == arg || r.name == arg)
 
         if (!reference) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reference_not_found, `**${message.author.username}**`)}`)
 
             return false
         }
 
         if (element.references.includes(reference.id)) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reference_already_added, `**${message.author.username}**`)}`)
 
             return false
         }
@@ -74,7 +72,7 @@ const add = async (self, server, message, args) => {
         const type = 'type' in reference ? 'CHANNEL' : 'ROLE'
 
         if (type != element.type) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reference_does_not_match, `**${message.author.username}**`)}`)
 
             return false
         }
@@ -82,13 +80,13 @@ const add = async (self, server, message, args) => {
         const in_single_element = server.modules.reactions.some(r => (r.element.single || r.element.global_single) && r.references.includes(reference.id))
 
         if (in_single_element) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reference_in_single_reaction, `**${message.author.username}**`)}`)
 
             return false
         }
 
         if ((type == 'CHANNEL' && !reference.manageable) || (type == 'ROLE' && !reference.editable)) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reference_not_manageable, `**${message.author.username}**`)}`)
 
             return false
         }
@@ -99,7 +97,7 @@ const add = async (self, server, message, args) => {
             }
         })
 
-        await message.channel.send(`${self._emojis.OK} |`)
+        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.reactions.add.texts.reference_success_added, `**${message.author.username}**`)}`)
 
         return true
     }
@@ -112,7 +110,7 @@ const add = async (self, server, message, args) => {
     }
 
     if (!raw_args.channel || !raw_args.message_id || !raw_args.emoji || !raw_args.reference) {
-        await message.channel.send(`${self._emojis.ERROR} | `)
+        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reactions_no_required_args, `**${message.author.username}**`)}`)
 
         return false
     }
@@ -121,18 +119,18 @@ const add = async (self, server, message, args) => {
      * @type {import('discord.js').TextChannel | import('discord.js').NewsChannel}
      */
     const channel = message.mentions.channels.first() || message.guild.channels.cache.get(raw_args.channel)
-    const message_reaction = await channel.messages.fetch(raw_args.message_id, false)
+    const message_reaction = await channel.messages.fetch(raw_args.message_id, false, true)
     const emoji = Util.parseEmoji(raw_args.emoji)
-    const reference = message.mentions.channels.last() || message.guild.channels.cache.find(c => c.id == raw_args.reference || c.name == raw_args.reference) || message.mentions.roles.first() || message.guild.roles.cache.find(r => r.id == raw_args.reference || r.name == raw_args.reference)
-
+    const reference = message.mentions.channels.filter(c => c.id != channel.id).last() || message.guild.channels.cache.find(c => c.id == raw_args.reference || c.name == raw_args.reference) || message.mentions.roles.first() || message.guild.roles.cache.find(r => r.id == raw_args.reference || r.name == raw_args.reference)
+    
     if (!channel || !message_reaction || !emoji || !reference) {
-        await message.channel.send(`${self._emojis.ERROR} |`)
+        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reactions_invalid_args, `**${message.author.username}**`)}`)
 
         return false
     }
 
     if (message_reaction.reactions.cache.size == 20) {
-        await message.channel.send(`${self._emojis.ERROR} |`)
+        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.message_max_reactions, `**${message.author.username}**`)}`)
 
         return false
     }
@@ -140,43 +138,72 @@ const add = async (self, server, message, args) => {
     const elements = server.modules.reactions
     const type = 'type' in reference ? 'CHANNEL' : 'ROLE'
 
-    if (elements.some(r => r.message.id == message_reaction.id && r.references.includes(reference.id))) {
-        await message.channel.send(`${self._emojis.ERROR} |`)
+    if (elements.some(r => r.message.id == message_reaction.id && r.emoji.name == emoji.name)) {
+        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.emoji_already_used, `**${message.author.username}**`)}`)
 
         return false
     }
 
     if (elements.some(r => (r.element.single || r.element.global_single) && r.references.includes(reference.id))) {
-        await message.channel.send(`${self._emojis.ERROR} |`)
+        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reaction_in_single_element, `**${message.author.username}**`)}`)
 
         return false
     }
 
     if ((type == 'CHANNEL' && !reference.manageable) || (type == 'ROLE' && !reference.editable)) {
-        await message.channel.send(`${self._emojis.ERROR} |`)
+        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reference_not_manageable, `**${message.author.username}**`)}`)
 
         return false
     }
-
-    const element_id = GenerateUID()
 
     try {
         await message_reaction.react(emoji.id || emoji.name)
     } catch (err) {
         switch (err.message) {
             case 'Unknown Emoji':
-                await message.channel.send(`${self._emojis.ERROR} |`)
+                await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_emoji, `**${message.author.username}**`)}`)
             break
 
             default:
-                await message.channel.send(`${self._emojis.ERROR} |`)
+                await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_error, `**${message.author.username}**`)}`)
             break
         }
 
         return false
     }
 
+    const element_id = GenerateUID()
+
+    await self.db.servers.update({ _id: message.guild.id }, {
+        $push: {
+            'modules.reactions': {
+                id: element_id,
+                type: type,
+                element: {
+                    single: false,
+                    global_single: false,
+                    reverse: false,
+                    lifespan: 0
+                },
+                message: {
+                    id: message_reaction.id,
+                    channel_id: channel.id
+                },
+                emoji: emoji,
+                references: [reference.id]
+            }
+        }
+    })
+
     const embed = new MessageEmbed()
+        .setTitle(locale.reactions.add.texts.success.title)
+        .addField(locale.reactions.add.texts.success.element_id, element_id, true)
+        .addField(locale.reactions.add.texts.success.channel, `<#${channel.id}>`, true)
+        .addField(locale.reactions.add.texts.success.message_id, message_reaction.id, true)
+        .addField(locale.reactions.add.texts.success.emoji, emoji.id ? `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>` : emoji.name, true)
+        .addField(locale.reactions.add.texts.success.reference, reference.name, true)
+        .addField('\u200B', '\u200B', true)
+        .setColor(0x43b581)
         
     await message.channel.send(embed)
 
@@ -199,7 +226,7 @@ const remove = async (self, server, message, args) => {
         const element = server.modules.reactions.find(r => r.id == uid)
 
         if (!element) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.reaction_element_not_found, `**${message.author.username}**`)}`)
     
             return false
         }
@@ -224,14 +251,14 @@ const remove = async (self, server, message, args) => {
             await message_reaction.reactions.cache.delete(reaction.emoji.id || reaction.emoji.name)
         }
     
-        await message.channel.send(`${self._emojis.OK} |`)
+        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.reactions.remove.texts.remove_reaction_success, `**${message.author.username}**`)}`)
     }
 
     else if (snowflake) {
         const elements = server.modules.reactions.filter(r => r.message.id == snowflake)
 
         if (!elements.length) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.reaction_elements_not_found_by_message_id, `**${message.author.username}**`)}`)
 
             return false
         }
@@ -251,7 +278,7 @@ const remove = async (self, server, message, args) => {
         })
 
         await message_reaction.reactions.removeAll()
-        await message.channel.send(`${self._emojis.OK} |`)
+        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.reactions.remove.texts.remove_reactions_success, `**${message.author.username}**`)}`)
     }
 
     return true
@@ -267,13 +294,12 @@ const reverse = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
     const uid = ParseUID(args[0])
-    const snowflake = ParseSnowflake(args[0])
 
     if (uid) {
         const element = server.modules.reactions.find(r => r.id == uid)
 
         if (!element) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.reaction_element_not_found, `**${message.author.username}**`)}`)
     
             return false
         }
@@ -298,7 +324,11 @@ const reverse = async (self, server, message, args) => {
             }
         }
 
-        await message.channel.send(`${self._emojis.OK} | `)
+        await message.channel.send(`${self._emojis.OK} | ${element.element.reverse ? self.translator.format(locale.reactions.reverse.texts.reverse_inactive, `**${message.author.username}**`) : self.translator.format(locale.reactions.reverse.texts.reverse_active, `**${message.author.username}**`)}`)
+    }
+
+    else {
+
     }
 
     return true
@@ -320,13 +350,13 @@ const single = async (self, server, message, args) => {
         const element = server.modules.reactions.find(r => r.id == uid)
 
         if (!element) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.reaction_element_not_found, `**${message.author.username}**`)}`)
     
             return false
         }
 
         if (element.element.reverse) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.single.texts.reaction_element_is_reverse, `**${message.author.username}**`)}`)
     
             return false
         }
@@ -334,7 +364,7 @@ const single = async (self, server, message, args) => {
         const duplicates = server.modules.reactions.filter(r => element.references.some(ref => r.references.includes(ref)))
 
         if (duplicates.length > 1) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.single.texts.reaction_element_duplicate, `**${message.author.username}**`)}`)
     
             return false
         }
@@ -345,41 +375,44 @@ const single = async (self, server, message, args) => {
             }
         })
 
-        await message.channel.send(`${self._emojis.OK} |`)
+        await message.channel.send(`${self._emojis.OK} | ${element.element.single ? self.translator.format(locale.reactions.single.texts.single_inactive, `**${message.author.username}**`) : self.translator.format(locale.reactions.single.texts.single_active, `**${message.author.username}**`)}`)
     }
 
     else if (snowflake) {
         const elements = server.modules.reactions.filter(r => r.message.id == snowflake && !r.element.reverse)
 
         if (!elements.length) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.reaction_elements_not_found_by_message_id, `**${message.author.username}**`)}`)
     
             return false
         }
 
         if (elements.some(r => r.element.reverse)) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.single.texts.reaction_elements_some_reverse, `**${message.author.username}**`)}`)
     
             return false
         }
 
-        const duplicates = server.modules.reactions.filter(r => elements.some(e => e.references.some(ref => r.references.includes(ref))))
-
-        if (duplicates.length > 1) {
-            await message.channel.send(`${self._emojis.ERROR} |`)
-    
-            return false
-        }
-
+        let singled = 0
         for (const element of elements) {
+            const duplicates = server.modules.reactions.filter(r => element.references.some(ref => r.references.includes(ref)))
+
+            if (duplicates.length > 1) continue
+
             await self.db.servers.update({ _id: message.guild.id, 'modules.reactions.id': element.id }, {
                 $set: {
                     'modules.reactions.$.element.single': element.element.single ? false : true
                 }
             })
+
+            singled++
         }
 
-        await message.channel.send(`${self._emojis.OK} |`)
+        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.reactions.single.texts.single_message_toggle, `**${message.author.username}**`, singled)}`)
+    }
+
+    else {
+
     }
 
     return true

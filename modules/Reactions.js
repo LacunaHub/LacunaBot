@@ -3,7 +3,7 @@ class Reactions {
      * Генерирует уникальный идентификатор для элемента реакций
      */
     static GenerateUID() {
-        return `${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+        return `L${Math.random().toString(36).substr(2, 9).toUpperCase()}`
     }
 
     /**
@@ -12,7 +12,7 @@ class Reactions {
      * @param {String} string
      */
     static ParseUID(string) {
-        const match = string ? string.match(/[a-z0-9]{9}/i) : null
+        const match = string ? string.match(/L[A-Z0-9]{9}/) : null
 
         return match ? match.toString() : null
     }
@@ -167,7 +167,7 @@ class Reactions {
                 }
 
                 if (element.type == 'ROLE') {
-                    const roles = message.guild.roles.cache.filter(r => r.editable && element.roles_id.includes(r.id))
+                    const roles = message.guild.roles.cache.filter(r => r.editable && element.references.includes(r.id))
 
                     if (roles.size) {
                         try {
