@@ -13,6 +13,7 @@ const User = new Schema({
     },
     boost: {
         available: { type: Boolean, default: false },
+        type: { type: String, default: 'NONE' },
         tier: { type: Number, default: 0 },
         boosted_guilds: { type: Array, default: [] }
     },

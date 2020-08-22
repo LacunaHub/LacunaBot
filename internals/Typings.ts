@@ -419,6 +419,7 @@ export interface UserDocument {
     }
     boost: {
         available: Boolean
+        type: 'NONE' | 'PATREON' | 'BOOSTY' | 'SERVER_BOOST'
         tier: Number
         boosted_guilds: Array<BoostedGuild>
     }
