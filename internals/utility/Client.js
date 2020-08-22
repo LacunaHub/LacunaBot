@@ -2,11 +2,7 @@ const Lacuna = require('../Lacuna')
 
 module.exports = new Lacuna({
     presence: {
-        status: 'online',
-        activity: {
-            name: 'lacuna.ru',
-            type: 'WATCHING'
-        }
+        status: 'online'
     },
     messageCacheMaxSize: 100,
     messageCacheLifetime: 7200,

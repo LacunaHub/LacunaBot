@@ -23,10 +23,10 @@ class Logs {
      * @param {import('discord.js').GuildMember} member
      */
     static async GuildMemberAdd(self, server, member) {
-        if (server.moderation.logs.guild_member_add.active) {
+        if (server.moderation.logs.types.guild_member_add.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = message.guild.channels.cache.get(server.moderation.logs.guild_member_add.channel_id)
+            const log = message.guild.channels.cache.get(server.moderation.logs.types.guild_member_add.channel_id)
 
             const is_ok = log && message.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(message.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -80,10 +80,10 @@ class Logs {
      * @param {import('discord.js').GuildMember} member
      */
     static async GuildMemberRemove(self, server, member) {
-        if (server.moderation.logs.guild_member_remove.active) {
+        if (server.moderation.logs.types.guild_member_remove.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = message.guild.channels.cache.get(server.moderation.logs.guild_member_remove.channel_id)
+            const log = message.guild.channels.cache.get(server.moderation.types.logs.guild_member_remove.channel_id)
 
             const is_ok = log && message.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(message.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -137,10 +137,10 @@ class Logs {
      * @param {import('discord.js').Message} message
      */
     static async MessageDelete(self, server, message) {
-        if (server.moderation.logs.message_delete.active) {
+        if (server.moderation.logs.types.message_delete.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = message.guild.channels.cache.get(server.moderation.logs.message_delete.channel_id)
+            const log = message.guild.channels.cache.get(server.moderation.logs.types.message_delete.channel_id)
 
             const is_ok = log && message.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(message.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -172,7 +172,7 @@ class Logs {
                     .addField(locale.logs.common.sender, `${message.author.tag}\n(${message.author.id})`, true)
                     .addField(locale.logs.common.channel, `<#${message.channel.id}>`, true)
                     .addField(locale.logs.message_delete.content, content)
-                    .setFooter(`${locale.logs.common.message_id}: ${message.id}`)
+                    .setFooter(message.id)
                     .setTimestamp()
                     .setColor(0xF04747)
 
@@ -201,11 +201,11 @@ class Logs {
      * @param {import('discord.js').Collection<String, import('discord.js').Message>} messages
      */
     static async MessageDeleteBulk(self, server, messages) {
-        if (server.moderation.logs.message_delete_bulk.active) {
+        if (server.moderation.logs.types.message_delete_bulk.active) {
             const message = messages.first()
             const locale = self.translator.locale(server.locale).modules
 
-            const log = message.guild.channels.cache.get(server.moderation.logs.message_delete_bulk.channel_id)
+            const log = message.guild.channels.cache.get(server.moderation.logs.types.message_delete_bulk.channel_id)
 
             const is_ok = log && message.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(message.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -260,10 +260,10 @@ class Logs {
      * @param {import('discord.js').Message} message
      */
     static async MessageUpdate(self, server, before, message) {
-        if (server.moderation.logs.message_update.active) {
+        if (server.moderation.logs.types.message_update.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = message.guild.channels.cache.get(server.moderation.logs.message_update.channel_id)
+            const log = message.guild.channels.cache.get(server.moderation.logs.types.message_update.channel_id)
 
             const is_ok = log && message.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(message.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -292,12 +292,12 @@ class Logs {
                 const attachment = message.attachments.first()
             
                 const embed = new MessageEmbed()
-                    .setTitle(locale.logs.message_delete.title)
+                    .setTitle(locale.logs.message_update.title)
                     .addField(locale.logs.common.sender, `${message.author.tag}\n(${message.author.id})`, true)
                     .addField(locale.logs.common.channel, `<#${message.channel.id}>`, true)
                     .addField(locale.logs.message_update.content_before_update, before_content)
                     .addField(locale.logs.message_update.content_after_update, content)
-                    .setFooter(`${locale.logs.common.message_id}: ${message.id}`)
+                    .setFooter(message.id)
                     .setTimestamp()
                     .setColor(0xE19517)
 
@@ -326,10 +326,10 @@ class Logs {
      * @param {import('discord.js').VoiceState} state
      */
     static async VoiceConnect(self, server, state) {
-        if (server.moderation.logs.voice_connect.active) {
+        if (server.moderation.logs.types.voice_connect.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = state.guild.channels.cache.get(server.moderation.logs.voice_connect.channel_id)
+            const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_connect.channel_id)
 
             const is_ok = log && state.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(state.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -384,10 +384,10 @@ class Logs {
      * @param {import('discord.js').VoiceChannel} channel
      */
     static async VoiceDisconnect(self, server, state, channel) {
-        if (server.moderation.logs.voice_disconnect.active) {
+        if (server.moderation.logs.types.voice_disconnect.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = state.guild.channels.cache.get(server.moderation.logs.voice_disconnect.channel_id)
+            const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_disconnect.channel_id)
 
             const is_ok = log && state.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(state.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -442,10 +442,10 @@ class Logs {
      * @param {import('discord.js').VoiceState} state
      */
     static async VoiceMove(self, server, before, state) {
-        if (server.moderation.logs.voice_disconnect.active) {
+        if (server.moderation.logs.types.voice_disconnect.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = state.guild.channels.cache.get(server.moderation.logs.voice_move.channel_id)
+            const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_move.channel_id)
 
             const is_ok = log && state.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(state.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -499,10 +499,10 @@ class Logs {
      * @param {import('discord.js').VoiceState} state
      */
     static async VoiceServerMute(self, server, state) {
-        if (server.moderation.logs.voice_server_mute.active) {
+        if (server.moderation.logs.types.voice_server_mute.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = state.guild.channels.cache.get(server.moderation.logs.voice_server_mute.channel_id)
+            const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_server_mute.channel_id)
 
             const is_ok = log && state.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(state.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -556,10 +556,10 @@ class Logs {
      * @param {import('discord.js').VoiceState} state
      */
     static async VoiceServerUnmute(self, server, state) {
-        if (server.moderation.logs.voice_server_unmute.active) {
+        if (server.moderation.logs.types.voice_server_unmute.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = state.guild.channels.cache.get(server.moderation.logs.voice_server_unmute.channel_id)
+            const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_server_unmute.channel_id)
 
             const is_ok = log && state.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(state.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -613,10 +613,10 @@ class Logs {
      * @param {import('discord.js').VoiceState} state
      */
     static async VoiceServerDeaf(self, server, state) {
-        if (server.moderation.logs.voice_server_deaf.active) {
+        if (server.moderation.logs.types.voice_server_deaf.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = state.guild.channels.cache.get(server.moderation.logs.voice_server_deaf.channel_id)
+            const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_server_deaf.channel_id)
 
             const is_ok = log && state.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(state.guild.me).has('MANAGE_WEBHOOKS')
 
@@ -670,10 +670,10 @@ class Logs {
      * @param {import('discord.js').VoiceState} state
      */
     static async VoiceServerUndeaf(self, server, state) {
-        if (server.moderation.logs.voice_server_undeaf.active) {
+        if (server.moderation.logs.types.voice_server_undeaf.active) {
             const locale = self.translator.locale(server.locale).modules
 
-            const log = state.guild.channels.cache.get(server.moderation.logs.voice_server_undeaf.channel_id)
+            const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_server_undeaf.channel_id)
 
             const is_ok = log && state.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(state.guild.me).has('MANAGE_WEBHOOKS')
 

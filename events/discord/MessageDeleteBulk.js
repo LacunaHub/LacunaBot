@@ -17,6 +17,6 @@ const execute = async (self, messages) => {
 }
 
 module.exports = {
-    name: 'messageDelete',
+    name: 'messageDeleteBulk',
     fn: execute
 }

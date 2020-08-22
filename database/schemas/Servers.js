@@ -32,109 +32,111 @@ const Server = new Schema({
         },
         logs: {
             webhooks: { type: Array, default: [] },
-            channel_create: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            channel_delete: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            channel_update: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            guild_ban_add: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            guild_ban_remove: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            guild_member_add: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            guild_member_remove: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            guild_member_update: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            invite_create: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            invite_delete: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            message_delete: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            message_delete_bulk: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            message_update: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            role_add: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            role_create: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            role_delete: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            role_remove: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            role_update: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            user_update: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            voice_connect: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            voice_disconnect: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            voice_move: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            voice_server_mute: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            voice_server_unmute: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            voice_server_deaf: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            voice_server_undeaf: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
+            types: {
+                channel_create: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                channel_delete: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                channel_update: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                guild_ban_add: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                guild_ban_remove: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                guild_member_add: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                guild_member_remove: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                guild_member_update: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                invite_create: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                invite_delete: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                message_delete: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                message_delete_bulk: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                message_update: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                role_add: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                role_create: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                role_delete: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                role_remove: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                role_update: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                user_update: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                voice_connect: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                voice_disconnect: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                voice_move: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                voice_server_mute: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                voice_server_unmute: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                voice_server_deaf: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                voice_server_undeaf: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                }
             }
         },
         automoder: {

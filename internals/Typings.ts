@@ -30,109 +30,111 @@ export interface ServerDocument {
         }
         logs: {
             webhooks: Array<LogsWebhook>
-            channel_create: {
-                active: Boolean
-                channel_id: String
-            }
-            channel_delete: {
-                active: Boolean
-                channel_id: String
-            }
-            channel_update: {
-                active: Boolean
-                channel_id: String
-            }
-            guild_ban_add: {
-                active: Boolean
-                channel_id: String
-            }
-            guild_ban_remove: {
-                active: Boolean
-                channel_id: String
-            }
-            guild_member_add: {
-                active: Boolean
-                channel_id: String
-            }
-            guild_member_remove: {
-                active: Boolean
-                channel_id: String
-            }
-            guild_member_update: {
-                active: Boolean
-                channel_id: String
-            }
-            invite_create: {
-                active: Boolean
-                channel_id: String
-            }
-            invite_delete: {
-                active: Boolean
-                channel_id: String
-            }
-            message_delete: {
-                active: Boolean
-                channel_id: String
-            }
-            message_delete_bulk: {
-                active: Boolean
-                channel_id: String
-            }
-            message_update: {
-                active: Boolean
-                channel_id: String
-            }
-            role_add: {
-                active: Boolean
-                channel_id: String
-            },
-            role_create: {
-                active: Boolean,
-                channel_id: String
-            }
-            role_delete: {
-                active: Boolean
-                channel_id: String
-            }
-            role_remove: {
-                active: Boolean
-                channel_id: String
-            }
-            role_update: {
-                active: Boolean
-                channel_id: String
-            }
-            user_update: {
-                active: Boolean
-                channel_id: String
-            }
-            voice_connect: {
-                active: Boolean
-                channel_id: String
-            }
-            voice_disconnect: {
-                active: Boolean
-                channel_id: String
-            }
-            voice_move: {
-                active: Boolean
-                channel_id: String
-            }
-            voice_server_mute: {
-                active: Boolean
-                channel_id: String
-            }
-            voice_server_unmute: {
-                active: Boolean
-                channel_id: String
-            }
-            voice_server_deaf: {
-                active: Boolean
-                channel_id: String
-            }
-            voice_server_undeaf: {
-                active: Boolean
-                channel_id: String
+            types: {
+                channel_create: {
+                    active: Boolean
+                    channel_id: String
+                }
+                channel_delete: {
+                    active: Boolean
+                    channel_id: String
+                }
+                channel_update: {
+                    active: Boolean
+                    channel_id: String
+                }
+                guild_ban_add: {
+                    active: Boolean
+                    channel_id: String
+                }
+                guild_ban_remove: {
+                    active: Boolean
+                    channel_id: String
+                }
+                guild_member_add: {
+                    active: Boolean
+                    channel_id: String
+                }
+                guild_member_remove: {
+                    active: Boolean
+                    channel_id: String
+                }
+                guild_member_update: {
+                    active: Boolean
+                    channel_id: String
+                }
+                invite_create: {
+                    active: Boolean
+                    channel_id: String
+                }
+                invite_delete: {
+                    active: Boolean
+                    channel_id: String
+                }
+                message_delete: {
+                    active: Boolean
+                    channel_id: String
+                }
+                message_delete_bulk: {
+                    active: Boolean
+                    channel_id: String
+                }
+                message_update: {
+                    active: Boolean
+                    channel_id: String
+                }
+                role_add: {
+                    active: Boolean
+                    channel_id: String
+                },
+                role_create: {
+                    active: Boolean,
+                    channel_id: String
+                }
+                role_delete: {
+                    active: Boolean
+                    channel_id: String
+                }
+                role_remove: {
+                    active: Boolean
+                    channel_id: String
+                }
+                role_update: {
+                    active: Boolean
+                    channel_id: String
+                }
+                user_update: {
+                    active: Boolean
+                    channel_id: String
+                }
+                voice_connect: {
+                    active: Boolean
+                    channel_id: String
+                }
+                voice_disconnect: {
+                    active: Boolean
+                    channel_id: String
+                }
+                voice_move: {
+                    active: Boolean
+                    channel_id: String
+                }
+                voice_server_mute: {
+                    active: Boolean
+                    channel_id: String
+                }
+                voice_server_unmute: {
+                    active: Boolean
+                    channel_id: String
+                }
+                voice_server_deaf: {
+                    active: Boolean
+                    channel_id: String
+                }
+                voice_server_undeaf: {
+                    active: Boolean
+                    channel_id: String
+                }
             }
         }
         automoder: {

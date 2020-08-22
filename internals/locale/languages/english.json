@@ -343,6 +343,28 @@
                 "user_not_muted": "{0}, пользователь не был заглушен"
             }
         },
+        "logs": {
+            "description": "Управление журналом действий",
+            "arguments": [
+                {
+                    "name": "тип",
+                    "description": "Тип события для журнала действий",
+                    "required": true,
+                    "types": ["MENTION"]
+                },
+                {
+                    "name": "канал",
+                    "description": "Канал для указанного типа события журнала",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                }
+            ],
+            "texts": {
+                "unknown_log_type": "{0}, вы ввели неизвестный тип события журнала действий, вот список доступных: {1}",
+                "log_type_activated": "{0}, событие для журнала действий {1} активировано",
+                "log_type_disable": "{0}, я больше не буду следить за событием {1}"
+            }
+        },
         "reactions": {
             "description": "Управление элементами меню реакций",
             "reaction_element_not_found": "{0}, элемент реакции не найден",

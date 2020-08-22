@@ -7,7 +7,7 @@ const moment = require('moment')
  * @param {import('discord.js').Message} message
  * @param {String[]} args
  */
-const run = async (self, server, message, args) => {
+const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
     const member = await message.guild.members.fetch(message)
@@ -50,7 +50,7 @@ const run = async (self, server, message, args) => {
 }
 
 module.exports = {
-    fn: run,
+    fn: execute,
     name: 'user',
     description: 'commands.user.description',
     group: 'general',
