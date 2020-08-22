@@ -20,19 +20,18 @@ const execute = async (self, server, message, args) => {
     amount = amount.match(/\d+/)
     amount = Number(amount ? amount : 10)
 
-    const mention = message.mentions.users.first() || args[1]
-    const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
+    const mention = message.mentions.users.first()
 
-    const reason = args.slice(member ? 2 : 1).join(' ')
+    const reason = args.slice(mention ? 2 : 1).join(' ')
 
     if (amount < 2) amount = 2
     else if (amount > 100) amount = 100
     
     if (message.deletable && !message.deleted) await message.delete()
 
-    if (member) {
+    if (mention) {
         let messages = await message.channel.messages.fetch({ limit: amount }, false)
-        messages = messages.filter(m => m.author.id == member.id)
+        messages = messages.filter(m => m.author.id == mention.id)
 
         await message.channel.bulkDelete(messages)
         const success = await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.prune.texts.messages_pruned, `**${message.author.username}**`, amount)}`)
@@ -57,8 +56,8 @@ const execute = async (self, server, message, args) => {
                     timestamp: Date.now(),
                     reason: reason ? `${amount}:${reason}` : '',
                     target: {
-                        id: member ? member.id : '',
-                        name: member ? member.user.tag : ''
+                        id: mention ? mention.id : '',
+                        name: mention ? mention.tag : ''
                     },
                     executor: {
                         id: message.author.id,
@@ -71,7 +70,7 @@ const execute = async (self, server, message, args) => {
 
     const case_log_message = new MessageEmbed()
         .setTitle(locale.common.case_log.cases.PRUNE)
-        .addField(locale.common.case_log.target, member ? member.user.tag : locale.common.texts.none, true)
+        .addField(locale.common.case_log.target, mention ? mention.tag : locale.common.texts.none, true)
         .addField(locale.common.case_log.executor, message.author.tag, true)
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))

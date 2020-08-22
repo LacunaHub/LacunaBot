@@ -3,7 +3,7 @@
  * @param {import('discord.js').Guild} guild
  */
 const execute = async (self, guild) => {
-    const server = await self.db.servers.fetch({ _id: state.guild.id })
+    const server = await self.db.servers.fetch({ _id: guild.id })
 
     await self.logger.info(`${self.user.username} added to guild ${guild.name} (${guild.id}) (${guild.members.cache.filter(m => !m.user.bot).size}/${guild.memberCount})`)
 

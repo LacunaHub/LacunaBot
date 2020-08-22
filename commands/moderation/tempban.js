@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js')
 const moment = require('moment')
 const ms = require('ms')
 const Tempban = require('../../internals/structures/TemporaryBan')
+const { images } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -90,11 +91,12 @@ const execute = async (self, server, message, args) => {
 
     const case_log_message = new MessageEmbed()
         .setTitle(locale.common.case_log.cases.BAN_ADD)
-        .addField(locale.common.case_log.target, member.user.tag, true)
+        .addField(locale.common.case_log.target, `${member.user.tag} (${member.id})`, true)
         .addField(locale.common.case_log.executor, message.author.tag, true)
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .addField(locale.common.case_log.duration, moment(Date.now() + timer).locale(server.locale).endOf().fromNow(true))
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setThumbnail(images.BAN_ADD_TEMP)
         .setTimestamp()
         .setColor(0xF04747)
 

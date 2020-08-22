@@ -196,6 +196,22 @@
                 "dm_message_description": "Выдана блокировка на сервере {0}"
             }
         },
+        "cases": {
+            "description": "Устанавливает канал для журнала модерации",
+            "arguments": [
+                {
+                    "name": "канал",
+                    "description": "Канал в который будут поступать случаи модерации",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                }
+            ],
+            "texts": {
+                "no_channel_argument": "{0}, пожалуйста, укажите канал для журнала модерации",
+                "invalid_channel": "{0}, укажите действительный канал для журнала модерации",
+                "case_log_set": "{0}, журнал модерации будет отправляться в канал {1}"
+            }
+        },
         "kick": {
             "description": "Выгоняет пользователя с сервера",
             "arguments": [
@@ -492,7 +508,8 @@
                 "message_id": "id сообщения",
                 "webhook_create_reason": "Логи: создание веб-крючка для события \"{0}\"",
                 "members": "Участников",
-                "account_created": "Дата регистрации"
+                "account_created": "Дата регистрации",
+                "role": "Роль"
             },
             "guild_member_add": {
                 "title": "Пользователь присоединился к серверу",
@@ -501,6 +518,12 @@
             "guild_member_remove": {
                 "title": "Пользователь покинул сервер",
                 "bot_remove": "Бот удалён"
+            },
+            "guild_member_update": {
+                "title": "Участник изменён",
+                "nickname_update": "Отображаемое имя изменено",
+                "before_changes": "До изменения",
+                "after_changes": "После изменения"
             },
             "message_delete": {
                 "title": "Сообщение удалено",
@@ -514,6 +537,12 @@
                 "title": "Сообщение изменено",
                 "content_before_update": "До изменение",
                 "content_after_update": "После изменения"
+            },
+            "role_member_add": {
+                "title": "Роль добавлена"
+            },
+            "role_member_remove": {
+                "title": "Роль убрана"
             },
             "voice_connect": {
                 "title": "Голосовое подключение"

@@ -15,7 +15,7 @@ const User = new Schema({
         available: { type: Boolean, default: false },
         type: { type: String, default: 'NONE' },
         tier: { type: Number, default: 0 },
-        boosted_guilds: { type: Array, default: [] }
+        guilds: { type: Array, default: [] }
     },
     created_at: { type: Number, default: Date.now() },
     modified_at: { type: Number, default: 0 }

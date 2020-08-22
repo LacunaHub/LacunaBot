@@ -83,10 +83,6 @@ export interface ServerDocument {
                     active: Boolean
                     channel_id: String
                 }
-                role_add: {
-                    active: Boolean
-                    channel_id: String
-                },
                 role_create: {
                     active: Boolean,
                     channel_id: String
@@ -95,7 +91,11 @@ export interface ServerDocument {
                     active: Boolean
                     channel_id: String
                 }
-                role_remove: {
+                role_member_add: {
+                    active: Boolean
+                    channel_id: String
+                }
+                role_member_remove: {
                     active: Boolean
                     channel_id: String
                 }
@@ -421,7 +421,7 @@ export interface UserDocument {
         available: Boolean
         type: 'NONE' | 'PATREON' | 'BOOSTY' | 'SERVER_BOOST'
         tier: Number
-        boosted_guilds: Array<BoostedGuild>
+        guilds: Array<BoostedGuild>
     }
     created_at: Number
     modified_at: Number

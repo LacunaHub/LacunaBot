@@ -85,10 +85,6 @@ const Server = new Schema({
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
                 },
-                role_add: {
-                    active: { type: Boolean, default: false },
-                    channel_id: { type: String, default: '' }
-                },
                 role_create: {
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
@@ -97,7 +93,11 @@ const Server = new Schema({
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
                 },
-                role_remove: {
+                role_member_add: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                role_member_remove: {
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
                 },
