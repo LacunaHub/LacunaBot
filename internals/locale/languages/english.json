@@ -64,6 +64,19 @@
                 "STRING": "String"
             }
         },
+        "about": {
+            "description": "Показывает некоторую информацию о боте",
+            "texts": {
+                "developer": "Разработчик",
+                "version": "Версия",
+                "os_uptime": "Время работы системы",
+                "shard_uptime": "Время работы фрагмента",
+                "total_guilds": "Серверов",
+                "total_users": "Пользователей",
+                "shards": "Фрагментов",
+                "latency": "Задержка"
+            }
+        },
         "help": {
             "description": "Shows list of commands",
             "arguments": [
