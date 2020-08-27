@@ -29,7 +29,7 @@ const execute = async (self, server, message, args) => {
         .addField(locale.about.texts.total_users, total_users, true)
         .addField(locale.about.texts.shards, self.shard.count, true)
         .addField(locale.about.texts.os_uptime, numbro(os.uptime()).format({ output: 'time' }), true)
-        .addField(locale.about.texts.shard_uptime, numbro(self.uptime).format({ output: 'time' }), true)
+        .addField(locale.about.texts.shard_uptime, numbro(self.uptime / 1000).format({ output: 'time' }), true)
         .addField('\u200B', '\u200B', true)
         .setFooter(`© ${application.owner.name}`, application.owner.iconURL())
 

@@ -25,7 +25,7 @@ class Logs {
      * @param {import('discord.js').Channel} channel
      */
     static async ChannelCreate(self, server, channel) {
-
+        
     }
 
     /**

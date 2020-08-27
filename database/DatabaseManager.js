@@ -78,6 +78,11 @@ class Manager {
     static async update(schema, findOptions, updateOptions) {
         try {
             await schema.updateOne(findOptions, updateOptions)
+            await schema.updateOne(findOptions, {
+                $set: {
+                    modified_at: Date.now()
+                }
+            })
 
             return true
         } catch (err) {
@@ -94,6 +99,11 @@ class Manager {
     static async updateSome(schema, findOptions, updateOptions) {
         try {
             await schema.updateMany(findOptions, updateOptions)
+            await schema.updateMany(findOptions, {
+                $set: {
+                    modified_at: Date.now()
+                }
+            })
 
             return true
         } catch (err) {
