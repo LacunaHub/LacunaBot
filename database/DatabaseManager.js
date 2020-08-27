@@ -146,7 +146,7 @@ class ServersManager {
 
     /**
      * @param {import('../internals/Typings').ServerDocument} options
-     * @returns {import('../internals/Typings').ServerDocument}
+     * @returns {Promise<import('../internals/Typings').ServerDocument>}
      */
     static async find(options) {
         return await Manager.find(Servers, options)
@@ -154,7 +154,7 @@ class ServersManager {
 
     /**
      * @param {import('../internals/Typings').ServerDocument} options
-     * @returns {import('../internals/Typings').ServerDocument[]}
+     * @returns {Promise<import('../internals/Typings').ServerDocument[]>}
      */
     static async findSome(options) {
         return await Manager.findSome(Servers, options)
@@ -162,7 +162,7 @@ class ServersManager {
 
     /**
      * @param {import('../internals/Typings').ServerDocument} options
-     * @returns {import('../internals/Typings').ServerDocument}
+     * @returns {Promise<import('../internals/Typings').ServerDocument>}
      */
     static async fetch(options) {
         return await Manager.fetch(Servers, options)
@@ -209,7 +209,7 @@ class UsersManager {
 
     /**
      * @param {import('../internals/Typings').UserDocument} options
-     * @returns {import('../internals/Typings').UserDocument}
+     * @returns {Promise<import('../internals/Typings').UserDocument>}
      */
     static async find(options) {
         return await Manager.find(Users, options)
@@ -217,7 +217,7 @@ class UsersManager {
 
     /**
      * @param {import('../internals/Typings').UserDocument} options
-     * @returns {import('../internals/Typings').UserDocument[]}
+     * @returns {Promise<import('../internals/Typings').UserDocument[]>}
      */
     static async findSome(options) {
         return await Manager.findSome(Users, options)
@@ -225,7 +225,7 @@ class UsersManager {
 
     /**
      * @param {import('../internals/Typings').UserDocument} options
-     * @returns {import('../internals/Typings').UserDocument}
+     * @returns {Promise<import('../internals/Typings').UserDocument>}
      */
     static async fetch(options) {
         return await Manager.fetch(Users, options)

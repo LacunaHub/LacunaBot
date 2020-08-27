@@ -419,13 +419,15 @@ export interface UserDocument {
     }
     boost: {
         available: Boolean
-        type: 'NONE' | 'PATREON' | 'BOOSTY' | 'SERVER_BOOST'
+        type: BoostType
         tier: Number
         guilds: Array<BoostedGuild>
     }
     created_at: Number
     modified_at: Number
 }
+
+export type BoostType = 'NONE' | 'DEVELOPER' | 'TEAM' | 'PATREON' | 'BOOSTY' | 'SERVER_BOOST'
 
 export interface BoostedGuild {
     id: String
@@ -494,4 +496,11 @@ export interface ModuleExecutionData {
         id: String
         name: String
     }
+}
+
+export interface PlayerQueue {
+    tracks: Array<import('@lavacord/discord.js').TrackData>
+    repeat: Boolean
+    volume: Number
+    skip_votes: Number
 }

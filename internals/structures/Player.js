@@ -3,6 +3,7 @@ const { Collection } = require('discord.js')
 const { URLSearchParams } = require('url')
 const schedule = require('node-schedule')
 const request = require('node-fetch')
+const QueueManager = require('./QueueManager')
 
 class Player {
     /**
@@ -18,10 +19,7 @@ class Player {
 
         this.options = options
 
-        /**
-         * @type {Collection<String, import('../typedef').PlayerQueue>}
-         */
-        this.queues = new Collection()
+        this.queues = new QueueManager()
 
         this.manager = new Manager(this.self, this.nodes, {
             user: this.options.user,
@@ -58,7 +56,7 @@ class Player {
                 }
             }
         }).sort((a, b) => {
-            const months = ['Luana']
+            const months = ['Winter']
 
             return months.indexOf(a.id) - months.indexOf(b.id)
         })
@@ -79,11 +77,28 @@ class Player {
      * Выполняет подключение ко всем музыкальным плеерам
      */
     async connect() {
-        this.manager.on('error', (err, node) => {
-            this.self.logger.error(`(Player#${node.id}):`, err)
-        })
+        const connection = await this.manager.connect()
 
-        return await this.manager.connect()
+        await this.self.emit('playerManagerConnect', this.manager.nodes.size)
+
+        this.manager.on('ready', (node) => this.self.emit('playerNodeReady', node))
+        this.manager.on('disconnect', (event, node) => this.self.emit('playerNodeDisconnect', event, node))
+        this.manager.on('reconnecting', (node) => this.self.emit('playerNodeReconnecting', node))
+        this.manager.on('error', (err, node) => this.self.emit('playerNodeError', err, node))
+
+        return connection
+    }
+
+    /**
+     * Возвращает плеер и очередь воспроизведения
+     * 
+     * @param {String} id
+     */
+    get(id) {
+        const player = this.manager.players.get(id)
+        const queue = this.queues.cache.get(id)
+
+        return player && queue ? { player: player, queue: queue } : null
     }
 
     /**
@@ -113,7 +128,7 @@ class Player {
 
     /**
      * Останавливает воспроизведение на 30 минут, когда в голосовом канале никого нет,
-     * после чего закрывает соединение и возобновляет его, когда кто-то присоединяется к соединению
+     * после чего закрывает соединение или возобновляет его, когда кто-то присоединяется к соединению
      * 
      * @param {String} id
      * @param {Boolean} state

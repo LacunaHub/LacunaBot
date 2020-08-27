@@ -14,7 +14,8 @@ const execute = async (self, before, message) => {
         partial = true
     }
 
-    if (message.author.bot || message.channel.type == 'dm') return null
+    if (message.author.bot || message.channel.type == 'dm') return false
+    if ((!before.embeds.length && message.embeds.length) || (!before.pinned && message.pinned)) return false
 
     const server = await self.db.servers.fetch({ _id: message.guild.id })
 

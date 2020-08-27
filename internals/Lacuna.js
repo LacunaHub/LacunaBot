@@ -16,6 +16,8 @@ class Lacuna extends Client {
     constructor(options = {}) {
         super(options)
 
+        this.start_timestamp = null
+
         /**
          * @type {Collection<String, Command}
          */
@@ -31,13 +33,13 @@ class Lacuna extends Client {
          */
         this.tempmutes = new Collection()
 
-        this.player = new Player(this, { user: process.env.CLIENT_ID, shards: process.env.CLIENT_MAX_SHARDS })
-
         this.logger = logger
 
         this.db = DatabaseManager
 
         this.translator = Translator
+
+        this.player = null
 
         this.start()
     }
@@ -45,11 +47,25 @@ class Lacuna extends Client {
     get _emojis() {
         return {
             OK: '<:OK:746635543042981898>',
-            ERROR: '<:ERROR:746635499355242577>'
+            ERROR: '<:ERROR:746635499355242577>',
+            details: {
+                OK: {
+                    animated: false,
+                    id: '746635543042981898',
+                    name: 'OK'
+                },
+                ERROR: {
+                    animated: false,
+                    id: '746635499355242577',
+                    name: 'ERROR'
+                }
+            }
         }
     }
 
     async start() {
+        this.start_timestamp = Date.now()
+
         await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
 
         await this.login(process.env.CLIENT_TOKEN)
@@ -57,18 +73,18 @@ class Lacuna extends Client {
         this.loadcommands()
         this.loadevents()
 
-        process.on('unhandledRejection', err => {
-            if (err.name != 'DiscordAPIError') {
-                const _err = err.stack ? err.stack : err.message
+        this.player = new Player(this, { user: process.env.CLIENT_ID, shards: Number(process.env.CLIENT_MAX_SHARDS) })
 
-                this.logger.error('(Unhandled Rejection)', _err)
-                //this.logger.telegram.error('`Unhandled Rejection`', `\`\`\`\n${_err}\n\`\`\``)
-            }
-        })
+        process.on('unhandledRejection', err => this.emit('unhandledRejection', err))
 
         return Date.now()
     }
 
+    /**
+     * Загрузка всех команд
+     * 
+     * @private
+     */
     loadcommands() {
         fs.readdir("./commands", async (err, files) => {
             if (err) {
@@ -118,6 +134,11 @@ class Lacuna extends Client {
         })
     }
 
+    /**
+     * Загрузка всех событий
+     * 
+     * @private
+     */
     loadevents() {
         fs.readdir('./events', async (err, files) => {
             if (err) {
@@ -129,6 +150,7 @@ class Lacuna extends Client {
             const dirs = files.filter(f => !f.includes('.'))
 
             let progress = 0
+            let events = 0
 
             dirs.forEach(dir => {
                 fs.readdir(`./events/${dir}`, (err, _files) => {
@@ -144,7 +166,7 @@ class Lacuna extends Client {
                     
                         return
                     }
-        
+
                     js.forEach(file => {
                         const event = require(`../events/${dir}/${file}`)
         
@@ -153,7 +175,8 @@ class Lacuna extends Client {
                     })
 
                     progress++
-                    if (progress == dirs.length) logger.info(`(Events): Loaded ${this.listenerCount()} events`)
+                    events += js.length
+                    if (progress == dirs.length) logger.info(`(Events): Loaded ${events} events in ${progress} categories`)
                 })
             })
         })
