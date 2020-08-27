@@ -53,7 +53,7 @@ const execute = async (self, server, message, args) => {
 
     if (search.loadType === 'PLAYLIST_LOADED') {
         if (!server.server.premium.available) {
-            await _message.edit(`${self._emojis.ERROR} | `)
+            await _message.edit(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.playlist_loaded_no_premium, `**${message.author.username}**`)}`)
 
             return false
         }
