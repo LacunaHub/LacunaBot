@@ -12,7 +12,7 @@ const execute = async (self, server, message, args) => {
     const provided_command = args[0]
 
     if (!provided_command) {
-        const commands = self.commands.filter(c => !c.hidden && !(c.premium_only && !server.server.premium.available))
+        const commands = self.commands.filter(c => !c.private && !(c.premium_only && !server.server.premium.available))
 
         const categories = {
             general: commands.filter(c => {
@@ -46,7 +46,7 @@ const execute = async (self, server, message, args) => {
     }
 
     else {
-        const command = self.commands.find(c => !c.hidden && c.name == provided_command)
+        const command = self.commands.find(c => !c.private && c.name == provided_command)
 
         if (!command) {
             await message.channel.send(`${self._emojis.ERROR} | `)

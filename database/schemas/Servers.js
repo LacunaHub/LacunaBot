@@ -65,6 +65,10 @@ const Server = new Schema({
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
                 },
+                guild_update: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
                 invite_create: {
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
@@ -219,6 +223,20 @@ const Server = new Schema({
             restore_nicknames: { type: Boolean, default: false },
             strict_roles: { type: Array, default: [] },
             data: { type: Array, default: [] }
+        },
+        music: {
+            allowed: {
+                channels: { type: Array, default: [] },
+                roles: { type: Array, default: [] }
+            },
+            blocked: {
+                channels: { type: Array, default: [] },
+                roles: { type: Array, default: [] }
+            },
+            queue_max_length: { type: Number, default: 0 },
+            track_max_duration: { type: Number, default: 0 },
+            allow_radio_playback: { type: Boolean, default: true },
+            disable_skip_vote: { type: Boolean, default: false }
         }
     },
     created_at: { type: Number, default: Date.now() },

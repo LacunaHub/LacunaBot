@@ -7,7 +7,7 @@ const { GuildMemberAdd } = require('../../modules/Logs')
  */
 const execute = async (self, member) => {
     if (member.partial) {
-        member = await member.guild.members.fetch({ member: member.id, cache: false })
+        member = await member.guild.members.fetch({ member: member, cache: false })
     }
 
     const server = await self.db.servers.fetch({ _id: member.guild.id })

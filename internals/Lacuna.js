@@ -18,6 +18,8 @@ class Lacuna extends Client {
 
         this.start_timestamp = null
 
+        this.application = null
+
         /**
          * @type {Collection<String, Command}
          */
@@ -74,6 +76,7 @@ class Lacuna extends Client {
         this.loadevents()
 
         this.player = new Player(this, { user: process.env.CLIENT_ID, shards: Number(process.env.CLIENT_MAX_SHARDS) })
+        this.application = await this.fetchApplication()
 
         process.on('unhandledRejection', err => this.emit('unhandledRejection', err))
 

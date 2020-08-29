@@ -28,8 +28,6 @@ const execute = async (self, state) => {
         if (voice_roles.size) await state.member.roles.add(voice_roles, locale.voice_manager.voice_add_roles_reason)
     }
 
-    await CreateTempVoice(self, state)
-
     await VoiceConnect(self, server, state)
 
     return true

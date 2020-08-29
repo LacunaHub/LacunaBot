@@ -69,7 +69,7 @@ const execute = async (self, server, message, args) => {
 
     const case_log_message = new MessageEmbed()
         .setTitle(locale.common.case_log.cases.BAN_ADD)
-        .addField(locale.common.case_log.target, `${member.user.tag} (${member.id})`, true)
+        .addField(locale.common.case_log.target, `${member.user.tag}\n(${member.id})`, true)
         .addField(locale.common.case_log.executor, message.author.tag, true)
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))

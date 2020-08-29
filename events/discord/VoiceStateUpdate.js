@@ -5,11 +5,11 @@
  */
 const execute = async (self, before, state) => {
     if (before.member.partial) {
-        before.member = await state.guild.members.fetch({ member: before.member.id, cache: false })
+        before.member = await state.guild.members.fetch({ member: before.member, cache: false })
     }
 
     if (state.member.partial) {
-        state.member = await state.guild.members.fetch({ member: state.member.id, cache: false })
+        state.member = await state.guild.members.fetch({ member: state.member, cache: false })
     }
 
     if (!before.channelID && state.channelID) {

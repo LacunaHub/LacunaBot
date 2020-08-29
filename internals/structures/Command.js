@@ -32,11 +32,11 @@ class Command {
 
         this.guild_only = Boolean(data.guild_only)
 
-        this.owner_only = Boolean(data.owner_only)
+        this.developer_only = Boolean(data.developer_only)
 
         this.premium_only = Boolean(data.premium_only)
 
-        this.hidden = Boolean(data.hidden)
+        this.private = Boolean(data.private)
 
         this.nsfw = Boolean(data.nsfw)
 
@@ -78,7 +78,7 @@ class Command {
     denied(server, message) {
         const command = server.commands.system.find(c => c.name == this.name)
 
-        if (this.owner_only) return false
+        if (this.developer_only && !this.self.application.owner.members.some(m => m.id == message.author.id)) return false
 
         if (this.guild_only && !message.guild) return false
 

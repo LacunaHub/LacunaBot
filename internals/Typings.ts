@@ -63,6 +63,10 @@ export interface ServerDocument {
                     active: Boolean
                     channel_id: String
                 }
+                guild_update: {
+                    active: Boolean
+                    channel_id: String
+                }
                 invite_create: {
                     active: Boolean
                     channel_id: String
@@ -443,9 +447,9 @@ export interface CommandInfo {
     subcommands: [] | null
     uses: Number
     guild_only: Boolean
-    owner_only: Boolean
+    developer_only: Boolean
     premium_only: Boolean
-    hidden: Boolean
+    private: Boolean
     nsfw: Boolean
     throttling: CommandThrottlingOptions | null
     throttles: Map<String, CommandThrottledUser>

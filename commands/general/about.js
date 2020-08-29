@@ -17,9 +17,8 @@ const execute = async (self, server, message, args) => {
     
     total_guilds = total_guilds.reduce((a, b) => a + b, 0)
     total_users = total_users.reduce((a, b) => a + b, 0)
-
-    const application = await self.fetchApplication()
-    const developer = await self.users.fetch(application.owner.ownerID)
+    
+    const developer = await self.users.fetch(self.application.owner.ownerID)
 
     const embed = new MessageEmbed()
         .addField(locale.about.texts.developer, developer.tag, true)
@@ -31,7 +30,7 @@ const execute = async (self, server, message, args) => {
         .addField(locale.about.texts.os_uptime, numbro(os.uptime()).format({ output: 'time' }), true)
         .addField(locale.about.texts.shard_uptime, numbro(self.uptime / 1000).format({ output: 'time' }), true)
         .addField('\u200B', '\u200B', true)
-        .setFooter(`© ${application.owner.name}`, application.owner.iconURL())
+        .setFooter(`© ${self.application.owner.name}`, self.application.owner.iconURL())
 
     await message.channel.send(embed)
 
