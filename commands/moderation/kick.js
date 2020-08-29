@@ -43,7 +43,7 @@ const execute = async (self, server, message, args) => {
             $push: {
                 'moderation.case_log.cases': {
                     case_id: case_id,
-                    type: 1 << 1,
+                    type: 1 << 2,
                     timestamp: Date.now(),
                     reason: reason || '',
                     target: {
