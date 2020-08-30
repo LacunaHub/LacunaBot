@@ -1,6 +1,6 @@
 {
   "name": "lacuna",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "A Discord bot",
   "main": "start.js",
   "scripts": {
@@ -26,6 +26,7 @@
     "ms": "^2.1.2",
     "node-fetch": "^2.6.0",
     "node-schedule": "^1.3.2",
-    "numbro": "^2.3.1"
+    "numbro": "^2.3.1",
+    "zlib-sync": "^0.1.7"
   }
 }

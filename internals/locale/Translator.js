@@ -1,4 +1,9 @@
 class Translator {
+    /**
+     * Выбирает указанную локализацию
+     * 
+     * @param {String} locale
+     */
     static locale(locale) {
         let file
 
@@ -16,6 +21,8 @@ class Translator {
     }
 
     /**
+     * Заменяет все выделенные места в строке указанными параметрами по порядку
+     * 
      * @param {String} str
      * @param  {...any} args
      */

@@ -78,7 +78,9 @@ class Command {
     denied(server, message) {
         const command = server.commands.system.find(c => c.name == this.name)
 
-        if (this.developer_only && !this.self.application.owner.members.some(m => m.id == message.author.id)) return false
+        if (this.self.application.owner.members.some(m => m.id == message.author.id)) return true
+
+        if (this.developer_only) return false
 
         if (this.guild_only && !message.guild) return false
 
@@ -107,6 +109,8 @@ class Command {
      */
     allowed(server, message) {
         const command = server.commands.system.find(c => c.name == this.name)
+
+        if (this.self.application.owner.members.some(m => m.id == message.author.id)) return true
 
         if (command) {
             if (command.allowed.roles.length && message.member.roles.some(r => command.allowed.roles.includes(r.id))) return true
