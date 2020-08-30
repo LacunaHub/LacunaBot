@@ -222,6 +222,21 @@ export interface ServerDocument {
             strict_roles: Array<String>
             data: Array<RestoringData>
         }
+        music: {
+            allowed: {
+                channels: Array<String>
+                roles: Array<String>
+            }
+            blocked: {
+                channels: Array<String>
+                roles: Array<String>
+            }
+            queue_max_length: Number
+            track_max_duration: Number
+            default_volume: Number
+            allow_radio_playback: Boolean
+            disable_skip_vote: Boolean
+        }
     }
     created_at: Number
     modified_at: Number

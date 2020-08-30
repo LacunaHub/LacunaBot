@@ -33,6 +33,12 @@ const execute = async (self, server, message, args) => {
     await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.volume.texts.volume_changed, `**${message.author.username}**`, self.player.queues.currentVolume(message.guild.id), volume)}`)
     await self.player.queues.volume(message.guild.id, volume)
 
+    await self.db.servers.update({ _id: message.guild.id }, {
+        $set: {
+            'modules.music.default_volume': volume
+        }
+    })
+
     return true
 }
 

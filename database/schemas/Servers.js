@@ -235,6 +235,7 @@ const Server = new Schema({
             },
             queue_max_length: { type: Number, default: 0 },
             track_max_duration: { type: Number, default: 0 },
+            default_volume: { type: Number, default: 100 },
             allow_radio_playback: { type: Boolean, default: true },
             disable_skip_vote: { type: Boolean, default: false }
         }

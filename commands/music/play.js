@@ -30,7 +30,7 @@ const execute = async (self, server, message, args) => {
         return false
     }
 
-    const queue = self.player.queues.fetch(message.guild.id, { tracks: [], volume: 100, repeat: false, skip_votes: 0 })
+    const queue = self.player.queues.fetch(message.guild.id, { tracks: [], volume: server.modules.music.default_volume, repeat: false, skip_votes: 0 })
 
     const _message = await message.channel.send(`:mag: | ${self.translator.format(locale.play.texts.search_in_progress, `**${message.author.username}**`, `\`${search_track}\``)}`)
     const search = await self.player.search(search_track)
