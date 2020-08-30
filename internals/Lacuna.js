@@ -82,7 +82,7 @@ class Lacuna extends Client {
             const err = error.stack ? error.stack : error.message
 
             this.logger.error('(Unhandled Rejection)', err)
-            //this.logger.telegram.error('`Unhandled Rejection`', `\`\`\`\n${err}\n\`\`\``)
+            this.logger.telegram.error('`Unhandled Rejection`', `\`\`\`\n${err}\n\`\`\``)
         })
 
         return Date.now()

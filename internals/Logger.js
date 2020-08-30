@@ -1,10 +1,7 @@
 const moment = require('moment')
+const request = require('node-fetch')
 
 class Logger {
-    constructor() {
-        throw new Error(`The ${this.constructor.name} class can't be called via 'new'`)
-    }
-
     static log(message, ...args) {
         console.log(`[LOG] – [${moment().format()}]:`, message, ...args)
     }
@@ -49,4 +46,81 @@ class Logger {
     }
 }
 
+class TelegramLogger {
+    static get base_url() {
+        return `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`
+    }
+
+    static async log(message, ...args) {
+        const options = {
+            url: this.base_url,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: process.env.TELEGRAM_LOG_CHAT_ID,
+                text: `✏ *LOG* | ${message} ${args.join(' ')}`,
+                parse_mode: 'Markdown',
+                disable_notification: true
+            })
+        }
+
+        await request(this.base_url, options)
+    }
+
+    static async info(message, ...args) {
+        const options = {
+            url: this.base_url,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: process.env.TELEGRAM_LOG_CHAT_ID,
+                text: `ℹ *INFO* | ${message} ${args.join(' ')}`,
+                parse_mode: 'Markdown',
+                disable_notification: true
+            })
+        }
+
+        await request(this.base_url, options)
+    }
+
+    static async warn(message, ...args) {
+        const options = {
+            url: this.base_url,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: process.env.TELEGRAM_LOG_CHAT_ID,
+                text: `⚠ *WARN* | ${message} ${args.join(' ')}`,
+                parse_mode: 'Markdown'
+            })
+        }
+
+        await request(this.base_url, options)
+    }
+
+    static async error(message, ...args) {
+        const options = {
+            url: this.base_url,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: process.env.TELEGRAM_LOG_CHAT_ID,
+                text: `‼ *ERROR* | ${message} ${args.join(' ')}`,
+                parse_mode: 'Markdown'
+            })
+        }
+
+        await request(this.base_url, options)
+    }
+}
+
 module.exports = Logger
+module.exports.telegram = TelegramLogger
