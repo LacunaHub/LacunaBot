@@ -168,7 +168,7 @@ class Player {
      */
     async destroy(id) {
         await this.manager.leave(id)
-        await this.queues.delete(id)
+        await this.queues.cache.delete(id)
 
         return this
     }

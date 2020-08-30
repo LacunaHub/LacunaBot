@@ -132,13 +132,13 @@
                 },
                 "members": {
                     "title": "Members",
-                    "online": "Online {0}",
-                    "total": "Total {0}"
+                    "online": "online",
+                    "total": "total"
                 },
                 "channels": {
                     "title": "Channels",
-                    "text": "Text: {0}",
-                    "voice": "Voice: {0}"
+                    "text": "text",
+                    "voice": "voice"
                 },
                 "verification_level": "Verification level",
                 "verification_levels": ["None", "Low", "Medium", "High", "Very high"],
