@@ -7,7 +7,7 @@ class Utils {
      * @param {String} [end]
      */
     static TruncateString(string, limit = 100, end = '...') {
-        if (!string || typeof string !== 'string') throw new TypeError('Argument not provided or isn\'t string')
+        if (typeof string !== 'string') throw new TypeError('Argument not provided or isn\'t string')
 
         if (typeof limit !== 'number') limit = 100
         if (typeof end !== 'string') end = '...'

@@ -458,7 +458,7 @@ class Logs {
             const is_ok = log && message.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(message.guild.me).has('MANAGE_WEBHOOKS')
 
             if (is_ok) {
-                const content = TruncateString(message.content, 800)
+                const content = TruncateString(message.content || '', 800)
 
                 const webhooks = await message.guild.fetchWebhooks()
                 const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
@@ -581,8 +581,8 @@ class Logs {
             const is_ok = log && message.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(message.guild.me).has('MANAGE_WEBHOOKS')
 
             if (is_ok) {
-                const before_content = TruncateString(before.content, 800)
-                const content = TruncateString(message.content, 800)
+                const before_content = TruncateString(before.content || '', 800)
+                const content = TruncateString(message.content || '', 800)
 
                 const webhooks = await message.guild.fetchWebhooks()
                 const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
