@@ -1,3 +1,5 @@
+const help = require('../../commands/general/help')
+
 /**
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').Message} message
@@ -15,6 +17,10 @@ const execute = async (self, message) => {
 
     if (command) {
         await command.execute(server, message, args)
+    }
+
+    if (message.content.trim().startsWith(`<@!${self.user.id}>`) && message.content.trim().length == `<@!${self.user.id}>`.length) {
+        await help.fn(self, server, message, args)
     }
 
     return true

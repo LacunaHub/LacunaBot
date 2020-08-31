@@ -7,7 +7,7 @@ const execute = async (self, id, unavailable_guilds) => {
     const start_ms = Date.now() - self.start_timestamp
 
     await self.logger.info(`(Start): ${self.user.username}#${id} ready for ${start_ms}ms after start`)
-    await self.logger.telegram.info(`\`Start:\` ${bot_username} started for ${start_ms}ms`)
+    await self.logger.telegram.info(`\`Start:\` ${self.user.username}#${id} started for ${start_ms}ms`)
 
     return true
 }

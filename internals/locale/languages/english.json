@@ -471,6 +471,21 @@
                 "log_type_disable": "{0}, я больше не буду следить за событием {1}"
             }
         },
+        "prefix": {
+            "description": "Изменяет префикс бота",
+            "arguments": [
+                {
+                    "name": "префикс",
+                    "description": "Новый префикс для команд бота",
+                    "required": true,
+                    "types": ["STRING"]
+                }
+            ],
+            "texts": {
+                "prefix_max_length": "{0}, префикс не может превышать 3 символа",
+                "prefix_set": "{0}, префикс бота успешно изменен с {1} на {2}"
+            }
+        },
         "reactions": {
             "description": "Управление элементами меню реакций",
             "reaction_element_not_found": "{0}, элемент реакции не найден",

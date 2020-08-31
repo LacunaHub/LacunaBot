@@ -26,11 +26,11 @@ const execute = async (self, server, message, args) => {
     }
 
     if (!game.type) game.name = status
-    else if (game.type == 0) game.name = `${locale.user.texts.presence.playing} **${game.name}**`
-    else if (game.type == 1) game.name = `${locale.user.texts.presence.streaming} [**${game.name}**](${game.url})`
-    else if (game.type == 2) game.name = `${locale.user.texts.presence.listening_to} **${game.name}**`
-    else if (game.type == 3) game.name = `${locale.user.texts.presence.watching} **${game.name}**`
-    else if (game.type == 4) game.name = `${game.emoji ? `${game.emoji} ` : ''}${game.state}`
+    else if (game.type == 'PLAYING') game.name = `${locale.user.texts.presence.playing} **${game.name}**`
+    else if (game.type == 'STREAMING') game.name = `${locale.user.texts.presence.streaming} [**${game.name}**](${game.url})`
+    else if (game.type == 'LISTENING') game.name = `${locale.user.texts.presence.listening_to} **${game.name}**`
+    else if (game.type == 'WATCHING') game.name = `${locale.user.texts.presence.watching} **${game.name}**`
+    else if (game.type == 'CUSTOM_STATUS') game.name = `${game.emoji ? `${game.emoji} ` : ''}${game.state}`
 
     const name = specified.nickname ? `${specified.user.tag} — ${specified.nickname}` : specified.user.tag
 
