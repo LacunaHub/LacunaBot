@@ -19,8 +19,11 @@ const execute = async (self, message) => {
         await command.execute(server, message, args)
     }
 
-    if (message.content.trim().startsWith(`<@!${self.user.id}>`) && message.content.trim().length == `<@!${self.user.id}>`.length) {
-        await help.fn(self, server, message, args)
+    if (message.mentions.has(self.user.id)) {
+        const mentioned = message.content.trim().startsWith(`<@${self.user.id}>`) || message.content.trim().length == `<@${self.user.id}>`.length
+        const mentioned_with_exclamation = message.content.trim().startsWith(`<@!${self.user.id}>`) || message.content.trim().length == `<@!${self.user.id}>`.length
+
+        if (mentioned || mentioned_with_exclamation) await help.fn(self, server, message, args)
     }
 
     return true
