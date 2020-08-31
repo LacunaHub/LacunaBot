@@ -49,7 +49,7 @@ const execute = async (self, server, message, args) => {
         const command = self.commands.find(c => !c.private && c.name == provided_command)
 
         if (!command) {
-            await message.channel.send(`${self._emojis.ERROR} | `)
+            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.help.texts.command_not_found, `**${message.author.username}**`)}`)
 
             return false
         }

@@ -96,6 +96,7 @@
                     "music": "Music",
                     "utility": "Utility"
                 },
+                "command_not_found": "{0}, команда не найдена",
                 "usage": "Usage",
                 "args": "Arguments",
                 "subcommands": "Subcommands",
