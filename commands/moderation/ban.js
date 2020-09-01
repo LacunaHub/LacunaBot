@@ -77,9 +77,14 @@ const execute = async (self, server, message, args) => {
         .setTimestamp()
         .setColor(0xF04747)
 
-    await member.send(dm_message).catch()
+    try {
+        await member.send(dm_message)
+    } catch (err) {
+        await self.logger.error(err)
+    }
+
     await message.guild.members.ban(member, { reason: reason })
-    if (case_log) await case_log.send(case_log_message).catch()
+    if (case_log) await case_log.send(case_log_message)
 
     return true
 }
