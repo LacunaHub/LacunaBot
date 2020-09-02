@@ -13,12 +13,12 @@ const User = new Schema({
     },
     boost: {
         available: { type: Boolean, default: false },
-        type: { type: String, default: 'NONE' },
+        type: { type: Array, default: [] },
         tier: { type: Number, default: 0 },
         guilds: { type: Array, default: [] }
     },
     created_at: { type: Number, default: Date.now() },
     modified_at: { type: Number, default: 0 }
-})
+}, { versionKey: false })
 
 module.exports = model('Users', User)

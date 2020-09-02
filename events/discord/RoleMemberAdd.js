@@ -19,8 +19,10 @@ const execute = async (self, member, role) => {
                     $set: {
                         flags: user.flags | 1 << 0,
                         'boost.available': true,
-                        'boost.type': 'DEVELOPER',
                         'boost.tier': 100
+                    },
+                    $push: {
+                        'boost.type': 'DEVELOPER'
                     }
                 })
             }
@@ -30,18 +32,23 @@ const execute = async (self, member, role) => {
                     $set: {
                         flags: user.flags | 1 << 1,
                         'boost.available': true,
-                        'boost.type': 'TEAM',
-                        'boost.tier': user.boost.tier || 2
+                        'boost.tier': user.boost.tier + 2
+                    },
+                    $push: {
+                        'boost.type': 'TEAM'
                     }
                 })
             }
     
-            if (role.id == '746752483115794583' && !user.boost.available) {
+            if (role.id == '746752483115794583') {
                 await self.db.users.update({ _id: member.id }, {
                     $set: {
                         'boost.available': true,
                         'boost.type': 'SERVER_BOOST',
-                        'boost.tier': 1
+                        'boost.tier': user.boost.tier + 1
+                    },
+                    $push: {
+                        'boost.type': 'SERVER_BOOST'
                     }
                 })
             }

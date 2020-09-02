@@ -10,7 +10,8 @@ const moment = require('moment')
 const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const member = await message.guild.members.fetch(message)
+    const mention = message.mentions.users.first() || args[0]
+    const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
 
     const specified = member ? member : message.member
 

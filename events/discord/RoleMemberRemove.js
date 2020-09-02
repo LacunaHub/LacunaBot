@@ -18,10 +18,12 @@ const execute = async (self, member, role) => {
                 await self.db.users.update({ _id: member.id }, {
                     $set: {
                         flags: user.flags ? user.flags ^ 1 << 0 : user.flags,
-                        'boost.available': false,
-                        'boost.type': 'NONE',
-                        'boost.tier': 0,
+                        'boost.available': user.boost.type.length < 2 ? false : true,
+                        'boost.tier': user.boost.tier < 100 ? 0 : user.boost.tier - 100,
                         'boost.guilds': []
+                    },
+                    $pull: {
+                        'boost.type': 'DEVELOPER'
                     }
                 })
             }
@@ -30,10 +32,12 @@ const execute = async (self, member, role) => {
                 await self.db.users.update({ _id: member.id }, {
                     $set: {
                         flags: user.flags ? user.flags ^ 1 << 1 : user.flags,
-                        'boost.available': false,
-                        'boost.type': 'NONE',
-                        'boost.tier': 0,
+                        'boost.available': user.boost.type.length < 2 ? false : true,
+                        'boost.tier': user.boost.tier < 2 ? 0 : user.boost.tier - 2,
                         'boost.guilds': []
+                    },
+                    $pull: {
+                        'boost.type': 'TEAM'
                     }
                 })
             }
@@ -41,10 +45,12 @@ const execute = async (self, member, role) => {
             if (role.id == '746752483115794583') {
                 await self.db.users.update({ _id: member.id }, {
                     $set: {
-                        'boost.available': false,
-                        'boost.type': 'NONE',
-                        'boost.tier': 0,
+                        'boost.available': user.boost.type.length < 2 ? false : true,
+                        'boost.tier': user.boost.tier < 1 ? 0 : user.boost.tier - 1,
                         'boost.guilds': []
+                    },
+                    $pull: {
+                        'boost.type': 'SERVER_BOOST'
                     }
                 })
             }

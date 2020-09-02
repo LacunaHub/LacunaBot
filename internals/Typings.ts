@@ -438,7 +438,7 @@ export interface UserDocument {
     }
     boost: {
         available: Boolean
-        type: BoostType
+        type: Array<BoostType>
         tier: Number
         guilds: Array<BoostedGuild>
     }
@@ -446,7 +446,7 @@ export interface UserDocument {
     modified_at: Number
 }
 
-export type BoostType = 'NONE' | 'DEVELOPER' | 'TEAM' | 'PATREON' | 'BOOSTY' | 'SERVER_BOOST'
+export type BoostType = 'DEVELOPER' | 'TEAM' | 'PATREON' | 'BOOSTY' | 'SERVER_BOOST' | 'CUSTOM'
 
 export interface BoostedGuild {
     id: String

@@ -555,7 +555,7 @@ class Logs {
                     name: server.server.premium.available ? webhook.name : self.user.username
                 })
 
-                await self.emit('moduleExecution', { module: 'Logs: Message Delete Bulk', guild: { id: message.guild.id, name: message.guild.name }, target: { id: message.author.id, name: message.author.tag } })
+                await self.emit('moduleExecution', { module: 'Logs: Message Delete Bulk', guild: { id: message.guild.id, name: message.guild.name }, target: { id: message.author ? message.author.id : message.id, name: message.author ? message.author.tag : message.type } })
             
                 return true
             }
