@@ -1,8 +1,12 @@
 const Lacuna = require('../Lacuna')
+const { version } = require('../../package.json')
 
 module.exports = new Lacuna({
     presence: {
-        status: 'online'
+        status: 'online',
+        activity: {
+            name: `v${version}`
+        }
     },
     messageCacheMaxSize: 100,
     messageCacheLifetime: 7200,

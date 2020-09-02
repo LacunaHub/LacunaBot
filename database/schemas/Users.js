@@ -17,7 +17,7 @@ const User = new Schema({
         tier: { type: Number, default: 0 },
         guilds: { type: Array, default: [] }
     },
-    created_at: { type: Number, default: Date.now() },
+    created_at: { type: Number, default: 0 },
     modified_at: { type: Number, default: 0 }
 }, { versionKey: false })
 

@@ -10,6 +10,7 @@ class Manager {
      */
     static async create(schema, options) {
         try {
+            options['created_at'] = Date.now()
             await schema.create(options)
     
             return true

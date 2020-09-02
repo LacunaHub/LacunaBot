@@ -240,9 +240,9 @@ const Server = new Schema({
             disable_skip_vote: { type: Boolean, default: false }
         }
     },
-    created_at: { type: Number, default: Date.now() },
+    created_at: { type: Number, default: 0 },
     modified_at: { type: Number, default: 0 },
-    activity_ping_at: { type: Number, default: Date.now() }
+    activity_ping_at: { type: Number, default: 0 }
 }, { versionKey: false })
 
 module.exports = model('Servers', Server)
