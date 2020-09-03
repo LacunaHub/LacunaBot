@@ -47,7 +47,7 @@ const execute = async (self, server, message, args) => {
     const case_log = message.guild.channels.cache.get(server.moderation.case_log.channel_id)
     const case_id = server.moderation.case_log.cases.length + 1
 
-    if (case_log) {
+    if (case_log && server.moderation.case_log.case_types.PRUNE_MESSAGES) {
         await self.db.servers.update({ _id: message.guild.id }, {
             $push: {
                 'moderation.case_log.cases': {
@@ -77,7 +77,7 @@ const execute = async (self, server, message, args) => {
         .setTimestamp()
         .setColor(0xE19517)
 
-    if (case_log) await case_log.send(case_log_message)
+    if (case_log && server.moderation.case_log.case_types.PRUNE_MESSAGES) await case_log.send(case_log_message)
 
     return true
 }

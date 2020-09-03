@@ -13,7 +13,7 @@ const execute = async (self, guild, user) => {
 
     const case_log = guild.channels.cache.get(server.moderation.case_log.channel_id)
 
-    if (case_log && guild.me.hasPermission('VIEW_AUDIT_LOG')) {
+    if (case_log && guild.me.hasPermission('VIEW_AUDIT_LOG') && server.moderation.case_log.case_types.BAN_ADD) {
         const audit = await guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_BAN_ADD' })
         const entry = audit.entries.find(e => e.target.id == user.id)
 

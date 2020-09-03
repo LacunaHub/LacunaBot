@@ -60,7 +60,7 @@ const execute = async (self, member, role) => {
     const case_log = member.guild.channels.cache.get(server.moderation.case_log.channel_id)
     const mute_role = member.guild.roles.cache.get(server.moderation.roles.mute)
 
-    if (case_log && (mute_role && mute_role.id == role.id) && member.guild.me.hasPermission('VIEW_AUDIT_LOG')) {
+    if (case_log && (mute_role && mute_role.id == role.id) && member.guild.me.hasPermission('VIEW_AUDIT_LOG') && server.moderation.case_log.case_types.MUTE_ADD) {
         const audit = await member.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_ROLE_UPDATE' })
         const entry = audit.entries.find(e => e.target.id == member.id)
 

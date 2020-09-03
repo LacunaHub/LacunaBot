@@ -27,6 +27,16 @@ export interface ServerDocument {
         case_log: {
             cases: Array<ModerationCase>
             channel_id: String
+            case_types: {
+                BAN_ADD: Boolean
+                BAN_REMOVE: Boolean
+                KICK: Boolean
+                MUTE_ADD: Boolean
+                MUTE_REMOVE: Boolean
+                PRUNE_MESSAGES: Boolean
+                WARN_ADD: Boolean
+                WARN_REMOVE: Boolean
+            }
         }
         logs: {
             webhooks: Array<LogsWebhook>

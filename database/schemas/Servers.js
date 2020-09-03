@@ -28,7 +28,17 @@ const Server = new Schema({
     moderation: {
         case_log: {
             cases: { type: Array, default: [] },
-            channel_id: { type: String, default: '' }
+            channel_id: { type: String, default: '' },
+            case_types: {
+                BAN_ADD: { type: Boolean, default: true },
+                BAN_REMOVE: { type: Boolean, default: true },
+                KICK: { type: Boolean, default: true },
+                MUTE_ADD: { type: Boolean, default: true },
+                MUTE_REMOVE: { type: Boolean, default: true },
+                PRUNE_MESSAGES: { type: Boolean, default: true },
+                WARN_ADD: { type: Boolean, default: true },
+                WARN_REMOVE: { type: Boolean, default: true }
+            }
         },
         logs: {
             webhooks: { type: Array, default: [] },

@@ -38,7 +38,7 @@ const execute = async (self, server, message, args) => {
 
     if (message.deletable && !message.deleted) await message.delete()
 
-    if (case_log) {
+    if (case_log && server.moderation.case_log.case_types.BAN_ADD) {
         await self.db.servers.update({ _id: message.guild.id }, {
             $push: {
                 'moderation.case_log.cases': {
@@ -84,7 +84,7 @@ const execute = async (self, server, message, args) => {
     }
 
     await message.guild.members.ban(member, { reason: reason })
-    if (case_log) await case_log.send(case_log_message)
+    if (case_log && server.moderation.case_log.case_types.BAN_ADD) await case_log.send(case_log_message)
 
     return true
 }
