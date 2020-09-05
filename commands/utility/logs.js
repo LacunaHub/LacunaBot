@@ -12,7 +12,7 @@ const execute = async (self, server, message, args) => {
     const log_type = args[0]
     const channel = message.mentions.channels.first() || message.guild.channels.cache.find(c => c.id == args[1] || c.name == args[1])
 
-    if (!log_type || !channel) {
+    if (!log_type) {
         await help.fn(self, server, message, ['logs'])
 
         return false
@@ -27,14 +27,18 @@ const execute = async (self, server, message, args) => {
         return false
     }
 
-    const log_entry = server.moderation.logs.types[log_type]
+    if (!channel && args[1] != 'OFF') {
+        await message.channel.send(`${self._emojis.ERROR} | `)
+
+        return false
+    }
 
     await self.db.servers.update({ _id: message.guild.id }, {
-        [`moderation.logs.types.${log_type}.active`]: log_entry.active ? false : true,
-        [`moderation.logs.types.${log_type}.channel_id`]: channel.id
+        [`moderation.logs.types.${log_type}.active`]: args[1] == 'OFF' ? false : true,
+        [`moderation.logs.types.${log_type}.channel_id`]: args[1] == 'OFF' ? '' : channel.id
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(log_entry.active ? locale.logs.texts.log_type_disable : locale.logs.texts.log_type_activated, `**${message.author.username}**`, `\`${log_type}\``)}`)
+    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(args[1] == 'OFF' ? locale.logs.texts.log_type_disable : locale.logs.texts.log_type_activated, `**${message.author.username}**`, `\`${log_type}\``)}`)
 
     return true
 }

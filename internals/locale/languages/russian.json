@@ -486,7 +486,7 @@
                 },
                 {
                     "name": "канал",
-                    "description": "Канал для указанного типа события журнала",
+                    "description": "Канал для указанного типа события журнала, OFF для отключения",
                     "required": true,
                     "types": ["MENTION", "SNOWFLAKE", "STRING"]
                 }
