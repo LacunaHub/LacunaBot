@@ -119,7 +119,24 @@ const add = async (self, server, message, args) => {
      * @type {import('discord.js').TextChannel | import('discord.js').NewsChannel}
      */
     const channel = message.mentions.channels.first() || message.guild.channels.cache.get(raw_args.channel)
-    const message_reaction = await channel.messages.fetch(raw_args.message_id, false, true)
+
+    let message_reaction
+    try {
+        message_reaction = await channel.messages.fetch(raw_args.message_id, false, true)
+    } catch (err) {
+        switch (err.message) {
+            case 'Unknown Message':
+                await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_message, `**${message.author.username}**`)}`)
+            break
+
+            default:
+                await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_error_on_fetch_message, `**${message.author.username}**`)}`)
+            break
+        }
+
+        return false
+    }
+
     const emoji = Util.parseEmoji(raw_args.emoji)
     const reference = message.mentions.channels.filter(c => c.id != channel.id).last() || message.guild.channels.cache.find(c => c.id == raw_args.reference || c.name == raw_args.reference) || message.mentions.roles.first() || message.guild.roles.cache.find(r => r.id == raw_args.reference || r.name == raw_args.reference)
     
@@ -165,7 +182,7 @@ const add = async (self, server, message, args) => {
             break
 
             default:
-                await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_error, `**${message.author.username}**`)}`)
+                await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_error_on_react, `**${message.author.username}**`)}`)
             break
         }
 
