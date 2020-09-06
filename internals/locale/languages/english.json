@@ -129,7 +129,9 @@
                     "us-central": "US central",
                     "us-east": "US east",
                     "us-south": "US south",
-                    "us-west": "US west"
+                    "us-west": "US west",
+                    "frankfurt": "Франкфурт",
+                    "unknown": "Unknown"
                 },
                 "members": {
                     "title": "Members",

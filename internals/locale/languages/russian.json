@@ -129,7 +129,9 @@
                     "us-central": "США",
                     "us-east": "США",
                     "us-south": "США",
-                    "us-west": "США"
+                    "us-west": "США",
+                    "frankfurt": "Франкфурт",
+                    "unknown": "Неизвестно"
                 },
                 "members": {
                     "title": "Участники",
