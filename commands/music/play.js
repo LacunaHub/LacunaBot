@@ -30,7 +30,7 @@ const execute = async (self, server, message, args) => {
         return false
     }
 
-    const queue = self.player.queues.fetch(message.guild.id, { tracks: [], volume: server.modules.music.default_volume, repeat: false, skip_votes: 0 })
+    const queue = self.player.queues.fetch(message.guild.id, { tracks: [], volume: server.modules.music.default_volume, repeat: false, skip_votes: 0, executor: message.author.id })
 
     const _message = await message.channel.send(`:mag: | ${self.translator.format(locale.play.texts.search_in_progress, `**${message.author.username}**`, `\`${search_track}\``)}`)
     const search = await self.player.search(search_track)
@@ -104,7 +104,7 @@ const execute = async (self, server, message, args) => {
                 if (!queue.repeat) await queue.tracks.shift()
     
                 if (queue.tracks.length) {
-                    await player.play(queue.tracks[0].track, { volume: queue.volume * 100 })
+                    await player.play(queue.tracks[0].track, { volume: queue.volume })
                 }
     
                 else {

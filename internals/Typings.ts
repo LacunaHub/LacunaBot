@@ -532,4 +532,5 @@ export interface PlayerQueue {
     repeat: Boolean
     volume: Number
     skip_votes: Number
+    executor: String
 }

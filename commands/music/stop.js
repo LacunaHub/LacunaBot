@@ -15,6 +15,10 @@ const execute = async (self, server, message, args) => {
         return false
     }
 
+    if (playback.queue.executor != message.author.id && !message.member.hasPermission('MANAGE_CHANNELS')) {
+        await message.react(self._emojis.details.ERROR.id)
+    }
+
     await self.player.destroy(message.guild.id)
     await message.react(self._emojis.details.OK.id)
 
@@ -27,6 +31,5 @@ module.exports = {
     description: 'commands.stop.description',
     group: 'music',
     guild_only: true,
-    self_permissions: ['SEND_MESSAGES'],
-    user_permissions: ['MANAGE_CHANNELS']
+    self_permissions: ['SEND_MESSAGES']
 }

@@ -62,6 +62,20 @@ class QueueManager {
     }
 
     /**
+     * Добавляет голос для пропуска трека
+     * 
+     * @param {String} guild_id
+     */
+    voteForSkip(guild_id) {
+        const cache = this.cache.get(guild_id)
+
+        if (!cache) throw new Error('Queue cache of guild not found')
+
+        cache.skip_votes++
+        return cache
+    }
+
+    /**
      * Сбрасывает голоса для пропуска трека
      * 
      * @param {String} guild_id
@@ -72,6 +86,21 @@ class QueueManager {
         if (!cache) throw new Error('Queue cache of guild not found')
 
         cache.skip_votes = 0
+        return cache
+    }
+
+    /**
+     * Устанавливает исполнителя воспроизведения
+     * 
+     * @param {String} guild_id
+     * @param {String} user_id
+     */
+    setPlaybackExecutor(guild_id, user_id) {
+        const cache = this.cache.get(guild_id)
+
+        if (!cache) throw new Error('Queue cache of guild not found')
+
+        cache.executor = user_id
         return cache
     }
 }

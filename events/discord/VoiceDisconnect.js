@@ -14,10 +14,11 @@ const execute = async (self, state, channel) => {
     const connection = state.guild.me.voice.channel
 
     if (connection) {
-        const listeners = connection.members.filter(m => !m.user.bot).size
+        const listeners = connection.members.filter(m => !m.user.bot)
 
-        if (!listeners && connection.id == state.member.voice.channelID) {
+        if (!listeners.size && connection.id == state.member.voice.channelID) {
             await self.player.wait(state.guild.id, true)
+            await self.player.queues.setPlaybackExecutor(state.guild.id, listeners.first() ? listeners.first().id : '')
         }
     }
 
