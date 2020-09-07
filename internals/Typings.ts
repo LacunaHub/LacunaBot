@@ -167,8 +167,8 @@ export interface ServerDocument {
             }
         }
         warnings: {
-            penalties: Array<WarnPenalty>
-            violators: Array<WarnViolator>
+            penalties: Array<WarningsPenalty>
+            violators: Array<WarningsViolator>
         },
         roles: {
             mute: String
