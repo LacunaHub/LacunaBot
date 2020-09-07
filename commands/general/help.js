@@ -100,7 +100,11 @@ const execute = async (self, server, message, args) => {
                 }
             })
 
-            embed.addField(locale.help.texts.usage, usages)
+            const usage_field = embed.fields.find(e => e.name == locale.help.texts.usage)
+
+            if (usage_field) usage_field.value = `${usage_field.value}\n\n${usages}`
+            else embed.addField(locale.help.texts.usage, usages)
+
             for (const doc of subcmd_doc) embed.addField(doc.name, doc.args)
         }
 

@@ -339,13 +339,13 @@ export interface LogsWebhook {
     channel_id: String
 }
 
-export interface WarnPenalty {
-    amount: Number
-    action: Number
-    timer?: Number
+export interface WarningsPenalty {
+    penalties: Number
+    action_type: Number
+    time_of_temp_penalty: Number
 }
 
-export interface WarnViolator {
+export interface WarningsViolator {
     user_id: String
     violations: Array<ViolatorViolation>
 }
