@@ -347,7 +347,13 @@ export interface WarnPenalty {
 
 export interface WarnViolator {
     user_id: String
-    violations: Number
+    violations: Array<ViolatorViolation>
+}
+
+export interface ViolatorViolation {
+    id: String
+    timestamp: Number
+    reason: String
 }
 
 export interface TemporaryBanEntry {

@@ -55,7 +55,8 @@
                 "target": "User",
                 "executor": "Executor",
                 "reason": "Reason",
-                "duration": "Duration"
+                "duration": "Duration",
+                "warnings": "Warnings"
             },
             "args_types": {
                 "MENTION": "Mention",
@@ -415,6 +416,29 @@
                 "user_not_found": "{0}, пользователь не был указан или не найден",
                 "cant_remove_role": "{0}, я не могу убрать роль заглушения у этого пользователя",
                 "user_not_muted": "{0}, пользователь не был заглушен"
+            }
+        },
+        "warn": {
+            "description": "Выдаёт предупреждение пользователю",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Пользователь, которому будет выдано предупреждение",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                },
+                {
+                    "name": "причина",
+                    "description": "Причина для журнала случаев",
+                    "required": false,
+                    "types": ["STRING"]
+                }
+            ],
+            "texts": {
+                "user_not_found": "{0}, пользователь не был указан или не найден",
+                "user_is_moderator": "{0}, я не могу выдать предупреждение указанному пользователю",
+                "user_warned_dm": "{0}, вам было выдано предупреждение на сервере {1} по причине: {2}",
+                "user_warned_closed_dm": "{0}, вам было выдано предупреждение по причине: {1}"
             }
         },
         "current": {
