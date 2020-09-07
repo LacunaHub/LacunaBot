@@ -485,8 +485,8 @@ export interface CommandInfo {
     throttling: CommandThrottlingOptions | null
     throttles: Map<String, CommandThrottledUser>
     early_access: Number | null
-    self_permissions: import('discord.js').PermissionResolvable | null
-    user_permissions: import('discord.js').PermissionResolvable | null
+    self_permissions: import('discord.js').PermissionResolvable
+    user_permissions: import('discord.js').PermissionResolvable
 }
 
 export interface SubcommandInfo {
@@ -498,6 +498,8 @@ export interface SubcommandInfo {
     premium_only: Boolean
     private: Boolean
     nsfw: Boolean
+    self_permissions: import('discord.js').PermissionResolvable
+    user_permissions: import('discord.js').PermissionResolvable
 }
 
 interface CommandThrottlingOptions {
