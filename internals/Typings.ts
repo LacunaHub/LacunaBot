@@ -1,4 +1,6 @@
-export interface ServerDocument {
+import { Document } from 'mongoose'
+
+export interface ServerDocument extends Document {
     _id: String
     locale: 'en' | 'ru'
     prefix: String
@@ -441,7 +443,7 @@ export interface RestoringData {
     timestamp: Number
 }
 
-export interface UserDocument {
+export interface UserDocument extends Document {
     _id: String
     flags: Number
     profile: {
