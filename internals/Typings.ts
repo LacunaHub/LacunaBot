@@ -1,4 +1,6 @@
-export interface ServerDocument {
+import { Document } from 'mongoose'
+
+export interface ServerDocument extends Document {
     _id: String
     locale: 'en' | 'ru'
     prefix: String
@@ -167,8 +169,8 @@ export interface ServerDocument {
             }
         }
         warnings: {
-            penalties: Array<WarnPenalty>
-            violators: Array<WarnViolator>
+            penalties: Array<WarningsPenalty>
+            violators: Array<WarningsViolator>
         },
         roles: {
             mute: String
@@ -339,15 +341,21 @@ export interface LogsWebhook {
     channel_id: String
 }
 
-export interface WarnPenalty {
-    amount: Number
-    action: Number
-    timer?: Number
+export interface WarningsPenalty {
+    penalties: Number
+    action_type: Number
+    time_of_temp_penalty: Number
 }
 
-export interface WarnViolator {
+export interface WarningsViolator {
     user_id: String
-    violations: Number
+    violations: Array<ViolatorViolation>
+}
+
+export interface ViolatorViolation {
+    id: String
+    timestamp: Number
+    reason: String
 }
 
 export interface TemporaryBanEntry {
@@ -435,7 +443,7 @@ export interface RestoringData {
     timestamp: Number
 }
 
-export interface UserDocument {
+export interface UserDocument extends Document {
     _id: String
     flags: Number
     profile: {
@@ -479,8 +487,8 @@ export interface CommandInfo {
     throttling: CommandThrottlingOptions | null
     throttles: Map<String, CommandThrottledUser>
     early_access: Number | null
-    self_permissions: import('discord.js').PermissionResolvable | null
-    user_permissions: import('discord.js').PermissionResolvable | null
+    self_permissions: import('discord.js').PermissionResolvable
+    user_permissions: import('discord.js').PermissionResolvable
 }
 
 export interface SubcommandInfo {
@@ -492,6 +500,8 @@ export interface SubcommandInfo {
     premium_only: Boolean
     private: Boolean
     nsfw: Boolean
+    self_permissions: import('discord.js').PermissionResolvable
+    user_permissions: import('discord.js').PermissionResolvable
 }
 
 interface CommandThrottlingOptions {

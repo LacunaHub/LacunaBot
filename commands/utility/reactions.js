@@ -252,7 +252,24 @@ const remove = async (self, server, message, args) => {
          * @type {import('discord.js').TextChannel | import('discord.js').NewsChannel}
          */
         const channel = message.guild.channels.cache.get(element.message.channel_id)
-        const message_reaction = await channel.messages.fetch(element.message.id, false)
+
+        let message_reaction
+        try {
+            message_reaction = await channel.messages.fetch(raw_args.message_id, false, true)
+        } catch (err) {
+            switch (err.message) {
+                case 'Unknown Message':
+                    await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_message, `**${message.author.username}**`)}`)
+                break
+    
+                default:
+                    await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_error_on_fetch_message, `**${message.author.username}**`)}`)
+                break
+            }
+    
+            return false
+        }
+        
         const reaction = message_reaction.reactions.cache.get(element.emoji.id || element.emoji.name)
     
         await self.db.servers.update({ _id: message.guild.id }, {
@@ -284,7 +301,23 @@ const remove = async (self, server, message, args) => {
          * @type {import('discord.js').TextChannel | import('discord.js').NewsChannel}
          */
         const channel = message.guild.channels.cache.get(elements[0].message.channel_id)
-        const message_reaction = await channel.messages.fetch(snowflake, false)
+        
+        let message_reaction
+        try {
+            message_reaction = await channel.messages.fetch(raw_args.message_id, false, true)
+        } catch (err) {
+            switch (err.message) {
+                case 'Unknown Message':
+                    await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_message, `**${message.author.username}**`)}`)
+                break
+    
+                default:
+                    await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_error_on_fetch_message, `**${message.author.username}**`)}`)
+                break
+            }
+    
+            return false
+        }
 
         await self.db.servers.update({ _id: message.guild.id }, {
             $pull: {
