@@ -544,3 +544,17 @@ export interface PlayerQueue {
     skip_votes: Number
     executor: String
 }
+
+export interface Patron extends Document {
+    _id: String
+    name: String
+    user_id: String
+    email: String
+    discord_id: String
+    last_charge_date: String
+    will_pay_amount_cents: Number
+    lifetime_support_cents: Number
+    patron_status: String
+    image_url: String
+    last_check_at: Number
+}

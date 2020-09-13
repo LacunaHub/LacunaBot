@@ -44,7 +44,6 @@ const execute = async (self, member, role) => {
                 await self.db.users.update({ _id: member.id }, {
                     $set: {
                         'boost.available': true,
-                        'boost.type': 'SERVER_BOOST',
                         'boost.tier': user.boost.tier + 1
                     },
                     $push: {

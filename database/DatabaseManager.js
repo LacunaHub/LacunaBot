@@ -1,5 +1,6 @@
 const Servers = require('./schemas/Servers')
 const Users = require('./schemas/Users')
+const Patrons = require('./schemas/Patrons')
 
 const logger = require('../internals/Logger')
 
@@ -273,6 +274,63 @@ class UsersManager {
     }
 }
 
+class PatronsManager {
+    /**
+     * @param {import('../internals/Typings').Patron} options
+     */
+    static async create(options) {
+        return await Manager.create(Patrons, options)
+    }
+
+    /**
+     * @param {import('../internals/Typings').Patron} options
+     * @returns {Promise<import('../internals/Typings').Patron>}
+     */
+    static async find(options) {
+        return await Manager.find(Patrons, options)
+    }
+
+    /**
+     * @param {import('../internals/Typings').Patron} options
+     * @returns {Promise<import('../internals/Typings').Patron[]>}
+     */
+    static async findSome(options) {
+        return await Manager.findSome(Patrons, options)
+    }
+
+    /**
+     * @param {import('../internals/Typings').Patron} findOptions
+     * @param {*} updateOptions
+     */
+    static async update(findOptions, updateOptions) {
+        return await Manager.update(Patrons, findOptions, updateOptions)
+    }
+
+    /**
+     * @param {import('../internals/Typings').Patron} findOptions
+     * @param {*} updateOptions
+     */
+    static async updateSome(findOptions, updateOptions) {
+        return await Manager.updateSome(Patrons, findOptions, updateOptions)
+    }
+
+    /**
+     * @param {import('../internals/Typings').Patron} options
+     */
+    static async delete(options) {
+        return await Manager.delete(Patrons, options)
+    }
+
+    /**
+     * @param {import('../internals/Typings').Patron} options
+     */
+    static async deleteSome(options) {
+        return await Manager.deleteSome(options)
+    }
+}
+
 module.exports.servers = ServersManager
 
 module.exports.users = UsersManager
+
+module.exports.patrons = PatronsManager
