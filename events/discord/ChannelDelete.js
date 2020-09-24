@@ -13,6 +13,8 @@ const execute = async (self, channel) => {
 
     await ChannelDelete(self, server, channel)
 
+    await self.channels.cache.delete(channel.id)
+
     return true
 }
 

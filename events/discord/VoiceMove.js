@@ -29,6 +29,7 @@ const execute = async (self, before, state) => {
         if (voice_roles.size) await state.member.roles.remove(voice_roles, locale.voice_manager.voice_remove_roles_reason)
     }
 
+    await CreateTempVoiceOnMove(self, server, before, state)
     await VoiceMove(self, server, before, state)
 
     return true

@@ -424,7 +424,7 @@ export interface VoiceChannelTrigger {
     channel_id: String
     default: {
         name: String
-        limit: String
+        limit: Number
         permissions: Number
     }
     children: Array<VoiceChannelTriggerChildren>
