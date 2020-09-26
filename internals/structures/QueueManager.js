@@ -34,6 +34,21 @@ class QueueManager {
     }
 
     /**
+     * Переключает режим повтора воспроизведений
+     * 
+     * @param {String} guild_id
+     */
+    repeat(guild_id) {
+        const cache = this.cache.get(guild_id)
+
+        if (!cache) return null
+
+        cache.repeat = !cache.repeat
+
+        return cache
+    }
+
+    /**
      * Перемешивает очередь воспроизведения
      * 
      * @param {String} guild_id

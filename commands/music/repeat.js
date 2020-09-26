@@ -21,16 +21,16 @@ const execute = async (self, server, message, args) => {
         return false
     }
 
-    await self.player.destroy(message.guild.id)
-    await message.react(self._emojis.details.OK.id)
+    await self.player.queues.repeat(message.guild.id)
+    await message.react(playback.queue.repeat ? '🔂' : '🔁')
 
     return true
 }
 
 module.exports = {
     fn: execute,
-    name: 'stop',
-    description: 'commands.stop.description',
+    name: 'repeat',
+    description: 'commands.repeat.description',
     group: 'music',
     guild_only: true,
     self_permissions: ['SEND_MESSAGES', 'ADD_REACTIONS']
