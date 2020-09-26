@@ -68,6 +68,18 @@ const execute = async (self, server, message, args) => {
     if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
         const track = search.tracks[0]
 
+        if (queue.tracks.length >= 15 && !server.server.premium.available) {
+            await _message.edit(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.queue_limit_reached_no_premium, `**${message.author.username}**`)}`)
+
+            return false
+        }
+
+        if (track.info.isStream) {
+            await _message.edit(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.track_stream_only_for_premium, `**${message.author.username}**`)}`)
+
+            return false
+        }
+
         await queue.tracks.push(track)
 
         if (player.playing) reply = `:musical_note: | ${self.translator.format(locale.play.texts.added_to_queue, `**${message.author.username}**`, `**${track.info.title}**`, queue.tracks.length)}`
