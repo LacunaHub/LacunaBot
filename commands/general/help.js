@@ -84,12 +84,14 @@ const execute = async (self, server, message, args) => {
 
         if (command.subcommands.size) {
             const usages = command.subcommands.map(s => {
-                const args_pattern = docs[s.name].arguments.map(a => `${a.required ? '<' : '['}${a.name}${a.required ? '>' : ']'}`).join(' ')
+                const args_pattern = docs[s.name].arguments ? ' ' + docs[s.name].arguments.map(a => `${a.required ? '<' : '['}${a.name}${a.required ? '>' : ']'}`).join(' ') : ''
 
-                return `\`${server.prefix}${command.name} ${s.name} ${args_pattern}\`: ${docs[s.name].description}`
+                return `\`${server.prefix}${command.name} ${s.name}${args_pattern}\`: ${docs[s.name].description}`
             }).join('\n\n')
 
             const subcmd_doc = command.subcommands.map(s => {
+                if (!docs[s.name].arguments) return null
+
                 const args_doc = docs[s.name].arguments.map(a => {
                     return `\`${a.required ? '<' : '['}${a.name}${a.required ? '>' : ']'}\`: ${a.description}` +
                     `\n- ${a.required ? locale.help.texts.required : locale.help.texts.optional}` +
@@ -100,7 +102,7 @@ const execute = async (self, server, message, args) => {
                     name: `${command.name} ${s.name}${s.aliases.length ? `/${s.aliases.join('/')}` : ''}`,
                     args: args_doc
                 }
-            })
+            }).filter(a => a)
 
             const usage_field = embed.fields.find(e => e.name == locale.help.texts.usage)
 

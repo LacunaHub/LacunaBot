@@ -14,7 +14,7 @@ const execute = async (self, server, message, args) => {
         .addField(locale.config.texts.prefix, `\`${server.prefix}\``, true)
         .addField(locale.config.texts.locale, `\`${server.locale}\``, true)
         .addField(locale.config.texts.bonuses, server.server.premium.available ? self._emojis.OK : self._emojis.ERROR, true)
-        .addField(locale.config.texts.moderation.title, self.translator.format(locale.config.texts.moderation.value, `<#${server.moderation.case_log.channel_id}>`, Object.entries(server.moderation.case_log.case_types).filter(k => !k[1]).map(k => `\`${k[0]}\``).join(', ') || locale.common.texts.none, `<@&${server.moderation.roles.mute}>`))
+        .addField(locale.config.texts.moderation.title, self.translator.format(locale.config.texts.moderation.value, server.moderation.case_log.channel_id ? `<#${server.moderation.case_log.channel_id}>` : '', Object.entries(server.moderation.case_log.case_types).filter(k => !k[1]).map(k => `\`${k[0]}\``).join(', ') || locale.common.texts.none, server.moderation.roles.mute ? `<@&${server.moderation.roles.mute}>` : ''))
 
     await message.channel.send(embed)
 
@@ -53,6 +53,31 @@ const reactions = async (self, server, message, args) => {
     await message.channel.send(`${channels}\n\n${roles}`)
 }
 
+/**
+ * @param {import('../../internals/Lacuna')} self
+ * @param {import('../../internals/Typings').ServerDocument} server
+ * @param {import('discord.js').Message} message
+ * @param {String[]} args
+ */
+const tvc = async (self, server, message, args) => {
+    const locale = self.translator.locale(server.locale).commands
+
+    if (!server.modules.voice_manager.temp_voice_channels.triggers.length) {
+        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.config.tvc.texts.no_voice_triggers, `**${message.author.username}**`)}`)
+
+        return false
+    }
+
+    const embed = new MessageEmbed()
+        .setTitle(locale.config.tvc.texts.title)
+    
+    for (const trigger of server.modules.voice_manager.temp_voice_channels.triggers) {
+        embed.addField(trigger.id, self.translator.format(locale.config.tvc.texts.field_value, `<#${trigger.channel_id}>`, trigger.default.name, trigger.default.limit), true)
+    }
+
+    await message.channel.send(embed)
+}
+
 module.exports = {
     fn: execute,
     name: 'config',
@@ -63,6 +88,11 @@ module.exports = {
             fn: reactions,
             name: 'reactions',
             description: 'commands.config.reactions.description'
+        },
+        {
+            fn: tvc,
+            name: 'tvc',
+            description: 'commands.config.tvc.description'
         }
     ],
     guild_only: true,
