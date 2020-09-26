@@ -1,0 +1,23 @@
+const express = require('express')
+const body_parser = require('body-parser')
+const cors = require('cors')
+const morgan = require('morgan')
+const { connect } = require('mongoose')
+const logger = require('../Logger')
+
+const app = express()
+
+connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+
+app.use(morgan('[API] – [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'))
+app.use(body_parser.json())
+app.use(cors())
+
+app.use('/webhooks/patreon', require('./webhooks/patreon'))
+
+app.all('/*', async (req, res) => await res.status(404).json({ status: 404, message: 'Not Found' }))
+
+app.listen(process.env.SERVER_PORT, () => {
+    logger.info(`(API): Service started on port ${process.env.SERVER_PORT}`)
+    logger.telegram.info(`(API): Service started on port ${process.env.SERVER_PORT}`)
+})

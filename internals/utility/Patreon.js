@@ -6,6 +6,8 @@ class Patreon {
     static async SyncPatrons() {
         const patrons = await Patrons.findSome({})
 
+        if (!patrons.length) return null
+
         for (const patron of patrons) {
             const i = patrons.indexOf(patron)
 
@@ -13,6 +15,10 @@ class Patreon {
                 await Patreon.CheckPatron(patron)
             }, i * 4000)
         }
+
+        setTimeout(() => {
+            Patreon.SyncPatrons()
+        }, 600000)
     }
 
     /**
@@ -48,6 +54,14 @@ class Patreon {
             })
         }
 
+        if ((!patron.discord_id && discord) || (discord && patron.discord_id !== discord.user_id)) {
+            await Patrons.update({ _id: patron._id }, {
+                $set: {
+                    discord_id: discord.user_id
+                }
+            })
+        }
+
         if (discord && (!patron.last_charge_date || new Date(patron.last_charge_date).getTime() !== new Date(body.data.attributes.last_charge_date).getTime())) {
             if (patron.lifetime_support_cents != body.data.attributes.lifetime_support_cents) {
                 await Patrons.update({ _id: patron._id }, {
@@ -71,7 +85,7 @@ class Patreon {
                 if (!user.boost.type.includes('PATREON')) {
                     await Users.update({ _id: discord }, {
                         $push: {
-                            'boost.type':'PATREON'
+                            'boost.type': 'PATREON'
                         }
                     })
                 }
@@ -79,14 +93,6 @@ class Patreon {
                 await logger.info(`(Patreon Charge): by ${patron.name} with amount ${will_pay / 100}$`)
                 await logger.telegram.warn(`\`Patreon Charge:\` by ${patron.name} with amount ${will_pay / 100}$`)
             }
-        }
-
-        if ((!patron.discord_id && discord) || (discord && patron.discord_id !== discord.user_id)) {
-            await Patrons.update({ _id: patron._id }, {
-                $set: {
-                    discord_id: discord.user_id
-                }
-            })
         }
 
         const patron_status = body.data.attributes.patron_status
