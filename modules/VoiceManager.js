@@ -13,6 +13,18 @@ class VoiceManager {
         if (trigger_index >= 1 && !server.server.premium.available) return false
 
         if (trigger && state.guild.me.hasPermission('MANAGE_CHANNELS')) {
+            const children = trigger.children.find(c => c.owner_id == state.member.id)
+
+            if (children) {
+                const channel = state.guild.channels.cache.get(children.channel_id)
+
+                if (channel && channel.manageable) await state.member.voice.setChannel(children.channel_id)
+
+                await self.emit('moduleExecution', { module: 'Temp Voice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
+
+                return true
+            }
+
             const parent = state.channel.parent
             
             const temp_voice = await state.guild.channels.create(`${trigger.default.name} #${trigger.children.length + 1}`, {
