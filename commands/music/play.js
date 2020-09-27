@@ -74,7 +74,7 @@ const execute = async (self, server, message, args) => {
             return false
         }
 
-        if (track.info.isStream) {
+        if (track.info.isStream && !server.server.premium.available) {
             await _message.edit(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.track_stream_only_for_premium, `**${message.author.username}**`)}`)
 
             return false
