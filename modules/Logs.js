@@ -268,6 +268,118 @@ class Logs {
     }
 
     /**
+     * Ведет журнал для события GUILD_BAN_ADD
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Guild} guild
+     * @param {import('discord.js').User} user
+     */
+    static async GuildBanAdd(self, server, guild, user) {
+        if (server.moderation.logs.types.guild_ban_add.active) {
+            const locale = self.translator.locale(server.locale)
+
+            const log = guild.channels.cache.get(server.moderation.logs.types.guild_ban_add.channel_id)
+
+            const is_ok = log && guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(guild.me).has('MANAGE_WEBHOOKS')
+
+            if (is_ok) {
+                const webhooks = await guild.fetchWebhooks()
+                const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
+                let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+                if (!webhook) {
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.commands.common.case_log.cases.BAN_ADD) })
+
+                    await self.db.servers.update({ _id: guild.id }, {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelID
+                            }
+                        }
+                    })
+                }
+            
+                const embed = new MessageEmbed()
+                    .setTitle(locale.commands.common.case_log.cases.BAN_ADD)
+                    .setDescription(`${user.tag} (${user.id})`)
+                    .setTimestamp()
+                    .setColor(0xE19517)
+
+                await webhook.send('', {
+                    embeds: [embed],
+                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    name: server.server.premium.available ? webhook.name : self.user.username
+                })
+
+                await self.emit('moduleExecution', { module: 'Logs: Guild Ban Add', guild: { id: guild.id, name: guild.name }, target: { id: user.id, name: user.tag } })
+            
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Ведет журнал для события GUILD_BAN_REMOVE
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Guild} guild
+     * @param {import('discord.js').User} user
+     */
+    static async GuildBanRemove(self, server, guild, user) {
+        if (server.moderation.logs.types.guild_ban_remove.active) {
+            const locale = self.translator.locale(server.locale)
+
+            const log = guild.channels.cache.get(server.moderation.logs.types.guild_ban_remove.channel_id)
+
+            const is_ok = log && guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(guild.me).has('MANAGE_WEBHOOKS')
+
+            if (is_ok) {
+                const webhooks = await guild.fetchWebhooks()
+                const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
+                let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+                if (!webhook) {
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.commands.common.case_log.cases.BAN_REMOVE) })
+
+                    await self.db.servers.update({ _id: guild.id }, {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelID
+                            }
+                        }
+                    })
+                }
+            
+                const embed = new MessageEmbed()
+                    .setTitle(locale.commands.common.case_log.cases.BAN_REMOVE)
+                    .setDescription(`${user.tag} (${user.id})`)
+                    .setTimestamp()
+                    .setColor(0xE19517)
+
+                await webhook.send('', {
+                    embeds: [embed],
+                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    name: server.server.premium.available ? webhook.name : self.user.username
+                })
+
+                await self.emit('moduleExecution', { module: 'Logs: Guild Ban Remove', guild: { id: guild.id, name: guild.name }, target: { id: user.id, name: user.tag } })
+            
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
      * Ведет журнал для события GUILD_MEMBER_ADD
      * 
      * @param {import('../internals/Lacuna')} self
@@ -416,7 +528,7 @@ class Logs {
                     })
                 }
 
-                if (before.nickname != member.nickname) {                
+                if (before.nickname != member.nickname) {
                     const embed = new MessageEmbed()
                         .setTitle(locale.logs.guild_member_update.nickname_update)
                         .setDescription(`${member.user.tag} (${member.id})`)
@@ -434,6 +546,185 @@ class Logs {
     
                     await self.emit('moduleExecution', { module: 'Logs: Guild Member Update', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
                 }
+            
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Ведет журнал для события GUILD_MEMBER_UPDATE
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Guild} before
+     * @param {import('discord.js').Guild} guild
+     */
+    static async GuildUpdate(self, server, before, guild) {
+        if (server.moderation.logs.types.guild_update.active) {
+            const locale = self.translator.locale(server.locale)
+
+            const log = guild.channels.cache.get(server.moderation.logs.types.guild_update.channel_id)
+
+            const is_ok = log && guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(member.guild.me).has('MANAGE_WEBHOOKS')
+
+            if (is_ok) {
+                const webhooks = await guild.fetchWebhooks()
+                const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
+                let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+                if (!webhook) {
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.logs.guild_member_update.title) })
+
+                    await self.db.servers.update({ _id: guild.id }, {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelID
+                            }
+                        }
+                    })
+                }
+
+                if (before.name != guild.name) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs)
+                        .addField(locale.modules.logs.common.before_changes, before.name, true)
+                        .addField(locale.modules.logs.common.after_changes, guild.name, true)
+                        .addField('\u200B', '\u200B', true)
+                        .setTimestamp()
+                        .setColor(0xE19517)
+    
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.region != guild.region) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs)
+                        .addField(locale.modules.logs.common.before_changes, locale.commands.server.texts.regions[before.region], true)
+                        .addField(locale.modules.logs.common.after_changes, locale.commands.server.texts.regions[guild.region], true)
+                        .addField('\u200B', '\u200B', true)
+                        .setTimestamp()
+                        .setColor(0xE19517)
+    
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.afkChannelID != guild.afkChannelID) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs)
+                        .addField(locale.modules.logs.common.before_changes, before.afkChannel ? before.afkChannel.name : locale.commands.common.texts.none, true)
+                        .addField(locale.modules.logs.common.after_changes, guild.afkChannel ? guild.afkChannel.name : locale.commands.common.texts.none, true)
+                        .addField('\u200B', '\u200B', true)
+                        .setTimestamp()
+                        .setColor(0xE19517)
+    
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.afkTimeout != guild.afkTimeout) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs)
+                        .addField(locale.modules.logs.common.before_changes, before.afkTimeout, true)
+                        .addField(locale.modules.logs.common.after_changes, guild.afkTimeout, true)
+                        .addField('\u200B', '\u200B', true)
+                        .setTimestamp()
+                        .setColor(0xE19517)
+
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.verificationLevel != guild.verificationLevel) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs)
+                        .addField(locale.modules.logs.common.before_changes, locale.commands.server.texts.verification_levels[before.verificationLevel], true)
+                        .addField(locale.modules.logs.common.after_changes, locale.commands.server.texts.verification_levels[guild.verificationLevel], true)
+                        .addField('\u200B', '\u200B', true)
+                        .setTimestamp()
+                        .setColor(0xE19517)
+
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.description != guild.description) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs)
+                        .addField(locale.modules.logs.common.before_changes, before.description, true)
+                        .addField(locale.modules.logs.common.after_changes, guild.description, true)
+                        .setTimestamp()
+                        .setColor(0xE19517)
+
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.systemChannelID != guild.systemChannelID) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs)
+                        .addField(locale.modules.logs.common.before_changes, before.systemChannel ? `#${before.systemChannel.name}` : locale.commands.common.texts.none, true)
+                        .addField(locale.modules.logs.common.after_changes, guild.systemChannel ? `#${guild.systemChannel.name}` : locale.commands.common.texts.none, true)
+                        .addField('\u200B', '\u200B', true)
+                        .setTimestamp()
+                        .setColor(0xE19517)
+
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.ownerID != guild.ownerID) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs)
+                        .addField(locale.modules.logs.common.before_changes, before.owner ? before.owner.user.tag : `<@${before.ownerID}>`, true)
+                        .addField(locale.modules.logs.common.after_changes, guild.owner ? guild.owner.user.tag : `<@${guild.ownerID}>`, true)
+                        .addField('\u200B', '\u200B', true)
+                        .setTimestamp()
+                        .setColor(0xE19517)
+
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.defaultMessageNotifications != guild.defaultMessageNotifications) {
+
+                }
+
+                if (before.explicitContentFilter != guild.explicitContentFilter) {
+
+                }
+
+                await self.emit('moduleExecution', { module: 'Logs: Guild Update', guild: { id: guild.id, name: guild.name }, target: { id: guild.id, name: guild.name } })
             
                 return true
             }

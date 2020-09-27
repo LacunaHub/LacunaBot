@@ -838,7 +838,9 @@
                 "webhook_create_reason": "Логи: создание веб-крючка для события \"{0}\"",
                 "members": "Участников",
                 "account_created": "Дата регистрации",
-                "role": "Роль"
+                "role": "Роль",
+                "before_changes": "До изменения",
+                "after_changes": "После изменения"
             },
             "channel_create": {
                 "title": "Канал создан",

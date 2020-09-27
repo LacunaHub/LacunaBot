@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { images } = require('../../modules/Logs')
+const { GuildBanAdd } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -54,6 +55,8 @@ const execute = async (self, guild, user) => {
             })
         }
     }
+
+    await GuildBanAdd(self, server, guild, user)
 
     return true
 }

@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { images } = require('../../modules/Logs')
+const { GuildBanRemove } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -58,6 +59,8 @@ const execute = async (self, guild, user) => {
     const tempban = self.tempbans.get(`${guild.id}:${user.id}`)
     
     if (tempban) await tempban.delete()
+
+    await GuildBanRemove(self, server, guild, user)
 
     return true
 }
