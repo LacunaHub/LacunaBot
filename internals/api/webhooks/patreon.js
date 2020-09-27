@@ -30,6 +30,8 @@ router.post('/pledge/:signature', async (req, res) => {
 
     const patron = await db.patrons.find({ _id: data.id })
 
+    console.log(patron, data)
+
     await Patreon.CheckPatron(patron)
 
     await res.status(204).end()
