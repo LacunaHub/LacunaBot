@@ -46,9 +46,9 @@ class Patreon {
 
         res = await res.json()
 
-        const user_attr = body.included.find(i => i.type === 'user')
+        const user_attr = res.included.find(i => i.type === 'user')
         const discord = user_attr.attributes.social_connections.discord
-        const will_pay = body.data.attributes.will_pay_amount_cents
+        const will_pay = res.data.attributes.will_pay_amount_cents
 
         if (!patron.image_url || patron.image_url != user_attr.attributes.image_url) {
             await Patrons.update({ _id: patron._id }, {
@@ -66,13 +66,13 @@ class Patreon {
             })
         }
 
-        if (discord && (!patron.last_charge_date || new Date(patron.last_charge_date).getTime() !== new Date(body.data.attributes.last_charge_date).getTime())) {
-            if (patron.lifetime_support_cents != body.data.attributes.lifetime_support_cents) {
+        if (discord && (!patron.last_charge_date || new Date(patron.last_charge_date).getTime() !== new Date(res.data.attributes.last_charge_date).getTime())) {
+            if (patron.lifetime_support_cents != res.data.attributes.lifetime_support_cents) {
                 await Patrons.update({ _id: patron._id }, {
                     $set: {
-                        last_charge_date: body.data.attributes.last_charge_date,
+                        last_charge_date: res.data.attributes.last_charge_date,
                         will_pay_amount_cents: will_pay,
-                        lifetime_support_cents: body.data.attributes.lifetime_support_cents
+                        lifetime_support_cents: res.data.attributes.lifetime_support_cents
                     }
                 })
 
@@ -99,7 +99,7 @@ class Patreon {
             }
         }
 
-        const patron_status = body.data.attributes.patron_status
+        const patron_status = res.data.attributes.patron_status
 
         if (patron.patron_status !== patron_status) {
             await Patrons.update({ _id: patron._id }, {
