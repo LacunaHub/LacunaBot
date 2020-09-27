@@ -38,9 +38,13 @@ class Patreon {
             res = await request(options.url, options)
         } catch (err) {
             await logger.error(err)
+
+            return null
         }
 
         if (!res) return null
+
+        res = await res.json()
 
         const user_attr = body.included.find(i => i.type === 'user')
         const discord = user_attr.attributes.social_connections.discord
