@@ -48,7 +48,7 @@ class Patreon {
 
         const user_attr = res.included.find(i => i.type === 'user')
         const discord = user_attr.attributes.social_connections.discord
-        const will_pay = res.data.attributes.will_pay_amount_cents
+        const will_pay = res.data.attributes.currently_entitled_amount_cents
 
         if (!patron.image_url || patron.image_url != user_attr.attributes.image_url) {
             await Patrons.update({ _id: patron._id }, {
