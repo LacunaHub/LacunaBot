@@ -38,13 +38,17 @@ class Patreon {
             res = await request(options.url, options)
         } catch (err) {
             await logger.error(err)
+
+            return null
         }
 
         if (!res) return null
 
-        const user_attr = body.included.find(i => i.type === 'user')
+        res = await res.json()
+
+        const user_attr = res.included.find(i => i.type === 'user')
         const discord = user_attr.attributes.social_connections.discord
-        const will_pay = body.data.attributes.will_pay_amount_cents
+        const will_pay = res.data.attributes.will_pay_amount_cents
 
         if (!patron.image_url || patron.image_url != user_attr.attributes.image_url) {
             await Patrons.update({ _id: patron._id }, {
@@ -62,40 +66,38 @@ class Patreon {
             })
         }
 
-        if (discord && (!patron.last_charge_date || new Date(patron.last_charge_date).getTime() !== new Date(body.data.attributes.last_charge_date).getTime())) {
-            if (patron.lifetime_support_cents != body.data.attributes.lifetime_support_cents) {
-                await Patrons.update({ _id: patron._id }, {
-                    $set: {
-                        last_charge_date: body.data.attributes.last_charge_date,
-                        will_pay_amount_cents: will_pay,
-                        lifetime_support_cents: body.data.attributes.lifetime_support_cents
-                    }
-                })
-
-                const user = await Users.fetch({ _id: discord })
-
-                await Users.update({ _id: discord }, {
-                    $set: {
-                        flags: (user.flags & 16) === 16 ? user.flags : user.flags | 1 << 4,
-                        'boost.available': true,
-                        'boost.tier': patron.will_pay_amount_cents < will_pay ? user.boost.tier + ((will_pay - patron.will_pay_amount_cents) / 100) : user.boost.tier - ((patron.will_pay_amount_cents - will_pay) / 100)
-                    }
-                })
-
-                if (!user.boost.type.includes('PATREON')) {
-                    await Users.update({ _id: discord }, {
-                        $push: {
-                            'boost.type': 'PATREON'
-                        }
-                    })
+        if (discord && (!patron.last_charge_date || new Date(patron.last_charge_date).getTime() !== new Date(res.data.attributes.last_charge_date).getTime())) {
+            await Patrons.update({ _id: patron._id }, {
+                $set: {
+                    last_charge_date: res.data.attributes.last_charge_date,
+                    will_pay_amount_cents: will_pay,
+                    lifetime_support_cents: res.data.attributes.lifetime_support_cents
                 }
+            })
 
-                await logger.info(`(Patreon Charge): by ${patron.name} with amount ${will_pay / 100}$`)
-                await logger.telegram.warn(`\`Patreon Charge:\` by ${patron.name} with amount ${will_pay / 100}$`)
+            const user = await Users.fetch({ _id: discord })
+
+            await Users.update({ _id: discord }, {
+                $set: {
+                    flags: (user.flags & 16) === 16 ? user.flags : user.flags | 1 << 4,
+                    'boost.available': true,
+                    'boost.tier': patron.will_pay_amount_cents < will_pay ? user.boost.tier + ((will_pay - patron.will_pay_amount_cents) / 100) : user.boost.tier - ((patron.will_pay_amount_cents - will_pay) / 100)
+                }
+            })
+
+            if (!user.boost.type.includes('PATREON')) {
+                await Users.update({ _id: discord }, {
+                    $push: {
+                        'boost.type': 'PATREON'
+                    }
+                })
             }
+
+            await logger.info(`(Patreon Charge): by ${patron.name} with amount ${will_pay / 100}$`)
+            await logger.telegram.warn(`\`Patreon Charge:\` by ${patron.name} with amount ${will_pay / 100}$`)
         }
 
-        const patron_status = body.data.attributes.patron_status
+        const patron_status = res.data.attributes.patron_status
 
         if (patron.patron_status !== patron_status) {
             await Patrons.update({ _id: patron._id }, {
