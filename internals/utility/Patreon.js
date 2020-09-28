@@ -67,36 +67,34 @@ class Patreon {
         }
 
         if (discord && (!patron.last_charge_date || new Date(patron.last_charge_date).getTime() !== new Date(res.data.attributes.last_charge_date).getTime())) {
-            if (patron.lifetime_support_cents != res.data.attributes.lifetime_support_cents) {
-                await Patrons.update({ _id: patron._id }, {
-                    $set: {
-                        last_charge_date: res.data.attributes.last_charge_date,
-                        will_pay_amount_cents: will_pay,
-                        lifetime_support_cents: res.data.attributes.lifetime_support_cents
-                    }
-                })
-
-                const user = await Users.fetch({ _id: discord })
-
-                await Users.update({ _id: discord }, {
-                    $set: {
-                        flags: (user.flags & 16) === 16 ? user.flags : user.flags | 1 << 4,
-                        'boost.available': true,
-                        'boost.tier': patron.will_pay_amount_cents < will_pay ? user.boost.tier + ((will_pay - patron.will_pay_amount_cents) / 100) : user.boost.tier - ((patron.will_pay_amount_cents - will_pay) / 100)
-                    }
-                })
-
-                if (!user.boost.type.includes('PATREON')) {
-                    await Users.update({ _id: discord }, {
-                        $push: {
-                            'boost.type': 'PATREON'
-                        }
-                    })
+            await Patrons.update({ _id: patron._id }, {
+                $set: {
+                    last_charge_date: res.data.attributes.last_charge_date,
+                    will_pay_amount_cents: will_pay,
+                    lifetime_support_cents: res.data.attributes.lifetime_support_cents
                 }
+            })
 
-                await logger.info(`(Patreon Charge): by ${patron.name} with amount ${will_pay / 100}$`)
-                await logger.telegram.warn(`\`Patreon Charge:\` by ${patron.name} with amount ${will_pay / 100}$`)
+            const user = await Users.fetch({ _id: discord })
+
+            await Users.update({ _id: discord }, {
+                $set: {
+                    flags: (user.flags & 16) === 16 ? user.flags : user.flags | 1 << 4,
+                    'boost.available': true,
+                    'boost.tier': patron.will_pay_amount_cents < will_pay ? user.boost.tier + ((will_pay - patron.will_pay_amount_cents) / 100) : user.boost.tier - ((patron.will_pay_amount_cents - will_pay) / 100)
+                }
+            })
+
+            if (!user.boost.type.includes('PATREON')) {
+                await Users.update({ _id: discord }, {
+                    $push: {
+                        'boost.type': 'PATREON'
+                    }
+                })
             }
+
+            await logger.info(`(Patreon Charge): by ${patron.name} with amount ${will_pay / 100}$`)
+            await logger.telegram.warn(`\`Patreon Charge:\` by ${patron.name} with amount ${will_pay / 100}$`)
         }
 
         const patron_status = res.data.attributes.patron_status
