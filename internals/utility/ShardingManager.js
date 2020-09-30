@@ -14,6 +14,6 @@ manager.spawn(Number(process.env.CLIENT_MAX_SHARDS), 15000)
 
 manager.on('shardCreate', shard => logger.info(`(Sharding Manager): Launching shard #${shard.id}`))
 
-SyncPatrons()
+setTimeout(() => SyncPatrons(), 300000)
 
 module.exports = manager

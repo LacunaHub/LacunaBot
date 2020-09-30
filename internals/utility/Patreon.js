@@ -16,9 +16,7 @@ class Patreon {
             }, i * 4000)
         }
 
-        setTimeout(() => {
-            Patreon.SyncPatrons()
-        }, 600000)
+        setTimeout(() => Patreon.SyncPatrons(), 600000)
     }
 
     /**
@@ -48,7 +46,16 @@ class Patreon {
 
         const user_attr = res.included.find(i => i.type === 'user')
         const discord = user_attr.attributes.social_connections.discord
+        const patron_status = res.data.attributes.patron_status
         const will_pay = res.data.attributes.currently_entitled_amount_cents
+
+        if (patron.name != res.data.attributes.full_name) {
+            await Patrons.update({ _id: patron._id }, {
+                $set: {
+                    name: res.data.attributes.full_name
+                }
+            })
+        }
 
         if (!patron.image_url || patron.image_url != user_attr.attributes.image_url) {
             await Patrons.update({ _id: patron._id }, {
@@ -66,10 +73,17 @@ class Patreon {
             })
         }
 
-        if (discord && (!patron.last_charge_date || new Date(patron.last_charge_date).getTime() !== new Date(res.data.attributes.last_charge_date).getTime())) {
+        if (patron.last_charge_date != res.data.attributes.last_charge_date) {
             await Patrons.update({ _id: patron._id }, {
                 $set: {
-                    last_charge_date: res.data.attributes.last_charge_date,
+                    last_charge_date: user_attr.attributes.last_charge_date
+                }
+            })
+        }
+
+        if (discord && patron_status == 'active_patron' && !patron.last_charge_date) {
+            await Patrons.update({ _id: patron._id }, {
+                $set: {
                     will_pay_amount_cents: will_pay,
                     lifetime_support_cents: res.data.attributes.lifetime_support_cents
                 }
@@ -96,8 +110,6 @@ class Patreon {
             await logger.info(`(Patreon Charge): by ${patron.name} with amount ${will_pay / 100}$`)
             await logger.telegram.warn(`\`Patreon Charge:\` by ${patron.name} with amount ${will_pay / 100}$`)
         }
-
-        const patron_status = res.data.attributes.patron_status
 
         if (patron.patron_status !== patron_status) {
             await Patrons.update({ _id: patron._id }, {
