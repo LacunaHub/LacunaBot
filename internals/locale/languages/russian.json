@@ -897,9 +897,7 @@
             },
             "guild_member_update": {
                 "title": "Участник изменён",
-                "nickname_update": "Отображаемое имя изменено",
-                "before_changes": "До изменения",
-                "after_changes": "После изменения"
+                "nickname_update": "Отображаемое имя изменено"
             },
             "guild_update": {
                 "title": "Сервер изменён",
