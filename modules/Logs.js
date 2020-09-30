@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js')
 const { TruncateString } = require('../internals/utility/Utils')
 const moment = require('moment')
+const user = require('../commands/general/user')
 
 class Logs {
     static get images() {
@@ -576,7 +577,7 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.logs.guild_member_update.title) })
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.logs.guild_update.title) })
 
                     await self.db.servers.update({ _id: guild.id }, {
                         $push: {
@@ -591,7 +592,8 @@ class Logs {
 
                 if (before.name != guild.name) {
                     const embed = new MessageEmbed()
-                        .setTitle(locale.logs)
+                        .setTitle(locale.modules.logs.guild_update.title)
+                        .setDescription(locale.modules.logs.guild_update.types.name)
                         .addField(locale.modules.logs.common.before_changes, before.name, true)
                         .addField(locale.modules.logs.common.after_changes, guild.name, true)
                         .addField('\u200B', '\u200B', true)
@@ -607,7 +609,8 @@ class Logs {
 
                 if (before.region != guild.region) {
                     const embed = new MessageEmbed()
-                        .setTitle(locale.logs)
+                        .setTitle(locale.modules.logs.guild_update.title)
+                        .setDescription(locale.commands.server.texts.region)
                         .addField(locale.modules.logs.common.before_changes, locale.commands.server.texts.regions[before.region], true)
                         .addField(locale.modules.logs.common.after_changes, locale.commands.server.texts.regions[guild.region], true)
                         .addField('\u200B', '\u200B', true)
@@ -623,7 +626,8 @@ class Logs {
 
                 if (before.afkChannelID != guild.afkChannelID) {
                     const embed = new MessageEmbed()
-                        .setTitle(locale.logs)
+                        .setTitle(locale.modules.logs.guild_update.title)
+                        .setDescription(locale.commands.server.texts.afk_channel)
                         .addField(locale.modules.logs.common.before_changes, before.afkChannel ? before.afkChannel.name : locale.commands.common.texts.none, true)
                         .addField(locale.modules.logs.common.after_changes, guild.afkChannel ? guild.afkChannel.name : locale.commands.common.texts.none, true)
                         .addField('\u200B', '\u200B', true)
@@ -639,7 +643,8 @@ class Logs {
 
                 if (before.afkTimeout != guild.afkTimeout) {
                     const embed = new MessageEmbed()
-                        .setTitle(locale.logs)
+                        .setTitle(locale.modules.logs.guild_update.title)
+                        .setDescription(locale.modules.logs.guild_update.types.afk_timeout)
                         .addField(locale.modules.logs.common.before_changes, before.afkTimeout, true)
                         .addField(locale.modules.logs.common.after_changes, guild.afkTimeout, true)
                         .addField('\u200B', '\u200B', true)
@@ -655,7 +660,8 @@ class Logs {
 
                 if (before.verificationLevel != guild.verificationLevel) {
                     const embed = new MessageEmbed()
-                        .setTitle(locale.logs)
+                        .setTitle(locale.modules.logs.guild_update.title)
+                        .setDescription(locale.commands.server.texts.verification_level)
                         .addField(locale.modules.logs.common.before_changes, locale.commands.server.texts.verification_levels[before.verificationLevel], true)
                         .addField(locale.modules.logs.common.after_changes, locale.commands.server.texts.verification_levels[guild.verificationLevel], true)
                         .addField('\u200B', '\u200B', true)
@@ -671,9 +677,10 @@ class Logs {
 
                 if (before.description != guild.description) {
                     const embed = new MessageEmbed()
-                        .setTitle(locale.logs)
-                        .addField(locale.modules.logs.common.before_changes, before.description, true)
-                        .addField(locale.modules.logs.common.after_changes, guild.description, true)
+                        .setTitle(locale.modules.logs.guild_update.title)
+                        .setDescription(locale.modules.logs.guild_update.types.description)
+                        .addField(locale.modules.logs.common.before_changes, before.description || locale.commands.common.texts.none, true)
+                        .addField(locale.modules.logs.common.after_changes, guild.description || locale.commands.common.texts.none, true)
                         .setTimestamp()
                         .setColor(0xE19517)
 
@@ -686,7 +693,8 @@ class Logs {
 
                 if (before.systemChannelID != guild.systemChannelID) {
                     const embed = new MessageEmbed()
-                        .setTitle(locale.logs)
+                        .setTitle(locale.modules.logs.guild_update.title)
+                        .setDescription(locale.modules.logs.guild_update.types.system_channel)
                         .addField(locale.modules.logs.common.before_changes, before.systemChannel ? `#${before.systemChannel.name}` : locale.commands.common.texts.none, true)
                         .addField(locale.modules.logs.common.after_changes, guild.systemChannel ? `#${guild.systemChannel.name}` : locale.commands.common.texts.none, true)
                         .addField('\u200B', '\u200B', true)
@@ -702,7 +710,8 @@ class Logs {
 
                 if (before.ownerID != guild.ownerID) {
                     const embed = new MessageEmbed()
-                        .setTitle(locale.logs)
+                        .setTitle(locale.modules.logs.guild_update.title)
+                        .setDescription(locale.commands.server.texts.owner)
                         .addField(locale.modules.logs.common.before_changes, before.owner ? before.owner.user.tag : `<@${before.ownerID}>`, true)
                         .addField(locale.modules.logs.common.after_changes, guild.owner ? guild.owner.user.tag : `<@${guild.ownerID}>`, true)
                         .addField('\u200B', '\u200B', true)
@@ -716,15 +725,121 @@ class Logs {
                     })
                 }
 
-                if (before.defaultMessageNotifications != guild.defaultMessageNotifications) {
-
-                }
-
-                if (before.explicitContentFilter != guild.explicitContentFilter) {
-
-                }
-
                 await self.emit('moduleExecution', { module: 'Logs: Guild Update', guild: { id: guild.id, name: guild.name }, target: { id: guild.id, name: guild.name } })
+            
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Ведет журнал для события INVITE_CREATE
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Invite} invite
+     */
+    static async InviteCreate(self, server, invite) {
+        if (server.moderation.logs.types.invite_create.active) {
+            const locale = self.translator.locale(server.locale).modules
+
+            const log = invite.guild.channels.cache.get(server.moderation.logs.types.invite_create.channel_id)
+
+            const is_ok = log && invite.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(invite.guild.me).has('MANAGE_WEBHOOKS')
+
+            if (is_ok) {
+                const webhooks = await invite.guild.fetchWebhooks()
+                const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
+                let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+                if (!webhook) {
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.invite_create.title) })
+
+                    await self.db.servers.update({ _id: invite.guild.id }, {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelID
+                            }
+                        }
+                    })
+                }
+            
+                const embed = new MessageEmbed()
+                    .setTitle(locale.logs.invite_create.title)
+                    .addField(locale.logs.common.invite_code, `[${invite.code}](${invite.url})`, true)
+                    .addField(locale.logs.common.channel, `<#${invite.channel.id}>`, true)
+                    .addField(locale.logs.common.invite_inviter, invite.inviter ? `${invite.inviter.tag}` : '\u200B', true)
+                    .setTimestamp()
+                    .setColor(0xF04747)
+
+                await webhook.send('', {
+                    embeds: [embed],
+                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    name: server.server.premium.available ? webhook.name : self.user.username
+                })
+
+                await self.emit('moduleExecution', { module: 'Logs: Invite Create', guild: { id: invite.guild.id, name: invite.guild.name }, target: { id: invite.channel.name, name: invite.code } })
+            
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Ведет журнал для события INVITE_DELETE
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Invite} invite
+     */
+    static async InviteDelete(self, server, invite) {
+        if (server.moderation.logs.types.invite_delete.active) {
+            const locale = self.translator.locale(server.locale).modules
+
+            const log = invite.guild.channels.cache.get(server.moderation.logs.types.invite_delete.channel_id)
+
+            const is_ok = log && invite.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(invite.guild.me).has('MANAGE_WEBHOOKS')
+
+            if (is_ok) {
+                const webhooks = await invite.guild.fetchWebhooks()
+                const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
+                let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+                if (!webhook) {
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.invite_delete.title) })
+
+                    await self.db.servers.update({ _id: invite.guild.id }, {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelID
+                            }
+                        }
+                    })
+                }
+            
+                const embed = new MessageEmbed()
+                    .setTitle(locale.logs.invite_create.title)
+                    .addField(locale.logs.common.invite_code, invite.code, true)
+                    .addField(locale.logs.common.channel, `<#${invite.channel.id}>`, true)
+                    .addField(locale.logs.common.invite_inviter, invite.inviter ? `${invite.inviter.tag}` : '\u200B', true)
+                    .setTimestamp()
+                    .setColor(0xF04747)
+
+                await webhook.send('', {
+                    embeds: [embed],
+                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    name: server.server.premium.available ? webhook.name : self.user.username
+                })
+
+                await self.emit('moduleExecution', { module: 'Logs: Invite Delete', guild: { id: invite.guild.id, name: invite.guild.name }, target: { id: invite.channel.name, name: invite.code } })
             
                 return true
             }
@@ -923,6 +1038,120 @@ class Logs {
     }
 
     /**
+     * Ведет журнал для события ROLE_CREATE
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Role} role
+     */
+    static async RoleCreate(self, server, role) {
+        if (server.moderation.logs.types.role_create.active) {
+            const locale = self.translator.locale(server.locale).modules
+
+            const log = role.guild.channels.cache.get(server.moderation.logs.types.role_create.channel_id)
+
+            const is_ok = log && role.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(role.guild.me).has('MANAGE_WEBHOOKS')
+
+            if (is_ok) {
+                const webhooks = await role.guild.fetchWebhooks()
+                const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
+                let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+                if (!webhook) {
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_create.title) })
+
+                    await self.db.servers.update({ _id: role.guild.id }, {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelID
+                            }
+                        }
+                    })
+                }
+            
+                const embed = new MessageEmbed()
+                    .setTitle(locale.logs.role_create.title)
+                    .addField(locale.logs.common.role_name, `<@&${role.name}>`, true)
+                    .addField(locale.logs.common.position, role.position, true)
+                    .setFooter(role.id)
+                    .setTimestamp()
+                    .setColor(0xF04747)
+
+                await webhook.send('', {
+                    embeds: [embed],
+                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    name: server.server.premium.available ? webhook.name : self.user.username
+                })
+
+                await self.emit('moduleExecution', { module: 'Logs: Role Create', guild: { id: role.guild.id, name: role.guild.name }, target: { id: role.name, name: role.id } })
+            
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Ведет журнал для события ROLE_DELETE
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Role} role
+     */
+    static async RoleDelete(self, server, role) {
+        if (server.moderation.logs.types.role_delete.active) {
+            const locale = self.translator.locale(server.locale).modules
+
+            const log = role.guild.channels.cache.get(server.moderation.logs.types.role_delete.channel_id)
+
+            const is_ok = log && role.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(role.guild.me).has('MANAGE_WEBHOOKS')
+
+            if (is_ok) {
+                const webhooks = await role.guild.fetchWebhooks()
+                const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
+                let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+                if (!webhook) {
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_delete.title) })
+
+                    await self.db.servers.update({ _id: role.guild.id }, {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelID
+                            }
+                        }
+                    })
+                }
+            
+                const embed = new MessageEmbed()
+                    .setTitle(locale.logs.role_delete.title)
+                    .addField(locale.logs.common.role_name, `<@&${role.name}>`, true)
+                    .addField(locale.logs.common.position, role.position, true)
+                    .setFooter(role.id)
+                    .setTimestamp()
+                    .setColor(0xF04747)
+
+                await webhook.send('', {
+                    embeds: [embed],
+                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    name: server.server.premium.available ? webhook.name : self.user.username
+                })
+
+                await self.emit('moduleExecution', { module: 'Logs: Role Delete', guild: { id: role.guild.id, name: role.guild.name }, target: { id: role.name, name: role.id } })
+            
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
      * Ведет журнал для события ROLE_MEMBER_ADD
      * 
      * @param {import('../internals/Lacuna')} self
@@ -1028,6 +1257,204 @@ class Logs {
                 })
 
                 await self.emit('moduleExecution', { module: 'Logs: Role Member Remove', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+            
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Ведет журнал для события ROLE_UPDATE
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Role} before
+     * @param {import('discord.js').Role} role
+     */
+    static async RoleUpdate(self, server, before, role) {
+        if (server.moderation.logs.types.role_update.active) {
+            const locale = self.translator.locale(server.locale)
+
+            const log = role.guild.channels.cache.get(server.moderation.logs.types.role_update.channel_id)
+
+            const is_ok = log && role.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(role.guild.me).has('MANAGE_WEBHOOKS')
+
+            if (is_ok) {
+                const webhooks = await role.guild.fetchWebhooks()
+                const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
+                let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+                if (!webhook) {
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.modules.logs.role_update.title) })
+
+                    await self.db.servers.update({ _id: role.guild.id }, {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelID
+                            }
+                        }
+                    })
+                }
+
+                if (before.name != role.name) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.modules.logs.role_update.title)
+                        .setDescription(locale.modules.logs.common.role_name)
+                        .addField(locale.modules.logs.common.before_changes, before.name, true)
+                        .addField(locale.modules.logs.common.after_changes, role.name, true)
+                        .setFooter(role.id)
+                        .setTimestamp()
+                        .setColor(0xF04747)
+
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.hexColor != role.hexColor) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.modules.logs.role_update.title)
+                        .setDescription(locale.modules.logs.role_update.types.color)
+                        .addField(locale.modules.logs.common.before_changes, before.hexColor, true)
+                        .addField(locale.modules.logs.common.after_changes, role.hexColor, true)
+                        .setFooter(role.id)
+                        .setTimestamp()
+                        .setColor(0xF04747)
+
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+                
+                if (before.permissions != role.permissions) {
+                    const before_permissions = before.permissions.toArray(false)
+                    const permissions = role.permissions.toArray(false)
+
+                    if (before_permissions.length < permissions.length) {
+                        const perms = permissions.filter(p => !before_permissions.includes(p))
+
+                        const embed = new MessageEmbed()
+                            .setTitle(locale.modules.logs.role_update.title)
+                            .addField(locale.modules.logs.role_update.types.permissions_added, perms.map(p => locale.commands.common.permissions[p]).join(', '), true)
+                            .addField('\u200B', '\u200B', true)
+                            .setFooter(role.id)
+                            .setTimestamp()
+                            .setColor(0xF04747)
+
+                        await webhook.send('', {
+                            embeds: [embed],
+                            avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                            name: server.server.premium.available ? webhook.name : self.user.username
+                        })
+                    }
+
+                    if (before_permissions.length > permissions.length) {
+                        const perms = before_permissions.filter(p => !permissions.includes(p))
+
+                        const embed = new MessageEmbed()
+                            .setTitle(locale.modules.logs.role_update.title)
+                            .addField(locale.modules.logs.role_update.types.permissions_removed, perms.map(p => locale.commands.common.permissions[p]).join(', '), true)
+                            .addField('\u200B', '\u200B', true)
+                            .setFooter(role.id)
+                            .setTimestamp()
+                            .setColor(0xF04747)
+
+                        await webhook.send('', {
+                            embeds: [embed],
+                            avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                            name: server.server.premium.available ? webhook.name : self.user.username
+                        })
+                    }
+                }
+
+                await self.emit('moduleExecution', { module: 'Logs: Role Update', guild: { id: role.guild.id, name: role.guild.name }, target: { id: role.name, name: role.id } })
+            
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Ведет журнал для события USER_UPDATE
+     * 
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Guild} guild
+     * @param {import('discord.js').User} before
+     * @param {import('discord.js').User} user
+     */
+    static async UserUpdate(self, server, guild, before, user) {
+        if (server.moderation.logs.types.user_update.active) {
+            const locale = self.translator.locale(server.locale).modules
+
+            const log = guild.channels.cache.get(server.moderation.logs.types.user_update.channel_id)
+
+            const is_ok = log && guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(guild.me).has('MANAGE_WEBHOOKS')
+
+            if (is_ok) {
+                const webhooks = await guild.fetchWebhooks()
+                const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
+                let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+                if (!webhook) {
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.user_update.title) })
+
+                    await self.db.servers.update({ _id: guild.id }, {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelID
+                            }
+                        }
+                    })
+                }
+
+                if (before.username != user.username) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs.user_update.title)
+                        .setDescription(locale.logs.user_update.types.username)
+                        .addField(locale.logs.common.before_changes, before.username, true)
+                        .addField(locale.logs.common.after_changes, user.username, true)
+                        .setFooter(user.id)
+                        .setTimestamp()
+                        .setColor(0xF04747)
+
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                if (before.discriminator != user.discriminator) {
+                    const embed = new MessageEmbed()
+                        .setTitle(locale.logs.user_update.title)
+                        .setDescription(locale.logs.user_update.types.discriminator)
+                        .addField(locale.logs.common.before_changes, before.discriminator, true)
+                        .addField(locale.logs.common.after_changes, user.discriminator, true)
+                        .setFooter(user.id)
+                        .setTimestamp()
+                        .setColor(0xF04747)
+
+                    await webhook.send('', {
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        name: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                }
+
+                await self.emit('moduleExecution', { module: 'Logs: User Update', guild: { id: guild.id, name: guild.name }, target: { id: user.username, name: user.id } })
             
                 return true
             }

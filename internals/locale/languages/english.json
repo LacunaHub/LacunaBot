@@ -840,7 +840,11 @@
                 "account_created": "Дата регистрации",
                 "role": "Роль",
                 "before_changes": "До изменения",
-                "after_changes": "После изменения"
+                "after_changes": "После изменения",
+                "invite_code": "Код приглашения",
+                "invite_inviter": "Приглашающий",
+                "role_name": "Название роли",
+                "position": "Позиция"
             },
             "channel_create": {
                 "title": "Канал создан",
@@ -881,6 +885,21 @@
                 "before_changes": "До изменения",
                 "after_changes": "После изменения"
             },
+            "guild_update": {
+                "title": "Сервер изменён",
+                "types": {
+                    "name": "Название",
+                    "afk_timeout": "Тайм-аут бездействия",
+                    "description": "Описание",
+                    "system_channel": "Системный канал"
+                }
+            },
+            "invite_create": {
+                "title": "Приглашение создано"
+            },
+            "invite_delete": {
+                "title": "Приглашение удалено"
+            },
             "message_delete": {
                 "title": "Сообщение удалено",
                 "content": "Содержимое"
@@ -894,11 +913,32 @@
                 "content_before_update": "Содержимое до изменение",
                 "content_after_update": "Содержимое после изменения"
             },
+            "role_create": {
+                "title": "Роль создана"
+            },
+            "role_delete": {
+                "title": "Роль удалена"
+            },
             "role_member_add": {
                 "title": "Роль добавлена"
             },
             "role_member_remove": {
                 "title": "Роль убрана"
+            },
+            "role_update": {
+                "title": "Роль изменена",
+                "types": {
+                    "color": "Цвет",
+                    "permissions_added": "Добавлены разрешения",
+                    "permissions_removed": "Убраны разрешения"
+                }
+            },
+            "user_update": {
+                "title": "Пользователь изменён",
+                "types": {
+                    "username": "Имя пользователя",
+                    "discriminator": "Дискриминатор"
+                }
             },
             "voice_connect": {
                 "title": "Голосовое подключение"

@@ -1,3 +1,5 @@
+const { GuildUpdate } = require('../../modules/Logs')
+
 /**
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').Guild} before
@@ -6,12 +8,12 @@
 const execute = async (self, before, guild) => {
     const server = await self.db.servers.fetch({ _id: guild.id })
 
-    
+    await GuildUpdate(self, server, before, guild)
 
     return true
 }
 
 module.exports = {
-    name: 'guildCreate',
+    name: 'guildUpdate',
     fn: execute
 }
