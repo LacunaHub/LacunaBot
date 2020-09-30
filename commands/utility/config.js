@@ -78,6 +78,26 @@ const tvc = async (self, server, message, args) => {
     await message.channel.send(embed)
 }
 
+/**
+ * @param {import('../../internals/Lacuna')} self
+ * @param {import('../../internals/Typings').ServerDocument} server
+ * @param {import('discord.js').Message} message
+ * @param {String[]} args
+ */
+const logs = async (self, server, message, args) => {
+    const locale = self.translator.locale(server.locale)
+
+    const embed = new MessageEmbed()
+
+    for (const log_type of Object.keys(server.moderation.logs.types).filter(k => k != '$init').map(k => k)) {
+        embed.addField(locale.modules.logs[log_type].title, server.moderation.logs.types[log_type].channel_id ? `<#${server.moderation.logs.types[log_type].channel_id}>` : '\u200B', true)
+    }
+
+    await message.channel.send(embed)
+
+    return true
+}
+
 module.exports = {
     fn: execute,
     name: 'config',
@@ -93,6 +113,11 @@ module.exports = {
             fn: tvc,
             name: 'tvc',
             description: 'commands.config.tvc.description'
+        },
+        {
+            fn: logs,
+            name: 'logs',
+            description: 'commands.config.logs.description'
         }
     ],
     guild_only: true,
