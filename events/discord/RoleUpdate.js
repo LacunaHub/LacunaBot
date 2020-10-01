@@ -6,11 +6,13 @@ const { RoleUpdate } = require('../../modules/Logs')
  * @param {import('discord.js').Role} role
  */
 const execute = async (self, before, role) => {
+    if (before.position != role.position) return false
+
     const server = await self.db.servers.find({ _id: role.guild.id })
 
     if (!server) return false
 
-    await RoleUpdate(self, server, before, invite)
+    await RoleUpdate(self, server, before, role)
 
     return true
 }
