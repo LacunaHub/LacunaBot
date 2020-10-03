@@ -146,7 +146,7 @@ class Command {
         if (missing) {
             if (missing.includes('SEND_MESSAGES')) return false
 
-            await message.channel.send(`${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.missing_permissions, `**${message.author.username}**`, missing.map(p => `\`${locale.commands.common.permissions[p]}\``).join(', '))}`)
+            await message.channel.send(`${this.self._emojis.WARNING} | ${this.self.translator.format(locale.commands.common.texts.missing_permissions, `**${message.author.username}**`, missing.map(p => `\`${locale.commands.common.permissions[p]}\``).join(', '))}`)
 
             return false
         }
