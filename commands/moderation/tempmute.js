@@ -60,7 +60,7 @@ const execute = async (self, server, message, args) => {
     let mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
 
     if (!mute_role || message.guild.me.roles.highest.position < mute_role.position) {
-        mute_role = await message.guild.roles.create({ data: { name: 'Muted', color: 0x607D8B }})
+        mute_role = await message.guild.roles.create({ data: { name: 'Muted', color: 0x607D8B, permissions: message.guild.roles.everyone.permissions.remove('SEND_MESSAGES') }})
         await self.db.servers.update({ _id: message.guild.id }, {
             $set: {
                 'moderation.roles.mute': mute_role.id

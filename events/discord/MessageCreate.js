@@ -10,7 +10,10 @@ const execute = async (self, message) => {
     const server = await self.db.servers.fetch({ _id: message.guild.id })
 
     if (message.member.roles.cache.has(server.moderation.roles.mute) && !message.member.hasPermission('MANAGE_MESSAGES')) {
-        if (message.deletable && !message.deleted) await message.delete()
+        const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
+        const has_permissions = message.channel.permissionsFor(mute_role.id).has('SEND_MESSAGES')
+
+        if (message.deletable && !message.deleted && !has_permissions) await message.delete()
 
         return false
     }
