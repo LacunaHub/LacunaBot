@@ -55,7 +55,7 @@ class Logs {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.channel_create.title)
                     .setDescription(`${channel.name} (${channel.id})`)
-                    .addField(locale.logs.common.members, channel.position, true)
+                    .addField(locale.logs.common.position, channel.position, true)
                     .addField(locale.logs.channel_create.type, locale.logs.channel_create.types[channel.type] || locale.logs.channel_create.types.unknown, true)
                     .addField(locale.logs.channel_create.types.category, channel.parent ? channel.parent.name : '\u200B', true)
                     .setTimestamp()
@@ -113,7 +113,6 @@ class Logs {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.channel_delete.title)
                     .setDescription(`${channel.name} (${channel.id})`)
-                    .addField(locale.logs.common.members, channel.position, true)
                     .addField(locale.logs.channel_create.type, locale.logs.channel_create.types[channel.type] || locale.logs.channel_create.types.unknown, true)
                     .addField(locale.logs.channel_create.types.category, channel.parent ? channel.parent.name : '\u200B', true)
                     .setTimestamp()
@@ -203,7 +202,7 @@ class Logs {
                     const embed = new MessageEmbed()
                         .setTitle(locale.logs.channel_update.title)
                         .setDescription(`${channel.name} (${channel.id})`)
-                        .addField('\u200B', self.translator.format(locale.logs.channel_update.rate_limit_update, `**${before.rateLimitPerUser}**`, `**${channel.rateLimitPerUser}**`), true)
+                        .addField('\u200B', self.translator.format(locale.logs.channel_update.rate_limit_update, `**${before.rateLimitPerUser || 0}**`, `**${channel.rateLimitPerUser || 0}**`), true)
                         .setTimestamp()
                         .setColor(0xE19517)
 
@@ -307,7 +306,7 @@ class Logs {
                     .setTitle(locale.commands.common.case_log.cases.BAN_ADD)
                     .setDescription(`${user.tag} (${user.id})`)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor(0xF04747)
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -774,7 +773,7 @@ class Logs {
                     .addField(locale.logs.common.channel, `<#${invite.channel.id}>`, true)
                     .addField(locale.logs.common.invite_inviter, invite.inviter ? `${invite.inviter.tag}` : '\u200B', true)
                     .setTimestamp()
-                    .setColor(0xF04747)
+                    .setColor(0x43b581)
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -1077,7 +1076,7 @@ class Logs {
                     .addField(locale.logs.common.position, role.position, true)
                     .setFooter(role.id)
                     .setTimestamp()
-                    .setColor(0xF04747)
+                    .setColor(0x43b581)
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -1325,7 +1324,7 @@ class Logs {
                         .addField(locale.modules.logs.common.after_changes, role.hexColor, true)
                         .setFooter(role.id)
                         .setTimestamp()
-                        .setColor(0xF04747)
+                        .setColor(0xE19517)
 
                     await webhook.send('', {
                         embeds: [embed],
@@ -1347,7 +1346,7 @@ class Logs {
                             .addField('\u200B', '\u200B', true)
                             .setFooter(role.id)
                             .setTimestamp()
-                            .setColor(0xF04747)
+                            .setColor(0xE19517)
 
                         await webhook.send('', {
                             embeds: [embed],
@@ -1365,7 +1364,7 @@ class Logs {
                             .addField('\u200B', '\u200B', true)
                             .setFooter(role.id)
                             .setTimestamp()
-                            .setColor(0xF04747)
+                            .setColor(0xE19517)
 
                         await webhook.send('', {
                             embeds: [embed],
@@ -1428,7 +1427,7 @@ class Logs {
                         .addField(locale.logs.common.after_changes, user.username, true)
                         .setFooter(user.id)
                         .setTimestamp()
-                        .setColor(0xF04747)
+                        .setColor(0xE19517)
 
                     await webhook.send('', {
                         embeds: [embed],
@@ -1445,7 +1444,7 @@ class Logs {
                         .addField(locale.logs.common.after_changes, user.discriminator, true)
                         .setFooter(user.id)
                         .setTimestamp()
-                        .setColor(0xF04747)
+                        .setColor(0xE19517)
 
                     await webhook.send('', {
                         embeds: [embed],
