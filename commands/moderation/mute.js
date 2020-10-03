@@ -1,4 +1,4 @@
-const { MessageEmbed, Permissions } = require('discord.js')
+const { MessageEmbed } = require('discord.js')
 const { images } = require('../../modules/Logs')
 
 /**
