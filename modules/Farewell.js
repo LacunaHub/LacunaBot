@@ -19,7 +19,7 @@ class Farewell {
 
                 if (server.modules.farewell.format == 'DM') {
                     try {
-                        await member.send(null, { content: message.content })
+                        await member.send(null, { content: content })
                     } catch (err) {
                         await self.logger.error(err)
                     }
@@ -28,7 +28,7 @@ class Farewell {
                 if (server.modules.farewell.format == 'CHANNEL') {
                     const channel = member.guild.channels.cache.get(server.modules.farewell.channel_id)
 
-                    if (channel) await channel.send(null, { content: message.content })
+                    if (channel) await channel.send(null, { content: content })
                 }
             }
         }
