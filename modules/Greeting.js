@@ -1,3 +1,5 @@
+const Replacer = require('./Replacer')
+
 class Greeting {
     /**
      * Отправляет приветственное сообщение
@@ -13,9 +15,11 @@ class Greeting {
             const message = server.modules.welcome.message
 
             if (message) {
+                const content = await Replacer.Replace(self, server.modules.welcome.message.content, { guild: member.guild, member: member })
+
                 if (server.modules.welcome.format == 'DM') {
                     try {
-                        await member.send(null, { content: message.content })
+                        await member.send(null, { content: content })
                     } catch (err) {
                         
                     }
@@ -24,7 +28,7 @@ class Greeting {
                 if (server.modules.welcome.format == 'CHANNEL') {
                     const channel = member.guild.channels.cache.get(server.modules.welcome.channel_id)
 
-                    if (channel) await channel.send(null, { content: message.content })
+                    if (channel) await channel.send(null, { content: content })
                 }
             }
         }

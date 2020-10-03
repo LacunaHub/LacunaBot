@@ -1,3 +1,5 @@
+const Replacer = require('./Replacer')
+
 class Farewell {
     /**
      * Отправляет прощальное сообщение
@@ -13,6 +15,8 @@ class Farewell {
             const message = server.modules.farewell.message
 
             if (message) {
+                const content = await Replacer.Replace(self, server.modules.farewell.message.content, { guild: member.guild, member: member })
+
                 if (server.modules.farewell.format == 'DM') {
                     try {
                         await member.send(null, { content: message.content })
