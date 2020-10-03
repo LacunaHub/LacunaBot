@@ -48,18 +48,24 @@ class Lacuna extends Client {
 
     get _emojis() {
         return {
-            OK: '<:OK:746635543042981898>',
-            ERROR: '<:ERROR:746635499355242577>',
+            OK: '<:OK:761265867950260284>',
+            ERROR: '<:ERROR:761265867110481970>',
+            WARNING: '<:WARNING:761920271669395496>',
             details: {
                 OK: {
                     animated: false,
-                    id: '746635543042981898',
+                    id: '761265867950260284',
                     name: 'OK'
                 },
                 ERROR: {
                     animated: false,
-                    id: '746635499355242577',
+                    id: '761265867110481970',
                     name: 'ERROR'
+                },
+                WARNING: {
+                    animated: false,
+                    id: '761920271669395496',
+                    name: 'WARNING'
                 }
             }
         }

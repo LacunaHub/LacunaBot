@@ -1,4 +1,4 @@
-const Welcome = require('../../modules/Welcome')
+const Greeting = require('../../modules/Greeting')
 const { GuildMemberAdd } = require('../../modules/Logs')
 
 /**
@@ -12,7 +12,7 @@ const execute = async (self, member) => {
 
     const server = await self.db.servers.fetch({ _id: member.guild.id })
 
-    await Welcome.Handle(self, server, member)
+    await Greeting.Handle(self, server, member)
 
     await GuildMemberAdd(self, server, member)
 

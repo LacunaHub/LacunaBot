@@ -17,7 +17,7 @@ class Farewell {
                     try {
                         await member.send(null, { content: message.content })
                     } catch (err) {
-                        
+                        await self.logger.error(err)
                     }
                 }
 
@@ -46,10 +46,11 @@ class Farewell {
             }
 
             else {
-                await self.db.servers.update({ _id: member.guild.id, 'members.modules.restoring.data.user_id': member.id }, {
+                await self.db.servers.update({ _id: member.guild.id, 'modules.restoring.data.user_id': member.id }, {
                     $set: {
-                        'members.restoring.data.$.roles': member.roles.cache.filter(r => r.id != member.guild.id).map(r => r.id),
-                        'members.restoring.data.$.nickname': member.nickname
+                        'modules.restoring.data.$.roles': member.roles.cache.filter(r => r.id != member.guild.id).map(r => r.id),
+                        'modules.restoring.data.$.nickname': member.nickname,
+                        'modules.restoring.data.$.timestamp': Date.now()
                     }
                 })
             }

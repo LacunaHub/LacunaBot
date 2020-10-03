@@ -1,4 +1,4 @@
-class Welcome {
+class Greeting {
     /**
      * Отправляет приветственное сообщение
      * 
@@ -30,10 +30,26 @@ class Welcome {
         }
 
         if (server.modules.welcome.initial_roles.active) {
-            const roles = member.guild.roles.cache.filter(r => server.modules.welcome.initial_roles.roles.includes(r.id))
+            const roles = member.guild.roles.cache.filter(r => r.editable && server.modules.welcome.initial_roles.roles.includes(r.id))
 
             if (roles.size) {
-                await member.roles.add(roles, '')
+                await member.roles.add(roles, '') // Need reason
+            }
+        }
+
+        if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
+            const data = server.modules.restoring.data.find(d => d.user_id == member.id)
+
+            if (data) {
+                if (server.modules.restoring.restore_nicknames && data.nickname) {
+                    if (member.manageable) await member.setNickname(data.nickname, '') // Need reason
+                }
+
+                if (server.modules.restoring.restore_roles && data.roles.length) {
+                    const roles = member.guild.roles.cache.filter(r => r.editable && data.roles.includes(r.id))
+
+                    if (roles.size) await member.roles.add(roles, '') // Need reason
+                }
             }
         }
 
@@ -41,4 +57,4 @@ class Welcome {
     }
 }
 
-module.exports = Welcome
+module.exports = Greeting
