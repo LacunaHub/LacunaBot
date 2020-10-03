@@ -9,6 +9,12 @@ const execute = async (self, message) => {
 
     const server = await self.db.servers.fetch({ _id: message.guild.id })
 
+    if (message.member.roles.cache.has(server.moderation.roles.mute) && !message.member.hasPermission('MANAGE_MESSAGES')) {
+        if (message.deletable && !message.deleted) await message.delete()
+
+        return false
+    }
+
     const splitted = message.content.split(' ')
     const command_name = splitted[0].toLowerCase()
     const args = splitted.slice(1).filter(arg => arg)
