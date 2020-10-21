@@ -558,3 +558,28 @@ export interface Patron extends Document {
     image_url: String
     last_check_at: Number
 }
+
+export interface ServerActivities extends Document {
+    _id: String
+    levels: Array<LevelActivities>
+}
+
+export interface LevelActivities {
+    user_id: String
+    experience: {
+        total: Number
+        current: Number
+        level: Number
+    }
+    activity: {
+        text: {
+            total_messages: Number
+            last_message_at: Number
+        }
+        voice: {
+            total_time: Number
+            connected_at?: Number
+            disconnected_at?: Number
+        }
+    }
+}

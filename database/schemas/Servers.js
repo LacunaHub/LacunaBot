@@ -248,7 +248,8 @@ const Server = new Schema({
             default_volume: { type: Number, default: 100 },
             allow_radio_playback: { type: Boolean, default: true },
             disable_skip_vote: { type: Boolean, default: false }
-        }
+        },
+        statistics: { type: Array, default: [] }
     },
     created_at: { type: Number, default: 0 },
     modified_at: { type: Number, default: 0 },
