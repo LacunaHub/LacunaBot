@@ -173,5 +173,6 @@ module.exports = {
         }
     ],
     guild_only: true,
-    self_permissions: ['SEND_MESSAGES', 'EMBED_LINKS']
+    self_permissions: ['SEND_MESSAGES'],
+    user_permissions: ['ADMINISTRATOR']
 }
