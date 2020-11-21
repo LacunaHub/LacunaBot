@@ -257,7 +257,7 @@ export interface ServerDocument extends Document {
 
 export interface SystemCommandOptions {
     name: String
-    active: Boolean
+    inactive: Boolean
     throttle: {
         type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
         usages: Number

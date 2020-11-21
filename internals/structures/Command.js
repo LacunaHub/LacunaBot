@@ -53,6 +53,10 @@ class Command {
         this.self.commands.set(this.name, this)
     }
 
+    get manageable() {
+        return this.name != 'commands' && this.name != 'boost' && this.name != 'eval'
+    }
+
     /**
      * Проверяет, имеет ли бот все нужные разрешения для выполнения команды
      * 
@@ -174,6 +178,127 @@ class Command {
         if (result) await this.self.emit('commandExecution', { command: { name: this.name, uses: this.uses }, message: message, args: args })
 
         return true
+    }
+
+    /**
+     * @param {string} guild_id
+     */
+    async fetchConfig(guild_id) {
+        const server = await this.self.db.servers.fetch({ _id: guild_id })
+
+        const config = server.commands.system.find(c => c.name == this.name)
+
+        if (!config) {
+            await this.self.db.servers.update({ _id: guild_id }, {
+                $push: {
+                    'commands.system': {
+                        name: this.name,
+                        inactive: false,
+                        throttle: {
+                            type: 'PER_CHANNEL',
+                            usages: 0,
+                            duration: 0
+                        },
+                        delete_command: { active: false, after_ms: 0 },
+                        delete_reply: { active: false, after_ms: 0 },
+                        allowed: { channels: [], roles: [] },
+                        blocked: {  channels: [], roles: [] }
+                    }
+                }
+            })
+        }
+
+        return config || {
+            name: this.name,
+            inactive: false,
+            throttle: {
+                type: 'PER_CHANNEL',
+                usages: 0,
+                duration: 0
+            },
+            delete_command: { active: false, after_ms: 0 },
+            delete_reply: { active: false, after_ms: 0 },
+            allowed: { channels: [], roles: [] },
+            blocked: {  channels: [], roles: [] }
+        }
+    }
+
+    /**
+     * @param {string} guild_id
+     * @param {Object} data
+     * @param {'CHANNEL'|'ROLE'} data.type
+     * @param {string} data.reference
+     * @param {boolean} data.remove
+     */
+    async allow(guild_id, data = { type: '', reference: '', remove: false }) {
+        if (!guild_id) throw new TypeError('Invalid arguments')
+
+        await this.fetchConfig(guild_id)
+
+        if (data.reference && data.type) {
+            if (data.type == 'CHANNEL') {
+                this.self.db.servers.update({ _id: guild_id, 'commands.system.name': this.name }, {
+                    [data.remove ? '$pull' : '$push']: {
+                        'commands.system.$.allowed.channels': data.reference
+                    }
+                })
+            }
+
+            if (data.type == 'ROLE') {
+                this.self.db.servers.update({ _id: guild_id, 'commands.system.name': this.name }, {
+                    [data.remove ? '$pull' : '$push']: {
+                        'commands.system.$.allowed.roles': data.reference
+                    }
+                })
+            }
+
+            return null
+        }
+
+        await this.self.db.servers.update({ _id: guild_id, 'commands.system.name': this.name }, {
+            $set: {
+                'commands.system.$.inactive': false
+            }
+        })
+    }
+
+    /**
+     * @param {string} guild_id
+     * @param {Object} data
+     * @param {'CHANNEL'|'ROLE'} data.type
+     * @param {string} data.reference
+     * @param {boolean} data.remove
+     */
+    async block(guild_id, data = { type: '', reference: '', remove: false }) {
+        if (!guild_id) throw new TypeError('Invalid arguments')
+
+        await this.fetchConfig(guild_id)
+
+        if (data.reference && data.type) {
+            if (data.type == 'CHANNEL') {
+                this.self.db.servers.update({ _id: guild_id, 'commands.system.name': this.name }, {
+                    [data.remove ? '$pull' : '$push']: {
+                        'commands.system.$.blocked.channels': data.reference
+                    }
+                })
+            }
+
+            if (data.type == 'ROLE') {
+                this.self.db.servers.update({ _id: guild_id, 'commands.system.name': this.name }, {
+                    [data.remove ? '$pull' : '$push']: {
+                        'commands.system.$.blocked.roles': data.reference
+                    }
+                })
+            }
+
+            return null
+        }
+
+        await this.self.db.servers.update({ _id: guild_id, 'commands.system.name': this.name }, {
+            $set: {
+                'commands.system.$.inactive': true
+            }
+        })
     }
 }
 

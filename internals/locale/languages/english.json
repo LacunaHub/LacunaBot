@@ -594,6 +594,69 @@
                 "boost_activated": "{0}, бонусы для этого сервера успешно активированы"
             }
         },
+        "commands": {
+            "description": "Изменение настроек команд",
+            "allow": {
+                "description": "Разрешает использование команд",
+                "arguments": [
+                    {
+                        "name": "команда",
+                        "description": "Название команды или категория (general, moderation, music, utility)",
+                        "required": true,
+                        "types": ["STRING"]
+                    },
+                    {
+                        "name": "для",
+                        "description": "Канал или роль",
+                        "required": false,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ]
+            },
+            "block": {
+                "description": "Запрещает использование команд",
+                "arguments": [
+                    {
+                        "name": "команда",
+                        "description": "Название команды или категория (general, moderation, music, utility)",
+                        "required": true,
+                        "types": ["STRING"]
+                    },
+                    {
+                        "name": "для",
+                        "description": "Канал или роль",
+                        "required": false,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ]
+            },
+            "config": {
+                "description": "Показывает настройки команды",
+                "arguments": [
+                    {
+                        "name": "команда",
+                        "description": "Название команды",
+                        "required": true,
+                        "types": ["STRING"]
+                    }
+                ],
+                "texts": {
+                    "title": "Конфигурация команды",
+                    "fields": {
+                        "allowed": "Разрешено",
+                        "blocked": "Запрещено"
+                    }
+                }
+            },
+            "texts": {
+                "no_path": "{0}, укажите название команды или категорию",
+                "no_command_or_group": "{0}, указанная команда или категория не найдена",
+                "not_manageable": "{0}, невозможно изменить настройки для данной команды",
+                "config_overwrite": "{0}, разрешения команды успешно изменены",
+                "active": "{0}, команда успешно включена",
+                "inactive": "{0}, команда успешно отключена"
+            }
+        },
         "config": {
             "description": "Выводит конфигурацию настроек сервера",
             "reactions": {
