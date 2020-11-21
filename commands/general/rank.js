@@ -13,7 +13,7 @@ const execute = async (self, server, message, args) => {
 
     let attachment
     try {
-        attachment = await GenerateRankCard(self, server, message, args)
+        attachment = await GenerateRankCard(self, message, args)
     } catch (err) {
         await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.error_on_render, `**${message.author.username}**`)}`)
 

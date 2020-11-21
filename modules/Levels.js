@@ -159,9 +159,7 @@ class Levels {
      * @param {import('discord.js').Message} message
      * @param {string[]} args
      */
-    static async GenerateRankCard(self, server, message, args) {
-        const locale = self.translator.locale(server.locale).commands
-
+    static async GenerateRankCard(self, message, args) {
         const activity = await self.db.activities.fetch({ _id: message.guild.id })
 
         const mention = message.mentions.users.first() || args[0]
@@ -170,6 +168,8 @@ class Levels {
 
         const sorted = activity.levels.sort((a, b) => b.experience.total - a.experience.total)
         const level = sorted.find(lvl => lvl.user_id == member.id)
+
+        if (!level) return null
 
         const canvas = await Canvas.createCanvas(720, 256)
         const ctx = canvas.getContext('2d')
