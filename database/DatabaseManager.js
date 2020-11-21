@@ -221,8 +221,8 @@ class ServerActivitiesManager {
     }
 
     /**
-     * @param {import('../internals/Typings').ServerDocument} options
-     * @returns {Promise<import('../internals/Typings').ServerDocument>}
+     * @param {import('../internals/Typings').ServerActivities} options
+     * @returns {Promise<import('../internals/Typings').ServerActivities>}
      */
     static async find(options) {
         return await Manager.find(ServerActivities, options)

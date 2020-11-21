@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js')
+const { TruncateString, TruncateArray } = require('../../internals/utility/Utils')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -90,9 +91,42 @@ const logs = async (self, server, message, args) => {
     const embed = new MessageEmbed()
 
     for (const log_type of Object.keys(server.moderation.logs.types).filter(k => k != '$init').map(k => k)) {
-        embed.addField(locale.modules.logs[log_type].title, server.moderation.logs.types[log_type].channel_id ? `<#${server.moderation.logs.types[log_type].channel_id}>` : '\u200B', true)
+        embed.addField(locale.modules.logs[log_type].title, server.moderation.logs.types[log_type].channel_id ? `${self._emojis.OK} <#${server.moderation.logs.types[log_type].channel_id}>` : self._emojis.ERROR, true)
     }
 
+    await message.channel.send(embed)
+
+    return true
+}
+
+/**
+ * @param {import('../../internals/Lacuna')} self
+ * @param {import('../../internals/Typings').ServerDocument} server
+ * @param {import('discord.js').Message} message
+ * @param {String[]} args
+ */
+const levels = async (self, server, message, args) => {
+    const locale = self.translator.locale(server.locale).commands
+
+    const embed = new MessageEmbed()
+        .setTitle(locale.config.levels.texts.levels)
+        .setDescription(server.modules.levels.active ? self._emojis.OK : self._emojis.ERROR)
+
+    if (server.modules.levels.allowed.channels.length || server.modules.levels.allowed.roles.length) {
+        const array = [...server.modules.levels.allowed.channels.map(c => { return { t: 'C', id: c } }), ...server.modules.levels.allowed.roles.map(r => { return { t: 'R', id: r } })]
+        embed.addField(locale.config.texts.active, TruncateArray(array.map(item => item.t == 'C' ? `<#${item.id}>` : `<@&${item.id}>`), 20, ' '))
+    }
+
+    if (server.modules.levels.blocked.channels.length || server.modules.levels.blocked.roles.length) {
+        const array = [...server.modules.levels.blocked.channels.map(c => { return { t: 'C', id: c } }), ...server.modules.levels.blocked.roles.map(r => { return { t: 'R', id: r } })]
+        embed.addField(locale.config.texts.inactive, TruncateArray(array.map(item => item.t == 'C' ? `<#${item.id}>` : `<@&${item.id}>`), 20, ' '))
+    }
+    
+    embed.addField(locale.config.levels.texts.single_roles, server.modules.levels.single_roles ? self._emojis.OK : self._emojis.ERROR, true)
+    embed.addField(locale.config.levels.texts.alerts, server.modules.levels.level_up_alerts.active ? `${self._emojis.OK} ${server.modules.levels.level_up_alerts.format == 1 ? `(${locale.config.levels.texts.alerts_dm})` : ''}` : self._emojis.ERROR, true)
+    embed.addField(locale.config.levels.texts.alerts_template, TruncateString(server.modules.levels.level_up_alerts.message.content, 768) || '\u200B')
+    embed.addField(locale.config.levels.texts.awards, TruncateArray(server.modules.levels.awards.map(a => `${self.translator.format(locale.config.levels.texts.award_level, a.level)} → <@&${a.references[0]}>`), 10, ', '))
+    
     await message.channel.send(embed)
 
     return true
@@ -118,6 +152,11 @@ module.exports = {
             fn: logs,
             name: 'logs',
             description: 'commands.config.logs.description'
+        },
+        {
+            fn: levels,
+            name: 'levels',
+            description: 'commands.config.levels.description'
         }
     ],
     guild_only: true,

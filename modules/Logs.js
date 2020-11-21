@@ -1,7 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { TruncateString } = require('../internals/utility/Utils')
 const moment = require('moment')
-const user = require('../commands/general/user')
 
 class Logs {
     static get images() {

@@ -409,7 +409,7 @@ export interface ReactionElement {
 
 export interface LevelAward {
     id: String
-    type: Number
+    type: 'CHANNEL' | 'ROLE'
     level: Number
     references: Array<String>
 }
