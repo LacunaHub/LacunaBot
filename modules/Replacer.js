@@ -45,7 +45,6 @@ class Replacer {
             'guild.icon': guild.iconURL(),
             'guild.id': guild.id,
             'guild.members': guild.memberCount,
-            'guild.members.online': guild.members.cache.filter(member => member.presence.status != 'offline').size,
             'guild.members.bots': guild.members.cache.filter(member => member.user.bot).size,
             'guild.members.users': guild.members.cache.filter(member => !member.user.bot).size,
             'guild.owner': guild.owner ? guild.owner.user.username : '`guild.owner`',
