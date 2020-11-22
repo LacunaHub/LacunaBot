@@ -249,6 +249,16 @@ export interface ServerDocument extends Document {
             allow_radio_playback: Boolean
             disable_skip_vote: Boolean
         }
+        reports: {
+            active: Boolean
+            channel_id: String
+            emoji: {
+                animated: Boolean
+                id: String
+                name: String
+            }
+            minimum: Number
+        }
     }
     created_at: Number
     modified_at: Number
