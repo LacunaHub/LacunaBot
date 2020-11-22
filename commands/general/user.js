@@ -37,7 +37,6 @@ const execute = async (self, server, message, args) => {
 
     const embed = new MessageEmbed()
         .setAuthor(name, specified.user.displayAvatarURL())
-        .setDescription(game.name)
         .addField(locale.user.texts.account_created, `${moment(specified.user.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(specified.user.createdTimestamp).locale(server.locale).fromNow()})`, true)
         .addField(locale.user.texts.member_joined, `${moment(specified.joinedTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(specified.joinedTimestamp).locale(server.locale).fromNow()})`, true)
         .addField(locale.user.texts.permissions, specified.permissions.toArray().map(p => locale.common.permissions[p]).join(', '))

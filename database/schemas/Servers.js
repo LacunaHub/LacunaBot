@@ -248,6 +248,17 @@ const Server = new Schema({
             default_volume: { type: Number, default: 100 },
             allow_radio_playback: { type: Boolean, default: true },
             disable_skip_vote: { type: Boolean, default: false }
+        },
+        statistics: { type: Array, default: [] },
+        reports: {
+            active: { type: Boolean, default: false },
+            channel_id: { type: String, default: '' },
+            emoji: {
+                animated: { type: Boolean, default: false },
+                id: { type: String, default: '' },
+                name: { type: String, default: '' }
+            },
+            minimum: { type: Number, default: 3 }
         }
     },
     created_at: { type: Number, default: 0 },

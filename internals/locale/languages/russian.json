@@ -112,6 +112,29 @@
                 "aliases": "Псевдонимы"
             }
         },
+        "leaders": {
+            "description": "Выводит таблицу лидеров",
+            "texts": {
+                "leaderboard": "Доска лидеров",
+                "positions": "{0} – всего позиций",
+                "last_message_at": "последнее {0}"
+            }
+        },
+        "rank": {
+            "description": "Показывает ранговую карточку",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Выведет ранговую карточку указанного пользователя",
+                    "required": false,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                }
+            ],
+            "texts": {
+                "error_on_render": "{0}, произошла ошибка при создании ранговой карточки",
+                "no_rank_card": "{0}, ранговая карточка не найдена"
+            }
+        },
         "server": {
             "description": "Выводит информацию о сервере",
             "texts": {
@@ -578,6 +601,69 @@
                 "boost_activated": "{0}, бонусы для этого сервера успешно активированы"
             }
         },
+        "commands": {
+            "description": "Изменение настроек команд",
+            "allow": {
+                "description": "Разрешает использование команд",
+                "arguments": [
+                    {
+                        "name": "команда",
+                        "description": "Название команды или категория (general, moderation, music, utility)",
+                        "required": true,
+                        "types": ["STRING"]
+                    },
+                    {
+                        "name": "для",
+                        "description": "Канал или роль",
+                        "required": false,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ]
+            },
+            "block": {
+                "description": "Запрещает использование команд",
+                "arguments": [
+                    {
+                        "name": "команда",
+                        "description": "Название команды или категория (general, moderation, music, utility)",
+                        "required": true,
+                        "types": ["STRING"]
+                    },
+                    {
+                        "name": "для",
+                        "description": "Канал или роль",
+                        "required": false,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ]
+            },
+            "config": {
+                "description": "Показывает настройки команды",
+                "arguments": [
+                    {
+                        "name": "команда",
+                        "description": "Название команды",
+                        "required": true,
+                        "types": ["STRING"]
+                    }
+                ],
+                "texts": {
+                    "title": "Конфигурация команды",
+                    "fields": {
+                        "allowed": "Разрешено",
+                        "blocked": "Запрещено"
+                    }
+                }
+            },
+            "texts": {
+                "no_path": "{0}, укажите название команды или категорию",
+                "no_command_or_group": "{0}, указанная команда или категория не найдена",
+                "not_manageable": "{0}, невозможно изменить настройки для данной команды",
+                "config_overwrite": "{0}, разрешения команды успешно изменены",
+                "active": "{0}, команда успешно включена",
+                "inactive": "{0}, команда успешно отключена"
+            }
+        },
         "config": {
             "description": "Выводит конфигурацию настроек сервера",
             "reactions": {
@@ -606,6 +692,18 @@
             "logs": {
                 "description": "Выводит настройки журнала действий"
             },
+            "levels": {
+                "description": "Выводит настройки уровней",
+                "texts": {
+                    "levels": "Уровни",
+                    "single_roles": "Одиночные роли",
+                    "alerts": "Оповещения о новом уровне",
+                    "alerts_dm": "личные сообщения",
+                    "alerts_template": "Шаблон оповещений",
+                    "awards": "Награды за уровни",
+                    "award_level": "Ур. {0}"
+                }
+            },
             "texts": {
                 "title": "Общая конфигурация",
                 "prefix": "Префикс",
@@ -614,7 +712,9 @@
                 "moderation": {
                     "title": "Модерация",
                     "value": "Журнал случаев: {0}\nОтключенные события: {1}\nРоль заглушения: {2}"
-                }
+                },
+                "active": "Активно",
+                "inactive": "Неактивно"
             }
         },
         "farewell": {
@@ -718,6 +818,105 @@
                     "argument_off": "{0}, начальные роли успешно отключены",
                     "no_initial_roles": "{0}, указанные начальные роли не найдены",
                     "roles_set": "{0}, начальные роли успешно установлены"
+                }
+            }
+        },
+        "levels": {
+            "description": "Настройки уровней",
+            "allow": {
+                "description": "Включает уровни глобально или в определенных каналах",
+                "arguments": [
+                    {
+                        "name": "канал",
+                        "description": "Включает уровни в указанном канале",
+                        "required": false,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ],
+                "texts": {
+                    "levels_allowed": "{0}, уровни успешно активированы",
+                    "no_reference": "{0}, пожалуйста, укажите канал, в котором хотите включить уровни"
+                }
+            },
+            "block": {
+                "description": "Отключает уровни глобально или в определенных каналах",
+                "arguments": [
+                    {
+                        "name": "канал",
+                        "description": "Отключает уровни в указанном канале",
+                        "required": false,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ],
+                "texts": {
+                    "levels_blocked": "{0}, уровни успешно отключены",
+                    "no_reference": "{0}, пожалуйста, укажите канал, в котором хотите отключить уровни"
+                }
+            },
+            "add": {
+                "description": "Добавляет награды за уровни",
+                "arguments": [
+                    {
+                        "name": "уровень",
+                        "description": "Уровень, который необходимо получить",
+                        "required": true,
+                        "types": ["NUMBER"]
+                    },
+                    {
+                        "name": "награда",
+                        "description": "Награда, которая будет выдана",
+                        "required": true,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ],
+                "texts": {
+                    "awards_limit_reached": "{0}, достигнуто ограничение на количество наград за уровни",
+                    "invalid_arguments": "{0}, аргументы введены неверно",
+                    "not_editable_reference": "{0}, у меня нет разрешений на изменение указанной награды",
+                    "invalid_level": "{0}, пожалуйста, укажите уровень в диапазоне от 1 до 2500",
+                    "level_award_exists": "{0}, награда за указанный уровень уже создана",
+                    "reference_already_used": "{0}, указанная награда уже используется",
+                    "award_added": "{0}, награда за уровень успешно добавлена"
+                }
+            },
+            "remove": {
+                "description": "Удаляет награды за уровни",
+                "arguments": [
+                    {
+                        "name": "уровень",
+                        "description": "Уровень награды",
+                        "required": true,
+                        "types": ["NUMBER"]
+                    }
+                ],
+                "texts": {
+                    "invalid_level_argument": "{0}, аргументы уровня введен неверно",
+                    "no_award_for_level": "{0}, за данный уровень награды не существует",
+                    "award_removed": "{0}, награда успешно удалена"
+                }
+            },
+            "alerts": {
+                "description": "Оповещения о повышении уровня",
+                "arguments": [
+                    {
+                        "name": "формат",
+                        "description": "Формат отправки оповещений (OFF, DM)",
+                        "required": false,
+                        "types": ["STRING"]
+                    },
+                    {
+                        "name": "текст",
+                        "description": "Шаблон оповещения",
+                        "required": true,
+                        "types": ["STRING"]
+                    }
+                ],
+                "texts": {
+                    "no_format": "{0}, аргументы указаны неверно",
+                    "alerts_off": "{0}, оповещения о повышении уровня успешно отключены",
+                    "alerts_dm": "{0}, оповещения теперь будут отправляться в личные сообщения",
+                    "no_text": "{0}, пожалуйста, укажите шаблон оповещений",
+                    "text_set": "{0}, текст оповещений успешно установлен"
                 }
             }
         },

@@ -249,6 +249,16 @@ export interface ServerDocument extends Document {
             allow_radio_playback: Boolean
             disable_skip_vote: Boolean
         }
+        reports: {
+            active: Boolean
+            channel_id: String
+            emoji: {
+                animated: Boolean
+                id: String
+                name: String
+            }
+            minimum: Number
+        }
     }
     created_at: Number
     modified_at: Number
@@ -257,7 +267,7 @@ export interface ServerDocument extends Document {
 
 export interface SystemCommandOptions {
     name: String
-    active: Boolean
+    inactive: Boolean
     throttle: {
         type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
         usages: Number
@@ -409,7 +419,7 @@ export interface ReactionElement {
 
 export interface LevelAward {
     id: String
-    type: Number
+    type: 'CHANNEL' | 'ROLE'
     level: Number
     references: Array<String>
 }
@@ -557,4 +567,29 @@ export interface Patron extends Document {
     patron_status: String
     image_url: String
     last_check_at: Number
+}
+
+export interface ServerActivities extends Document {
+    _id: String
+    levels: Array<LevelActivities>
+}
+
+export interface LevelActivities {
+    user_id: String
+    experience: {
+        total: Number
+        current: Number
+        level: Number
+    }
+    activity: {
+        text: {
+            total_messages: Number
+            last_message_at: Number
+        }
+        voice: {
+            total_time: Number
+            connected_at?: Number
+            disconnected_at?: Number
+        }
+    }
 }

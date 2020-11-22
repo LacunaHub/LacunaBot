@@ -1,7 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { TruncateString } = require('../internals/utility/Utils')
 const moment = require('moment')
-const user = require('../commands/general/user')
 
 class Logs {
     static get images() {
@@ -568,7 +567,7 @@ class Logs {
 
             const log = guild.channels.cache.get(server.moderation.logs.types.guild_update.channel_id)
 
-            const is_ok = log && guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(member.guild.me).has('MANAGE_WEBHOOKS')
+            const is_ok = log && guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(guild.me).has('MANAGE_WEBHOOKS')
 
             if (is_ok) {
                 const webhooks = await guild.fetchWebhooks()
@@ -1072,7 +1071,7 @@ class Logs {
             
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.role_create.title)
-                    .addField(locale.logs.common.role_name, `<@&${role.name}>`, true)
+                    .addField(locale.logs.common.role_name, role.name, true)
                     .addField(locale.logs.common.position, role.position, true)
                     .setFooter(role.id)
                     .setTimestamp()
@@ -1129,7 +1128,7 @@ class Logs {
             
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.role_delete.title)
-                    .addField(locale.logs.common.role_name, `<@&${role.name}>`, true)
+                    .addField(locale.logs.common.role_name, role.name, true)
                     .addField(locale.logs.common.position, role.position, true)
                     .setFooter(role.id)
                     .setTimestamp()
@@ -1302,7 +1301,7 @@ class Logs {
                 if (before.name != role.name) {
                     const embed = new MessageEmbed()
                         .setTitle(locale.modules.logs.role_update.title)
-                        .setDescription(locale.modules.logs.common.role_name)
+                        .setDescription(`${role.name}: ${locale.modules.logs.common.role_name}`)
                         .addField(locale.modules.logs.common.before_changes, before.name, true)
                         .addField(locale.modules.logs.common.after_changes, role.name, true)
                         .setFooter(role.id)
@@ -1319,7 +1318,7 @@ class Logs {
                 if (before.hexColor != role.hexColor) {
                     const embed = new MessageEmbed()
                         .setTitle(locale.modules.logs.role_update.title)
-                        .setDescription(locale.modules.logs.role_update.types.color)
+                        .setDescription(`${role.name}: ${locale.modules.logs.role_update.types.color}`)
                         .addField(locale.modules.logs.common.before_changes, before.hexColor, true)
                         .addField(locale.modules.logs.common.after_changes, role.hexColor, true)
                         .setFooter(role.id)
@@ -1342,6 +1341,7 @@ class Logs {
 
                         const embed = new MessageEmbed()
                             .setTitle(locale.modules.logs.role_update.title)
+                            .setDescription(role.name)
                             .addField(locale.modules.logs.role_update.types.permissions_added, perms.map(p => locale.commands.common.permissions[p]).join(', '), true)
                             .addField('\u200B', '\u200B', true)
                             .setFooter(role.id)
@@ -1360,6 +1360,7 @@ class Logs {
 
                         const embed = new MessageEmbed()
                             .setTitle(locale.modules.logs.role_update.title)
+                            .setDescription(role.name)
                             .addField(locale.modules.logs.role_update.types.permissions_removed, perms.map(p => locale.commands.common.permissions[p]).join(', '), true)
                             .addField('\u200B', '\u200B', true)
                             .setFooter(role.id)
@@ -1422,7 +1423,7 @@ class Logs {
                 if (before.username != user.username) {
                     const embed = new MessageEmbed()
                         .setTitle(locale.logs.user_update.title)
-                        .setDescription(locale.logs.user_update.types.username)
+                        .setDescription(`${user.tag}: ${locale.logs.user_update.types.username}`)
                         .addField(locale.logs.common.before_changes, before.username, true)
                         .addField(locale.logs.common.after_changes, user.username, true)
                         .setFooter(user.id)
@@ -1439,7 +1440,7 @@ class Logs {
                 if (before.discriminator != user.discriminator) {
                     const embed = new MessageEmbed()
                         .setTitle(locale.logs.user_update.title)
-                        .setDescription(locale.logs.user_update.types.discriminator)
+                        .setDescription(`${user.tag}: ${locale.logs.user_update.types.discriminator}`)
                         .addField(locale.logs.common.before_changes, before.discriminator, true)
                         .addField(locale.logs.common.after_changes, user.discriminator, true)
                         .setFooter(user.id)

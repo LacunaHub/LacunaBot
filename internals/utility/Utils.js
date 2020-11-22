@@ -1,5 +1,26 @@
 class Utils {
     /**
+     * Обрезает массив, если он превышает допустимое количество
+     * 
+     * @param {Any[]} array
+     * @param {Number} [limit]
+     * @param {String} [separator]
+     */
+    static TruncateArray(array, limit = 15, separator = '\n') {
+        if (!array || !Array.isArray(array)) throw new TypeError('Argument not provided or isn\'t string')
+
+        if (array.length > limit) {
+            const length = array.length - limit
+
+            array = array.slice(0, limit)
+            array.push(`${length} ...`)
+        }
+    
+        return array.join(separator)
+    }
+
+
+    /**
      * Обрезает строку, если она превышает допустимое количество символов
      * 
      * @param {String} string

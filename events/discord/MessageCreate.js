@@ -1,4 +1,5 @@
 const help = require('../../commands/general/help')
+const { Text } = require('../../modules/Levels')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -34,6 +35,8 @@ const execute = async (self, message) => {
 
         if (mentioned || mentioned_with_exclamation) await help.fn(self, server, message, args)
     }
+
+    await Text(self, server, message)
 
     return true
 }

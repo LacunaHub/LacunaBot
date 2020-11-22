@@ -1,4 +1,5 @@
 const Servers = require('./schemas/Servers')
+const ServerActivities = require('./schemas/ServerActivities')
 const Users = require('./schemas/Users')
 const Patrons = require('./schemas/Patrons')
 
@@ -211,6 +212,69 @@ class ServersManager {
     }
 }
 
+class ServerActivitiesManager {
+    /**
+     * @param {import('../internals/Typings').ServerActivities} options
+     */
+    static async create(options) {
+        return await Manager.create(ServerActivities, options)
+    }
+
+    /**
+     * @param {import('../internals/Typings').ServerActivities} options
+     * @returns {Promise<import('../internals/Typings').ServerActivities>}
+     */
+    static async find(options) {
+        return await Manager.find(ServerActivities, options)
+    }
+
+    /**
+     * @param {import('../internals/Typings').ServerActivities} options
+     * @returns {Promise<import('../internals/Typings').ServerActivities[]>}
+     */
+    static async findSome(options) {
+        return await Manager.findSome(ServerActivities, options)
+    }
+
+    /**
+     * @param {import('../internals/Typings').ServerActivities} options
+     * @returns {Promise<import('../internals/Typings').ServerActivities>}
+     */
+    static async fetch(options) {
+        return await Manager.fetch(ServerActivities, options)
+    }
+
+    /**
+     * @param {import('../internals/Typings').ServerActivities} findOptions
+     * @param {*} updateOptions
+     */
+    static async update(findOptions, updateOptions) {
+        return await Manager.update(ServerActivities, findOptions, updateOptions)
+    }
+
+    /**
+     * @param {import('../internals/Typings').ServerActivities} findOptions
+     * @param {*} updateOptions
+     */
+    static async updateSome(findOptions, updateOptions) {
+        return await Manager.updateSome(ServerActivities, findOptions, updateOptions)
+    }
+
+    /**
+     * @param {import('../internals/Typings').ServerActivities} options
+     */
+    static async delete(options) {
+        return await Manager.delete(ServerActivities, options)
+    }
+
+    /**
+     * @param {import('../internals/Typings').ServerActivities} options
+     */
+    static async deleteSome(options) {
+        return await Manager.deleteSome(options)
+    }
+}
+
 class UsersManager {
     /**
      * @param {import('../internals/Typings').UserDocument} options
@@ -330,6 +394,8 @@ class PatronsManager {
 }
 
 module.exports.servers = ServersManager
+
+module.exports.activities = ServerActivitiesManager
 
 module.exports.users = UsersManager
 

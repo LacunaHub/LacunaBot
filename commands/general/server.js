@@ -17,7 +17,7 @@ const execute = async (self, server, message, args) => {
         .addField(locale.server.texts.owner, server_owner.user.tag, true)
         .addField(locale.server.texts.id, message.guild.id, true)
         .addField(locale.server.texts.region, locale.server.texts.regions[message.guild.region] || locale.server.texts.regions.unknown, true)
-        .addField(locale.server.texts.members.title, `${message.guild.members.cache.filter(member => member.presence.status != 'offline' && !member.user.bot).size} ${locale.server.texts.members.online}\n${message.guild.memberCount} ${locale.server.texts.members.total}`, true)
+        .addField(locale.server.texts.members.title, `${message.guild.memberCount} ${locale.server.texts.members.total}`, true)
         .addField(locale.server.texts.channels.title, `${message.guild.channels.cache.filter(c => c.type == 'text').size} ${locale.server.texts.channels.text}\n${message.guild.channels.cache.filter(c => c.type == 'voice').size} ${locale.server.texts.channels.voice}`, true)
         .addField(locale.server.texts.verification_level, locale.server.texts.verification_levels[message.guild.verificationLevel], true)
         .addField(locale.server.texts.afk_channel, message.guild.afkChannel ? message.guild.afkChannel.name : locale.common.texts.none, true)
