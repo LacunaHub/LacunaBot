@@ -125,7 +125,7 @@ const levels = async (self, server, message, args) => {
     embed.addField(locale.config.levels.texts.single_roles, server.modules.levels.single_roles ? self._emojis.OK : self._emojis.ERROR, true)
     embed.addField(locale.config.levels.texts.alerts, server.modules.levels.level_up_alerts.active ? `${self._emojis.OK} ${server.modules.levels.level_up_alerts.format == 1 ? `(${locale.config.levels.texts.alerts_dm})` : ''}` : self._emojis.ERROR, true)
     embed.addField(locale.config.levels.texts.alerts_template, TruncateString(server.modules.levels.level_up_alerts.message.content, 768) || '\u200B')
-    embed.addField(locale.config.levels.texts.awards, TruncateArray(server.modules.levels.awards.map(a => `${self.translator.format(locale.config.levels.texts.award_level, a.level)} → <@&${a.references[0]}>`), 10, ', '))
+    embed.addField(locale.config.levels.texts.awards, TruncateArray(server.modules.levels.awards.map(a => `${self.translator.format(locale.config.levels.texts.award_level, a.level)} → <@&${a.references[0]}>`), 10, ', ') || '\u200B')
     
     await message.channel.send(embed)
 

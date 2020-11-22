@@ -6,11 +6,11 @@ const { GuildMemberRemove } = require('../../modules/Logs')
  * @param {import('discord.js').GuildMember} member
  */
 const execute = async (self, member) => {
-    if (!member || !member.guild) return false
-    
     if (member.partial) {
         member = await member.guild.members.fetch({ member: member.id, cache: false })
     }
+
+    if (!member || !member.guild) return false
 
     const server = await self.db.servers.fetch({ _id: member.guild.id })
 
