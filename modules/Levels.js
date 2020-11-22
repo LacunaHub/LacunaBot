@@ -263,7 +263,7 @@ class Levels {
         ctx.textAlign = 'end'
         ctx.fillText(formula, 695, 205)
 
-        return new MessageAttachment(canvas.toBuffer(), 'lacuna-rank.png')
+        return new MessageAttachment(canvas.toBuffer(), `lacuna-rank-${Date.now()}.png`)
     }
 }
 
