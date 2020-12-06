@@ -278,12 +278,6 @@ const alerts = async (self, server, message, args) => {
     }
 
     if (format == 'DM') {
-        if (server.modules.levels.level_up_alerts.format == 1) {
-            await message.react(self._emojis.details.ERROR.id)
-
-            return false
-        }
-
         await self.db.servers.update({ _id: message.guild.id }, {
             $set: {
                 'modules.levels.level_up_alerts.active': true,
