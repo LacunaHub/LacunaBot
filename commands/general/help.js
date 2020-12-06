@@ -17,19 +17,19 @@ const execute = async (self, server, message, args) => {
         const categories = {
             general: commands.filter(c => {
                 const config = server.commands.system.find(e => e.name == c.name)
-                return c.group == 'general' && (!config || config && config.active)
+                return c.group == 'general' && (!config || (config && !config.inactive))
             }),
             moderation: commands.filter(c => {
                 const config = server.commands.system.find(e => e.name == c.name)
-                return c.group == 'moderation' && (!config || config && config.active)
+                return c.group == 'moderation' && (!config || (config && !config.inactive))
             }),
             music: commands.filter(c => {
                 const config = server.commands.system.find(e => e.name == c.name)
-                return c.group == 'music' && (!config || config && config.active)
+                return c.group == 'music' && (!config || (config && !config.inactive))
             }),
             utility: commands.filter(c => {
                 const config = server.commands.system.find(e => e.name == c.name)
-                return c.group == 'utility' && (!config || config && config.active)
+                return c.group == 'utility' && (!config || (config && !config.inactive))
             })
         }
     
