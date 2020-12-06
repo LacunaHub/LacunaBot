@@ -10,13 +10,13 @@ const execute = async (self, server, message, args) => {
     const user = await self.db.users.find({ _id: message.author.id })
 
     if (!user || !user.boost.available) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.boost.texts.no_boost_tokens, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.boost.texts.no_boost_tokens, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (server.server.premium.available) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.boost.texts.premium_already_available, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.boost.texts.premium_already_available, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -59,7 +59,7 @@ const execute = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.boost.texts.boost_activated, `**${message.author.username}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.boost.texts.boost_activated, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }

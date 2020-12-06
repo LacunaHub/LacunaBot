@@ -24,13 +24,13 @@ const add = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
     if (server.modules.voice_manager.temp_voice_channels.triggers.length >= 1 && !server.server.premium.available) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.add.texts.triggers_limit_no_premium, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.add.texts.triggers_limit_no_premium, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (server.modules.voice_manager.temp_voice_channels.triggers.length >= 25) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.add.texts.triggers_limit, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.add.texts.triggers_limit, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -40,7 +40,7 @@ const add = async (self, server, message, args) => {
     const voice_name = args.slice(2).join(' ') || (channel ? channel.name : '')
     
     if (!channel) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.add.texts.no_voice_channel, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.add.texts.no_voice_channel, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -48,7 +48,7 @@ const add = async (self, server, message, args) => {
     const exists = server.modules.voice_manager.temp_voice_channels.triggers.some(t => t.channel_id == channel.id)
 
     if (exists) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.add.texts.trigger_exists, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.add.texts.trigger_exists, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -77,7 +77,7 @@ const add = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -94,7 +94,7 @@ const remove = async (self, server, message, args) => {
     const uid = args[0]
 
     if (!uid) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.remove.texts.no_uid, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.remove.texts.no_uid, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -102,7 +102,7 @@ const remove = async (self, server, message, args) => {
     const exists = server.modules.voice_manager.temp_voice_channels.triggers.some(t => t.id == uid)
 
     if (!exists) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.remove.texts.not_exists, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.tvc.remove.texts.not_exists, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -115,7 +115,7 @@ const remove = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.tvc.remove.texts.deleted, `**${message.author.username}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.tvc.remove.texts.deleted, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }

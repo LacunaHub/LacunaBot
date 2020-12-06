@@ -10,7 +10,7 @@ const execute = async (self, server, message, args) => {
     const playback = self.player.get(message.guild.id)
 
     if (!playback) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }

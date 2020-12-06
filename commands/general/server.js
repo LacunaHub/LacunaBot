@@ -26,7 +26,7 @@ const execute = async (self, server, message, args) => {
         .setFooter(`${locale.server.texts.footer.server_created} ${moment(message.guild.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)} (${(moment(message.guild.createdTimestamp).locale(server.locale).fromNow())})`)
         .setColor()
     
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }

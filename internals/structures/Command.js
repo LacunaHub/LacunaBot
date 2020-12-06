@@ -150,13 +150,13 @@ class Command {
         if (missing) {
             if (missing.includes('SEND_MESSAGES')) return false
 
-            await message.channel.send(`${this.self._emojis.WARNING} | ${this.self.translator.format(locale.commands.common.texts.missing_permissions, `**${message.author.username}**`, missing.map(p => `\`${locale.commands.common.permissions[p]}\``).join(', '))}`)
+            await message.reply(`${this.self._emojis.WARNING} | ${this.self.translator.format(locale.commands.common.texts.missing_permissions, `**${message.author.username}**`, missing.map(p => `\`${locale.commands.common.permissions[p]}\``).join(', '))}`, { allowedMentions: { repliedUser: false } })
 
             return false
         }
 
         if (this.premium_only && !server.server.premium.available) {
-            await message.channel.send(`${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${message.author.username}**`)}`)
+            await message.reply(`${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
             return false
         }

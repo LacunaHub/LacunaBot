@@ -18,7 +18,7 @@ const execute = async (self, server, message, args) => {
     }
 
     if (prefix.length > 3) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.prefix.texts.prefix_max_length, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.prefix.texts.prefix_max_length, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -29,7 +29,7 @@ const execute = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.prefix.texts.prefix_set, `**${message.author.username}**`, `\`${server.prefix}\``, `\`${prefix}\``)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.prefix.texts.prefix_set, `**${message.author.username}**`, `\`${server.prefix}\``, `\`${prefix}\``)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }

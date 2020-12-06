@@ -15,18 +15,18 @@ const execute = async (self, server, message, args) => {
     try {
         attachment = await GenerateRankCard(self, message, args)
     } catch (err) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.error_on_render, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.error_on_render, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!attachment) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.no_rank_card, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.no_rank_card, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
-    await message.channel.send(attachment)
+    await message.reply({ files: [attachment], allowedMentions: { repliedUser: false } })
 
     return true
 }

@@ -18,6 +18,9 @@ class Replacer {
         const guild = stuff.guild
         const member = stuff.member
 
+        const activity = await self.db.activities.fetch({ _id: guild.id })
+        const levels = activity.levels.find(level => level.user_id == member.id)
+
         const replacers = {
             'message.channel': message ? message.channel.name : '`message.channel`',
             'message.channel.id': message ? message.channel.id : '`message.channel.id`',
@@ -68,7 +71,12 @@ class Replacer {
 			'member.mention': `<@${member.id}>`,
             'member.joined_at': member.joinedTimestamp,
             'member.nickname': member.nickname || '`member.nickname`',
-            'member.premium_since': member.premiumSinceTimestamp
+            'member.premium_since': member.premiumSinceTimestamp,
+            'member.level': levels ? levels.experience.level : 0,
+            'member.level.current_xp': levels ? levels.experience.current : 0,
+            'member.level.remaining_xp': levels ? Math.round((150 + (levels.experience.level * levels.experience.level * 8)) - levels.experience.current) : 0,
+            'member.level.need_xp': levels ? 150 + (levels.experience.level * levels.experience.level * 8) : 0,
+            'member.level.total_xp': levels ? levels.experience.total : 0
         }
 
         let patterns = string.match(/{\s*([\w.]+)\s*}/g) || []

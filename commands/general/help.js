@@ -42,14 +42,14 @@ const execute = async (self, server, message, args) => {
         if (categories.music.size) embed.addField(locale.help.texts.categories.music, categories.music.map(c => `\`${c.name}\``).join(', '))
         if (categories.utility.size) embed.addField(locale.help.texts.categories.utility, categories.utility.map(c => `\`${c.name}\``).join(', '))
     
-        await message.channel.send(embed)
+        await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
     }
 
     else {
         const command = self.commands.find(c => !c.private && c.name == provided_command)
 
         if (!command) {
-            await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.help.texts.command_not_found, `**${message.author.username}**`)}`)
+            await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.help.texts.command_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
             return false
         }
@@ -112,7 +112,7 @@ const execute = async (self, server, message, args) => {
             for (const doc of subcmd_doc) embed.addField(doc.name, doc.args)
         }
 
-        await message.channel.send(embed)
+        await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
     }
 
     return true

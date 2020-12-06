@@ -22,13 +22,13 @@ const execute = async (self, server, message, args) => {
 
     if (!log_type_exists) {
         const log_types = Object.keys(server.moderation.logs.types).filter(k => k != '$init').map(k => `\`${k}\``).join(', ')
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.logs.texts.unknown_log_type, `**${message.author.username}**`, log_types)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.logs.texts.unknown_log_type, `**${message.author.username}**`, log_types)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!channel && args[1] != 'OFF') {
-        await message.channel.send(`${self._emojis.ERROR} | `)
+        await message.react(self._emojis.details.ERROR.id)
 
         return false
     }
@@ -38,7 +38,7 @@ const execute = async (self, server, message, args) => {
         [`moderation.logs.types.${log_type}.channel_id`]: args[1] == 'OFF' ? '' : channel.id
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(args[1] == 'OFF' ? locale.logs.texts.log_type_disable : locale.logs.texts.log_type_activated, `**${message.author.username}**`, `\`${log_type}\``)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(args[1] == 'OFF' ? locale.logs.texts.log_type_disable : locale.logs.texts.log_type_activated, `**${message.author.username}**`, `\`${log_type}\``)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }

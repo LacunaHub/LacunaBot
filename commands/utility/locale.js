@@ -10,7 +10,7 @@ const execute = async (self, server, message, args) => {
     let language = args[0]
 
     if (!language) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.locale.texts.language_not_entered, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.locale.texts.language_not_entered, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -24,13 +24,13 @@ const execute = async (self, server, message, args) => {
     }
 
     else {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.locale.texts.unknown_locale, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.locale.texts.unknown_locale, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (server.locale == language) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.locale.texts.locale_already_selected, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.locale.texts.locale_already_selected, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -43,7 +43,7 @@ const execute = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.locale.texts.locale_set, `**${message.author.username}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.locale.texts.locale_set, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }

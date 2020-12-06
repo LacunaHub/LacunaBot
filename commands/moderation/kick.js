@@ -16,19 +16,19 @@ const execute = async (self, server, message, args) => {
     const reason = args.slice(1).join(' ')
 
     if (!member) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.kick.texts.user_not_found, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.kick.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (member.hasPermission("KICK_MEMBERS")) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.kick.texts.user_has_moder_permission, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.kick.texts.user_has_moder_permission, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!member.kickable) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.kick.texts.cant_kick_user, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.kick.texts.cant_kick_user, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }

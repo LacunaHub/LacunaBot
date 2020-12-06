@@ -13,7 +13,7 @@ const execute = async (self, server, message, args) => {
     const case_log = message.guild.channels.cache.get(server.moderation.case_log.channel_id)
 
     if (!case_log) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reason.texts.no_case_log, `**${message.author.username}**`, '`/cases channel`')}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.reason.texts.no_case_log, `**${message.author.username}**`, '`/cases channel`')}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -22,13 +22,13 @@ const execute = async (self, server, message, args) => {
     const reason = args.slice(1).join(' ')
 
     if (!case_id) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reason.texts.no_case_id, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.reason.texts.no_case_id, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!reason) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reason.texts.no_reason, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.reason.texts.no_reason, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -37,7 +37,7 @@ const execute = async (self, server, message, args) => {
     const case_message = messages.find(m => m.author.id == self.user.id && m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.includes(`#${case_id}`))
 
     if (!case_message) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.reason.texts.no_case_message, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.reason.texts.no_case_message, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }

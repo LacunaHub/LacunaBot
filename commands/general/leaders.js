@@ -39,7 +39,7 @@ const execute = async (self, server, message, args) => {
         embed.addField(`#${index + 1} ${message.author.username}`, `${self.translator.format(locale.config.levels.texts.award_level, current_user_level.experience.level)} → :sparkles: ${current_user_level.experience.current} (${current_user_level.experience.total})\n:incoming_envelope: ${current_user_level.activity.text.total_messages} (${self.translator.format(locale.leaders.texts.last_message_at, moment(current_user_level.activity.text.last_message_at || Date.now()).locale(server.locale).fromNow())})`)
     }
 
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }

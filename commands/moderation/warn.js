@@ -17,13 +17,13 @@ const execute = async (self, server, message, args) => {
     const reason = args.slice(1).join(' ')
 
     if (!member) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.texts.user_not_found, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (member.hasPermission('MANAGE_ROLES')) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.texts.user_is_moderator, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.texts.user_is_moderator, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -128,13 +128,13 @@ const remove = async (self, server, message, args) => {
     const reason = args.slice(2).join(' ')
 
     if (!member) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.texts.user_not_found, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!warn_id) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.no_warn_id, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.no_warn_id, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -142,7 +142,7 @@ const remove = async (self, server, message, args) => {
     const violator = server.moderation.warnings.violators.find(v => v.user_id == member.id)
 
     if (!violator || !violator.violations.length) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.no_violator_or_violations, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.no_violator_or_violations, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -150,7 +150,7 @@ const remove = async (self, server, message, args) => {
     const violation = violator.violations.find(v => v.id == warn_id)
 
     if (!violation) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.invalid_warn_id, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.invalid_warn_id, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }

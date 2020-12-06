@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, APIMessage } = require('discord.js')
 const { version } = require('../../package.json')
 const numbro = require('numbro')
 const os = require('os')
@@ -32,7 +32,7 @@ const execute = async (self, server, message, args) => {
         .addField('\u200B', '\u200B', true)
         .setFooter(`© ${self.application.owner.name}`, self.application.owner.iconURL())
 
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }

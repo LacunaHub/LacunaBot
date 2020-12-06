@@ -17,7 +17,7 @@ const execute = async (self, server, message, args) => {
         .addField(locale.config.texts.bonuses, server.server.premium.available ? self._emojis.OK : self._emojis.ERROR, true)
         .addField(locale.config.texts.moderation.title, self.translator.format(locale.config.texts.moderation.value, server.moderation.case_log.channel_id ? `<#${server.moderation.case_log.channel_id}>` : '', Object.entries(server.moderation.case_log.case_types).filter(k => !k[1]).map(k => `\`${k[0]}\``).join(', ') || locale.common.texts.none, server.moderation.roles.mute ? `<@&${server.moderation.roles.mute}>` : ''))
 
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -34,7 +34,7 @@ const reactions = async (self, server, message, args) => {
     const message_id = args[0]
 
     if (!message_id) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.config.reactions.texts.no_message_id, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.config.reactions.texts.no_message_id, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -42,7 +42,7 @@ const reactions = async (self, server, message, args) => {
     const elements = server.modules.reactions.filter(r => r.message.id == message_id)
 
     if (!elements.length) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.config.reactions.texts.no_elements, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.config.reactions.texts.no_elements, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -51,7 +51,7 @@ const reactions = async (self, server, message, args) => {
 
     const roles = elements.filter(r => r.type === 'ROLE').map(r => `${r.references.map(ref => message.guild.roles.cache.get(ref) ? `**@${message.guild.roles.cache.get(ref).name}**` : `**@${ref}**`).join(', ')} – ${r.emoji.id ? `<${r.emoji.animated ? 'a' : ''}:${r.emoji.name}:${r.emoji.id}>`: r.emoji.name} \`${r.id}\``).join('\n') || ''
 
-    await message.channel.send(`${channels}\n\n${roles}`)
+    await message.reply(`${channels}\n\n${roles}`, { allowedMentions: { repliedUser: false } })
 }
 
 /**
@@ -64,7 +64,7 @@ const tvc = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
     if (!server.modules.voice_manager.temp_voice_channels.triggers.length) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.config.tvc.texts.no_voice_triggers, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.config.tvc.texts.no_voice_triggers, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -76,7 +76,7 @@ const tvc = async (self, server, message, args) => {
         embed.addField(trigger.id, self.translator.format(locale.config.tvc.texts.field_value, `<#${trigger.channel_id}>`, trigger.default.name, trigger.default.limit), true)
     }
 
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 }
 
 /**
@@ -94,7 +94,7 @@ const logs = async (self, server, message, args) => {
         embed.addField(locale.modules.logs[log_type].title, server.moderation.logs.types[log_type].channel_id ? `${self._emojis.OK} <#${server.moderation.logs.types[log_type].channel_id}>` : self._emojis.ERROR, true)
     }
 
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -127,7 +127,7 @@ const levels = async (self, server, message, args) => {
     embed.addField(locale.config.levels.texts.alerts_template, TruncateString(server.modules.levels.level_up_alerts.message.content, 768) || '\u200B')
     embed.addField(locale.config.levels.texts.awards, TruncateArray(server.modules.levels.awards.map(a => `${self.translator.format(locale.config.levels.texts.award_level, a.level)} → <@&${a.references[0]}>`), 10, ', ') || '\u200B')
     
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }

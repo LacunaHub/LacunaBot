@@ -24,7 +24,7 @@ const content = async (self, server, message, args) => {
     const text = args.join(' ')
 
     if (!text) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.content.texts.no_texts, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.content.texts.no_texts, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -37,7 +37,7 @@ const content = async (self, server, message, args) => {
             }
         })
 
-        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.greeting.content.texts.module_off, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.greeting.content.texts.module_off, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return true
     }
@@ -49,7 +49,7 @@ const content = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.greeting.content.texts.text_set, `**${message.author.username}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.greeting.content.texts.text_set, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -66,7 +66,7 @@ const channel = async (self, server, message, args) => {
     const direction = args[0]
 
     if (!direction) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.channel.texts.no_direction, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.channel.texts.no_direction, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -79,7 +79,7 @@ const channel = async (self, server, message, args) => {
             }
         })
 
-        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.greeting.channel.texts.direction_dm, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.greeting.channel.texts.direction_dm, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return true
     }
@@ -87,7 +87,7 @@ const channel = async (self, server, message, args) => {
     const where = message.mentions.channels.first() || message.guild.channels.cache.filter(c => c.type == 'text').find(c => c.id == direction || c.name == direction)
 
     if (!where) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.channel.texts.no_where, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.channel.texts.no_where, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -99,7 +99,7 @@ const channel = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.greeting.channel.texts.direction_channel, `**${message.author.username}**`, `**#${where.name}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.greeting.channel.texts.direction_channel, `**${message.author.username}**`, `**#${where.name}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -116,7 +116,7 @@ const roles = async (self, server, message, args) => {
     const argument = args.join(' ')
 
     if (!argument) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.roles.texts.no_argument, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.roles.texts.no_argument, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -129,7 +129,7 @@ const roles = async (self, server, message, args) => {
             }
         })
 
-        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.greeting.roles.texts.argument_off, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.greeting.roles.texts.argument_off, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return true
     }
@@ -137,7 +137,7 @@ const roles = async (self, server, message, args) => {
     const initial_roles = message.mentions.roles.first() ? message.mentions.roles.first(3) : message.guild.roles.cache.filter(r => args.some(a => a == r.id)).first(3)
 
     if (!initial_roles.length) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.roles.texts.no_initial_roles, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.roles.texts.no_initial_roles, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -149,7 +149,7 @@ const roles = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.greeting.roles.texts.roles_set, `**${message.author.username}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.greeting.roles.texts.roles_set, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }

@@ -235,9 +235,9 @@ class Levels {
         ctx.lineTo(695, 85)
         ctx.stroke()
 
-        const place = await Canvas.loadImage('https://discord.com/assets/0a00e865c445d42dfb9f64bedfab8cf8.svg')
-        const lvl = await Canvas.loadImage('https://discord.com/assets/141d49436743034a59dec6bd5618675d.svg')
-        const messages = await Canvas.loadImage('https://discord.com/assets/95ff2ac1c2edcb54e96d85f4976711d2.svg')
+        const place = await Canvas.loadImage('./assets/trophy.svg')
+        const lvl = await Canvas.loadImage('./assets/star.svg')
+        const messages = await Canvas.loadImage('./assets/incoming_envelope.svg')
 
         ctx.font = '25px Gotham Pro Medium'
         ctx.fillStyle = '#ffffff'
@@ -247,15 +247,16 @@ class Levels {
         ctx.fillText(sorted.indexOf(level) + 1, 695, 70)
         ctx.drawImage(place, (690 - 25) - m2.width, 48, 25, 25)
 
-        ctx.textBaseline = 'top'
-        ctx.fillText(level.experience.level, 205, 95)
+        ctx.textAlign = 'start'
+        ctx.fillText(level.experience.level, 190, 117)
         ctx.drawImage(lvl, 160, 95, 25, 25)
 
         ctx.textAlign = 'end'
         const m3 = ctx.measureText(level.activity.text.total_messages)
-        ctx.fillText(level.activity.text.total_messages, 695, 95)
+        ctx.fillText(level.activity.text.total_messages, 695, 117)
         ctx.drawImage(messages, (690 - 25) - m3.width, 95, 25, 25)
 
+        ctx.textBaseline = 'top'
         ctx.font = '20px Gotham Pro Medium'
         ctx.textAlign = 'start'
         ctx.fillText(level.experience.current, 25, 205)

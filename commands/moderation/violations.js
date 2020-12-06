@@ -15,7 +15,7 @@ const execute = async (self, server, message, args) => {
     const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
 
     if (!member) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.user_not_found, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -23,7 +23,7 @@ const execute = async (self, server, message, args) => {
     const violator = server.moderation.warnings.violators.find(v => v.user_id == member.id)
 
     if (!violator || !violator.violations.length) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.no_violations, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.no_violations, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -39,7 +39,7 @@ const execute = async (self, server, message, args) => {
         .addField(locale.violations.texts.total, violator.violations.length, true)
         .addField(locale.violations.texts.last_10_violations, last_10_violations.map(v => `**${v.reason || locale.common.texts.none}** – ${moment(v.timestamp).locale(server.locale).fromNow()}: \`${v.id}\``))
 
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }

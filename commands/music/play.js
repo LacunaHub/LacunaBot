@@ -11,7 +11,7 @@ const execute = async (self, server, message, args) => {
     const voice = message.member.voice.channel
 
     if (!voice) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_voice_channel, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_voice_channel, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -19,20 +19,20 @@ const execute = async (self, server, message, args) => {
     const has_permissions = voice.permissionsFor(message.guild.me).has(['CONNECT', 'SPEAK', 'USE_VAD'])
 
     if (!has_permissions) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_required_permissions_in_voice, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_required_permissions_in_voice, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!search_track) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_search_track, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_search_track, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     const queue = self.player.queues.fetch(message.guild.id, { tracks: [], volume: server.modules.music.default_volume, repeat: false, skip_votes: 0, executor: message.author.id })
 
-    const _message = await message.channel.send(`:mag: | ${self.translator.format(locale.play.texts.search_in_progress, `**${message.author.username}**`, `\`${search_track}\``)}`)
+    const _message = await message.reply(`:mag: | ${self.translator.format(locale.play.texts.search_in_progress, `**${message.author.username}**`, `\`${search_track}\``)}`, { allowedMentions: { repliedUser: false } })
     const search = await self.player.search(search_track)
 
     if (search.loadType === 'LOAD_FAILED') {

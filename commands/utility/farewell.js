@@ -24,7 +24,7 @@ const content = async (self, server, message, args) => {
     const text = args.join(' ')
 
     if (!text) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.content.texts.no_texts, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.content.texts.no_texts, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -37,7 +37,7 @@ const content = async (self, server, message, args) => {
             }
         })
 
-        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.farewell.content.texts.module_off, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.farewell.content.texts.module_off, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return true
     }
@@ -49,7 +49,7 @@ const content = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.farewell.content.texts.text_set, `**${message.author.username}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.farewell.content.texts.text_set, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -66,7 +66,7 @@ const channel = async (self, server, message, args) => {
     const direction = args[0]
 
     if (!direction) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.channel.texts.no_direction, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.channel.texts.no_direction, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -79,7 +79,7 @@ const channel = async (self, server, message, args) => {
             }
         })
 
-        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.farewell.channel.texts.direction_dm, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.farewell.channel.texts.direction_dm, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return true
     }
@@ -87,7 +87,7 @@ const channel = async (self, server, message, args) => {
     const where = message.mentions.channels.first() || message.guild.channels.cache.filter(c => c.type == 'text').find(c => c.id == direction || c.name == direction)
 
     if (!where) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.channel.texts.no_where, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.channel.texts.no_where, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -99,7 +99,7 @@ const channel = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.farewell.channel.texts.direction_channel, `**${message.author.username}**`, `**#${where.name}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.farewell.channel.texts.direction_channel, `**${message.author.username}**`, `**#${where.name}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -116,13 +116,13 @@ const save = async (self, server, message, args) => {
     const type = args[0], types = ['ROLES', 'NICKNAME']
 
     if (!type) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.save.texts.no_save_type, `**${message.author.username}**`, `${types.map(t => `\`${t}\``).join(' ')}`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.save.texts.no_save_type, `**${message.author.username}**`, `${types.map(t => `\`${t}\``).join(' ')}`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!types.includes(type)) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.save.texts.unknown_save_type, `**${message.author.username}**`, `${types.map(t => `\`${t}\``).join(' ')}`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.save.texts.unknown_save_type, `**${message.author.username}**`, `${types.map(t => `\`${t}\``).join(' ')}`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }

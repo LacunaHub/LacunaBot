@@ -26,7 +26,7 @@ const allow = async (self, server, message, args) => {
     const path = args[0], ref = args.slice(1).join(' ')
 
     if (!path) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.no_path, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.no_path, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -35,13 +35,13 @@ const allow = async (self, server, message, args) => {
     const group = self.commands.filter(c => c.group == path && c.manageable).array()
 
     if (!command && !group.length) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.no_command_or_group, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.no_command_or_group, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
-    if (!command.manageable) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.not_manageable, `**${message.author.username}**`)}`)
+    if (command && !command.manageable) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.not_manageable, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -81,7 +81,7 @@ const allow = async (self, server, message, args) => {
             }
         }
 
-        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.commands.texts.config_overwrite, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.commands.texts.config_overwrite, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return true
     }
@@ -89,7 +89,7 @@ const allow = async (self, server, message, args) => {
     if (command) await command.allow(message.guild.id)
     if (group.length) for (const grouped of group) await grouped.allow(message.guild.id)
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.commands.texts.active, `**${message.author.username}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.commands.texts.active, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -106,7 +106,7 @@ const block = async (self, server, message, args) => {
     const path = args[0], ref = args.slice(1).join(' ')
 
     if (!path) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.no_path, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.no_path, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -115,13 +115,13 @@ const block = async (self, server, message, args) => {
     const group = self.commands.filter(c => c.group == path && c.manageable).array()
 
     if (!command && !group.length) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.no_command_or_group, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.no_command_or_group, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
-    if (!command.manageable) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.not_manageable, `**${message.author.username}**`)}`)
+    if (command && !command.manageable) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.commands.texts.not_manageable, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -161,7 +161,7 @@ const block = async (self, server, message, args) => {
             }
         }
 
-        await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.commands.texts.config_overwrite, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.commands.texts.config_overwrite, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return true
     }
@@ -169,7 +169,7 @@ const block = async (self, server, message, args) => {
     if (command) await command.block(message.guild.id)
     if (group.length) for (const grouped of group) await grouped.block(message.guild.id)
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.commands.texts.inactive, `**${message.author.username}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.commands.texts.inactive, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -186,7 +186,7 @@ const config = async (self, server, message, args) => {
     const command = self.commands.get(args[0])
 
     if (!command || !command.manageable) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.help.texts.command_not_found, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.help.texts.command_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -199,7 +199,7 @@ const config = async (self, server, message, args) => {
         .addField(locale.commands.config.texts.fields.allowed, config && (config.allowed.channels.length || config.allowed.roles.length) ? TruncateArray([...config.allowed.channels.map(c => { return { t: 'C', id: c } }), ...config.allowed.roles.map(r => { return { t: 'R', id: r } })].map(item => item.t == 'C' ? `<#${item.id}>` : `<@&${item.id}>`), 15, ', ') : '-')
         .addField(locale.commands.config.texts.fields.blocked, config && (config.blocked.channels.length || config.blocked.roles.length) ? TruncateArray([...config.blocked.channels.map(c => { return { t: 'C', id: c } }), ...config.blocked.roles.map(r => { return { t: 'R', id: r } })].map(item => item.t == 'C' ? `<#${item.id}>` : `<@&${item.id}>`), 15, ', ') : '-')
 
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }

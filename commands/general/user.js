@@ -44,7 +44,7 @@ const execute = async (self, server, message, args) => {
         .setColor(specified.displayHexColor)
         .setFooter(`ID: ${specified.id}`)
 
-    await message.channel.send(embed)
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }

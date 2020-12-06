@@ -24,13 +24,13 @@ const channel = async (self, server, message, args) => {
     const channel = message.mentions.channels.first() || message.guild.channels.cache.find(c => c.id == args[0] || c.name == args[0])
 
     if (!args[0]) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.cases.channel.texts.no_channel_argument, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.cases.channel.texts.no_channel_argument, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!channel || channel.type != 'text') {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.cases.channel.texts.invalid_channel, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.cases.channel.texts.invalid_channel, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -41,7 +41,7 @@ const channel = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.cases.channel.texts.case_log_set, `**${message.author.username}**`, `**#${channel.name}**`)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.cases.channel.texts.case_log_set, `**${message.author.username}**`, `**#${channel.name}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -59,7 +59,7 @@ const toggle = async (self, server, message, args) => {
 
     if (!event) {
         const event_types = Object.keys(server.moderation.case_log.case_types).filter(k => k != '$init').map(k => `\`${k}\``).join(', ')
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.cases.toggle.texts.event_type_not_entered, `**${message.author.username}**`, event_types)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.cases.toggle.texts.event_type_not_entered, `**${message.author.username}**`, event_types)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -67,7 +67,7 @@ const toggle = async (self, server, message, args) => {
     const event_exists = event in server.moderation.case_log.case_types
 
     if (!event_exists) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.cases.toggle.texts.event_type_not_found, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.cases.toggle.texts.event_type_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -80,7 +80,7 @@ const toggle = async (self, server, message, args) => {
         }
     })
 
-    await message.channel.send(`${self._emojis.OK} | ${self.translator.format(event_entry ? locale.cases.toggle.texts.event_type_disable : locale.cases.toggle.texts.event_type_enable, `**${message.author.username}**`, `\`${event}\``)}`)
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(event_entry ? locale.cases.toggle.texts.event_type_disable : locale.cases.toggle.texts.event_type_enable, `**${message.author.username}**`, `\`${event}\``)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }

@@ -16,19 +16,19 @@ const execute = async (self, server, message, args) => {
     const reason = args.slice(1).join(' ')
 
     if (!member) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_not_found, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (member.hasPermission("BAN_MEMBERS")) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_moder_permission, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_moder_permission, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!member.bannable) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.cant_ban_user, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.cant_ban_user, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }

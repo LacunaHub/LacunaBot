@@ -16,19 +16,19 @@ const execute = async (self, server, message, args) => {
     const reason = args.slice(1).join(' ')
 
     if (!member) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_not_found, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (member.hasPermission("MANAGE_ROLES")) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_has_moder_permission, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_has_moder_permission, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
     if (!member.manageable) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.cant_mute_user, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.cant_mute_user, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -50,7 +50,7 @@ const execute = async (self, server, message, args) => {
     const tempmute = self.tempmutes.find(m => m.user_id == member.id)
 
     if (member.roles.cache.has(mute_role) || tempmute) {
-        await message.channel.send(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_already_muted, `**${message.author.username}**`)}`)
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_already_muted, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
