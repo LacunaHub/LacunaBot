@@ -66,16 +66,16 @@
             }
         },
         "about": {
-            "description": "Показывает некоторую информацию о боте",
+            "description": "Displays some bot information",
             "texts": {
-                "developer": "Разработчик",
-                "version": "Версия",
-                "os_uptime": "Время работы системы",
-                "shard_uptime": "Время работы фрагмента",
-                "total_guilds": "Серверов",
-                "total_users": "Пользователей",
-                "shards": "Фрагментов",
-                "latency": "Задержка"
+                "developer": "Developer",
+                "version": "Version",
+                "os_uptime": "System Uptime",
+                "shard_uptime": "Shard Uptime",
+                "total_guilds": "Servers",
+                "total_users": "Users",
+                "shards": "Shards",
+                "latency": "Latency"
             }
         },
         "help": {
@@ -97,7 +97,7 @@
                     "music": "Music",
                     "utility": "Utility"
                 },
-                "command_not_found": "{0}, команда не найдена",
+                "command_not_found": "{0}, command not found",
                 "usage": "Usage",
                 "args": "Arguments",
                 "subcommands": "Subcommands",
@@ -109,30 +109,30 @@
                     "self": "Bot",
                     "user": "Command author"
                 },
-                "aliases": "Псевдонимы"
+                "aliases": "Aliases"
             }
         },
         "leaders": {
-            "description": "Выводит таблицу лидеров",
+            "description": "Shows leaderboard",
             "texts": {
-                "leaderboard": "Доска лидеров",
-                "positions": "{0} – всего позиций",
-                "last_message_at": "последнее {0}"
+                "leaderboard": "Leaderboard",
+                "positions": "{0} – total positions",
+                "last_message_at": "last {0}"
             }
         },
         "rank": {
-            "description": "Показывает ранговую карточку",
+            "description": "Shows rank card",
             "arguments": [
                 {
-                    "name": "пользователь",
-                    "description": "Выведет ранговую карточку указанного пользователя",
+                    "name": "user",
+                    "description": "Shows rank card of specified user",
                     "required": false,
                     "types": ["MENTION", "SNOWFLAKE"]
                 }
             ],
             "texts": {
-                "error_on_render": "{0}, произошла ошибка при создании ранговой карточки",
-                "no_rank_card": "{0}, ранговая карточка не найдена"
+                "error_on_render": "{0}, an error occurred while creating rank card",
+                "no_rank_card": "{0}, rank card not found"
             }
         },
         "server": {
@@ -208,109 +208,109 @@
             }
         },
         "ban": {
-            "description": "Выдаёт блокировку пользователю",
+            "description": "Executes ban to user",
             "arguments": [
                 {
-                    "name": "пользователь",
-                    "description": "Выдаст блокировку указанному пользователю",
+                    "name": "user",
+                    "description": "Ban specified user",
                     "required": true,
                     "types": ["MENTION", "SNOWFLAKE"]
                 },
                 {
-                    "name": "причина",
-                    "description": "Причина для журнала случаев",
+                    "name": "reason",
+                    "description": "Reason for cases log",
                     "required": false,
                     "types": ["STRING"]
                 }
             ],
             "texts": {
-                "user_not_found": "{0}, пользователь не был указан или не найден",
-                "user_has_moder_permission": "{0}, я не могу заблокировать этого пользователя, потому что у него есть разрешения модератора",
-                "cant_ban_user": "{0}, невозможно заблокировать этого пользователя",
-                "dm_message_description": "Выдана блокировка на сервере {0}"
+                "user_not_found": "{0}, user was not specified of not found",
+                "user_has_moder_permission": "{0}, I can't ban this user because thi user has moderation permissions",
+                "cant_ban_user": "{0}, impossible to ban this user",
+                "dm_message_description": "Ban on server {0}"
             }
         },
         "cases": {
-            "description": "Устанавливает канал для журнала модерации",
+            "description": "Cases log management",
             "channel": {
-                "description": "Устанавливает канал для журнала модерации",
+                "description": "Sets channel for cases log",
                 "arguments": [
                     {
-                        "name": "канал",
-                        "description": "Канал в который будут поступать случаи модерации",
+                        "name": "channel",
+                        "description": "Channel that will receive moderation cases",
                         "required": true,
                         "types": ["MENTION", "SNOWFLAKE", "STRING"]
                     }
                 ],
                 "texts": {
-                    "no_channel_argument": "{0}, пожалуйста, укажите канал для журнала модерации",
-                    "invalid_channel": "{0}, укажите действительный канал для журнала модерации",
-                    "case_log_set": "{0}, журнал модерации будет отправляться в канал {1}"
+                    "no_channel_argument": "{0}, please, specify a channel for cases log",
+                    "invalid_channel": "{0}, specify valid channel for cases log",
+                    "case_log_set": "{0}, moderation log will be sent to {1} channel"
                 }
             },
             "toggle": {
-                "description": "Включает/отключает событие для журнала модерации",
+                "description": "Toggles moderation log events",
                 "arguments": [
                     {
-                        "name": "событие",
-                        "description": "Событие журнала модерации",
+                        "name": "event",
+                        "description": "Moderation log event",
                         "required": true,
                         "types": ["STRING"]
                     }
                 ],
                 "texts": {
-                    "event_type_not_entered": "{0}, список доступных событий: {1}",
-                    "event_type_not_found": "{0}, введенный тип события журнала модерации не найден",
-                    "event_type_disable": "{0}, событие {1} больше не будет записываться в журнал модерации",
-                    "event_type_enable": "{0}, событие журнала модерации {1} включено"
+                    "event_type_not_entered": "{0}, list of available events: {1}",
+                    "event_type_not_found": "{0}, entered type of moderation log event was not found",
+                    "event_type_disable": "{0}, event {1} will no longer be logged in moderation log",
+                    "event_type_enable": "{0}, moderation log event {1} enabled"
                 }
             }
         },
         "kick": {
-            "description": "Выгоняет пользователя с сервера",
+            "description": "Executes kick to user",
             "arguments": [
                 {
-                    "name": "пользователь",
-                    "description": "Выгонит указанного пользователя с сервера",
+                    "name": "user",
+                    "description": "Kick specified user",
                     "required": true,
                     "types": ["MENTION", "SNOWFLAKE"]
                 },
                 {
-                    "name": "причина",
-                    "description": "Причина для журнала случаев",
+                    "name": "reason",
+                    "description": "Reason for cases log",
                     "required": false,
                     "types": ["STRING"]
                 }
             ],
             "texts": {
-                "user_not_found": "{0}, пользователь не был указан или не найден",
-                "user_has_moder_permission": "{0}, я не могу выгнать этого пользователя, потому что у него есть разрешения модератора",
-                "cant_kick_user": "{0}, невозможно выгнать этого пользователя",
-                "dm_message_description": "Исключение с сервера {0}"
+                "user_not_found": "{0}, user was not specified of not found",
+                "user_has_moder_permission": "{0}, I can't kick this user because thi user has moderation permissions",
+                "cant_kick_user": "{0}, impossible to ban this user",
+                "dm_message_description": "Kick from server {0}"
             }
         },
         "mute": {
-            "description": "Выдаёт заглушение пользователю",
+            "description": "Executes mute to user",
             "arguments": [
                 {
-                    "name": "пользователь",
-                    "description": "Выдаст заглушение указанному пользователю",
+                    "name": "user",
+                    "description": "Mute specified user",
                     "required": true,
                     "types": ["MENTION", "SNOWFLAKE"]
                 },
                 {
-                    "name": "причина",
-                    "description": "Причина для журнала случаев",
+                    "name": "reason",
+                    "description": "Reason for cases log",
                     "required": false,
                     "types": ["STRING"]
                 }
             ],
             "texts": {
-                "user_not_found": "{0}, пользователь не был указан или не найден",
-                "user_has_moder_permission": "{0}, я не могу заглушить этого пользователя, потому что у него есть разрешения модератора",
-                "cant_mute_user": "{0}, невозможно заглушить этого пользователя",
-                "user_already_muted": "{0}, пользователю уже было выдано заглушение",
-                "dm_message_description": "Выдано заглушение на сервере {0}"
+                "user_not_found": "{0}, user was not specified of not found",
+                "user_has_moder_permission": "{0}, I can't mute this user because thi user has moderation permissions",
+                "cant_mute_user": "{0}, impossible to ban this user",
+                "user_already_muted": "{0}, user already muted",
+                "dm_message_description": "Mute on server {0}"
             }
         },
         "prune": {
