@@ -1084,6 +1084,47 @@
                 }
             }
         },
+        "reports": {
+            "description": "Reports management",
+            "channel": {
+                "description": "Sets channel for reports or disables module",
+                "arguments": [
+                    {
+                        "name": "channel",
+                        "description": "Reports channel or OFF to disable",
+                        "required": true,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ],
+                "texts": {
+                    "no_direction": "{0}, please provide a channel for reports",
+                    "direction_off": "{0}, reports successfully disabled",
+                    "no_where": "{0}, provided channel not found or not exists",
+                    "activated": "{0}, reports activated and will send to channel {1}"
+                }
+            },
+            "emoji": {
+                "description": "Sets reaction emoji and minimum reaction amount for triggering",
+                "arguments": [
+                    {
+                        "name": "emoji",
+                        "description": "Reaction emoji",
+                        "required": true,
+                        "types": ["STRING"]
+                    },
+                    {
+                        "name": "amount",
+                        "description": "Reaction amount for triggering",
+                        "required": false,
+                        "types": ["NUMBER"]
+                    }
+                ],
+                "texts": {
+                    "invalid_arguments": "{0}, please see the command help and enter valid arguments",
+                    "success": "{0}, reaction emoji successfully set"
+                }
+            }
+        },
         "tvc": {
             "description": "Управление временными голосовыми каналами",
             "add": {
