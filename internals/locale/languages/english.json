@@ -97,7 +97,7 @@
                     "music": "Music",
                     "utility": "Utility"
                 },
-                "command_not_found": "{0}, команда не найдена",
+                "command_not_found": "{0}, command not found",
                 "usage": "Usage",
                 "args": "Arguments",
                 "subcommands": "Subcommands",
@@ -109,7 +109,7 @@
                     "self": "Bot",
                     "user": "Command author"
                 },
-                "aliases": "Псевдонимы"
+                "aliases": "Aliases"
             }
         },
         "leaders": {
@@ -695,6 +695,15 @@
                     "alerts_template": "Шаблон оповещений",
                     "awards": "Награды за уровни",
                     "award_level": "Ур. {0}"
+                }
+            },
+            "reports": {
+                "description": "Выводит настройки жалоб",
+                "texts": {
+                    "reports": "Жалобы",
+                    "channel": "Канал для жалоб",
+                    "reaction": "Реакция для жалоб",
+                    "reaction_minimum": "Минимальное количество реакций"
                 }
             },
             "texts": {
