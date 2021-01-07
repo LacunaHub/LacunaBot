@@ -1,3 +1,5 @@
+const { Permissions } = require('discord.js')
+
 class VoiceManager {
     /**
      * Создаёт временный голосовой канал
@@ -29,7 +31,7 @@ class VoiceManager {
             
             const temp_voice = await state.guild.channels.create(`${trigger.default.name} #${trigger.children.length + 1}`, {
                 type: 'voice',
-                permissionOverwrites: state.channel.permissionOverwrites,
+                permissionOverwrites: trigger.default.permissions ? state.channel.permissionOverwrites.set(state.member.id, { type: 'member', id: state.member.id, allow: new Permissions(trigger.default.permissions) }) : state.channel.permissionOverwrites,
                 parent: parent && parent.manageable ? parent : null,
                 userLimit: trigger.default.limit,
                 bitrate: state.channel.bitrate,
@@ -165,6 +167,13 @@ class VoiceManager {
                         [`modules.voice_manager.temp_voice_channels.triggers.$.children.${children_index}.owner_id`]: channel.members.first().id
                     }
                 })
+
+                const overwrites = channel.permissionOverwrites.find(p => p.id === trigger_children.owner_id)
+                if (overwrites) await overwrites.delete()
+
+                const permissions = {}
+                for (const p of new Permissions(trigger.default.permissions).toArray()) permissions[p] = true
+                await channel.createOverwrite(channel.members.first().id, permissions)
             }
         
             return true
