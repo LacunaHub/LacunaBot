@@ -106,7 +106,7 @@ class TemporaryMute {
     /**
      * @param {import('../Lacuna')} self
      */
-    static async AddEntries(self) {
+    static async HandleEntries(self) {
         let servers = await self.db.servers.findSome({ 'moderation.tempmutes.0': { $exists: true } })
 
         servers = servers.filter(s => self.guilds.cache.has(s._id))

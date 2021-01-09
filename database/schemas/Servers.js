@@ -173,7 +173,8 @@ const Server = new Schema({
             violators: { type: Array, default: [] }
         },
         roles: {
-            mute: { type: String, default: '' }
+            mute: { type: String, default: '' },
+            temporary: { type: Array, default: '' }
         },
         tempbans: { type: Array, default: [] },
         tempmutes: { type: Array, default: [] }

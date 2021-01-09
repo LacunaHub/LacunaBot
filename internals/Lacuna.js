@@ -9,6 +9,10 @@ const DatabaseManager = require('../database/DatabaseManager')
 const Player = require('./structures/Player')
 const Translator = require('./locale/Translator')
 
+const TemporaryBan = require('./structures/TemporaryBan')
+const TemporaryMute = require('./structures/TemporaryMute')
+const TemporaryRole = require('./structures/TemporaryRole')
+
 class Lacuna extends Client {
     /**
      * @param {import('discord.js').ClientOptions} [options]
@@ -26,14 +30,19 @@ class Lacuna extends Client {
         this.commands = new Collection()
 
         /**
-         * @type {Collection<String, import('./structures/TemporaryBan')>}
+         * @type {Collection<String, TemporaryBan>}
          */
         this.tempbans = new Collection()
 
         /**
-         * @type {Collection<String, import('./structures/TemporaryMute')>}
+         * @type {Collection<String, TemporaryMute>}
          */
         this.tempmutes = new Collection()
+
+        /**
+         * @type {Collection<String, TemporaryRole>}
+         */
+        this.temproles = new Collection()
 
         this.logger = logger
 
@@ -83,6 +92,10 @@ class Lacuna extends Client {
 
         this.player = new Player(this, { user: process.env.CLIENT_ID, shards: Number(process.env.CLIENT_MAX_SHARDS) })
         this.application = await this.fetchApplication()
+
+        await TemporaryBan.HandleEntries(this)
+        await TemporaryMute.HandleEntries(this)
+        await TemporaryRole.HandleEntries(this)
 
         process.on('unhandledRejection', error => {
             const err = error.stack ? error.stack : error.message

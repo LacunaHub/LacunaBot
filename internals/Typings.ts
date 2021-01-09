@@ -174,6 +174,7 @@ export interface ServerDocument extends Document {
         },
         roles: {
             mute: String
+            temporary: Array<TemporaryRoleEntry>
         },
         tempbans: Array<TemporaryBanEntry>
         tempmutes: Array<TemporaryMuteEntry>
@@ -393,6 +394,22 @@ export interface TemporaryMuteConstructor {
     role_id: String
     expires_timestamp: Number
     reason: String
+    init?: Boolean
+}
+
+export interface TemporaryRoleEntry {
+    user_id: String
+    role_id: String
+    unique_id: String
+    expires_timestamp: Number
+}
+
+export interface TemporaryRoleConstructor {
+    user_id: String
+    guild_id: String
+    role_id: String
+    unique_id: String
+    expires_timestamp: Number
     init?: Boolean
 }
 

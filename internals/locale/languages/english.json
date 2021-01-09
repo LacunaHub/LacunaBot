@@ -698,12 +698,12 @@
                 }
             },
             "reports": {
-                "description": "Выводит настройки жалоб",
+                "description": "Shows reports config",
                 "texts": {
-                    "reports": "Жалобы",
-                    "channel": "Канал для жалоб",
-                    "reaction": "Реакция для жалоб",
-                    "reaction_minimum": "Минимальное количество реакций"
+                    "reports": "Reports",
+                    "channel": "Reports channel",
+                    "reaction": "Reports reaction",
+                    "reaction_minimum": "Minimum reactions"
                 }
             },
             "texts": {
@@ -1132,6 +1132,36 @@
                     "invalid_arguments": "{0}, please see the command help and enter valid arguments",
                     "success": "{0}, reaction emoji successfully set"
                 }
+            }
+        },
+        "temprole": {
+            "description": "Выдает роль пользователю на указанное время",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Пользователь, которому будет выдана роль",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                },
+                {
+                    "name": "время",
+                    "description": "Время через которое роль будет убрана",
+                    "required": true,
+                    "types": ["STRING"]
+                },
+                {
+                    "name": "роль",
+                    "description": "Роль, которая будет выдана пользователю",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                }
+            ],
+            "texts": {
+                "invalid_arguments": "{0}, аргументы указаны неверно",
+                "invalid_timer": "{0}, аргумент времени указан неверно",
+                "role_not_editable": "{0}, у меня нет разрешений на выдачу этой роли кому-либо",
+                "has_role": "{0}, пользователь уже имеет эту роль",
+                "success": "{0}, роль успешно выдана пользователю {1} и будет убрана {2}"
             }
         },
         "tvc": {
