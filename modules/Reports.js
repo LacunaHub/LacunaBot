@@ -23,7 +23,7 @@ class Report {
     }
 
     get emoji() {
-        return `<${this.server.modules.reports.emoji.animated ? 'a:' : ':'}${this.server.modules.reports.emoji.name}:${this.server.modules.reports.emoji.id}>`
+        return this.server.modules.reports.emoji.id ? `<${this.server.modules.reports.emoji.animated ? 'a:' : ':'}${this.server.modules.reports.emoji.name}:${this.server.modules.reports.emoji.id}>` : this.server.modules.reports.emoji.name
     }
 
     async exists() {
