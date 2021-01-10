@@ -23,7 +23,7 @@ class Report {
     }
 
     get emoji() {
-        return `<${this.server.modules.reports.emoji.animated ? 'a:' : ''}${this.server.modules.reports.emoji.name}:${this.server.modules.reports.emoji.id}>`
+        return this.server.modules.reports.emoji.id ? `<${this.server.modules.reports.emoji.animated ? 'a:' : ':'}${this.server.modules.reports.emoji.name}:${this.server.modules.reports.emoji.id}>` : this.server.modules.reports.emoji.name
     }
 
     async exists() {
@@ -34,7 +34,7 @@ class Report {
     }
 
     correct(number) {
-        return this.server.modules.reports.minimum > number
+        return number >= this.server.modules.reports.minimum
     }
 
     async create(reporters) {
@@ -57,7 +57,7 @@ class Report {
     }
 
     async edit(reporters) {
-        const messages = await this.channel.messages.fetch({limit: 50}, false)
+        const messages = await this.channel.messages.fetch({ limit: 50 }, false)
         const filter = messages.find(m => m.author.id == this.message.client.user.id && m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.startsWith(`ID: ${this.message.id}`))
         
         if (!filter) return null
@@ -65,7 +65,7 @@ class Report {
         try {
             const message = await this.channel.messages.fetch(filter.id, false)
 
-            if (message) return await message.edit(`${emoji} **${reporters}** | <#${this.message.channel.id}>`)
+            if (message) return await message.edit(`${this.emoji} **${reporters}** | <#${this.message.channel.id}>`)
 
             return null
         } catch (err) {
@@ -74,7 +74,7 @@ class Report {
     }
 
     async delete() {
-        const messages = await this.channel.messages.fetch({limit: 30}, false)
+        const messages = await this.channel.messages.fetch({ limit: 50 }, false)
         const filter = messages.find(m => m.author.id == this.message.client.user.id && m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.startsWith(`ID: ${this.message.id}`))
         
         if (!filter) return null
@@ -91,7 +91,7 @@ class Report {
     }
 
     /**
-     * @param {import('../../internals/Lacuna')} self
+     * @param {import('../internals/Lacuna')} self
      * @param {import('../internals/Typings').ServerDocument} server
      * @param {import('discord.js').MessageReaction} reaction
      */
@@ -99,7 +99,7 @@ class Report {
         if (server.modules.reports.active) {
             const message = reaction.message
             const message_reaction = message.reactions.cache.get(server.modules.reports.emoji.id || server.modules.reports.emoji.name), reporters = message_reaction ? message_reaction.count : 0
-
+            
             if (message_reaction) {
                 const report = new this(self, server, message)
 
@@ -120,7 +120,7 @@ class Report {
     }
 
     /**
-     * @param {import('../../internals/Lacuna')} self
+     * @param {import('../internals/Lacuna')} self
      * @param {import('../internals/Typings').ServerDocument} server
      * @param {import('discord.js').MessageReaction} reaction
      */
@@ -128,7 +128,7 @@ class Report {
         if (server.modules.reports.active) {
             const message = reaction.message
             const message_reaction = message.reactions.cache.get(server.modules.reports.emoji.id || server.modules.reports.emoji.name), reporters = message_reaction ? message_reaction.count : 0
-
+            
             if (message_reaction) {
                 const report = new this(self, server, message)
 

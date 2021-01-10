@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, Permissions } = require('discord.js')
 const id = require('../../internals/utility/UID')
 const help = require('../general/help')
 
@@ -78,6 +78,22 @@ const add = async (self, server, message, args) => {
     })
 
     await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
+
+    const msg = await message.channel.send(`:grey_question: | ${self.translator.format(locale.tvc.add.texts.give_special_permissions, `**${message.author.username}**`)}`)
+    await msg.react(self._emojis.details.OK.id)
+    await msg.react(self._emojis.details.ERROR.id)
+
+    const collector = await msg.createReactionCollector((reaction, user) => (reaction.emoji.id === self._emojis.details.OK.id || reaction.emoji.id === self._emojis.details.ERROR.id) && user.id === message.author.id, { time: 60000, maxEmojis: 1, maxUsers: 1 })
+
+    collector.on('collect', async (reaction) => {
+        if (reaction.emoji.id === self._emojis.details.OK.id) {
+            await self.db.servers.update({ _id: message.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.id': uid }, {
+                'modules.voice_manager.temp_voice_channels.triggers.$.default.permissions': new Permissions(['MANAGE_CHANNELS']).bitfield
+            })
+        }
+    })
+
+    collector.on('end', async () => await msg.delete())
 
     return true
 }

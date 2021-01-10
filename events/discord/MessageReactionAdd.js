@@ -1,4 +1,5 @@
 const { ReactionMenuAdd } = require('../../modules/Reactions')
+const Reports = require('../../modules/Reports')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -22,6 +23,7 @@ const execute = async (self, reaction, user) => {
     const server = await self.db.servers.fetch({ _id: message.guild.id })
 
     await ReactionMenuAdd(self, server, reaction, user)
+    await Reports.ReactionAdd(self, server, reaction)
 
     if (partial) {
         await message.reactions.cache.delete(reaction.emoji.id || reaction.emoji.name)

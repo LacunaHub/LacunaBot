@@ -132,6 +132,28 @@ const levels = async (self, server, message, args) => {
     return true
 }
 
+/**
+ * @param {import('../../internals/Lacuna')} self
+ * @param {import('../../internals/Typings').ServerDocument} server
+ * @param {import('discord.js').Message} message
+ * @param {String[]} args
+ */
+const reports = async (self, server, message, args) => {
+    const locale = self.translator.locale(server.locale).commands
+
+    const embed = new MessageEmbed()
+        .setTitle(locale.config.reports.texts.reports)
+        .setDescription(server.modules.reports.active ? self._emojis.OK : self._emojis.ERROR)
+
+    embed.addField(locale.config.reports.texts.channel, server.modules.reports.channel_id ? `<#${server.modules.reports.channel_id}>` : '\u200B', true)
+    embed.addField(locale.config.reports.texts.reaction, server.modules.reports.emoji.id ? `<:${server.modules.reports.emoji.name}:${server.modules.reports.emoji.id}>` : server.modules.reports.emoji.name || '\u200B', true)
+    embed.addField(locale.config.reports.texts.reaction_minimum, server.modules.reports.minimum, true)
+
+    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
+
+    return true
+}
+
 module.exports = {
     fn: execute,
     name: 'config',
@@ -157,6 +179,11 @@ module.exports = {
             fn: levels,
             name: 'levels',
             description: 'commands.config.levels.description'
+        },
+        {
+            fn: reports,
+            name: 'reports',
+            description: 'commands.config.reports.description'
         }
     ],
     guild_only: true,

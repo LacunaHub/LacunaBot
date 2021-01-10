@@ -35,7 +35,7 @@ const execute = async (self, server, message, args) => {
     
         const embed = new MessageEmbed()
             .setTitle(locale.help.texts.title)
-            .setDescription(self.translator.format(locale.help.texts.description, `\`${server.prefix}\``))
+            .setDescription(self.translator.format(locale.help.texts.description, `\`${server.prefix}\``, 'https://docs.voidlacuna.ru', 'https://www.spherecord.net'))
     
         if (categories.general.size) embed.addField(locale.help.texts.categories.general, categories.general.map(c => `\`${c.name}\``).join(', '))
         if (categories.moderation.size) embed.addField(locale.help.texts.categories.moderation, categories.moderation.map(c => `\`${c.name}\``).join(', '))

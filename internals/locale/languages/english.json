@@ -90,7 +90,7 @@
             ],
             "texts": {
                 "title": "Command list",
-                "description": "Use {0} as a server prefix",
+                "description": "Use {0} as a server prefix\n[Docs]({1})\n[Discord Guilds]({2})",
                 "categories": {
                     "general": "General",
                     "moderation": "Moderation",
@@ -697,6 +697,15 @@
                     "award_level": "Ур. {0}"
                 }
             },
+            "reports": {
+                "description": "Shows reports config",
+                "texts": {
+                    "reports": "Reports",
+                    "channel": "Reports channel",
+                    "reaction": "Reports reaction",
+                    "reaction_minimum": "Minimum reactions"
+                }
+            },
             "texts": {
                 "title": "Общая конфигурация",
                 "prefix": "Префикс",
@@ -1084,6 +1093,77 @@
                 }
             }
         },
+        "reports": {
+            "description": "Reports management",
+            "channel": {
+                "description": "Sets channel for reports or disables module",
+                "arguments": [
+                    {
+                        "name": "channel",
+                        "description": "Reports channel or OFF to disable",
+                        "required": true,
+                        "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                    }
+                ],
+                "texts": {
+                    "no_direction": "{0}, please provide a channel for reports",
+                    "direction_off": "{0}, reports successfully disabled",
+                    "no_where": "{0}, provided channel not found or not exists",
+                    "activated": "{0}, reports activated and will send to channel {1}"
+                }
+            },
+            "emoji": {
+                "description": "Sets reaction emoji and minimum reaction amount for triggering",
+                "arguments": [
+                    {
+                        "name": "emoji",
+                        "description": "Reaction emoji",
+                        "required": true,
+                        "types": ["STRING"]
+                    },
+                    {
+                        "name": "amount",
+                        "description": "Reaction amount for triggering",
+                        "required": false,
+                        "types": ["NUMBER"]
+                    }
+                ],
+                "texts": {
+                    "invalid_arguments": "{0}, please see the command help and enter valid arguments",
+                    "success": "{0}, reaction emoji successfully set"
+                }
+            }
+        },
+        "temprole": {
+            "description": "Выдает роль пользователю на указанное время",
+            "arguments": [
+                {
+                    "name": "пользователь",
+                    "description": "Пользователь, которому будет выдана роль",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE"]
+                },
+                {
+                    "name": "время",
+                    "description": "Время через которое роль будет убрана",
+                    "required": true,
+                    "types": ["STRING"]
+                },
+                {
+                    "name": "роль",
+                    "description": "Роль, которая будет выдана пользователю",
+                    "required": true,
+                    "types": ["MENTION", "SNOWFLAKE", "STRING"]
+                }
+            ],
+            "texts": {
+                "invalid_arguments": "{0}, аргументы указаны неверно",
+                "invalid_timer": "{0}, аргумент времени указан неверно",
+                "role_not_editable": "{0}, у меня нет разрешений на выдачу этой роли кому-либо",
+                "has_role": "{0}, пользователь уже имеет эту роль",
+                "success": "{0}, роль успешно выдана пользователю {1} и будет убрана {2}"
+            }
+        },
         "tvc": {
             "description": "Управление временными голосовыми каналами",
             "add": {
@@ -1117,7 +1197,8 @@
                         "title": "Голосовой триггер успешно создан",
                         "uid": "Уникальный ID",
                         "name": "Название канала"
-                    }
+                    },
+                    "give_special_permissions": "{0}, хотите ли вы выдавать разрешение на управление каналом владельцу временного голосового канала при создании?"
                 }
             },
             "remove": {
