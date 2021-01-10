@@ -90,7 +90,7 @@
             ],
             "texts": {
                 "title": "Command list",
-                "description": "Use {0} as a server prefix",
+                "description": "Use {0} as a server prefix\n[Docs]({1})\n[Discord Guilds]({2})",
                 "categories": {
                     "general": "General",
                     "moderation": "Moderation",
