@@ -100,7 +100,9 @@ class TemporaryRole {
     async removeRole() {
         const member = await this.getMember()
 
-        if (member) {
+        if (!member.roles) return null
+
+        if (member && member.roles.cache.has(this.role_id)) {
             await member.roles.remove(this.role_id, 'Temporary Role')
         }
     }
