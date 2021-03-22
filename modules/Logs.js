@@ -936,7 +936,7 @@ class Logs {
                     .setTitle(locale.logs.message_delete.title)
                     .addField(locale.logs.common.sender, `${message.author.tag}\n(${message.author.id})`, true)
                     .addField(locale.logs.common.channel, `<#${message.channel.id}>`, true)
-                    .addField(locale.logs.message_delete.content, content || '\u200B')
+                    .addField(locale.logs.message_delete.content, content || `\`[${locale.logs.message_delete.attachment}]\``)
                     .setFooter(message.id)
                     .setTimestamp()
                     .setColor(0xF04747)

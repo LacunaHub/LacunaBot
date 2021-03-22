@@ -1374,7 +1374,8 @@
             },
             "message_delete": {
                 "title": "Сообщение удалено",
-                "content": "Содержимое"
+                "content": "Содержимое",
+                "attachment": "Вложение"
             },
             "message_delete_bulk": {
                 "title": "Массовое удаление сообщений",
