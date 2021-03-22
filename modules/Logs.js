@@ -38,7 +38,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_create.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_create.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: channel.guild.id }, {
                         $push: {
@@ -96,7 +100,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_delete.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_delete.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: channel.guild.id }, {
                         $push: {
@@ -154,7 +162,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_update.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_update.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: channel.guild.id }, {
                         $push: {
@@ -288,7 +300,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.commands.common.case_log.cases.BAN_ADD) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.commands.common.case_log.cases.BAN_ADD) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: guild.id }, {
                         $push: {
@@ -344,7 +360,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.commands.common.case_log.cases.BAN_REMOVE) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.commands.common.case_log.cases.BAN_REMOVE) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: guild.id }, {
                         $push: {
@@ -399,7 +419,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.guild_member_add.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.guild_member_add.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: member.guild.id }, {
                         $push: {
@@ -456,7 +480,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.guild_member_remove.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.guild_member_remove.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: member.guild.id }, {
                         $push: {
@@ -514,7 +542,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.guild_member_update.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.guild_member_update.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: member.guild.id }, {
                         $push: {
@@ -575,7 +607,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.logs.guild_update.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.logs.guild_update.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: guild.id }, {
                         $push: {
@@ -753,7 +789,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.invite_create.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.invite_create.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: invite.guild.id }, {
                         $push: {
@@ -810,7 +850,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.invite_delete.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.invite_delete.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: invite.guild.id }, {
                         $push: {
@@ -869,7 +913,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.message_delete.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.message_delete.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: message.guild.id }, {
                         $push: {
@@ -932,7 +980,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.message_delete_bulk.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.message_delete_bulk.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: message.guild.id }, {
                         $push: {
@@ -993,7 +1045,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.message_update.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.message_update.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: message.guild.id }, {
                         $push: {
@@ -1056,7 +1112,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_create.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_create.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: role.guild.id }, {
                         $push: {
@@ -1113,7 +1173,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_delete.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_delete.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: role.guild.id }, {
                         $push: {
@@ -1171,7 +1235,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_member_add.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_member_add.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: member.guild.id }, {
                         $push: {
@@ -1228,7 +1296,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_member_remove.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_member_remove.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: member.guild.id }, {
                         $push: {
@@ -1285,7 +1357,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.modules.logs.role_update.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.modules.logs.role_update.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: role.guild.id }, {
                         $push: {
@@ -1407,7 +1483,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.user_update.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.user_update.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: guild.id }, {
                         $push: {
@@ -1484,7 +1564,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_connect.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_connect.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: state.guild.id }, {
                         $push: {
@@ -1542,7 +1626,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_disconnect.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_disconnect.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: state.guild.id }, {
                         $push: {
@@ -1600,7 +1688,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_move.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_move.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: state.guild.id }, {
                         $push: {
@@ -1657,7 +1749,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_server_mute.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_server_mute.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: state.guild.id }, {
                         $push: {
@@ -1714,7 +1810,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_server_unmute.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_server_unmute.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: state.guild.id }, {
                         $push: {
@@ -1771,7 +1871,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_server_deaf.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_server_deaf.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: state.guild.id }, {
                         $push: {
@@ -1828,7 +1932,11 @@ class Logs {
                 let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
                 if (!webhook) {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_server_undeaf.title) })
+                    try {
+                        webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_server_undeaf.title) })
+                    } catch (err) {
+                        return false
+                    }
 
                     await self.db.servers.update({ _id: state.guild.id }, {
                         $push: {
