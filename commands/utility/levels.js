@@ -214,7 +214,7 @@ const remove = async (self, server, message, args) => {
 
     const level = Number(args[0])
 
-    if (!level || isNaN(level)) {
+    if ((!level && level != 0) || isNaN(level)) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.levels.remove.texts.invalid_level_argument, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
