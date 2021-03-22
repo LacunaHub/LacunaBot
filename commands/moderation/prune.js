@@ -34,13 +34,13 @@ const execute = async (self, server, message, args) => {
         messages = messages.filter(m => m.author.id == mention.id)
 
         await message.channel.bulkDelete(messages)
-        const success = await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.prune.texts.messages_pruned, `**${message.author.username}**`, amount)}`, { allowedMentions: { repliedUser: false } })
+        const success = await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.prune.texts.messages_pruned, `**${message.author.username}**`, amount)}`)
         await success.delete({ timeout: 1000 })
     }
 
     else {
         await message.channel.bulkDelete(amount, true)
-        const success = await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.prune.texts.messages_pruned, `**${message.author.username}**`, amount)}`, { allowedMentions: { repliedUser: false } })
+        const success = await message.channel.send(`${self._emojis.OK} | ${self.translator.format(locale.prune.texts.messages_pruned, `**${message.author.username}**`, amount)}`)
         await success.delete({ timeout: 1000 })
     }
 
