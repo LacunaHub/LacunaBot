@@ -12,6 +12,7 @@ const Translator = require('./locale/Translator')
 const TemporaryBan = require('./structures/TemporaryBan')
 const TemporaryMute = require('./structures/TemporaryMute')
 const TemporaryRole = require('./structures/TemporaryRole')
+const Giveaway = require('./structures/Giveaway')
 
 class Lacuna extends Client {
     /**
@@ -43,6 +44,11 @@ class Lacuna extends Client {
          * @type {Collection<String, TemporaryRole>}
          */
         this.temproles = new Collection()
+
+        /**
+         * @type {Collection<String, Giveaway>}
+         */
+        this.giveaways = new Collection()
 
         this.logger = logger
 
@@ -96,6 +102,7 @@ class Lacuna extends Client {
         await TemporaryBan.HandleEntries(this)
         await TemporaryMute.HandleEntries(this)
         await TemporaryRole.HandleEntries(this)
+        await Giveaway.HandleEntries(this)
 
         process.on('unhandledRejection', error => {
             const err = error.stack ? error.stack : error.message

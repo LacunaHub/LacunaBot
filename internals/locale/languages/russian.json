@@ -777,6 +777,73 @@
                 }
             }
         },
+        "giveaway": {
+            "description": "Создаёт и удаляет розыгрыши",
+            "create": {
+                "description": "Создаёт новый розыгрыш",
+                "arguments": [
+                    {
+                        "name": "время",
+                        "description": "Длительность розыгрыша",
+                        "required": true,
+                        "types": ["STRING"]
+                    },
+                    {
+                        "name": "число_победителей",
+                        "description": "Сколько будет выбрано победителей",
+                        "required": false,
+                        "types": ["NUMBER"]
+                    },
+                    {
+                        "name": "название",
+                        "description": "Название розыгрыша",
+                        "required": true,
+                        "types": ["STRING"]
+                    }
+                ],
+                "texts": {
+                    "no_timer_or_prize": "{0}, пожалуйста, укажите нужные аргументы",
+                    "invalid_time": "{0}, аргумент времени указан неверно",
+                    "max_allowed_giveaways_reached": "{0}, достигнуто максимальное количество запущенных розыгрышей",
+                    "giveaway_started": ":tada: РОЗЫГРЫШ НАЧАЛСЯ!",
+                    "giveaway_participate": "Нажмите на :tada: для участия",
+                    "giveaways_remains": "Завершится {0}"
+                }
+            },
+            "remove": {
+                "description": "Удаляет розыгрыш",
+                "arguments": [
+                    {
+                        "name": "id_сообщения",
+                        "description": "Идентификатор сообщения",
+                        "required": true,
+                        "types": ["SNOWFLAKE"]
+                    }
+                ],
+                "texts": {
+                    "no_message_id": "{0}, пожалуйста, укажите идентификатор сообщения",
+                    "giveaway_not_found": "{0}, розыгрыш не найден",
+                    "ga_message_not_found": "{0}, сообщение розыгрыша не найдено"
+                }
+            },
+            "end": {
+                "description": "Завершает розыгрыш",
+                "arguments": [
+                    {
+                        "name": "id_сообщения",
+                        "description": "Идентификатор сообщения",
+                        "required": true,
+                        "types": ["SNOWFLAKE"]
+                    }
+                ],
+                "texts": {
+                    "giveaway_ended": ":tada: РОЗЫГРЫШ ЗАВЕРШЕН!",
+                    "no_members": "Участники розыгрыша не найдены",
+                    "winners": "Победители:\n{0}",
+                    "congrats": "Мои поздравления {0}! Вы выиграли {1}!"
+                }
+            }
+        },
         "greeting": {
             "description": "Настройка приветствия на сервере",
             "content": {

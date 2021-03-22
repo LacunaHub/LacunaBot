@@ -261,6 +261,9 @@ export interface ServerDocument extends Document {
             minimum: Number
         }
     }
+    utility: {
+        giveaways: Array<Giveaway>
+    }
     created_at: Number
     modified_at: Number
     activity_ping_at: Number
@@ -609,4 +612,15 @@ export interface LevelActivities {
             disconnected_at?: Number
         }
     }
+}
+
+export interface Giveaway {
+    message_id: string
+    channel_id: string
+    guild_id: string
+    prize: string
+    winners_amount: number
+    members: string[]
+    expiration_date: Date
+    locale: string
 }

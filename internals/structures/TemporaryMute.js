@@ -1,4 +1,5 @@
 const { scheduleJob } = require('node-schedule')
+const Logger = require('../Logger')
 
 class TemporaryMute {
     /**
@@ -124,6 +125,8 @@ class TemporaryMute {
                 }
             }
         }
+
+        await Logger.log(`(Structures): Loaded ${entries} temporary mutes from ${servers.length} servers`)
 
         return entries
     }

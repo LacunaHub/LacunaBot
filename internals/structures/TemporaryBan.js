@@ -1,4 +1,5 @@
 const { scheduleJob } = require('node-schedule')
+const Logger = require('../Logger')
 
 class TemporaryBan {
     /**
@@ -113,6 +114,8 @@ class TemporaryBan {
                 }
             }
         }
+
+        await Logger.log(`(Structures): Loaded ${entries} temporary bans from ${servers.length} servers`)
 
         return entries
     }

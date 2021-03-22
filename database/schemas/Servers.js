@@ -262,6 +262,9 @@ const Server = new Schema({
             minimum: { type: Number, default: 3 }
         }
     },
+    utility: {
+        giveaways: { type: Array, default: [] }
+    },
     created_at: { type: Number, default: 0 },
     modified_at: { type: Number, default: 0 },
     activity_ping_at: { type: Number, default: 0 }

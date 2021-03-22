@@ -1,4 +1,5 @@
 const { scheduleJob } = require('node-schedule')
+const Logger = require('../Logger')
 
 class TemporaryRole {
     /**
@@ -128,6 +129,8 @@ class TemporaryRole {
                 }
             }
         }
+
+        await Logger.log(`(Structures): Loaded ${entries} temporary roles from ${servers.length} servers`)
 
         return entries
     }

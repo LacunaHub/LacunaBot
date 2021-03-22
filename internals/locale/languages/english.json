@@ -768,6 +768,71 @@
                 }
             }
         },
+        "giveaway": {
+            "description": "Creates and removes giveaways",
+            "create": {
+                "description": "Creates a new giveaway",
+                "arguments": [
+                    {
+                        "name": "time",
+                        "description": "Giveaway duration",
+                        "required": true,
+                        "types": ["STRING"]
+                    },                    {
+                        "name": "winners_amount",
+                        "description": "How many winners will be selected",
+                        "required": false,
+                        "types": ["NUMBER"]
+                    },                    {
+                        "name": "name",
+                        "description": "Giveaway name",
+                        "required": true,
+                        "types": ["STRING"]
+                    }
+                ],
+                "texts": {
+                    "no_timer_or_prize": "{0}, please enter required arguments",
+                    "invalid_time": "{0}, time argument is not valid",
+                    "max_allowed_giveaways_reached": "{0}, maximum allowed active giveaways reached",
+                    "giveaway_started": ":tada: GIVEAWAY STARTED!",
+                    "giveaway_participate": "Click on :tada: to participate",
+                    "giveaways_remains": "Ends {0}"
+                }
+            },
+            "remove": {
+                "description": "Removes giveaway",
+                "arguments": [
+                    {
+                        "name": "message_id",
+                        "description": "ID of message",
+                        "required": true,
+                        "types": ["SNOWFLAKE"]
+                    }
+                ],
+                "texts": {
+                    "no_message_id": "{0}, please, enter message id",
+                    "giveaway_not_found": "{0}, giveaway not found",
+                    "ga_message_not_found": "{0}, giveaway message not found"
+                }
+            },
+            "end": {
+                "description": "Ends giveaway",
+                "arguments": [
+                    {
+                        "name": "message_id",
+                        "description": "ID of message",
+                        "required": true,
+                        "types": ["SNOWFLAKE"]
+                    }
+                ],
+                "texts": {
+                    "giveaway_ended": ":tada: GIVEAWAY ENDED!",
+                    "no_members": "Giveaway members not found",
+                    "winners": "Winners:\n{0}",
+                    "congrats": "My congratulations {0}! Your won {1}!"
+                }
+            }
+        },
         "greeting": {
             "description": "Настройка приветствия на сервере",
             "content": {

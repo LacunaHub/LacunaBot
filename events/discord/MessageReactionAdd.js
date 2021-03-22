@@ -1,3 +1,4 @@
+const Giveaway = require('../../internals/structures/Giveaway')
 const { ReactionMenuAdd } = require('../../modules/Reactions')
 const Reports = require('../../modules/Reports')
 
@@ -24,6 +25,7 @@ const execute = async (self, reaction, user) => {
 
     await ReactionMenuAdd(self, server, reaction, user)
     await Reports.ReactionAdd(self, server, reaction)
+    await Giveaway.ReactionAdd(self, server, message, user.id)
 
     if (partial) {
         await message.reactions.cache.delete(reaction.emoji.id || reaction.emoji.name)
