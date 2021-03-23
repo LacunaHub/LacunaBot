@@ -33,7 +33,7 @@ class Giveaway {
 
         if (Date.now() >= this.expiration_date.getTime() || this.expiration_date.getTime() - Date.now() <= 30000) {
             this.endMessage()
-            this.deleteDatabaseEntry()
+            this.deleteEntry()
 
             return
         }
