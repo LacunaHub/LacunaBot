@@ -177,5 +177,6 @@ module.exports = {
         },
     ],
     guild_only: true,
-    self_permissions: ['SEND_MESSAGES', 'EMBED_LINKS', 'ADD_REACTIONS']
+    self_permissions: ['SEND_MESSAGES', 'EMBED_LINKS', 'ADD_REACTIONS'],
+    user_permissions: ['MANAGE_MESSAGES']
 }
