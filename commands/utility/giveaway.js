@@ -124,6 +124,69 @@ const remove = async (self, server, message, args) => {
  * @param {import('discord.js').Message} message
  * @param {String[]} args
  */
+const repick = async (self, server, message, args) => {
+    const locale = self.translator.locale(server.locale).commands
+
+    const message_id = args[0]
+
+    if (!message_id) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.remove.texts.no_message_id, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    const giveaway = self.giveaways.find(g => g.message_id == message_id)
+
+    if (giveaway) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.repick.texts.ga_is_active, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    let __message
+
+    try {
+        __message = await message.channel.messages.fetch(message_id)
+    } catch (err) {
+        
+    }
+
+    if (!__message) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.remove.texts.ga_message_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    const reaction = __message.reactions.cache.get('🎉')
+
+    if (!reaction || __message.author.id != self.user.id) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.repick.texts.ga_members_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    let users = await reaction.users.fetch()
+    users = users.filter(user => !user.bot)
+
+    if (!users.size) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.repick.texts.ga_members_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        await users.clear()
+        
+        return false
+    }
+
+    const new_winner = users.randomKey()
+    await __message.reply(self.translator.format(locale.giveaway.repick.texts.new_winner, `<@${new_winner}>`), { allowedMentions: { repliedUser: false } })
+    await users.clear()
+}
+
+/**
+ * @param {import('../../internals/Lacuna')} self
+ * @param {import('../../internals/Typings').ServerDocument} server
+ * @param {import('discord.js').Message} message
+ * @param {String[]} args
+ */
  const end = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
@@ -171,10 +234,15 @@ module.exports = {
             description: 'commands.giveaway.remove.description'
         },
         {
+            fn: repick,
+            name: 'repick',
+            description: 'commands.giveaway.repick.description'
+        },
+        {
             fn: end,
             name: 'end',
             description: 'commands.giveaway.end.description'
-        },
+        }
     ],
     guild_only: true,
     self_permissions: ['SEND_MESSAGES', 'EMBED_LINKS', 'ADD_REACTIONS'],

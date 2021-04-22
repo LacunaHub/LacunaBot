@@ -826,6 +826,22 @@
                     "ga_message_not_found": "{0}, сообщение розыгрыша не найдено"
                 }
             },
+            "repick": {
+                "description": "Выбирает нового победителя",
+                "arguments": [
+                    {
+                        "name": "id_сообщения",
+                        "description": "Идентификатор сообщения",
+                        "required": true,
+                        "types": ["SNOWFLAKE"]
+                    }
+                ],
+                "texts": {
+                    "ga_is_active": "{0}, этот розыгрыш всё еще активный",
+                    "ga_members_not_found": "{0}, участники розыгрыша не найдены",
+                    "new_winner": "{0} – новый победитель!"
+                }
+            },
             "end": {
                 "description": "Завершает розыгрыш",
                 "arguments": [

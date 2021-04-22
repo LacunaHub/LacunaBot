@@ -149,7 +149,7 @@ class Giveaway {
         if (this.members.length) {
             const members = new Collection()
 
-            for (const member of this.members) members.set(member, this.message_id)
+            for (const member of this.members.filter(m => this.guild.members.cache.has(m))) members.set(member, this.message_id)
 
             const winners = members.randomKey(this.winners_amount >= members.size ? members.size : this.winners_amount)
 
