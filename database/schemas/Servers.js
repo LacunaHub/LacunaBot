@@ -244,10 +244,10 @@ const Server = new Schema({
                 channels: { type: Array, default: [] },
                 roles: { type: Array, default: [] }
             },
-            queue_max_length: { type: Number, default: 0 },
+            queue_max_length: { type: Number, default: 15 },
             track_max_duration: { type: Number, default: 0 },
             default_volume: { type: Number, default: 100 },
-            allow_radio_playback: { type: Boolean, default: true },
+            allow_radio_playback: { type: Boolean, default: false },
             disable_skip_vote: { type: Boolean, default: false }
         },
         statistics: { type: Array, default: [] },
