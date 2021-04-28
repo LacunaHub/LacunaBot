@@ -1,5 +1,6 @@
 const { Permissions } = require('discord.js')
 const OAuth2 = require('../discord/OAuth2')
+const ShardingManager = require('../../utility/ShardingManager')
 
 const oauth2 = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
 
@@ -30,6 +31,7 @@ module.exports = async function(req, res, next) {
 module.exports.permitted = async function (req, res, next) {
     const access_token = req.headers.authorization
     const guild_id = req.params.guild_id
+    const user_id = req.headers['x-user-id']
 
     if (!access_token || access_token === 'null') {
         await res.status(401).send('Unauthorized')
@@ -62,8 +64,9 @@ module.exports.permitted = async function (req, res, next) {
     }
 
     const permissions = new Permissions(guild.permissions)
+    const owner = await ShardingManager.shards.first().eval(`this.application.owner.members.some(m => m.id == ${user_id})`)
 
-    if (!guild.owner && !permissions.has('ADMINISTRATOR')) {
+    if (!guild.owner && !permissions.has('ADMINISTRATOR') && !owner) {
         await res.status(403).send('Forbidden')
 
         return

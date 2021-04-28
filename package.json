@@ -1,6 +1,6 @@
 {
   "name": "lacuna",
-  "version": "0.13.2",
+  "version": "1.0.0",
   "description": "A Discord bot",
   "main": "start.js",
   "scripts": {
