@@ -56,15 +56,15 @@ module.exports.permitted = async function (req, res, next) {
     }
 
     const guild = guilds.find(g => g.id == guild_id)
+    const owner = await ShardingManager.shards.first().eval(`this.application.owner.members.some(m => m.id == ${user_id})`)
 
-    if (!guild) {
+    if (!guild && !owner) {
         await res.status(404).send('Not Found')
 
         return
     }
 
     const permissions = new Permissions(guild.permissions)
-    const owner = await ShardingManager.shards.first().eval(`this.application.owner.members.some(m => m.id == ${user_id})`)
 
     if (!guild.owner && !permissions.has('ADMINISTRATOR') && !owner) {
         await res.status(403).send('Forbidden')
