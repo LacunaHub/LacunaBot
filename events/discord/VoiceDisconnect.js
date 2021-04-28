@@ -22,7 +22,7 @@ const execute = async (self, state, channel) => {
         }
     }
 
-    const voice_roles_bound = server.modules.voice_manager.voice_roles.filter(r => !r.bound_channels_id.length || r.bound_channels_id.includes(state.channelID))
+    const voice_roles_bound = server.modules.voice_manager.voice_roles.filter(r => !r.bound_channels_id.length || r.bound_channels_id.includes(channel.id))
 
     if (voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && voice_roles_bound.some(b => b.role_id == r.id))

@@ -55,10 +55,6 @@ class Player {
                     total: node.stats.players
                 }
             }
-        }).sort((a, b) => {
-            const months = ['Winter']
-
-            return months.indexOf(a.id) - months.indexOf(b.id)
         })
     }
 

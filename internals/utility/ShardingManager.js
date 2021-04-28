@@ -10,7 +10,9 @@ const manager = new ShardingManager('./internals/utility/Client.js', {
     respawn: true
 })
 
-manager.spawn(Number(process.env.CLIENT_MAX_SHARDS), 15000)
+const shards = Number(process.env.CLIENT_MAX_SHARDS)
+
+manager.spawn(shards, 15000)
 
 manager.on('shardCreate', shard => logger.info(`(Sharding Manager): Launching shard #${shard.id}`))
 

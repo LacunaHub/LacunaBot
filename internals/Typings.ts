@@ -476,6 +476,12 @@ export interface RestoringData {
 export interface UserDocument extends Document {
     _id: String
     flags: Number
+    user: {
+        username: string
+        discriminator: string
+        avatar: string
+        flags: number
+    },
     profile: {
         name: String
         gender: Number

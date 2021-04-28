@@ -1,5 +1,4 @@
 const express = require('express')
-const body_parser = require('body-parser')
 const cors = require('cors')
 const morgan = require('morgan')
 const { connect } = require('mongoose')
@@ -9,10 +8,17 @@ const app = express()
 
 connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
 
+app.set('trust proxy', 1)
+app.disable('x-powered-by')
+
 app.use(morgan('[API] – [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'))
-app.use(body_parser.json())
+app.use(express.json())
 app.use(cors())
 
+app.use('/guilds', require('./routes/guilds'))
+app.use('/authorize', require('./routes/oauth2'))
+app.use('/structure', require('./routes/structure'))
+app.use('/users', require('./routes/users'))
 app.use('/webhooks/patreon', require('./webhooks/patreon'))
 
 app.all('/*', async (req, res) => await res.status(404).json({ status: 404, message: 'Not Found' }))
