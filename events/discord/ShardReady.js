@@ -14,18 +14,18 @@ const execute = async (self, id, unavailable_guilds) => {
     await self.logger.telegram.info(`\`Start:\` ${self.user.username}#${id} started for ${start_ms}ms`)
 
     if (id == (shards - 1)) {
-        // setInterval(async () => {
-        //     const guilds = await self.shard.fetchClientValues('guilds.cache.size')
+        setInterval(async () => {
+            const guilds = await self.shard.fetchClientValues('guilds.cache.size')
         
-        //     await Utility.updateOne({'charts': { $exists: true }}, {
-        //         $push: {
-        //             'charts.guilds': {
-        //                 n: guilds.reduce((a, b) => a + b, 0),
-        //                 ts: Date.now()
-        //             }
-        //         }
-        //     })
-        // }, 120000)
+            await Utility.updateOne({'charts': { $exists: true }}, {
+                $push: {
+                    'charts.guilds': {
+                        n: guilds.reduce((a, b) => a + b, 0),
+                        ts: Date.now()
+                    }
+                }
+            })
+        }, 180000)
     }
 
     return true
