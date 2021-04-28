@@ -11,7 +11,6 @@ module.exports = new Lacuna({
     messageCacheMaxSize: 100,
     messageCacheLifetime: 7200,
     messageSweepInterval: 60,
-    fetchAllMembers: true,
     ws: {
         intents: [
             'GUILDS',
