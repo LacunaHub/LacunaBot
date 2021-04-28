@@ -110,7 +110,7 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
         prefix: updated.prefix,
         premium: updated.server.premium,
         commands: {
-            ...updated.commands, list: commands.map(c => { return { ...c, docs: { description: locale[c.name]?.description } }})
+            ...updated.commands, list: commands.map(c => { return { ...c, docs: { description: locale[c.name].description } }})
         },
         guild: {
             ...req.headers['x-guild-data'], channels: channels, roles: roles.filter(r => r.id != guild_id)
