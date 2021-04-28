@@ -25,7 +25,7 @@ const execute = async (self, id, unavailable_guilds) => {
                     }
                 }
             })
-        }, 180000)
+        }, 300000)
     }
 
     return true
