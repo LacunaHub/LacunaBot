@@ -108,7 +108,10 @@ class Lacuna extends Client {
             const err = error.stack ? error.stack : error.message
 
             this.logger.error('(Unhandled Rejection)', err)
-            this.logger.telegram.error('`Unhandled Rejection`', `\`\`\`\n${err}\n\`\`\``)
+
+            if (err.name != 'DiscordAPIError') {
+                this.logger.telegram.error('`Unhandled Rejection`', `\`\`\`\n${err}\n\`\`\``)
+            }
         })
 
         Message.prototype.reply = async function(content, options) {
