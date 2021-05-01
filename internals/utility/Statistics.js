@@ -27,7 +27,7 @@ class Statistics {
                 Authorization: `SDC ${process.env.BOTSSD_API_KEY}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ servers: guilds })
+            body: JSON.stringify({ servers: guilds, shards: 0 })
         })
 
         await Logger.log(`(Statistics): Guild count has been sent`)
