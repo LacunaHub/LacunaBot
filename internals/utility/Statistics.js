@@ -24,7 +24,7 @@ class Statistics {
         await fetch(`https://api.server-discord.com/v2/bots/${process.env.CLIENT_ID}/stats`, {
             method: 'POST',
             headers: {
-                Authorization: process.env.BOTSSD_API_KEY,
+                Authorization: `SDC ${process.env.BOTSSD_API_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ servers: guilds })
