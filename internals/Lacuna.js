@@ -109,7 +109,7 @@ class Lacuna extends Client {
 
             this.logger.error('(Unhandled Rejection)', err)
 
-            if (err.name != 'DiscordAPIError') {
+            if (typeof err === 'string' && !err.includes('DiscordAPIError')) {
                 this.logger.telegram.error('`Unhandled Rejection`', `\`\`\`\n${err}\n\`\`\``)
             }
         })
