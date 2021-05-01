@@ -1,4 +1,5 @@
 const Utility = require('../../database/schemas/Utility')
+const { scheduleJob, RecurrenceRule, Range } = require('node-schedule')
 
 const shards = Number(process.env.CLIENT_MAX_SHARDS)
 
@@ -14,7 +15,10 @@ const execute = async (self, id, unavailable_guilds) => {
     await self.logger.telegram.info(`\`Start:\` ${self.user.username}#${id} started for ${start_ms}ms`)
 
     if (id == (shards - 1)) {
-        setInterval(async () => {
+        const rule = new RecurrenceRule()
+        rule.minute = new Range(0, 59, 5)
+
+        await scheduleJob(rule, async () => {
             const guilds = await self.shard.fetchClientValues('guilds.cache.size')
         
             await Utility.updateOne({'charts': { $exists: true }}, {
@@ -25,7 +29,9 @@ const execute = async (self, id, unavailable_guilds) => {
                     }
                 }
             })
-        }, 300000)
+        })
+
+        await self.logger.info(`(Utility): Guilds chart update schedule has been initialized`)
     }
 
     return true
