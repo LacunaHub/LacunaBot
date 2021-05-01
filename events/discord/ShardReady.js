@@ -1,5 +1,6 @@
 const Utility = require('../../database/schemas/Utility')
 const { scheduleJob, RecurrenceRule, Range } = require('node-schedule')
+const Statistics = require('../../internals/utility/Statistics')
 
 const shards = Number(process.env.CLIENT_MAX_SHARDS)
 
@@ -19,16 +20,19 @@ const execute = async (self, id, unavailable_guilds) => {
         rule.minute = new Range(0, 59, 5)
 
         await scheduleJob(rule, async () => {
-            const guilds = await self.shard.fetchClientValues('guilds.cache.size')
+            let guilds = await self.shard.fetchClientValues('guilds.cache.size')
+            guilds = guilds.reduce((a, b) => a + b, 0)
         
             await Utility.updateOne({'charts': { $exists: true }}, {
                 $push: {
                     'charts.guilds': {
-                        n: guilds.reduce((a, b) => a + b, 0),
+                        n: guilds,
                         ts: Date.now()
                     }
                 }
             })
+
+            await Statistics.sendGuildCount(guilds)
         })
 
         await self.logger.info(`(Utility): Guilds chart update schedule has been initialized`)
