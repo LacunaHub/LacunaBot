@@ -48,7 +48,7 @@ module.exports = {
     fn: execute,
     name: 'violations',
     description: 'commands.violations.description',
-    aliases: ['viols'],
+    aliases: ['viols', 'warns'],
     group: 'moderation',
     guild_only: true,
     self_permissions: ['SEND_MESSAGES', 'EMBED_LINKS'],

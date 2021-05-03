@@ -9,7 +9,11 @@ const { GenerateRankCard } = require('../../modules/Levels')
 const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    if (!server.modules.levels.active) return false
+    if (!server.modules.levels.active) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.levels_is_disabled, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
 
     let attachment
     try {

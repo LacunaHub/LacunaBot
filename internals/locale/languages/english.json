@@ -132,7 +132,8 @@
             ],
             "texts": {
                 "error_on_render": "{0}, an error occurred while creating rank card",
-                "no_rank_card": "{0}, rank card not found"
+                "no_rank_card": "{0}, rank card not found",
+                "levels_is_disabled": "{0}, levels is disabled on this server"
             }
         },
         "server": {
