@@ -252,6 +252,10 @@ class Guilds {
     static async addReactionElement(server, reaction) {
         const element_id = GenerateUID(), emoji = Util.parseEmoji(reaction.emoji)
         const elements = server.modules.reactions
+
+        if (elements.length >= 100 && !server.server.premium.available) return 'reactions_limit_reached_no_premium'
+
+        if (elements.length >= 250) return 'reactions_limit_reached'
         
         if (elements.some(r => r.message.id == reaction.message.id && r.emoji.name == emoji.name)) return 'emoji_already_used'
 
