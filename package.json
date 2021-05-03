@@ -1,6 +1,6 @@
 {
   "name": "lacuna",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A Discord bot",
   "main": "start.js",
   "scripts": {
@@ -26,6 +26,7 @@
     "dotenv": "^8.2.0",
     "erlpack": "github:discord/erlpack",
     "express": "^4.17.1",
+    "express-rate-limit": "^5.2.6",
     "fs-extra": "^9.0.1",
     "libsodium-wrappers": "^0.7.8",
     "moment": "^2.27.0",

@@ -1,4 +1,7 @@
 const Servers = require('../../../database/schemas/Servers')
+const { GenerateUID } = require('../../../modules/Reactions')
+const { Util } = require('discord.js')
+const Channels = require('../discord/rest/Channels')
 
 class Guilds {
     /**
@@ -29,8 +32,8 @@ class Guilds {
 
         if (data.moderation) {
             if (data.moderation.case_log) {
-                if (typeof data.moderation.case_log.channel_id === 'string' && data.moderation.case_log.channel_id !== guild.moderation.case_log.channel_id) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.case_log.channel_id': data.moderation.case_log.channel_id } })
+                if ((typeof data.moderation.case_log.channel_id === 'string' || data.moderation.case_log.channel_id === null) && data.moderation.case_log.channel_id !== guild.moderation.case_log.channel_id) {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.case_log.channel_id': data.moderation.case_log.channel_id || '' } })
                 }
 
                 if (typeof data.moderation.case_log.case_types === 'object') {
@@ -56,8 +59,8 @@ class Guilds {
             }
 
             if (data.moderation.roles) {
-                if (typeof data.moderation.roles.mute === 'string' && data.moderation.roles.mute !== guild.moderation.roles.mute) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.roles.mute': data.moderation.roles.mute } })
+                if ((typeof data.moderation.roles.mute === 'string' || data.moderation.roles.mute === null) && data.moderation.roles.mute !== guild.moderation.roles.mute) {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.roles.mute': data.moderation.roles.mute || '' } })
                 }
             }
         }
@@ -219,9 +222,116 @@ class Guilds {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.voice_roles': data.modules.voice_manager.voice_roles } })
                 }
             }
+
+            if (data.modules.reports) {
+                if (typeof data.modules.reports.active === 'boolean' && data.modules.reports.active !== guild.modules.reports.active) {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.reports.active': data.modules.reports.active } })
+                }
+
+                if (typeof data.modules.reports.channel_id === 'string' && data.modules.reports.channel_id !== guild.modules.reports.channel_id) {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.reports.channel_id': data.modules.reports.channel_id } })
+                }
+
+                if (typeof data.modules.reports.emoji === 'object' && data.modules.reports.emoji.name !== guild.modules.reports.emoji.name) {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.reports.emoji': data.modules.reports.emoji } })
+                }
+
+                if (data.modules.reports.minimum && typeof data.modules.reports.minimum === 'number' && data.modules.reports.minimum !== guild.modules.reports.minimum) {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.reports.minimum': data.modules.reports.minimum } })
+                }
+            }
         }
 
         return await Servers.findOne({ _id: guild._id }).lean()
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {Partial<import('../../Typings').ReactionElement>} reaction
+     */
+    static async addReactionElement(server, reaction) {
+        const element_id = GenerateUID(), emoji = Util.parseEmoji(reaction.emoji)
+        const elements = server.modules.reactions
+        
+        if (elements.some(r => r.message.id == reaction.message.id && r.emoji.name == emoji.name)) return 'emoji_already_used'
+
+        if (elements.some(r => (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref)))) return 'reference_is_single'
+
+        const message = await Channels.getMessage(reaction.message.channel_id, reaction.message.id)
+
+        if (!message) return 'unknown_message'
+
+        const __reaction = await Channels.createReaction(reaction.message.channel_id, reaction.message.id, emoji.id ? `${emoji.name}:${emoji.id}` : emoji.name)
+
+        if (!__reaction) return 'cannot_create_reaction'
+
+        await Servers.updateOne({ _id: server._id }, {
+            $push: {
+                'modules.reactions': {
+                    id: element_id,
+                    type: reaction.type,
+                    element: {
+                        single: reaction.element.single,
+                        global_single: false,
+                        reverse: reaction.element.reverse,
+                        lifespan: 0
+                    },
+                    message: {
+                        id: reaction.message.id,
+                        channel_id: reaction.message.channel_id
+                    },
+                    emoji: emoji,
+                    references: reaction.references
+                }
+            }
+        })
+
+        const updated = await Servers.findOne({ _id: server._id }).lean()
+        return updated.modules.reactions.find(r => r.id == element_id)
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {import('../../Typings').ReactionElement} reaction
+     */
+     static async editReactionElement(server, reaction) {
+        const element = server.modules.reactions.find(r => r.id == reaction.id)
+
+        if (!element) return 'element_not_found'
+
+        if (server.modules.reactions.some(r => r.id != reaction.id && (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref)))) return 'reference_is_single'
+
+        await Servers.updateOne({ _id: server._id, 'modules.reactions.id': element.id }, {
+            $set: {
+                'modules.reactions.$.element.single': reaction.element.single,
+                'modules.reactions.$.element.reverse': reaction.element.reverse,
+                'modules.reactions.$.references': reaction.references
+            }
+        })
+
+        return reaction
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {string} reaction_id
+     */
+    static async removeReactionElement(server, reaction_id) {
+        const element = server.modules.reactions.find(r => r.id == reaction_id)
+
+        if (!element) return 'element_not_found'
+
+        await Servers.updateOne({ _id: server._id }, {
+            $pull: {
+                'modules.reactions': {
+                    id: reaction_id
+                }
+            }
+        })
+
+        await Channels.deleteReactionEmoji(element.message.channel_id, element.message.id, element.emoji.id ? `${element.emoji.name}:${element.emoji.id}` : element.emoji.name)
+
+        return true
     }
 }
 

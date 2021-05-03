@@ -3,6 +3,7 @@ const cors = require('cors')
 const morgan = require('morgan')
 const { connect } = require('mongoose')
 const logger = require('../Logger')
+const limiter = require('express-rate-limit')
 
 const app = express()
 
@@ -14,6 +15,20 @@ app.disable('x-powered-by')
 app.use(morgan('[API] – [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'))
 app.use(express.json())
 app.use(cors())
+app.use(limiter({ windowMs: 600000, max: 50 }))
+
+app.all('/*', async (req, res, next) => {
+    const referer = req.headers['referer']
+    const hosts = ['https://voidlacuna.ru', 'https://www.voidlacuna.ru', 'https://discord.com']
+
+    if (!hosts.some(host => referer.includes(host))) {
+        await res.status(423).send('Locked')
+
+        return
+    }
+
+    await next()
+})
 
 app.use('/guilds', require('./routes/guilds'))
 app.use('/authorize', require('./routes/oauth2'))

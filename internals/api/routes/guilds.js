@@ -11,7 +11,7 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
     const guild_id = req.params.guild_id
 
     if (!guild_id) {
-        await res.status(400).json('Invalid Form')
+        await res.status(400).send('Invalid Form')
 
         return
     }
@@ -22,13 +22,14 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
     const guild = await servers.findOne({ _id: guild_id }).lean()
 
     if (!guild || guild.server.blocked) {
-        await res.status(404).json('Guild Not Found')
+        await res.status(404).send('Guild Not Found')
 
         return
     }
 
     const channels = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').channels.cache`)).filter(data => data)[0]
     const roles = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').roles.cache.filter(r => !r.managed)`)).filter(data => data)[0]
+    const emojis = (await ShardingManager.broadcastEval(`this.emojis.cache.filter(e => e.guild.id == ${guild_id})`)).filter(data => data)[0]
     const commands = await ShardingManager.shards.first().eval('this.commands.filter(c => !c.private).map(c => { return { name: c.name, aliases: c.aliases, group: c.group, premium: c.premium_only, permissions: { client: c.self_permissions, author: c.user_permissions } } })')
 
     const locale = Translator.locale(guild.locale).commands
@@ -42,7 +43,7 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
             ...guild.commands, list: commands.map(c => { return { ...c, docs: { description: locale[c.name].description } }})
         },
         guild: {
-            ...req.headers['x-guild-data'], channels: channels, roles: roles.filter(r => r.id != guild_id)
+            ...req.headers['x-guild-data'], channels: channels, roles: roles.filter(r => r.id != guild_id), emojis: emojis
         },
         moderation: {
             case_log: {
@@ -69,7 +70,9 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
                 restore_nicknames: guild.modules.restoring.restore_nicknames,
                 strict_roles: guild.modules.restoring.strict_roles
             },
-            music: guild.modules.music
+            reports: guild.modules.reports,
+            music: guild.modules.music,
+            reactions: guild.modules.reactions
         }
     })
 })
@@ -80,7 +83,7 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
     const options = req.body
 
     if (!guild_id) {
-        await res.status(400).json('Invalid Form')
+        await res.status(400).send('Invalid Form')
 
         return
     }
@@ -91,13 +94,14 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
     const guild = await servers.findOne({ _id: guild_id }).lean()
 
     if (!guild || guild.server.blocked) {
-        await res.status(404).json('Guild Not Found')
+        await res.status(404).send('Guild Not Found')
 
         return
     }
 
     const channels = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').channels.cache`)).filter(data => data)[0]
     const roles = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').roles.cache.filter(r => !r.managed)`)).filter(data => data)[0]
+    const emojis = (await ShardingManager.broadcastEval(`this.emojis.cache.filter(e => e.guild.id == ${guild_id})`)).filter(data => data)[0]
     const commands = await ShardingManager.shards.first().eval('this.commands.filter(c => !c.private).map(c => { return { name: c.name, aliases: c.aliases, group: c.group, premium: c.premium_only, permissions: { client: c.self_permissions, author: c.user_permissions } } })')
 
     const locale = Translator.locale(guild.locale).commands
@@ -113,7 +117,7 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
             ...updated.commands, list: commands.map(c => { return { ...c, docs: { description: locale[c.name].description } }})
         },
         guild: {
-            ...req.headers['x-guild-data'], channels: channels, roles: roles.filter(r => r.id != guild_id)
+            ...req.headers['x-guild-data'], channels: channels, roles: roles.filter(r => r.id != guild_id), emojis: emojis
         },
         moderation: {
             case_log: {
@@ -140,9 +144,107 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
                 restore_nicknames: updated.modules.restoring.restore_nicknames,
                 strict_roles: updated.modules.restoring.strict_roles
             },
-            music: updated.modules.music
+            reports: updated.modules.reports,
+            music: updated.modules.music,
+            reactions: updated.modules.reactions
         }
     })
+})
+
+router.put('/:guild_id/reactions', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const options = req.body
+
+    if (!guild_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.addReactionElement(guild, options)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(200).json(result)
+})
+
+router.patch('/:guild_id/reactions', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const options = req.body
+
+    if (!guild_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.editReactionElement(guild, options)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(200).json(result)
+})
+
+router.delete('/:guild_id/reactions/:reaction_id', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const reaction_id = req.params.reaction_id
+
+    if (!guild_id || !reaction_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.removeReactionElement(guild, reaction_id)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(204).end()
 })
 
 module.exports = router

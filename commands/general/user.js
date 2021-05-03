@@ -39,7 +39,6 @@ const execute = async (self, server, message, args) => {
         .setAuthor(name, specified.user.displayAvatarURL())
         .addField(locale.user.texts.account_created, `${moment(specified.user.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(specified.user.createdTimestamp).locale(server.locale).fromNow()})`, true)
         .addField(locale.user.texts.member_joined, `${moment(specified.joinedTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(specified.joinedTimestamp).locale(server.locale).fromNow()})`, true)
-        .addField(locale.user.texts.permissions, specified.permissions.toArray().map(p => locale.common.permissions[p]).join(', '))
         .addField(`${locale.user.texts.roles} [${specified.roles.cache.filter(r => r.id != message.guild.id).size}]`, specified.roles.cache.filter(r => r.id != message.guild.id).map(role => role.name) || locale.common.texts.none)
         .setColor(specified.displayHexColor)
         .setFooter(`ID: ${specified.id}`)
