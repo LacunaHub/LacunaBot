@@ -15,7 +15,7 @@ router.get('/summary', identify, async (req, res) => {
     const pings = await ShardingManager.fetchClientValues('ws.ping')
     const uptimes = await ShardingManager.fetchClientValues('uptime')
     const players = await ShardingManager.shards.first().eval('this.player.stats')
-    const util = await Utility.findOne({}, { 'charts.guilds': { $slice: -50 } }).lean()
+    const util = await Utility.findOne({}, { 'charts.guilds': { $slice: -100 } }).lean()
 
     const cluster = {
         id: nou.os.hostname(),
