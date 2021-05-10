@@ -10,12 +10,13 @@ const { images } = require('../../modules/Logs')
 const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.users.first() || args[0]
-
-    const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
+    /**
+     * @type {import('discord.js').GuildMember}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null)
     const reason = args.slice(1).join(' ')
 
-    if (!member) {
+    if (!mention) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
@@ -26,9 +27,9 @@ const execute = async (self, server, message, args) => {
 
     const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
 
-    const tempmute = self.tempmutes.find(m => m.user_id == member.id)
+    const tempmute = self.tempmutes.find(m => m.user_id == mention.id)
 
-    if (!mute_role && !member.roles.cache.has(mute_role) && !tempmute) {
+    if (!mute_role && !mention.roles.cache.has(mute_role) && !tempmute) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_muted, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
@@ -51,8 +52,8 @@ const execute = async (self, server, message, args) => {
                     timestamp: Date.now(),
                     reason: reason || '',
                     target: {
-                        id: member.id,
-                        name: member.user.tag
+                        id: mention.id,
+                        name: mention.user.tag
                     },
                     executor: {
                         id: message.author.id,
@@ -65,7 +66,7 @@ const execute = async (self, server, message, args) => {
 
     const case_log_message = new MessageEmbed()
         .setTitle(locale.common.case_log.cases.MUTE_REMOVE)
-        .addField(locale.common.case_log.target, `${member.user.tag}\n(${member.id})`, true)
+        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, message.author.tag, true)
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))
@@ -74,7 +75,7 @@ const execute = async (self, server, message, args) => {
         .setColor(0xF04747)
 
     if (tempmute) await tempmute.delete(false)
-    else await member.roles.remove(mute_role.id)
+    else await mention.roles.remove(mute_role.id)
     if (case_log && server.moderation.case_log.case_types.MUTE_REMOVE) await case_log.send(case_log_message).catch()
 
     return true

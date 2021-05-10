@@ -12,13 +12,16 @@ const id = require('../../internals/utility/UID')
 const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.users.first() || args[0]
-    const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
+    /**
+     * @type {import('discord.js').GuildMember}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null)
+    
     let timer = args[1]
     const raw_role = args.slice(2).join(' ')
     const role = message.mentions.roles.first() || message.guild.roles.cache.find(r => r.id == raw_role || r.name == raw_role)
 
-    if (!member || !timer || !role) {
+    if (!mention || !timer || !role) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.temprole.texts.invalid_arguments, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
@@ -38,7 +41,7 @@ const execute = async (self, server, message, args) => {
         return false
     }
 
-    const has_role = self.temproles.some(r => r.user_id == member.id && r.role_id == role.id)
+    const has_role = self.temproles.some(r => r.user_id == mention.id && r.role_id == role.id)
     if (has_role) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.temprole.texts.has_role, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
@@ -48,10 +51,10 @@ const execute = async (self, server, message, args) => {
     if (timer < ms('1m')) timer = ms('1m')
     else if (timer > ms('2y')) timer = ms('2y')
 
-    await member.roles.add(role.id)
+    await mention.roles.add(role.id)
 
     new TemporaryRole(self, {
-        user_id: member.id,
+        user_id: mention.id,
         guild_id: message.guild.id,
         role_id: role.id,
         unique_id: id.simple(6),
@@ -59,7 +62,7 @@ const execute = async (self, server, message, args) => {
         init: true
     })
 
-    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.temprole.texts.success, `**${message.author.username}**`, `**${member.user.tag}**`, moment(Date.now() + timer).locale(server.locale).endOf().fromNow())}`, { allowedMentions: { repliedUser: false } })
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.temprole.texts.success, `**${message.author.username}**`, `**${mention.user.tag}**`, moment(Date.now() + timer).locale(server.locale).endOf().fromNow())}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }

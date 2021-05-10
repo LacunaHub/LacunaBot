@@ -1,7 +1,37 @@
 const fetch = require('node-fetch')
 const Logger = require('../Logger')
+const { scheduleJob, RecurrenceRule, Range } = require('node-schedule')
+const Utility = require('../../database/schemas/Utility')
 
 class Statistics {
+    /**
+     * @param {import('discord.js').ShardingManager} manager
+     */
+    static async schedule(manager) {
+        const rule = new RecurrenceRule()
+        rule.minute = new Range(0, 59, 5)
+
+        await scheduleJob(rule, async () => {
+            if (!manager.shards.every(shard => shard.ready)) return null
+
+            let guilds = await manager.fetchClientValues('guilds.cache.size')
+            guilds = guilds.reduce((a, b) => a + b, 0)
+        
+            await Utility.updateOne({'charts': { $exists: true }}, {
+                $push: {
+                    'charts.guilds': {
+                        n: guilds,
+                        ts: Date.now()
+                    }
+                }
+            })
+
+            await Statistics.sendGuildCount(guilds)
+        })
+
+        await Logger.info(`(Utility): Guilds chart update schedule has been initialized`)
+    }
+
     static async sendGuildCount(guilds) {
         await fetch(`https://discord.bots.gg/api/v1/bots/${process.env.CLIENT_ID}/stats`, {
             method: 'POST',

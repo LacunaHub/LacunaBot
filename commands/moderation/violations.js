@@ -10,17 +10,18 @@ const moment = require('moment')
 const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.users.first() || args[0]
+    /**
+     * @type {import('discord.js').GuildMember}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null)
 
-    const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
-
-    if (!member) {
+    if (!mention) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
-    const violator = server.moderation.warnings.violators.find(v => v.user_id == member.id)
+    const violator = server.moderation.warnings.violators.find(v => v.user_id == mention.id)
 
     if (!violator || !violator.violations.length) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.no_violations, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
@@ -33,7 +34,7 @@ const execute = async (self, server, message, args) => {
     const last_10_violations = violator.violations.slice(Math.max(violator.violations.length - 10, 0)).sort((a, b) => b.timestamp - a.timestamp)
 
     const embed = new MessageEmbed()
-        .setAuthor(self.translator.format(locale.violations.texts.title, member.user.tag), member.user.displayAvatarURL())
+        .setAuthor(self.translator.format(locale.violations.texts.title, mention.user.tag), mention.user.displayAvatarURL())
         .addField(locale.violations.texts.last_24_hours, last_24_hours.length, true)
         .addField(locale.violations.texts.last_7_days, last_7_days.length, true)
         .addField(locale.violations.texts.total, violator.violations.length, true)

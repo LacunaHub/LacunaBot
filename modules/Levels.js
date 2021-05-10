@@ -162,12 +162,13 @@ class Levels {
     static async GenerateRankCard(self, message, args) {
         const activity = await self.db.activities.fetch({ _id: message.guild.id })
 
-        const mention = message.mentions.users.first() || args[0]
-
-        const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : message.member
+        /**
+         * @type {import('discord.js').GuildMember}
+         */
+        const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null) || message.member
 
         const sorted = activity.levels.sort((a, b) => b.experience.total - a.experience.total)
-        const level = sorted.find(lvl => lvl.user_id == member.id)
+        const level = sorted.find(lvl => lvl.user_id == mention.id)
 
         if (!level) return null
 
@@ -187,7 +188,7 @@ class Levels {
         ctx.strokeRect(border_radius / 2, border_radius / 2, rect_x - border_radius, rect_y - border_radius)
         ctx.fillRect(border_radius / 2, border_radius / 2, rect_x - border_radius, rect_y - border_radius)
 
-        const avatar = await Canvas.loadImage(member.user.displayAvatarURL({ format: 'png' }))
+        const avatar = await Canvas.loadImage(mention.user.displayAvatarURL({ format: 'png' }))
 
         ctx.beginPath()
         ctx.arc(85, 85, 60, 0, Math.PI * 2, true)
@@ -220,12 +221,12 @@ class Levels {
 
         ctx.font = '25px Gotham Pro Medium'
         ctx.fillStyle = '#ffffff'
-        const username = member.user.username
+        const username = mention.user.username
         const measure = ctx.measureText(username)
         ctx.fillText(measure.width > 400 ? 'Username' : username, 160, 70, 400)
 
         ctx.fillStyle = '#424242'
-        ctx.fillText(`#${member.user.discriminator}`, measure.width > 400 ? 160 + ctx.measureText('Username').width : 160 + measure.width, 70)
+        ctx.fillText(`#${mention.user.discriminator}`, measure.width > 400 ? 160 + ctx.measureText('Username').width : 160 + measure.width, 70)
 
         ctx.strokeStyle = '#424242'
         ctx.beginPath()

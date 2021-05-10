@@ -1,6 +1,7 @@
 const { Client, Collection, Message, APIMessage } = require('discord.js')
 const { connect } = require('mongoose')
 const fs = require('fs-extra')
+const Utils = require('../internals/utility/Utils')
 
 const Command = require('./structures/Command')
 const Subcommand = require('./structures/Subcommand')
@@ -24,6 +25,8 @@ class Lacuna extends Client {
         this.start_timestamp = null
 
         this.application = null
+
+        this.utils = Utils
 
         /**
          * @type {Collection<String, Command}

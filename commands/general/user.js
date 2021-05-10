@@ -10,38 +10,20 @@ const moment = require('moment')
 const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.users.first() || args[0]
-    const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
+    /**
+     * @type {import('discord.js').GuildMember}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null) || message.member
 
-    const specified = member ? member : message.member
-
-    const status = locale.user.texts.statuses[specified.presence.status]
-    const activity = specified.presence.activities[0]
-
-    const game = {
-        name: activity && activity.name ? activity.name : '',
-        url: activity && activity.url ? activity.url : null,
-        type: activity && activity.type ? activity.type : null,
-        state: activity && activity.state ? activity.state : '',
-        emoji: activity && activity.emoji ? activity.emoji.id ? null : activity.emoji.name : null
-    }
-
-    if (!game.type) game.name = status
-    else if (game.type == 'PLAYING') game.name = `${locale.user.texts.presence.playing} **${game.name}**`
-    else if (game.type == 'STREAMING') game.name = `${locale.user.texts.presence.streaming} [**${game.name}**](${game.url})`
-    else if (game.type == 'LISTENING') game.name = `${locale.user.texts.presence.listening_to} **${game.name}**`
-    else if (game.type == 'WATCHING') game.name = `${locale.user.texts.presence.watching} **${game.name}**`
-    else if (game.type == 'CUSTOM_STATUS') game.name = `${game.emoji ? `${game.emoji} ` : ''}${game.state}`
-
-    const name = specified.nickname ? `${specified.user.tag} — ${specified.nickname}` : specified.user.tag
+    const name = mention.nickname ? `${mention.user.tag} — ${mention.nickname}` : mention.user.tag
 
     const embed = new MessageEmbed()
-        .setAuthor(name, specified.user.displayAvatarURL())
-        .addField(locale.user.texts.account_created, `${moment(specified.user.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(specified.user.createdTimestamp).locale(server.locale).fromNow()})`, true)
-        .addField(locale.user.texts.member_joined, `${moment(specified.joinedTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(specified.joinedTimestamp).locale(server.locale).fromNow()})`, true)
-        .addField(`${locale.user.texts.roles} [${specified.roles.cache.filter(r => r.id != message.guild.id).size}]`, specified.roles.cache.filter(r => r.id != message.guild.id).map(role => role.name) || locale.common.texts.none)
-        .setColor(specified.displayHexColor)
-        .setFooter(`ID: ${specified.id}`)
+        .setAuthor(name, mention.user.displayAvatarURL())
+        .addField(locale.user.texts.account_created, `${moment(mention.user.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(mention.user.createdTimestamp).locale(server.locale).fromNow()})`, true)
+        .addField(locale.user.texts.member_joined, `${moment(mention.joinedTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(mention.joinedTimestamp).locale(server.locale).fromNow()})`, true)
+        .addField(`${locale.user.texts.roles} [${mention.roles.cache.filter(r => r.id != message.guild.id).size}]`, mention.roles.cache.filter(r => r.id != message.guild.id).map(role => role.name).join(', ') || locale.common.texts.none)
+        .setColor(mention.displayHexColor)
+        .setFooter(`ID: ${mention.id}`)
 
     await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 

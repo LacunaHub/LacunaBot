@@ -20,7 +20,10 @@ const execute = async (self, server, message, args) => {
     amount = amount.match(/\d+/)
     amount = Number(amount ? amount : 10)
 
-    const mention = message.mentions.users.first()
+    /**
+     * @type {import('discord.js').GuildMember}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null)
 
     const reason = args.slice(mention ? 2 : 1).join(' ')
 
@@ -57,7 +60,7 @@ const execute = async (self, server, message, args) => {
                     reason: reason ? `${amount}:${reason}` : '',
                     target: {
                         id: mention ? mention.id : '',
-                        name: mention ? mention.tag : ''
+                        name: mention ? mention.user.tag : ''
                     },
                     executor: {
                         id: message.author.id,
@@ -70,7 +73,7 @@ const execute = async (self, server, message, args) => {
 
     const case_log_message = new MessageEmbed()
         .setTitle(locale.common.case_log.cases.PRUNE)
-        .addField(locale.common.case_log.target, mention ? mention.tag : locale.common.texts.none, true)
+        .addField(locale.common.case_log.target, mention ? mention.user.tag : locale.common.texts.none, true)
         .addField(locale.common.case_log.executor, message.author.tag, true)
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))

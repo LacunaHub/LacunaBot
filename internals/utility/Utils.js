@@ -63,6 +63,10 @@ class Utils {
 
         return array
     }
+
+    static isSnowflake(str) {
+        return /\d{17,19}/.test(str)
+    }
 }
 
 module.exports = Utils

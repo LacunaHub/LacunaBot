@@ -10,24 +10,25 @@ const { images } = require('../../modules/Logs')
 const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.users.first() || args[0]
-
-    const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
+    /**
+     * @type {import('discord.js').GuildMember}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null)
     const reason = args.slice(1).join(' ')
 
-    if (!member) {
+    if (!mention) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
-    if (member.hasPermission("MANAGE_ROLES")) {
+    if (mention.hasPermission("MANAGE_ROLES")) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_has_moder_permission, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
-    if (!member.manageable) {
+    if (!mention.manageable) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.cant_mute_user, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
@@ -47,9 +48,9 @@ const execute = async (self, server, message, args) => {
         })
     }
 
-    const tempmute = self.tempmutes.find(m => m.user_id == member.id)
+    const tempmute = self.tempmutes.find(m => m.user_id == mention.id)
 
-    if (member.roles.cache.has(mute_role) || tempmute) {
+    if (mention.roles.cache.has(mute_role) || tempmute) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_already_muted, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
@@ -66,8 +67,8 @@ const execute = async (self, server, message, args) => {
                     timestamp: Date.now(),
                     reason: reason || '',
                     target: {
-                        id: member.id,
-                        name: member.user.tag
+                        id: mention.id,
+                        name: mention.user.tag
                     },
                     executor: {
                         id: message.author.id,
@@ -79,7 +80,7 @@ const execute = async (self, server, message, args) => {
     }
 
     const dm_message = new MessageEmbed()
-        .setAuthor(member.user.tag, member.user.displayAvatarURL())
+        .setAuthor(mention.user.tag, mention.user.displayAvatarURL())
         .setDescription(self.translator.format(locale.mute.texts.dm_message_description, `**${message.guild.name}**`))
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .setThumbnail(message.guild.iconURL())
@@ -88,7 +89,7 @@ const execute = async (self, server, message, args) => {
 
     const case_log_message = new MessageEmbed()
         .setTitle(locale.common.case_log.cases.MUTE_ADD)
-        .addField(locale.common.case_log.target, `${member.user.tag}\n(${member.id})`, true)
+        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, message.author.tag, true)
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))
@@ -97,12 +98,12 @@ const execute = async (self, server, message, args) => {
         .setColor(0xF04747)
 
     try {
-        await member.send(dm_message)
+        await mention.send(dm_message)
     } catch (err) {
         await self.logger.error(err)
     }
 
-    await member.roles.add(mute_role)
+    await mention.roles.add(mute_role)
     if (case_log && server.moderation.case_log.case_types.MUTE_ADD) await case_log.send(case_log_message).catch()
 
     return true

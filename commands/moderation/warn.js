@@ -11,18 +11,19 @@ const id = require('../../internals/utility/UID')
 const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.users.first() || args[0]
-
-    const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
+    /**
+     * @type {import('discord.js').GuildMember}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null)
     const reason = args.slice(1).join(' ')
 
-    if (!member) {
+    if (!mention) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
-    if (member.hasPermission('MANAGE_ROLES')) {
+    if (mention.hasPermission('MANAGE_ROLES')) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.texts.user_is_moderator, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
@@ -43,8 +44,8 @@ const execute = async (self, server, message, args) => {
                     timestamp: timestamp,
                     reason: reason || '',
                     target: {
-                        id: member.id,
-                        name: member.user.tag
+                        id: mention.id,
+                        name: mention.user.tag
                     },
                     executor: {
                         id: message.author.id,
@@ -55,13 +56,13 @@ const execute = async (self, server, message, args) => {
         })
     }
 
-    const violator = server.moderation.warnings.violators.find(v => v.user_id == member.id)
+    const violator = server.moderation.warnings.violators.find(v => v.user_id == mention.id)
     
     if (!violator) {
         await self.db.servers.update({ _id: message.guild.id }, {
             $push: {
                 'moderation.warnings.violators': {
-                    user_id: member.id,
+                    user_id: mention.id,
                     violations: [
                         {
                             id: id.simple(5),
@@ -75,7 +76,7 @@ const execute = async (self, server, message, args) => {
     }
 
     else {
-        await self.db.servers.update({ _id: message.guild.id, 'moderation.warnings.violators.user_id': member.id }, {
+        await self.db.servers.update({ _id: message.guild.id, 'moderation.warnings.violators.user_id': mention.id }, {
             $push: {
                 'moderation.warnings.violators.$.violations': {
                     id: id.simple(5),
@@ -88,7 +89,7 @@ const execute = async (self, server, message, args) => {
 
     const case_log_message = new MessageEmbed()
         .setTitle(locale.common.case_log.cases.WARN_ADD)
-        .addField(locale.common.case_log.target, `${member.user.tag}\n(${member.id})`, true)
+        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, message.author.tag, true)
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))
@@ -97,11 +98,11 @@ const execute = async (self, server, message, args) => {
         .setColor(0xE19517)
 
     try {
-        await member.send(self.translator.format(locale.warn.texts.user_warned_dm, `**${member.displayName}**`, `**${message.guild.name}**`, `**${reason || locale.common.texts.none}**`))
+        await mention.send(self.translator.format(locale.warn.texts.user_warned_dm, `**${mention.displayName}**`, `**${message.guild.name}**`, `**${reason || locale.common.texts.none}**`))
     } catch (err) {
         switch (err.message) {
             default:
-                await message.channel.send(self.translator.format(locale.warn.texts.user_warned_closed_dm, `<@${member.id}>`, `**${reason || locale.common.texts.none}**`))
+                await message.channel.send(self.translator.format(locale.warn.texts.user_warned_closed_dm, `<@${mention.id}>`, `**${reason || locale.common.texts.none}**`))
             break
         }
     }
@@ -121,13 +122,14 @@ const execute = async (self, server, message, args) => {
 const remove = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.users.first() || args[0]
-
-    const member = mention ? await message.guild.members.fetch({ user: mention, cache: false }) : null
+    /**
+     * @type {import('discord.js').GuildMember}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null)
     const warn_id = args[1]
     const reason = args.slice(2).join(' ')
 
-    if (!member) {
+    if (!mention) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.texts.user_not_found, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
@@ -139,7 +141,7 @@ const remove = async (self, server, message, args) => {
         return false
     }
 
-    const violator = server.moderation.warnings.violators.find(v => v.user_id == member.id)
+    const violator = server.moderation.warnings.violators.find(v => v.user_id == mention.id)
 
     if (!violator || !violator.violations.length) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.no_violator_or_violations, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
@@ -169,8 +171,8 @@ const remove = async (self, server, message, args) => {
                     timestamp: Date.now(),
                     reason: reason || '',
                     target: {
-                        id: member.id,
-                        name: member.user.tag
+                        id: mention.id,
+                        name: mention.user.tag
                     },
                     executor: {
                         id: message.author.id,
@@ -181,7 +183,7 @@ const remove = async (self, server, message, args) => {
         })
     }
 
-    await self.db.servers.update({ _id: message.guild.id, 'moderation.warnings.violators.user_id': member.id }, {
+    await self.db.servers.update({ _id: message.guild.id, 'moderation.warnings.violators.user_id': mention.id }, {
         $pull: {
             'moderation.warnings.violators.$.violations': {
                 id: violation.id
@@ -191,7 +193,7 @@ const remove = async (self, server, message, args) => {
 
     const case_log_message = new MessageEmbed()
         .setTitle(locale.common.case_log.cases.WARN_REMOVE)
-        .addField(locale.common.case_log.target, `${member.user.tag}\n(${member.id})`, true)
+        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, message.author.tag, true)
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))
