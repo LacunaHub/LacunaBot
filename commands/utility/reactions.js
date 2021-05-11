@@ -137,7 +137,7 @@ const add = async (self, server, message, args) => {
         return false
     }
 
-    const emoji = Util.parseEmoji(raw_args.emoji)
+    const emoji = self.utils.isSnowflake(raw_args.emoji) ? Util.parseEmoji(self.emojis.resolveIdentifier(raw_args.emoji)) : Util.parseEmoji(raw_args.emoji)
     const reference = message.mentions.channels.filter(c => c.id != channel.id).last() || message.guild.channels.cache.find(c => c.id == raw_args.reference || c.name == raw_args.reference) || message.mentions.roles.first() || message.guild.roles.cache.find(r => r.id == raw_args.reference || r.name == raw_args.reference)
     
     if (!channel || !message_reaction || !emoji || !reference) {
@@ -255,8 +255,9 @@ const remove = async (self, server, message, args) => {
 
         let message_reaction
         try {
-            message_reaction = await channel.messages.fetch(raw_args.message_id, false, true)
+            message_reaction = await channel.messages.fetch(element.message.id, false, true)
         } catch (err) {
+            console.log(err)
             switch (err.message) {
                 case 'Unknown Message':
                     await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.unknown_message, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
@@ -304,7 +305,7 @@ const remove = async (self, server, message, args) => {
         
         let message_reaction
         try {
-            message_reaction = await channel.messages.fetch(raw_args.message_id, false, true)
+            message_reaction = await channel.messages.fetch(elements[0].message.id, false, true)
         } catch (err) {
             switch (err.message) {
                 case 'Unknown Message':

@@ -630,3 +630,22 @@ export interface Giveaway {
     expiration_date: Date
     locale: string
 }
+
+export interface TwitchChannel {
+    live: boolean
+    last_check_timestamp: number
+    channel: {
+        id: string
+        display_name: string
+        login: string
+    }
+    alerts: {
+        channel_id: string
+        message_template: string
+        display_preview: boolean
+        after_end: {
+            delete_alert: boolean
+            message_id: string
+        }
+    }
+}
