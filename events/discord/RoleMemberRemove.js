@@ -10,7 +10,7 @@ const { images } = require('../../modules/Logs')
 const execute = async (self, member, role) => {
     const server = await self.db.servers.fetch({ _id: member.guild.id })
 
-    if (member.guild.id == '740586549145763960' && ['746826292900528311', '746825558205136926', '746752483115794583'].includes(role.id)) {
+    if (member.guild.id == '740586549145763960' && ['746826292900528311', '746825558205136926', '746752483115794583', '842088941678886962'].includes(role.id)) {
         const user = await self.db.users.find({ _id: member.id })
 
         if (user) {
@@ -51,6 +51,18 @@ const execute = async (self, member, role) => {
                     },
                     $pull: {
                         'boost.type': 'SERVER_BOOST'
+                    }
+                })
+            }
+
+            if (role.id == '842088941678886962') {
+                await self.db.users.update({ _id: member.id }, {
+                    $set: {
+                        'boost.available': user.boost.type.length < 2 ? false : true,
+                        'boost.tier': user.boost.tier < 1 ? 0 : user.boost.tier - 1,
+                    },
+                    $pull: {
+                        'boost.type': 'GIVEAWAY_WINNER'
                     }
                 })
             }
