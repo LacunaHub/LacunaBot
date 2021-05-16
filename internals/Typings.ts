@@ -523,8 +523,8 @@ export interface CommandInfo {
     throttling: CommandThrottlingOptions | null
     throttles: Map<String, CommandThrottledUser>
     early_access: Number | null
-    self_permissions: import('discord.js').PermissionResolvable
-    user_permissions: import('discord.js').PermissionResolvable
+    self_permissions: import('discord.js').PermissionResolvable[]
+    user_permissions: import('discord.js').PermissionResolvable[]
 }
 
 export interface SubcommandInfo {

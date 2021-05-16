@@ -122,7 +122,7 @@ class Command {
             if (!command.allowed.roles.length && !this.user_permissions.length) return true
         }
 
-        if (!command && !this.user_permissions) return true
+        if (!command && !this.user_permissions.length) return true
 
         if (this.user_permissions.length && message.member.hasPermission(this.user_permissions)) return true
 
