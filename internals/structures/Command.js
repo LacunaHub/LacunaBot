@@ -143,8 +143,6 @@ class Command {
 
         if (this.early_access && this.early_access >= Date.now() && !server.server.premium.available) return false
 
-        console.log(this.denied(server, message), this.allowed(server, message))
-
         if (!this.denied(server, message) || !this.allowed(server, message)) return false
 
         const missing = this.hasPermission(message)
