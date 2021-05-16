@@ -117,9 +117,9 @@ class Command {
         if (this.self.application.owner.members.some(m => m.id == message.author.id)) return true
 
         if (command) {
-            if (command.allowed.roles.length && message.member.roles.some(r => command.allowed.roles.includes(r.id))) return true
+            if (command.allowed.roles.length && message.member.roles.cache.some(r => command.allowed.roles.includes(r.id))) return true
 
-            if (!command.allowed.roles.length && !this.user_permissions) return true
+            if (!command.allowed.roles.length && !this.user_permissions.length) return true
         }
 
         if (!command && !this.user_permissions) return true
