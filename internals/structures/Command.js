@@ -93,13 +93,13 @@ class Command {
         if ((server.commands.permissions.allowed.channels.length && !server.commands.permissions.allowed.channels.includes(message.channel.id)) && !message.member.hasPermission('ADMINISTRATOR')) return false
 
         if (command) {
-            if (!command.active) return false
+            if (command.inactive) return false
 
             if (command.blocked.channels.includes(message.channel.id)) return false
 
             if (command.allowed.channels.length && !command.allowed.channels.includes(message.channel.id)) return false
 
-            if (message.member.roles.some(r => command.blocked.roles.includes(r.id))) return false
+            if (message.member.roles.cache.some(r => command.blocked.roles.includes(r.id))) return false
         }
 
         return true
@@ -124,7 +124,7 @@ class Command {
 
         if (!command && !this.user_permissions) return true
 
-        if (this.user_permissions && message.member.hasPermission(this.user_permissions)) return true
+        if (this.user_permissions.length && message.member.hasPermission(this.user_permissions)) return true
 
         return false
     }
@@ -142,6 +142,8 @@ class Command {
         const locale = this.self.translator.locale(server.locale)
 
         if (this.early_access && this.early_access >= Date.now() && !server.server.premium.available) return false
+
+        console.log(this.denied(server, message), this.allowed(server, message))
 
         if (!this.denied(server, message) || !this.allowed(server, message)) return false
 
