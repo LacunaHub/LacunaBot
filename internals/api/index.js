@@ -17,9 +17,11 @@ app.use(express.json())
 app.use(cors())
 app.use(limiter({ windowMs: 600000, max: 50 }))
 
+app.use('/webhooks/patreon', require('./webhooks/patreon'))
+
 app.all('/*', async (req, res, next) => {
     const referer = req.headers['referer']
-    const hosts = ['https://voidlacuna.ru', 'https://www.voidlacuna.ru', 'https://discord.com', 'https://patreon.com', 'https://www.patreon.com']
+    const hosts = ['https://voidlacuna.ru', 'https://www.voidlacuna.ru', 'https://discord.com']
 
     if (!referer || !hosts.some(host => referer.includes(host))) {
         await res.status(423).send('Locked')
@@ -34,7 +36,6 @@ app.use('/guilds', require('./routes/guilds'))
 app.use('/authorize', require('./routes/oauth2'))
 app.use('/structure', require('./routes/structure'))
 app.use('/users', require('./routes/users'))
-app.use('/webhooks/patreon', require('./webhooks/patreon'))
 
 app.all('/*', async (req, res) => await res.status(404).json({ status: 404, message: 'Not Found' }))
 
