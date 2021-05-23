@@ -89,9 +89,9 @@ class Patreon {
                 }
             })
 
-            const user = await Users.fetch({ _id: discord })
+            const user = await Users.fetch({ _id: discord.user_id })
 
-            await Users.update({ _id: discord }, {
+            await Users.update({ _id: discord.user_id }, {
                 $set: {
                     flags: (user.flags & 16) === 16 ? user.flags : user.flags | 1 << 4,
                     'boost.available': true,
@@ -100,7 +100,7 @@ class Patreon {
             })
 
             if (!user.boost.type.includes('PATREON')) {
-                await Users.update({ _id: discord }, {
+                await Users.update({ _id: discord.user_id }, {
                     $push: {
                         'boost.type': 'PATREON'
                     }
@@ -119,10 +119,10 @@ class Patreon {
             })
 
             if (patron_status !== 'active_patron') {
-                const user = await Users.find({ _id: discord })
+                const user = await Users.find({ _id: discord.user_id })
 
                 if (user) {
-                    await Users.update({ _id: discord }, {
+                    await Users.update({ _id: discord.user_id }, {
                         $set: {
                             'boost.available': user.boost.type.length < (will_pay / 100) ? false : true,
                             'boost.tier': user.boost.tier < (will_pay / 100) ? 0 : user.boost.tier - (will_pay / 100)
@@ -142,7 +142,7 @@ class Patreon {
                                 }
                             })
 
-                            await Users.update({ _id: discord }, {
+                            await Users.update({ _id: discord.user_id }, {
                                 $pull: {
                                     'boost.guilds': {
                                         id: rem.id
