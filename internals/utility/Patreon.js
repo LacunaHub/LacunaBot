@@ -48,6 +48,7 @@ class Patreon {
         const discord = user_attr.attributes.social_connections.discord
         const patron_status = res.data.attributes.patron_status
         const will_pay = res.data.attributes.currently_entitled_amount_cents
+        const last_charge_date = res.data.attributes.last_charge_date
 
         if (patron.name != res.data.attributes.full_name) {
             await Patrons.update({ _id: patron._id }, {
@@ -76,7 +77,7 @@ class Patreon {
         if (patron.last_charge_date != res.data.attributes.last_charge_date) {
             await Patrons.update({ _id: patron._id }, {
                 $set: {
-                    last_charge_date: user_attr.attributes.last_charge_date
+                    last_charge_date: res.data.attributes.last_charge_date
                 }
             })
         }
