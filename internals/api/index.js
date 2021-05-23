@@ -19,9 +19,9 @@ app.use(limiter({ windowMs: 600000, max: 50 }))
 
 app.all('/*', async (req, res, next) => {
     const referer = req.headers['referer']
-    const hosts = ['https://voidlacuna.ru', 'https://www.voidlacuna.ru', 'https://discord.com']
+    const hosts = ['https://voidlacuna.ru', 'https://www.voidlacuna.ru', 'https://discord.com', 'https://patreon.com', 'https://www.patreon.com']
 
-    if (!hosts.some(host => referer.includes(host))) {
+    if (!referer || !hosts.some(host => referer.includes(host))) {
         await res.status(423).send('Locked')
 
         return

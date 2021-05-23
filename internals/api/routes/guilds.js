@@ -58,7 +58,8 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
             },
             roles: {
                 mute: guild.moderation.roles.mute
-            }
+            },
+            automoder: guild.moderation.automoder
         },
         modules: {
             welcome: guild.modules.welcome,
@@ -132,7 +133,8 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
             },
             roles: {
                 mute: updated.moderation.roles.mute
-            }
+            },
+            automoder: updated.moderation.automoder
         },
         modules: {
             welcome: updated.modules.welcome,

@@ -63,6 +63,125 @@ class Guilds {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.roles.mute': data.moderation.roles.mute || '' } })
                 }
             }
+
+            if (data.moderation.automoder) {
+                if (data.moderation.automoder.links_filter) {
+                    if (typeof data.moderation.automoder.links_filter.active === 'boolean' && data.moderation.automoder.links_filter.active !== guild.moderation.automoder.links_filter.active) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.active': data.moderation.automoder.links_filter.active } })
+                    }
+
+                    if (Array.isArray(data.moderation.automoder.links_filter.registry)) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.registry': data.moderation.automoder.links_filter.registry } })
+                    }
+
+                    if (Array.isArray(data.moderation.automoder.links_filter.allowed_registry)) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.allowed_registry': data.moderation.automoder.links_filter.allowed_registry } })
+                    }
+
+                    if (typeof data.moderation.automoder.links_filter.delete_all_links === 'boolean' && data.moderation.automoder.links_filter.delete_all_links !== guild.moderation.automoder.links_filter.delete_all_links) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.delete_all_links': data.moderation.automoder.links_filter.delete_all_links } })
+                    }
+
+                    if (typeof data.moderation.automoder.links_filter.delete_referral_invites === 'boolean' && data.moderation.automoder.links_filter.delete_referral_invites !== guild.moderation.automoder.links_filter.delete_referral_invites) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.delete_referral_invites': data.moderation.automoder.links_filter.delete_referral_invites } })
+                    }
+
+                    if (data.moderation.automoder.links_filter.penalty) {
+                        if (typeof data.moderation.automoder.links_filter.penalty.action === 'number' && data.moderation.automoder.links_filter.penalty.action !== guild.moderation.automoder.links_filter.penalty.action) {
+                            if ([0, 1 << 0, 1 << 1, 1 << 2, 1 << 3].some(bit => (data.moderation.automoder.links_filter.penalty.action & bit) === bit))
+                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.action': data.moderation.automoder.links_filter.penalty.action } })
+                        }
+
+                        if (typeof data.moderation.automoder.links_filter.penalty.timer === 'number' && data.moderation.automoder.links_filter.penalty.timer !== guild.moderation.automoder.links_filter.penalty.timer) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.timer': data.moderation.automoder.links_filter.penalty.timer } })
+                        }
+
+                        if (typeof data.moderation.automoder.links_filter.penalty.message.content === 'string' && data.moderation.automoder.links_filter.penalty.message.content !== guild.moderation.automoder.links_filter.penalty.message.content) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.message.content': data.moderation.automoder.links_filter.penalty.message.content } })
+                        }
+                    }
+
+                    if (data.moderation.automoder.links_filter.ignored) {
+                        if (Array.isArray(data.moderation.automoder.links_filter.ignored.channels)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.ignored.channels': data.moderation.automoder.links_filter.ignored.channels } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.links_filter.ignored.roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.ignored.roles': data.moderation.automoder.links_filter.ignored.roles } })
+                        }
+                    }
+                }
+
+                if (data.moderation.automoder.swear_filter) {
+                    if (typeof data.moderation.automoder.swear_filter.active === 'boolean' && data.moderation.automoder.swear_filter.active !== guild.moderation.automoder.swear_filter.active) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.active': data.moderation.automoder.swear_filter.active } })
+                    }
+
+                    if (Array.isArray(data.moderation.automoder.swear_filter.registry)) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.registry': data.moderation.automoder.swear_filter.registry } })
+                    }
+
+                    if (data.moderation.automoder.swear_filter.penalty) {
+                        if (typeof data.moderation.automoder.swear_filter.penalty.action === 'number' && data.moderation.automoder.swear_filter.penalty.action !== guild.moderation.automoder.swear_filter.penalty.action) {
+                            if ([0, 1 << 0, 1 << 1, 1 << 2, 1 << 3].some(bit => (data.moderation.automoder.swear_filter.penalty.action & bit) === bit))
+                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.action': data.moderation.automoder.swear_filter.penalty.action } })
+                        }
+
+                        if (typeof data.moderation.automoder.swear_filter.penalty.timer === 'number' && data.moderation.automoder.swear_filter.penalty.timer !== guild.moderation.automoder.swear_filter.penalty.timer) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.timer': data.moderation.automoder.swear_filter.penalty.timer } })
+                        }
+
+                        if (typeof data.moderation.automoder.swear_filter.penalty.message.content === 'string' && data.moderation.automoder.swear_filter.penalty.message.content !== guild.moderation.automoder.swear_filter.penalty.message.content) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.message.content': data.moderation.automoder.swear_filter.penalty.message.content } })
+                        }
+                    }
+
+                    if (data.moderation.automoder.swear_filter.ignored) {
+                        if (Array.isArray(data.moderation.automoder.swear_filter.ignored.channels)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.ignored.channels': data.moderation.automoder.swear_filter.ignored.channels } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.swear_filter.ignored.roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.ignored.roles': data.moderation.automoder.swear_filter.ignored.roles } })
+                        }
+                    }
+                }
+
+                if (data.moderation.automoder.users_slowdown) {
+                    if (typeof data.moderation.automoder.users_slowdown.active === 'boolean' && data.moderation.automoder.users_slowdown.active !== guild.moderation.automoder.users_slowdown.active) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.active': data.moderation.automoder.users_slowdown.active } })
+                    }
+
+                    if (typeof data.moderation.automoder.users_slowdown.messages_limit === 'number' && data.moderation.automoder.users_slowdown.messages_limit !== guild.moderation.automoder.users_slowdown.messages_limit) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.messages_limit': data.moderation.automoder.users_slowdown.messages_limit } })
+                    }
+
+                    if (data.moderation.automoder.users_slowdown.penalty) {
+                        if (typeof data.moderation.automoder.users_slowdown.penalty.action === 'number' && data.moderation.automoder.users_slowdown.penalty.action !== guild.moderation.automoder.users_slowdown.penalty.action) {
+                            if ([0, 1 << 0, 1 << 1, 1 << 2, 1 << 3].some(bit => (data.moderation.automoder.users_slowdown.penalty.action & bit) === bit))
+                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.action': data.moderation.automoder.users_slowdown.penalty.action } })
+                        }
+
+                        if (typeof data.moderation.automoder.users_slowdown.penalty.timer === 'number' && data.moderation.automoder.users_slowdown.penalty.timer !== guild.moderation.automoder.users_slowdown.penalty.timer) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.timer': data.moderation.automoder.users_slowdown.penalty.timer } })
+                        }
+
+                        if (typeof data.moderation.automoder.users_slowdown.penalty.message.content === 'string' && data.moderation.automoder.users_slowdown.penalty.message.content !== guild.moderation.automoder.users_slowdown.penalty.message.content) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.message.content': data.moderation.automoder.users_slowdown.penalty.message.content } })
+                        }
+                    }
+
+                    if (data.moderation.automoder.users_slowdown.ignored) {
+                        if (Array.isArray(data.moderation.automoder.users_slowdown.ignored.channels)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.ignored.channels': data.moderation.automoder.users_slowdown.ignored.channels } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.users_slowdown.ignored.roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.ignored.roles': data.moderation.automoder.users_slowdown.ignored.roles } })
+                        }
+                    }
+                }
+            }
         }
 
         if (data.modules) {
@@ -127,6 +246,10 @@ class Guilds {
 
                 if (typeof data.modules.levels.single_roles === 'boolean' && data.modules.levels.single_roles !== guild.modules.levels.single_roles) {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.single_roles': data.modules.levels.single_roles } })
+                }
+
+                if (typeof data.modules.levels.reset_on_leave === 'boolean' && data.modules.levels.reset_on_leave !== guild.modules.levels.reset_on_leave) {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.reset_on_leave': data.modules.levels.reset_on_leave } })
                 }
 
                 if (data.modules.levels.allowed) {

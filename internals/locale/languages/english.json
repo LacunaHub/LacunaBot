@@ -1302,6 +1302,9 @@
         }
     },
     "modules": {
+        "automoder": {
+            "default_slowdown_message": "{ member.mention }, stop sending messages so fast!"
+        },
         "logs": {
             "common": {
                 "sender": "Отправитель",

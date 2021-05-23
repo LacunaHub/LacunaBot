@@ -18,6 +18,16 @@ const execute = async (self, member) => {
 
     await GuildMemberRemove(self, server, member)
 
+    if (server.modules.levels.reset_on_leave) {
+        await self.db.activities.update({ _id: member.guild.id }, {
+            $pull: {
+                'levels': {
+                    user_id: member.id
+                }
+            }
+        })
+    }
+
     return true
 }
 

@@ -338,7 +338,7 @@
             ],
             "texts": {
                 "no_amount_argument": "{0}, необходимо указать количество сообщений",
-                "messages_pruned": "{0}, cообщения успешно очищены ({1})"
+                "messages_pruned": "{0}, сообщения успешно очищены ({1})"
             }
         },
         "reason": {
@@ -1313,6 +1313,9 @@
         }
     },
     "modules": {
+        "automoder": {
+            "default_slowdown_message": "{ member.mention }, перестаньте отправлять сообщения так быстро!"
+        },
         "logs": {
             "common": {
                 "sender": "Отправитель",

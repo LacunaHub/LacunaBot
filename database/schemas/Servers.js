@@ -3,7 +3,7 @@ const { model, Schema } = require('mongoose')
 const Server = new Schema({
     _id: { type: String },
     locale: { type: String, default: 'ru' },
-    prefix: { type: String, default: '/' },
+    prefix: { type: String, default: '!' },
     server: {
         premium: {
             available: { type: Boolean, default: false },
@@ -160,7 +160,114 @@ const Server = new Schema({
                 penalty: {
                     action: { type: Number, default: 0 },
                     timer: { type: Number, default: 0 },
-                    warn_message: { type: String, default: '' }
+                    message: {
+                        content: { type: String, default: '' },
+                        embed: {
+                            active: { type: Boolean, default: false },
+                            title: { type: String, default: null },
+                            description: { type: String, default: null },
+                            url: { type: String, default: null },
+                            timestamp: { type: String, default: null },
+                            color: { type: String, default: null },
+                            footer: {
+                                text: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            image: {
+                                url: { type: String, default: null }
+                            },
+                            thumbnail: {
+                                url: { type: String, default: null }
+                            },
+                            author: {
+                                name: { type: String, default: null },
+                                url: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            fields: { type: Array, default: [] }
+                        }
+                    }
+                },
+                ignored: {
+                    channels: { type: Array, default: [] },
+                    roles: { type: Array, default: [] }
+                }
+            },
+            links_filter: {
+                active: { type: Boolean, default: false },
+                registry: { type: Array, default: [] },
+                allowed_registry: { type: Array, default: [] },
+                delete_all_links: { type: Boolean, default: false },
+                delete_referral_invites: { type: Boolean, default: false },
+                penalty: {
+                    action: { type: Number, default: 0 },
+                    timer: { type: Number, default: 0 },
+                    message: {
+                        content: { type: String, default: '' },
+                        embed: {
+                            active: { type: Boolean, default: false },
+                            title: { type: String, default: null },
+                            description: { type: String, default: null },
+                            url: { type: String, default: null },
+                            timestamp: { type: String, default: null },
+                            color: { type: String, default: null },
+                            footer: {
+                                text: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            image: {
+                                url: { type: String, default: null }
+                            },
+                            thumbnail: {
+                                url: { type: String, default: null }
+                            },
+                            author: {
+                                name: { type: String, default: null },
+                                url: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            fields: { type: Array, default: [] }
+                        }
+                    }
+                },
+                ignored: {
+                    channels: { type: Array, default: [] },
+                    roles: { type: Array, default: [] }
+                }
+            },
+            users_slowdown: {
+                active: { type: Boolean, default: false },
+                messages_limit: { type: Array, default: 3 },
+                penalty: {
+                    action: { type: Number, default: 0 },
+                    timer: { type: Number, default: 0 },
+                    message: {
+                        content: { type: String, default: '' },
+                        embed: {
+                            active: { type: Boolean, default: false },
+                            title: { type: String, default: null },
+                            description: { type: String, default: null },
+                            url: { type: String, default: null },
+                            timestamp: { type: String, default: null },
+                            color: { type: String, default: null },
+                            footer: {
+                                text: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            image: {
+                                url: { type: String, default: null }
+                            },
+                            thumbnail: {
+                                url: { type: String, default: null }
+                            },
+                            author: {
+                                name: { type: String, default: null },
+                                url: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            fields: { type: Array, default: [] }
+                        }
+                    }
                 },
                 ignored: {
                     channels: { type: Array, default: [] },
@@ -185,7 +292,31 @@ const Server = new Schema({
             format: { type: String, default: 'DM' },
             channel_id: { type: String, default: '' },
             message: {
-                content: { type: String, default: '' }
+                content: { type: String, default: '' },
+                embed: {
+                    active: { type: Boolean, default: false },
+                    title: { type: String, default: null },
+                    description: { type: String, default: null },
+                    url: { type: String, default: null },
+                    timestamp: { type: String, default: null },
+                    color: { type: String, default: null },
+                    footer: {
+                        text: { type: String, default: null },
+                        icon_url: { type: String, default: null }
+                    },
+                    image: {
+                        url: { type: String, default: null }
+                    },
+                    thumbnail: {
+                        url: { type: String, default: null }
+                    },
+                    author: {
+                        name: { type: String, default: null },
+                        url: { type: String, default: null },
+                        icon_url: { type: String, default: null }
+                    },
+                    fields: { type: Array, default: [] }
+                }
             },
             initial_roles: {
                 active: { type: Boolean, default: false },
@@ -197,13 +328,38 @@ const Server = new Schema({
             format: { type: String, default: 'DM' },
             channel_id: { type: String, default: '' },
             message: {
-                content: { type: String, default: '' }
+                content: { type: String, default: '' },
+                embed: {
+                    active: { type: Boolean, default: false },
+                    title: { type: String, default: null },
+                    description: { type: String, default: null },
+                    url: { type: String, default: null },
+                    timestamp: { type: String, default: null },
+                    color: { type: String, default: null },
+                    footer: {
+                        text: { type: String, default: null },
+                        icon_url: { type: String, default: null }
+                    },
+                    image: {
+                        url: { type: String, default: null }
+                    },
+                    thumbnail: {
+                        url: { type: String, default: null }
+                    },
+                    author: {
+                        name: { type: String, default: null },
+                        url: { type: String, default: null },
+                        icon_url: { type: String, default: null }
+                    },
+                    fields: { type: Array, default: [] }
+                }
             }
         },
         reactions: { type: Array, default: [] },
         levels: {
             active: { type: Boolean, default: false },
             single_roles: { type: Boolean, default: false },
+            reset_on_leave: { type: Boolean, default: false },
             blocked: {
                 channels: { type: Array, default: [] },
                 roles: { type: Array, default: [] }
@@ -218,7 +374,30 @@ const Server = new Schema({
                 channel_id: { type: String, default: '' },
                 message: {
                     content: { type: String, default: '' },
-                    embed: { type: Object, default: {} }
+                    embed: {
+                        active: { type: Boolean, default: false },
+                        title: { type: String, default: null },
+                        description: { type: String, default: null },
+                        url: { type: String, default: null },
+                        timestamp: { type: String, default: null },
+                        color: { type: String, default: null },
+                        footer: {
+                            text: { type: String, default: null },
+                            icon_url: { type: String, default: null }
+                        },
+                        image: {
+                            url: { type: String, default: null }
+                        },
+                        thumbnail: {
+                            url: { type: String, default: null }
+                        },
+                        author: {
+                            name: { type: String, default: null },
+                            url: { type: String, default: null },
+                            icon_url: { type: String, default: null }
+                        },
+                        fields: { type: Array, default: [] }
+                    }
                 }
             },
             awards: { type: Array, default: [] }

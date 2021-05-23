@@ -1,5 +1,6 @@
 const help = require('../../commands/general/help')
 const { Text } = require('../../modules/Levels')
+const Automoder = require('../../modules/Automoder')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -37,6 +38,10 @@ const execute = async (self, message) => {
     }
 
     await Text(self, server, message)
+
+    await Automoder.linksFilter(self, server, message)
+    await Automoder.swearFilter(self, server, message)
+    await Automoder.slowdownUser(self, server, message)
 
     return true
 }

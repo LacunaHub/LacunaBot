@@ -104,6 +104,7 @@ const execute = async (self, server, message, args) => {
     }
 
     await mention.roles.add(mute_role)
+    if (mention.voice.channelID) mention.voice.kick()
     if (case_log && server.moderation.case_log.case_types.MUTE_ADD) await case_log.send(case_log_message).catch()
 
     return true

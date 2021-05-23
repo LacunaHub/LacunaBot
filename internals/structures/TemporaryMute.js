@@ -69,6 +69,7 @@ class TemporaryMute {
 
             if (member) {
                 await member.roles.add(this.role_id, this.reason)
+                if (member.voice.channelID) await member.voice.kick()
             }
         } catch (err) {}
     }

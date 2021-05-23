@@ -38,6 +38,8 @@ class VoiceManager {
                 reason: ''
             })
 
+            await state.channel.permissionOverwrites.delete(state.member.id)
+
             await self.db.servers.update({ _id: state.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.id': trigger.id }, {
                 $push: {
                     'modules.voice_manager.temp_voice_channels.triggers.$.children': {

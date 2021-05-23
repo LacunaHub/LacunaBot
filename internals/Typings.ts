@@ -160,11 +160,49 @@ export interface ServerDocument extends Document {
                 penalty: {
                     action: Number
                     timer: Number
-                    warn_message: String
+                    message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
                 },
                 ignored: {
                     channels: Array<String>
                     roles: Array<String>
+                }
+            }
+            links_filter: {
+                active: boolean
+                registry: string[]
+                allowed_registry: string[]
+                delete_all_links: boolean
+                delete_referral_invites: boolean
+                penalty: {
+                    action: number
+                    timer: number
+                    message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                },
+                ignored: {
+                    channels: string[]
+                    roles: string[]
+                }
+            }
+            users_slowdown: {
+                active: boolean
+                messages_limit: number
+                penalty: {
+                    action: number
+                    timer: number
+                    message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                },
+                ignored: {
+                    channels: string[]
+                    roles: string[]
                 }
             }
         }
@@ -186,6 +224,7 @@ export interface ServerDocument extends Document {
             channel_id: String
             message: {
                 content: String
+                embed: MessageEmbed
             }
             initial_roles: {
                 active: Boolean
@@ -198,12 +237,14 @@ export interface ServerDocument extends Document {
             channel_id: String
             message: {
                 content: String
+                embed: MessageEmbed
             }
         },
         reactions: Array<ReactionElement>
         levels: {
             active: Boolean
             single_roles: Boolean
+            reset_on_leave: boolean
             blocked: {
                 channels: Array<String>
                 roles: Array<String>
@@ -218,7 +259,7 @@ export interface ServerDocument extends Document {
                 channel_id: String
                 message: {
                     content: String
-                    embed: import('discord.js').MessageEmbed
+                    embed: MessageEmbed
                 }
             },
             awards: Array<LevelAward>
@@ -648,4 +689,35 @@ export interface TwitchChannel {
             message_id: string
         }
     }
+}
+
+export interface MessageEmbed {
+    active: boolean
+    title?: string
+    description?: string
+    url?: string
+    timestamp?: string
+    color?: string
+    footer: {
+        text?: string
+        icon_url?: string
+    },
+    image: {
+        url?: string
+    },
+    thumbnail: {
+        url?: string
+    },
+    author: {
+        name?: string
+        url?: string
+        icon_url?: string
+    },
+    fields: MessageEmbedFields[]
+}
+
+export interface MessageEmbedFields {
+    name: string
+    value: string
+    inline?: boolean
 }
