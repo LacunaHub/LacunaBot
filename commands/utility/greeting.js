@@ -1,3 +1,4 @@
+const Greeting = require('../../modules/Greeting')
 const help = require('../general/help')
 
 /**
@@ -154,6 +155,30 @@ const roles = async (self, server, message, args) => {
     return true
 }
 
+/**
+ * @param {import('../../internals/Lacuna')} self
+ * @param {import('../../internals/Typings').ServerDocument} server
+ * @param {import('discord.js').Message} message
+ * @param {String[]} args
+ */
+const test = async (self, server, message, args) => {
+    const locale = self.translator.locale(server.locale).commands
+
+    if (!server.modules.welcome.active) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.test.texts.inactive, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    if ((!server.modules.welcome.message.content && !server.modules.welcome.message.embed.active)) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.greeting.test.texts.no_content, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    await Greeting.Handle(self, server, message.member)
+}
+
 module.exports = {
     fn: execute,
     name: 'greeting',
@@ -174,6 +199,11 @@ module.exports = {
             fn: roles,
             name: 'roles',
             description: 'commands.greeting.roles.description'
+        },
+        {
+            fn: test,
+            name: 'test',
+            description: 'commands.greeting.test.description'
         }
     ],
     guild_only: true,

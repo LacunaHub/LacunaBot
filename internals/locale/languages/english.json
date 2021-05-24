@@ -767,6 +767,13 @@
                     "no_save_type": "{0}, пожалуйста, укажите сохраняемый параметр: {1}",
                     "unknown_save_type": "{0}, введен неверный сохраняемый параметр, доступные: {1}"
                 }
+            },
+            "test": {
+                "description": "Test farewell message",
+                "texts": {
+                    "inactive": "{0}, farewell is disabled on this server",
+                    "no_content": "{0}, farewell message can't be empty"
+                }
             }
         },
         "giveaway": {
@@ -900,6 +907,13 @@
                     "argument_off": "{0}, начальные роли успешно отключены",
                     "no_initial_roles": "{0}, указанные начальные роли не найдены",
                     "roles_set": "{0}, начальные роли успешно установлены"
+                }
+            },
+            "test": {
+                "description": "Test greeting message",
+                "texts": {
+                    "inactive": "{0}, greetings is disabled on this server",
+                    "no_content": "{0}, greeting message can't be empty"
                 }
             }
         },

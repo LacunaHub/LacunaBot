@@ -1,6 +1,6 @@
 const Servers = require('../../../database/schemas/Servers')
 const { GenerateUID } = require('../../../modules/Reactions')
-const { Util } = require('discord.js')
+const { Util, MessageEmbed } = require('discord.js')
 const Channels = require('../discord/rest/Channels')
 
 class Guilds {
@@ -96,8 +96,45 @@ class Guilds {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.timer': data.moderation.automoder.links_filter.penalty.timer } })
                         }
 
-                        if (typeof data.moderation.automoder.links_filter.penalty.message.content === 'string' && data.moderation.automoder.links_filter.penalty.message.content !== guild.moderation.automoder.links_filter.penalty.message.content) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.message.content': data.moderation.automoder.links_filter.penalty.message.content } })
+                        if (data.moderation.automoder.links_filter.penalty.message) {
+                            if (typeof data.moderation.automoder.links_filter.penalty.message.content === 'string' && data.moderation.automoder.links_filter.penalty.message.content !== guild.moderation.automoder.links_filter.penalty.message.content) {
+                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.message.content': data.moderation.automoder.links_filter.penalty.message.content } })
+                            }
+
+                            if (data.moderation.automoder.links_filter.penalty.message.embed) {
+                                if (data.moderation.automoder.links_filter.penalty.message.embed.fields.length)
+                                    data.moderation.automoder.links_filter.penalty.message.embed.fields = data.moderation.automoder.links_filter.penalty.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
+
+                                const embed = new MessageEmbed(data.moderation.automoder.links_filter.penalty.message.embed)
+                                await Servers.updateOne({ _id: guild._id }, {
+                                    $set: {
+                                        'moderation.automoder.links_filter.penalty.message.embed': {
+                                            active: data.moderation.automoder.links_filter.penalty.message.embed.active,
+                                            title: embed.title,
+                                            description: embed.description,
+                                            url: embed.url,
+                                            timestamp: data.moderation.automoder.links_filter.penalty.message.embed.timestamp,
+                                            color: data.moderation.automoder.links_filter.penalty.message.embed.color,
+                                            footer: {
+                                                text: embed.footer.text,
+                                                icon_url: embed.footer.iconURL
+                                            },
+                                            image: {
+                                                url: embed.image.url
+                                            },
+                                            thumbnail: {
+                                                url: embed.thumbnail.url
+                                            },
+                                            author: {
+                                                name: embed.author.name,
+                                                url: embed.author.url,
+                                                icon_url: embed.author.iconURL
+                                            },
+                                            fields: embed.fields
+                                        }
+                                    }
+                                })
+                            }
                         }
                     }
 
@@ -131,8 +168,45 @@ class Guilds {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.timer': data.moderation.automoder.swear_filter.penalty.timer } })
                         }
 
-                        if (typeof data.moderation.automoder.swear_filter.penalty.message.content === 'string' && data.moderation.automoder.swear_filter.penalty.message.content !== guild.moderation.automoder.swear_filter.penalty.message.content) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.message.content': data.moderation.automoder.swear_filter.penalty.message.content } })
+                        if (data.moderation.automoder.swear_filter.penalty.message) {
+                            if (typeof data.moderation.automoder.swear_filter.penalty.message.content === 'string' && data.moderation.automoder.swear_filter.penalty.message.content !== guild.moderation.automoder.swear_filter.penalty.message.content) {
+                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.message.content': data.moderation.automoder.swear_filter.penalty.message.content } })
+                            }
+
+                            if (data.moderation.automoder.swear_filter.penalty.message.embed) {
+                                if (data.moderation.automoder.swear_filter.penalty.message.embed.fields.length)
+                                    data.moderation.automoder.swear_filter.penalty.message.embed.fields = data.moderation.automoder.swear_filter.penalty.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
+
+                                const embed = new MessageEmbed(data.moderation.automoder.swear_filter.penalty.message.embed)
+                                await Servers.updateOne({ _id: guild._id }, {
+                                    $set: {
+                                        'moderation.automoder.swear_filter.penalty.message.embed': {
+                                            active: data.moderation.automoder.swear_filter.penalty.message.embed.active,
+                                            title: embed.title,
+                                            description: embed.description,
+                                            url: embed.url,
+                                            timestamp: data.moderation.automoder.swear_filter.penalty.message.embed.timestamp,
+                                            color: data.moderation.automoder.swear_filter.penalty.message.embed.color,
+                                            footer: {
+                                                text: embed.footer.text,
+                                                icon_url: embed.footer.iconURL
+                                            },
+                                            image: {
+                                                url: embed.image.url
+                                            },
+                                            thumbnail: {
+                                                url: embed.thumbnail.url
+                                            },
+                                            author: {
+                                                name: embed.author.name,
+                                                url: embed.author.url,
+                                                icon_url: embed.author.iconURL
+                                            },
+                                            fields: embed.fields
+                                        }
+                                    }
+                                })
+                            }
                         }
                     }
 
@@ -166,8 +240,45 @@ class Guilds {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.timer': data.moderation.automoder.users_slowdown.penalty.timer } })
                         }
 
-                        if (typeof data.moderation.automoder.users_slowdown.penalty.message.content === 'string' && data.moderation.automoder.users_slowdown.penalty.message.content !== guild.moderation.automoder.users_slowdown.penalty.message.content) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.message.content': data.moderation.automoder.users_slowdown.penalty.message.content } })
+                        if (data.moderation.automoder.users_slowdown.penalty.message) {
+                            if (typeof data.moderation.automoder.users_slowdown.penalty.message.content === 'string' && data.moderation.automoder.users_slowdown.penalty.message.content !== guild.moderation.automoder.users_slowdown.penalty.message.content) {
+                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.message.content': data.moderation.automoder.users_slowdown.penalty.message.content } })
+                            }
+
+                            if (data.moderation.automoder.users_slowdown.penalty.message.embed) {
+                                if (data.moderation.automoder.users_slowdown.penalty.message.embed.fields.length)
+                                    data.moderation.automoder.users_slowdown.penalty.message.embed.fields = data.moderation.automoder.users_slowdown.penalty.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
+
+                                const embed = new MessageEmbed(data.moderation.automoder.users_slowdown.penalty.message.embed)
+                                await Servers.updateOne({ _id: guild._id }, {
+                                    $set: {
+                                        'moderation.automoder.users_slowdown.penalty.message.embed': {
+                                            active: data.moderation.automoder.users_slowdown.penalty.message.embed.active,
+                                            title: embed.title,
+                                            description: embed.description,
+                                            url: embed.url,
+                                            timestamp: data.moderation.automoder.users_slowdown.penalty.message.embed.timestamp,
+                                            color: data.moderation.automoder.users_slowdown.penalty.message.embed.color,
+                                            footer: {
+                                                text: embed.footer.text,
+                                                icon_url: embed.footer.iconURL
+                                            },
+                                            image: {
+                                                url: embed.image.url
+                                            },
+                                            thumbnail: {
+                                                url: embed.thumbnail.url
+                                            },
+                                            author: {
+                                                name: embed.author.name,
+                                                url: embed.author.url,
+                                                icon_url: embed.author.iconURL
+                                            },
+                                            fields: embed.fields
+                                        }
+                                    }
+                                })
+                            }
                         }
                     }
 
@@ -202,7 +313,42 @@ class Guilds {
 
                 if (data.modules.welcome.message) {
                     if (typeof data.modules.welcome.message.content === 'string' && data.modules.welcome.message.content !== guild.modules.welcome.message.content) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.welcome.message': data.modules.welcome.message } })
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.welcome.message.content': data.modules.welcome.message.content } })
+                    }
+
+                    if (data.modules.welcome.message.embed) {
+                        if (data.modules.welcome.message.embed.fields.length)
+                            data.modules.welcome.message.embed.fields = data.modules.welcome.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
+
+                        const embed = new MessageEmbed(data.modules.welcome.message.embed)
+                        await Servers.updateOne({ _id: guild._id }, {
+                            $set: {
+                                'modules.welcome.message.embed': {
+                                    active: data.modules.welcome.message.embed.active,
+                                    title: embed.title,
+                                    description: embed.description,
+                                    url: embed.url,
+                                    timestamp: data.modules.welcome.message.embed.timestamp,
+                                    color: data.modules.welcome.message.embed.color,
+                                    footer: {
+                                        text: embed.footer.text,
+                                        icon_url: embed.footer.iconURL
+                                    },
+                                    image: {
+                                        url: embed.image.url
+                                    },
+                                    thumbnail: {
+                                        url: embed.thumbnail.url
+                                    },
+                                    author: {
+                                        name: embed.author.name,
+                                        url: embed.author.url,
+                                        icon_url: embed.author.iconURL
+                                    },
+                                    fields: embed.fields
+                                }
+                            }
+                        })
                     }
                 }
 
@@ -234,7 +380,42 @@ class Guilds {
 
                 if (data.modules.farewell.message) {
                     if (typeof data.modules.farewell.message.content === 'string' && data.modules.farewell.message.content !== guild.modules.farewell.message.content) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.farewell.message': data.modules.farewell.message } })
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.farewell.message.content': data.modules.farewell.message.content } })
+                    }
+
+                    if (data.modules.farewell.message.embed) {
+                        if (data.modules.farewell.message.embed.fields.length)
+                            data.modules.farewell.message.embed.fields = data.modules.farewell.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
+
+                        const embed = new MessageEmbed(data.modules.farewell.message.embed)
+                        await Servers.updateOne({ _id: guild._id }, {
+                            $set: {
+                                'modules.farewell.message.embed': {
+                                    active: data.modules.farewell.message.embed.active,
+                                    title: embed.title,
+                                    description: embed.description,
+                                    url: embed.url,
+                                    timestamp: data.modules.farewell.message.embed.timestamp,
+                                    color: data.modules.farewell.message.embed.color,
+                                    footer: {
+                                        text: embed.footer.text,
+                                        icon_url: embed.footer.iconURL
+                                    },
+                                    image: {
+                                        url: embed.image.url
+                                    },
+                                    thumbnail: {
+                                        url: embed.thumbnail.url
+                                    },
+                                    author: {
+                                        name: embed.author.name,
+                                        url: embed.author.url,
+                                        icon_url: embed.author.iconURL
+                                    },
+                                    fields: embed.fields
+                                }
+                            }
+                        })
                     }
                 }
             }
@@ -289,7 +470,42 @@ class Guilds {
 
                     if (data.modules.levels.level_up_alerts.message) {
                         if (typeof data.modules.levels.level_up_alerts.message.content === 'string' && data.modules.levels.level_up_alerts.message.content !== guild.modules.levels.level_up_alerts.message.content) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.message': data.modules.levels.level_up_alerts.message } })
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.message.content': data.modules.levels.level_up_alerts.message.content } })
+                        }
+
+                        if (data.modules.levels.level_up_alerts.message.embed) {
+                            if (data.modules.levels.level_up_alerts.message.embed.fields.length)
+                                data.modules.levels.level_up_alerts.message.embed.fields = data.modules.levels.level_up_alerts.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
+
+                            const embed = new MessageEmbed(data.modules.levels.level_up_alerts.message.embed)
+                            await Servers.updateOne({ _id: guild._id }, {
+                                $set: {
+                                    'modules.levels.level_up_alerts.message.embed': {
+                                        active: data.modules.levels.level_up_alerts.message.embed.active,
+                                        title: embed.title,
+                                        description: embed.description,
+                                        url: embed.url,
+                                        timestamp: data.modules.levels.level_up_alerts.message.embed.timestamp,
+                                        color: data.modules.levels.level_up_alerts.message.embed.color,
+                                        footer: {
+                                            text: embed.footer.text,
+                                            icon_url: embed.footer.iconURL
+                                        },
+                                        image: {
+                                            url: embed.image.url
+                                        },
+                                        thumbnail: {
+                                            url: embed.thumbnail.url
+                                        },
+                                        author: {
+                                            name: embed.author.name,
+                                            url: embed.author.url,
+                                            icon_url: embed.author.iconURL
+                                        },
+                                        fields: embed.fields
+                                    }
+                                }
+                            })
                         }
                     }
 

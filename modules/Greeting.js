@@ -12,24 +12,20 @@ class Greeting {
         if (member.user.bot) return false
 
         if (server.modules.welcome.active) {
-            const message = server.modules.welcome.message
+            const content = await Replacer.ReplaceMessageTemplate(self, server.modules.welcome.message, { guild: member.guild, member: member })
 
-            if (message) {
-                const content = await Replacer.Replace(self, server.modules.welcome.message.content, { guild: member.guild, member: member })
-
-                if (server.modules.welcome.format == 'DM') {
-                    try {
-                        await member.send(null, { content: content })
-                    } catch (err) {
-                        
-                    }
+            if (server.modules.welcome.format == 'DM') {
+                try {
+                    await member.send(null, content)
+                } catch (err) {
+                    
                 }
+            }
 
-                if (server.modules.welcome.format == 'CHANNEL') {
-                    const channel = member.guild.channels.cache.get(server.modules.welcome.channel_id)
+            if (server.modules.welcome.format == 'CHANNEL') {
+                const channel = member.guild.channels.cache.get(server.modules.welcome.channel_id)
 
-                    if (channel) await channel.send(null, { content: content })
-                }
+                if (channel) await channel.send(null, content)
             }
         }
 

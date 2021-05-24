@@ -1,3 +1,4 @@
+const Farewell = require('../../modules/Farewell')
 const help = require('../general/help')
 
 /**
@@ -150,6 +151,30 @@ const save = async (self, server, message, args) => {
     return true
 }
 
+/**
+ * @param {import('../../internals/Lacuna')} self
+ * @param {import('../../internals/Typings').ServerDocument} server
+ * @param {import('discord.js').Message} message
+ * @param {String[]} args
+ */
+ const test = async (self, server, message, args) => {
+    const locale = self.translator.locale(server.locale).commands
+
+    if (!server.modules.farewell.active) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.test.texts.inactive, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    if ((!server.modules.farewell.message.content && !server.modules.farewell.message.embed.active)) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.test.texts.no_content, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    await Farewell.Handle(self, server, message.member)
+}
+
 module.exports = {
     fn: execute,
     name: 'farewell',
@@ -170,6 +195,11 @@ module.exports = {
             fn: save,
             name: 'save',
             description: 'commands.farewell.save.description'
+        },
+        {
+            fn: test,
+            name: 'test',
+            description: 'commands.farewell.test.description'
         }
     ],
     guild_only: true,

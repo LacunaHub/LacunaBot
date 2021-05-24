@@ -71,20 +71,20 @@ class Levels {
             const level_up_alerts = server.modules.levels.level_up_alerts
 
             if (level_up_alerts.active) {
-                const congrats = await Replacer.Replace(self, level_up_alerts.message.content, { message: message, guild: message.guild, member: message.member })
+                const congrats = await Replacer.ReplaceMessageTemplate(self, level_up_alerts.message, { message: message, guild: message.guild, member: message.member })
 
                 if (level_up_alerts.format === 0) {
-                    await message.channel.send(congrats)
+                    await message.channel.send(null, congrats)
                 }
 
                 else if (level_up_alerts.format === 1) {
-                    await message.member.send(congrats)
+                    await message.member.send(null, congrats)
                 }
 
                 else if (level_up_alerts.format === 2) {
                     const channel = message.guild.channels.cache.get(level_up_alerts.channel_id)
 
-                    if (channel) await channel.send(congrats)
+                    if (channel) await channel.send(null, congrats)
                 }
             }
 

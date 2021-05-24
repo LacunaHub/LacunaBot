@@ -1,3 +1,4 @@
+const { MessageEmbed } = require('discord.js')
 const moment = require('moment')
 
 class Replacer {
@@ -39,7 +40,7 @@ class Replacer {
             'guild': guild.name,
             'guild.acronym': guild.nameAcronym,
             'guild.afk_channel_id': guild.afkChannelID || '`guild.afk_channel_id`',
-            'guild.banner': guild.bannerURL || '`guild.banner`',
+            'guild.banner': guild.bannerURL() || '`guild.banner`',
             'guild.channels': guild.channels.cache.size,
             'guild.channels.text': guild.channels.cache.filter(channel => channel.type == 'text').size,
             'guild.channels.voice': guild.channels.cache.filter(channel => channel.type == 'voice').size,
@@ -138,6 +139,58 @@ class Replacer {
 
         return string
     }
+
+    /**
+     * @param {import('../internals/Lacuna')} self
+     * @param {Template} template
+     * @param {Object} stuff
+     * @param {import('discord.js').Message} stuff.message
+     * @param {import('discord.js').Guild} stuff.guild
+     * @param {import('discord.js').GuildMember} stuff.member
+     * 
+     * @typedef {Object} Template
+     * @property {string} content
+     * @property {import('../internals/Typings').MessageEmbed} embed
+     * 
+     */
+    static async ReplaceMessageTemplate(self, template, stuff) {
+        const content = await Replacer.Replace(self, template.content, stuff)
+        let embed = {}
+
+        if (template.embed.active) {
+            embed = {
+                title: template.embed.title ? await Replacer.Replace(self, template.embed.title, stuff) : null,
+                description: template.embed.description ? await Replacer.Replace(self, template.embed.description, stuff) : null,
+                url: template.embed.url ? await Replacer.Replace(self, template.embed.url, stuff) : null,
+                timestamp: template.embed.timestamp ? Number(await Replacer.Replace(self, template.embed.timestamp, stuff)) : null,
+                color: template.embed.color ? template.embed.color : null,
+                footer: {
+                    text: template.embed.footer.text ? await Replacer.Replace(self, template.embed.footer.text, stuff) : null,
+                    icon_url: template.embed.footer.icon_url ? await Replacer.Replace(self, template.embed.footer.icon_url, stuff) : null
+                },
+                image: {
+                    url: template.embed.image.url ? await Replacer.Replace(self, template.embed.image.url, stuff) : null
+                },
+                thumbnail: {
+                    url: template.embed.thumbnail.url ? await Replacer.Replace(self, template.embed.thumbnail.url, stuff) : null
+                },
+                author: {
+                    name: template.embed.author.name ? await Replacer.Replace(self, template.embed.author.name, stuff) : null,
+                    url: template.embed.author.url ? await Replacer.Replace(self, template.embed.author.url, stuff) : null,
+                    icon_url: template.embed.author.icon_url ? await Replacer.Replace(self, template.embed.author.icon_url, stuff) : null
+                },
+                fields: template.embed.fields.length ? await Promise.all(template.embed.fields.map(async field => {
+                    return {
+                        name: field.name ? await Replacer.Replace(self, field.name, stuff) : null,
+                        value: field.value ? await Replacer.Replace(self, field.value, stuff) : null,
+                        inline: Boolean(field.inline)
+                    }
+                })) : []
+            }
+        }
+
+        return template.embed.active ? { content: content, embed: new MessageEmbed(embed) } : { content: content }
+    }
 }
 
 function CHOOSE(...args) {
@@ -155,6 +208,12 @@ function DATE(date = Date.now(), format = 'DD MMM YYYY HH:mm', utc_offset = '+00
     if (typeof locale !== 'string' || !['en', 'ru'].includes(locale)) locale = 'ru'
 
     return moment(new Date(date)).locale(locale).utcOffset(utc_offset).format(format)
+}
+
+function IF(expression, if_value, else_value) {
+    expression = Boolean(expression)
+
+    return expression ? if_value : else_value
 }
 
 function LOWER(str) {

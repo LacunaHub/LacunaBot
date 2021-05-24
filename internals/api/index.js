@@ -19,18 +19,18 @@ app.use(limiter({ windowMs: 600000, max: 50 }))
 
 app.use('/webhooks/patreon', require('./webhooks/patreon'))
 
-app.all('/*', async (req, res, next) => {
-    const referer = req.headers['referer']
-    const hosts = ['https://voidlacuna.ru', 'https://www.voidlacuna.ru', 'https://discord.com']
+// app.all('/*', async (req, res, next) => {
+//     const referer = req.headers['referer']
+//     const hosts = ['https://voidlacuna.ru', 'https://www.voidlacuna.ru', 'https://discord.com']
 
-    if (!referer || !hosts.some(host => referer.includes(host))) {
-        await res.status(423).send('Locked')
+//     if (!referer || !hosts.some(host => referer.includes(host))) {
+//         await res.status(423).send('Locked')
 
-        return
-    }
+//         return
+//     }
 
-    await next()
-})
+//     await next()
+// })
 
 app.use('/guilds', require('./routes/guilds'))
 app.use('/authorize', require('./routes/oauth2'))

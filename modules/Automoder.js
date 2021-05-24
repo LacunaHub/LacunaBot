@@ -14,7 +14,7 @@ class Automoder {
         const config = server.moderation.automoder.swear_filter
 
         if (!config.active) return false
-        if (message.member.hasPermission('MANAGE_MESSAGES')) return false
+        //if (message.member.hasPermission('MANAGE_MESSAGES')) return false
 
         if (config.ignored.channels.includes(message.channel.id)) return false
         if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
@@ -54,10 +54,10 @@ class Automoder {
                 }
             }
 
-            if (send_message && config.penalty.message.content) {
-                const content = await Replacer.Replace(self, config.penalty.message.content, { message: message, guild: message.guild, member: message.member })
+            if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
+                const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message, { message: message, guild: message.guild, member: message.member })
 
-                await message.channel.send(content)
+                await message.channel.send(null, content)
             }
 
             if (!config.penalty.action || delete_message) {
@@ -182,9 +182,9 @@ class Automoder {
             if (send_message) {
                 const default_content = self.translator.locale(server.locale).modules.automoder.default_slowdown_message
 
-                const content = await Replacer.Replace(self, config.penalty.message.content || default_content, { message: message, guild: message.guild, member: message.member })
+                const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message || default_content, { message: message, guild: message.guild, member: message.member })
 
-                await message.channel.send(content)
+                await message.channel.send(null, content)
             }
 
             if (!config.penalty.action || delete_message) {
@@ -249,10 +249,10 @@ class Penalties {
             }
         }
 
-        if (send_message && config.penalty.message.content) {
-            const content = await Replacer.Replace(self, config.penalty.message.content, { message: message, guild: message.guild, member: message.member })
+        if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
+            const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message, { message: message, guild: message.guild, member: message.member })
 
-            await message.channel.send(content)
+            await message.channel.send(null, content)
         }
 
         if (!config.penalty.action || delete_message) {
