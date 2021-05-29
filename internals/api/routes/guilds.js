@@ -4,6 +4,8 @@ const authorize = require('../utility/Authorize')
 const ShardingManager = require('../../utility/ShardingManager')
 const Translator = require('../../locale/Translator')
 const Guilds = require('../interfaces/Guilds')
+const Twitch = require('../../../modules/Twitch')
+const YouTube = require('../../../modules/YouTube')
 
 const router = Router()
 
@@ -73,7 +75,13 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
             },
             reports: guild.modules.reports,
             music: guild.modules.music,
-            reactions: guild.modules.reactions
+            reactions: guild.modules.reactions,
+            twitch: {
+                channels: guild.modules.twitch.channels
+            },
+            youtube: {
+                channels: guild.modules.youtube.channels
+            }
         }
     })
 })
@@ -148,7 +156,13 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
             },
             reports: updated.modules.reports,
             music: updated.modules.music,
-            reactions: updated.modules.reactions
+            reactions: updated.modules.reactions,
+            twitch: {
+                channels: updated.modules.twitch.channels
+            },
+            youtube: {
+                channels: updated.modules.youtube.channels
+            }
         }
     })
 })
@@ -239,6 +253,260 @@ router.delete('/:guild_id/reactions/:reaction_id', authorize, authorize.permitte
     }
 
     const result = await Guilds.removeReactionElement(guild, reaction_id)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(204).end()
+})
+
+router.get('/:guild_id/twitch/search', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const query = req.query.q
+
+    if (!guild_id || !query) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const channels = await Twitch.searchChannels(query)
+
+    if (!channels || !channels.length) {
+        await res.status(404).send('Twitch Channels Not Found')
+
+        return
+    }
+
+    const added = guild.modules.twitch.channels
+
+    await res.status(200).json(channels.filter(channel => !added.some(c => c.channel.id == channel.id)))
+})
+
+router.put('/:guild_id/twitch', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const options = req.body
+
+    if (!guild_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.addTwitchChannel(guild, options)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(200).json(result)
+})
+
+router.patch('/:guild_id/twitch', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const options = req.body
+
+    if (!guild_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.editTwitchChannel(guild, options)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(200).json(result)
+})
+
+router.delete('/:guild_id/twitch/:channel_id', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const channel_id = req.params.channel_id
+
+    if (!guild_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.removeTwitchChannel(guild, channel_id)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(204).end()
+})
+
+router.get('/:guild_id/youtube/search', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const query = req.query.q
+
+    if (!guild_id || !query) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const channels = await YouTube.searchChannels(query)
+
+    const added = guild.modules.youtube.channels
+
+    await res.status(200).json(channels.filter(channel => !added.some(c => c.channel.id == channel.id)))
+})
+
+router.put('/:guild_id/youtube', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const options = req.body
+
+    if (!guild_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.addYouTubeChannel(guild, options)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(200).json(result)
+})
+
+router.patch('/:guild_id/youtube', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const options = req.body
+
+    if (!guild_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.editYouTubeChannel(guild, options)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(200).json(result)
+})
+
+router.delete('/:guild_id/youtube/:channel_id', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const channel_id = req.params.channel_id
+
+    if (!guild_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.removeYouTubeChannel(guild, channel_id)
 
     if (typeof result === 'string') {
         await res.status(400).send(result)

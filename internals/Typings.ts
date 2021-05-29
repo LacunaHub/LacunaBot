@@ -301,6 +301,14 @@ export interface ServerDocument extends Document {
             }
             minimum: Number
         }
+        twitch: {
+            custom_client_id: string
+            channels: TwitchChannel[]
+        }
+        youtube: {
+            custom_api_key: string
+            channels: YouTubeChannel[]
+        }
     }
     utility: {
         giveaways: Array<Giveaway>
@@ -673,12 +681,13 @@ export interface Giveaway {
 }
 
 export interface TwitchChannel {
+    active: boolean
     live: boolean
     last_check_timestamp: number
     channel: {
         id: string
         display_name: string
-        login: string
+        logo: string
     }
     alerts: {
         channel_id: string
@@ -687,6 +696,32 @@ export interface TwitchChannel {
         after_end: {
             delete_alert: boolean
             message_id: string
+        },
+        webhook: {
+            id: string
+            token: string
+        }
+    }
+}
+
+export interface YouTubeChannel {
+    active: boolean
+    last_video_id: string
+    last_check_timestamp: number
+    channel: {
+        id: string
+        name: string
+        thumbnail: string
+    }
+    alerts: {
+        channel_id: string
+        videos_message_template: string
+        broadcasts_message_template: string
+        videos: boolean
+        broadcasts: boolean
+        webhook: {
+            id: string
+            token: string
         }
     }
 }

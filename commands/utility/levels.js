@@ -169,7 +169,7 @@ const add = async (self, server, message, args) => {
         return false
     }
 
-    if (level < 0 || level > 2500) {
+    if (level < 0 || level > 8000) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.levels.add.texts.invalid_level, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false

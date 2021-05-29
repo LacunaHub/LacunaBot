@@ -13,11 +13,13 @@ class Replacer {
      * @param {import('discord.js').Message} stuff.message
      * @param {import('discord.js').Guild} stuff.guild
      * @param {import('discord.js').GuildMember} stuff.member
+     * @param {import('../internals/Typings').TwitchChannel|import('../internals/Typings').YouTubeChannel} stuff.subs
      */
     static async Replace(self, string, stuff) {
         const message = stuff.message
         const guild = stuff.guild
         const member = stuff.member
+        const subs = stuff.subs
 
         const activity = await self.db.activities.fetch({ _id: guild.id })
         const levels = activity.levels.find(level => level.user_id == member.id)
@@ -77,7 +79,10 @@ class Replacer {
             'member.level.current_xp': levels ? levels.experience.current : 0,
             'member.level.remaining_xp': levels ? Math.round((150 + (levels.experience.level * levels.experience.level * 8)) - levels.experience.current) : 0,
             'member.level.need_xp': levels ? 150 + (levels.experience.level * levels.experience.level * 8) : 0,
-            'member.level.total_xp': levels ? levels.experience.total : 0
+            'member.level.total_xp': levels ? levels.experience.total : 0,
+            'subs.name': subs ? subs.name : '`subs.name`',
+            'subs.title': subs ? subs.title : '`subs.title`',
+            'subs.link': subs ? subs.link : '`subs.link`'
         }
 
         let patterns = string.match(/{\s*([\w.]+)\s*}/g) || []

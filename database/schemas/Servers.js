@@ -439,6 +439,14 @@ const Server = new Schema({
                 name: { type: String, default: '' }
             },
             minimum: { type: Number, default: 3 }
+        },
+        twitch: {
+            custom_client_id: { type: String, default: '' },
+            channels: { type: Array, default: [] }
+        },
+        youtube: {
+            custom_api_key: { type: String, default: '' },
+            channels: { type: Array, default: [] }
         }
     },
     utility: {

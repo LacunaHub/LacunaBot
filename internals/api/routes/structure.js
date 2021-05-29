@@ -5,10 +5,9 @@ const numbro = require('numbro')
 const { version } = require('../../../package.json')
 
 const router = Router()
-const identify = require('../utility/Identify')
 const Utility = require('../../../database/schemas/Utility')
 
-router.get('/summary', identify, async (req, res) => {
+router.get('/summary', async (req, res) => {
     const guilds = await ShardingManager.fetchClientValues('guilds.cache.size')
     const users = await ShardingManager.fetchClientValues('users.cache.size')
     const channels = await ShardingManager.fetchClientValues('channels.cache.size')

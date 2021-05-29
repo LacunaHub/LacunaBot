@@ -2,6 +2,7 @@ const Servers = require('../../../database/schemas/Servers')
 const { GenerateUID } = require('../../../modules/Reactions')
 const { Util, MessageEmbed } = require('discord.js')
 const Channels = require('../discord/rest/Channels')
+const Webhooks = require('../discord/rest/Webhooks')
 
 class Guilds {
     /**
@@ -673,6 +674,185 @@ class Guilds {
         })
 
         await Channels.deleteReactionEmoji(element.message.channel_id, element.message.id, element.emoji.id ? `${element.emoji.name}:${element.emoji.id}` : element.emoji.name)
+
+        return true
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {Partial<import('../../Typings').TwitchChannel>} channel
+     */
+    static async addTwitchChannel(server, channel) {
+        const channels = server.modules.twitch.channels
+
+        if (channels.length >= 2 && !server.server.premium.available) return 'twitch_channels_limit_reached_no_premium'
+
+        if (channels.length >= 10) return 'twitch_channels_limit_reached'
+
+        if (channels.some(c => c.channel.id == channel.channel.id)) return 'twitch_channel_already_added'
+
+        await Servers.updateOne({ _id: server._id }, {
+            $push: {
+                'modules.twitch.channels': {
+                    active: true,
+                    live: false,
+                    last_check_timestamp: 0,
+                    channel: {
+                        id: channel.channel.id,
+                        display_name: channel.channel.display_name,
+                        logo: channel.channel.logo
+                    },
+                    alerts: {
+                        channel_id: channel.alerts.channel_id,
+                        message_template: channel.alerts.message_template,
+                        display_preview: channel.alerts.display_preview,
+                        after_end: {
+                            delete_alert: channel.alerts.after_end.delete_alert,
+                            message_id: ''
+                        },
+                        webhook: {
+                            id: '',
+                            token: ''
+                        }
+                    }
+                }
+            }
+        })
+
+        const updated = await Servers.findOne({ _id: server._id }).lean()
+        return updated.modules.twitch.channels.find(c => c.channel.id == channel.channel.id)
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {Partial<import('../../Typings').TwitchChannel>} channel
+     */
+    static async editTwitchChannel(server, channel) {
+        const channels = server.modules.twitch.channels
+
+        if (!channels.some(c => c.channel.id == channel.channel.id)) return 'twitch_channel_not_found'
+
+        await Servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': channel.channel.id }, {
+            $set: {
+                'modules.twitch.channels.$.alerts.channel_id': channel.alerts.channel_id,
+                'modules.twitch.channels.$.alerts.message_template': channel.alerts.message_template,
+                'modules.twitch.channels.$.alerts.display_preview': channel.alerts.display_preview,
+                'modules.twitch.channels.$.alerts.after_end.delete_alert': channel.alerts.after_end.delete_alert
+            }
+        })
+
+        return channel
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {number} channel_id
+     */
+    static async removeTwitchChannel(server, channel_id) {
+        channel_id = Number(channel_id)
+
+        const channels = server.modules.twitch.channels
+        const channel = channels.find(c => c.channel.id == channel_id)
+
+        if (!channel) return 'twitch_channel_not_found'
+
+        await Servers.updateOne({ _id: server._id }, {
+            $pull: {
+                'modules.twitch.channels': {
+                    'channel.id': channel_id
+                }
+            }
+        })
+        
+        if (channel.alerts.webhook.id) await Webhooks.deleteWebhook(channel.alerts.webhook.id)
+
+        return true
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {Partial<import('../../Typings').YouTubeChannel>} channel
+     */
+     static async addYouTubeChannel(server, channel) {
+        const channels = server.modules.youtube.channels
+
+        if (channels.length >= 2 && !server.server.premium.available) return 'youtube_channels_limit_reached_no_premium'
+
+        if (channels.length >= 10) return 'youtube_channels_limit_reached'
+
+        if (channels.some(c => c.channel.id == channel.channel.id)) return 'youtube_channel_already_added'
+
+        await Servers.updateOne({ _id: server._id }, {
+            $push: {
+                'modules.youtube.channels': {
+                    active: true,
+                    last_video_id: '',
+                    last_check_timestamp: 0,
+                    channel: {
+                        id: channel.channel.id,
+                        name: channel.channel.name,
+                        thumbnail: channel.channel.thumbnail
+                    },
+                    alerts: {
+                        channel_id: channel.alerts.channel_id,
+                        videos_message_template: channel.alerts.videos_message_template,
+                        broadcasts_message_template: channel.alerts.broadcasts_message_template,
+                        videos: channel.alerts.videos,
+                        broadcasts: channel.alerts.broadcasts,
+                        webhook: {
+                            id: '',
+                            token: ''
+                        }
+                    }
+                }
+            }
+        })
+
+        const updated = await Servers.findOne({ _id: server._id }).lean()
+        return updated.modules.youtube.channels.find(c => c.channel.id == channel.channel.id)
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {Partial<import('../../Typings').YouTubeChannel>} channel
+     */
+    static async editYouTubeChannel(server, channel) {
+        const channels = server.modules.youtube.channels
+
+        if (!channels.some(c => c.channel.id == channel.channel.id)) return 'youtube_channel_not_found'
+
+        await Servers.updateOne({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
+            $set: {
+                'modules.youtube.channels.$.alerts.channel_id': channel.alerts.channel_id,
+                'modules.youtube.channels.$.alerts.videos_message_template': channel.alerts.videos_message_template,
+                'modules.youtube.channels.$.alerts.broadcasts_message_template': channel.alerts.broadcasts_message_template,
+                'modules.youtube.channels.$.alerts.videos': channel.alerts.videos,
+                'modules.youtube.channels.$.alerts.broadcasts': channel.alerts.broadcasts
+            }
+        })
+
+        return channel
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {number} channel_id
+     */
+    static async removeYouTubeChannel(server, channel_id) {
+        const channels = server.modules.youtube.channels
+        const channel = channels.find(c => c.channel.id == channel_id)
+
+        if (!channel) return 'youtube_channel_not_found'
+
+        await Servers.updateOne({ _id: server._id }, {
+            $pull: {
+                'modules.youtube.channels': {
+                    'channel.id': channel_id
+                }
+            }
+        })
+
+        if (channel.alerts.webhook.id) await Webhooks.deleteWebhook(channel.alerts.webhook.id)
 
         return true
     }
