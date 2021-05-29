@@ -75,7 +75,8 @@
                 "total_guilds": "Servers",
                 "total_users": "Users",
                 "shards": "Shards",
-                "latency": "Latency"
+                "latency": "Latency",
+                "state": "State"
             }
         },
         "help": {
@@ -90,12 +91,17 @@
             ],
             "texts": {
                 "title": "Command list",
-                "description": "Use {0} as a server prefix\n[Website]({1})\n[Docs]({2})\n[Discord Guilds]({3})",
+                "description": "Use {0} as a server prefix",
                 "categories": {
                     "general": "General",
                     "moderation": "Moderation",
                     "music": "Music",
                     "utility": "Utility"
+                },
+                "links": {
+                    "website": "Website",
+                    "docs": "Documentation",
+                    "listing": "Discord Guilds"
                 },
                 "command_not_found": "{0}, command not found",
                 "usage": "Usage",

@@ -1,7 +1,7 @@
 const Lacuna = require('../Lacuna')
 const { version } = require('../../package.json')
 
-module.exports = new Lacuna({
+const lacuna = new Lacuna({
     presence: {
         status: 'online',
         activity: {
@@ -26,3 +26,8 @@ module.exports = new Lacuna({
     },
     partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'REACTION']
 })
+
+const buttons = require('discord-buttons')(lacuna)
+
+module.exports = lacuna
+module.exports.Buttons = buttons

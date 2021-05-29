@@ -1,7 +1,8 @@
-const { MessageEmbed, APIMessage } = require('discord.js')
+const { MessageEmbed } = require('discord.js')
 const { version } = require('../../package.json')
 const numbro = require('numbro')
 const os = require('os')
+const { Buttons } = require('../../internals/utility/Client')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -32,7 +33,12 @@ const execute = async (self, server, message, args) => {
         .addField('\u200B', '\u200B', true)
         .setFooter(`© ${self.application.owner.name}`, self.application.owner.iconURL())
 
-    await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
+    const state = new Buttons.MessageButton()
+        .setStyle('url')
+        .setLabel(locale.about.texts.state)
+        .setURL('https://www.voidlacuna.ru/state')
+
+    await message.reply({ buttons: [state], embed: embed, allowedMentions: { repliedUser: false } })
 
     return true
 }

@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js')
+const { Buttons } = require('../../internals/utility/Client')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -35,14 +36,29 @@ const execute = async (self, server, message, args) => {
     
         const embed = new MessageEmbed()
             .setTitle(locale.help.texts.title)
-            .setDescription(self.translator.format(locale.help.texts.description, `\`${server.prefix}\``, 'https://www.voidlacuna.ru', 'https://docs.voidlacuna.ru', 'https://www.spherecord.net'))
+            .setDescription(self.translator.format(locale.help.texts.description, `\`${server.prefix}\``))
+
+        const website = new Buttons.MessageButton()
+            .setStyle('url')
+            .setLabel(locale.help.texts.links.website)
+            .setURL('https://www.voidlacuna.ru')
+
+        const docs = new Buttons.MessageButton()
+            .setStyle('url')
+            .setLabel(locale.help.texts.links.docs)
+            .setURL('https://docs.voidlacuna.ru')
+
+        const listing = new Buttons.MessageButton()
+            .setStyle('url')
+            .setLabel(locale.help.texts.links.listing)
+            .setURL('https://www.spherecord.net')
     
         if (categories.general.size) embed.addField(locale.help.texts.categories.general, categories.general.map(c => `\`${c.name}\``).join(', '))
         if (categories.moderation.size) embed.addField(locale.help.texts.categories.moderation, categories.moderation.map(c => `\`${c.name}\``).join(', '))
         if (categories.music.size) embed.addField(locale.help.texts.categories.music, categories.music.map(c => `\`${c.name}\``).join(', '))
         if (categories.utility.size) embed.addField(locale.help.texts.categories.utility, categories.utility.map(c => `\`${c.name}\``).join(', '))
     
-        await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
+        await message.reply({ buttons: [website, docs, listing], embed: embed, allowedMentions: { repliedUser: false } })
     }
 
     else {
