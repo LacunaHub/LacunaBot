@@ -99,10 +99,10 @@ class YouTube {
 
             servers = servers.filter(server => self.guilds.cache.has(server._id))
 
+            await self.logger.info(`(YouTube): Scheduled check started for ${servers.length} servers`)
+
             for (const server of servers) {
                 const channels = server.modules.youtube.channels.sort((a, b) => a.channel.name - b.channel.name).filter(c => (Date.now() - c.last_check_timestamp) > 180000 && (c.alerts.videos || c.alerts.broadcasts))
-
-                await self.logger.info(`(YouTube): Scheduled check started for ${channels.length} channels`)
                 
                 await channels.forEach(async (channel, i) => {
                     if (i > 1 && !server.server.premium.available) return false
