@@ -83,10 +83,10 @@ class Twitch {
 
             servers = servers.filter(server => self.guilds.cache.has(server._id))
 
+            await self.logger.info(`(Twitch): Scheduled check started for ${servers.length} servers`)
+
             for (const server of servers) {
                 const broadcasters = server.modules.twitch.channels.sort((a, b) => a.channel.display_name - b.channel.display_name).filter(c => (Date.now() - c.last_check_timestamp) > 180000)
-
-                await self.logger.info(`(Twitch): Scheduled check started for ${broadcasters.length} channels`)
                 
                 await broadcasters.forEach(async (broadcaster, i) => {
                     if (i > 1 && !server.server.premium.available) return false
