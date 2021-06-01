@@ -447,7 +447,8 @@ const Server = new Schema({
         youtube: {
             custom_api_key: { type: String, default: '' },
             channels: { type: Array, default: [] }
-        }
+        },
+        autoreactions: { type: Array, default: [] }
     },
     utility: {
         giveaways: { type: Array, default: [] }

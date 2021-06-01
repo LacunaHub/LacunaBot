@@ -185,6 +185,30 @@ class Reactions {
             }
         }
     }
+
+
+    /**
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Message} message
+     */
+    static async autoReact(server, message) {
+        const auto_reaction = server.modules.autoreactions.find(ar => ar.channel_id == message.channel.id)
+
+        if (auto_reaction) {
+            const content = message.content.toLowerCase()
+            const split = content.split(/\s{1,}/)
+
+            if (auto_reaction.triggers.length && !auto_reaction.triggers.some(t => split.includes(t))) return false
+
+            for (const emoji of auto_reaction.reactions) {
+                await message.react(emoji.id || emoji.name)
+            }
+
+            return true
+        }
+
+        return false
+    }
 }
 
 module.exports = Reactions

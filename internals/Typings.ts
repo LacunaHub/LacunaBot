@@ -309,6 +309,7 @@ export interface ServerDocument extends Document {
             custom_api_key: string
             channels: YouTubeChannel[]
         }
+        autoreactions: AutoReaction[]
     }
     utility: {
         giveaways: Array<Giveaway>
@@ -755,4 +756,11 @@ export interface MessageEmbedFields {
     name: string
     value: string
     inline?: boolean
+}
+
+export interface AutoReaction {
+    channel_id: string
+    reactions: Array<{ animated: boolean, id: string, name: string }>
+    matches: string[]
+    exclude_matches: string[]
 }
