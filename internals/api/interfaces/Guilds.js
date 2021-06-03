@@ -293,6 +293,79 @@ class Guilds {
                         }
                     }
                 }
+
+                if (data.moderation.automoder.anti_caps) {
+                    if (typeof data.moderation.automoder.anti_caps.active === 'boolean' && data.moderation.automoder.anti_caps.active !== guild.moderation.automoder.anti_caps.active) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.active': data.moderation.automoder.anti_caps.active } })
+                    }
+
+                    if (typeof data.moderation.automoder.anti_caps.percentage_of_caps === 'number' && data.moderation.automoder.anti_caps.percentage_of_caps !== guild.moderation.automoder.anti_caps.percentage_of_caps) {
+                        if (data.moderation.automoder.anti_caps.percentage_of_caps >= 1 && data.moderation.automoder.anti_caps.percentage_of_caps <= 100)
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.percentage_of_caps': data.moderation.automoder.anti_caps.percentage_of_caps } })
+                    }
+
+                    if (data.moderation.automoder.anti_caps.penalty) {
+                        if (typeof data.moderation.automoder.anti_caps.penalty.action === 'number' && data.moderation.automoder.anti_caps.penalty.action !== guild.moderation.automoder.anti_caps.penalty.action) {
+                            if ([0, 1 << 0, 1 << 1, 1 << 2, 1 << 3].some(bit => (data.moderation.automoder.anti_caps.penalty.action & bit) === bit))
+                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.action': data.moderation.automoder.anti_caps.penalty.action } })
+                        }
+
+                        if (typeof data.moderation.automoder.anti_caps.penalty.timer === 'number' && data.moderation.automoder.anti_caps.penalty.timer !== guild.moderation.automoder.anti_caps.penalty.timer) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.timer': data.moderation.automoder.anti_caps.penalty.timer } })
+                        }
+
+                        if (data.moderation.automoder.anti_caps.penalty.message) {
+                            if (typeof data.moderation.automoder.anti_caps.penalty.message.content === 'string' && data.moderation.automoder.anti_caps.penalty.message.content !== guild.moderation.automoder.anti_caps.penalty.message.content) {
+                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.message.content': data.moderation.automoder.anti_caps.penalty.message.content } })
+                            }
+
+                            if (data.moderation.automoder.anti_caps.penalty.message.embed) {
+                                if (data.moderation.automoder.anti_caps.penalty.message.embed.fields.length)
+                                    data.moderation.automoder.anti_caps.penalty.message.embed.fields = data.moderation.automoder.anti_caps.penalty.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
+
+                                const embed = new MessageEmbed(data.moderation.automoder.anti_caps.penalty.message.embed)
+                                await Servers.updateOne({ _id: guild._id }, {
+                                    $set: {
+                                        'moderation.automoder.anti_caps.penalty.message.embed': {
+                                            active: data.moderation.automoder.anti_caps.penalty.message.embed.active,
+                                            title: embed.title,
+                                            description: embed.description,
+                                            url: embed.url,
+                                            timestamp: data.moderation.automoder.anti_caps.penalty.message.embed.timestamp,
+                                            color: data.moderation.automoder.anti_caps.penalty.message.embed.color,
+                                            footer: {
+                                                text: embed.footer.text,
+                                                icon_url: embed.footer.iconURL
+                                            },
+                                            image: {
+                                                url: embed.image.url
+                                            },
+                                            thumbnail: {
+                                                url: embed.thumbnail.url
+                                            },
+                                            author: {
+                                                name: embed.author.name,
+                                                url: embed.author.url,
+                                                icon_url: embed.author.iconURL
+                                            },
+                                            fields: embed.fields
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                    }
+
+                    if (data.moderation.automoder.anti_caps.ignored) {
+                        if (Array.isArray(data.moderation.automoder.anti_caps.ignored.channels)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.ignored.channels': data.moderation.automoder.anti_caps.ignored.channels } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.anti_caps.ignored.roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.ignored.roles': data.moderation.automoder.anti_caps.ignored.roles } })
+                        }
+                    }
+                }
             }
         }
 

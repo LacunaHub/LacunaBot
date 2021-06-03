@@ -17,13 +17,29 @@ const execute = async (self, server, message, args) => {
 
     const name = mention.nickname ? `${mention.user.tag} — ${mention.nickname}` : mention.user.tag
 
+    const flags = mention.user.flags?.serialize()
+    const badges = []
+
+    if (flags.DISCORD_EMPLOYEE) badges.push('<:staff:314068430787706880>')
+    if (flags.PARTNERED_SERVER_OWNER) badges.push('<:partnernew:754032603081998336>')
+    if (flags.HYPESQUAD_EVENTS) badges.push('<:hs_events:499516789605269514>')
+    if (flags.HOUSE_BRAVERY) badges.push('<:bravery:481759491961126922>')
+    if (flags.HOUSE_BRILLIANCE) badges.push('<:brilliance:481759492380295168>')
+    if (flags.HOUSE_BALANCE) badges.push('<:balance:481759491453616148>')
+    if (flags.BUGHUNTER_LEVEL_1) badges.push('<:bughunter:464402287599681540>')
+    if (flags.BUGHUNTER_LEVEL_2) badges.push('<:bughunter:464402287599681540>')
+    if (flags.EARLY_VERIFIED_DEVELOPER) badges.push('<:verified_bot_developer:850039111963901992>')
+    if (flags.EARLY_SUPPORTER) badges.push('<:supporter:585763690868113455>')
+    if (mention.premiumSinceTimestamp) badges.push('<:nitro:464402288593731585>')
+
     const embed = new MessageEmbed()
         .setAuthor(name, mention.user.displayAvatarURL())
         .addField(locale.user.texts.account_created, `${moment(mention.user.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(mention.user.createdTimestamp).locale(server.locale).fromNow()})`, true)
         .addField(locale.user.texts.member_joined, `${moment(mention.joinedTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(mention.joinedTimestamp).locale(server.locale).fromNow()})`, true)
         .addField(`${locale.user.texts.roles} [${mention.roles.cache.filter(r => r.id != message.guild.id).size}]`, mention.roles.cache.filter(r => r.id != message.guild.id).map(role => role.name).join(', ') || locale.common.texts.none)
-        .setColor(mention.displayHexColor)
         .setFooter(`ID: ${mention.id}`)
+
+    if (badges.length) embed.setDescription(badges.map(badge => badge).join(' '))
 
     await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 

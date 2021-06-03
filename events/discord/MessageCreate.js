@@ -42,6 +42,7 @@ const execute = async (self, message) => {
     await Automoder.linksFilter(self, server, message)
     await Automoder.swearFilter(self, server, message)
     await Automoder.slowdownUser(self, server, message)
+    await Automoder.antiCaps(self, server, message)
 
     return true
 }

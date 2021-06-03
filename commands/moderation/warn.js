@@ -33,28 +33,7 @@ const execute = async (self, server, message, args) => {
     const case_id = server.moderation.case_log.cases.length + 1
     const timestamp = Date.now()
 
-    if (message.deletable && !message.deleted) await message.delete()
-
-    if (case_log && server.moderation.case_log.case_types.WARN_ADD) {
-        await self.db.servers.update({ _id: message.guild.id }, {
-            $push: {
-                'moderation.case_log.cases': {
-                    case_id: case_id,
-                    type: 1 << 8,
-                    timestamp: timestamp,
-                    reason: reason || '',
-                    target: {
-                        id: mention.id,
-                        name: mention.user.tag
-                    },
-                    executor: {
-                        id: message.author.id,
-                        name: message.author.tag
-                    }
-                }
-            }
-        })
-    }
+    await message.react(self._emojis.details.OK.id).catch(self.logger.error)
 
     const violator = server.moderation.warnings.violators.find(v => v.user_id == mention.id)
     
@@ -87,28 +66,46 @@ const execute = async (self, server, message, args) => {
         })
     }
 
+    const dm_message = new MessageEmbed()
+        .setAuthor(locale.common.case_log.cases.WARN_ADD, images.WARN_ADD)
+        .addField(locale.common.case_log.server, message.guild.name, true)
+        .addField(locale.common.case_log.reason, reason || locale.common.texts.none, true)
+        .setTimestamp()
+        .setColor('#EF5350')
+
     const case_log_message = new MessageEmbed()
-        .setTitle(locale.common.case_log.cases.WARN_ADD)
+        .setAuthor(locale.common.case_log.cases.WARN_ADD, images.WARN_ADD)
         .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, message.author.tag, true)
         .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))
-        .setThumbnail(images.WARN_ADD)
         .setTimestamp()
-        .setColor(0xE19517)
+        .setColor('#EF5350')
 
-    try {
-        await mention.send(self.translator.format(locale.warn.texts.user_warned_dm, `**${mention.displayName}**`, `**${message.guild.name}**`, `**${reason || locale.common.texts.none}**`))
-    } catch (err) {
-        switch (err.message) {
-            default:
-                await message.channel.send(self.translator.format(locale.warn.texts.user_warned_closed_dm, `<@${mention.id}>`, `**${reason || locale.common.texts.none}**`))
-            break
-        }
+    await mention.send(dm_message).catch(self.logger.error)
+
+    if (case_log && server.moderation.case_log.case_types.WARN_ADD) {
+        await case_log.send(case_log_message).catch(self.logger.error)
+    
+        await self.db.servers.update({ _id: message.guild.id }, {
+            $push: {
+                'moderation.case_log.cases': {
+                    case_id: case_id,
+                    type: 1 << 8,
+                    timestamp: timestamp,
+                    reason: reason || '',
+                    target: {
+                        id: mention.id,
+                        name: mention.user.tag
+                    },
+                    executor: {
+                        id: message.author.id,
+                        name: message.author.tag
+                    }
+                }
+            }
+        })
     }
-
-    if (message.deletable && !message.deleted) await message.delete()
-    if (case_log && server.moderation.case_log.case_types.WARN_ADD) await case_log.send(case_log_message)
 
     return true
 }
@@ -160,9 +157,28 @@ const remove = async (self, server, message, args) => {
     const case_log = message.guild.channels.cache.get(server.moderation.case_log.channel_id)
     const case_id = server.moderation.case_log.cases.length + 1
 
-    if (message.deletable && !message.deleted) await message.delete()
+    await message.react(self._emojis.details.OK.id).catch(self.logger.error)
+
+    await self.db.servers.update({ _id: message.guild.id, 'moderation.warnings.violators.user_id': mention.id }, {
+        $pull: {
+            'moderation.warnings.violators.$.violations': {
+                id: violation.id
+            }
+        }
+    })
+
+    const case_log_message = new MessageEmbed()
+        .setAuthor(locale.common.case_log.cases.WARN_REMOVE, images.WARN_REMOVE)
+        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
+        .addField(locale.common.case_log.executor, message.author.tag, true)
+        .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
+        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setTimestamp()
+        .setColor('#2FDF84')
 
     if (case_log && server.moderation.case_log.case_types.WARN_REMOVE) {
+        await case_log.send(case_log_message).catch(self.logger.error)
+    
         await self.db.servers.update({ _id: message.guild.id }, {
             $push: {
                 'moderation.case_log.cases': {
@@ -182,27 +198,6 @@ const remove = async (self, server, message, args) => {
             }
         })
     }
-
-    await self.db.servers.update({ _id: message.guild.id, 'moderation.warnings.violators.user_id': mention.id }, {
-        $pull: {
-            'moderation.warnings.violators.$.violations': {
-                id: violation.id
-            }
-        }
-    })
-
-    const case_log_message = new MessageEmbed()
-        .setTitle(locale.common.case_log.cases.WARN_REMOVE)
-        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
-        .addField(locale.common.case_log.executor, message.author.tag, true)
-        .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
-        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
-        .setThumbnail(images.WARN_REMOVE)
-        .setTimestamp()
-        .setColor(0xE19517)
-
-    if (message.deletable && !message.deleted) await message.delete()
-    if (case_log && server.moderation.case_log.case_types.WARN_REMOVE) await case_log.send(case_log_message)
 
     return true
 }

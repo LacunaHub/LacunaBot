@@ -56,7 +56,8 @@
                 "executor": "Модератор",
                 "reason": "Причина",
                 "duration": "Длительность",
-                "warnings": "Предупреждений"
+                "warnings": "Предупреждений",
+                "server": "Сервер"
             },
             "args_types": {
                 "MENTION": "Упоминание",
@@ -230,6 +231,12 @@
                     "types": ["MENTION", "SNOWFLAKE"]
                 },
                 {
+                    "name": "длительность",
+                    "description": "Длительность заглушения (пример: 10m)",
+                    "required": false,
+                    "types": ["STRING"]
+                },
+                {
                     "name": "причина",
                     "description": "Причина для журнала случаев",
                     "required": false,
@@ -312,6 +319,12 @@
                     "types": ["MENTION", "SNOWFLAKE"]
                 },
                 {
+                    "name": "длительность",
+                    "description": "Длительность заглушения (пример: 10m)",
+                    "required": false,
+                    "types": ["STRING"]
+                },
+                {
                     "name": "причина",
                     "description": "Причина для журнала случаев",
                     "required": false,
@@ -382,7 +395,7 @@
                 {
                     "name": "длительность",
                     "description": "Длительность временной блокировки",
-                    "required": true,
+                    "required": false,
                     "types": ["STRING", "NUMBER"] 
                 },
                 {
@@ -391,30 +404,22 @@
                     "required": false,
                     "types": ["STRING"]
                 }
-            ],
-            "texts": {
-                "user_not_found": "{0}, пользователь не был указан или не найден",
-                "user_has_moder_permission": "{0}, я не могу заблокировать этого пользователя, потому что у него есть разрешения модератора",
-                "cant_ban_user": "{0}, невозможно заблокировать этого пользователя",
-                "no_timer_argument": "{0}, необходимо указать время блокировки",
-                "invalid_timer_argument": "{0}, аргумент времени блокировки указан неверно",
-                "dm_message_description": "Выдана временная блокировка на сервере {0}"
-            }
+            ]
         },
         "tempmute": {
             "description": "Выдаёт временное заглушение пользователю",
             "arguments": [
                 {
                     "name": "пользователь",
-                    "description": "Выдаст временное заглушение указанному пользователю",
+                    "description": "Выдаст заглушение указанному пользователю",
                     "required": true,
                     "types": ["MENTION", "SNOWFLAKE"]
                 },
                 {
                     "name": "длительность",
-                    "description": "Длительность временного заглушения",
-                    "required": true,
-                    "types": ["STRING", "NUMBER"] 
+                    "description": "Длительность заглушения (пример: 10m)",
+                    "required": false,
+                    "types": ["STRING"]
                 },
                 {
                     "name": "причина",
@@ -422,16 +427,7 @@
                     "required": false,
                     "types": ["STRING"]
                 }
-            ],
-            "texts": {
-                "user_not_found": "{0}, пользователь не был указан или не найден",
-                "user_has_moder_permission": "{0}, я не могу заглушить этого пользователя, потому что у него есть разрешения модератора",
-                "cant_mute_user": "{0}, невозможно заглушить этого пользователя",
-                "user_already_muted": "{0}, пользователю уже было выдано заглушение",
-                "no_timer_argument": "{0}, необходимо указать время заглушения",
-                "invalid_timer_argument": "{0}, аргумент времени заглушения указан неверно",
-                "dm_message_description": "Выдано временное заглушение на сервере {0}"
-            }
+            ]
         },
         "unmute": {
             "description": "Снимает заглушение у пользователя",

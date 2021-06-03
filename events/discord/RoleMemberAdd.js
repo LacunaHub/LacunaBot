@@ -76,17 +76,16 @@ const execute = async (self, member, role) => {
         const entry = audit.entries.find(e => e.target.id == member.id)
 
         if (entry) {
-            if (entry.executor.id == self.user.id) return false
+            if (entry.executor.id == self.user.id && !(entry.reason && entry.reason.includes('Автомодер:'))) return false
 
             const case_id = server.moderation.case_log.cases.length + 1
 
             const embed = new MessageEmbed()
-                .setTitle(locale.commands.common.case_log.cases.MUTE_ADD)
+                .setAuthor(locale.commands.common.case_log.cases.MUTE_ADD, images.MUTE_ADD)
                 .addField(locale.commands.common.case_log.target, `${member.user.tag}\n(${member.id})`, true)
                 .addField(locale.commands.common.case_log.executor, entry.executor.tag, true)
                 .addField(locale.commands.common.case_log.reason, entry.reason || locale.commands.common.texts.none)
                 .setFooter(self.translator.format(locale.commands.common.case_log.case, case_id))
-                .setThumbnail(images.MUTE_ADD)
                 .setTimestamp()
                 .setColor(0xF04747)
 

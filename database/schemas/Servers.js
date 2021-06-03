@@ -273,6 +273,45 @@ const Server = new Schema({
                     channels: { type: Array, default: [] },
                     roles: { type: Array, default: [] }
                 }
+            },
+            anti_caps: {
+                active: { type: Boolean, default: false },
+                percentage_of_caps: { type: Number, default: 70 },
+                penalty: {
+                    action: { type: Number, default: 0 },
+                    timer: { type: Number, default: 0 },
+                    message: {
+                        content: { type: String, default: '' },
+                        embed: {
+                            active: { type: Boolean, default: false },
+                            title: { type: String, default: null },
+                            description: { type: String, default: null },
+                            url: { type: String, default: null },
+                            timestamp: { type: String, default: null },
+                            color: { type: String, default: null },
+                            footer: {
+                                text: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            image: {
+                                url: { type: String, default: null }
+                            },
+                            thumbnail: {
+                                url: { type: String, default: null }
+                            },
+                            author: {
+                                name: { type: String, default: null },
+                                url: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            fields: { type: Array, default: [] }
+                        }
+                    }
+                },
+                ignored: {
+                    channels: { type: Array, default: [] },
+                    roles: { type: Array, default: [] }
+                }
             }
         },
         warnings: {

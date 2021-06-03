@@ -16,15 +16,17 @@ const execute = async (self, server, message, args) => {
         .setAuthor(message.guild.name, message.guild.iconURL())
         .addField(locale.server.texts.owner, server_owner.user.tag, true)
         .addField(locale.server.texts.id, message.guild.id, true)
-        .addField(locale.server.texts.region, locale.server.texts.regions[message.guild.region] || locale.server.texts.regions.unknown, true)
         .addField(locale.server.texts.members.title, `${message.guild.memberCount} ${locale.server.texts.members.total}`, true)
         .addField(locale.server.texts.channels.title, `${message.guild.channels.cache.filter(c => c.type == 'text').size} ${locale.server.texts.channels.text}\n${message.guild.channels.cache.filter(c => c.type == 'voice').size} ${locale.server.texts.channels.voice}`, true)
         .addField(locale.server.texts.verification_level, locale.server.texts.verification_levels[message.guild.verificationLevel], true)
         .addField(locale.server.texts.afk_channel, message.guild.afkChannel ? message.guild.afkChannel.name : locale.common.texts.none, true)
         .addField(locale.server.texts.roles, message.guild.roles.cache.size, true)
         .addField(locale.server.texts.emojis, message.guild.emojis.cache.size, true)
+        .addField('\u200B', '\u200B', true)
         .setFooter(`${locale.server.texts.footer.server_created} ${moment(message.guild.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)} (${(moment(message.guild.createdTimestamp).locale(server.locale).fromNow())})`)
         .setColor()
+
+    if (message.guild.description) embed.setDescription(message.guild.description)
     
     await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 

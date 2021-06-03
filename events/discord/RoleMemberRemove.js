@@ -102,12 +102,11 @@ const execute = async (self, member, role) => {
             const case_id = server.moderation.case_log.cases.length + 1
 
             const embed = new MessageEmbed()
-                .setTitle(locale.commands.common.case_log.cases.MUTE_REMOVE)
+                .setAuthor(locale.commands.common.case_log.cases.MUTE_REMOVE, images.MUTE_REMOVE)
                 .addField(locale.commands.common.case_log.target, `${member.user.tag}\n(${member.id})`, true)
                 .addField(locale.commands.common.case_log.executor, entry.executor.tag, true)
                 .addField(locale.commands.common.case_log.reason, entry.reason || locale.commands.common.texts.none)
                 .setFooter(self.translator.format(locale.commands.common.case_log.case, case_id))
-                .setThumbnail(images.MUTE_REMOVE)
                 .setTimestamp()
                 .setColor(0xF04747)
 

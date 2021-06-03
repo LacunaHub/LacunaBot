@@ -1,6 +1,8 @@
 const TemporaryBan = require('../internals/structures/TemporaryBan')
 const TemporaryMute = require('../internals/structures/TemporaryMute')
 const Replacer = require('./Replacer')
+const Utils = require('../internals/utility/Utils')
+const moment = require('moment')
 
 const usersInSlowdown = new Map()
 
@@ -14,7 +16,7 @@ class Automoder {
         const config = server.moderation.automoder.swear_filter
 
         if (!config.active) return false
-        //if (message.member.hasPermission('MANAGE_MESSAGES')) return false
+        if (message.member.hasPermission('MANAGE_MESSAGES')) return false
 
         if (config.ignored.channels.includes(message.channel.id)) return false
         if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
@@ -25,15 +27,17 @@ class Automoder {
         if (config.registry.some(reg => split.includes(reg))) {
             const tempban = (config.penalty.action & 1 << 0) === (1 << 0)
             const tempmute = (config.penalty.action & 1 << 1) === (1 << 1)
-            const send_message = ((config.penalty.action & 1 << 2) === (1 << 2))
+            const send_message = (config.penalty.action & 1 << 2) === (1 << 2)
             const delete_message = (config.penalty.action & 1 << 3) === (1 << 3)
 
             if (tempban && !tempmute && config.penalty.timer) {
+                const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+
                 new TemporaryBan(self, {
                     user_id: message.author.id,
                     guild_id: message.guild.id,
-                    expires_timestamp: Date.now() + (config.penalty.timer * 1000),
-                    reason: 'Автомодер: Фильтр плохих слов',
+                    expires_timestamp: expires_timestamp,
+                    reason: `Автомодер: Фильтр слов (${moment(expires_timestamp).locale(server.locale).endOf().fromNow(true)})`,
                     init: true
                 })
             }
@@ -43,12 +47,14 @@ class Automoder {
                 const __tempmute = self.tempmutes.find(tm => tm.user_id == message.author.id)
 
                 if (mute_role && !__tempmute && !mute_role.members.has(message.author.id)) {
+                    const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+
                     new TemporaryMute(self, {
                         user_id: message.author.id,
                         guild_id: message.guild.id,
                         role_id: mute_role.id,
-                        expires_timestamp: Date.now() + (config.penalty.timer * 1000),
-                        reason: 'Автомодер: Фильтр плохих слов',
+                        expires_timestamp: expires_timestamp,
+                        reason: `Автомодер: Фильтр слов (${moment(expires_timestamp).locale(server.locale).endOf().fromNow(true)})`,
                         init: true
                     })
                 }
@@ -62,11 +68,11 @@ class Automoder {
 
             if (!config.penalty.action || delete_message) {
                 if (message.deletable && !message.deleted) await message.delete()
-
-                return true
             }
 
             await self.emit('moduleExecution', { module: 'Automoder: Swear Filter', guild: { id: message.guild.id, name: message.guild.name }, target: { id: message.author.id, name: message.author.tag } })
+        
+            return true
         }
     }
 
@@ -154,11 +160,13 @@ class Automoder {
             const delete_message = (config.penalty.action & 1 << 3) === (1 << 3)
 
             if (tempban && !tempmute && config.penalty.timer) {
+                const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+
                 new TemporaryBan(self, {
                     user_id: message.author.id,
                     guild_id: message.guild.id,
-                    expires_timestamp: Date.now() + (config.penalty.timer * 1000),
-                    reason: 'Автомодер: Замедление отправки сообщений',
+                    expires_timestamp: expires_timestamp,
+                    reason: `Автомодер: Замедление отправки сообщений (${moment(expires_timestamp).locale(server.locale).endOf().fromNow(true)})`,
                     init: true
                 })
             }
@@ -168,12 +176,14 @@ class Automoder {
                 const __tempmute = self.tempmutes.find(tm => tm.user_id == message.author.id)
 
                 if (mute_role && !__tempmute && !mute_role.members.has(message.author.id)) {
+                    const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+
                     new TemporaryMute(self, {
                         user_id: message.author.id,
                         guild_id: message.guild.id,
                         role_id: mute_role.id,
-                        expires_timestamp: Date.now() + (config.penalty.timer * 1000),
-                        reason: 'Автомодер: Замедление отправки сообщений',
+                        expires_timestamp: expires_timestamp,
+                        reason: `Автомодер: Замедление отправки сообщений (${moment(expires_timestamp).locale(server.locale).endOf().fromNow(true)})`,
                         init: true
                     })
                 }
@@ -193,8 +203,6 @@ class Automoder {
                 } catch (err) {
                     
                 }
-
-                return true
             }
 
             clearTimeout(slowdowner.timeout)
@@ -206,6 +214,71 @@ class Automoder {
         }
 
         return false
+    }
+
+    /**
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Message} message
+     */
+    static async antiCaps(self, server, message) {
+        const config = server.moderation.automoder.anti_caps
+
+        if (!config.active) return false
+        if (message.member.hasPermission('MANAGE_MESSAGES')) return false
+
+        if (config.ignored.channels.includes(message.channel.id)) return false
+        if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
+
+        const splitted_case = Utils.splitStringCase(message.content)
+        const upper_percent = splitted_case.length ? Math.floor(splitted_case.upper.length * 100 / splitted_case.length) : 0
+
+        if (upper_percent > config.percentage_of_caps) {
+            const tempban = (config.penalty.action & 1 << 0) === (1 << 0)
+            const tempmute = (config.penalty.action & 1 << 1) === (1 << 1)
+            const send_message = ((config.penalty.action & 1 << 2) === (1 << 2))
+            const delete_message = (config.penalty.action & 1 << 3) === (1 << 3)
+
+            if (tempban && !tempmute && config.penalty.timer) {
+                new TemporaryBan(self, {
+                    user_id: message.author.id,
+                    guild_id: message.guild.id,
+                    expires_timestamp: Date.now() + (config.penalty.timer * 1000),
+                    reason: 'Автомодер: Анти-капс',
+                    init: true
+                })
+            }
+
+            if (!tempban && tempmute && config.penalty.timer) {
+                const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
+                const __tempmute = self.tempmutes.find(tm => tm.user_id == message.author.id)
+
+                if (mute_role && !__tempmute && !mute_role.members.has(message.author.id)) {
+                    new TemporaryMute(self, {
+                        user_id: message.author.id,
+                        guild_id: message.guild.id,
+                        role_id: mute_role.id,
+                        expires_timestamp: Date.now() + (config.penalty.timer * 1000),
+                        reason: 'Автомодер: Анти-капс',
+                        init: true
+                    })
+                }
+            }
+
+            if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
+                const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message, { message: message, guild: message.guild, member: message.member })
+
+                await message.channel.send(null, content)
+            }
+
+            if (!config.penalty.action || delete_message) {
+                if (message.deletable && !message.deleted) await message.delete()
+            }
+
+            await self.emit('moduleExecution', { module: 'Automoder: Anti Caps', guild: { id: message.guild.id, name: message.guild.name }, target: { id: message.author.id, name: message.author.tag } })
+        
+            return true
+        }
     }
 }
 
@@ -224,11 +297,13 @@ class Penalties {
         const delete_message = (config.penalty.action & 1 << 3) === (1 << 3)
 
         if (tempban && !tempmute && config.penalty.timer) {
+            const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+
             new TemporaryBan(self, {
                 user_id: message.author.id,
                 guild_id: message.guild.id,
-                expires_timestamp: Date.now() + (config.penalty.timer * 1000),
-                reason: 'Автомодер: Фильтр ссылок',
+                expires_timestamp: expires_timestamp,
+                reason: `Автомодер: Фильтр ссылок (${moment(expires_timestamp).locale(server.locale).endOf().fromNow(true)})`,
                 init: true
             })
         }
@@ -238,12 +313,14 @@ class Penalties {
             const tempmute = self.tempmutes.find(tm => tm.user_id == message.author.id)
 
             if (mute_role && !tempmute && !mute_role.members.has(message.author.id)) {
+                const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+
                 new TemporaryMute(self, {
                     user_id: message.author.id,
                     guild_id: message.guild.id,
                     role_id: mute_role.id,
-                    expires_timestamp: Date.now() + (config.penalty.timer * 1000),
-                    reason: 'Автомодер: Фильтр ссылок',
+                    expires_timestamp: expires_timestamp,
+                    reason: `Автомодер: Фильтр ссылок (${moment(expires_timestamp).locale(server.locale).endOf().fromNow(true)})`,
                     init: true
                 })
             }

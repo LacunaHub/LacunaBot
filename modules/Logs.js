@@ -5,15 +5,14 @@ const moment = require('moment')
 class Logs {
     static get images() {
         return {
-            BAN_ADD: 'https://i.imgur.com/tfSm8aN.png',
-            BAN_ADD_TEMP: 'https://i.imgur.com/Q7plUGo.png',
-            BAN_REMOVE: 'https://i.imgur.com/NLCI4I3.png',
-            KICK: 'https://i.imgur.com/wN9N2jk.png',
-            MUTE_ADD: 'https://i.imgur.com/1PNNkPW.png',
-            MUTE_ADD_TEMP: 'https://i.imgur.com/jCjF7ar.png',
-            MUTE_REMOVE: 'https://i.imgur.com/7bhawaJ.png',
-            WARN_ADD: 'https://i.imgur.com/YdoUgfu.png',
-            WARN_REMOVE: 'https://i.imgur.com/02OscFB.png'
+            BAN_ADD: 'https://i.imgur.com/qI02Ivf.png',
+            BAN_REMOVE: 'https://i.imgur.com/FVnlHqJ.png',
+            KICK: 'https://i.imgur.com/RYVLGuy.png',
+            MUTE_ADD: 'https://i.imgur.com/t5FJ6Gw.png',
+            MUTE_REMOVE: 'https://i.imgur.com/rtL11np.png',
+            PRUNE_MESSAGES: 'https://i.imgur.com/vUd9gtw.png',
+            WARN_ADD: 'https://i.imgur.com/R03G3G5.png',
+            WARN_REMOVE: 'https://i.imgur.com/AXNkdfG.png'
         }
     }
 

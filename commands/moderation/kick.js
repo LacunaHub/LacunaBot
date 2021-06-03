@@ -37,9 +37,31 @@ const execute = async (self, server, message, args) => {
     const case_log = message.guild.channels.cache.get(server.moderation.case_log.channel_id)
     const case_id = server.moderation.case_log.cases.length + 1
 
-    if (message.deletable && !message.deleted) await message.delete()
+    await message.react(self._emojis.details.OK.id).catch(self.logger.error)
+
+    const dm_message = new MessageEmbed()
+        .setAuthor(locale.common.case_log.cases.KICK, images.KICK)
+        .addField(locale.common.case_log.server, message.guild.name, true)
+        .addField(locale.common.case_log.reason, reason || locale.common.texts.none, true)
+        .setTimestamp()
+        .setColor('#EF5350')
+
+    const case_log_message = new MessageEmbed()
+        .setAuthor(locale.common.case_log.cases.KICK, images.KICK)
+        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
+        .addField(locale.common.case_log.executor, message.author.tag, true)
+        .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
+        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setTimestamp()
+        .setColor('#EF5350')
+
+    await mention.send(dm_message).catch(self.logger.error)
+
+    await mention.kick(reason).catch(self.logger.error)
 
     if (case_log && server.moderation.case_log.case_types.KICK) {
+        await case_log.send(case_log_message).catch(self.logger.error)
+    
         await self.db.servers.update({ _id: message.guild.id }, {
             $push: {
                 'moderation.case_log.cases': {
@@ -59,33 +81,6 @@ const execute = async (self, server, message, args) => {
             }
         })
     }
-
-    const dm_message = new MessageEmbed()
-        .setAuthor(mention.user.tag, mention.user.displayAvatarURL())
-        .setDescription(self.translator.format(locale.kick.texts.dm_message_description, `**${message.guild.name}**`))
-        .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
-        .setThumbnail(message.guild.iconURL())
-        .setTimestamp()
-        .setColor(0xF04747)
-
-    const case_log_message = new MessageEmbed()
-        .setTitle(locale.common.case_log.cases.KICK)
-        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
-        .addField(locale.common.case_log.executor, message.author.tag, true)
-        .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
-        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
-        .setThumbnail(images.KICK)
-        .setTimestamp()
-        .setColor(0xF04747)
-
-    try {
-        await mention.send(dm_message)
-    } catch (err) {
-        await self.logger.error(err)
-    }
-
-    await mention.kick(reason)
-    if (case_log && server.moderation.case_log.case_types.KICK) await case_log.send(case_log_message).catch()
 
     return true
 }

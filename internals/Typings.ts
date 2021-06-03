@@ -205,6 +205,22 @@ export interface ServerDocument extends Document {
                     roles: string[]
                 }
             }
+            anti_caps: {
+                active: boolean
+                percentage_of_caps: number
+                penalty: {
+                    action: number
+                    timer: number
+                    message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                },
+                ignored: {
+                    channels: string[]
+                    roles: string[]
+                }
+            }
         }
         warnings: {
             penalties: Array<WarningsPenalty>

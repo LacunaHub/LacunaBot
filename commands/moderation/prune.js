@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js')
+const { images } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -50,7 +51,18 @@ const execute = async (self, server, message, args) => {
     const case_log = message.guild.channels.cache.get(server.moderation.case_log.channel_id)
     const case_id = server.moderation.case_log.cases.length + 1
 
+    const case_log_message = new MessageEmbed()
+        .setAuthor(locale.common.case_log.cases.PRUNE, images.PRUNE_MESSAGES)
+        .addField(locale.common.case_log.target, mention ? mention.user.tag : locale.common.texts.none, true)
+        .addField(locale.common.case_log.executor, message.author.tag, true)
+        .addField(locale.common.case_log.reason, `${reason || locale.common.texts.none} (<#${message.channel.id}>)`)
+        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setTimestamp()
+        .setColor('#EF5350')
+
     if (case_log && server.moderation.case_log.case_types.PRUNE_MESSAGES) {
+        await case_log.send(case_log_message).catch(self.logger.error)
+    
         await self.db.servers.update({ _id: message.guild.id }, {
             $push: {
                 'moderation.case_log.cases': {
@@ -70,17 +82,6 @@ const execute = async (self, server, message, args) => {
             }
         })
     }
-
-    const case_log_message = new MessageEmbed()
-        .setTitle(locale.common.case_log.cases.PRUNE)
-        .addField(locale.common.case_log.target, mention ? mention.user.tag : locale.common.texts.none, true)
-        .addField(locale.common.case_log.executor, message.author.tag, true)
-        .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
-        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
-        .setTimestamp()
-        .setColor(0xE19517)
-
-    if (case_log && server.moderation.case_log.case_types.PRUNE_MESSAGES) await case_log.send(case_log_message)
 
     return true
 }

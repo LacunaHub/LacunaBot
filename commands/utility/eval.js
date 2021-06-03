@@ -16,9 +16,9 @@ const execute = async (self, server, message, args) => {
         const code = args.slice(0).join(' ')
         const evaled = eval(code)
 
-        await message.channel.send(`**ВЫВОД**:\`\`\`xl\n${clean(evaled)}\n\`\`\``, { split: true, allowedMentions: { repliedUser: false } })
+        await message.channel.send(`**ВЫВОД**:\`\`\`xl\n${clean(evaled)}\n\`\`\``)
     } catch(err) {
-        await message.channel.send(`**ОШИБКА**:\`\`\`xl\n${clean(err)}\n\`\`\``, { split: true, allowedMentions: { repliedUser: false } })
+        await message.channel.send(`**ОШИБКА**:\`\`\`xl\n${clean(err)}\n\`\`\``)
     }
 }
 

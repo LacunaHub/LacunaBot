@@ -24,12 +24,11 @@ const execute = async (self, guild, user) => {
             const case_id = server.moderation.case_log.cases.length + 1
     
             const embed = new MessageEmbed()
-                .setTitle(locale.commands.common.case_log.cases.BAN_REMOVE)
+                .setAuthor(locale.commands.common.case_log.cases.BAN_REMOVE, images.BAN_REMOVE)
                 .addField(locale.commands.common.case_log.target, `${user.tag}\n(${user.id})`, true)
                 .addField(locale.commands.common.case_log.executor, entry.executor.tag, true)
                 .addField(locale.commands.common.case_log.reason, entry.reason || locale.commands.common.texts.none)
                 .setFooter(self.translator.format(locale.commands.common.case_log.case, case_id))
-                .setThumbnail(images.BAN_REMOVE)
                 .setTimestamp()
                 .setColor(0xF04747)
             

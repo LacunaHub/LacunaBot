@@ -41,9 +41,23 @@ const execute = async (self, server, message, args) => {
         return false
     }
 
-    if (message.deletable && !message.deleted) await message.delete()
+    await message.react(self._emojis.details.OK.id).catch(self.logger.error)
+
+    const case_log_message = new MessageEmbed()
+        .setAuthor(locale.common.case_log.cases.MUTE_REMOVE, images.MUTE_REMOVE)
+        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
+        .addField(locale.common.case_log.executor, message.author.tag, true)
+        .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
+        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setTimestamp()
+        .setColor('#2FDF84')
+
+    if (tempmute) await tempmute.delete(false)
+    else await mention.roles.remove(mute_role.id).catch(self.logger.error)
 
     if (case_log && server.moderation.case_log.case_types.MUTE_REMOVE) {
+        await case_log.send(case_log_message).catch(self.logger.error)
+    
         await self.db.servers.update({ _id: message.guild.id }, {
             $push: {
                 'moderation.case_log.cases': {
@@ -63,20 +77,6 @@ const execute = async (self, server, message, args) => {
             }
         })
     }
-
-    const case_log_message = new MessageEmbed()
-        .setTitle(locale.common.case_log.cases.MUTE_REMOVE)
-        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
-        .addField(locale.common.case_log.executor, message.author.tag, true)
-        .addField(locale.common.case_log.reason, reason || locale.common.texts.none)
-        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
-        .setThumbnail(images.MUTE_REMOVE)
-        .setTimestamp()
-        .setColor(0xF04747)
-
-    if (tempmute) await tempmute.delete(false)
-    else await mention.roles.remove(mute_role.id)
-    if (case_log && server.moderation.case_log.case_types.MUTE_REMOVE) await case_log.send(case_log_message).catch()
 
     return true
 }

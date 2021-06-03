@@ -67,6 +67,28 @@ class Utils {
     static isSnowflake(str) {
         return /\d{17,19}/.test(str)
     }
+
+    /**
+     * 
+     * @param {string} string
+     */
+    static splitStringCase(string) {
+        const upper = [], lower = []
+
+        string = string.replace(/([^a-zа-яё]+)/gi, '')
+
+        for (let i = 0; i < string.length; i++) {
+            if (string.charAt(i) === string.charAt(i).toUpperCase()) {
+                upper.push(string.charAt(i))
+            }
+
+            else if (string.charAt(i) === string.charAt(i).toLowerCase()) {
+                lower.push(string.charAt(i))
+            }
+        }
+
+        return { upper, lower, length: string.length }
+    }
 }
 
 module.exports = Utils
