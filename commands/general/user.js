@@ -17,7 +17,7 @@ const execute = async (self, server, message, args) => {
 
     const name = mention.nickname ? `${mention.user.tag} — ${mention.nickname}` : mention.user.tag
 
-    const flags = mention.user.flags?.serialize()
+    const flags = mention.user.flags.serialize()
     const badges = []
 
     if (flags.DISCORD_EMPLOYEE) badges.push('<:staff:314068430787706880>')
