@@ -77,7 +77,7 @@ const add = async (self, server, message, args) => {
             return false
         }
 
-        const in_single_element = server.modules.reactions.some(r => (r.element.single || r.element.global_single) && r.references.includes(reference.id))
+        const in_single_element = server.modules.reactions.some(r => r.message.id == element.message.id && (r.element.single || r.element.global_single) && r.references.includes(reference.id))
 
         if (in_single_element) {
             await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reference_in_single_reaction, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
@@ -161,7 +161,7 @@ const add = async (self, server, message, args) => {
         return false
     }
 
-    if (elements.some(r => (r.element.single || r.element.global_single) && r.references.includes(reference.id))) {
+    if (elements.some(r => r.message.id == message_reaction.id && (r.element.single || r.element.global_single) && r.references.includes(reference.id))) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reaction_in_single_element, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
@@ -408,7 +408,7 @@ const single = async (self, server, message, args) => {
             return false
         }
 
-        const duplicates = server.modules.reactions.filter(r => element.references.some(ref => r.references.includes(ref)))
+        const duplicates = server.modules.reactions.filter(r => r.message.id == element.message.id && element.references.some(ref => r.references.includes(ref)))
 
         if (duplicates.length > 1) {
             await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.single.texts.reaction_element_duplicate, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
@@ -442,7 +442,7 @@ const single = async (self, server, message, args) => {
 
         let singled = 0
         for (const element of elements) {
-            const duplicates = server.modules.reactions.filter(r => element.references.some(ref => r.references.includes(ref)))
+            const duplicates = server.modules.reactions.filter(r => r.message.id == element.message.id && element.references.some(ref => r.references.includes(ref)))
 
             if (duplicates.length > 1) continue
 

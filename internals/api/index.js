@@ -23,11 +23,11 @@ app.all('/*', async (req, res, next) => {
     const referer = req.headers['referer']
     const hosts = ['https://voidlacuna.ru', 'https://www.voidlacuna.ru', 'https://discord.com']
 
-    // if (req.hostname === 'localhost') {
-    //     await next()
+    if (req.hostname === 'localhost') {
+        await next()
 
-    //     return
-    // }
+        return
+    }
 
     if (!referer || !hosts.some(host => referer.includes(host))) {
         await res.status(423).send('Locked')
