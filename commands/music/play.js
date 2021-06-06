@@ -74,7 +74,7 @@ const execute = async (self, server, message, args) => {
     if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
         const track = search.tracks[0]
 
-        if (queue.tracks.length >= server.modules.music.queue_max_length) {
+        if (queue.tracks.length >= server.modules.music.queue_max_length && server.modules.music.queue_max_length) {
             await _message.edit(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.queue_limit_reached_no_premium, `**${message.author.username}**`)}`)
 
             return false
