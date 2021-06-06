@@ -627,12 +627,15 @@ class Guilds {
 
             if (data.modules.voice_manager) {
                 if (Array.isArray(data.modules.voice_manager.temp_voice_channels.triggers)) {
-                    if (data.modules.voice_manager.temp_voice_channels.triggers.length > 1 && !guild.server.premium.available) {}
-                    else await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.temp_voice_channels.triggers': data.modules.voice_manager.temp_voice_channels.triggers } })
+                    if ((data.modules.voice_manager.temp_voice_channels.triggers.length == 1 && !guild.server.premium.available) || data.modules.voice_manager.temp_voice_channels.triggers.length <= 30) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.temp_voice_channels.triggers': data.modules.voice_manager.temp_voice_channels.triggers } })
+                    }
                 }
 
                 if (Array.isArray(data.modules.voice_manager.voice_roles)) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.voice_roles': data.modules.voice_manager.voice_roles } })
+                    if (data.modules.voice_manager.voice_roles.length <= 100) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.voice_roles': data.modules.voice_manager.voice_roles } })
+                    }
                 }
             }
 
@@ -652,6 +655,21 @@ class Guilds {
                 if (data.modules.reports.minimum && typeof data.modules.reports.minimum === 'number' && data.modules.reports.minimum !== guild.modules.reports.minimum) {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.reports.minimum': data.modules.reports.minimum } })
                 }
+            }
+
+            if (data.modules.autoreactions) {
+                if (data.modules.autoreactions.length && data.modules.autoreactions.length <= 30) {
+                    for (const reaction of data.modules.autoreactions) {
+                        reaction.reactions.filter(emoji => !emoji.name).forEach(emoji => {
+                            const index = reaction.reactions.indexOf(emoji)
+                            reaction.reactions[index] = Util.parseEmoji(emoji)
+                        })
+                    }
+
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.autoreactions': data.modules.autoreactions } })
+                }
+
+                else await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.autoreactions': [] } })
             }
         }
 

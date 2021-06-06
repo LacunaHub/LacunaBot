@@ -24,7 +24,7 @@ class Automoder {
         const content = message.content.toLowerCase()
         const split = content.split(/\s{1,}/)
 
-        if (config.registry.some(reg => split.includes(reg))) {
+        if (config.registry.some(reg => split.includes(reg.toLowerCase()))) {
             const tempban = (config.penalty.action & 1 << 0) === (1 << 0)
             const tempmute = (config.penalty.action & 1 << 1) === (1 << 1)
             const send_message = (config.penalty.action & 1 << 2) === (1 << 2)
@@ -233,7 +233,7 @@ class Automoder {
         const splitted_case = Utils.splitStringCase(message.content)
         const upper_percent = splitted_case.length ? Math.floor(splitted_case.upper.length * 100 / splitted_case.length) : 0
 
-        if (upper_percent > config.percentage_of_caps) {
+        if (upper_percent >= config.percentage_of_caps) {
             const tempban = (config.penalty.action & 1 << 0) === (1 << 0)
             const tempmute = (config.penalty.action & 1 << 1) === (1 << 1)
             const send_message = ((config.penalty.action & 1 << 2) === (1 << 2))

@@ -1,5 +1,6 @@
 const help = require('../general/help')
 const UID = require('../../internals/utility/UID')
+const Levels = require('../../modules/Levels')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -247,67 +248,64 @@ const remove = async (self, server, message, args) => {
  * @param {import('discord.js').Message} message
  * @param {String[]} args
  */
-const alerts = async (self, server, message, args) => {
+const set = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const format = args[0]
-    let text = args.slice(1).join(' ')
+    /**
+     * @type {import('discord.js').GuildMember}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null)
+    const level = isNaN(args[1]) ? null : Math.floor(Number(args[1]))
 
-    if (!format) {
-        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.levels.alerts.texts.no_format, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
-
-        return false
-    }
-
-    if (format == 'OFF') {
-        if (!server.modules.levels.level_up_alerts.active) {
-            await message.react(self._emojis.details.ERROR.id)
-
-            return false
-        }
-
-        await self.db.servers.update({ _id: message.guild.id }, {
-            $set: {
-                'modules.levels.level_up_alerts.active': false
-            }
-        })
-
-        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.levels.alerts.texts.alerts_off, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
-
-        return true
-    }
-
-    if (format == 'DM') {
-        await self.db.servers.update({ _id: message.guild.id }, {
-            $set: {
-                'modules.levels.level_up_alerts.active': true,
-                'modules.levels.level_up_alerts.format': 1,
-                'modules.levels.level_up_alerts.message.content': text ? text.replace(/\s{2,}/, ' ').trim() : server.modules.levels.level_up_alerts.message.content
-            }
-        })
-
-        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.levels.alerts.texts.alerts_dm, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
-
-        return true
-    }
-
-    if (!text) {
-        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.levels.alerts.texts.no_text, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+    if (!mention) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.levels.set.texts.no_mention, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
 
-    text = `${format} ${text}`
+    if (!level || level < 1 || level > 2500) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.levels.set.texts.no_level, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
-    await self.db.servers.update({ _id: message.guild.id }, {
-        $set: {
-            'modules.levels.level_up_alerts.active': true,
-            'modules.levels.level_up_alerts.format': 0,
-            'modules.levels.level_up_alerts.message.content': text.replace(/\s{2,}/, ' ').trim()
-        }
-    })
+        return false
+    }
 
-    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.levels.alerts.texts.text_set, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+    let total_xp = 0
+
+    for (let i = 0; i < level; i++) {
+        total_xp = total_xp + (150 + (i * i * 8))
+    }
+
+    const activity = await self.db.activities.fetch({ _id: message.guild.id })
+    const levels = activity.levels.find(level => level.user_id == mention.id)
+    
+    if (!levels) {
+        await self.db.activities.update({ _id: message.guild.id }, {
+            $push: {
+                levels: {
+                    user_id: mention.id,
+                    experience: { total: total_xp, current: 0, level: level },
+                    activity: {
+                        text: { total_messages: 0, last_message_at: null },
+                        voice: { total_time: 0, connected_at: null, disconnected_at: null }
+                    }
+                }
+            }
+        })
+    }
+
+    else {
+        await self.db.activities.update({ _id: message.guild.id, 'levels.user_id': mention.id }, {
+            $set: {
+                'levels.$.experience.level': level,
+                'levels.$.experience.current': 0,
+                'levels.$.experience.total': total_xp
+            }
+        })
+    }
+
+    await Levels.updateAwards(self, server, message, level, mention)
+
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.levels.set.texts.set_success, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -318,16 +316,57 @@ const alerts = async (self, server, message, args) => {
  * @param {import('discord.js').Message} message
  * @param {String[]} args
  */
-const single = async (self, server, message, args) => {
+const reset = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    await self.db.servers.update({ _id: message.guild.id }, {
-        $set: {
-            'modules.levels.single_roles': !server.modules.levels.single_roles
-        }
-    })
+    if (args[0] === 'all') {
+        await self.db.activities.update({ _id: message.guild.id }, {
+            $set: {
+                levels: []
+            }
+        })
 
-    await message.reply(`${self._emojis.OK} | ${self.translator.format(server.modules.levels.single_roles ? locale.levels.singleroles.texts.inactive : locale.levels.singleroles.texts.active, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.levels.reset.texts.reset_success, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return true
+    }
+
+    /**
+     * @type {import('discord.js').GuildMember|import('discord.js').Role}
+     */
+    const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null) || message.mentions.roles.first() || message.guild.roles.cache.find(r => r.id == args[0] || r.name == args[0])
+
+    if (!mention) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.levels.reset.texts.no_mention, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    const is_role = 'color' in mention
+
+    if (is_role) {
+        await mention.members.forEach(async member => {
+            await self.db.activities.update({ _id: message.guild.id }, {
+                $pull: {
+                    levels: {
+                        user_id: member.id
+                    }
+                }
+            })
+        })
+    }
+
+    else {
+        await self.db.activities.update({ _id: message.guild.id }, {
+            $pull: {
+                levels: {
+                    user_id: mention.id
+                }
+            }
+        })
+    }
+
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.levels.reset.texts.reset_success, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }
@@ -359,14 +398,14 @@ module.exports = {
             description: 'commands.levels.remove.description'
         },
         {
-            fn: alerts,
-            name: 'alerts',
-            description: 'commands.levels.alerts.description'
+            fn: set,
+            name: 'set',
+            description: 'commands.levels.set.description'
         },
         {
-            fn: single,
-            name: 'singleroles',
-            description: 'commands.levels.singleroles.description'
+            fn: reset,
+            name: 'reset',
+            description: 'commands.levels.reset.description'
         }
     ],
     guild_only: true,

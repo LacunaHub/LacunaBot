@@ -81,7 +81,8 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
             },
             youtube: {
                 channels: guild.modules.youtube.channels
-            }
+            },
+            autoreactions: guild.modules.autoreactions
         }
     })
 })
@@ -162,7 +163,8 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
             },
             youtube: {
                 channels: updated.modules.youtube.channels
-            }
+            },
+            autoreactions: updated.modules.autoreactions
         }
     })
 })

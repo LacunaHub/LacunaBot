@@ -1,6 +1,7 @@
 const help = require('../../commands/general/help')
 const { Text } = require('../../modules/Levels')
 const Automoder = require('../../modules/Automoder')
+const { autoReact } = require('../../modules/Reactions')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -11,7 +12,7 @@ const execute = async (self, message) => {
 
     const server = await self.db.servers.fetch({ _id: message.guild.id })
 
-    if (message.member.roles.cache.has(server.moderation.roles.mute) && !message.member.hasPermission('MANAGE_MESSAGES')) {
+    if (message.member && message.member.roles.cache.has(server.moderation.roles.mute) && !message.member.hasPermission('MANAGE_MESSAGES')) {
         const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
         const has_permissions = message.channel.permissionsFor(mute_role.id).has('SEND_MESSAGES')
 
@@ -43,6 +44,8 @@ const execute = async (self, message) => {
     await Automoder.swearFilter(self, server, message)
     await Automoder.slowdownUser(self, server, message)
     await Automoder.antiCaps(self, server, message)
+
+    await autoReact(server, message)
 
     return true
 }

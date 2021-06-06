@@ -30,8 +30,10 @@ const execute = async (self, state, channel) => {
         if (voice_roles.size) await state.member.roles.remove(voice_roles, locale.voice_manager.voice_remove_roles_reason)
     }
 
-    await DeleteTempVoice(self, server, channel)
-    await VoiceDisconnect(self, server, state, channel)
+    if (channel) {
+        await DeleteTempVoice(self, server, channel)
+        await VoiceDisconnect(self, server, state, channel)
+    }
 
     return true
 }

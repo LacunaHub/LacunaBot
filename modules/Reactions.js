@@ -198,7 +198,7 @@ class Reactions {
             const content = message.content.toLowerCase()
             const split = content.split(/\s{1,}/)
 
-            if (auto_reaction.triggers.length && !auto_reaction.triggers.some(t => split.includes(t))) return false
+            if ((auto_reaction.matches.length && !auto_reaction.matches.some(m => split.includes(m.toLowerCase()))) || (auto_reaction.exclude_matches.length && auto_reaction.exclude_matches.some(m => split.includes(m.toLowerCase())))) return false
 
             for (const emoji of auto_reaction.reactions) {
                 await message.react(emoji.id || emoji.name)

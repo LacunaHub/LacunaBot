@@ -50,12 +50,6 @@ class Levels {
         const points = Math.floor(Math.random() * 11) + (15 + level)
 
         if ((next_level - current_xp) <= points) {
-            const awards = server.modules.levels.awards.sort((a, b) => b.level - a.level)
-            const reward = awards.find(award => award.level === (level + 1))
-
-            const less_awards = awards.filter(award => award.level < (level + 1)).sort((a, b) => b.level - a.level)
-            const less_reward = less_awards[0] || null
-
             await self.db.activities.update({ _id: message.guild.id, 'levels.user_id': message.author.id }, {
                 $set: {
                     'levels.$.experience.level': level + 1,
@@ -68,73 +62,7 @@ class Levels {
                 }
             })
 
-            const level_up_alerts = server.modules.levels.level_up_alerts
-
-            if (level_up_alerts.active) {
-                const congrats = await Replacer.ReplaceMessageTemplate(self, level_up_alerts.message, { message: message, guild: message.guild, member: message.member })
-
-                if (level_up_alerts.format === 0) {
-                    await message.channel.send(null, congrats)
-                }
-
-                else if (level_up_alerts.format === 1) {
-                    await message.member.send(null, congrats)
-                }
-
-                else if (level_up_alerts.format === 2) {
-                    const channel = message.guild.channels.cache.get(level_up_alerts.channel_id)
-
-                    if (channel) await channel.send(null, congrats)
-                }
-            }
-
-            if (reward) {
-                if (reward.type === 'ROLE') {
-                    const roles = message.guild.roles.cache.filter(r => r.editable && reward.references.includes(r.id))
-
-                    if (roles.size) {
-                        try {
-                            if (!roles.some(r => message.member.roles.cache.has(r.id))) await message.member.roles.add(roles)
-
-                            if (server.modules.levels.single_roles && less_reward) {
-                                const less_roles = message.guild.roles.cache.filter(r => r.editable && less_reward.references.includes(r.id))
-
-                                if (less_roles.size) {
-                                    if (less_roles.some(r => message.member.roles.cache.has(r.id))) await message.member.roles.remove(less_roles)
-                                }
-                            }
-                        } catch (err) {
-                            await self.logger.error('Error at level_role_rewards', err)
-
-                            return false
-                        }
-                    }
-                }
-            }
-
-            if (!reward && less_reward) {
-                if (less_reward.type === 'ROLE') {
-                    const roles = message.guild.roles.cache.filter(r => r.editable && less_reward.references.includes(r.id))
-
-                    if (roles.size) {
-                        try {
-                            if (!roles.some(r => message.member.roles.cache.has(r.id))) await message.member.roles.add(roles)
-
-                            if (server.modules.levels.single_roles && less_awards[1]) {
-                                const less_roles = message.guild.roles.cache.filter(r => r.editable && less_awards[1].references.includes(r.id))
-
-                                if (less_roles.size) {
-                                    if (less_roles.some(r => message.member.roles.cache.has(r.id))) await message.member.roles.remove(less_roles)
-                                }
-                            }
-                        } catch (err) {
-                            await self.logger.error('Error at level_less_role_rewards', err)
-
-                            return false
-                        }
-                    }
-                }
-            }
+            await Levels.updateAwards(self, server, message, level + 1)
         }
 
         else {
@@ -151,6 +79,91 @@ class Levels {
         }
 
         return true
+    }
+
+    /**
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').Message} message
+     * @param {number} level
+     * @param {import('discord.js').GuildMember} [mention]
+     */
+    static async updateAwards(self, server, message, level, mention) {
+        const member = mention || message.member
+
+        const awards = server.modules.levels.awards.sort((a, b) => b.level - a.level)
+        const reward = awards.find(award => award.level === level)
+
+        const less_awards = awards.filter(award => award.level < level).sort((a, b) => b.level - a.level)
+        const less_reward = less_awards[0] || null
+
+        const level_up_alerts = server.modules.levels.level_up_alerts
+
+        if (level_up_alerts.active) {
+            const congrats = await Replacer.ReplaceMessageTemplate(self, level_up_alerts.message, { message: message, guild: message.guild, member: message.member })
+
+            if (level_up_alerts.format === 0) {
+                await message.channel.send(null, congrats)
+            }
+
+            else if (level_up_alerts.format === 1) {
+                await member.send(null, congrats)
+            }
+
+            else if (level_up_alerts.format === 2) {
+                const channel = message.guild.channels.cache.get(level_up_alerts.channel_id)
+
+                if (channel) await channel.send(null, congrats)
+            }
+        }
+
+        if (reward) {
+            if (reward.type === 'ROLE') {
+                const roles = message.guild.roles.cache.filter(r => r.editable && reward.references.includes(r.id))
+
+                if (roles.size) {
+                    try {
+                        if (!roles.some(r => member.roles.cache.has(r.id))) await member.roles.add(roles)
+
+                        if (server.modules.levels.single_roles && less_reward) {
+                            const less_roles = message.guild.roles.cache.filter(r => r.editable && less_reward.references.includes(r.id))
+
+                            if (less_roles.size) {
+                                if (less_roles.some(r => member.roles.cache.has(r.id))) await member.roles.remove(less_roles)
+                            }
+                        }
+                    } catch (err) {
+                        await self.logger.error('Error at level_role_rewards', err)
+
+                        return false
+                    }
+                }
+            }
+        }
+
+        if (!reward && less_reward) {
+            if (less_reward.type === 'ROLE') {
+                const roles = message.guild.roles.cache.filter(r => r.editable && less_reward.references.includes(r.id))
+
+                if (roles.size) {
+                    try {
+                        if (!roles.some(r => member.roles.cache.has(r.id))) await member.roles.add(roles)
+
+                        if (server.modules.levels.single_roles && less_awards[1]) {
+                            const less_roles = message.guild.roles.cache.filter(r => r.editable && less_awards[1].references.includes(r.id))
+
+                            if (less_roles.size) {
+                                if (less_roles.some(r => member.roles.cache.has(r.id))) await member.roles.remove(less_roles)
+                            }
+                        }
+                    } catch (err) {
+                        await self.logger.error('Error at level_less_role_rewards', err)
+
+                        return false
+                    }
+                }
+            }
+        }
     }
 
     /**

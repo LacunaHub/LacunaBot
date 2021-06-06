@@ -16,6 +16,12 @@ const execute = async (self, server, message, args) => {
         return false
     }
 
+    if ((server.modules.music.allowed.channels.length && !server.modules.music.allowed.channels.includes(voice.id)) || server.modules.music.blocked.channels.includes(voice.id)) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.not_allowed_in_current_channel, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
     const has_permissions = voice.permissionsFor(message.guild.me).has(['CONNECT', 'SPEAK', 'USE_VAD'])
 
     if (!has_permissions) {
@@ -68,7 +74,7 @@ const execute = async (self, server, message, args) => {
     if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
         const track = search.tracks[0]
 
-        if (queue.tracks.length >= 15 && !server.server.premium.available) {
+        if (queue.tracks.length >= server.modules.music.queue_max_length) {
             await _message.edit(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.queue_limit_reached_no_premium, `**${message.author.username}**`)}`)
 
             return false
@@ -76,6 +82,12 @@ const execute = async (self, server, message, args) => {
 
         if (track.info.isStream && !server.server.premium.available) {
             await _message.edit(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.track_stream_only_for_premium, `**${message.author.username}**`)}`)
+
+            return false
+        }
+
+        if (track.info.isStream && !server.modules.music.allow_radio_playback) {
+            await _message.edit(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.track_stream_disabled, `**${message.author.username}**`)}`)
 
             return false
         }
