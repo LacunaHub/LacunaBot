@@ -19,7 +19,7 @@ const execute = async (self, member) => {
 
     const case_log = member.guild.channels.cache.get(server.moderation.case_log.channel_id)
 
-    if (case_log && guild.me.hasPermission('VIEW_AUDIT_LOG') && server.moderation.case_log.case_types.KICK) {
+    if (case_log && member.guild.me.hasPermission('VIEW_AUDIT_LOG') && server.moderation.case_log.case_types.KICK) {
         const audit = await member.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_KICK' })
         const entry = audit.entries.find(e => e.target.id == member.id)
 
