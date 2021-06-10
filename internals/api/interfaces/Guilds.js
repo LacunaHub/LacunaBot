@@ -717,7 +717,7 @@ class Guilds {
         
         if (elements.some(r => r.message.id == reaction.message.id && r.emoji.name == emoji.name)) return 'emoji_already_used'
 
-        if (elements.some(r => (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref)))) return 'reference_is_single'
+        if (elements.some(r => r.message.id == reaction.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref)))) return 'reference_is_single'
 
         const message = await Channels.getMessage(reaction.message.channel_id, reaction.message.id)
 
@@ -761,7 +761,7 @@ class Guilds {
 
         if (!element) return 'element_not_found'
 
-        if (server.modules.reactions.some(r => r.id != reaction.id && (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref)))) return 'reference_is_single'
+        if (server.modules.reactions.some(r => r.id != reaction.id && r.message.id == reaction.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref)))) return 'reference_is_single'
 
         await Servers.updateOne({ _id: server._id, 'modules.reactions.id': element.id }, {
             $set: {

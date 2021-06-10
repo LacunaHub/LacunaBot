@@ -87,7 +87,7 @@ class Reactions {
                         }
 
                         if (element.element.single || element.element.global_single) {
-                            const single_elements = server.modules.reactions.filter(r => element.element.global_single || (element.element.single && element.message.id == message.id))
+                            const single_elements = server.modules.reactions.filter(r => r.element.global_single || (r.element.single && r.message.id == message.id))
                             const has_single_element = single_elements.some(sr => sr.references.some(r => member.roles.cache.has(r)))
 
                             if (has_single_element) {
