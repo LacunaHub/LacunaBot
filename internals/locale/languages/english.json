@@ -177,7 +177,13 @@
                     "voice": "voice"
                 },
                 "verification_level": "Verification level",
-                "verification_levels": ["None", "Low", "Medium", "High", "Very high"],
+                "verification_levels": {
+                    "NONE": "None",
+                    "LOW": "Low",
+                    "MEDIUM": "Medium",
+                    "HIGH": "High",
+                    "VERY_HIGH": "Very high"
+                },
                 "afk_channel": "AFK channel",
                 "roles": "Roles",
                 "emojis": "Emojis",
