@@ -61,17 +61,41 @@ class TemporaryMute {
 
     async mute() {
         const guild = this.self.guilds.cache.get(this.guild_id)
-        if (!guild || !guild.available) return null
+        if (!guild || !guild.available) return false
 
-        try {
-            let member = guild.members.cache.get(this.user_id)
-            if (!member) member = await guild.members.fetch(this.user_id)
+        const server = await this.self.db.servers.find({ _id: guild.id })
 
-            if (member) {
-                await member.roles.add(this.role_id, this.reason)
-                if (member.voice.channelID) await member.voice.kick()
+        /**
+         * @type {import('discord.js').GuildMember}
+         */
+        const member = await guild.members._fetchSingle({ user: this.user_id, cache: false })
+
+        if (member) {
+            if (server.moderation.roles.on_mute.remove_all_roles) {
+                const current_roles = member.roles.cache.filter(r => r.editable && r.id != guild.id).map(r => r.id)
+    
+                await this.self.db.servers.update({ _id: guild.id }, {
+                    $push: {
+                        'moderation.roles.on_mute.returnable_roles': {
+                            user_id: member.id,
+                            roles: current_roles
+                        }
+                    }
+                })
+    
+                const strict_roles = [...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)), ...member.roles.cache.filter(r => !r.editable).map(r => r.id)]
+    
+                await member.roles.set([this.role_id, ...strict_roles], this.reason).catch(this.self.logger.error)
             }
-        } catch (err) {}
+            
+            else {
+                await member.roles.add(this.role_id, this.reason).catch(this.self.logger.error)
+            }
+
+            if (member.voice.channelID) await member.voice.kick(this.reason).catch(this.self.logger.error)
+
+            return true
+        }
     }
 
     async delete(scheduled = true) {
@@ -95,14 +119,32 @@ class TemporaryMute {
         const guild = this.self.guilds.cache.get(this.guild_id)
         if (!guild || !guild.available) return null
 
-        try {
-            let member = guild.members.cache.get(this.user_id)
-            if (!member) member = await guild.members.fetch(this.user_id)
+        const server = await this.self.db.servers.find({ _id: guild.id })
 
-            if (member && member.roles.cache.has(this.role_id)) {
-                await member.roles.remove(this.role_id, reason)
+        /**
+         * @type {import('discord.js').GuildMember}
+         */
+        const member = await guild.members._fetchSingle({ user: this.user_id, cache: false })
+
+        if (member) {
+            const returnable_roles = server.moderation.roles.on_mute.returnable_roles.find(r => r.user_id == member.id)
+
+            if (returnable_roles) {
+                await this.self.db.servers.update({ _id: guild.id }, {
+                    $pull: {
+                        'moderation.roles.on_mute.returnable_roles': {
+                            user_id: member.id
+                        }
+                    }
+                })
+    
+                await member.roles.add(returnable_roles.roles.filter(r => guild.roles.cache.has(r))).catch(this.self.logger.error)
             }
-        } catch (err) {}
+
+            await member.roles.remove(this.role_id, reason).catch(this.self.logger.error)
+
+            return true
+        }
     }
 
     /**

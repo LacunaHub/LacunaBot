@@ -1218,9 +1218,9 @@ class Logs {
      * @param {import('../internals/Lacuna')} self
      * @param {import('../internals/Typings').ServerDocument} server
      * @param {import('discord.js').GuildMember} member
-     * @param {import('discord.js').Role} role
+     * @param {import('discord.js').Collection<string, import('discord.js').Role>} roles
      */
-    static async RoleMemberAdd(self, server, member, role) {
+    static async RoleMemberAdd(self, server, member, roles) {
         if (server.moderation.logs.types.role_member_add.active) {
             const locale = self.translator.locale(server.locale).modules
 
@@ -1254,7 +1254,7 @@ class Logs {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.role_member_add.title)
                     .addField(member.user.bot ? locale.logs.common.bot : locale.logs.common.user, `${member.user.tag}\n(${member.user.id})`, true)
-                    .addField(locale.logs.common.role, `<@&${role.id}>`, true)
+                    .addField(locale.logs.common.role, roles.map(role => `<@&${role.id}>`).join(', '), true)
                     .setTimestamp()
                     .setColor(0x43b581)
 
@@ -1279,9 +1279,9 @@ class Logs {
      * @param {import('../internals/Lacuna')} self
      * @param {import('../internals/Typings').ServerDocument} server
      * @param {import('discord.js').GuildMember} member
-     * @param {import('discord.js').Role} role
+     * @param {import('discord.js').Collection<string, import('discord.js').Role>} roles
      */
-    static async RoleMemberRemove(self, server, member, role) {
+    static async RoleMemberRemove(self, server, member, roles) {
         if (server.moderation.logs.types.role_member_remove.active) {
             const locale = self.translator.locale(server.locale).modules
 
@@ -1315,7 +1315,7 @@ class Logs {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.role_member_remove.title)
                     .addField(member.user.bot ? locale.logs.common.bot : locale.logs.common.user, `${member.user.tag}\n(${member.user.id})`, true)
-                    .addField(locale.logs.common.role, `<@&${role.id}>`, true)
+                    .addField(locale.logs.common.role, roles.map(role => `<@&${role.id}>`).join(', '), true)
                     .setTimestamp()
                     .setColor(0xF04747)
 

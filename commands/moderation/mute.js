@@ -99,8 +99,28 @@ const execute = async (self, server, message, args) => {
     }
 
     else {
-        await mention.roles.add(mute_role).catch(self.logger.error)
-        if (mention.voice.channelID) mention.voice.kick().catch(self.logger.error)
+        if (server.moderation.roles.on_mute.remove_all_roles) {
+            const current_roles = mention.roles.cache.filter(r => r.editable && r.id != message.guild.id).map(r => r.id)
+
+            await self.db.servers.update({ _id: message.guild.id }, {
+                $push: {
+                    'moderation.roles.on_mute.returnable_roles': {
+                        user_id: mention.id,
+                        roles: current_roles
+                    }
+                }
+            })
+
+            const strict_roles = [...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)), ...mention.roles.cache.filter(r => !r.editable).map(r => r.id)]
+
+            await mention.roles.set([mute_role.id, ...strict_roles], reason).catch(self.logger.error)
+        }
+        
+        else {
+            await mention.roles.add(mute_role, reason).catch(self.logger.error)
+        }
+
+        if (mention.voice.channelID) mention.voice.kick(reason).catch(self.logger.error)
     }
 
     if (case_log && server.moderation.case_log.case_types.MUTE_ADD) {

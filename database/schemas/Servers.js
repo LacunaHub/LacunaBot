@@ -190,7 +190,8 @@ const Server = new Schema({
                 },
                 ignored: {
                     channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
+                    roles: { type: Array, default: [] },
+                    permissions: { type: Number, default: 8 }
                 }
             },
             links_filter: {
@@ -232,7 +233,8 @@ const Server = new Schema({
                 },
                 ignored: {
                     channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
+                    roles: { type: Array, default: [] },
+                    permissions: { type: Number, default: 8 }
                 }
             },
             users_slowdown: {
@@ -271,7 +273,8 @@ const Server = new Schema({
                 },
                 ignored: {
                     channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
+                    roles: { type: Array, default: [] },
+                    permissions: { type: Number, default: 8 }
                 }
             },
             anti_caps: {
@@ -310,7 +313,8 @@ const Server = new Schema({
                 },
                 ignored: {
                     channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
+                    roles: { type: Array, default: [] },
+                    permissions: { type: Number, default: 8 }
                 }
             }
         },
@@ -320,7 +324,12 @@ const Server = new Schema({
         },
         roles: {
             mute: { type: String, default: '' },
-            temporary: { type: Array, default: '' }
+            temporary: { type: Array, default: '' },
+            on_mute: {
+                remove_all_roles: { type: Boolean, default: false },
+                strict_roles: { type: Array, default: [] },
+                returnable_roles: { type: Array, default: [] }
+            }
         },
         tempbans: { type: Array, default: [] },
         tempmutes: { type: Array, default: [] }

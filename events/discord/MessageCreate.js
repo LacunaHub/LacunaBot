@@ -31,7 +31,7 @@ const execute = async (self, message) => {
         await command.execute(server, message, args)
     }
 
-    if (message.mentions.has(self.user.id)) {
+    if (message.mentions.has(self.user.id, { ignoreEveryone: true, ignoreRoles: true })) {
         const mentioned = message.content.trim().startsWith(`<@${self.user.id}>`) || message.content.trim().length == `<@${self.user.id}>`.length
         const mentioned_with_exclamation = message.content.trim().startsWith(`<@!${self.user.id}>`) || message.content.trim().length == `<@!${self.user.id}>`.length
 

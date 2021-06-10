@@ -5,7 +5,7 @@ const lacuna = new Lacuna({
     presence: {
         status: 'online',
         activity: {
-            name: `v${version}`
+            name: `voidlacuna.ru (v${version})`
         }
     },
     messageCacheMaxSize: 100,

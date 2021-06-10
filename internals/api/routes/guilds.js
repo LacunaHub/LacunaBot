@@ -59,7 +59,11 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
                 penalties: guild.moderation.warnings.penalties
             },
             roles: {
-                mute: guild.moderation.roles.mute
+                mute: guild.moderation.roles.mute,
+                on_mute: {
+                    remove_all_roles: guild.moderation.roles.on_mute.remove_all_roles,
+                    strict_roles: guild.moderation.roles.on_mute.strict_roles
+                }
             },
             automoder: guild.moderation.automoder
         },
@@ -141,7 +145,11 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
                 penalties: updated.moderation.warnings.penalties
             },
             roles: {
-                mute: updated.moderation.roles.mute
+                mute: updated.moderation.roles.mute,
+                on_mute: {
+                    remove_all_roles: updated.moderation.roles.on_mute.remove_all_roles,
+                    strict_roles: updated.moderation.roles.on_mute.strict_roles
+                }
             },
             automoder: updated.moderation.automoder
         },

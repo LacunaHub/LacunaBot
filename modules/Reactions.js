@@ -192,6 +192,8 @@ class Reactions {
      * @param {import('discord.js').Message} message
      */
     static async autoReact(server, message) {
+        if (message.type !== 'DEFAULT') return false
+        
         const auto_reaction = server.modules.autoreactions.find(ar => ar.channel_id == message.channel.id)
 
         if (auto_reaction) {

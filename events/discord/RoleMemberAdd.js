@@ -5,16 +5,16 @@ const { images } = require('../../modules/Logs')
 /**
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').GuildMember} member
- * @param {import('discord.js').Role} role
+ * @param {import('discord.js').Collection<string, import('discord.js').Role>} roles
  */
-const execute = async (self, member, role) => {
+const execute = async (self, member, roles) => {
     const server = await self.db.servers.fetch({ _id: member.guild.id })
 
-    if (member.guild.id == '740586549145763960' && ['746826292900528311', '746825558205136926', '746752483115794583', '842088941678886962'].includes(role.id)) {
+    if (member.guild.id == '740586549145763960' && ['746826292900528311', '746825558205136926', '746752483115794583', '842088941678886962'].some(r => roles.has(r))) {
         const user = await self.db.users.fetch({ _id: member.id })
         
         if (user) {
-            if (role.id == '746826292900528311') {
+            if (roles.has('746826292900528311')) {
                 await self.db.users.update({ _id: member.id }, {
                     $set: {
                         flags: user.flags | 1 << 0,
@@ -27,7 +27,7 @@ const execute = async (self, member, role) => {
                 })
             }
     
-            if (role.id == '746825558205136926') {
+            if (roles.has('746825558205136926')) {
                 await self.db.users.update({ _id: member.id }, {
                     $set: {
                         flags: user.flags | 1 << 1,
@@ -40,7 +40,7 @@ const execute = async (self, member, role) => {
                 })
             }
     
-            if (role.id == '746752483115794583') {
+            if (roles.has('746752483115794583')) {
                 await self.db.users.update({ _id: member.id }, {
                     $set: {
                         'boost.available': true,
@@ -52,7 +52,7 @@ const execute = async (self, member, role) => {
                 })
             }
 
-            if (role.id == '842088941678886962') {
+            if (roles.has('842088941678886962')) {
                 await self.db.users.update({ _id: member.id }, {
                     $set: {
                         'boost.available': true,
@@ -71,7 +71,7 @@ const execute = async (self, member, role) => {
     const case_log = member.guild.channels.cache.get(server.moderation.case_log.channel_id)
     const mute_role = member.guild.roles.cache.get(server.moderation.roles.mute)
 
-    if (case_log && (mute_role && mute_role.id == role.id) && member.guild.me.hasPermission('VIEW_AUDIT_LOG') && server.moderation.case_log.case_types.MUTE_ADD) {
+    if (case_log && (mute_role && roles.has(mute_role.id)) && member.guild.me.hasPermission('VIEW_AUDIT_LOG') && server.moderation.case_log.case_types.MUTE_ADD) {
         const audit = await member.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_ROLE_UPDATE' })
         const entry = audit.entries.find(e => e.target.id == member.id)
 
@@ -87,7 +87,7 @@ const execute = async (self, member, role) => {
                 .addField(locale.commands.common.case_log.reason, entry.reason || locale.commands.common.texts.none)
                 .setFooter(self.translator.format(locale.commands.common.case_log.case, case_id))
                 .setTimestamp()
-                .setColor(0xF04747)
+                .setColor('#EF5350')
 
             await case_log.send(embed)
 
@@ -112,7 +112,7 @@ const execute = async (self, member, role) => {
         }
     }
 
-    await RoleMemberAdd(self, server, member, role)
+    await RoleMemberAdd(self, server, member, roles)
 
     return true
 }

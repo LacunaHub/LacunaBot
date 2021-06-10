@@ -53,7 +53,23 @@ const execute = async (self, server, message, args) => {
         .setColor('#2FDF84')
 
     if (tempmute) await tempmute.delete(false)
-    else await mention.roles.remove(mute_role.id).catch(self.logger.error)
+    else {
+        const returnable_roles = server.moderation.roles.on_mute.returnable_roles.find(r => r.user_id == mention.id)
+
+        if (returnable_roles) {
+            await self.db.servers.update({ _id: message.guild.id }, {
+                $pull: {
+                    'moderation.roles.on_mute.returnable_roles': {
+                        user_id: mention.id
+                    }
+                }
+            })
+
+            await mention.roles.add(returnable_roles.roles.filter(r => mention.guild.roles.cache.has(r)))
+        }
+
+        await mention.roles.remove(mute_role.id, reason).catch(self.logger.error)
+    }
 
     if (case_log && server.moderation.case_log.case_types.MUTE_REMOVE) {
         await case_log.send(case_log_message).catch(self.logger.error)

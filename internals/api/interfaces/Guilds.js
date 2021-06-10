@@ -63,6 +63,21 @@ class Guilds {
                 if ((typeof data.moderation.roles.mute === 'string' || data.moderation.roles.mute === null) && data.moderation.roles.mute !== guild.moderation.roles.mute) {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.roles.mute': data.moderation.roles.mute || '' } })
                 }
+
+                if (data.moderation.roles.on_mute) {
+                    if (typeof data.moderation.roles.on_mute.remove_all_roles === 'boolean' && data.moderation.roles.on_mute.remove_all_roles !== guild.moderation.roles.on_mute.remove_all_roles) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.roles.on_mute.remove_all_roles': data.moderation.roles.on_mute.remove_all_roles } })
+                    }
+
+                    if (Array.isArray(data.moderation.roles.on_mute.strict_roles)) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.roles.on_mute.strict_roles': data.moderation.roles.on_mute.strict_roles } })
+                    }
+                }
+            }
+
+            if (data.moderation.warnings) {
+                if (Array.isArray(data.moderation.warnings.penalties))
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.warnings.penalties': data.moderation.warnings.penalties } })
             }
 
             if (data.moderation.automoder) {
@@ -89,8 +104,7 @@ class Guilds {
 
                     if (data.moderation.automoder.links_filter.penalty) {
                         if (typeof data.moderation.automoder.links_filter.penalty.action === 'number' && data.moderation.automoder.links_filter.penalty.action !== guild.moderation.automoder.links_filter.penalty.action) {
-                            if ([0, 1 << 0, 1 << 1, 1 << 2, 1 << 3].some(bit => (data.moderation.automoder.links_filter.penalty.action & bit) === bit))
-                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.action': data.moderation.automoder.links_filter.penalty.action } })
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.action': data.moderation.automoder.links_filter.penalty.action } })
                         }
 
                         if (typeof data.moderation.automoder.links_filter.penalty.timer === 'number' && data.moderation.automoder.links_filter.penalty.timer !== guild.moderation.automoder.links_filter.penalty.timer) {
@@ -147,6 +161,10 @@ class Guilds {
                         if (Array.isArray(data.moderation.automoder.links_filter.ignored.roles)) {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.ignored.roles': data.moderation.automoder.links_filter.ignored.roles } })
                         }
+
+                        if (typeof data.moderation.automoder.links_filter.ignored.permissions === 'number' && data.moderation.automoder.links_filter.ignored.permissions !== guild.moderation.automoder.links_filter.ignored.permissions) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.ignored.permissions': data.moderation.automoder.links_filter.ignored.permissions } })
+                        }
                     }
                 }
 
@@ -161,8 +179,7 @@ class Guilds {
 
                     if (data.moderation.automoder.swear_filter.penalty) {
                         if (typeof data.moderation.automoder.swear_filter.penalty.action === 'number' && data.moderation.automoder.swear_filter.penalty.action !== guild.moderation.automoder.swear_filter.penalty.action) {
-                            if ([0, 1 << 0, 1 << 1, 1 << 2, 1 << 3].some(bit => (data.moderation.automoder.swear_filter.penalty.action & bit) === bit))
-                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.action': data.moderation.automoder.swear_filter.penalty.action } })
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.action': data.moderation.automoder.swear_filter.penalty.action } })
                         }
 
                         if (typeof data.moderation.automoder.swear_filter.penalty.timer === 'number' && data.moderation.automoder.swear_filter.penalty.timer !== guild.moderation.automoder.swear_filter.penalty.timer) {
@@ -219,6 +236,10 @@ class Guilds {
                         if (Array.isArray(data.moderation.automoder.swear_filter.ignored.roles)) {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.ignored.roles': data.moderation.automoder.swear_filter.ignored.roles } })
                         }
+
+                        if (typeof data.moderation.automoder.swear_filter.ignored.permissions === 'number' && data.moderation.automoder.swear_filter.ignored.permissions !== guild.moderation.automoder.swear_filter.ignored.permissions) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.ignored.permissions': data.moderation.automoder.swear_filter.ignored.permissions } })
+                        }
                     }
                 }
 
@@ -233,8 +254,7 @@ class Guilds {
 
                     if (data.moderation.automoder.users_slowdown.penalty) {
                         if (typeof data.moderation.automoder.users_slowdown.penalty.action === 'number' && data.moderation.automoder.users_slowdown.penalty.action !== guild.moderation.automoder.users_slowdown.penalty.action) {
-                            if ([0, 1 << 0, 1 << 1, 1 << 2, 1 << 3].some(bit => (data.moderation.automoder.users_slowdown.penalty.action & bit) === bit))
-                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.action': data.moderation.automoder.users_slowdown.penalty.action } })
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.action': data.moderation.automoder.users_slowdown.penalty.action } })
                         }
 
                         if (typeof data.moderation.automoder.users_slowdown.penalty.timer === 'number' && data.moderation.automoder.users_slowdown.penalty.timer !== guild.moderation.automoder.users_slowdown.penalty.timer) {
@@ -291,6 +311,10 @@ class Guilds {
                         if (Array.isArray(data.moderation.automoder.users_slowdown.ignored.roles)) {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.ignored.roles': data.moderation.automoder.users_slowdown.ignored.roles } })
                         }
+
+                        if (typeof data.moderation.automoder.users_slowdown.ignored.permissions === 'number' && data.moderation.automoder.users_slowdown.ignored.permissions !== guild.moderation.automoder.users_slowdown.ignored.permissions) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.ignored.permissions': data.moderation.automoder.users_slowdown.ignored.permissions } })
+                        }
                     }
                 }
 
@@ -306,8 +330,7 @@ class Guilds {
 
                     if (data.moderation.automoder.anti_caps.penalty) {
                         if (typeof data.moderation.automoder.anti_caps.penalty.action === 'number' && data.moderation.automoder.anti_caps.penalty.action !== guild.moderation.automoder.anti_caps.penalty.action) {
-                            if ([0, 1 << 0, 1 << 1, 1 << 2, 1 << 3].some(bit => (data.moderation.automoder.anti_caps.penalty.action & bit) === bit))
-                                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.action': data.moderation.automoder.anti_caps.penalty.action } })
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.action': data.moderation.automoder.anti_caps.penalty.action } })
                         }
 
                         if (typeof data.moderation.automoder.anti_caps.penalty.timer === 'number' && data.moderation.automoder.anti_caps.penalty.timer !== guild.moderation.automoder.anti_caps.penalty.timer) {
@@ -363,6 +386,10 @@ class Guilds {
 
                         if (Array.isArray(data.moderation.automoder.anti_caps.ignored.roles)) {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.ignored.roles': data.moderation.automoder.anti_caps.ignored.roles } })
+                        }
+
+                        if (typeof data.moderation.automoder.anti_caps.ignored.permissions === 'number' && data.moderation.automoder.anti_caps.ignored.permissions !== guild.moderation.automoder.anti_caps.ignored.permissions) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.ignored.permissions': data.moderation.automoder.anti_caps.ignored.permissions } })
                         }
                     }
                 }
@@ -627,7 +654,7 @@ class Guilds {
 
             if (data.modules.voice_manager) {
                 if (Array.isArray(data.modules.voice_manager.temp_voice_channels.triggers)) {
-                    if ((data.modules.voice_manager.temp_voice_channels.triggers.length == 1 && !guild.server.premium.available) || data.modules.voice_manager.temp_voice_channels.triggers.length <= 30) {
+                    if ((data.modules.voice_manager.temp_voice_channels.triggers.length == 2 && !guild.server.premium.available) || data.modules.voice_manager.temp_voice_channels.triggers.length <= 30) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.temp_voice_channels.triggers': data.modules.voice_manager.temp_voice_channels.triggers } })
                     }
                 }

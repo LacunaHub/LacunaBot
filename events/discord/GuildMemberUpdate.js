@@ -10,16 +10,16 @@ const execute = async (self, before, member) => {
 
     const server = await self.db.servers.fetch({ _id: member.guild.id })
 
-    if (before.roles.cache.size < member.roles.cache.size) {
-        const role = member.roles.cache.find(r => !before.roles.cache.has(r.id))
+    if (member.roles.cache.some(r => !before.roles.cache.has(r.id))) {
+        const roles = member.roles.cache.filter(r => !before.roles.cache.has(r.id))
 
-        await self.emit('roleMemberAdd', member, role)
+        await self.emit('roleMemberAdd', member, roles)
     }
     
-    if (before.roles.cache.size > member.roles.cache.size) {
-        const role = before.roles.cache.find(r => !member.roles.cache.has(r.id))
+    if (before.roles.cache.some(r => !member.roles.cache.has(r.id))) {
+        const roles = before.roles.cache.filter(r => !member.roles.cache.has(r.id))
 
-        await self.emit('roleMemberRemove', member, role)
+        await self.emit('roleMemberRemove', member, roles)
     }
 
     await GuildMemberUpdate(self, server, before, member)

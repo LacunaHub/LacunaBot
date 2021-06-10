@@ -166,8 +166,9 @@ export interface ServerDocument extends Document {
                     }
                 },
                 ignored: {
-                    channels: Array<String>
-                    roles: Array<String>
+                    channels: string[]
+                    roles: string[]
+                    permissions: number
                 }
             }
             links_filter: {
@@ -187,6 +188,7 @@ export interface ServerDocument extends Document {
                 ignored: {
                     channels: string[]
                     roles: string[]
+                    permissions: number
                 }
             }
             users_slowdown: {
@@ -203,6 +205,7 @@ export interface ServerDocument extends Document {
                 ignored: {
                     channels: string[]
                     roles: string[]
+                    permissions: number
                 }
             }
             anti_caps: {
@@ -219,6 +222,7 @@ export interface ServerDocument extends Document {
                 ignored: {
                     channels: string[]
                     roles: string[]
+                    permissions: number
                 }
             }
         }
@@ -229,6 +233,11 @@ export interface ServerDocument extends Document {
         roles: {
             mute: String
             temporary: Array<TemporaryRoleEntry>
+            on_mute: {
+                remove_all_roles: boolean
+                strict_roles: string[]
+                returnable_roles: Array<{ user_id: string, roles: string[] }>
+            }
         },
         tempbans: Array<TemporaryBanEntry>
         tempmutes: Array<TemporaryMuteEntry>
@@ -422,20 +431,25 @@ export interface LogsWebhook {
 }
 
 export interface WarningsPenalty {
-    penalties: Number
-    action_type: Number
-    time_of_temp_penalty: Number
+    id: string
+    penalties: number
+    action: number
+    duration: number
+    message: {
+        content: string
+        embed: MessageEmbed
+    }
 }
 
 export interface WarningsViolator {
-    user_id: String
+    user_id: string
     violations: Array<ViolatorViolation>
 }
 
 export interface ViolatorViolation {
-    id: String
-    timestamp: Number
-    reason: String
+    id: string
+    timestamp: number
+    reason: string
 }
 
 export interface TemporaryBanEntry {
