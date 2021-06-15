@@ -328,6 +328,10 @@ class Guilds {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.percentage_of_caps': data.moderation.automoder.anti_caps.percentage_of_caps } })
                     }
 
+                    if (typeof data.moderation.automoder.anti_caps.minimum_content_length === 'number' && data.moderation.automoder.anti_caps.minimum_content_length !== guild.moderation.automoder.anti_caps.minimum_content_length) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.minimum_content_length': data.moderation.automoder.anti_caps.minimum_content_length } })
+                    }
+
                     if (data.moderation.automoder.anti_caps.penalty) {
                         if (typeof data.moderation.automoder.anti_caps.penalty.action === 'number' && data.moderation.automoder.anti_caps.penalty.action !== guild.moderation.automoder.anti_caps.penalty.action) {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.action': data.moderation.automoder.anti_caps.penalty.action } })
@@ -390,6 +394,56 @@ class Guilds {
 
                         if (typeof data.moderation.automoder.anti_caps.ignored.permissions === 'number' && data.moderation.automoder.anti_caps.ignored.permissions !== guild.moderation.automoder.anti_caps.ignored.permissions) {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.ignored.permissions': data.moderation.automoder.anti_caps.ignored.permissions } })
+                        }
+                    }
+                }
+
+                if (data.moderation.automoder.nicknames) {
+                    if (typeof data.moderation.automoder.nicknames.active === 'boolean' && data.moderation.automoder.nicknames.active !== guild.moderation.automoder.nicknames.active) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.active': data.moderation.automoder.nicknames.active } })
+                    }
+
+                    if (data.moderation.automoder.nicknames.types) {
+                        if (typeof data.moderation.automoder.nicknames.types.special_characters === 'boolean' && data.moderation.automoder.nicknames.types.special_characters !== guild.moderation.automoder.nicknames.types.special_characters) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.special_characters': data.moderation.automoder.nicknames.types.special_characters } })
+                        }
+
+                        if (typeof data.moderation.automoder.nicknames.types.zalgo === 'boolean' && data.moderation.automoder.nicknames.types.zalgo !== guild.moderation.automoder.nicknames.types.zalgo) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.zalgo': data.moderation.automoder.nicknames.types.zalgo } })
+                        }
+
+                        if (typeof data.moderation.automoder.nicknames.types.diacritics === 'boolean' && data.moderation.automoder.nicknames.types.diacritics !== guild.moderation.automoder.nicknames.types.diacritics) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.diacritics': data.moderation.automoder.nicknames.types.diacritics } })
+                        }
+
+                        if (typeof data.moderation.automoder.nicknames.types.emojis === 'boolean' && data.moderation.automoder.nicknames.types.emojis !== guild.moderation.automoder.nicknames.types.emojis) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.emojis': data.moderation.automoder.nicknames.types.emojis } })
+                        }
+
+                        if (typeof data.moderation.automoder.nicknames.types.links === 'boolean' && data.moderation.automoder.nicknames.types.links !== guild.moderation.automoder.nicknames.types.links) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.links': data.moderation.automoder.nicknames.types.links } })
+                        }
+
+                        if (typeof data.moderation.automoder.nicknames.types.regexp.pattern === 'string' && data.moderation.automoder.nicknames.types.regexp.pattern !== guild.moderation.automoder.nicknames.types.regexp.pattern) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.regexp.pattern': data.moderation.automoder.nicknames.types.regexp.pattern } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.nicknames.types.regexp.flags)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.regexp.flags': data.moderation.automoder.nicknames.types.regexp.flags } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.nicknames.types.contains)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.contains': data.moderation.automoder.nicknames.types.contains } })
+                        }
+                    }
+
+                    if (data.moderation.automoder.nicknames.ignored) {
+                        if (Array.isArray(data.moderation.automoder.nicknames.ignored.roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.ignored.roles': data.moderation.automoder.nicknames.ignored.roles } })
+                        }
+
+                        if (typeof data.moderation.automoder.nicknames.ignored.permissions === 'number' && data.moderation.automoder.nicknames.ignored.permissions !== guild.moderation.automoder.nicknames.ignored.permissions) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.ignored.permissions': data.moderation.automoder.nicknames.ignored.permissions } })
                         }
                     }
                 }

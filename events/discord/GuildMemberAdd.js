@@ -1,3 +1,4 @@
+const Automoder = require('../../modules/Automoder')
 const Greeting = require('../../modules/Greeting')
 const { GuildMemberAdd } = require('../../modules/Logs')
 
@@ -15,6 +16,7 @@ const execute = async (self, member) => {
     await Greeting.Handle(self, server, member)
 
     await GuildMemberAdd(self, server, member)
+    await Automoder.updateNickname(self, server, member)
 
     return true
 }

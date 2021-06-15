@@ -44,6 +44,7 @@ const execute = async (self, message) => {
     await Automoder.swearFilter(self, server, message)
     await Automoder.slowdownUser(self, server, message)
     await Automoder.antiCaps(self, server, message)
+    await Automoder.updateNickname(self, server, message.member)
 
     await autoReact(server, message)
 

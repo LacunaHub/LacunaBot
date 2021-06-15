@@ -4,8 +4,11 @@ const Replacer = require('./Replacer')
 const Utils = require('../internals/utility/Utils')
 const moment = require('moment')
 const Warnings = require('./Warnings')
+const unzalgo = require('unzalgo')
 
 const usersInSlowdown = new Map()
+
+const adjectives = ['Foggy', 'Magnanimous', 'Taboo', 'Compulsive', 'Busy', 'Angry', 'Responsive', 'Amiable', 'Nice', 'Unexpected']
 
 class Automoder {
     /**
@@ -316,7 +319,7 @@ class Automoder {
         const splitted_case = Utils.splitStringCase(message.content)
         const upper_percent = splitted_case.length ? Math.floor(splitted_case.upper.length * 100 / splitted_case.length) : 0
 
-        if (upper_percent >= config.percentage_of_caps) {
+        if (upper_percent >= config.percentage_of_caps && message.content.length >= config.minimum_content_length) {
             const ban = (config.penalty.action & 1 << 0) === (1 << 0)
             const mute = (config.penalty.action & 1 << 1) === (1 << 1)
             const send_message = (config.penalty.action & 1 << 2) === (1 << 2)
@@ -407,6 +410,72 @@ class Automoder {
         
             return true
         }
+    }
+
+    /**
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').GuildMember} member
+     */
+    static async updateNickname(self, server, member) {
+        const config = server.moderation.automoder.nicknames
+
+        if (!config.active) return false
+        if (member.permissions.any(config.ignored.permissions, false)) return false
+
+        if (member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
+
+        let name = Automoder._adjustNickname(config.types, member.displayName)
+
+        if (!name.length) {
+            const random = Math.floor(Math.random() * adjectives.length)
+
+            name = adjectives[random]
+        }
+
+        if (member.manageable && name !== member.displayName) {
+            await member.setNickname(name, 'Автомодер: Модерирование никнеймов')
+        
+            await self.emit('moduleExecution', { module: 'Automoder: Nickname Moderation', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+        }
+    
+        return true
+    }
+
+    /**
+     * @param {*} types
+     * @param {string} name
+     * @returns {string}
+     */
+    static _adjustNickname(types, name) {
+        const regexps = {
+            special_characters: /[-!@#$%\^&*()_=+\[\]\\{};:'"|,<.>\/?]/g,
+            emojis: /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}/gu,
+        }
+
+        const split = name.split(/\s{1,}/)
+
+        if (regexps.special_characters.test(name) && types.special_characters) name = name.replace(regexps.special_characters, '')
+        if (unzalgo.isZalgo(name) && types.zalgo) name = unzalgo.clean(name)
+        if (types.diacritics) name = name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+        if (regexps.emojis.test(name) && types.emojis) name = name.replace(regexps.emojis, '')
+
+        if (types.contains.some(c => split.includes(c))) {
+            types.contains.forEach(c => name = name.replace(c, ''))
+        }
+        
+        if (types.regexp.pattern) {
+            let regexp = null
+            try {
+                regexp = new RegExp(types.regexp.pattern, types.regexp.flags.join(''))
+            } catch (err) {
+                regexp = null
+            }
+
+            if (regexp) name = name.replace(regexp, '')
+        }
+
+        return name.trim()
     }
 }
 

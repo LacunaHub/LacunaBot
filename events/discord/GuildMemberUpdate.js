@@ -1,3 +1,4 @@
+const Automoder = require('../../modules/Automoder')
 const { GuildMemberUpdate } = require('../../modules/Logs')
 
 /**
@@ -23,6 +24,8 @@ const execute = async (self, before, member) => {
     }
 
     await GuildMemberUpdate(self, server, before, member)
+
+    if (before.nickname !== member.nickname) await Automoder.updateNickname(self, server, member)
 
     return true
 }

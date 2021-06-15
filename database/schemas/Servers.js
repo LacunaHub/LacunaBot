@@ -280,6 +280,7 @@ const Server = new Schema({
             anti_caps: {
                 active: { type: Boolean, default: false },
                 percentage_of_caps: { type: Number, default: 70 },
+                minimum_content_length: { type: Number, default: 10 },
                 penalty: {
                     action: { type: Number, default: 0 },
                     timer: { type: Number, default: 0 },
@@ -313,6 +314,24 @@ const Server = new Schema({
                 },
                 ignored: {
                     channels: { type: Array, default: [] },
+                    roles: { type: Array, default: [] },
+                    permissions: { type: Number, default: 8 }
+                }
+            },
+            nicknames: {
+                active: { type: Boolean, default: false },
+                types: {
+                    special_characters: { type: Boolean, default: false },
+                    zalgo: { type: Boolean, default: false },
+                    diacritics: { type: Boolean, default: false },
+                    emojis: { type: Boolean, default: false },
+                    regexp: {
+                        pattern: { type: String, default: '' },
+                        flags: { type: Array, default: [] }
+                    },
+                    contains: { type: Array, default: [] }
+                },
+                ignored: {
                     roles: { type: Array, default: [] },
                     permissions: { type: Number, default: 8 }
                 }

@@ -211,6 +211,7 @@ export interface ServerDocument extends Document {
             anti_caps: {
                 active: boolean
                 percentage_of_caps: number
+                minimum_content_length: number
                 penalty: {
                     action: number
                     timer: number
@@ -221,6 +222,24 @@ export interface ServerDocument extends Document {
                 },
                 ignored: {
                     channels: string[]
+                    roles: string[]
+                    permissions: number
+                }
+            }
+            nicknames: {
+                active: boolean
+                types: {
+                    special_characters: boolean
+                    zalgo: boolean
+                    diacritics: boolean
+                    emojis: boolean
+                    regexp: {
+                        pattern: string
+                        flags: string[]
+                    }
+                    contains: string[]
+                }
+                ignored: {
                     roles: string[]
                     permissions: number
                 }
