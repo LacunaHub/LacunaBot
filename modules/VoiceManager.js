@@ -12,7 +12,7 @@ class VoiceManager {
         const trigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.channel_id == state.channelID)
         const trigger_index = server.modules.voice_manager.temp_voice_channels.triggers.indexOf(trigger)
 
-        if (trigger_index >= 1 && !server.server.premium.available) return false
+        if (trigger_index >= 2 && !server.server.premium.available) return false
 
         if (trigger && state.guild.me.hasPermission('MANAGE_CHANNELS')) {
             const children = trigger.children.find(c => c.owner_id == state.member.id)
