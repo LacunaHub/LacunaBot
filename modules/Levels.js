@@ -84,6 +84,19 @@ class Levels {
     /**
      * @param {import('../internals/Lacuna')} self
      * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').VoiceState} state
+     */
+    static async Voice(self, server, state) {
+        if (!server.modules.levels.active) return false
+
+        if (server.modules.levels.blocked.channels.includes(state.channel.id) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))) return false
+        if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channel.id)) return false
+        if (server.modules.levels.allowed.roles.length && !state.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id))) return false
+    }
+
+    /**
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
      * @param {import('discord.js').Message} message
      * @param {number} level
      * @param {import('discord.js').GuildMember} [mention]

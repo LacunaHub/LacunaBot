@@ -24,7 +24,8 @@ router.get('/callback', async (req, res) => {
     await res.cookie('user_id', user.id, { maxAge: auth.expires_in * 1000, domain: process.env.WEBSITE_DOMAIN })
         .cookie('user_username', user.username, { maxAge: auth.expires_in * 1000, domain: process.env.WEBSITE_DOMAIN })
         .cookie('user_discriminator', user.discriminator, { maxAge: auth.expires_in * 1000, domain: process.env.WEBSITE_DOMAIN })
-        .cookie('user_avatar', user.avatar, { maxAge: auth.expires_in * 1000, domain: process.env.WEBSITE_DOMAIN })
+        
+    if (user.avatar) res.cookie('user_avatar', user.avatar, { maxAge: auth.expires_in * 1000, domain: process.env.WEBSITE_DOMAIN })
 
     const entry = await users.find({ _id: user.id })
 
