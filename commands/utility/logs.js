@@ -10,7 +10,7 @@ const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
     const log_type = args[0]
-    const channel = message.mentions.channels.first() || message.guild.channels.cache.find(c => c.id == args[1] || c.name == args[1])
+    const channel = message.mentions.channels.first() || message.guild.channels.cache.filter(c => ['text', 'news'].includes(c.type)).find(c => c.id == args[1] || c.name == args[1])
 
     if (!log_type) {
         await help.fn(self, server, message, ['logs'])

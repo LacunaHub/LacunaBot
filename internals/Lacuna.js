@@ -98,8 +98,8 @@ class Lacuna extends Client {
 
         await this.login(process.env.CLIENT_TOKEN)
 
-        this.loadcommands()
-        this.loadevents()
+        this.loadCommands()
+        this.loadEvents()
 
         this.player = new Player(this, { user: process.env.CLIENT_ID, shards: Number(process.env.CLIENT_MAX_SHARDS) })
         this.application = await this.fetchApplication()
@@ -124,12 +124,7 @@ class Lacuna extends Client {
         return Date.now()
     }
 
-    /**
-     * Загрузка всех команд
-     * 
-     * @private
-     */
-    loadcommands() {
+    loadCommands() {
         fs.readdir("./commands", async (err, files) => {
             if (err) {
                 logger.error(err)
@@ -178,12 +173,7 @@ class Lacuna extends Client {
         })
     }
 
-    /**
-     * Загрузка всех событий
-     * 
-     * @private
-     */
-    loadevents() {
+    loadEvents() {
         fs.readdir('./events', async (err, files) => {
             if (err) {
                 logger.error(err)

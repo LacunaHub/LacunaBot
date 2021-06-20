@@ -1,4 +1,4 @@
-const { RoleMemberAdd } = require('../../modules/Logs')
+const RoleMemberAdd = require('../../modules/Logs/Role/RoleMemberAdd')
 const { MessageEmbed } = require('discord.js')
 const { images } = require('../../modules/Logs')
 

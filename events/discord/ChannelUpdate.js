@@ -1,4 +1,4 @@
-const { ChannelUpdate } = require('../../modules/Logs')
+const ChannelUpdate = require('../../modules/Logs/Channel/ChannelUpdate')
 
 /**
  * @param {import('../../internals/Lacuna')} self

@@ -1,4 +1,4 @@
-const { RoleUpdate } = require('../../modules/Logs')
+const RoleUpdate = require('../../modules/Logs/Role/RoleUpdate')
 
 /**
  * @param {import('../../internals/Lacuna')} self

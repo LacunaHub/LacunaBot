@@ -1,4 +1,4 @@
-const { VoiceServerUnmute } = require('../../modules/Logs')
+const VoiceServerUnmute = require('../../modules/Logs/Voice/VoiceServerUnmute')
 
 /**
  * @param {import('../../internals/Lacuna')} self

@@ -1,4 +1,4 @@
-const { VoiceServerDeaf } = require('../../modules/Logs')
+const VoiceServerDeaf = require('../../modules/Logs/Voice/VoiceServerDeaf')
 
 /**
  * @param {import('../../internals/Lacuna')} self

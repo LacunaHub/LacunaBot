@@ -142,7 +142,7 @@ class VoiceManager {
      * @param {import('discord.js').VoiceChannel} channel
      */
     static async DeleteTempVoice(self, server, channel) {
-        const trigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.children.some(c => c.channel_id == channel.id))
+        const trigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.children.some(c => c.channel_id == channel?.id))
 
         if (trigger && channel.guild.me.hasPermission('MANAGE_CHANNELS')) {
             const trigger_children = trigger.children.find(c => c.channel_id == channel.id)

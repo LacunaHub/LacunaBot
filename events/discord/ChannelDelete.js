@@ -1,4 +1,4 @@
-const { ChannelDelete } = require('../../modules/Logs')
+const ChannelDelete = require('../../modules/Logs/Channel/ChannelDelete')
 
 /**
  * @param {import('../../internals/Lacuna')} self
@@ -40,7 +40,7 @@ const execute = async (self, channel) => {
 
     await ChannelDelete(self, server, channel)
 
-    await self.channels.cache.delete(channel.id)
+    setTimeout(() => await self.channels.cache.delete(channel.id), 5000)
 
     return true
 }

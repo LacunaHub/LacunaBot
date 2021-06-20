@@ -1,4 +1,4 @@
-const { MessageUpdate } = require('../../modules/Logs')
+const MessageUpdate = require('../../modules/Logs/Message/MessageUpdate')
 
 /**
  * @param {import('../../internals/Lacuna')} self

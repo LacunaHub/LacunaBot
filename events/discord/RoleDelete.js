@@ -1,4 +1,4 @@
-const { RoleDelete } = require('../../modules/Logs')
+const RoleDelete = require('../../modules/Logs/Role/RoleDelete')
 
 /**
  * @param {import('../../internals/Lacuna')} self

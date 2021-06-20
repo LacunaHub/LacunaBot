@@ -1,4 +1,4 @@
-const { ChannelCreate } = require('../../modules/Logs')
+const ChannelCreate = require('../../modules/Logs/Channel/ChannelCreate')
 
 /**
  * @param {import('../../internals/Lacuna')} self

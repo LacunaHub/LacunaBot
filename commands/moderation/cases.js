@@ -21,7 +21,7 @@ const execute = async (self, server, message, args) => {
 const channel = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const channel = message.mentions.channels.first() || message.guild.channels.cache.find(c => c.id == args[0] || c.name == args[0])
+    const channel = message.mentions.channels.first() || message.guild.channels.cache.filter(c => ['text', 'news'].includes(c.type)).find(c => c.id == args[0] || c.name == args[0])
 
     if (!args[0]) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.cases.channel.texts.no_channel_argument, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })

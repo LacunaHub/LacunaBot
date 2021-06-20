@@ -1,4 +1,4 @@
-const { VoiceConnect } = require('../../modules/Logs')
+const VoiceConnect = require('../../modules/Logs/Voice/VoiceConnect')
 const { CreateTempVoice } = require('../../modules/VoiceManager')
 
 /**

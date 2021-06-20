@@ -1,4 +1,4 @@
-const { VoiceMove } = require('../../modules/Logs')
+const VoiceMove = require('../../modules/Logs/Voice/VoiceMove')
 const { CreateTempVoiceOnMove } = require('../../modules/VoiceManager')
 
 /**

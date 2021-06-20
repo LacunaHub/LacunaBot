@@ -1,4 +1,4 @@
-const { RoleMemberRemove } = require('../../modules/Logs')
+const RoleMemberRemove = require('../../modules/Logs/Role/RoleMemberRemove')
 const { MessageEmbed } = require('discord.js')
 const { images } = require('../../modules/Logs')
 
@@ -60,6 +60,7 @@ const execute = async (self, member, roles) => {
                     $set: {
                         'boost.available': user.boost.type.length < 2 ? false : true,
                         'boost.tier': user.boost.tier < 1 ? 0 : user.boost.tier - 1,
+                        'boost.guilds': []
                     },
                     $pull: {
                         'boost.type': 'GIVEAWAY_WINNER'

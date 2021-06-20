@@ -85,7 +85,7 @@ const channel = async (self, server, message, args) => {
         return true
     }
 
-    const where = message.mentions.channels.first() || message.guild.channels.cache.filter(c => c.type == 'text').find(c => c.id == direction || c.name == direction)
+    const where = message.mentions.channels.first() || message.guild.channels.cache.filter(c => ['text', 'news'].includes(c.type)).find(c => c.id == direction || c.name == direction)
 
     if (!where) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.farewell.channel.texts.no_where, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
