@@ -33,7 +33,7 @@ const execute = async (self, before, state) => {
     if (voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && voice_roles_bound.some(b => b.role_id == r.id))
 
-        if (voice_roles.size) await state.member.roles.remove(voice_roles, locale.voice_manager.voice_remove_roles_reason)
+        if (voice_roles.size) await state.member.roles.add(voice_roles, locale.voice_manager.voice_remove_roles_reason)
     }
 
     await CreateTempVoiceOnMove(self, server, before, state)
