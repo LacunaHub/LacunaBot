@@ -26,7 +26,7 @@ class Warnings {
         const timestamp = Date.now()
 
         const violator = server.moderation.warnings.violators.find(v => v.user_id == target.id)
-        const penalty = server.moderation.warnings.penalties.find(p => violator ? p.penalties == violator.violations.length + 1 : 1)
+        const penalty = server.moderation.warnings.penalties.find(p => violator ? p.penalties == violator.violations.length + 1 : p.penalties == 1)
     
         if (!violator) {
             await self.db.servers.update({ _id: message.guild.id }, {
