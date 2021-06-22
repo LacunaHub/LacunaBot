@@ -21,7 +21,14 @@ const execute = async (self, before, state) => {
         }
     }
 
-    const voice_roles_bound = server.modules.voice_manager.voice_roles.filter(r => r.bound_channels_id.includes(before.channelID))
+    const old_voice_roles_bound = server.modules.voice_manager.voice_roles.filter(r => r.bound_channels_id.includes(before.channelID))
+    const voice_roles_bound = server.modules.voice_manager.voice_roles.filter(r => r.bound_channels_id.includes(state.channelID))
+
+    if (old_voice_roles_bound.length) {
+        const voice_roles = state.guild.roles.cache.filter(r => r.editable && old_voice_roles_bound.some(b => b.role_id == r.id))
+
+        if (voice_roles.size) await state.member.roles.remove(voice_roles, locale.voice_manager.voice_remove_roles_reason)
+    }
 
     if (voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && voice_roles_bound.some(b => b.role_id == r.id))
