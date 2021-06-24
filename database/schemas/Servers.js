@@ -343,7 +343,7 @@ const Server = new Schema({
         },
         roles: {
             mute: { type: String, default: '' },
-            temporary: { type: Array, default: '' },
+            temporary: { type: Array, default: [] },
             on_mute: {
                 remove_all_roles: { type: Boolean, default: false },
                 strict_roles: { type: Array, default: [] },
