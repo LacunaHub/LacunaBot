@@ -50,7 +50,7 @@ class Automoder {
                 }
 
                 else {
-                    await message.guild.members.ban(message.author.id, { reason: 'Автомодер: Фильтр слов' })
+                    await message.guild.members.ban(message.author.id, { reason: 'Автомодер: Фильтр слов' }).catch(self.logger.error)
                 }
             }
 
@@ -91,14 +91,14 @@ class Automoder {
                         }
 
                         else {
-                            await message.member.roles.add(mute_role.id, 'Автомодер: Фильтр слов')
+                            await message.member.roles.add(mute_role.id, 'Автомодер: Фильтр слов').catch(self.logger.error)
                         }
                     }
                 }
             }
 
             if (kick && (!ban && !mute)) {
-                if (message.member.kickable) await message.member.kick('Автомодер: Фильтр слов')
+                if (message.member.kickable) await message.member.kick('Автомодер: Фильтр слов').catch(self.logger.error)
             }
 
             if (warn) {
@@ -108,11 +108,11 @@ class Automoder {
             if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
                 const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message, { message: message, guild: message.guild, member: message.member })
 
-                await message.channel.send(null, content)
+                await message.channel.send(null, content).catch(self.logger.error)
             }
 
             if (!config.penalty.action || delete_message) {
-                if (message.deletable && !message.deleted) await message.delete()
+                if (message.deletable && !message.deleted) await message.delete().catch(self.logger.error)
             }
 
             await self.emit('moduleExecution', { module: 'Automoder: Swear Filter', guild: { id: message.guild.id, name: message.guild.name }, target: { id: message.author.id, name: message.author.tag } })
@@ -157,7 +157,7 @@ class Automoder {
             const is_referral = invites ? invites.some(i => !guild_invites.some(k => k.url == `https://${i}`)) : false
             
             if (is_referral) {
-                if (message.deletable && !message.deleted) await message.delete()
+                if (message.deletable && !message.deleted) await message.delete().catch(self.logger.error)
 
                 await Penalties.linksPenalty(self, server, message)
 
@@ -220,7 +220,7 @@ class Automoder {
                 }
 
                 else {
-                    await message.guild.members.ban(message.author.id, { reason: 'Автомодер: Замедление отправки сообщений' })
+                    await message.guild.members.ban(message.author.id, { reason: 'Автомодер: Замедление отправки сообщений' }).catch(self.logger.error)
                 }
             }
 
@@ -261,14 +261,14 @@ class Automoder {
                         }
 
                         else {
-                            await message.member.roles.add(mute_role.id, 'Автомодер: Замедление отправки сообщений')
+                            await message.member.roles.add(mute_role.id, 'Автомодер: Замедление отправки сообщений').catch(self.logger.error)
                         }
                     }
                 }
             }
 
             if (kick && (!ban && !mute)) {
-                if (message.member.kickable) await message.member.kick('Автомодер: Замедление отправки сообщений')
+                if (message.member.kickable) await message.member.kick('Автомодер: Замедление отправки сообщений').catch(self.logger.error)
             }
 
             if (warn) {
@@ -280,7 +280,7 @@ class Automoder {
 
                 const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message || default_content, { message: message, guild: message.guild, member: message.member })
 
-                await message.channel.send(null, content)
+                await message.channel.send(null, content).catch(self.logger.error)
             }
 
             if (!config.penalty.action || delete_message) {
@@ -316,7 +316,7 @@ class Automoder {
         if (config.ignored.channels.includes(message.channel.id)) return false
         if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
 
-        const splitted_case = Utils.splitStringCase(message.content)
+        const splitted_case = Utils.splitStringCase(Utils.removeDiscordPatterns(message.content))
         const upper_percent = splitted_case.length ? Math.floor(splitted_case.upper.length * 100 / splitted_case.length) : 0
 
         if (upper_percent >= config.percentage_of_caps && message.content.length >= config.minimum_content_length) {
@@ -341,7 +341,7 @@ class Automoder {
                 }
 
                 else {
-                    await message.guild.members.ban(message.author.id, { reason: 'Автомодер: Анти-капс' })
+                    await message.guild.members.ban(message.author.id, { reason: 'Автомодер: Анти-капс' }).catch(self.logger.error)
                 }
             }
 
@@ -382,14 +382,14 @@ class Automoder {
                         }
 
                         else {
-                            await message.member.roles.add(mute_role.id, 'Автомодер: Анти-капс')
+                            await message.member.roles.add(mute_role.id, 'Автомодер: Анти-капс').catch(self.logger.error)
                         }
                     }
                 }
             }
 
             if (kick && (!ban && !mute)) {
-                if (message.member.kickable) await message.member.kick('Автомодер: Анти-капс')
+                if (message.member.kickable) await message.member.kick('Автомодер: Анти-капс').catch(self.logger.error)
             }
 
             if (warn) {
@@ -399,11 +399,11 @@ class Automoder {
             if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
                 const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message, { message: message, guild: message.guild, member: message.member })
 
-                await message.channel.send(null, content)
+                await message.channel.send(null, content).catch(self.logger.error)
             }
 
             if (!config.penalty.action || delete_message) {
-                if (message.deletable && !message.deleted) await message.delete()
+                if (message.deletable && !message.deleted) await message.delete().catch(self.logger.error)
             }
 
             await self.emit('moduleExecution', { module: 'Automoder: Anti Caps', guild: { id: message.guild.id, name: message.guild.name }, target: { id: message.author.id, name: message.author.tag } })
@@ -434,7 +434,7 @@ class Automoder {
         }
 
         if (member.manageable && name !== member.displayName) {
-            await member.setNickname(name, 'Автомодер: Модерирование никнеймов')
+            await member.setNickname(name, 'Автомодер: Модерирование никнеймов').catch(self.logger.error)
         
             await self.emit('moduleExecution', { module: 'Automoder: Nickname Moderation', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
         }
@@ -509,7 +509,7 @@ class Penalties {
             }
 
             else {
-                await message.guild.members.ban(message.author.id, { reason: 'Автомодер: Фильтр ссылок' })
+                await message.guild.members.ban(message.author.id, { reason: 'Автомодер: Фильтр ссылок' }).catch(self.logger.error)
             }
         }
 
@@ -550,14 +550,14 @@ class Penalties {
                     }
 
                     else {
-                        await message.member.roles.add(mute_role.id, 'Автомодер: Фильтр ссылок')
+                        await message.member.roles.add(mute_role.id, 'Автомодер: Фильтр ссылок').catch(self.logger.error)
                     }
                 }
             }
         }
 
         if (kick && (!ban && !mute)) {
-            if (message.member.kickable) await message.member.kick('Автомодер: Фильтр ссылок')
+            if (message.member.kickable) await message.member.kick('Автомодер: Фильтр ссылок').catch(self.logger.error)
         }
 
         if (warn) {
@@ -567,11 +567,11 @@ class Penalties {
         if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
             const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message, { message: message, guild: message.guild, member: message.member })
 
-            await message.channel.send(null, content)
+            await message.channel.send(null, content).catch(self.logger.error)
         }
 
         if (!config.penalty.action || delete_message) {
-            if (message.deletable && !message.deleted) await message.delete()
+            if (message.deletable && !message.deleted) await message.delete().catch(self.logger.error)
 
             return true
         }

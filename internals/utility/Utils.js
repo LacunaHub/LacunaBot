@@ -69,13 +69,12 @@ class Utils {
     }
 
     /**
-     * 
      * @param {string} string
      */
     static splitStringCase(string) {
         const upper = [], lower = []
 
-        string = string.replace(/([^a-zа-яё]+)/gi, '')
+        string = string.replace(/([^a-zа-яёй]+)/gi, '')
 
         for (let i = 0; i < string.length; i++) {
             if (string.charAt(i) === string.charAt(i).toUpperCase()) {
@@ -88,6 +87,13 @@ class Utils {
         }
 
         return { upper, lower, length: string.length }
+    }
+
+    /**
+     * @param {string} string
+     */
+    static removeDiscordPatterns(string) {
+        return string.replace(/<@!?\d+>/g, '').replace(/<@&\d+>/g, '').replace(/<#\d+>/g, '').replace(/<a?:.+:\d+>/g, '').replace(/\s{2,}/g, ' ').trim()
     }
 }
 
