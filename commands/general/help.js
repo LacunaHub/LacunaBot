@@ -37,6 +37,7 @@ const execute = async (self, server, message, args) => {
         const embed = new MessageEmbed()
             .setTitle(locale.help.texts.title)
             .setDescription(self.translator.format(locale.help.texts.description, `\`${server.prefix}\``))
+            .setFooter(self.translator.format(locale.help.texts.use_help_for_detail_info, server.prefix))
 
         const website = new Buttons.MessageButton()
             .setStyle('url')

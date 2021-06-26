@@ -73,7 +73,21 @@ const remove = async (self, server, message, args) => {
         return false
     }
 
-    const violation = violator.violations.find(v => v.id == warn_id)
+    if (warn_id === 'all') {
+        await self.db.servers.update({ _id: message.guild.id }, {
+            $pull: {
+                'moderation.warnings.violators': {
+                    user_id: mention.id
+                }
+            }
+        })
+
+        await message.react(self._emojis.details.OK.id).catch(self.logger.error)
+
+        return true
+    }
+
+    const violation = violator.violations.find((v, i) => v.id == warn_id || (i + 1) == warn_id)
 
     if (!violation) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.invalid_warn_id, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })

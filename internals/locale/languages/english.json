@@ -116,7 +116,8 @@
                     "self": "Bot",
                     "user": "Command author"
                 },
-                "aliases": "Aliases"
+                "aliases": "Aliases",
+                "use_help_for_detail_info": "You can enter {0}help [command] for more information about command"
             }
         },
         "leaders": {
@@ -498,9 +499,9 @@
                     },
                     {
                         "name": "пред",
-                        "description": "Идентификатор предупреждения",
+                        "description": "Идентификатор или порядковый номер предупреждения (all - убрать все предупреждения)",
                         "required": true,
-                        "types": ["STRING"]
+                        "types": ["NUMBER", "STRING"]
                     },
                     {
                         "name": "причина",

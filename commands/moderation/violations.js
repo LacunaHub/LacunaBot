@@ -31,14 +31,14 @@ const execute = async (self, server, message, args) => {
 
     const last_24_hours = violator.violations.filter(v => (Date.now() - v.timestamp) < 86400000)
     const last_7_days = violator.violations.filter(v => (Date.now() - v.timestamp) < 604800000)
-    const last_10_violations = violator.violations.slice(Math.max(violator.violations.length - 10, 0)).sort((a, b) => b.timestamp - a.timestamp)
+    const last_10_violations = violator.violations.slice(Math.max(violator.violations.length - 10, 0)).sort((a, b) => a.timestamp - b.timestamp)
 
     const embed = new MessageEmbed()
         .setAuthor(self.translator.format(locale.violations.texts.title, mention.user.tag), mention.user.displayAvatarURL())
         .addField(locale.violations.texts.last_24_hours, last_24_hours.length, true)
         .addField(locale.violations.texts.last_7_days, last_7_days.length, true)
         .addField(locale.violations.texts.total, violator.violations.length, true)
-        .addField(locale.violations.texts.last_10_violations, last_10_violations.map(v => `**${v.reason || locale.common.texts.none}** – ${moment(v.timestamp).locale(server.locale).fromNow()}: \`${v.id}\``))
+        .addField(locale.violations.texts.last_10_violations, last_10_violations.map((v, i) => `${i + 1}. **${v.reason || locale.common.texts.none}** – ${moment(v.timestamp).locale(server.locale).fromNow()}: \`${v.id}\``))
 
     await message.reply({ embed: embed, allowedMentions: { repliedUser: false } })
 
