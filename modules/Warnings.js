@@ -62,7 +62,6 @@ class Warnings {
             const mute = (penalty.action & 1 << 1) === (1 << 1)
             const kick = (penalty.action & 1 << 2) === (1 << 2)
             const send_message = (penalty.action & 1 << 3) === (1 << 3)
-            const send_dm_message = (penalty.action & 1 << 4) === (1 << 4)
             const reset_violations = (penalty.action & 1 << 7) === (1 << 7)
 
             if (ban && (!mute && !kick)) {
@@ -79,7 +78,7 @@ class Warnings {
                 }
 
                 else {
-                    await message.guild.members.ban(target.user.id, { reason: 'Автомодер: Предупреждение' })
+                    await message.guild.members.ban(target.user.id, { reason: 'Автомодер: Предупреждение' }).catch(self.logger.error)
                 }
             }
 
@@ -120,7 +119,7 @@ class Warnings {
                         }
                         
                         else {
-                            await target.roles.add(mute_role.id, 'Автомодер: Предупреждение')
+                            await target.roles.add(mute_role.id, 'Автомодер: Предупреждение').catch(self.logger.error)
                         }
                     }
                 }
@@ -133,9 +132,7 @@ class Warnings {
             if (send_message) {
                 const content = await Replacer.ReplaceMessageTemplate(self, penalty.message, { message: message, guild: message.guild, member: target })
 
-                await message.channel.send(null, content)
-
-                if (send_dm_message) await target.send(null, content)
+                await message.channel.send(null, content).catch(self.logger.error)
             }
 
             if (reset_violations) {
