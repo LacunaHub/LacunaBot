@@ -50,6 +50,14 @@ class Greeting {
 
                     if (roles.size) await member.roles.add(roles, '') // Need reason
                 }
+
+                await self.db.servers.update({ _id: member.guild.id }, {
+                    $pull: {
+                        'modules.restoring.data': {
+                            user_id: member.id
+                        }
+                    }
+                })
             }
         }
 

@@ -1,6 +1,5 @@
 const { MessageEmbed } = require('discord.js')
 const { images } = require('../../modules/Logs')
-const id = require('../../internals/utility/UID')
 const Warnings = require('../../modules/Warnings')
 
 /**
