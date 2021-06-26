@@ -10,6 +10,7 @@ export interface ServerDocument extends Document {
             will_expire_on: Number
         }
         blocked: Boolean
+        bot_experts: BotExpert[]
     }
     commands: {
         system: Array<SystemCommandOptions>
@@ -812,4 +813,9 @@ export interface AutoReaction {
     reactions: Array<{ animated: boolean, id: string, name: string }>
     matches: string[]
     exclude_matches: string[]
+}
+
+export interface BotExpert {
+    id: string
+    expires_timestamp: number
 }

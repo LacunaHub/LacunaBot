@@ -4,6 +4,7 @@ const { users } = require('../../../database/DatabaseManager')
 const authorize = require('../utility/Authorize')
 const { Permissions } = require('discord.js')
 const ShardingManager = require('../../utility/ShardingManager')
+const { isBotExpert } = require('../interfaces/Guilds')
 
 const router = Router()
 const oauth = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)

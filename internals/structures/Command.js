@@ -88,6 +88,8 @@ class Command {
 
         if (this.guild_only && !message.guild) return false
 
+        if (server.server.bot_experts.some(expert => expert.id === message.author.id && expert.expires_timestamp > Date.now())) return true
+
         if (server.commands.permissions.blocked.channels.includes(message.channel.id) && !message.member.hasPermission('ADMINISTRATOR')) return false
 
         if ((server.commands.permissions.allowed.channels.length && !server.commands.permissions.allowed.channels.includes(message.channel.id)) && !message.member.hasPermission('ADMINISTRATOR')) return false
@@ -115,6 +117,8 @@ class Command {
         const command = server.commands.system.find(c => c.name == this.name)
 
         if (this.self.application.owner.members.some(m => m.id == message.author.id)) return true
+
+        if (server.server.bot_experts.some(expert => expert.id === message.author.id && expert.expires_timestamp > Date.now())) return true
 
         if (command) {
             if (command.allowed.roles.length && message.member.roles.cache.some(r => command.allowed.roles.includes(r.id))) return true

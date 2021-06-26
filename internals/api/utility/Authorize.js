@@ -1,6 +1,7 @@
 const { Permissions } = require('discord.js')
 const OAuth2 = require('../discord/OAuth2')
 const ShardingManager = require('../../utility/ShardingManager')
+const { isBotExpert } = require('../interfaces/Guilds')
 
 const oauth2 = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
 
@@ -57,8 +58,9 @@ module.exports.permitted = async function (req, res, next) {
 
     const guild = guilds.find(g => g.id == guild_id)
     const owner = await ShardingManager.shards.first().eval(`this.application.owner.members.some(m => m.id == ${user_id})`)
+    const expert = await isBotExpert(guild_id, user_id)
 
-    if (owner) {
+    if (owner || expert) {
         req.headers['x-guild-data'] = guild
 
         await next()

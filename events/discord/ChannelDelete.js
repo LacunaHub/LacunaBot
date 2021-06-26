@@ -40,7 +40,7 @@ const execute = async (self, channel) => {
 
     await ChannelDelete(self, server, channel)
 
-    setTimeout(() => await self.channels.cache.delete(channel.id), 5000)
+    setTimeout(() => self.channels.cache.delete(channel.id), 5000)
 
     return true
 }

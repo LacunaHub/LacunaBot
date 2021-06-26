@@ -9,7 +9,8 @@ const Server = new Schema({
             available: { type: Boolean, default: false },
             will_expire_on: { type: Number, default: 0 }
         },
-        blocked: { type: Boolean, default: false }
+        blocked: { type: Boolean, default: false },
+        bot_experts: { type: Array, default: [] }
     },
     commands: {
         system: { type: Array, default: [] },

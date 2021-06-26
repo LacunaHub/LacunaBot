@@ -5,6 +5,11 @@ const Channels = require('../discord/rest/Channels')
 const Webhooks = require('../discord/rest/Webhooks')
 
 class Guilds {
+    static async isBotExpert(guild_id, id) {
+        const server = await Servers.findOne({ _id: guild_id })
+        return server ? server.server.bot_experts.some(expert => expert.id === id && expert.expires_timestamp > Date.now()) : false
+    }
+
     /**
      * @param {import('../../Typings').ServerDocument} guild
      * @param {Partial<import('../../Typings').ServerDocument>} data
