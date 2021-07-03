@@ -622,10 +622,8 @@ class Guilds {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.active': data.modules.levels.level_up_alerts.active } })
                     }
 
-                    if (typeof data.modules.levels.level_up_alerts.format === 'number' && data.modules.levels.level_up_alerts.format !== guild.modules.levels.level_up_alerts.format) {
-                        if ([0, 1, 2].includes(data.modules.levels.level_up_alerts.format)) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.format': data.modules.levels.level_up_alerts.format } })
-                        }
+                    if (typeof data.modules.levels.level_up_alerts.format === 'string' && data.modules.levels.level_up_alerts.format !== guild.modules.levels.level_up_alerts.format) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.format': data.modules.levels.level_up_alerts.format } })
 
                         if (typeof data.modules.levels.level_up_alerts.channel_id === 'string' && data.modules.levels.level_up_alerts.channel_id !== guild.modules.levels.level_up_alerts.channel_id) {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.channel_id': data.modules.levels.level_up_alerts.channel_id } })
