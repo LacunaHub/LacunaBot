@@ -439,7 +439,6 @@ const Server = new Schema({
             },
             level_up_alerts: {
                 active: { type: Boolean, default: false },
-                voice: { type: Boolean, default: false },
                 format: { type: String, default: 'CURRENT_CHANNEL' },
                 channel_id: { type: String, default: '' },
                 message: {
