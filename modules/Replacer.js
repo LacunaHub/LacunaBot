@@ -23,48 +23,49 @@ class Replacer {
 
         const activity = await self.db.activities.fetch({ _id: guild.id })
         const levels = activity.levels.find(level => level.user_id == member.id)
+        const server_owner = await guild.members.fetch(guild.ownerID)
 
         const replacers = {
-            'message.channel': message ? message.channel.name : '`message.channel`',
-            'message.channel.id': message ? message.channel.id : '`message.channel.id`',
-            'message.channel.mention': message ? `<#${message.channel.id}>` : '`message.channel.mention`',
-            'message.channel.nsfw': message ? message.channel.nsfw : '`message.channel.nsfw`',
-            'message.channel.position': message ? message.channel.position : '`message.channel.position`',
-            'message.channel.topic': message ? message.channel.topic || '`message.channel.topic`' : '`message.channel.topic`',
-            'message.channel.type': message ? message.channel.type : '`message.channel.type`',
-            'message.content': message ? message.content : '`message.content`',
-            'message.created_at': message ? message.createdTimestamp : '`message.created_at`',
-            'message.edited_at': message ? message.editedTimestamp || '`message.edited_at`' : '`message.edited_at`',
-            'message.id': message ? message.id : '`message.id`',
-            'message.tts': message ? message.tts : '`message.tts`',
-            'message.type': message ? message.type : '`message.type`',
-            'message.url': message ? message.url : '`message.url`',
+            'message.channel': message?.channel?.name ?? null,
+            'message.channel.id': message?.channel?.id ?? null,
+            'message.channel.mention': `<#${message?.channel?.id ?? '1'}>`,
+            'message.channel.nsfw': message?.channel?.nsfw ?? null,
+            'message.channel.position': message?.channel?.position ?? null,
+            'message.channel.topic': message?.channel?.topic ?? null,
+            'message.channel.type': message?.channel?.type ?? null,
+            'message.content': message?.content ?? null,
+            'message.created_at': message?.createdTimestamp ?? null,
+            'message.edited_at': message?.editedTimestamp ?? null,
+            'message.id': message?.id ?? null,
+            'message.tts': message?.tts ?? null,
+            'message.type': message?.type ?? null,
+            'message.url': message?.url ?? null,
             'guild': guild.name,
             'guild.acronym': guild.nameAcronym,
-            'guild.afk_channel_id': guild.afkChannelID || '`guild.afk_channel_id`',
-            'guild.banner': guild.bannerURL() || '`guild.banner`',
+            'guild.afk_channel_id': guild.afkChannelID,
+            'guild.banner': guild.bannerURL(),
             'guild.channels': guild.channels.cache.size,
             'guild.channels.text': guild.channels.cache.filter(channel => channel.type == 'text').size,
             'guild.channels.voice': guild.channels.cache.filter(channel => channel.type == 'voice').size,
             'guild.created_at': guild.createdTimestamp,
-            'guild.description': guild.description || '`guild.description`',
+            'guild.description': guild.description,
             'guild.icon': guild.iconURL(),
             'guild.id': guild.id,
             'guild.members': guild.memberCount,
             'guild.members.bots': guild.members.cache.filter(member => member.user.bot).size,
             'guild.members.users': guild.members.cache.filter(member => !member.user.bot).size,
-            'guild.owner': guild.owner ? guild.owner.user.username : '`guild.owner`',
-            'guild.owner.avatar': guild.owner ? guild.owner.user.displayAvatarURL() : '`guild.owner.avatar`',
-            'guild.owner.display_name': guild.owner ? guild.owner.displayName : '`guild.owner.display_name`',
+            'guild.owner': server_owner.user.username,
+            'guild.owner.avatar': server_owner.user.displayAvatarURL(),
+            'guild.owner.display_name': server_owner.displayName,
             'guild.owner.id': guild.ownerID,
-            'guild.owner.tag': guild.owner ? guild.owner.user.tag : '`guild.owner.tag`',
+            'guild.owner.tag': server_owner.user.tag,
             'guild.owner.mention': `<@${guild.ownerID}>`,
-            'guild.owner.nickname': guild.owner ? guild.owner.nickname || '`guild.owner.nickname`' : '`guild.owner.nickname`',
+            'guild.owner.nickname': server_owner.nickname,
             'guild.boosters_count': guild.premiumSubscriptionCount || 0,
             'guild.boost_tier': guild.premiumTier,
             'guild.region': guild.region,
-            'guild.splash': guild.splash || '`guild.splash`',
-            'guild.vanity_url': guild.vanityURLCode ? `https://discord.gg/${guild.vanityURLCode}` : '`guild.vanity_url`',
+            'guild.splash': guild.splash,
+            'guild.vanity_url': guild.vanityURLCode ? `https://discord.gg/${guild.vanityURLCode}` : null,
             'member': member.user.username,
             'member.avatar': member.user.displayAvatarURL(),
             'member.discriminator': member.user.discriminator,
@@ -73,16 +74,16 @@ class Replacer {
             'member.tag': member.user.tag,
 			'member.mention': `<@${member.id}>`,
             'member.joined_at': member.joinedTimestamp,
-            'member.nickname': member.nickname || '`member.nickname`',
+            'member.nickname': member.nickname,
             'member.premium_since': member.premiumSinceTimestamp,
-            'member.level': levels ? levels.experience.level : 0,
-            'member.level.current_xp': levels ? levels.experience.current : 0,
+            'member.level': levels?.experience?.level ?? 0,
+            'member.level.current_xp': levels?.experience?.current ?? 0,
             'member.level.remaining_xp': levels ? Math.round((150 + (levels.experience.level * levels.experience.level * 8)) - levels.experience.current) : 0,
             'member.level.need_xp': levels ? 150 + (levels.experience.level * levels.experience.level * 8) : 0,
-            'member.level.total_xp': levels ? levels.experience.total : 0,
-            'subs.name': subs ? subs.name : '`subs.name`',
-            'subs.title': subs ? subs.title : '`subs.title`',
-            'subs.link': subs ? subs.link : '`subs.link`'
+            'member.level.total_xp': levels?.experience?.total ?? 0,
+            'subs.name': subs?.name ?? null,
+            'subs.title': subs?.title?? null,
+            'subs.link': subs?.link?? null
         }
 
         let patterns = string.match(/{\s*([\w.]+)\s*}/g) || []
@@ -115,7 +116,7 @@ class Replacer {
 
             for (const pattern of args_patterns) {
                 const regex = new RegExp(`{\\s*${pattern}\\s*}`, 'g')
-                args = args.replace(regex, typeof replacers[pattern] !== 'undefined' ? replacers[pattern] : `\`${pattern}\``)
+                args = args.replace(regex, typeof replacers[pattern] !== 'undefined' ? replacers[pattern] : `null`)
             }
         
             return {
@@ -126,7 +127,7 @@ class Replacer {
 
         for (const pattern of patterns) {
             const regex = new RegExp(`{\\s*${pattern}\\s*}`, 'g')
-            string = string.replace(regex, typeof replacers[pattern] !== 'undefined' ? replacers[pattern] : `\`${pattern}\``)
+            string = string.replace(regex, typeof replacers[pattern] !== 'undefined' ? replacers[pattern] : `null`)
         }
 
         for (const func of functions) {
@@ -142,7 +143,7 @@ class Replacer {
             self.logger.info(`(Replacer: ${func.name}): on ${guild.name}`)
         }
 
-        return string
+        return string !== 'null' ? string : null
     }
 
     /**
@@ -163,6 +164,11 @@ class Replacer {
         let embed = {}
 
         if (template.embed.active) {
+            const image_url = template.embed.image.url ? await Replacer.Replace(self, template.embed.image.url, stuff) : null
+            const footer_icon_url = template.embed.footer.icon_url ? await Replacer.Replace(self, template.embed.footer.icon_url, stuff) : null
+            const thumbnail_url = template.embed.thumbnail.url ? await Replacer.Replace(self, template.embed.thumbnail.url, stuff) : null
+            const avatar_icon_url = template.embed.author.icon_url ? await Replacer.Replace(self, template.embed.author.icon_url, stuff) : null
+
             embed = {
                 title: template.embed.title ? await Replacer.Replace(self, template.embed.title, stuff) : null,
                 description: template.embed.description ? await Replacer.Replace(self, template.embed.description, stuff) : null,
@@ -171,18 +177,14 @@ class Replacer {
                 color: template.embed.color ? template.embed.color : null,
                 footer: {
                     text: template.embed.footer.text ? await Replacer.Replace(self, template.embed.footer.text, stuff) : null,
-                    icon_url: template.embed.footer.icon_url ? await Replacer.Replace(self, template.embed.footer.icon_url, stuff) : null
+                    icon_url: footer_icon_url
                 },
-                image: {
-                    url: template.embed.image.url ? await Replacer.Replace(self, template.embed.image.url, stuff) : null
-                },
-                thumbnail: {
-                    url: template.embed.thumbnail.url ? await Replacer.Replace(self, template.embed.thumbnail.url, stuff) : null
-                },
+                image: image_url ? { url: image_url } : null,
+                thumbnail: thumbnail_url ? { url: thumbnail_url } : null,
                 author: {
                     name: template.embed.author.name ? await Replacer.Replace(self, template.embed.author.name, stuff) : null,
                     url: template.embed.author.url ? await Replacer.Replace(self, template.embed.author.url, stuff) : null,
-                    icon_url: template.embed.author.icon_url ? await Replacer.Replace(self, template.embed.author.icon_url, stuff) : null
+                    icon_url: avatar_icon_url
                 },
                 fields: template.embed.fields.length ? await Promise.all(template.embed.fields.map(async field => {
                     return {

@@ -48,7 +48,7 @@ const add = async (self, server, message, args) => {
             return false
         }
 
-        if (element.references.length >= 3) {
+        if (element.references.length >= 5) {
             await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.reactions.add.texts.reaction_references_limit_reached, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
             return false

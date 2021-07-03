@@ -585,6 +585,10 @@ class Guilds {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.active': data.modules.levels.active } })
                 }
 
+                if (typeof data.modules.levels.voice === 'boolean' && data.modules.levels.voice !== guild.modules.levels.voice) {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.voice': data.modules.levels.voice } })
+                }
+
                 if (typeof data.modules.levels.single_roles === 'boolean' && data.modules.levels.single_roles !== guild.modules.levels.single_roles) {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.single_roles': data.modules.levels.single_roles } })
                 }

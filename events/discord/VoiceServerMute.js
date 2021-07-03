@@ -1,3 +1,4 @@
+const { voiceUnassign } = require('../../modules/Levels')
 const VoiceServerMute = require('../../modules/Logs/Voice/VoiceServerMute')
 
 /**
@@ -7,6 +8,7 @@ const VoiceServerMute = require('../../modules/Logs/Voice/VoiceServerMute')
 const execute = async (self, state) => {
     const server = await self.db.servers.fetch({ _id: state.guild.id })
 
+    await voiceUnassign(self, server, state, state.channel)
     await VoiceServerMute(self, server, state)
 
     return true

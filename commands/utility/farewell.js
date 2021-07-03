@@ -173,6 +173,8 @@ const save = async (self, server, message, args) => {
     }
 
     await Farewell.Handle(self, server, message.member)
+
+    return true
 }
 
 module.exports = {

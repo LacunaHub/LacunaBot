@@ -303,7 +303,7 @@ const set = async (self, server, message, args) => {
         })
     }
 
-    await Levels.updateAwards(self, server, message, level, mention)
+    await Levels.updateAwards(self, server, { member: mention, level })
 
     await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.levels.set.texts.set_success, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 

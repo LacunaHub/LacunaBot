@@ -177,6 +177,8 @@ const test = async (self, server, message, args) => {
     }
 
     await Greeting.Handle(self, server, message.member)
+
+    return true
 }
 
 module.exports = {

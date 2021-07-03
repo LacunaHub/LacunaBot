@@ -287,8 +287,9 @@ export interface ServerDocument extends Document {
         },
         reactions: Array<ReactionElement>
         levels: {
-            active: Boolean
-            single_roles: Boolean
+            active: boolean
+            voice: boolean
+            single_roles?: boolean
             reset_on_leave: boolean
             blocked: {
                 channels: Array<String>
@@ -299,11 +300,11 @@ export interface ServerDocument extends Document {
                 roles: Array<String>
             },
             level_up_alerts: {
-                active: Boolean
-                format: Number
-                channel_id: String
+                active: boolean
+                format: 'DM' | 'CHANNEL' | 'CURRENT_CHANNEL'
+                channel_id: string
                 message: {
-                    content: String
+                    content: string
                     embed: MessageEmbed
                 }
             },
@@ -538,10 +539,20 @@ export interface ReactionElement {
 }
 
 export interface LevelAward {
-    id: String
+    id: string
     type: 'CHANNEL' | 'ROLE'
-    level: Number
-    references: Array<String>
+    level: number
+    single: boolean
+    references: string[]
+    alert: {
+        active: boolean
+        format: 'DM' | 'CHANNEL' | 'CURRENT_CHANNEL'
+        channel_id: string
+        message: {
+            content: string
+            embed: MessageEmbed
+        }
+    }
 }
 
 export interface VoiceRole {
@@ -600,7 +611,7 @@ export interface UserDocument extends Document {
     modified_at: Number
 }
 
-export type BoostType = 'DEVELOPER' | 'TEAM' | 'PATREON' | 'BOOSTY' | 'SERVER_BOOST' | 'CUSTOM'
+export type BoostType = 'DEVELOPER' | 'TEAM' | 'PATREON' | 'BOOSTY' | 'SERVER_BOOST' | 'CUSTOM' | 'GIVEAWAY_WINNER'
 
 export interface BoostedGuild {
     id: String
@@ -701,21 +712,21 @@ export interface ServerActivities extends Document {
 }
 
 export interface LevelActivities {
-    user_id: String
+    user_id: string
     experience: {
-        total: Number
-        current: Number
-        level: Number
+        total: number
+        current: number
+        level: number
     }
     activity: {
         text: {
-            total_messages: Number
-            last_message_at: Number
+            total_messages: number
+            last_message_at: number
         }
         voice: {
-            total_time: Number
-            connected_at?: Number
-            disconnected_at?: Number
+            total_time: number
+            connected_at?: number
+            disconnected_at?: number
         }
     }
 }
@@ -811,6 +822,7 @@ export interface MessageEmbedFields {
 export interface AutoReaction {
     channel_id: string
     reactions: Array<{ animated: boolean, id: string, name: string }>
+    message_types: string[]
     matches: string[]
     exclude_matches: string[]
 }

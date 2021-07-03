@@ -1,3 +1,4 @@
+const { voiceAssign } = require('../../modules/Levels')
 const VoiceConnect = require('../../modules/Logs/Voice/VoiceConnect')
 const { CreateTempVoice } = require('../../modules/VoiceManager')
 
@@ -25,9 +26,10 @@ const execute = async (self, state) => {
     if (voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && voice_roles_bound.some(b => b.role_id == r.id))
 
-        if (voice_roles.size) await state.member.roles.add(voice_roles, locale.voice_manager.voice_add_roles_reason)
+        if (voice_roles.size) await state.member.roles.add(voice_roles, locale.voice_manager.voice_add_roles_reason).catch(self.logger.error)
     }
-
+    
+    await voiceAssign(self, server, state)
     await CreateTempVoice(self, server, state)
     await VoiceConnect(self, server, state)
 

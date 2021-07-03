@@ -29,8 +29,8 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
         return
     }
 
-    const channels = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').channels.cache`)).filter(data => data)[0]
-    const roles = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').roles.cache.filter(r => !r.managed)`)).filter(data => data)[0]
+    const channels = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').channels.cache.sort((a, b) => a.parentID - b.parentID || a.position - b.position)`)).filter(data => data)[0]
+    const roles = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').roles.cache.filter(r => !r.managed).sort((a, b) => b.rawPosition - a.rawPosition).map(r => { return { ...r, higher: !r.editable, guild: null } })`)).filter(data => data)[0]
     const emojis = (await ShardingManager.broadcastEval(`this.emojis.cache.filter(e => e.guild.id == ${guild_id})`)).filter(data => data)[0]
     const commands = await ShardingManager.shards.first().eval('this.commands.filter(c => !c.private).map(c => { return { name: c.name, aliases: c.aliases, group: c.group, premium: c.premium_only, permissions: { client: c.self_permissions, author: c.user_permissions } } })')
 
@@ -113,8 +113,8 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
         return
     }
 
-    const channels = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').channels.cache`)).filter(data => data)[0]
-    const roles = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').roles.cache.filter(r => !r.managed)`)).filter(data => data)[0]
+    const channels = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').channels.cache.sort((a, b) => a.parentID - b.parentID || a.position - b.position)`)).filter(data => data)[0]
+    const roles = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').roles.cache.filter(r => !r.managed).sort((a, b) => b.rawPosition - a.rawPosition).map(r => { return { ...r, higher: !r.editable, guild: null } })`)).filter(data => data)[0]
     const emojis = (await ShardingManager.broadcastEval(`this.emojis.cache.filter(e => e.guild.id == ${guild_id})`)).filter(data => data)[0]
     const commands = await ShardingManager.shards.first().eval('this.commands.filter(c => !c.private).map(c => { return { name: c.name, aliases: c.aliases, group: c.group, premium: c.premium_only, permissions: { client: c.self_permissions, author: c.user_permissions } } })')
 

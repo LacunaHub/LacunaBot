@@ -15,21 +15,21 @@ class Farewell {
             const content = await Replacer.ReplaceMessageTemplate(self, server.modules.farewell.message, { guild: member.guild, member: member })
 
             if (server.modules.farewell.format == 'DM') {
-                try {
-                    await member.send(null, content)
-                } catch (err) {
-                    await self.logger.error(err)
-                }
+                await member.send(null, content).catch(self.logger.error)
             }
 
             if (server.modules.farewell.format == 'CHANNEL') {
                 const channel = member.guild.channels.cache.get(server.modules.farewell.channel_id)
 
-                if (channel) await channel.send(null, content)
+                if (channel) await channel.send(null, content).catch(self.logger.error)
             }
+
+            await self.emit('moduleExecution', { module: 'Farewell', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
         }
 
         if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
+            if (member.user.bot) return false
+
             const data = server.modules.restoring.data.find(i => i.user_id == member.id)
 
             if (!data) {
@@ -54,6 +54,8 @@ class Farewell {
                     }
                 })
             }
+
+            await self.emit('moduleExecution', { module: 'Restoring: Member Remove', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
         }
     }
 }

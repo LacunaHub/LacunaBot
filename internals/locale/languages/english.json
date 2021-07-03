@@ -125,7 +125,8 @@
             "texts": {
                 "leaderboard": "Leaderboard",
                 "positions": "{0} – total positions",
-                "last_message_at": "last {0}"
+                "last_message_at": "last {0}",
+                "no_activity": "{0}, on this server no one got the level yet"
             }
         },
         "rank": {
@@ -721,7 +722,7 @@
                     "alerts_dm": "личные сообщения",
                     "alerts_template": "Шаблон оповещений",
                     "awards": "Награды за уровни",
-                    "award_level": "Ур. {0}"
+                    "award_level": "Lv. {0}"
                 }
             },
             "reports": {

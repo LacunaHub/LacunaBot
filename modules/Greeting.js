@@ -15,18 +15,16 @@ class Greeting {
             const content = await Replacer.ReplaceMessageTemplate(self, server.modules.welcome.message, { guild: member.guild, member: member })
 
             if (server.modules.welcome.format == 'DM') {
-                try {
-                    await member.send(null, content)
-                } catch (err) {
-                    
-                }
+                await member.send(null, content).catch(self.logger.error)
             }
 
             if (server.modules.welcome.format == 'CHANNEL') {
                 const channel = member.guild.channels.cache.get(server.modules.welcome.channel_id)
 
-                if (channel) await channel.send(null, content)
+                if (channel) await channel.send(null, content).catch(self.logger.error)
             }
+
+            await self.emit('moduleExecution', { module: 'Greeting', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
         }
 
         if (server.modules.welcome.initial_roles.active) {
@@ -34,10 +32,14 @@ class Greeting {
 
             if (roles.size) {
                 await member.roles.add(roles, '') // Need reason
+
+                await self.emit('moduleExecution', { module: 'Greeting: Initial Roles', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
             }
         }
 
         if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
+            if (member.user.bot) return false
+
             const data = server.modules.restoring.data.find(d => d.user_id == member.id)
 
             if (data) {
@@ -58,6 +60,8 @@ class Greeting {
                         }
                     }
                 })
+
+                await self.emit('moduleExecution', { module: 'Restoring: Member Add', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
             }
         }
 

@@ -1,5 +1,5 @@
 const help = require('../../commands/general/help')
-const { Text } = require('../../modules/Levels')
+const { messageCreate } = require('../../modules/Levels')
 const Automoder = require('../../modules/Automoder')
 const { autoReact } = require('../../modules/Reactions')
 
@@ -38,7 +38,7 @@ const execute = async (self, message) => {
         if (mentioned || mentioned_with_exclamation) await help.fn(self, server, message, args)
     }
 
-    await Text(self, server, message)
+    await messageCreate(self, server, message)
 
     await Automoder.linksFilter(self, server, message)
     await Automoder.swearFilter(self, server, message)

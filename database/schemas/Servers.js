@@ -426,7 +426,8 @@ const Server = new Schema({
         reactions: { type: Array, default: [] },
         levels: {
             active: { type: Boolean, default: false },
-            single_roles: { type: Boolean, default: false },
+            voice: { type: Boolean, default: false },
+            single_roles: { type: Boolean },
             reset_on_leave: { type: Boolean, default: false },
             blocked: {
                 channels: { type: Array, default: [] },
@@ -438,7 +439,8 @@ const Server = new Schema({
             },
             level_up_alerts: {
                 active: { type: Boolean, default: false },
-                format: { type: Number, default: 0 },
+                voice: { type: Boolean, default: false },
+                format: { type: String, default: 'CURRENT_CHANNEL' },
                 channel_id: { type: String, default: '' },
                 message: {
                     content: { type: String, default: '' },
