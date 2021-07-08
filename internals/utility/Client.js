@@ -8,7 +8,7 @@ const lacuna = new Lacuna({
             name: `voidlacuna.ru (v${version})`
         }
     },
-    messageCacheMaxSize: 100,
+    messageCacheMaxSize: 50,
     messageCacheLifetime: 7200,
     messageSweepInterval: 60,
     ws: {
