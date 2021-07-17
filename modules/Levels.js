@@ -94,8 +94,8 @@ class Levels {
     static async voiceAssign(self, server, state) {
         if (!server.modules.levels.voice) return false
 
-        if (server.modules.levels.blocked.channels.includes(state.channel.id) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))) return false
-        if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channel.id)) return false
+        if (server.modules.levels.blocked.channels.includes(state.channelID) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))) return false
+        if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channelID)) return false
         if (server.modules.levels.allowed.roles.length && !state.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id))) return false
         if (state.guild.afkChannelID === state.channelID) return false
 

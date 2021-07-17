@@ -41,7 +41,7 @@ module.exports = async (self, server, channel) => {
         
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.channel_create.title)
-                .setDescription(self.translator.format(locale.logs.channel_create.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `${locale.logs.channel_create.types[channel.type] || locale.logs.channel_create.types.unknown} <#${channel.id}>)`))
+                .setDescription(self.translator.format(locale.logs.channel_create.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `${locale.logs.channel_create.types[channel.type] || locale.logs.channel_create.types.unknown} <#${channel.id}>`))
                 .addField(locale.logs.common.category, channel?.parent?.name ?? '-', true)
                 .addField(locale.logs.common.position, channel.rawPosition, true)
                 .setFooter(channel.id)
