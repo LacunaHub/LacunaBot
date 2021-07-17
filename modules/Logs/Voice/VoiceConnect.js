@@ -38,11 +38,10 @@ module.exports = async (self, server, state) => {
         
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.voice_connect.title)
-                .addField(state.member.user.bot ? locale.logs.common.bot : locale.logs.common.user, `${state.member.user.tag}\n(${state.member.id})`, true)
-                .addField(locale.logs.common.channel, `<#${state.channelID}>`, true)
-                .addField('\u200B', '\u200B', true)
+                .setDescription(self.translator.format(locale.logs.voice_connect.template, `**${state.member.user.tag}**`, `<#${state?.channelID ?? '1'}>`))
+                .setFooter(state.member.id)
                 .setTimestamp()
-                .setColor(0x43b581)
+                .setColor('#2FDF84')
 
             await webhook.send('', {
                 embeds: [embed],

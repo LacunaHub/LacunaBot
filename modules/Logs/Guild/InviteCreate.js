@@ -42,7 +42,7 @@ module.exports = async (self, server, invite) => {
                 .addField(locale.logs.common.channel, `<#${invite.channel.id}>`, true)
                 .addField(locale.logs.common.invite_inviter, invite.inviter ? `${invite.inviter.tag}` : '\u200B', true)
                 .setTimestamp()
-                .setColor(0x43b581)
+                .setColor('#2FDF84')
 
             await webhook.send('', {
                 embeds: [embed],

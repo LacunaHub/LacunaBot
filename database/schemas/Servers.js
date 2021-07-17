@@ -187,7 +187,9 @@ const Server = new Schema({
                             },
                             fields: { type: Array, default: [] }
                         }
-                    }
+                    },
+                    add_roles: { type: Array, default: [] },
+                    remove_roles: { type: Array, default: [] }
                 },
                 ignored: {
                     channels: { type: Array, default: [] },
@@ -230,7 +232,9 @@ const Server = new Schema({
                             },
                             fields: { type: Array, default: [] }
                         }
-                    }
+                    },
+                    add_roles: { type: Array, default: [] },
+                    remove_roles: { type: Array, default: [] }
                 },
                 ignored: {
                     channels: { type: Array, default: [] },
@@ -270,7 +274,9 @@ const Server = new Schema({
                             },
                             fields: { type: Array, default: [] }
                         }
-                    }
+                    },
+                    add_roles: { type: Array, default: [] },
+                    remove_roles: { type: Array, default: [] }
                 },
                 ignored: {
                     channels: { type: Array, default: [] },
@@ -311,7 +317,9 @@ const Server = new Schema({
                             },
                             fields: { type: Array, default: [] }
                         }
-                    }
+                    },
+                    add_roles: { type: Array, default: [] },
+                    remove_roles: { type: Array, default: [] }
                 },
                 ignored: {
                     channels: { type: Array, default: [] },

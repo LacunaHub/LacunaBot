@@ -18,6 +18,9 @@ module.exports = async (self, server, role) => {
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
+            const audit = role.guild.me.hasPermission('VIEW_AUDIT_LOG') ? await role.guild.fetchAuditLogs({ limit: 1, type: 'ROLE_CREATE' }) : null
+            const executor = audit?.entries?.first()?.executor
+
             if (!webhook) {
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_create.title) })
@@ -38,11 +41,12 @@ module.exports = async (self, server, role) => {
         
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.role_create.title)
-                .addField(locale.logs.common.role_name, role.name, true)
-                .addField(locale.logs.common.position, role.position, true)
+                .setDescription(self.translator.format(locale.logs.role_create.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `<@&${role.id}>`))
+                .addField(locale.logs.role_create.color, `\`${role.hexColor}\``, true)
+                .addField(locale.logs.common.position, role.rawPosition, true)
                 .setFooter(role.id)
                 .setTimestamp()
-                .setColor(0x43b581)
+                .setColor('#2FDF84')
 
             await webhook.send('', {
                 embeds: [embed],

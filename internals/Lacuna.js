@@ -16,6 +16,7 @@ const TemporaryRole = require('./structures/TemporaryRole')
 const Giveaway = require('./structures/Giveaway')
 const Twitch = require('../modules/Twitch')
 const YouTube = require('../modules/YouTube')
+const Levels = require('../modules/Levels')
 
 class Lacuna extends Client {
     /**
@@ -110,6 +111,7 @@ class Lacuna extends Client {
         await Giveaway.HandleEntries(this)
         await Twitch.scheduleCheck(this)
         await YouTube.scheduleCheck(this)
+        await Levels.checkVoiceStates(this)
 
         process.on('unhandledRejection', error => {
             const err = error.stack ? error.stack : error.message

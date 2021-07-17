@@ -35,6 +35,7 @@ class Automoder {
             const delete_message = (config.penalty.action & 1 << 3) === (1 << 3)
             const kick = (config.penalty.action & 1 << 4) === (1 << 4)
             const warn = (config.penalty.action & 1 << 5) === (1 << 5)
+            const edit_roles = (config.penalty.action & 1 << 6) === (1 << 6)
 
             if (ban && (!mute && !kick)) {
                 if (config.penalty.timer) {
@@ -101,6 +102,24 @@ class Automoder {
                 if (message.member.kickable) await message.member.kick('Автомодер: Фильтр слов').catch(self.logger.error)
             }
 
+            if (edit_roles && (!ban && !kick)) {
+                if (config.penalty?.add_roles?.length) {
+                    const editable = message.guild.roles.cache.filter(r => r.editable && config.penalty.add_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await message.member.roles.add(editable, 'Автомодер: Фильтр слов').catch(self.logger.error)
+                    }
+                }
+
+                if (config.penalty?.remove_roles?.length) {
+                    const editable = message.guild.roles.cache.filter(r => r.editable && config.penalty.remove_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await message.member.roles.remove(editable, 'Автомодер: Фильтр слов').catch(self.logger.error)
+                    }
+                }
+            }
+
             if (warn) {
                 await Warnings.add(self, server, message, { target: message.member, executor: message.guild.me, reason: 'Автомодер: Фильтр слов' })
             }
@@ -151,7 +170,7 @@ class Automoder {
             }
         }
 
-        if (config.delete_referral_invites) {
+        if (config.delete_referral_invites && message.guild.me.hasPermission('MANAGE_GUILD')) {
             const guild_invites = await message.guild.fetchInvites()
             const invites = message.content.match(/discord.gg\/\w+/gi)
             const is_referral = invites ? invites.some(i => !guild_invites.some(k => k.url == `https://${i}`)) : false
@@ -205,6 +224,7 @@ class Automoder {
             const delete_message = (config.penalty.action & 1 << 3) === (1 << 3)
             const kick = (config.penalty.action & 1 << 4) === (1 << 4)
             const warn = (config.penalty.action & 1 << 5) === (1 << 5)
+            const edit_roles = (config.penalty.action & 1 << 6) === (1 << 6)
 
             if (ban && (!mute && !kick)) {
                 if (config.penalty.timer) {
@@ -271,6 +291,24 @@ class Automoder {
                 if (message.member.kickable) await message.member.kick('Автомодер: Замедление отправки сообщений').catch(self.logger.error)
             }
 
+            if (edit_roles && (!ban && !kick)) {
+                if (config.penalty?.add_roles?.length) {
+                    const editable = message.guild.roles.cache.filter(r => r.editable && config.penalty.add_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await message.member.roles.add(editable, 'Автомодер: Замедление отправки сообщений').catch(self.logger.error)
+                    }
+                }
+
+                if (config.penalty?.remove_roles?.length) {
+                    const editable = message.guild.roles.cache.filter(r => r.editable && config.penalty.remove_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await message.member.roles.remove(editable, 'Автомодер: Замедление отправки сообщений').catch(self.logger.error)
+                    }
+                }
+            }
+
             if (warn) {
                 await Warnings.add(self, server, message, { target: message.member, executor: message.guild.me, reason: 'Автомодер: Замедление отправки сообщений' })
             }
@@ -326,6 +364,7 @@ class Automoder {
             const delete_message = (config.penalty.action & 1 << 3) === (1 << 3)
             const kick = (config.penalty.action & 1 << 4) === (1 << 4)
             const warn = (config.penalty.action & 1 << 5) === (1 << 5)
+            const edit_roles = (config.penalty.action & 1 << 6) === (1 << 6)
 
             if (ban && (!mute && !kick)) {
                 if (config.penalty.timer) {
@@ -390,6 +429,24 @@ class Automoder {
 
             if (kick && (!ban && !mute)) {
                 if (message.member.kickable) await message.member.kick('Автомодер: Анти-капс').catch(self.logger.error)
+            }
+
+            if (edit_roles && (!ban && !kick)) {
+                if (config.penalty?.add_roles?.length) {
+                    const editable = message.guild.roles.cache.filter(r => r.editable && config.penalty.add_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await message.member.roles.add(editable, 'Автомодер: Анти-капс').catch(self.logger.error)
+                    }
+                }
+
+                if (config.penalty?.remove_roles?.length) {
+                    const editable = message.guild.roles.cache.filter(r => r.editable && config.penalty.remove_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await message.member.roles.remove(editable, 'Автомодер: Анти-капс').catch(self.logger.error)
+                    }
+                }
             }
 
             if (warn) {
@@ -494,6 +551,7 @@ class Penalties {
         const delete_message = (config.penalty.action & 1 << 3) === (1 << 3)
         const kick = (config.penalty.action & 1 << 4) === (1 << 4)
         const warn = (config.penalty.action & 1 << 5) === (1 << 5)
+        const edit_roles = (config.penalty.action & 1 << 6) === (1 << 6)
 
         if (ban && (!mute && !kick)) {
             if (config.penalty.timer) {
@@ -558,6 +616,24 @@ class Penalties {
 
         if (kick && (!ban && !mute)) {
             if (message.member.kickable) await message.member.kick('Автомодер: Фильтр ссылок').catch(self.logger.error)
+        }
+
+        if (edit_roles && (!ban && !kick)) {
+            if (config.penalty?.add_roles?.length) {
+                const editable = message.guild.roles.cache.filter(r => r.editable && config.penalty.add_roles.includes(r.id))
+
+                if (editable.size) {
+                    await message.member.roles.add(editable, 'Автомодер: Фильтр ссылок').catch(self.logger.error)
+                }
+            }
+
+            if (config.penalty?.remove_roles?.length) {
+                const editable = message.guild.roles.cache.filter(r => r.editable && config.penalty.remove_roles.includes(r.id))
+
+                if (editable.size) {
+                    await message.member.roles.remove(editable, 'Автомодер: Фильтр ссылок').catch(self.logger.error)
+                }
+            }
         }
 
         if (warn) {

@@ -42,7 +42,7 @@ module.exports = async (self, server, member) => {
                 .addField(locale.logs.common.members, member.guild.memberCount, true)
                 .addField('\u200B', '\u200B', true)
                 .setTimestamp()
-                .setColor(0xF04747)
+                .setColor('#EF5350')
 
             await webhook.send('', {
                 embeds: [embed],

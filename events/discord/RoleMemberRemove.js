@@ -94,7 +94,7 @@ const execute = async (self, member, roles) => {
     if (tempmute && (mute_role && roles.has(mute_role.id))) await tempmute.delete(false)
 
     if (case_log && (mute_role && roles.has(mute_role.id)) && member.guild.me.hasPermission('VIEW_AUDIT_LOG') && server.moderation.case_log.case_types.MUTE_REMOVE) {
-        const audit = await member.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_ROLE_UPDATE' })
+        const audit = await member.guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_ROLE_UPDATE' })
         const entry = audit.entries.find(e => e.target.id == member.id)
 
         if (entry) {

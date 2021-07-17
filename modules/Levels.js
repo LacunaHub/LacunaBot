@@ -2,6 +2,7 @@ const Replacer = require('./Replacer')
 const Canvas = require('canvas')
 const { MessageAttachment } = require('discord.js')
 const numbro = require('numbro')
+const { scheduleJob, RecurrenceRule, Range } = require('node-schedule')
 
 class Levels {
     /**
@@ -322,9 +323,18 @@ class Levels {
         const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null) || message.member
 
         const sorted = activity.levels.sort((a, b) => b.experience.total - a.experience.total)
-        const level = sorted.find(lvl => lvl.user_id == mention.id)
+        let level = sorted.find(lvl => lvl.user_id == mention.id)
 
-        if (!level) return null
+        if (!level) {
+            level = {
+                user_id: mention.id,
+                experience: { total: 0, current: 0, level: 0 },
+                activity: {
+                    text: { total_messages: 0, last_message_at: null },
+                    voice: { total_time: 0, connected_at: null, disconnected_at: null }
+                }
+            }
+        }
 
         const canvas = await Canvas.createCanvas(720, 256)
         const ctx = canvas.getContext('2d')
@@ -439,6 +449,41 @@ class Levels {
         ctx.fillText(next_xp_format, 695, 205)
 
         return new MessageAttachment(canvas.toBuffer(), `lacuna-rank-${Date.now()}.png`)
+    }
+
+    /**
+     * @param {import('../internals/Lacuna')} self
+     */
+    static async checkVoiceStates(self) {
+        const rule = new RecurrenceRule()
+        rule.minute = new Range(0, 59, 20)
+
+        scheduleJob(rule, async () => {
+            if (!self.readyTimestamp) return null
+
+            let servers = await self.db.servers.findSome({ 'modules.levels.voice': true })
+
+            servers = servers.filter(s => self.guilds.cache.has(s._id))
+
+            for (const server of servers) {
+                const activities = await self.db.activities.find({ _id: server._id })
+
+                if (activities) {
+                    const guild = self.guilds.cache.get(server._id)
+                    const in_voice = activities.levels.filter(level => level.activity.voice.connected_at)
+
+                    for (const user of in_voice) {
+                        const state = guild.voiceStates.cache.some(voice => voice?.member?.id == user.user_id && voice.channelID != guild.afkChannelID && voice?.channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)?.size > 1)
+
+                        if (!state) {
+                            const member = await guild.members._fetchSingle({ user: user.user_id })
+
+                            if (member) await Levels.voiceCount(self, server, member)
+                        }
+                    }
+                }
+            }
+        })
     }
 }
 

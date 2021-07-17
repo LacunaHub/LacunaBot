@@ -41,12 +41,12 @@ module.exports = async (self, server, guild, before, user) => {
             if (before.username != user.username) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.user_update.title)
-                    .setDescription(`${user.tag}: ${locale.logs.user_update.types.username}`)
+                    .setDescription(self.translator.format(locale.logs.user_update.types.username, `**${user.tag}**`))
                     .addField(locale.logs.common.before_changes, before.username, true)
                     .addField(locale.logs.common.after_changes, user.username, true)
                     .setFooter(user.id)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -58,12 +58,12 @@ module.exports = async (self, server, guild, before, user) => {
             if (before.discriminator != user.discriminator) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.user_update.title)
-                    .setDescription(`${user.tag}: ${locale.logs.user_update.types.discriminator}`)
+                    .setDescription(self.translator.format(locale.logs.user_update.types.discriminator, `**${user.tag}**`))
                     .addField(locale.logs.common.before_changes, before.discriminator, true)
                     .addField(locale.logs.common.after_changes, user.discriminator, true)
                     .setFooter(user.id)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],

@@ -38,11 +38,12 @@ module.exports = async (self, server, state) => {
         
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.voice_server_deaf.title)
-                .addField(state.member.user.bot ? locale.logs.common.bot : locale.logs.common.user, `${state.member.user.tag}\n(${state.member.id})`, true)
+                .addField(state.member.user.bot ? locale.logs.common.bot : locale.logs.common.user, `${state.member.user.tag}`, true)
                 .addField(locale.logs.common.channel, `<#${state.channelID}>`, true)
                 .addField('\u200B', '\u200B', true)
+                .setFooter(state.member.id)
                 .setTimestamp()
-                .setColor(0xE19517)
+                .setColor('#FFA726')
 
             await webhook.send('', {
                 embeds: [embed],

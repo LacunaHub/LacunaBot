@@ -32,10 +32,13 @@ const execute = async (self, server, message, args) => {
     if (flags.EARLY_SUPPORTER) badges.push('<:supporter:585763690868113455>')
     if (mention.premiumSinceTimestamp) badges.push('<:nitro:464402288593731585>')
 
+    const created_ts = Math.round(mention.user.createdTimestamp / 1000)
+    const joined_ts = Math.round(mention.joinedTimestamp / 1000)
+
     const embed = new MessageEmbed()
         .setAuthor(name, mention.user.displayAvatarURL())
-        .addField(locale.user.texts.account_created, `${moment(mention.user.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(mention.user.createdTimestamp).locale(server.locale).fromNow()})`, true)
-        .addField(locale.user.texts.member_joined, `${moment(mention.joinedTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)}\n(${moment(mention.joinedTimestamp).locale(server.locale).fromNow()})`, true)
+        .addField(locale.user.texts.account_created, `<t:${created_ts}> – <t:${created_ts}:R>`, true)
+        .addField(locale.user.texts.member_joined, `<t:${joined_ts}> – <t:${joined_ts}:R>`, true)
         .addField(`${locale.user.texts.roles} [${mention.roles.cache.filter(r => r.id != message.guild.id).size}]`, mention.roles.cache.filter(r => r.id != message.guild.id).map(role => role.name).join(', ') || locale.common.texts.none)
         .setFooter(`ID: ${mention.id}`)
 

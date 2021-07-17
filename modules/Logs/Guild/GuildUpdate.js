@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js')
+const numbro = require('numbro')
 
 /**
  * @param {import('../../../internals/Lacuna')} self
@@ -18,6 +19,9 @@ module.exports = async (self, server, before, guild) => {
             const webhooks = await guild.fetchWebhooks()
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+            const audit = guild.me.hasPermission('VIEW_AUDIT_LOG') ? await guild.fetchAuditLogs({ limit: 1, type: 'GUILD_UPDATE' }) : null
+            const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
                 try {
@@ -40,29 +44,11 @@ module.exports = async (self, server, before, guild) => {
             if (before.name != guild.name) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(locale.modules.logs.guild_update.types.name)
+                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.name))
                     .addField(locale.modules.logs.common.before_changes, before.name, true)
                     .addField(locale.modules.logs.common.after_changes, guild.name, true)
-                    .addField('\u200B', '\u200B', true)
                     .setTimestamp()
-                    .setColor(0xE19517)
-
-                await webhook.send('', {
-                    embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    name: server.server.premium.available ? webhook.name : self.user.username
-                })
-            }
-
-            if (before.region != guild.region) {
-                const embed = new MessageEmbed()
-                    .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(locale.commands.server.texts.region)
-                    .addField(locale.modules.logs.common.before_changes, locale.commands.server.texts.regions[before.region], true)
-                    .addField(locale.modules.logs.common.after_changes, locale.commands.server.texts.regions[guild.region], true)
-                    .addField('\u200B', '\u200B', true)
-                    .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -74,12 +60,11 @@ module.exports = async (self, server, before, guild) => {
             if (before.afkChannelID != guild.afkChannelID) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(locale.commands.server.texts.afk_channel)
-                    .addField(locale.modules.logs.common.before_changes, before.afkChannel ? before.afkChannel.name : locale.commands.common.texts.none, true)
-                    .addField(locale.modules.logs.common.after_changes, guild.afkChannel ? guild.afkChannel.name : locale.commands.common.texts.none, true)
-                    .addField('\u200B', '\u200B', true)
+                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.afk_channel))
+                    .addField(locale.modules.logs.common.before_changes, before?.afkChannel?.name ?? '-', true)
+                    .addField(locale.modules.logs.common.after_changes, guild?.afkChannel?.name ?? '-', true)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -91,12 +76,11 @@ module.exports = async (self, server, before, guild) => {
             if (before.afkTimeout != guild.afkTimeout) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(locale.modules.logs.guild_update.types.afk_timeout)
-                    .addField(locale.modules.logs.common.before_changes, before.afkTimeout, true)
-                    .addField(locale.modules.logs.common.after_changes, guild.afkTimeout, true)
-                    .addField('\u200B', '\u200B', true)
+                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.afk_timeout))
+                    .addField(locale.modules.logs.common.before_changes, before.afkTimeout ? numbro(before.afkTimeout).format({ output: 'time' }) : '-', true)
+                    .addField(locale.modules.logs.common.after_changes, guild.afkTimeout ? numbro(guild.afkTimeout).format({ output: 'time' }) : '-', true)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -108,12 +92,11 @@ module.exports = async (self, server, before, guild) => {
             if (before.verificationLevel != guild.verificationLevel) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(locale.commands.server.texts.verification_level)
+                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.verification_level))
                     .addField(locale.modules.logs.common.before_changes, locale.commands.server.texts.verification_levels[before.verificationLevel], true)
                     .addField(locale.modules.logs.common.after_changes, locale.commands.server.texts.verification_levels[guild.verificationLevel], true)
-                    .addField('\u200B', '\u200B', true)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -125,11 +108,11 @@ module.exports = async (self, server, before, guild) => {
             if (before.description != guild.description) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(locale.modules.logs.guild_update.types.description)
-                    .addField(locale.modules.logs.common.before_changes, before.description || locale.commands.common.texts.none, true)
-                    .addField(locale.modules.logs.common.after_changes, guild.description || locale.commands.common.texts.none, true)
+                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.description))
+                    .addField(locale.modules.logs.common.before_changes, before?.description ?? '-', true)
+                    .addField(locale.modules.logs.common.after_changes, guild?.description ?? '-', true)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -141,12 +124,11 @@ module.exports = async (self, server, before, guild) => {
             if (before.systemChannelID != guild.systemChannelID) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(locale.modules.logs.guild_update.types.system_channel)
-                    .addField(locale.modules.logs.common.before_changes, before.systemChannel ? `#${before.systemChannel.name}` : locale.commands.common.texts.none, true)
-                    .addField(locale.modules.logs.common.after_changes, guild.systemChannel ? `#${guild.systemChannel.name}` : locale.commands.common.texts.none, true)
-                    .addField('\u200B', '\u200B', true)
+                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.system_channel))
+                    .addField(locale.modules.logs.common.before_changes, before.systemChannel ? `#${before.systemChannel.name}` : '-', true)
+                    .addField(locale.modules.logs.common.after_changes, guild.systemChannel ? `#${guild.systemChannel.name}` : '-', true)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -155,15 +137,30 @@ module.exports = async (self, server, before, guild) => {
                 })
             }
 
-            if (before.ownerID != guild.ownerID) {
+            if (before.rulesChannelID != guild.rulesChannelID) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(locale.commands.server.texts.owner)
-                    .addField(locale.modules.logs.common.before_changes, before.owner ? before.owner.user.tag : `<@${before.ownerID}>`, true)
-                    .addField(locale.modules.logs.common.after_changes, guild.owner ? guild.owner.user.tag : `<@${guild.ownerID}>`, true)
-                    .addField('\u200B', '\u200B', true)
+                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.rules_channel))
+                    .addField(locale.modules.logs.common.before_changes, before.rulesChannel ? `#${before.rulesChannel.name}` : '-', true)
+                    .addField(locale.modules.logs.common.after_changes, guild.rulesChannel ? `#${guild.rulesChannel.name}` : '-', true)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
+
+                await webhook.send('', {
+                    embeds: [embed],
+                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    name: server.server.premium.available ? webhook.name : self.user.username
+                })
+            }
+
+            if (before.publicUpdatesChannelID != guild.publicUpdatesChannelID) {
+                const embed = new MessageEmbed()
+                    .setTitle(locale.modules.logs.guild_update.title)
+                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.public_updates_channel))
+                    .addField(locale.modules.logs.common.before_changes, before.publicUpdatesChannel ? `#${before.publicUpdatesChannel.name}` : '-', true)
+                    .addField(locale.modules.logs.common.after_changes, guild.publicUpdatesChannel ? `#${guild.publicUpdatesChannel.name}` : '-', true)
+                    .setTimestamp()
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],

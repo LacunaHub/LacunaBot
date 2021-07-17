@@ -91,7 +91,7 @@ class Giveaway {
     }
 
     async start() {
-        this.interval = setInterval(() => this.updateCountdown(), 120000)
+        //this.interval = setInterval(() => this.updateCountdown(), 120000)
         await this.toSchedule()
     }
 
@@ -128,7 +128,7 @@ class Giveaway {
     }
 
     async end(scheduled = true) {
-        await clearInterval(this.interval)
+        //await clearInterval(this.interval)
 
         if (scheduled) await this.endMessage(); else await this.deleteMessage()
 

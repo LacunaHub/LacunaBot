@@ -25,13 +25,13 @@ const execute = async (self, server, message, args) => {
     }
 
     const sorted = activity.levels.sort((a, b) => b.experience.total - a.experience.total)
-    const top10 = sorted.filter((el, i) => i < 9)
+    const top = sorted.filter((el, i) => i <= 14)
 
     const embed = new MessageEmbed()
         .setTitle(locale.leaders.texts.leaderboard)
         .setDescription(self.translator.format(locale.leaders.texts.positions, `\`${sorted.length}\``))
 
-    for (const level of top10) {
+    for (const level of top) {
         const index = sorted.indexOf(level)
         const user = await self.users.fetch(level.user_id, false)
         const current_xp_format = level.experience.current >= 1000 ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 1 }).toUpperCase() : level.experience.current.toFixed(1)

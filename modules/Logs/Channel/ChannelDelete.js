@@ -18,6 +18,9 @@ module.exports = async (self, server, channel) => {
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
+            const audit = channel.guild.me.hasPermission('VIEW_AUDIT_LOG') ? await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_DELETE' }) : null
+            const executor = audit?.entries?.first()?.executor
+
             if (!webhook) {
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_delete.title) })
@@ -38,11 +41,12 @@ module.exports = async (self, server, channel) => {
         
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.channel_delete.title)
-                .setDescription(`${channel.name} (${channel.id})`)
-                .addField(locale.logs.channel_create.type, locale.logs.channel_create.types[channel.type] || locale.logs.channel_create.types.unknown, true)
-                .addField(locale.logs.channel_create.types.category, channel.parent ? channel.parent.name : '\u200B', true)
+                .setDescription(self.translator.format(locale.logs.channel_delete.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `${locale.logs.channel_create.types[channel.type] || locale.logs.channel_create.types.unknown} **${channel.name}**`))
+                .addField(locale.logs.common.category, channel?.parent?.name ?? '-', true)
+                .addField(locale.logs.common.position, channel.rawPosition, true)
+                .setFooter(channel.id)
                 .setTimestamp()
-                .setColor(0xF04747)
+                .setColor('#EF5350')
 
             await webhook.send('', {
                 embeds: [embed],

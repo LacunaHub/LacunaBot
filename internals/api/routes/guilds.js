@@ -29,9 +29,15 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
         return
     }
 
-    const channels = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').channels.cache.sort((a, b) => a.parentID - b.parentID || a.position - b.position)`)).filter(data => data)[0]
-    const roles = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').roles.cache.filter(r => !r.managed).sort((a, b) => b.rawPosition - a.rawPosition).map(r => { return { ...r, higher: !r.editable, guild: null } })`)).filter(data => data)[0]
-    const emojis = (await ShardingManager.broadcastEval(`this.emojis.cache.filter(e => e.guild.id == ${guild_id})`)).filter(data => data)[0]
+    const data = (await ShardingManager.broadcastEval(
+        `const guild = this.guilds.cache.get('${guild_id}');` +
+        `const channels = guild.channels.cache.sort((a, b) => a.parentID - b.parentID || a.position - b.position);` +
+        `const roles = guild.roles.cache.filter(r => !r.managed).sort((a, b) => b.rawPosition - a.rawPosition).map(r => { return { ...r, higher: !r.editable, guild: null } });` +
+        `const emojis = this.emojis.cache.filter(e => e.guild.id == ${guild_id});` +
+        `const permissions = guild.me.permissions.toArray();` +
+        `Object.assign({}, { channels, roles, emojis, permissions })`
+    )).filter(data => data)[0]
+
     const commands = await ShardingManager.shards.first().eval('this.commands.filter(c => !c.private).map(c => { return { name: c.name, aliases: c.aliases, group: c.group, premium: c.premium_only, permissions: { client: c.self_permissions, author: c.user_permissions } } })')
 
     const locale = Translator.locale(guild.locale).commands
@@ -45,7 +51,7 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
             ...guild.commands, list: commands.map(c => { return { ...c, docs: { description: locale[c.name].description } }})
         },
         guild: {
-            ...req.headers['x-guild-data'], channels: channels, roles: roles.filter(r => r.id != guild_id), emojis: emojis
+            ...req.headers['x-guild-data'], channels: data.channels, roles: data.roles.filter(r => r.id != guild_id), emojis: data.emojis, permissions: data.permissions
         },
         moderation: {
             case_log: {
@@ -113,9 +119,15 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
         return
     }
 
-    const channels = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').channels.cache.sort((a, b) => a.parentID - b.parentID || a.position - b.position)`)).filter(data => data)[0]
-    const roles = (await ShardingManager.broadcastEval(`this.guilds.cache.get('${guild_id}').roles.cache.filter(r => !r.managed).sort((a, b) => b.rawPosition - a.rawPosition).map(r => { return { ...r, higher: !r.editable, guild: null } })`)).filter(data => data)[0]
-    const emojis = (await ShardingManager.broadcastEval(`this.emojis.cache.filter(e => e.guild.id == ${guild_id})`)).filter(data => data)[0]
+    const data = (await ShardingManager.broadcastEval(
+        `const guild = this.guilds.cache.get('${guild_id}');` +
+        `const channels = guild.channels.cache.sort((a, b) => a.parentID - b.parentID || a.position - b.position);` +
+        `const roles = guild.roles.cache.filter(r => !r.managed).sort((a, b) => b.rawPosition - a.rawPosition).map(r => { return { ...r, higher: !r.editable, guild: null } });` +
+        `const emojis = this.emojis.cache.filter(e => e.guild.id == ${guild_id});` +
+        `const permissions = guild.me.permissions.toArray();` +
+        `Object.assign({}, { channels, roles, emojis, permissions })`
+    )).filter(data => data)[0]
+    
     const commands = await ShardingManager.shards.first().eval('this.commands.filter(c => !c.private).map(c => { return { name: c.name, aliases: c.aliases, group: c.group, premium: c.premium_only, permissions: { client: c.self_permissions, author: c.user_permissions } } })')
 
     const locale = Translator.locale(guild.locale).commands
@@ -131,7 +143,7 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
             ...updated.commands, list: commands.map(c => { return { ...c, docs: { description: locale[c.name].description } }})
         },
         guild: {
-            ...req.headers['x-guild-data'], channels: channels, roles: roles.filter(r => r.id != guild_id), emojis: emojis
+            ...req.headers['x-guild-data'], channels: data.channels, roles: data.roles.filter(r => r.id != guild_id), emojis: data.emojis, permissions: data.permissions
         },
         moderation: {
             case_log: {
@@ -517,6 +529,102 @@ router.delete('/:guild_id/youtube/:channel_id', authorize, authorize.permitted, 
     }
 
     const result = await Guilds.removeYouTubeChannel(guild, channel_id)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(204).end()
+})
+
+router.put('/:guild_id/voice-triggers', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const options = req.body
+
+    if (!guild_id || !options) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.addVoiceTrigger(guild, options)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(200).json(result)
+})
+
+router.patch('/:guild_id/voice-triggers', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const options = req.body
+
+    if (!guild_id || !options) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.editVoiceTrigger(guild, options)
+
+    if (typeof result === 'string') {
+        await res.status(400).send(result)
+
+        return
+    }
+
+    await res.status(200).json(result)
+})
+
+router.delete('/:guild_id/voice-triggers/:channel_id', authorize, authorize.permitted, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const channel_id = req.params.channel_id
+
+    if (!guild_id || !channel_id) {
+        await res.status(400).send('Invalid Form')
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).send('Guild Not Found')
+
+        return
+    }
+
+    const result = await Guilds.removeVoiceTrigger(guild, channel_id)
 
     if (typeof result === 'string') {
         await res.status(400).send(result)

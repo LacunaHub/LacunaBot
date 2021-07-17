@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js')
+const { TruncateString } = require('../../../internals/utility/Utils')
 
 /**
  * @param {import('../../../internals/Lacuna')} self
@@ -41,9 +42,12 @@ module.exports = async (self, server, messages) => {
                 .setTitle(locale.logs.message_delete_bulk.title)
                 .addField(locale.logs.message_delete_bulk.amount, messages.size, true)
                 .addField(locale.logs.common.channel, `<#${message.channel.id}>`, true)
-                .addField('\u200B', '\u200B', true)
                 .setTimestamp()
-                .setColor(0xF04747)
+                .setColor('#EF5350')
+
+            for (const message of messages.first(10)) {
+                embed.addField(`${message.author.tag} <t:${Math.round(message.createdTimestamp / 1000)}:R>`, TruncateString(message.content || `\`[${locale.logs.message_delete.attachment}]\``, 100))
+            }
 
             await webhook.send('', {
                 embeds: [embed],

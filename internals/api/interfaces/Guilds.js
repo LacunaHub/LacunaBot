@@ -156,6 +156,14 @@ class Guilds {
                                 })
                             }
                         }
+
+                        if (Array.isArray(data.moderation.automoder.links_filter.penalty.add_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.add_roles': data.moderation.automoder.links_filter.penalty.add_roles } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.links_filter.penalty.remove_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.remove_roles': data.moderation.automoder.links_filter.penalty.remove_roles } })
+                        }
                     }
 
                     if (data.moderation.automoder.links_filter.ignored) {
@@ -231,6 +239,14 @@ class Guilds {
                                 })
                             }
                         }
+
+                        if (Array.isArray(data.moderation.automoder.swear_filter.penalty.add_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.add_roles': data.moderation.automoder.swear_filter.penalty.add_roles } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.swear_filter.penalty.remove_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.remove_roles': data.moderation.automoder.swear_filter.penalty.remove_roles } })
+                        }
                     }
 
                     if (data.moderation.automoder.swear_filter.ignored) {
@@ -305,6 +321,14 @@ class Guilds {
                                     }
                                 })
                             }
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.users_slowdown.penalty.add_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.add_roles': data.moderation.automoder.users_slowdown.penalty.add_roles } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.users_slowdown.penalty.remove_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.remove_roles': data.moderation.automoder.users_slowdown.penalty.remove_roles } })
                         }
                     }
 
@@ -385,6 +409,14 @@ class Guilds {
                                     }
                                 })
                             }
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.anti_caps.penalty.add_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.add_roles': data.moderation.automoder.anti_caps.penalty.add_roles } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.anti_caps.penalty.remove_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.remove_roles': data.moderation.automoder.anti_caps.penalty.remove_roles } })
                         }
                     }
 
@@ -714,12 +746,6 @@ class Guilds {
             }
 
             if (data.modules.voice_manager) {
-                if (Array.isArray(data.modules.voice_manager.temp_voice_channels.triggers)) {
-                    if ((data.modules.voice_manager.temp_voice_channels.triggers.length == 2 && !guild.server.premium.available) || data.modules.voice_manager.temp_voice_channels.triggers.length <= 30) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.temp_voice_channels.triggers': data.modules.voice_manager.temp_voice_channels.triggers } })
-                    }
-                }
-
                 if (Array.isArray(data.modules.voice_manager.voice_roles)) {
                     if (data.modules.voice_manager.voice_roles.length <= 100) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.voice_roles': data.modules.voice_manager.voice_roles } })
@@ -1032,6 +1058,70 @@ class Guilds {
         })
 
         if (channel.alerts.webhook.id) await Webhooks.deleteWebhook(channel.alerts.webhook.id)
+
+        return true
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {import('../../Typings').VoiceChannelTrigger} trigger
+     */
+    static async addVoiceTrigger(server, trigger) {
+        const triggers = server.modules.voice_manager.temp_voice_channels.triggers
+
+        if (triggers.length >= 2 && !server.server.premium.available) return 'voice_triggers_limit_reached_no_premium'
+
+        if (triggers.length >= 30) return 'voice_triggers_limit_reached'
+
+        if (triggers.some(t => t.channel_id == trigger.channel_id)) return 'voice_trigger_already_added'
+
+        await Servers.updateOne({ _id: server._id }, {
+            $push: {
+                'modules.voice_manager.temp_voice_channels.triggers': trigger
+            }
+        })
+
+        return trigger
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {Partial<import('../../Typings').VoiceChannelTrigger>} trigger
+     */
+    static async editVoiceTrigger(server, trigger) {
+        const triggers = server.modules.voice_manager.temp_voice_channels.triggers
+
+        if (!triggers.some(t => t.channel_id == trigger.channel_id)) return 'voice_trigger_not_found'
+
+        await Servers.updateOne({ _id: server._id, 'modules.voice_manager.temp_voice_channels.triggers.channel_id': trigger.channel_id }, {
+            $set: {
+                'modules.voice_manager.temp_voice_channels.triggers.$.default': trigger.default,
+                'modules.voice_manager.temp_voice_channels.triggers.$.allowed_roles': trigger.allowed_roles ?? [],
+                'modules.voice_manager.temp_voice_channels.triggers.$.blocked_roles': trigger.blocked_roles ?? [],
+                'modules.voice_manager.temp_voice_channels.triggers.$.moderator_roles': trigger.moderator_roles ?? []
+            }
+        })
+
+        return trigger
+    }
+
+    /**
+     * @param {import('../../Typings').ServerDocument} server
+     * @param {string} channel_id
+     */
+    static async removeVoiceTrigger(server, channel_id) {
+        const triggers = server.modules.voice_manager.temp_voice_channels.triggers
+        const trigger = triggers.find(t => t.channel_id == channel_id)
+
+        if (!trigger) return 'voice_trigger_not_found'
+
+        await Servers.updateOne({ _id: server._id }, {
+            $pull: {
+                'modules.voice_manager.temp_voice_channels.triggers': {
+                    channel_id: channel_id
+                }
+            }
+        })
 
         return true
     }

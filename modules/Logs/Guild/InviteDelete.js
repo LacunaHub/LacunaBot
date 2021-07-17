@@ -37,12 +37,12 @@ module.exports = async (self, server, invite) => {
             }
         
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.invite_create.title)
+                .setTitle(locale.logs.invite_delete.title)
                 .addField(locale.logs.common.invite_code, invite.code, true)
                 .addField(locale.logs.common.channel, `<#${invite.channel.id}>`, true)
                 .addField(locale.logs.common.invite_inviter, invite.inviter ? `${invite.inviter.tag}` : '\u200B', true)
                 .setTimestamp()
-                .setColor(0xF04747)
+                .setColor('#EF5350')
 
             await webhook.send('', {
                 embeds: [embed],

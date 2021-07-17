@@ -39,11 +39,12 @@ module.exports = async (self, server, before, state) => {
         
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.voice_move.title)
-                .addField(state.member.user.bot ? locale.logs.common.bot : locale.logs.common.user, `${state.member.user.tag}\n(${state.member.id})`, true)
+                .setDescription(self.translator.format(locale.logs.voice_move.template, `**${state.member.user.tag}**`))
                 .addField(locale.logs.voice_move.old_channel, `<#${before.channelID}>`, true)
                 .addField(locale.logs.voice_move.new_channel, `<#${state.channelID}>`, true)
+                .setFooter(state.member.id)
                 .setTimestamp()
-                .setColor(0xE19517)
+                .setColor('#FFA726')
 
             await webhook.send('', {
                 embeds: [embed],

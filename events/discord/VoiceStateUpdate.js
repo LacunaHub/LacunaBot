@@ -5,18 +5,18 @@
  */
 const execute = async (self, before, state) => {
     if (before.member.partial) {
-        before.member = await state.guild.members.fetch({ member: before.member, cache: false })
+        before.member = await before.member.fetch()
     }
 
     if (state.member.partial) {
-        state.member = await state.guild.members.fetch({ member: state.member, cache: false })
+        state.member = await state.member.fetch()
     }
 
     if (!before.channelID && state.channelID) {
         await self.emit('voiceConnect', state)
     }
 
-    else if (before.channelID && !state.channelID) {
+    else if (!state.channelID) {
         await self.emit('voiceDisconnect', state, before.channel)
     }
 

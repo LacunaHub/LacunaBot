@@ -1,3 +1,4 @@
+const { Permissions } = require('discord.js')
 const ChannelUpdate = require('../../modules/Logs/Channel/ChannelUpdate')
 
 /**
@@ -12,6 +13,23 @@ const execute = async (self, before, channel) => {
     const server = await self.db.servers.find({ _id: channel.guild.id })
 
     if (!server) return false
+
+    if (channel.type == 'voice' && !before.permissionOverwrites.equals(channel.permissionOverwrites)) {
+        const trigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.children.some(c => c.channel_id == channel.id))
+        const children = trigger?.children?.find(c => c.channel_id == channel.id)
+
+        if (trigger && children && trigger?.moderator_roles?.length) {
+            const permissions = new Permissions(trigger.default.permissions | 0x400)
+            const roles = trigger.moderator_roles.filter(mr => channel.guild.roles.cache.some(r => r.editable && r.id == mr))
+
+            for (const role of roles) {
+                const overwrites = channel.permissionOverwrites.find(p => p.id == role)
+                
+                if (!overwrites && channel.manageable) await channel.createOverwrite(role, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {})).catch(self.logger.error)
+                else if (!overwrites.allow.has(permissions) && channel.manageable) await overwrites.update(permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {})).catch(self.logger.error)
+            }
+        }
+    }
 
     await ChannelUpdate(self, server, before, channel)
 

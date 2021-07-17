@@ -38,7 +38,7 @@ const execute = async (self, message) => {
         if (mentioned || mentioned_with_exclamation) await help.fn(self, server, message, args)
     }
 
-    await messageCreate(self, server, message)
+    if (!command) await messageCreate(self, server, message)
 
     await Automoder.linksFilter(self, server, message)
     await Automoder.swearFilter(self, server, message)

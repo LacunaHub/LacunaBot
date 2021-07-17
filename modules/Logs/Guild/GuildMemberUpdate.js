@@ -19,6 +19,9 @@ module.exports = async (self, server, before, member) => {
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
+            const audit = member.guild.me.hasPermission('VIEW_AUDIT_LOG') ? await member.guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_UPDATE' }) : null
+            const executor = audit?.entries?.first()?.executor
+
             if (!webhook) {
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.guild_member_update.title) })
@@ -37,15 +40,14 @@ module.exports = async (self, server, before, member) => {
                 })
             }
 
-            if (before.nickname != member.nickname) {
+            if (before.displayName != member.displayName) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.logs.guild_member_update.nickname_update)
-                    .setDescription(`${member.user.tag} (${member.id})`)
+                    .setTitle(locale.logs.guild_member_update.title)
+                    .setDescription(self.translator.format(locale.logs.guild_member_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.guild_member_update.nickname_update, `**${member.user.tag}** (${member.id})`)))
                     .addField(locale.logs.common.before_changes, before.displayName, true)
                     .addField(locale.logs.common.after_changes, member.displayName, true)
-                    .addField('\u200B', '\u200B', true)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],

@@ -56,10 +56,11 @@ const create = async (self, server, message, args) => {
 
     prize = TruncateString(prize, 100)
 
+    const ts = Date.now() + timer
+
     const embed = new MessageEmbed()
         .setTitle(prize)
-        .setDescription(locale.giveaway.create.texts.giveaway_participate)
-        .setFooter(self.translator.format(locale.giveaway.create.texts.giveaways_remains, moment(Date.now() + timer).locale(server.locale).endOf().fromNow()))
+        .setDescription(`${locale.giveaway.create.texts.giveaway_participate}\n${self.translator.format(locale.giveaway.create.texts.giveaways_remains, `<t:${Math.round(ts / 1000)}:R>`)}`)
         .setColor(0x43b581)
 
     if (message.deletable && !message.deleted) await message.delete()
@@ -73,7 +74,7 @@ const create = async (self, server, message, args) => {
         guild_id: message.guild.id,
         prize: prize,
         winners_amount: winners_amount,
-        expiration_date: new Date(Date.now() + timer),
+        expiration_date: new Date(ts),
         locale: server.locale,
         init: true
     })

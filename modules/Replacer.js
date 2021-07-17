@@ -83,7 +83,8 @@ class Replacer {
             'member.level.total_xp': levels?.experience?.total ?? 0,
             'subs.name': subs?.name ?? null,
             'subs.title': subs?.title?? null,
-            'subs.link': subs?.link?? null
+            'subs.link': subs?.link?? null,
+            'index': stuff.index ?? 0
         }
 
         let patterns = string.match(/{\s*([\w.]+)\s*}/g) || []

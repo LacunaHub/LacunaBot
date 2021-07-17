@@ -48,7 +48,7 @@ module.exports = async (self, server, message) => {
                 .addField(locale.logs.message_delete.content, content || `\`[${locale.logs.message_delete.attachment}]\``)
                 .setFooter(message.id)
                 .setTimestamp()
-                .setColor(0xF04747)
+                .setColor('#EF5350')
 
             if (attachment && attachment.height) embed.setImage(attachment.proxyURL)
 

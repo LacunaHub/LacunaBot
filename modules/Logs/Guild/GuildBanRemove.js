@@ -19,6 +19,10 @@ module.exports = async (self, server, guild, user) => {
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
+            const audit = guild.me.hasPermission('VIEW_AUDIT_LOG') ? await guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_BAN_REMOVE' }) : null
+            const executor = audit?.entries?.first()?.executor
+            const reason = audit?.entries?.first()?.reason
+
             if (!webhook) {
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.commands.common.case_log.cases.BAN_REMOVE) })
@@ -39,9 +43,10 @@ module.exports = async (self, server, guild, user) => {
         
             const embed = new MessageEmbed()
                 .setTitle(locale.commands.common.case_log.cases.BAN_REMOVE)
-                .setDescription(`${user.tag} (${user.id})`)
+                .setDescription(self.translator.format(locale.modules.logs.guild_ban_remove.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, `**${user.tag}** (${user.id})`))
+                .addField(locale.commands.common.case_log.reason, reason ?? '-')
                 .setTimestamp()
-                .setColor(0xE19517)
+                .setColor('#2FDF84')
 
             await webhook.send('', {
                 embeds: [embed],

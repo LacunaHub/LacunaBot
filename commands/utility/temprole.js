@@ -51,6 +51,8 @@ const execute = async (self, server, message, args) => {
     if (timer < ms('1m')) timer = ms('1m')
     else if (timer > ms('2y')) timer = ms('2y')
 
+    const ts = Date.now() + timer
+
     await mention.roles.add(role.id)
 
     new TemporaryRole(self, {
@@ -58,11 +60,11 @@ const execute = async (self, server, message, args) => {
         guild_id: message.guild.id,
         role_id: role.id,
         unique_id: id.simple(6),
-        expires_timestamp: Date.now() + timer,
+        expires_timestamp: ts,
         init: true
     })
 
-    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.temprole.texts.success, `**${message.author.username}**`, `**${mention.user.tag}**`, moment(Date.now() + timer).locale(server.locale).endOf().fromNow())}`, { allowedMentions: { repliedUser: false } })
+    await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.temprole.texts.success, `**${message.author.username}**`, `**${mention.user.tag}**`, `<t:${Math.round(ts / 1000)}:R>`)}`, { allowedMentions: { repliedUser: false } })
 
     return true
 }

@@ -1,9 +1,9 @@
 const { Permissions } = require('discord.js')
+const { TruncateString } = require('../internals/utility/Utils')
+const Replacer = require('./Replacer')
 
 class VoiceManager {
     /**
-     * Создаёт временный голосовой канал
-     * 
      * @param {import('../internals/Lacuna')} self
      * @param {import('../internals/Typings').ServerDocument} server
      * @param {import('discord.js').VoiceState} state
@@ -12,7 +12,11 @@ class VoiceManager {
         const trigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.channel_id == state.channelID)
         const trigger_index = server.modules.voice_manager.temp_voice_channels.triggers.indexOf(trigger)
 
-        if (trigger_index >= 2 && !server.server.premium.available) return false
+        if (trigger_index >= 2 && !server.server.premium.available) {
+            await state.kick()
+
+            return false
+        }
 
         if (trigger && state.guild.me.hasPermission('MANAGE_CHANNELS')) {
             const children = trigger.children.find(c => c.owner_id == state.member.id)
@@ -27,18 +31,42 @@ class VoiceManager {
                 return true
             }
 
-            const parent = state.channel.parent
+            if ((trigger.allowed_roles?.length && !state.member.roles.cache.some(r => trigger.allowed_roles?.includes(r.id))) || state.member.roles.cache.some(r => trigger.blocked_roles?.includes(r.id))) {
+                await state.kick()
+    
+                return false
+            }
+
+            const parent = trigger.default.category_id ? state.guild.channels.cache.get(trigger.default.category_id) : state.channel.parent
+            const name = await Replacer.Replace(self, trigger.default.name, { guild: state.guild, member: state.member, index: trigger.children.length + 1 })
+            const permissions = new Permissions(trigger.default.permissions)
+
+            if (trigger.default.permissions) {
+                state.channel.permissionOverwrites.set(state.member.id, { type: 'member', id: state.member.id, allow: permissions })
+
+                if (trigger?.moderator_roles?.length) {
+                    const roles = trigger.moderator_roles.filter(mr => state.guild.roles.cache.some(r => r.editable && r.id == mr))
+
+                    for (const role of roles) {
+                        const overwrites = state.channel.permissionOverwrites.find(p => p.id == role)
+
+                        if (!overwrites) state.channel.permissionOverwrites.set(role, { type: 'role', id: role, allow: permissions })
+                        else state.channel.permissionOverwrites.set(role, { type: 'role', id: role, allow: new Permissions([...permissions, ...overwrites.allow]), deny: overwrites.deny })
+                    }
+                }
+            }
             
-            const temp_voice = await state.guild.channels.create(`${trigger.default.name} #${trigger.children.length + 1}`, {
+            const temp_voice = await state.guild.channels.create(TruncateString(name, 100, '') || 'Voice', {
                 type: 'voice',
-                permissionOverwrites: trigger.default.permissions ? state.channel.permissionOverwrites.set(state.member.id, { type: 'member', id: state.member.id, allow: new Permissions(trigger.default.permissions) }) : state.channel.permissionOverwrites,
+                permissionOverwrites: state.channel.permissionOverwrites,
                 parent: parent && parent.manageable ? parent : null,
                 userLimit: trigger.default.limit,
-                bitrate: state.channel.bitrate,
-                reason: ''
+                bitrate: state.channel.bitrate
             })
 
-            await state.channel.permissionOverwrites.delete(state.member.id)
+            if (trigger.default.position == 'TOP') await temp_voice.setPosition(0)
+
+            await state.channel.permissionOverwrites.sweep(overwrite => overwrite.id == state.member.id || trigger?.moderator_roles?.includes(overwrite.id))
 
             await self.db.servers.update({ _id: state.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.id': trigger.id }, {
                 $push: {
@@ -63,8 +91,6 @@ class VoiceManager {
     }
 
     /**
-     * Создаёт временный голосовой канал или перемещает в него, если он уже создан
-     * 
      * @param {import('../internals/Lacuna')} self
      * @param {import('../internals/Typings').ServerDocument} server
      * @param {import('discord.js').VoiceState} before
@@ -135,8 +161,6 @@ class VoiceManager {
     }
 
     /**
-     * Удаляет временный голосовой канал
-     * 
      * @param {import('../internals/Lacuna')} self
      * @param {import('../internals/Typings').ServerDocument} server
      * @param {import('discord.js').VoiceChannel} channel
@@ -173,9 +197,8 @@ class VoiceManager {
                 const overwrites = channel.permissionOverwrites.find(p => p.id === trigger_children.owner_id)
                 if (overwrites) await overwrites.delete()
 
-                const permissions = {}
-                for (const p of new Permissions(trigger.default.permissions).toArray()) permissions[p] = true
-                await channel.createOverwrite(channel.members.first().id, permissions)
+                const permissions = new Permissions(trigger.default.permissions)
+                await channel.createOverwrite(channel.members.first().id, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
             }
         
             return true

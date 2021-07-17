@@ -62,6 +62,7 @@ class Warnings {
             const mute = (penalty.action & 1 << 1) === (1 << 1)
             const kick = (penalty.action & 1 << 2) === (1 << 2)
             const send_message = (penalty.action & 1 << 3) === (1 << 3)
+            const edit_roles = (penalty.action & 1 << 4) === (1 << 4)
             const reset_violations = (penalty.action & 1 << 7) === (1 << 7)
 
             if (ban && (!mute && !kick)) {
@@ -127,6 +128,24 @@ class Warnings {
 
             if (kick && (!ban && !mute)) {
                 if (target.kickable) await target.kick('Автомодер: Предупреждение')
+            }
+
+            if (edit_roles && (!ban && !kick)) {
+                if (penalty?.add_roles?.length) {
+                    const editable = message.guild.roles.cache.filter(r => r.editable && penalty.add_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await target.roles.add(editable, 'Автомодер: Предупреждение').catch(self.logger.error)
+                    }
+                }
+
+                if (penalty?.remove_roles?.length) {
+                    const editable = message.guild.roles.cache.filter(r => r.editable && penalty.remove_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await target.roles.remove(editable, 'Автомодер: Предупреждение').catch(self.logger.error)
+                    }
+                }
             }
 
             if (send_message) {

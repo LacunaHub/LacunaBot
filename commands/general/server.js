@@ -12,6 +12,8 @@ const execute = async (self, server, message, args) => {
 
     const server_owner = await message.guild.members.fetch(message.guild.ownerID)
 
+    const created_ts = Math.round(message.guild.createdTimestamp / 1000)
+
     const embed = new MessageEmbed()
         .setAuthor(message.guild.name, message.guild.iconURL())
         .addField(locale.server.texts.owner, server_owner.user.tag, true)
@@ -23,7 +25,7 @@ const execute = async (self, server, message, args) => {
         .addField(locale.server.texts.roles, message.guild.roles.cache.size, true)
         .addField(locale.server.texts.emojis, message.guild.emojis.cache.size, true)
         .addField('\u200B', '\u200B', true)
-        .setFooter(`${locale.server.texts.footer.server_created} ${moment(message.guild.createdTimestamp).locale(server.locale).format(`DD MMM YYYY [${locale.common.texts.at}] HH:mm`)} (${(moment(message.guild.createdTimestamp).locale(server.locale).fromNow())})`)
+        .addField('\u200B', `${locale.server.texts.footer.server_created} <t:${created_ts}> – <t:${created_ts}:R>`)
         .setColor()
 
     if (message.guild.description) embed.setDescription(message.guild.description)

@@ -1,3 +1,4 @@
+const Automoder = require('../../modules/Automoder')
 const MessageUpdate = require('../../modules/Logs/Message/MessageUpdate')
 
 /**
@@ -28,6 +29,10 @@ const execute = async (self, before, message) => {
     if (command) {
         await command.execute(server, message, args)
     }
+
+    await Automoder.linksFilter(self, server, message)
+    await Automoder.swearFilter(self, server, message)
+    await Automoder.antiCaps(self, server, message)
 
     await MessageUpdate(self, server, before, message)
 

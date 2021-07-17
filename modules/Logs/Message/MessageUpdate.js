@@ -15,7 +15,7 @@ module.exports = async (self, server, before, message) => {
 
         const is_ok = log && message.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(message.guild.me).has('MANAGE_WEBHOOKS')
 
-        if (is_ok) {
+        if (is_ok && before.content != message.content) {
             const before_content = TruncateString(before.content || '', 800)
             const content = TruncateString(message.content || '', 800)
 
@@ -47,11 +47,11 @@ module.exports = async (self, server, before, message) => {
                 .setTitle(locale.logs.message_update.title)
                 .addField(locale.logs.common.sender, `${message.author.tag}\n(${message.author.id})`, true)
                 .addField(locale.logs.common.channel, `<#${message.channel.id}>`, true)
-                .addField(locale.logs.message_update.content_before_update, before_content || '\u200B')
-                .addField(locale.logs.message_update.content_after_update, content || '\u200B')
+                .addField(locale.logs.common.before_changes, before_content || `\`[${locale.logs.message_delete.attachment}]\``)
+                .addField(locale.logs.common.after_changes, content || `\`[${locale.logs.message_delete.attachment}]\``)
                 .setFooter(message.id)
                 .setTimestamp()
-                .setColor(0xE19517)
+                .setColor('#FFA726')
 
             if (attachment && attachment.height) embed.setImage(attachment.url)
 

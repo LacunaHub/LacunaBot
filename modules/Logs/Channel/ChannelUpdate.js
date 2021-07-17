@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js')
+const numbro = require('numbro')
 
 /**
 * @param {import('../../../internals/Lacuna')} self
@@ -18,6 +19,9 @@ module.exports = async (self, server, before, channel) => {
             const webhooks = await channel.guild.fetchWebhooks()
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+
+            const audit = channel.guild.me.hasPermission('VIEW_AUDIT_LOG') ? await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_UPDATE' }) : null
+            const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
                 try {
@@ -40,10 +44,12 @@ module.exports = async (self, server, before, channel) => {
             if (before.name != channel.name) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.channel_update.title)
-                    .setDescription(`${channel.name} (${channel.id})`)
-                    .addField('\u200B', self.translator.format(locale.logs.channel_update.name_update, `**${before.name}**`, `**${channel.name}**`), true)
+                    .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.name_update, `<#${channel.id}>`)))
+                    .addField(locale.logs.common.before_changes, before.name, true)
+                    .addField(locale.logs.common.after_changes, channel.name, true)
+                    .setFooter(channel.id)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -55,10 +61,12 @@ module.exports = async (self, server, before, channel) => {
             if (before.topic != channel.topic) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.channel_update.title)
-                    .setDescription(`${channel.name} (${channel.id})`)
-                    .addField('\u200B', self.translator.format(locale.logs.channel_update.topic_update, `**${before.topic || '-'}**`, `**${channel.topic || '-'}**`), true)
+                    .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.topic_update, `<#${channel.id}>`)))
+                    .addField(locale.logs.common.before_changes, before.topic ?? '-', true)
+                    .addField(locale.logs.common.after_changes, channel.topic ?? '-', true)
+                    .setFooter(channel.id)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -70,10 +78,12 @@ module.exports = async (self, server, before, channel) => {
             if (before.rateLimitPerUser != channel.rateLimitPerUser) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.channel_update.title)
-                    .setDescription(`${channel.name} (${channel.id})`)
-                    .addField('\u200B', self.translator.format(locale.logs.channel_update.rate_limit_update, `**${before.rateLimitPerUser || 0}**`, `**${channel.rateLimitPerUser || 0}**`), true)
+                    .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.rate_limit_update, `<#${channel.id}>`)))
+                    .addField(locale.logs.common.before_changes, before.rateLimitPerUser ? numbro(before.rateLimitPerUser).format({ output: 'time' }) : '-', true)
+                    .addField(locale.logs.common.after_changes, channel.rateLimitPerUser ? numbro(channel.rateLimitPerUser).format({ output: 'time' }) : '-', true)
+                    .setFooter(channel.id)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -85,10 +95,12 @@ module.exports = async (self, server, before, channel) => {
             if (before.parentID != channel.parentID) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.channel_update.title)
-                    .setDescription(`${channel.name} (${channel.id})`)
-                    .addField('\u200B', self.translator.format(locale.logs.channel_update.parent_update, before.parent ? `**${before.parent.name}**` : '**-**', channel.parent ? `**${channel.parent.name}**` : '**-**'), true)
+                    .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.parent_update, `<#${channel.id}>`)))
+                    .addField(locale.logs.common.before_changes, before?.parent?.name ?? '-', true)
+                    .addField(locale.logs.common.after_changes, channel?.parent?.name ?? '-', true)
+                    .setFooter(channel.id)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -100,10 +112,12 @@ module.exports = async (self, server, before, channel) => {
             if (before.bitrate != channel.bitrate) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.channel_update.title)
-                    .setDescription(`${channel.name} (${channel.id})`)
-                    .addField('\u200B', self.translator.format(locale.logs.channel_update.bitrate_update, `**${before.bitrate / 1000}**kbps`, `**${channel.bitrate / 1000}**kbps`), true)
+                    .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.bitrate_update, `<#${channel.id}>`)))
+                    .addField(locale.logs.common.before_changes, `${before.bitrate / 1000}kbps`, true)
+                    .addField(locale.logs.common.after_changes, `${channel.bitrate / 1000}kbps`, true)
+                    .setFooter(channel.id)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -115,10 +129,12 @@ module.exports = async (self, server, before, channel) => {
             if (before.userLimit != channel.userLimit) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.channel_update.title)
-                    .setDescription(`${channel.name} (${channel.id})`)
-                    .addField('\u200B', self.translator.format(locale.logs.channel_update.user_limit_update, `**${before.userLimit}**`, `**${channel.userLimit}**`), true)
+                    .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.user_limit_update, `<#${channel.id}>`)))
+                    .addField(locale.logs.common.before_changes, before.userLimit, true)
+                    .addField(locale.logs.common.after_changes, channel.userLimit, true)
+                    .setFooter(channel.id)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],

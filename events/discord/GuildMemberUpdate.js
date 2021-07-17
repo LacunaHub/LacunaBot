@@ -9,6 +9,14 @@ const GuildMemberUpdate = require('../../modules/Logs/Guild/GuildMemberUpdate')
 const execute = async (self, before, member) => {
     if (self.user.id == member.id) return false
 
+    if (before.partial) {
+        before = await before.fetch()
+    }
+
+    if (member.partial) {
+        member = await member.fetch()
+    }
+
     const server = await self.db.servers.fetch({ _id: member.guild.id })
 
     if (member.roles.cache.some(r => !before.roles.cache.has(r.id))) {
@@ -25,7 +33,7 @@ const execute = async (self, before, member) => {
 
     await GuildMemberUpdate(self, server, before, member)
 
-    if (before.nickname !== member.nickname) await Automoder.updateNickname(self, server, member)
+    await Automoder.updateNickname(self, server, member)
 
     return true
 }

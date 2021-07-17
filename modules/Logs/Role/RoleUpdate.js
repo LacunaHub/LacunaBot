@@ -19,6 +19,9 @@ module.exports = async (self, server, before, role) => {
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
 
+            const audit = role.guild.me.hasPermission('VIEW_AUDIT_LOG') ? await role.guild.fetchAuditLogs({ limit: 1, type: 'ROLE_UPDATE' }) : null
+            const executor = audit?.entries?.first()?.executor
+
             if (!webhook) {
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.modules.logs.role_update.title) })
@@ -40,12 +43,12 @@ module.exports = async (self, server, before, role) => {
             if (before.name != role.name) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.modules.logs.role_update.title)
-                    .setDescription(`${role.name}: ${locale.modules.logs.common.role_name}`)
+                    .setDescription(self.translator.format(locale.modules.logs.role_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, self.translator.format(locale.modules.logs.role_update.types.name, `<@&${role.id}>`)))
                     .addField(locale.modules.logs.common.before_changes, before.name, true)
                     .addField(locale.modules.logs.common.after_changes, role.name, true)
                     .setFooter(role.id)
                     .setTimestamp()
-                    .setColor(0xF04747)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -57,12 +60,12 @@ module.exports = async (self, server, before, role) => {
             if (before.hexColor != role.hexColor) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.modules.logs.role_update.title)
-                    .setDescription(`${role.name}: ${locale.modules.logs.role_update.types.color}`)
-                    .addField(locale.modules.logs.common.before_changes, before.hexColor, true)
-                    .addField(locale.modules.logs.common.after_changes, role.hexColor, true)
+                    .setDescription(self.translator.format(locale.modules.logs.role_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, self.translator.format(locale.modules.logs.role_update.types.color, `<@&${role.id}>`)))
+                    .addField(locale.modules.logs.common.before_changes, `\`${before.hexColor}\``, true)
+                    .addField(locale.modules.logs.common.after_changes, `\`${role.hexColor}\``, true)
                     .setFooter(role.id)
                     .setTimestamp()
-                    .setColor(0xE19517)
+                    .setColor('#FFA726')
 
                 await webhook.send('', {
                     embeds: [embed],
@@ -80,12 +83,11 @@ module.exports = async (self, server, before, role) => {
 
                     const embed = new MessageEmbed()
                         .setTitle(locale.modules.logs.role_update.title)
-                        .setDescription(role.name)
+                        .setDescription(self.translator.format(locale.modules.logs.role_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, self.translator.format(locale.modules.logs.role_update.types.permissions, `<@&${role.id}>`)))
                         .addField(locale.modules.logs.role_update.types.permissions_added, perms.map(p => locale.commands.common.permissions[p]).join(', '), true)
-                        .addField('\u200B', '\u200B', true)
                         .setFooter(role.id)
                         .setTimestamp()
-                        .setColor(0xE19517)
+                        .setColor('#FFA726')
 
                     await webhook.send('', {
                         embeds: [embed],
@@ -99,12 +101,11 @@ module.exports = async (self, server, before, role) => {
 
                     const embed = new MessageEmbed()
                         .setTitle(locale.modules.logs.role_update.title)
-                        .setDescription(role.name)
+                        .setDescription(self.translator.format(locale.modules.logs.role_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, self.translator.format(locale.modules.logs.role_update.types.permissions, `<@&${role.id}>`)))
                         .addField(locale.modules.logs.role_update.types.permissions_removed, perms.map(p => locale.commands.common.permissions[p]).join(', '), true)
-                        .addField('\u200B', '\u200B', true)
                         .setFooter(role.id)
                         .setTimestamp()
-                        .setColor(0xE19517)
+                        .setColor('#FFA726')
 
                     await webhook.send('', {
                         embeds: [embed],

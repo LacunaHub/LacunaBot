@@ -165,6 +165,8 @@ export interface ServerDocument extends Document {
                         content: string
                         embed: MessageEmbed
                     }
+                    add_roles: string[]
+                    remove_roles: string[]
                 },
                 ignored: {
                     channels: string[]
@@ -185,6 +187,8 @@ export interface ServerDocument extends Document {
                         content: string
                         embed: MessageEmbed
                     }
+                    add_roles: string[]
+                    remove_roles: string[]
                 },
                 ignored: {
                     channels: string[]
@@ -202,6 +206,8 @@ export interface ServerDocument extends Document {
                         content: string
                         embed: MessageEmbed
                     }
+                    add_roles: string[]
+                    remove_roles: string[]
                 },
                 ignored: {
                     channels: string[]
@@ -220,6 +226,8 @@ export interface ServerDocument extends Document {
                         content: string
                         embed: MessageEmbed
                     }
+                    add_roles: string[]
+                    remove_roles: string[]
                 },
                 ignored: {
                     channels: string[]
@@ -460,6 +468,8 @@ export interface WarningsPenalty {
         content: string
         embed: MessageEmbed
     }
+    add_roles: string[]
+    remove_roles: string[]
 }
 
 export interface WarningsViolator {
@@ -561,20 +571,25 @@ export interface VoiceRole {
 }
 
 export interface VoiceChannelTrigger {
-    id: String
-    channel_id: String
+    id: string
+    channel_id: string
     default: {
-        name: String
-        limit: Number
-        permissions: Number
+        name: string
+        limit: number
+        permissions: number
+        category_id: string
+        position: 'TOP' | 'BOTTOM'
     }
+    allowed_roles: string[]
+    blocked_roles: string[]
+    moderator_roles: string[]
     children: Array<VoiceChannelTriggerChildren>
 }
 
 interface VoiceChannelTriggerChildren {
-    channel_id: String
-    owner_id: String
-    created_at: Number
+    channel_id: string
+    owner_id: string
+    created_at: number
 }
 
 export interface RestoringData {
