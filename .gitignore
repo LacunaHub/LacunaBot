@@ -104,3 +104,4 @@ dist
 
 package-lock.json
 .vscode/
+database/playable-music-hosts.json

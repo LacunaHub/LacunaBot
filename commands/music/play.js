@@ -1,3 +1,5 @@
+const { Util } = require('discord.js')
+
 /**
  * @param {import('../../internals/Lacuna')} self
  * @param {import('../../internals/Typings').ServerDocument} server
@@ -32,6 +34,16 @@ const execute = async (self, server, message, args) => {
 
     if (!search_track) {
         await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_search_track, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+
+        return false
+    }
+
+    const is_url = new RegExp(`^https?:\/\/`).test(search_track)
+    delete require.cache[require.resolve('../../database/playable-music-hosts.json')]
+    const allowed_hosts = require('../../database/playable-music-hosts.json')
+
+    if (is_url && !allowed_hosts.some(h => search_track.startsWith(h))) {
+        await message.reply(`${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.not_allowed_host, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
 
         return false
     }
@@ -98,7 +110,7 @@ const execute = async (self, server, message, args) => {
         else reply = `:musical_note: | ${self.translator.format(locale.play.texts.now_playing, `**${message.author.username}**`, `**${track.info.title}**`)}`
     }
 
-    await _message.edit(reply)
+    await _message.edit(Util.removeMentions(reply))
 
     if (!player.playing) {
         await player.play(queue.tracks[0].track, { volume: queue.volume })
