@@ -1,3 +1,5 @@
+const { Util } = require('discord.js')
+
 /**
  * @param {import('../../internals/Lacuna')} self
  * @param {import('../../internals/Typings').ServerDocument} server
@@ -15,7 +17,7 @@ const execute = async (self, server, message, args) => {
         return false
     }
 
-    await message.reply(`:notes: | ${self.translator.format(locale.current.texts.now_playing, `**${message.author.username}**`, `**${playback.queue.tracks[0].info.title}**`)}`, { allowedMentions: { repliedUser: false } })
+    await message.reply(Util.removeMentions(`:notes: | ${self.translator.format(locale.current.texts.now_playing, `**${message.author.username}**`, `**${playback.queue.tracks[0].info.title}**`)}`), { allowedMentions: { repliedUser: false } })
 
     return true
 }

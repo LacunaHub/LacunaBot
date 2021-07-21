@@ -1,3 +1,5 @@
+const { Util } = require('discord.js')
+
 /**
  * @param {import('../../internals/Lacuna')} self
  * @param {import('../../internals/Typings').ServerDocument} server
@@ -35,19 +37,19 @@ const execute = async (self, server, message, args) => {
         if (playback.queue.skip_votes >= (members.size - playback.queue.skip_votes)) {
             await self.player.queues.resetSkipVotes(message.guild.id)
             
-            await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.skip.texts.skipped, `**${message.author.username}**`, `**${playback.queue.tracks[0].info.title}**`)}`, { allowedMentions: { repliedUser: false } })
+            await message.reply(Util.removeMentions(`${self._emojis.OK} | ${self.translator.format(locale.skip.texts.skipped, `**${message.author.username}**`, `**${playback.queue.tracks[0].info.title}**`)}`), { allowedMentions: { repliedUser: false } })
             await playback.player.emit('end', { reason: 'FINISHED' })
         }
 
         else {
-            await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.skip.texts.vote_for_skip, `**${message.author.username}**`, `**${playback.queue.tracks[0].info.title}**`, `\`${playback.queue.skip_votes}/${members.size - playback.queue.skip_votes}\``)}`, { allowedMentions: { repliedUser: false } })
+            await message.reply(Util.removeMentions(`${self._emojis.OK} | ${self.translator.format(locale.skip.texts.vote_for_skip, `**${message.author.username}**`, `**${playback.queue.tracks[0].info.title}**`, `\`${playback.queue.skip_votes}/${members.size - playback.queue.skip_votes}\``)}`), { allowedMentions: { repliedUser: false } })
         }
     }
 
     else {
         await self.player.queues.resetSkipVotes(message.guild.id)
 
-        await message.reply(`${self._emojis.OK} | ${self.translator.format(locale.skip.texts.skipped, `**${message.author.username}**`, `**${playback.queue.tracks[0].info.title}**`)}`, { allowedMentions: { repliedUser: false } })
+        await message.reply(Util.removeMentions(`${self._emojis.OK} | ${self.translator.format(locale.skip.texts.skipped, `**${message.author.username}**`, `**${playback.queue.tracks[0].info.title}**`)}`), { allowedMentions: { repliedUser: false } })
         await playback.player.emit('end', { reason: 'FINISHED' })
     }
 
