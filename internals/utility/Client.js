@@ -25,7 +25,7 @@ const lacuna = new Lacuna({
         ]
     },
     partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
-    disableMentions: 'everyone'
+    disableMentions: 'all'
 })
 
 const buttons = require('discord-buttons')(lacuna)
