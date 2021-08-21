@@ -15,7 +15,6 @@ app.disable('x-powered-by')
 app.use(morgan('[API] – [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'))
 app.use(express.json())
 app.use(cors())
-app.use(limiter({ windowMs: 600000, max: 50 }))
 
 app.use('/webhooks/patreon', require('./webhooks/patreon'))
 
