@@ -30,13 +30,15 @@ app.all('/*', async (req, res, next) => {
     }
 
     if (!referer || !hosts.some(host => referer.includes(host))) {
-        await res.status(423).send('Locked')
+        await res.status(503).send('Service Unavailable')
 
         return
     }
 
     await next()
 })
+
+app.use(limiter({ windowMs: 600000, max: 50 }))
 
 app.use('/guilds', require('./routes/guilds'))
 app.use('/authorize', require('./routes/oauth2'))
