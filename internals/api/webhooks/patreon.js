@@ -14,7 +14,7 @@ router.post('/pledge/:signature', async (req, res) => {
 
     const data = req.body.data
 
-    if (!req.body || !data) {
+    if (!data) {
         await res.status(400).json({ status: 400, message: 'Bad request' })
 
         return
