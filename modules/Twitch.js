@@ -76,7 +76,7 @@ class Twitch {
      */
     static async scheduleCheck(self) {
         const rule = new RecurrenceRule()
-        rule.minute = new Range(0, 59, 2)
+        rule.minute = new Range(0, 59, 5)
 
         const job = await scheduleJob(rule, async () => {
             let servers = await self.db.servers.findSome({ 'modules.twitch.channels.0': { $exists: true } })
@@ -86,7 +86,7 @@ class Twitch {
             await self.logger.info(`(Twitch): Scheduled check started for ${servers.length} servers`)
 
             for (const server of servers) {
-                const broadcasters = server.modules.twitch.channels.sort((a, b) => a.channel.display_name - b.channel.display_name).filter(c => (Date.now() - c.last_check_timestamp) > 240000)
+                const broadcasters = server.modules.twitch.channels.sort((a, b) => a.channel.display_name - b.channel.display_name).filter(c => (Date.now() - c.last_check_timestamp) > 600000)
                 
                 await broadcasters.forEach(async (broadcaster, i) => {
                     if (i > 1 && !server.server.premium.available) return false
