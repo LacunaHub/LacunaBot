@@ -1,7 +1,6 @@
 const { ShardingManager } = require('discord.js')
 const { connect } = require('mongoose')
 const logger = require('../Logger')
-const { SyncPatrons } = require('../utility/Patreon')
 const Statistics = require('./Statistics')
 
 connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -17,7 +16,6 @@ manager.spawn(shards, 15000)
 
 manager.on('shardCreate', shard => logger.info(`(Sharding Manager): Launching shard #${shard.id}`))
 
-setTimeout(() => SyncPatrons(), 300000)
 Statistics.schedule(manager)
 
 module.exports = manager
