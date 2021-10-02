@@ -24,7 +24,8 @@ const lacuna = new Lacuna({
             'GUILD_WEBHOOKS'
         ]
     },
-    partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'REACTION']
+    partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
+    disableMentions: 'everyone'
 })
 
 const buttons = require('discord-buttons')(lacuna)
