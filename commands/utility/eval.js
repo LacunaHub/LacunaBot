@@ -1,3 +1,5 @@
+const util = require('util')
+
 function clean(text) {
     if (typeof(text) === "string")
       return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203))
@@ -14,7 +16,9 @@ function clean(text) {
 const execute = async (self, server, message, args) => {
     try {
         const code = args.slice(0).join(' ')
-        const evaled = eval(code)
+        let evaled = eval(code)
+
+        if (typeof evaled !== 'string') evaled = util.inspect(evaled)
 
         await message.channel.send(`**ВЫВОД**:\`\`\`xl\n${clean(evaled)}\n\`\`\``)
     } catch(err) {

@@ -169,7 +169,7 @@ const Server = new Schema({
                             description: { type: String, default: null },
                             url: { type: String, default: null },
                             timestamp: { type: String, default: null },
-                            color: { type: Number, default: null },
+                            color: { type: String, default: null },
                             footer: {
                                 text: { type: String, default: null },
                                 icon_url: { type: String, default: null }

@@ -12,7 +12,8 @@ class Farewell {
         if (member.user.bot) return false
 
         if (server.modules.farewell.active) {
-            const content = await Replacer.ReplaceMessageTemplate(self, server.modules.farewell.message, { guild: member.guild, member: member })
+            const replacer = new Replacer(self, server.modules.farewell.message, { guild: member.guild, member: member })
+            const content = await replacer.replace()
 
             if (server.modules.farewell.format == 'DM') {
                 await member.send(null, content).catch(self.logger.error)

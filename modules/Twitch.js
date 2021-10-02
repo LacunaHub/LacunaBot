@@ -142,7 +142,12 @@ class Twitch {
                                 .setImage(broadcaster.alerts.display_preview ? stream.preview : stream.banner)
                                 .setColor(0x563194)
 
-                            const content = broadcaster.alerts.message_template ? await Replacer.Replace(self, broadcaster.alerts.message_template, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } }) : null
+                            let content = broadcaster.alerts.message_template || null
+
+                            if (content) {
+                                const replacer = new Replacer(self, broadcaster.alerts.message_template, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
+                                content = await replacer.replace()
+                            }
 
                             const message = await webhook.send(content, {
                                 embeds: [embed],

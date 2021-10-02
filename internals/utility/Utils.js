@@ -95,6 +95,16 @@ class Utils {
     static removeDiscordPatterns(string) {
         return string.replace(/<@!?\d+>/g, '').replace(/<@&\d+>/g, '').replace(/<#\d+>/g, '').replace(/<a?:.+:\d+>/g, '').replace(/\s{2,}/g, ' ').trim()
     }
+
+    static resolveObjectPath(path, object) {
+        return path.split('.').reduce((x, y) => {
+            return x ? x[y] : null
+        }, object)
+    }
+
+    static escapeRegEx(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    }
 }
 
 module.exports = Utils

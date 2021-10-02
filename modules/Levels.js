@@ -288,7 +288,8 @@ class Levels {
         const direction = award && award.alert && award.alert.active ? award.alert : server.modules.levels.level_up_alerts
 
         if (direction.active) {
-            const congrats = await Replacer.ReplaceMessageTemplate(self, direction.message, { message: refs.message, guild: member.guild, member: member })
+            const replacer = new Replacer(self, null, { message: refs.message, guild: member.guild, member: member })
+            const congrats = await replacer.replaceTemplateMessage(direction.message)
 
             if (direction.format === 'CURRENT_CHANNEL' && refs.message) {
                 await refs.message.channel.send(null, congrats).catch(self.logger.error)

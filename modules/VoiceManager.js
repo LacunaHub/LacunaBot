@@ -38,7 +38,8 @@ class VoiceManager {
             }
 
             const parent = trigger.default.category_id ? state.guild.channels.cache.get(trigger.default.category_id) : state.channel.parent
-            const name = await Replacer.Replace(self, trigger.default.name, { guild: state.guild, member: state.member, index: trigger.children.length + 1 })
+            const replacer = new Replacer(self, trigger.default.name, { guild: state.guild, member: state.member, index: trigger.children.length + 1 })
+            const name = await replacer.replace()
             const permissions = new Permissions(trigger.default.permissions)
 
             if (trigger.default.permissions) {

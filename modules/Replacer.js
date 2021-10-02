@@ -1,99 +1,37 @@
 const { MessageEmbed } = require('discord.js')
 const moment = require('moment')
+const { escapeRegEx, resolveObjectPath } = require('../internals/utility/Utils')
 
 class Replacer {
-    constructor() {
-        throw new Error(`The ${this.constructor.name} class can't be called via 'new'`)
-    }
-
     /**
      * @param {import('../internals/Lacuna')} self
-     * @param {String} string
-     * @param {Object} stuff
-     * @param {import('discord.js').Message} stuff.message
-     * @param {import('discord.js').Guild} stuff.guild
-     * @param {import('discord.js').GuildMember} stuff.member
-     * @param {import('../internals/Typings').TwitchChannel|import('../internals/Typings').YouTubeChannel} stuff.subs
+     * @param {string} string 
+     * @param {Object} shapers
+     * @param {import('discord.js').Message} shapers.message
+     * @param {import('discord.js').Guild} shapers.guild
+     * @param {import('discord.js').GuildMember} shapers.member
+     * @param {import('../internals/Typings').TwitchChannel|import('../internals/Typings').YouTubeChannel} shapers.subs
      */
-    static async Replace(self, string, stuff) {
-        const message = stuff.message
-        const guild = stuff.guild
-        const member = stuff.member
-        const subs = stuff.subs
+    constructor(self, string, shapers) {
+        this.self = self
 
-        const activity = await self.db.activities.fetch({ _id: guild.id })
-        const levels = activity.levels.find(level => level.user_id == member.id)
-        const server_owner = await guild.members.fetch(guild.ownerID)
+        this.string = string
 
-        const replacers = {
-            'message.channel': message?.channel?.name ?? null,
-            'message.channel.id': message?.channel?.id ?? null,
-            'message.channel.mention': `<#${message?.channel?.id ?? '1'}>`,
-            'message.channel.nsfw': message?.channel?.nsfw ?? null,
-            'message.channel.position': message?.channel?.position ?? null,
-            'message.channel.topic': message?.channel?.topic ?? null,
-            'message.channel.type': message?.channel?.type ?? null,
-            'message.content': message?.content ?? null,
-            'message.created_at': message?.createdTimestamp ?? null,
-            'message.edited_at': message?.editedTimestamp ?? null,
-            'message.id': message?.id ?? null,
-            'message.tts': message?.tts ?? null,
-            'message.type': message?.type ?? null,
-            'message.url': message?.url ?? null,
-            'guild': guild.name,
-            'guild.acronym': guild.nameAcronym,
-            'guild.afk_channel_id': guild.afkChannelID,
-            'guild.banner': guild.bannerURL(),
-            'guild.channels': guild.channels.cache.size,
-            'guild.channels.text': guild.channels.cache.filter(channel => channel.type == 'text').size,
-            'guild.channels.voice': guild.channels.cache.filter(channel => channel.type == 'voice').size,
-            'guild.created_at': guild.createdTimestamp,
-            'guild.description': guild.description,
-            'guild.icon': guild.iconURL(),
-            'guild.id': guild.id,
-            'guild.members': guild.memberCount,
-            'guild.members.bots': guild.members.cache.filter(member => member.user.bot).size,
-            'guild.members.users': guild.members.cache.filter(member => !member.user.bot).size,
-            'guild.owner': server_owner.user.username,
-            'guild.owner.avatar': server_owner.user.displayAvatarURL(),
-            'guild.owner.display_name': server_owner.displayName,
-            'guild.owner.id': guild.ownerID,
-            'guild.owner.tag': server_owner.user.tag,
-            'guild.owner.mention': `<@${guild.ownerID}>`,
-            'guild.owner.nickname': server_owner.nickname,
-            'guild.boosters_count': guild.premiumSubscriptionCount || 0,
-            'guild.boost_tier': guild.premiumTier,
-            'guild.region': guild.region,
-            'guild.splash': guild.splash,
-            'guild.vanity_url': guild.vanityURLCode ? `https://discord.gg/${guild.vanityURLCode}` : null,
-            'member': member.user.username,
-            'member.avatar': member.user.displayAvatarURL(),
-            'member.discriminator': member.user.discriminator,
-            'member.display_name': member.displayName,
-            'member.id': member.id,
-            'member.tag': member.user.tag,
-			'member.mention': `<@${member.id}>`,
-            'member.joined_at': member.joinedTimestamp,
-            'member.nickname': member.nickname,
-            'member.premium_since': member.premiumSinceTimestamp,
-            'member.level': levels?.experience?.level ?? 0,
-            'member.level.current_xp': levels?.experience?.current ?? 0,
-            'member.level.remaining_xp': levels ? Math.round((150 + (levels.experience.level * levels.experience.level * 8)) - levels.experience.current) : 0,
-            'member.level.need_xp': levels ? 150 + (levels.experience.level * levels.experience.level * 8) : 0,
-            'member.level.total_xp': levels?.experience?.total ?? 0,
-            'subs.name': subs?.name ?? null,
-            'subs.title': subs?.title?? null,
-            'subs.link': subs?.link?? null,
-            'index': stuff.index ?? 0
-        }
+        this.shapers = shapers
+    }
 
-        let patterns = string.match(/{\s*([\w.]+)\s*}/g) || []
-        let functions = string.match(/{\-\s*(\w+\(.*?\))\s*\-}/g) || []
+    replacers(string = this.string) {
+        const replacers = string.match(/{\s*([\w.]+)(\s+\|\s+[^\s]+)?\s*}/g) || []
+        return replacers.map(replacer => replacer.replace(/{|}/g, '').trim())
+    }
 
-        patterns = patterns.map(pattern => pattern.replace(/{|}/g, '').trim())
-        functions = functions.map(func => {
-            const ref = func.replace(/{-|-}/g, '').trim()
-            const regex = ref.match(/[\w]+|\(.*?\)/g)
+    codeSnippets(string = this.string) {
+        const snippets = string.match(/{\-\s*[A-Z]+\([^\-}]*\)\s*\-}/g) || []
+        return snippets.map(snippet => {
+            snippet = snippet.replace(/{-\s*|\s*-}/g, '')
+
+            const name = snippet.match(/^[A-Z]+/).toString()
+            const args = snippet.match(/\([^\-}]*\)$/).toString().replace(/^\(/, '').replace(/\)$/, '')
 
             const available = [
                 'CHOOSE',
@@ -107,90 +45,222 @@ class Replacer {
                 'TRIM',
                 'UPPER'
             ]
-        
-            if (!regex || !regex[0] || !regex[1] || !available.includes(regex[0])) return null
 
-            let args = regex[1].replace(/^\(/, '').replace(/\)$/, '')
+            if (available.includes(name)) {
+                let fn = undefined
 
-            let args_patterns = args.match(/{\s*([\w.]+)\s*}/g) || []
-            args_patterns = args_patterns.map(pattern => pattern.replace(/{|}/g, '').trim())
+                switch (name) {
+                    case 'CHOOSE':
+                        fn = CHOOSE
+                    break
+                    case 'DATE':
+                        fn = DATE
+                    break
+                    case 'LOWER':
+                        fn = LOWER
+                    break
+                    case 'MATH':
+                        fn = MATH
+                    break
+                    case 'NUMDECL':
+                        fn = NUMDECL
+                    break
+                    case 'RANDOM':
+                        fn = RANDOM
+                    break
+                    case 'REPLACE':
+                        fn = REPLACE
+                    break
+                    case 'TRUNCATE':
+                        fn = TRUNCATE
+                    break
+                    case 'TRIM':
+                        fn = TRIM
+                    break
+                    case 'UPPER':
+                        fn = UPPER
+                    break
+                }
 
-            for (const pattern of args_patterns) {
-                const regex = new RegExp(`{\\s*${pattern}\\s*}`, 'g')
-                args = args.replace(regex, typeof replacers[pattern] !== 'undefined' ? replacers[pattern] : `null`)
+                return { name: name, args: args, fn }
             }
-        
-            return {
-                name: regex[0],
-                args: args
-            }
-        }).filter(func => func)
+        }).filter(f => f)
+    }
 
-        for (const pattern of patterns) {
-            const regex = new RegExp(`{\\s*${pattern}\\s*}`, 'g')
-            string = string.replace(regex, typeof replacers[pattern] !== 'undefined' ? replacers[pattern] : `null`)
+    async replacements() {
+        const message = this.shapers.message
+        const guild = this.shapers.guild
+        const member = this.shapers.member
+        const subs = this.shapers.subs
+
+        const activity = await this.self.db.activities.fetch({ _id: guild.id })
+        const levels = activity.levels.find(level => level.user_id == member.id)
+        const server_owner = await guild.members.fetch(guild.ownerID)
+
+        const args = message?.content?.split(' ')?.slice(1).filter(arg => arg)
+
+        return {
+            message: {
+                channel: {
+                    name: message?.channel?.name,
+                    id: message?.channel?.id,
+                    mention: `<#${message?.channel?.id ?? '1'}>`,
+                    nsfw: message?.channel?.nsfw,
+                    position: message?.channel?.rawPosition,
+                    topic: message?.channel?.topic,
+                    type: message?.channel?.type
+                },
+                content: message?.content,
+                args: Object.assign({}, { map: args.join(' '), ...args }),
+                created_at: message?.createdTimestamp,
+                edited_at: message?.editedTimestamp,
+                id: message?.id,
+                tts: message?.tts,
+                type: message?.type,
+                url: message?.url,
+                mentions: {
+                    users: Object.assign({}, { ...message?.mentions?.users?.map(m => `<@${m.id}>`) }),
+                    roles: Object.assign({}, { ...message?.mentions?.roles?.map(m => `<@&${m.id}>`) }),
+                    channels: Object.assign({}, { ...message?.mentions?.channels?.map(m => `<#${m.id}>`) })
+                }
+            },
+            guild: {
+                name: guild.name,
+                acronym: guild.nameAcronym,
+                afk_channel_id: guild?.afkChannelID,
+                banner: guild?.banner,
+                channels: {
+                    total: guild.channels.cache.size,
+                    text: guild.channels.cache.filter(channel => channel.type == 'text').size,
+                    voice: guild.channels.cache.filter(channel => channel.type == 'voice').size,
+                    news: guild.channels.cache.filter(channel => channel.type == 'news').size,
+                    category: guild.channels.cache.filter(channel => channel.type == 'category').size,
+                    store: guild.channels.cache.filter(channel => channel.type == 'store').size
+                },
+                created_at: guild.createdTimestamp,
+                description: guild?.description,
+                icon: guild?.icon,
+                id: guild.id,
+                members: {
+                    total: guild.memberCount,
+                    bots: guild.members.cache.filter(member => member.user.bot).size,
+                    users: guild.members.cache.filter(member => !member.user.bot).size
+                },
+                owner: {
+                    username: server_owner?.user?.username,
+                    avatar: server_owner?.user?.displayAvatarURL(),
+                    display_name: server_owner?.displayName,
+                    tag: server_owner?.user?.tag,
+                    mention: `<@${guild.ownerID}>`,
+                    nickname: server_owner?.nickname
+                },
+                boosters_count: guild.premiumSubscriptionCount || 0,
+                boost_tier: guild.premiumTier,
+                splash: guild.splash,
+                vanity_url: guild.vanityURLCode ? `https://discord.gg/${guild.vanityURLCode}` : null
+            },
+            member: {
+                username: member.user.username,
+                avatar: member.user.displayAvatarURL(),
+                discriminator: member.user.discriminator,
+                display_name: member.displayName,
+                id: member.id,
+                tag: member.user.tag,
+                mention: `<@${member.id}>`,
+                created_at: member.user.createdTimestamp,
+                joined_at: member.joinedTimestamp,
+                nickname: member.nickname,
+                premium_since: member.premiumSinceTimestamp,
+                level: {
+                    rank: levels?.experience?.level ?? 0,
+                    current_xp: levels?.experience?.current ?? 0,
+                    remaining_xp: levels ? Math.round((150 + (levels.experience.level * levels.experience.level * 8)) - levels.experience.current) : 0,
+                    need_xp: levels ? 150 + (levels.experience.level * levels.experience.level * 8) : 0,
+                    total_xp: levels?.experience?.total ?? 0
+                },
+                voice: {
+                    name: member.voice?.channel?.name,
+                    id: member.voice?.channelID,
+                    mention: member.voice ? `<#${member.voice.channelID}>` : null,
+                    full: member.voice?.channel?.full,
+                    position: member.voice?.channel?.rawPosition
+                },
+                roles: Object.assign(...member.roles.cache.map(r => ({ [r.id]: { id: r.id, name: r.name } })))
+            },
+            subs: {
+                name: subs?.name ?? null,
+                title: subs?.title ?? null,
+                link: subs?.link ?? null
+            },
+            index: this.shapers.index ?? 0
+        }
+    }
+
+    async replace(string = this.string) {
+        const replacements = await this.replacements()
+
+        for (const replacer of this.replacers(string)) {
+            const regex = new RegExp(`{\\s*${escapeRegEx(replacer)}\\s*}`, 'g')
+            const alternate = replacer.split(/\s+\|\s+/)
+
+            const replacement = resolveObjectPath(alternate[0], replacements)
+
+            string = string.replace(regex, replacement ? replacement : alternate[1] ? resolveObjectPath(alternate[1].replace(/^\-/, ''), replacements) ?? (alternate[1].startsWith('-') ? alternate[1].replace(/^\-/, '') : null) : null)
         }
 
-        for (const func of functions) {
-            const regex = new RegExp(`{-\\s*${func.name}\(.*?\)\\s*-}`, 'g')
+        for (const snippet of this.codeSnippets(string)) {
+            const regex = new RegExp(`{-\\s*${escapeRegEx(snippet.name)}\([^\-}]*\)\\s*-}`, 'g')
+
             let res
+
             try {
-                res = eval(`${func.name}(${func.args})`)
+                res = snippet.fn(...snippet.args.split(/;\s{0,1}/))
             } catch (err) {
-                res = `\`${func.name}(${func.args})\``
+                console.log(err)
+                res = `\`${snippet.name}#${err.name}\``
             }
 
             string = string.replace(regex, res)
-            self.logger.info(`(Replacer: ${func.name}): on ${guild.name}`)
+            this.self.logger.info(`(Replacer: ${snippet.name}): on ${this.shapers.guild.name}`)
         }
 
-        return string !== 'null' ? string : null
+        return string
     }
 
     /**
-     * @param {import('../internals/Lacuna')} self
      * @param {Template} template
-     * @param {Object} stuff
-     * @param {import('discord.js').Message} stuff.message
-     * @param {import('discord.js').Guild} stuff.guild
-     * @param {import('discord.js').GuildMember} stuff.member
-     * 
-     * @typedef {Object} Template
-     * @property {string} content
-     * @property {import('../internals/Typings').MessageEmbed} embed
-     * 
      */
-    static async ReplaceMessageTemplate(self, template, stuff) {
-        const content = await Replacer.Replace(self, template.content, stuff)
+    async replaceTemplateMessage(template) {
+        const content = await this.replace(template.content)
         let embed = {}
 
         if (template.embed.active) {
-            const image_url = template.embed.image.url ? await Replacer.Replace(self, template.embed.image.url, stuff) : null
-            const footer_icon_url = template.embed.footer.icon_url ? await Replacer.Replace(self, template.embed.footer.icon_url, stuff) : null
-            const thumbnail_url = template.embed.thumbnail.url ? await Replacer.Replace(self, template.embed.thumbnail.url, stuff) : null
-            const avatar_icon_url = template.embed.author.icon_url ? await Replacer.Replace(self, template.embed.author.icon_url, stuff) : null
+            const image_url = template.embed.image.url ? await this.replace(template.embed.image.url) : null
+            const footer_icon_url = template.embed.footer.icon_url ? await this.replace(template.embed.footer.icon_url) : null
+            const thumbnail_url = template.embed.thumbnail.url ? await this.replace(template.embed.thumbnail.url) : null
+            const avatar_icon_url = template.embed.author.icon_url ? await this.replace(template.embed.author.icon_url) : null
 
             embed = {
-                title: template.embed.title ? await Replacer.Replace(self, template.embed.title, stuff) : null,
-                description: template.embed.description ? await Replacer.Replace(self, template.embed.description, stuff) : null,
-                url: template.embed.url ? await Replacer.Replace(self, template.embed.url, stuff) : null,
-                timestamp: template.embed.timestamp ? Number(await Replacer.Replace(self, template.embed.timestamp, stuff)) : null,
+                title: template.embed.title ? await this.replace(template.embed.title) : null,
+                description: template.embed.description ? await this.replace(template.embed.description) : null,
+                url: template.embed.url ? await this.replace(template.embed.url) : null,
+                timestamp: template.embed.timestamp ? Number(await this.replace(template.embed.timestamp)) : null,
                 color: template.embed.color ? template.embed.color : null,
                 footer: {
-                    text: template.embed.footer.text ? await Replacer.Replace(self, template.embed.footer.text, stuff) : null,
+                    text: template.embed.footer.text ? await this.replace(template.embed.footer.text) : null,
                     icon_url: footer_icon_url
                 },
                 image: image_url ? { url: image_url } : null,
                 thumbnail: thumbnail_url ? { url: thumbnail_url } : null,
                 author: {
-                    name: template.embed.author.name ? await Replacer.Replace(self, template.embed.author.name, stuff) : null,
-                    url: template.embed.author.url ? await Replacer.Replace(self, template.embed.author.url, stuff) : null,
+                    name: template.embed.author.name ? await this.replace(template.embed.author.name) : null,
+                    url: template.embed.author.url ? await this.replace(template.embed.author.url) : null,
                     icon_url: avatar_icon_url
                 },
                 fields: template.embed.fields.length ? await Promise.all(template.embed.fields.map(async field => {
                     return {
-                        name: field.name ? await Replacer.Replace(self, field.name, stuff) : null,
-                        value: field.value ? await Replacer.Replace(self, field.value, stuff) : null,
+                        name: field.name ? await this.replace(field.name) : null,
+                        value: field.value ? await this.replace(field.value) : null,
                         inline: Boolean(field.inline)
                     }
                 })) : []
@@ -202,81 +272,89 @@ class Replacer {
 }
 
 function CHOOSE(...args) {
-    if (!args.some(arg => typeof arg !== 'number' || typeof arg !== 'string')) throw new TypeError('Invalid function arguments was provided')
-    if (!args.length || args.length <= 1) throw new ReferenceError('Please specify 2 or more arguments')
+    if (!args.some(arg => typeof arg !== 'number' || typeof arg !== 'string')) throw new TypeError()
+    if (!args.length || args.length <= 1) throw new ReferenceError()
 
     const random = Math.floor(Math.random() * args.length)
     return args[random]
 }
 
-function DATE(date = Date.now(), format = 'DD MMM YYYY HH:mm', utc_offset = '+00:00', locale = 'ru') {
-    if (typeof date !== 'number' && !(date instanceof Date)) date = Date.now()
+function DATE(...args) {
+    let timestamp = Number(args[0]), format = args[1], utc = args[2], locale = args[3]
+
+    if (typeof timestamp !== 'number' || isNaN(timestamp)) timestamp = Date.now()
     if (typeof format !== 'string') format = 'DD MMM YYYY HH:mm'
-    if (!(/\+\d{2}:\d{2}/.test(utc_offset))) utc_offset = '+00:00'
+    if (!(/\+\d{2}:\d{2}/.test(utc))) utc = '+00:00'
     if (typeof locale !== 'string' || !['en', 'ru'].includes(locale)) locale = 'ru'
 
-    return moment(new Date(date)).locale(locale).utcOffset(utc_offset).format(format)
+    return moment(timestamp).locale(locale).utcOffset(utc).format(format)
 }
 
-function IF(expression, if_value, else_value) {
-    expression = Boolean(expression)
+function LOWER(...args) {
+    let str = args[0]
 
-    return expression ? if_value : else_value
-}
-
-function LOWER(str) {
-    if (typeof str !== 'string') throw new TypeError('Invalid function arguments was provided')
+    if (typeof str !== 'string') throw new TypeError()
 
     return str.toLowerCase()
 }
 
-function MATH(expression, digits = 0) {
-    if (typeof expression !== 'string') throw new TypeError('Invalid function arguments was provided')
-    if (typeof digits !== 'number' || (digits < 0 || digits > 20)) digits = 0
+function MATH(...args) {
+    let expression = args[0], digits = Number(args[1])
 
-    expression = expression.match(/(?:[0-9-+*/^()x])+/g)
+    if (typeof expression !== 'string') throw new TypeError()
+    if (typeof digits !== 'number' || (digits < 0 || digits > 20) || isNaN(digits)) digits = 0
+
+    expression = expression.match(/(?:[0-9\-\+\*\/\^\(\)])+/g) || []
 
     let result = eval(expression.join(' '))
 
     if (typeof result !== 'number') result = Number(result)
 
-    return Number(result.toFixed(digits))
+    return result.toFixed(digits)
 }
 
-function NUMDECL(number, titles, language = 'ru') {
-    if (typeof number !== 'number' || isNaN(number)) throw new TypeError('Invalid function arguments was provided')
-    if (!Array.isArray(titles) || titles.length <= 1) throw new TypeError('Invalid function arguments was provided')
-    if (typeof language !== 'string' || !['ru', 'en'].includes(language)) language = 'ru'
+function NUMDECL(...args) {
+    let number = Number(args[0]), titles = args[1]?.split('|'), locale = args[2]
 
-    if (language == 'ru') {
+    if (typeof number !== 'number' || isNaN(number)) throw new TypeError()
+    if (!Array.isArray(titles) || titles.length <= 1) throw new TypeError()
+    if (typeof locale !== 'string' || !['ru', 'en'].includes(locale)) locale = 'ru'
+
+    if (locale == 'ru') {
         const cases = [2, 0, 1, 1, 1, 2]
 
         return titles[ (number % 100 > 4 && number % 100 < 20) ? 2 : cases[ (number % 10 < 5) ? number % 10 : 5] ]
     }
 
-    if (language == 'en') {
+    if (locale == 'en') {
         return number > 1 ? titles[1] : titles[0]
     }
 }
 
-function RANDOM(start = 0, end = 100) {
-    if (typeof start !== 'number' || typeof end !== 'number') throw new TypeError('Invalid function arguments was provided')
+function RANDOM(...args) {
+    let start = Number(args[0]), end = Number(args[1])
 
-    const random = Math.floor(Math.random() * end) + start
-    return random
+    if (typeof start !== 'number' || isNaN(start) || start < -Math.pow(2, 53)) start = 0
+    if (typeof end !== 'number' || isNaN(end) || end > Math.pow(2, 53)) end = 100
+
+    return Math.floor(Math.random() * end) + start
 }
 
-function REPLACE(str, search, replacement, flags = 'g') {
-    if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string') throw new TypeError('Invalid function arguments was provided')
-    if (!flags.split('').some(flag => ['g', 'i'].includes(flag))) throw new ReferenceError('Unknown flag')
+function REPLACE(...args) {
+    let str = args[0], search = args[1], replacement = args[2], flags = args[3]
+
+    if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string') throw new TypeError()
+    if (!flags || !flags.split('').some(flag => ['g', 'i'].includes(flag))) flags = 'g'
 
     const regex = new RegExp(`${search}`, flags)
 
     return str.replace(regex, replacement)
 }
 
-function TRUNCATE(str, limit = 100, end = '...') {
-    if (typeof str !== 'string') throw new TypeError('Invalid function arguments was provided')
+function TRUNCATE(...args) {
+    let str = args[0], limit = Number(args[1]), end = args[2]
+
+    if (typeof str !== 'string') throw new TypeError()
     if (typeof limit !== 'number') limit = 100
     if (typeof end !== 'string') end = '...'
 
@@ -286,14 +364,18 @@ function TRUNCATE(str, limit = 100, end = '...') {
         return str
 }
 
-function TRIM(str) {
-    if (typeof str !== 'string') throw new TypeError('Invalid function arguments was provided')
+function TRIM(...args) {
+    let str = args[0]
+
+    if (typeof str !== 'string') throw new TypeError()
 
     return str.replace(/\s+/g, ' ').trim()
 }
 
-function UPPER(str) {
-    if (typeof str !== 'string') throw new TypeError('Invalid function arguments was provided')
+function UPPER(...args) {
+    let str = args[0]
+
+    if (typeof str !== 'string') throw new TypeError()
 
     return str.toUpperCase()
 }

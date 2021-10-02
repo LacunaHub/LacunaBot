@@ -34,6 +34,13 @@ class Guilds {
             if (Array.isArray(data.commands.system) && data.commands.system.length) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.system': data.commands.system } })
             }
+
+            if (Array.isArray(data.commands.custom)) {
+                data.commands.custom = data.commands.custom.slice(0, 249)
+                data.commands.custom = [ ...new Map(data.commands.custom.map(c => [c.name.toLowerCase(), c])).values() ]
+                
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.custom': data.commands.custom } })
+            }
         }
 
         if (data.moderation) {

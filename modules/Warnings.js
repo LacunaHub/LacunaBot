@@ -149,7 +149,8 @@ class Warnings {
             }
 
             if (send_message) {
-                const content = await Replacer.ReplaceMessageTemplate(self, penalty.message, { message: message, guild: message.guild, member: target })
+                const replacer = new Replacer(self, penalty.message, { message: message, guild: message.guild, member: target })
+                const content = await replacer.replace()
 
                 await message.channel.send(null, content).catch(self.logger.error)
             }

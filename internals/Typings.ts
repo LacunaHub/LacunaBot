@@ -14,7 +14,7 @@ export interface ServerDocument extends Document {
     }
     commands: {
         system: Array<SystemCommandOptions>
-        custom: Array<CustomCommandOptions>
+        custom: Array<CustomCommand>
         permissions: {
             allowed: {
                 channels: Array<String>
@@ -378,7 +378,7 @@ export interface SystemCommandOptions {
     inactive: Boolean
     throttle: {
         type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
-        usages: Number
+        uses: Number
         duration: Number
     }
     delete_command: {
@@ -399,22 +399,13 @@ export interface SystemCommandOptions {
     }
 }
 
-export interface CustomCommandOptions {
-    name: String
-    active: Boolean
-    throttle: {
-        type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
-        usages: Number
-        duration: Number
-    }
-    delete_command: {
-        active: Boolean
-        after_ms: Number
-    }
-    delete_reply: {
-        active: Boolean
-        after_ms: Number
-    }
+export interface CustomCommand {
+    name: string
+    description: string
+    type: 'USUAL' | 'TAG'
+    inactive: boolean
+    hidden: boolean
+    components: CustomCommandComponent[]
     allowed: {
         channels: Array<String>
         roles: Array<String>
@@ -423,19 +414,80 @@ export interface CustomCommandOptions {
         channels: Array<String>
         roles: Array<String>
     }
-    reply: {
-        message: {
-            content: String
-            tts: Boolean
-            embed: import('discord.js').MessageEmbed
-        }
+    throttle: {
+        type: 'NONE' | 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
+        max_uses: number
+        duration: number
     }
-    actions: {
-        roles: {
-            add: Array<String>
-            remove: Array<String>
-        }
+}
+
+export interface CustomCommandComponent {
+    type: 'CONDITION' | 'ACTION'
+    condition?: CustomCommandCondition
+    action?: CustomCommandAction
+}
+
+export interface CustomCommandCondition {
+    type: 'IF_ELSE' | 'COMPARE' | 'USER'
+    if_else?: {
+        condition: CustomCommandConditionIfElse
+        actions: Partial<CustomCommandComponent>[]
     }
+    compare?: {
+        operator: '==' | '!=' | '>' | '<' | '^' | '$' | '~' | '!~'
+        left: string
+        right: string
+    }
+    roles?: {
+        condition: 'HAS' | 'MISSING'
+        values: string[]
+    }
+    user?: {
+        condition: 'HAS_PERMISSIONS' | 'MISSING_PERMISSIONS' | 'HAS_ROLES' | 'MISSING_ROLES'
+        permissions?: string[]
+        roles?: string[]
+    }
+}
+
+export interface CustomCommandConditionIfElse {
+    type: 'COMPARE' | 'USER'
+    compare?: {
+        operator: '==' | '!=' | '>' | '<' | '^' | '$' | '~' | '!~'
+        left: string
+        right: string
+    }
+    roles?: {
+        condition: 'HAS' | 'MISSING'
+        values: string[]
+    }
+    user?: {
+        condition: 'HAS_PERMISSIONS' | 'MISSING_PERMISSIONS' | 'HAS_ROLES' | 'MISSING_ROLES'
+        permissions?: string[]
+        roles?: string[]
+    }
+}
+
+export interface CustomCommandAction {
+    type: 'REPLY' | 'MODIFY_ROLES' | 'ADD_REACTIONS' | 'DELETE_REQUEST' | 'FORWARD_TO_COMMAND'
+    reply?: CustomCommandActionReply
+    modify_roles?: {
+        add: string[]
+        remove: string[]
+    }
+    add_reactions?: string[]
+    delete_request?: number
+    forward_to_command?: string
+}
+
+export interface CustomCommandActionReply {
+    format: 'CHANNEL' | 'CURRENT_CHANNEL'
+    channel_id: string
+    message: {
+        content: string
+        embed: MessageEmbed
+        tts: boolean
+    }
+    delete: number
 }
 
 export interface ModerationCase {

@@ -125,7 +125,8 @@ class Automoder {
             }
 
             if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
-                const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message, { message: message, guild: message.guild, member: message.member })
+                const replacer = new Replacer(self, null, { message: message, guild: message.guild, member: message.member })
+                const content = await replacer.replaceTemplateMessage(config.penalty.message)
 
                 await message.channel.send(null, content).catch(self.logger.error)
             }
@@ -316,7 +317,8 @@ class Automoder {
             if (send_message) {
                 const default_content = self.translator.locale(server.locale).modules.automoder.default_slowdown_message
 
-                const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message || default_content, { message: message, guild: message.guild, member: message.member })
+                const replacer = new Replacer(self, null, { message: message, guild: message.guild, member: message.member })
+                const content = await replacer.replaceTemplateMessage(config.penalty.message || default_content)
 
                 await message.channel.send(null, content).catch(self.logger.error)
             }
@@ -454,7 +456,8 @@ class Automoder {
             }
 
             if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
-                const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message, { message: message, guild: message.guild, member: message.member })
+                const replacer = new Replacer(self, null, { message: message, guild: message.guild, member: message.member })
+                const content = await replacer.replaceTemplateMessage(config.penalty.message)
 
                 await message.channel.send(null, content).catch(self.logger.error)
             }
@@ -641,7 +644,8 @@ class Penalties {
         }
 
         if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
-            const content = await Replacer.ReplaceMessageTemplate(self, config.penalty.message, { message: message, guild: message.guild, member: message.member })
+            const replacer = new Replacer(self, null, { message: message, guild: message.guild, member: message.member })
+            const content = await replacer.replaceTemplateMessage(config.penalty.message)
 
             await message.channel.send(null, content).catch(self.logger.error)
         }
