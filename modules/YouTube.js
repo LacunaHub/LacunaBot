@@ -92,7 +92,7 @@ class YouTube {
      */
     static async scheduleCheck(self) {
         const rule = new RecurrenceRule()
-        rule.minute = new Range(0, 59, 2)
+        rule.minute = new Range(0, 59, 5)
 
         const job = scheduleJob(rule, async () => {
             let servers = await self.db.servers.findSome({ 'modules.youtube.channels.0': { $exists: true } })
@@ -102,7 +102,7 @@ class YouTube {
             await self.logger.info(`(YouTube): Scheduled check started for ${servers.length} servers`)
 
             for (const server of servers) {
-                const channels = server.modules.youtube.channels.sort((a, b) => a.channel.name - b.channel.name).filter(c => (Date.now() - c.last_check_timestamp) > 240000 && (c.alerts.videos || c.alerts.broadcasts))
+                const channels = server.modules.youtube.channels.sort((a, b) => a.channel.name - b.channel.name).filter(c => (Date.now() - c.last_check_timestamp) > 600000 && (c.alerts.videos || c.alerts.broadcasts))
                 
                 await channels.forEach(async (channel, i) => {
                     if (i > 1 && !server.server.premium.available) return false

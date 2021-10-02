@@ -9,7 +9,7 @@ const { Util } = require('discord.js')
 const execute = async (self, server, message, args) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const search_track = args.join(' ')
+    const search_track = Util.removeMentions(args.join(' '))
     const voice = message.member.voice.channel
 
     if (!voice) {

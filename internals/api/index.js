@@ -15,7 +15,6 @@ app.disable('x-powered-by')
 app.use(morgan('[API] – [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'))
 app.use(express.json())
 app.use(cors())
-app.use(limiter({ windowMs: 600000, max: 50 }))
 
 app.use('/webhooks/patreon', require('./webhooks/patreon'))
 
@@ -30,13 +29,15 @@ app.all('/*', async (req, res, next) => {
     }
 
     if (!referer || !hosts.some(host => referer.includes(host))) {
-        await res.status(423).send('Locked')
+        await res.status(503).send('Service Unavailable')
 
         return
     }
 
     await next()
 })
+
+app.use(limiter({ windowMs: 600000, max: 50 }))
 
 app.use('/guilds', require('./routes/guilds'))
 app.use('/authorize', require('./routes/oauth2'))

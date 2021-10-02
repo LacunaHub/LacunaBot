@@ -481,6 +481,15 @@ class Levels {
 
                             if (member) await Levels.voiceCount(self, server, member)
                         }
+                        
+                        else {
+                            await self.db.activities.update({ _id: guild.id, 'levels.user_id': user.user_id }, {
+                                $set: {
+                                    'levels.$.activity.voice.connected_at': null,
+                                    'levels.$.activity.voice.disconnected_at': Date.now()
+                                }
+                            })
+                        }
                     }
                 }
             }
