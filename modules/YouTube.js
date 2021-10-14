@@ -104,73 +104,71 @@ class YouTube {
                 const channels = server.modules.youtube.channels.sort((a, b) => a.channel.name - b.channel.name).filter(c => (Date.now() - c.last_check_timestamp) > 600000 && (c.alerts.videos || c.alerts.broadcasts))
                 
                 await channels.forEach(async (channel, i) => {
-                    setTimeout(async () => {
-                        if (i > 1 && !server.server.premium.available) return false
+                    if (i > 1 && !server.server.premium.available) return false
 
-                        const guild = self.guilds.cache.get(server._id)
+                    const guild = self.guilds.cache.get(server._id)
 
-                        if (!guild || !guild.available) return false
+                    if (!guild || !guild.available) return false
 
-                        const alert_channel = guild.channels.cache.get(channel.alerts.channel_id)
+                    const alert_channel = guild.channels.cache.get(channel.alerts.channel_id)
 
-                        if (alert_channel) {
-                            const video = await YouTube.checkVideos(channel.channel.id)
+                    if (alert_channel) {
+                        const video = await YouTube.checkVideos(channel.channel.id)
 
-                            if (video && video.video_id != channel.last_video_id && video.published <= 2) {
-                                await self.db.servers.update({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
-                                    $set: {
-                                        'modules.youtube.channels.$.last_video_id': video.video_id
-                                    }
-                                })
-
-                                const is_broadcast = await YouTube.isLiveBroadcast(video.video_id)
-
-                                const webhooks = await guild.fetchWebhooks()
-                                let webhook = webhooks.get(channel.alerts.webhook.id)
-
-                                if (!webhook) {
-                                    try {
-                                        webhook = await alert_channel.createWebhook(channel.channel.name, { avatar: channel.channel.thumbnail })
-                                    } catch (err) {
-                                        return false
-                                    }
-
-                                    await self.db.servers.update({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
-                                        $set: {
-                                            'modules.youtube.channels.$.alerts.webhook.id': webhook.id,
-                                            'modules.youtube.channels.$.alerts.webhook.token': webhook.token
-                                        }
-                                    })
-                                }
-
-                                if (is_broadcast && channel.alerts.broadcasts) {
-                                    const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.broadcasts_message_template)
-                                    const replacer = new Replacer(self, `${has_link ? channel.alerts.broadcasts_message_template : `${channel.alerts.broadcasts_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
-                                    const content = await replacer.replace()
-
-                                    await webhook.send(content)
-
-                                    await self.emit('moduleExecution', { module: 'YouTube: Broadcasts', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.name } })
-                                }
-
-                                else if (channel.alerts.videos) {
-                                    const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.videos_message_template)
-                                    const replacer = new Replacer(self, `${has_link ? channel.alerts.videos_message_template : `${channel.alerts.videos_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
-                                    const content = await replacer.replace()
-
-                                    await webhook.send(content)
-
-                                    await self.emit('moduleExecution', { module: 'YouTube: Videos', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.display_name } })
-                                }
-                            }
-
+                        if (video && video.video_id != channel.last_video_id && video.published <= 2) {
                             await self.db.servers.update({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
                                 $set: {
-                                    'modules.youtube.channels.$.last_check_timestamp': Date.now()
+                                    'modules.youtube.channels.$.last_video_id': video.video_id
                                 }
                             })
+
+                            const is_broadcast = await YouTube.isLiveBroadcast(video.video_id)
+
+                            const webhooks = await guild.fetchWebhooks()
+                            let webhook = webhooks.get(channel.alerts.webhook.id)
+
+                            if (!webhook) {
+                                try {
+                                    webhook = await alert_channel.createWebhook(channel.channel.name, { avatar: channel.channel.thumbnail })
+                                } catch (err) {
+                                    return false
+                                }
+
+                                await self.db.servers.update({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
+                                    $set: {
+                                        'modules.youtube.channels.$.alerts.webhook.id': webhook.id,
+                                        'modules.youtube.channels.$.alerts.webhook.token': webhook.token
+                                    }
+                                })
+                            }
+
+                            if (is_broadcast && channel.alerts.broadcasts) {
+                                const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.broadcasts_message_template)
+                                const replacer = new Replacer(self, `${has_link ? channel.alerts.broadcasts_message_template : `${channel.alerts.broadcasts_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
+                                const content = await replacer.replace()
+
+                                await webhook.send(content)
+
+                                await self.emit('moduleExecution', { module: 'YouTube: Broadcasts', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.name } })
+                            }
+
+                            else if (channel.alerts.videos) {
+                                const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.videos_message_template)
+                                const replacer = new Replacer(self, `${has_link ? channel.alerts.videos_message_template : `${channel.alerts.videos_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
+                                const content = await replacer.replace()
+
+                                await webhook.send(content)
+
+                                await self.emit('moduleExecution', { module: 'YouTube: Videos', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.display_name } })
+                            }
                         }
-                    }, (i + 1) * 1500)
+
+                        await self.db.servers.update({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
+                            $set: {
+                                'modules.youtube.channels.$.last_check_timestamp': Date.now()
+                            }
+                        })
+                    }
                 })
             }
         })
