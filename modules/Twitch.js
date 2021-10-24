@@ -144,8 +144,7 @@ class Twitch {
                             let content = broadcaster.alerts.message_template || null
 
                             if (content) {
-                                const replacer = new Replacer(self, broadcaster.alerts.message_template, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
-                                content = await replacer.replace()
+                                content = await Replacer.Replace(self, broadcaster.alerts.message_template, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
                             }
 
                             const message = await webhook.send(content, {
