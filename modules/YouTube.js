@@ -144,8 +144,7 @@ class YouTube {
 
                             if (is_broadcast && channel.alerts.broadcasts) {
                                 const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.broadcasts_message_template)
-                                const replacer = new Replacer(self, `${has_link ? channel.alerts.broadcasts_message_template : `${channel.alerts.broadcasts_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
-                                const content = await replacer.replace()
+                                const content = await Replacer.Replace(self, `${has_link ? channel.alerts.broadcasts_message_template : `${channel.alerts.broadcasts_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
 
                                 await webhook.send(content)
 
@@ -154,8 +153,7 @@ class YouTube {
 
                             else if (channel.alerts.videos) {
                                 const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.videos_message_template)
-                                const replacer = new Replacer(self, `${has_link ? channel.alerts.videos_message_template : `${channel.alerts.videos_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
-                                const content = await replacer.replace()
+                                const content = await Replacer.Replace(self, `${has_link ? channel.alerts.videos_message_template : `${channel.alerts.videos_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
 
                                 await webhook.send(content)
 
