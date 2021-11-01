@@ -1,185 +1,244 @@
-const { Collection } = require('discord.js')
-const Subcommand = require('./Subcommand')
-
 class Command {
     /**
      * @param {import('../Lacuna')} self
      * @param {import('../Typings').CommandInfo} data
      */
     constructor(self, data) {
-        if (!self || (!data.fn || typeof data.fn !== 'function') || (!data.name || typeof data.name !== 'string')) {
-            throw new TypeError('Incorrect arguments has provided. Please, check arguments and fix it.')
-        }
-
         this.self = self
 
-        this.fn = data.fn
+        this.prefix = data.prefix
+
+        this.slash = data.slash
+
+        this.user = data.user
+
+        this.message = data.message
 
         this.name = data.name
 
-        this.group = data.group || null
+        this.pretty_name = data.pretty_name
 
-        this.description = data.description || null
+        this.description = data.description
 
-        this.aliases = data.aliases || []
+        this.type = data.type
 
-        /**
-         * @type {Collection<String, Subcommand>}
-         */
-        this.subcommands = new Collection()
+        this.options = data.options
+
+        this.default_permission = Boolean(data.default_permission)
+
+        this.group = data.group ?? 'GENERAL'
+
+        this.is_prefix_command = Boolean(data.prefix)
+
+        this.is_slash_command = Boolean(data.slash)
+
+        this.is_user_command = Boolean(data.user)
+
+        this.is_message_command = Boolean(data.message)
+
+        this.subcommands = data.subcommands ?? []
 
         this.uses = 0
-
-        this.guild_only = Boolean(data.guild_only)
-
-        this.developer_only = Boolean(data.developer_only)
 
         this.premium_only = Boolean(data.premium_only)
 
         this.private = Boolean(data.private)
 
-        this.nsfw = Boolean(data.nsfw)
+        this.throttling = data.throttling ?? null
 
-        this.throttling = data.throttling || null
+        this.throttles = data.throttling ? new Map() : null
 
-        this.throttles = new Map()
-
-        this.self_permissions = data.self_permissions || []
-
-        this.user_permissions = data.user_permissions || []
-
-        this.early_access = data.early_access || null
+        this.permissions = {
+            self: data.permissions?.self ?? [],
+            user: data.permissions?.user ?? []
+        }
 
         this.self.commands.set(this.name, this)
     }
 
-    get manageable() {
-        return this.name != 'commands' && this.name != 'boost' && this.name != 'eval'
-    }
-
     /**
-     * Проверяет, имеет ли бот все нужные разрешения для выполнения команды
-     * 
-     * @param {import('discord.js').Message} message
-     * @returns {?import('discord.js').PermissionResolvable[]}
-     */
-    hasPermission(message) {
-        if (this.self_permissions && !message.guild.me.hasPermission(this.self_permissions)) {
-            const missing = message.channel.permissionsFor(this.self.user).missing(this.self_permissions)
-
-            if (missing) return missing
-        }
-
-        return null
-    }
-
-    /**
-     * Проверяет конфигурацию команды на наличие запретов
-     * 
      * @param {import('../Typings').ServerDocument} server
-     * @param {import('discord.js').Message} message
+     * @param {import('discord.js').CommandInteraction | import('discord.js').ContextMenuInteraction | import('discord.js').Message} signal
      */
-    denied(server, message) {
+    denied(server, signal) {
         const command = server.commands.system.find(c => c.name == this.name)
 
-        if (this.self.application.owner.members.some(m => m.id == message.author.id)) return true
+        if (this.self.application.owner.members.some(m => m.id == signal.member.id)) return true
 
-        if (this.developer_only) return false
+        if (this.private) return false
 
-        if (this.guild_only && !message.guild) return false
+        if (server.server.bot_experts.some(expert => expert.id === signal.member.id && expert.expires_timestamp > Date.now())) return true
 
-        if (server.server.bot_experts.some(expert => expert.id === message.author.id && expert.expires_timestamp > Date.now())) return true
+        if (server.commands.permissions.blocked.channels.includes(signal.channel.id) && !signal.member.permissions.has('ADMINISTRATOR')) return false
 
-        if (server.commands.permissions.blocked.channels.includes(message.channel.id) && !message.member.hasPermission('ADMINISTRATOR')) return false
-
-        if ((server.commands.permissions.allowed.channels.length && !server.commands.permissions.allowed.channels.includes(message.channel.id)) && !message.member.hasPermission('ADMINISTRATOR')) return false
+        if ((server.commands.permissions.allowed.channels.length && !server.commands.permissions.allowed.channels.includes(signal.channel.id)) && !signal.member.permissions.has('ADMINISTRATOR')) return false
 
         if (command) {
             if (command.inactive) return false
 
-            if (command.blocked.channels.includes(message.channel.id)) return false
+            if (command.blocked.channels.includes(signal.channel.id)) return false
 
-            if (command.allowed.channels.length && !command.allowed.channels.includes(message.channel.id)) return false
+            if (command.allowed.channels.length && !command.allowed.channels.includes(signal.channel.id)) return false
 
-            if (message.member.roles.cache.some(r => command.blocked.roles.includes(r.id))) return false
+            if (signal.member.roles.cache.some(r => command.blocked.roles.includes(r.id))) return false
         }
 
         return true
     }
 
     /**
-     * Проверяет конфигурацию команды на наличие ограничений
-     * 
      * @param {import('../Typings').ServerDocument} server
-     * @param {import('discord.js').Message} message
+     * @param {import('discord.js').CommandInteraction | import('discord.js').ContextMenuInteraction | import('discord.js').Message} signal
      */
-    allowed(server, message) {
+    allowed(server, signal) {
         const command = server.commands.system.find(c => c.name == this.name)
 
-        if (this.self.application.owner.members.some(m => m.id == message.author.id)) return true
+        if (this.self.application.owner.members.some(m => m.id == signal.member.id)) return true
 
-        if (server.server.bot_experts.some(expert => expert.id === message.author.id && expert.expires_timestamp > Date.now())) return true
+        if (server.server.bot_experts.some(expert => expert.id === signal.member.id && expert.expires_timestamp > Date.now())) return true
 
         if (command) {
-            if (command.allowed.roles.length && message.member.roles.cache.some(r => command.allowed.roles.includes(r.id))) return true
+            if (command.allowed.roles.length && signal.member.roles.cache.some(r => command.allowed.roles.includes(r.id))) return true
 
-            if (!command.allowed.roles.length && !this.user_permissions.length) return true
+            if (!command.allowed.roles.length && !this.permissions.user.length) return true
         }
 
-        if (!command && !this.user_permissions.length) return true
+        if (!command && !this.permissions.user.length) return true
 
-        if (this.user_permissions.length && message.member.hasPermission(this.user_permissions)) return true
+        if (this.permissions.user.length && signal.member.permissions.has(this.permissions.user)) return true
 
         return false
     }
 
     /**
-     * Обработка и выполнение команды
-     * 
      * @param {import('../Typings').ServerDocument} server
-     * @param {import('discord.js').Message} message
-     * @param {String[]} args
+     * @param {import('discord.js').CommandInteraction} interaction
      */
-    async execute(server, message, args) {
-        if (!message.content.startsWith(server.prefix)) return false
-
+    async executeSlash(server, interaction) {
         const locale = this.self.translator.locale(server.locale)
 
-        if (this.early_access && this.early_access >= Date.now() && !server.server.premium.available) return false
+        const denied = this.denied(server, interaction), allowed = this.allowed(server, interaction)
 
-        if (!this.denied(server, message) || !this.allowed(server, message)) return false
-
-        const missing = this.hasPermission(message)
-
-        if (missing) {
-            if (missing.includes('SEND_MESSAGES')) return false
-
-            await message.reply(`${this.self._emojis.WARNING} | ${this.self.translator.format(locale.commands.common.texts.missing_permissions, `**${message.author.username}**`, missing.map(p => `\`${locale.commands.common.permissions[p]}\``).join(', '))}`, { allowedMentions: { repliedUser: false } })
+        if (!denied || !allowed) {
+            await interaction.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.command_denied, `**${interaction.user.tag}**`)}`, ephemeral: true })
 
             return false
         }
 
         if (this.premium_only && !server.server.premium.available) {
-            await message.reply(`${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${message.author.username}**`)}`, { allowedMentions: { repliedUser: false } })
+            await interaction.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${interaction.user.tag}**`)}`, ephemeral: true })
 
             return false
         }
 
-        let result
+        this.uses++
 
-        const subcommand = this.subcommands.find(c => c.name == args[0] || (c.aliases && c.aliases.includes(args[0])))
+        const sc = this.subcommands.length ? interaction.options?.getSubcommand() : null
+        const subcommand = this.subcommands?.find(s => s.name == sc)
 
-        if (subcommand) {
-            result = await subcommand.fn(this.self, server, message, args.slice(1))
+        if (subcommand) await subcommand.slash(this.self, server, interaction)
+        else await this.slash(this.self, server, interaction)
+
+        this.self.emit('commandExecution', {
+            command: subcommand ? `${this.name} ${subcommand.name}` : this.name,
+            guild: { name: interaction.guild.name, id: interaction.guild.id },
+            channel: { name: interaction.channel?.name, id: interaction.channelId },
+            user: { name: interaction.user.username, id: interaction.user.id }
+        })
+
+        return true
+    }
+
+    /**
+     * @param {import('../Typings').ServerDocument} server
+     * @param {import('discord.js').ContextMenuInteraction} interaction
+     */
+    async executeContext(server, interaction) {
+        const locale = this.self.translator.locale(server.locale)
+
+        const denied = this.denied(server, interaction), allowed = this.allowed(server, interaction)
+
+        if (!denied || !allowed) {
+            await interaction.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.command_denied, `**${interaction.user.tag}**`)}`, ephemeral: true })
+
+            return false
         }
 
-        else {
-            result = await this.fn(this.self, server, message, args)
+        if (this.premium_only && !server.server.premium.available) {
+            await interaction.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${interaction.user.tag}**`)}`, ephemeral: true })
+
+            return false
         }
 
         this.uses++
 
-        if (result) await this.self.emit('commandExecution', { command: { name: this.name, uses: this.uses }, message: message, args: args })
+        if (interaction.targetType == 'MESSAGE') await this.message(this.self, server, interaction)
+        if (interaction.targetType == 'USER') await this.user(this.self, server, interaction)
+
+        this.self.emit('commandExecution', {
+            command: this.name,
+            guild: { name: interaction.guild.name, id: interaction.guild.id },
+            channel: { name: interaction.channel?.name, id: interaction.channelId },
+            user: { name: interaction.user.username, id: interaction.user.id }
+        })
+
+        return true
+    }
+
+
+    /**
+     * @param {import('../Typings').ServerDocument} server
+     * @param {import('discord.js').Message} message
+     */
+    async executePrefix(server, message) {
+        if (!message.content.startsWith(server.prefix)) return false
+
+        const locale = this.self.translator.locale(server.locale)
+
+        const denied = this.denied(server, message), allowed = this.allowed(server, message)
+
+        if (!denied || !allowed) return false
+
+        if (this.permissions.self.length && !message.guild.me.permissions.has(this.permissions.self)) {
+            const missing = message.channel.permissionsFor(message.guild.me).missing(this.permissions.self)
+
+            if (missing.includes('SEND_MESSAGES')) {
+                await message.author.send({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.missing_send_messages, `**${message.member.displayName}**`, `<#${message.channelId}>`)}` }).catch(() => {})
+
+                return false
+            }
+
+            if (missing) {
+                await message.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.missing_permissions, `**${message.member.displayName}**`, missing.map(p => `\`${locale.commands.common.permissions[p]?.toLowerCase()}\``).join(', '))}` })
+
+                return false
+            }
+        }
+
+        if (this.premium_only && !server.server.premium.available) {
+            await interaction.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${message.author.tag}**`)}`, ephemeral: true })
+
+            return false
+        }
+
+        this.uses++
+
+        const subcommand = this.subcommands?.find(sc => sc.name == message.args[0])
+
+        if (subcommand) {
+            message.args = message.args.slice(1)
+
+            await subcommand.prefix(this.self, server, message)
+        }
+
+        else await this.prefix(this.self, server, message)
+        
+        this.self.emit('commandExecution', {
+            command: subcommand ? `${this.name} ${subcommand.name}` : this.name,
+            guild: { name: message.guild.name, id: message.guild.id },
+            channel: { name: message.channel.name, id: message.channelId },
+            user: { name: message.author.username, id: message.author.id }
+        })
 
         return true
     }

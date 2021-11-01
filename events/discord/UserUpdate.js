@@ -5,7 +5,7 @@ const UserUpdate = require('../../modules/Logs/User/UserUpdate')
  * @param {import('discord.js').User} before
  * @param {import('discord.js').User} user
  */
-const execute = async (self, before, user) => {
+const handler = async (self, before, user) => {
     if (user.bot) return false
 
     const guilds = self.guilds.cache.filter(g => g.members.cache.has(user.id))
@@ -23,5 +23,5 @@ const execute = async (self, before, user) => {
 
 module.exports = {
     name: 'userUpdate',
-    fn: execute
+    handler
 }

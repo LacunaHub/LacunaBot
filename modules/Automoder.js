@@ -20,7 +20,7 @@ class Automoder {
         const config = server.moderation.automoder.swear_filter
 
         if (!config.active) return false
-        if (message.member.permissions.any(config.ignored.permissions, false)) return false
+        if (message.member.permissions.any(BigInt(config.ignored.permissions), false)) return false
 
         if (config.ignored.channels.includes(message.channel.id)) return false
         if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
@@ -128,7 +128,7 @@ class Automoder {
                 const replacer = new Replacer(self, null, { message: message, guild: message.guild, member: message.member })
                 const content = await replacer.replaceTemplateMessage(config.penalty.message)
 
-                await message.channel.send(null, content).catch(self.logger.error)
+                await message.channel.send(content).catch(self.logger.error)
             }
 
             if (!config.penalty.action || delete_message) {
@@ -150,7 +150,7 @@ class Automoder {
         const config = server.moderation.automoder.links_filter
 
         if (!config.active) return false
-        if (message.member.permissions.any(config.ignored.permissions, false)) return false
+        if (message.member.permissions.any(BigInt(config.ignored.permissions), false)) return false
 
         if (config.ignored.channels.includes(message.channel.id)) return false
         if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
@@ -171,8 +171,8 @@ class Automoder {
             }
         }
 
-        if (config.delete_referral_invites && message.guild.me.hasPermission('MANAGE_GUILD')) {
-            const guild_invites = await message.guild.fetchInvites()
+        if (config.delete_referral_invites && message.guild.me.permissions.has('MANAGE_GUILD')) {
+            const guild_invites = await message.guild.invites.fetch()
             const invites = message.content.match(/discord.gg\/\w+/gi)
             const is_referral = invites ? invites.some(i => !guild_invites.some(k => k.url == `https://${i}`)) : false
             
@@ -203,7 +203,7 @@ class Automoder {
         const config = server.moderation.automoder.users_slowdown
 
         if (!config.active) return false
-        if (message.member.permissions.any(config.ignored.permissions, false)) return false
+        if (message.member.permissions.any(BigInt(config.ignored.permissions), false)) return false
 
         if (config.ignored.channels.includes(message.channel.id)) return false
         if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
@@ -320,7 +320,7 @@ class Automoder {
                 const replacer = new Replacer(self, null, { message: message, guild: message.guild, member: message.member })
                 const content = await replacer.replaceTemplateMessage(config.penalty.message || default_content)
 
-                await message.channel.send(null, content).catch(self.logger.error)
+                await message.channel.send(content).catch(self.logger.error)
             }
 
             if (!config.penalty.action || delete_message) {
@@ -351,7 +351,7 @@ class Automoder {
         const config = server.moderation.automoder.anti_caps
 
         if (!config.active) return false
-        if (message.member.permissions.any(config.ignored.permissions, false)) return false
+        if (message.member.permissions.any(BigInt(config.ignored.permissions), false)) return false
 
         if (config.ignored.channels.includes(message.channel.id)) return false
         if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
@@ -459,7 +459,7 @@ class Automoder {
                 const replacer = new Replacer(self, null, { message: message, guild: message.guild, member: message.member })
                 const content = await replacer.replaceTemplateMessage(config.penalty.message)
 
-                await message.channel.send(null, content).catch(self.logger.error)
+                await message.channel.send(content).catch(self.logger.error)
             }
 
             if (!config.penalty.action || delete_message) {
@@ -481,7 +481,7 @@ class Automoder {
         const config = server.moderation.automoder.nicknames
 
         if (!config.active) return false
-        if (member.permissions.any(config.ignored.permissions, false)) return false
+        if (member.permissions.any(BigInt(config.ignored.permissions), false)) return false
 
         if (member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
 
@@ -647,7 +647,7 @@ class Penalties {
             const replacer = new Replacer(self, null, { message: message, guild: message.guild, member: message.member })
             const content = await replacer.replaceTemplateMessage(config.penalty.message)
 
-            await message.channel.send(null, content).catch(self.logger.error)
+            await message.channel.send(content).catch(self.logger.error)
         }
 
         if (!config.penalty.action || delete_message) {

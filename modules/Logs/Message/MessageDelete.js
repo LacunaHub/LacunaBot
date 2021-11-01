@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const { TruncateString } = require('../../../internals/utility/Utils')
+const { truncateString } = require('../../../internals/utility/Utils')
 
 /**
  * @param {import('../../../internals/Lacuna')} self
@@ -12,33 +12,39 @@ module.exports = async (self, server, message) => {
 
         const log = message.guild.channels.cache.get(server.moderation.logs.types.message_delete.channel_id)
 
-        const is_ok = log && message.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(message.guild.me).has('MANAGE_WEBHOOKS')
+        const is_ok = log && log.permissionsFor(message.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
 
         if (is_ok) {
-            const content = TruncateString(message.content || '', 800)
-
-            const webhooks = await message.guild.fetchWebhooks()
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
-            let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+            let webhook = logs_webhook ? (await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) : null
 
             if (!webhook) {
+                if (logs_webhook) {
+                    await self.db.servers.update({ _id: message.guild.id }, {
+                        $pull: {
+                            'moderation.logs.webhooks': {
+                                channel_id: log.id
+                            }
+                        }
+                    })
+                }
+
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.message_delete.title) })
-                } catch (err) {
-                    return false
-                }
+                } catch (err) { return false }
 
                 await self.db.servers.update({ _id: message.guild.id }, {
                     $push: {
                         'moderation.logs.webhooks': {
                             id: webhook.id,
                             token: webhook.token,
-                            channel_id: webhook.channelID
+                            channel_id: webhook.channelId
                         }
                     }
                 })
             }
 
+            const content = truncateString(message.content ?? '', 800)
             const attachment = message.attachments.first()
         
             const embed = new MessageEmbed()
@@ -52,7 +58,7 @@ module.exports = async (self, server, message) => {
 
             if (attachment && attachment.height) embed.setImage(attachment.proxyURL)
 
-            await webhook.send('', {
+            await webhook.send({
                 embeds: [embed],
                 avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
                 name: server.server.premium.available ? webhook.name : self.user.username

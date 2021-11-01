@@ -3,25 +3,17 @@
  * @param {import('discord.js').VoiceState} before
  * @param {import('discord.js').VoiceState} state
  */
-const execute = async (self, before, state) => {
-    if (before.member.partial) {
-        before.member = await before.member.fetch()
-    }
-
-    if (state.member.partial) {
-        state.member = await state.member.fetch()
-    }
-
-    if (!before.channelID && state.channelID) {
+const handler = async (self, before, state) => {
+    if (!before.channelId && state.channelId) {
         await self.emit('voiceConnect', state)
     }
 
-    else if (!state.channelID) {
+    else if (!state.channelId) {
         await self.emit('voiceDisconnect', state, before.channel)
     }
 
-    else if (before.channelID && state.channelID) {
-        if (before.channelID != state.channelID) {
+    else if (before.channelId && state.channelId) {
+        if (before.channelId != state.channelId) {
             await self.emit('voiceMove', before, state)
         }
 
@@ -53,5 +45,5 @@ const execute = async (self, before, state) => {
 
 module.exports = {
     name: 'voiceStateUpdate',
-    fn: execute
+    handler
 }

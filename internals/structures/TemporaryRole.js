@@ -41,11 +41,7 @@ class TemporaryRole {
     }
 
     async getMember() {
-        try {
-            return await this.guild.members._fetchSingle({ user: this.user_id, cache: false })
-        } catch (err) {
-            return null
-        }
+        return await this.guild.members.fetch(this.user_id).catch(() => {})
     }
 
     async create() {
@@ -77,7 +73,7 @@ class TemporaryRole {
         const member = await this.getMember()
 
         if (member) {
-            await member.roles.add(this.role_id, 'Temporary Role')
+            await member.roles.add(this.role_id, 'Temporary Role').catch(() => {})
         }
     }
 
@@ -104,7 +100,7 @@ class TemporaryRole {
         if (!member || !member.roles) return null
 
         if (member && member.roles.cache.has(this.role_id)) {
-            await member.roles.remove(this.role_id, 'Temporary Role')
+            await member.roles.remove(this.role_id, 'Temporary Role').catch(() => {})
         }
     }
 
@@ -112,9 +108,8 @@ class TemporaryRole {
      * @param {import('../Lacuna')} self
      */
     static async HandleEntries(self) {
-        let servers = await self.db.servers.findSome({ 'moderation.roles.temporary.0': { $exists: true } })
-
-        servers = servers.filter(s => self.guilds.cache.has(s._id))
+        const guilds = self.guilds.cache.map(g => g.id)
+        const servers = await self.db.servers.findSome({ _id: { $in: guilds }, 'moderation.roles.temporary.0': { $exists: true } })
 
         let entries = 0
 

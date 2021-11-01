@@ -4,7 +4,7 @@ const RoleCreate = require('../../modules/Logs/Role/RoleCreate')
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').Role} role
  */
-const execute = async (self, role) => {
+const handler = async (self, role) => {
     const server = await self.db.servers.find({ _id: role.guild.id })
 
     if (!server) return false
@@ -16,5 +16,5 @@ const execute = async (self, role) => {
 
 module.exports = {
     name: 'roleCreate',
-    fn: execute
+    handler
 }

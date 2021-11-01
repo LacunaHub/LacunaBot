@@ -7,7 +7,8 @@ const Server = new Schema({
     server: {
         premium: {
             available: { type: Boolean, default: false },
-            will_expire_on: { type: Number, default: 0 }
+            will_expire_on: { type: Number, default: 0 },
+            booster_id: { type: String, default: null }
         },
         blocked: { type: Boolean, default: false },
         bot_experts: { type: Array, default: [] }
@@ -24,7 +25,8 @@ const Server = new Schema({
                 channels: { type: Array, default: [] },
                 roles: { type: Array, default: [] }
             }
-        }
+        },
+        slash_commands: { type: Boolean, default: false }
     },
     moderation: {
         case_log: {

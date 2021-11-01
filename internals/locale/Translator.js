@@ -13,7 +13,7 @@ class Translator {
             break
         
             case 'en':
-                file = require('./languages/english.json')
+                file = require('./languages/russian.json')
             break
         }
 
@@ -32,7 +32,7 @@ class Translator {
         for (const pattern of patterns) {
             const i = patterns.indexOf(pattern)
 
-            str = str.replace(pattern, args[i])
+            str = str.replace(pattern, () => { return args[i] })
         }
 
         return str

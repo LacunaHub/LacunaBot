@@ -2,7 +2,7 @@
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').Message} message
  */
-const execute = async (self, message) => {
+const handler = async (self, message) => {
     const server = await self.db.servers.fetch({ _id: message.guild.id })
     const elements = server.modules.reactions.filter(r => r.message.id == message.id)
 
@@ -23,5 +23,5 @@ const execute = async (self, message) => {
 
 module.exports = {
     name: 'messageReactionRemoveAll',
-    fn: execute
+    handler
 }

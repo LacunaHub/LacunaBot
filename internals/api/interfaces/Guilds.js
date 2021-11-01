@@ -1,8 +1,15 @@
 const Servers = require('../../../database/schemas/Servers')
 const { GenerateUID } = require('../../../modules/Reactions')
 const { Util, MessageEmbed } = require('discord.js')
-const Channels = require('../discord/rest/Channels')
-const Webhooks = require('../discord/rest/Webhooks')
+const { REST } = require('@discordjs/rest')
+const { Routes } = require('discord-api-types/v9')
+const qdb = require('quick.db')
+const { resolveObjectPath, createEnum } = require('../../utility/Utils')
+const Translator = require('../../locale/Translator')
+
+const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
+
+const command_option_types = createEnum([ null, 'SUB_COMMAND', 'SUB_COMMAND_GROUP', 'STRING', 'INTEGER', 'BOOLEAN', 'USER', 'CHANNEL', 'ROLE', 'MENTIONABLE', 'NUMBER' ])
 
 class Guilds {
     static async isBotExpert(guild_id, id) {
@@ -18,7 +25,7 @@ class Guilds {
      */
     static async updateSettings(guild, data, user_id) {
         if (typeof data.prefix === 'string' && data.prefix !== guild.prefix) {
-            if (data.prefix.length && data.prefix.length <= 3) {
+            if (data.prefix.length && data.prefix.length <= 3 && !['/'].includes(data.prefix)) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'prefix': data.prefix } })
             }
         }
@@ -40,6 +47,75 @@ class Guilds {
                 data.commands.custom = [ ...new Map(data.commands.custom.map(c => [c.name.toLowerCase(), c])).values() ]
                 
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.custom': data.commands.custom } })
+            }
+
+            if ((typeof data.commands.slash_commands === 'boolean' && data.commands.slash_commands) || (guild.commands.slash_commands && Array.isArray(data.commands.system))) {
+                const data_commands = data.commands.system?.length ? data.commands.system : guild.commands.system
+                const locale = Translator.locale(data.locale ?? guild.locale)
+
+                let commands = qdb.get('commands')
+
+                const slash = commands.filter(c => c.is_slash_command && !data_commands.find(sc => sc.name == c.name)?.inactive).map(c => {
+                    return {
+                        name: c.name,
+                        description: resolveObjectPath(c.description, locale),
+                        type: 1,
+                        options: c?.options?.map(option => {
+                            if (option.type == 'SUB_COMMAND') return {
+                                ...option,
+                                type: command_option_types[option.type],
+                                description: resolveObjectPath(option.description, locale),
+                                options: option.options.map(o => {
+                                    return {
+                                        ...o,
+                                        type: command_option_types[o.type],
+                                        name: resolveObjectPath(o.name, locale),
+                                        description: resolveObjectPath(o.description, locale)
+                                    }
+                                })
+                            }
+        
+                            return {
+                                ...option,
+                                type: command_option_types[option.type],
+                                name: resolveObjectPath(option.name, locale),
+                                description: resolveObjectPath(option.description, locale)
+                            }
+                        }) ?? []
+                    }
+                })
+
+                const message = commands.filter(c => c.is_message_command && !data_commands.find(sc => sc.name == c.name)?.inactive).map(c => {
+                    return {
+                        name: resolveObjectPath(c.pretty_name, locale),
+                        type: 3
+                    }
+                })
+
+                const user = commands.filter(c => c.is_user_command && !data_commands.find(sc => sc.name == c.name)?.inactive).map(c => {
+                    return {
+                        name: resolveObjectPath(c.pretty_name, locale),
+                        type: 2
+                    }
+                })
+
+                commands = [ ...slash, ...message, ...user ]
+
+                const res = await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guild._id), {
+                    body: commands
+                }).catch(() => {})
+
+                if (typeof res !== 'undefined' && typeof data.commands.slash_commands === 'boolean') {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.slash_commands': data.commands.slash_commands } })
+                }
+            }
+
+            if (typeof data.commands.slash_commands === 'boolean' && !data.commands.slash_commands) {
+                const res = await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guild._id), { body: [] }).catch(() => {})
+                
+                if (typeof res !== 'undefined') {
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.slash_commands': data.commands.slash_commands } })
+                }
             }
         }
 
@@ -663,10 +739,10 @@ class Guilds {
 
                     if (typeof data.modules.levels.level_up_alerts.format === 'string' && data.modules.levels.level_up_alerts.format !== guild.modules.levels.level_up_alerts.format) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.format': data.modules.levels.level_up_alerts.format } })
+                    }
 
-                        if (typeof data.modules.levels.level_up_alerts.channel_id === 'string' && data.modules.levels.level_up_alerts.channel_id !== guild.modules.levels.level_up_alerts.channel_id) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.channel_id': data.modules.levels.level_up_alerts.channel_id } })
-                        }
+                    if (typeof data.modules.levels.level_up_alerts.channel_id === 'string' && data.modules.levels.level_up_alerts.channel_id !== guild.modules.levels.level_up_alerts.channel_id) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.channel_id': data.modules.levels.level_up_alerts.channel_id } })
                     }
 
                     if (data.modules.levels.level_up_alerts.message) {
@@ -813,11 +889,11 @@ class Guilds {
 
         if (elements.some(r => r.message.id == reaction.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref)))) return 'reference_is_single'
 
-        const message = await Channels.getMessage(reaction.message.channel_id, reaction.message.id)
+        const message = await rest.get(Routes.channelMessage(reaction.message.channel_id, reaction.message.id)).catch(() => {})
 
         if (!message) return 'unknown_message'
 
-        const __reaction = await Channels.createReaction(reaction.message.channel_id, reaction.message.id, emoji.id ? `${emoji.name}:${emoji.id}` : emoji.name)
+        const __reaction = await rest.put(Routes.channelMessageOwnReaction(reaction.message.channel_id, reaction.message.id, encodeURIComponent(emoji.id ? `${emoji.name}:${emoji.id}` : emoji.name))).catch(() => {})
 
         if (!__reaction) return 'cannot_create_reaction'
 
@@ -885,7 +961,7 @@ class Guilds {
             }
         })
 
-        await Channels.deleteReactionEmoji(element.message.channel_id, element.message.id, element.emoji.id ? `${element.emoji.name}:${element.emoji.id}` : element.emoji.name)
+        await rest.delete(Routes.channelMessageReaction(element.message.channel_id, element.message.id, encodeURIComponent(element.emoji.id ? `${element.emoji.name}:${element.emoji.id}` : element.emoji.name))).catch(() => {})
 
         return true
     }
@@ -976,7 +1052,7 @@ class Guilds {
             }
         })
         
-        if (channel.alerts.webhook.id) await Webhooks.deleteWebhook(channel.alerts.webhook.id)
+        if (channel.alerts.webhook.id) await rest.delete(Routes.webhook(channel.alerts.webhook.id))
 
         return true
     }
@@ -1064,7 +1140,7 @@ class Guilds {
             }
         })
 
-        if (channel.alerts.webhook.id) await Webhooks.deleteWebhook(channel.alerts.webhook.id)
+        if (channel.alerts.webhook.id) await rest.delete(Routes.webhook(channel.alerts.webhook.id))
 
         return true
     }

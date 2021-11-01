@@ -43,13 +43,15 @@ router.get('/@me', authorize, async (req, res) => {
     }
 
     guilds = guilds.filter(g => {
-        const permissions = new Permissions(g.permissions)
+        const permissions = new Permissions(BigInt(g.permissions))
 
         return g.owner || permissions.has('ADMINISTRATOR')
     })
 
     for (const guild of guilds) {
-        const joined = await ShardingManager.broadcastEval(`this.guilds.cache.has('${guild.id}')`)
+        const joined = await ShardingManager.broadcastEval((self, ctx) => {
+            return self.guilds.cache.has(ctx.guild.id)
+        }, { context: { guild } })
 
         guild.joined = joined.some(i => i)
     }

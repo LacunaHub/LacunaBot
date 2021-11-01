@@ -4,14 +4,14 @@ const ChannelDelete = require('../../modules/Logs/Channel/ChannelDelete')
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').GuildChannel} channel
  */
-const execute = async (self, channel) => {
-    if (channel.type == 'dm') return false
+const handler = async (self, channel) => {
+    if (channel.type == 'DM') return false
 
     const server = await self.db.servers.find({ _id: channel.guild.id })
 
     if (!server) return false
 
-    if (channel.type == 'voice') {
+    if (channel.type == 'GUILD_VOICE') {
         const trigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.channel_id == channel.id)
         const trigger_children = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.children.some(c => c.channel_id == channel.id))
 
@@ -47,5 +47,5 @@ const execute = async (self, channel) => {
 
 module.exports = {
     name: 'channelDelete',
-    fn: execute
+    handler
 }

@@ -1,4 +1,5 @@
 const { Util } = require('discord.js')
+const { parseCommandArguments } = require('../internals/utility/Utils')
 const Replacer = require('./Replacer')
 
 class CustomCommand {
@@ -7,9 +8,8 @@ class CustomCommand {
      * @param {import('../internals/Lacuna')} self
      * @param {import('../internals/Typings').ServerDocument} server
      * @param {import('discord.js').Message} message
-     * @param {String[]} args
      */
-    constructor(command, self, server, message, args) {
+    constructor(command, self, server, message) {
         this.command = command
 
         this.self = self
@@ -17,8 +17,6 @@ class CustomCommand {
         this.server = server
 
         this.message = message
-
-        this.args = args
     }
 
     async execute() {
@@ -166,13 +164,13 @@ class CustomCommand {
                                         const content = await replacer.replaceTemplateMessage({ content: if_component.action.reply.message.content, embed: if_component.action.reply.message.embed })
                 
                                         if (if_component.action.reply.format == 'CURRENT_CHANNEL') {
-                                            await this.message.channel.send(null, { ...content, tts: if_component.action.reply.message.tts }).catch(this.self.logger.error)
+                                            await this.message.channel.send({ ...content, tts: if_component.action.reply.message.tts }).catch(this.self.logger.error)
                                         }
                 
                                         if (if_component.action.reply.format == 'CHANNEL' && if_component.action.reply.channel_id) {
                                             const channel = this.message.guild.channels.cache.get(if_component.action.reply.channel_id)
                 
-                                            if (channel) await channel.send(null, { ...content, tts: if_component.action.reply.message.tts }).catch(this.self.logger.error)
+                                            if (channel) await channel.send({ ...content, tts: if_component.action.reply.message.tts }).catch(this.self.logger.error)
                                         }
                                     }
                                 }
@@ -213,24 +211,27 @@ class CustomCommand {
                                         const replacer = new Replacer(this.self, if_component.action.forward_to_command, { message: this.message, guild: this.message.guild, member: this.message.member })
                                         const replaced = await replacer.replace()
                             
-                                        const splitted = replaced.split(' ')
-                                        const name = splitted[0].toLowerCase()
-                                        const args = splitted.slice(1).filter(arg => arg)
+                                        const splitted = replaced.split(/\s+/)
+                                        const name = splitted.shift().toLowerCase()
+                                        const args = this.message.args
+                                        this.message.args = parseCommandArguments(splitted.join(' '))
                             
-                                        const command = this.self.commands.get(name)
+                                        const command = this.self.commands.find(c => c.name == name && c.is_prefix_command)
                             
-                                        if (command) await command.execute(this.server, this.message, args)
+                                        if (command) await command.executePrefix(this.server, this.message)
+
+                                        this.message.args = args
                                     }
                                 }
                 
                                 if (if_component.action.type == 'DELETE_REQUEST') {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'DELETE_REQUEST').indexOf(if_component)
                 
-                                    if (i == 0 && if_component.action.delete_request < 0) {
+                                    if (i == 0 && if_component.action.delete_request >= 0) {
                                         if (this.message.deletable && !this.message.deleted) {
                                             const timeout = if_component.action.delete_request
                 
-                                            if (!isNaN(timeout)) await this.message.delete({ timeout: timeout ? timeout * 1000 : 0 }).catch(this.self.logger.error)
+                                            if (!isNaN(timeout)) setTimeout(() => this.message.delete().catch(this.self.logger.error), timeout ? timeout * 1000 : 0)
                                         }
                                     }
                                 }
@@ -251,13 +252,13 @@ class CustomCommand {
                         const content = await replacer.replaceTemplateMessage({ content: component.action.reply.message.content, embed: component.action.reply.message.embed })
 
                         if (component.action.reply.format == 'CURRENT_CHANNEL') {
-                            await this.message.channel.send(null, { ...content, tts: component.action.reply.message.tts }).catch(this.self.logger.error)
+                            await this.message.channel.send({ ...content, tts: component.action.reply.message.tts }).catch(this.self.logger.error)
                         }
 
                         if (component.action.reply.format == 'CHANNEL' && component.action.reply.channel_id) {
                             const channel = this.message.guild.channels.cache.get(component.action.reply.channel_id)
 
-                            if (channel) await channel.send(null, { ...content, tts: component.action.reply.message.tts }).catch(this.self.logger.error)
+                            if (channel) await channel.send({ ...content, tts: component.action.reply.message.tts }).catch(this.self.logger.error)
                         }
                     }
                 }
@@ -298,24 +299,27 @@ class CustomCommand {
                         const replacer = new Replacer(this.self, component.action.forward_to_command, { message: this.message, guild: this.message.guild, member: this.message.member })
                         const replaced = await replacer.replace()
             
-                        const splitted = replaced.split(' ')
-                        const name = splitted[0].toLowerCase()
-                        const args = splitted.slice(1).filter(arg => arg)
+                        const splitted = replaced.split(/\s+/)
+                        const name = splitted.shift().toLowerCase()
+                        const args = this.message.args
+                        this.message.args = parseCommandArguments(splitted.join(' '))
             
-                        const command = this.self.commands.get(name)
+                        const command = this.self.commands.find(c => c.name == name && c.is_prefix_command)
             
-                        if (command) await command.execute(this.server, this.message, args)
+                        if (command) await command.executePrefix(this.server, this.message)
+
+                        this.message.args = args
                     }
                 }
 
                 if (component.action.type == 'DELETE_REQUEST') {
                     const i = this.command.components.filter(c => c.action?.type == 'DELETE_REQUEST').indexOf(component)
 
-                    if (i == 0 && component.action.delete_request > 0) {
+                    if (i == 0 && component.action.delete_request >= 0) {
                         if (this.message.deletable && !this.message.deleted) {
                             const timeout = component.action.delete_request
 
-                            if (!isNaN(timeout)) await this.message.delete({ timeout: timeout ? timeout * 1000 : 0 }).catch(this.self.logger.error)
+                            if (!isNaN(timeout)) setTimeout(() => this.message.delete().catch(this.self.logger.error), timeout ? timeout * 1000 : 0)
                         }
                     }
                 }

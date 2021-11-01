@@ -92,7 +92,7 @@ class TemporaryMute {
                 await member.roles.add(this.role_id, this.reason).catch(this.self.logger.error)
             }
 
-            if (member.voice.channelID) await member.voice.kick(this.reason).catch(this.self.logger.error)
+            if (member.voice.channelId) await member.voice.kick(this.reason).catch(this.self.logger.error)
 
             return true
         }
@@ -151,9 +151,8 @@ class TemporaryMute {
      * @param {import('../Lacuna')} self
      */
     static async HandleEntries(self) {
-        let servers = await self.db.servers.findSome({ 'moderation.tempmutes.0': { $exists: true } })
-
-        servers = servers.filter(s => self.guilds.cache.has(s._id))
+        const guilds = self.guilds.cache.map(g => g.id)
+        const servers = await self.db.servers.findSome({ _id: { $in: guilds }, 'moderation.tempmutes.0': { $exists: true } })
 
         let entries = 0
 

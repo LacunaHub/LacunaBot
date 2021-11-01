@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 const Logger = require('../Logger')
 const { scheduleJob, RecurrenceRule, Range } = require('node-schedule')
-const Utility = require('../../database/schemas/Utility')
+const qdb = require('quick.db')
 
 class Statistics {
     /**
@@ -9,22 +9,18 @@ class Statistics {
      */
     static async schedule(manager) {
         const rule = new RecurrenceRule()
-        rule.minute = new Range(0, 59, 5)
+        rule.minute = new Range(0, 59, 2)
 
         await scheduleJob(rule, async () => {
             if (!manager.shards.every(shard => shard.ready)) return null
 
             let guilds = await manager.fetchClientValues('guilds.cache.size')
             guilds = guilds.reduce((a, b) => a + b, 0)
-        
-            await Utility.updateOne({'charts': { $exists: true }}, {
-                $push: {
-                    'charts.guilds': {
-                        n: guilds,
-                        ts: Date.now()
-                    }
-                }
-            })
+
+            const pings = await manager.fetchClientValues('ws.ping')
+
+            qdb.push('charts.guilds', { n: guilds, ts: Date.now() })
+            qdb.push('charts.pings', { d: pings, ts: Date.now() })
 
             await Statistics.sendGuildCount(guilds)
         })

@@ -5,7 +5,7 @@ const VoiceServerUndeaf = require('../../modules/Logs/Voice/VoiceServerUndeaf')
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').VoiceState} state
  */
-const execute = async (self, state) => {
+const handler = async (self, state) => {
     const server = await self.db.servers.fetch({ _id: state.guild.id })
 
     await voiceAssign(self, server, state)
@@ -16,5 +16,5 @@ const execute = async (self, state) => {
 
 module.exports = {
     name: 'voiceServerUndeaf',
-    fn: execute
+    handler
 }

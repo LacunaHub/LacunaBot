@@ -1,34 +1,49 @@
 const Lacuna = require('../Lacuna')
 const { version } = require('../../package.json')
+const { LimitedCollection, Collection } = require('discord.js')
 
 const lacuna = new Lacuna({
     presence: {
         status: 'online',
-        activity: {
-            name: `voidlacuna.ru (v${version})`
-        }
-    },
-    messageCacheMaxSize: 50,
-    messageCacheLifetime: 7200,
-    messageSweepInterval: 60,
-    ws: {
-        intents: [
-            'GUILDS',
-            'GUILD_BANS',
-            'GUILD_EMOJIS',
-            'GUILD_INVITES',
-            'GUILD_MEMBERS',
-            'GUILD_MESSAGES',
-            'GUILD_MESSAGE_REACTIONS',
-            'GUILD_VOICE_STATES',
-            'GUILD_WEBHOOKS'
+        activities: [
+            {
+                name: `voidlacuna.ru (v${version})`
+            }
         ]
     },
+    messageCacheLifetime: 7200,
+    intents: [
+        'GUILDS',
+        'GUILD_MEMBERS',
+        'GUILD_BANS',
+        'GUILD_EMOJIS_AND_STICKERS',
+        'GUILD_WEBHOOKS',
+        'GUILD_INVITES',
+        'GUILD_VOICE_STATES',
+        'GUILD_MESSAGES',
+        'GUILD_MESSAGE_REACTIONS'
+    ],
     partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
-    disableMentions: 'everyone'
+    makeCache: manager => {
+        if (manager.name == 'MessageManager') return new LimitedCollection({
+            maxSize: 50,
+            sweepFilter: () => v => (Date.now() - v.createdTimestamp) > 3600000,
+            sweepInterval: 120
+        })
+
+        if (manager.name == 'UserManager') return new LimitedCollection({
+            maxSize: 25000,
+            keepOverLimit: v => v.id == process.env.CLIENT_ID
+        })
+
+        if (manager.name == 'GuildMemberManager') return new LimitedCollection({
+            maxSize: 2500,
+            sweepFilter: () => v => v.id != process.env.CLIENT_ID,
+            sweepInterval: 300
+        })
+
+        return new Collection()
+    }
 })
 
-const buttons = require('discord-buttons')(lacuna)
-
 module.exports = lacuna
-module.exports.Buttons = buttons

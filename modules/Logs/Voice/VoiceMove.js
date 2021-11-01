@@ -12,26 +12,33 @@ module.exports = async (self, server, before, state) => {
 
         const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_move.channel_id)
 
-        const is_ok = log && state.guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(state.guild.me).has('MANAGE_WEBHOOKS')
+        const is_ok = log && log.permissionsFor(state.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
 
         if (is_ok) {
-            const webhooks = await state.guild.fetchWebhooks()
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
-            let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+            let webhook = logs_webhook ? (await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) : null
 
             if (!webhook) {
+                if (logs_webhook) {
+                    await self.db.servers.update({ _id: state.guild.id }, {
+                        $pull: {
+                            'moderation.logs.webhooks': {
+                                channel_id: log.id
+                            }
+                        }
+                    })
+                }
+
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_move.title) })
-                } catch (err) {
-                    return false
-                }
+                } catch (err) { return false }
 
                 await self.db.servers.update({ _id: state.guild.id }, {
                     $push: {
                         'moderation.logs.webhooks': {
                             id: webhook.id,
                             token: webhook.token,
-                            channel_id: webhook.channelID
+                            channel_id: webhook.channelId
                         }
                     }
                 })
@@ -40,13 +47,13 @@ module.exports = async (self, server, before, state) => {
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.voice_move.title)
                 .setDescription(self.translator.format(locale.logs.voice_move.template, `**${state.member.user.tag}**`))
-                .addField(locale.logs.voice_move.old_channel, `<#${before.channelID}>`, true)
-                .addField(locale.logs.voice_move.new_channel, `<#${state.channelID}>`, true)
+                .addField(locale.logs.voice_move.old_channel, `<#${before.channelId}>`, true)
+                .addField(locale.logs.voice_move.new_channel, `<#${state.channelId}>`, true)
                 .setFooter(state.member.id)
                 .setTimestamp()
                 .setColor('#FFA726')
 
-            await webhook.send('', {
+            await webhook.send({
                 embeds: [embed],
                 avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
                 name: server.server.premium.available ? webhook.name : self.user.username

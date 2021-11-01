@@ -1,0 +1,34 @@
+const { MessageEmbed } = require('discord.js')
+
+/**
+ * @param {import('../../../internals/Lacuna')} self
+ * @param {import('../../../internals/Typings').ServerDocument} server
+ * @param {import('discord.js').CommandInteraction} interaction
+ */
+module.exports = async (self, server, interaction) => {
+    const locale = self.translator.locale(server.locale).commands
+
+    const server_owner = await interaction.guild.fetchOwner()
+
+    const created_ts = Math.round(interaction.guild.createdTimestamp / 1000)
+
+    const embed = new MessageEmbed()
+        .setAuthor(interaction.guild.name, interaction.guild.iconURL())
+        .addField(locale.server.texts.bonused, server.server.premium.available ? self._emojis.OK : self._emojis.ERROR)
+        .addField(locale.server.texts.owner, server_owner.user.tag, true)
+        .addField(locale.server.texts.id, interaction.guild.id, true)
+        .addField(locale.server.texts.members.title, `${interaction.guild.memberCount} ${locale.server.texts.members.total}`, true)
+        .addField(locale.server.texts.channels.title, `${interaction.guild.channels.cache.filter(c => c.type == 'text').size} ${locale.server.texts.channels.text}\n${interaction.guild.channels.cache.filter(c => c.type == 'voice').size} ${locale.server.texts.channels.voice}`, true)
+        .addField(locale.server.texts.verification_level, locale.server.texts.verification_levels[interaction.guild.verificationLevel], true)
+        .addField(locale.server.texts.afk_channel, interaction.guild?.afkChannel?.name ?? '-', true)
+        .addField(locale.server.texts.roles, `${interaction.guild.roles.cache.size}`, true)
+        .addField(locale.server.texts.emojis, `${interaction.guild.emojis.cache.size}`, true)
+        .addField('\u200B', '\u200B', true)
+        .addField('\u200B', `${locale.server.texts.footer.server_created} <t:${created_ts}:d> – <t:${created_ts}:R>`)
+
+    if (interaction.guild.description) embed.setDescription(interaction.guild.description)
+    
+    await interaction.reply({ embeds: [embed] })
+
+    return true
+}

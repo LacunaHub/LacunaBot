@@ -18,10 +18,8 @@ const User = new Schema({
         upvoters: { type: Array, default: [] }
     },
     boost: {
-        available: { type: Boolean, default: false },
-        type: { type: Array, default: [] },
-        tier: { type: Number, default: 0 },
-        guilds: { type: Array, default: [] }
+        points: { type: Number, default: 0 },
+        lifetime_points: { type: Number, default: 0 }
     },
     created_at: { type: Number, default: 0 },
     modified_at: { type: Number, default: 0 }

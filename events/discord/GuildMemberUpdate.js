@@ -1,4 +1,5 @@
 const Automoder = require('../../modules/Automoder')
+const Greeting = require('../../modules/Greeting')
 const GuildMemberUpdate = require('../../modules/Logs/Guild/GuildMemberUpdate')
 
 /**
@@ -6,16 +7,18 @@ const GuildMemberUpdate = require('../../modules/Logs/Guild/GuildMemberUpdate')
  * @param {import('discord.js').GuildMember} before
  * @param {import('discord.js').GuildMember} member
  */
-const execute = async (self, before, member) => {
+const handler = async (self, before, member) => {
     if (self.user.id == member.id) return false
 
     if (before.partial) {
-        before = await before.fetch()
+        before = await before.fetch().catch(() => {})
     }
 
     if (member.partial) {
-        member = await member.fetch()
+        member = await member.fetch().catch(() => {})
     }
+
+    if (!before || !member) return false
 
     const server = await self.db.servers.fetch({ _id: member.guild.id })
 
@@ -31,6 +34,8 @@ const execute = async (self, before, member) => {
         await self.emit('roleMemberRemove', member, roles)
     }
 
+    if (member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED') && !member.pending) await Greeting.Handle(self, server, member)
+
     await GuildMemberUpdate(self, server, before, member)
 
     await Automoder.updateNickname(self, server, member)
@@ -40,5 +45,5 @@ const execute = async (self, before, member) => {
 
 module.exports = {
     name: 'guildMemberUpdate',
-    fn: execute
+    handler
 }

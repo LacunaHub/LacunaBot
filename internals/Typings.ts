@@ -1,15 +1,17 @@
+import { ApplicationCommandOptionData } from 'discord.js'
 import { Document } from 'mongoose'
 
 export interface ServerDocument extends Document {
-    _id: String
+    _id: string
     locale: 'en' | 'ru'
-    prefix: String
+    prefix: string
     server: {
         premium: {
-            available: Boolean
-            will_expire_on: Number
+            available: boolean
+            will_expire_on: number
+            booster_id?: string
         }
-        blocked: Boolean
+        blocked: boolean
         bot_experts: BotExpert[]
     }
     commands: {
@@ -17,150 +19,151 @@ export interface ServerDocument extends Document {
         custom: Array<CustomCommand>
         permissions: {
             allowed: {
-                channels: Array<String>
-                roles: Array<String>
+                channels: Array<string>
+                roles: Array<string>
             }
             blocked: {
-                channels: Array<String>
-                roles: Array<String>
+                channels: Array<string>
+                roles: Array<string>
             }
         }
+        slash_commands: boolean
     }
     moderation: {
         case_log: {
             cases: Array<ModerationCase>
-            channel_id: String
+            channel_id: string
             case_types: {
-                BAN_ADD: Boolean
-                BAN_REMOVE: Boolean
-                KICK: Boolean
-                MUTE_ADD: Boolean
-                MUTE_REMOVE: Boolean
-                PRUNE_MESSAGES: Boolean
-                WARN_ADD: Boolean
-                WARN_REMOVE: Boolean
+                BAN_ADD: boolean
+                BAN_REMOVE: boolean
+                KICK: boolean
+                MUTE_ADD: boolean
+                MUTE_REMOVE: boolean
+                PRUNE_MESSAGES: boolean
+                WARN_ADD: boolean
+                WARN_REMOVE: boolean
             }
         }
         logs: {
             webhooks: Array<LogsWebhook>
             types: {
                 channel_create: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 channel_delete: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 channel_update: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 guild_ban_add: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 guild_ban_remove: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 guild_member_add: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 guild_member_remove: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 guild_member_update: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 guild_update: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 invite_create: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 invite_delete: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 message_delete: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 message_delete_bulk: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 message_update: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 role_create: {
-                    active: Boolean,
-                    channel_id: String
+                    active: boolean,
+                    channel_id: string
                 }
                 role_delete: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 role_member_add: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 role_member_remove: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 role_update: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 user_update: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 voice_connect: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 voice_disconnect: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 voice_move: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 voice_server_mute: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 voice_server_unmute: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 voice_server_deaf: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
                 voice_server_undeaf: {
-                    active: Boolean
-                    channel_id: String
+                    active: boolean
+                    channel_id: string
                 }
             }
         }
         automoder: {
             swear_filter: {
-                active: Boolean
-                registry: Array<String>
+                active: boolean
+                registry: Array<string>
                 penalty: {
-                    action: Number
-                    timer: Number
+                    action: number
+                    timer: number
                     message: {
                         content: string
                         embed: MessageEmbed
@@ -259,7 +262,7 @@ export interface ServerDocument extends Document {
             violators: Array<WarningsViolator>
         },
         roles: {
-            mute: String
+            mute: string
             temporary: Array<TemporaryRoleEntry>
             on_mute: {
                 remove_all_roles: boolean
@@ -272,24 +275,24 @@ export interface ServerDocument extends Document {
     }
     modules: {
         welcome: {
-            active: Boolean
+            active: boolean
             format: 'DM' | 'CHANNEL'
-            channel_id: String
+            channel_id: string
             message: {
-                content: String
+                content: string
                 embed: MessageEmbed
             }
             initial_roles: {
-                active: Boolean
-                roles: Array<String>
+                active: boolean
+                roles: Array<string>
             }
         },
         farewell: {
-            active: Boolean
+            active: boolean
             format: 'DM' | 'CHANNEL'
-            channel_id: String
+            channel_id: string
             message: {
-                content: String
+                content: string
                 embed: MessageEmbed
             }
         },
@@ -300,12 +303,12 @@ export interface ServerDocument extends Document {
             single_roles?: boolean
             reset_on_leave: boolean
             blocked: {
-                channels: Array<String>
-                roles: Array<String>
+                channels: Array<string>
+                roles: Array<string>
             },
             allowed: {
-                channels: Array<String>
-                roles: Array<String>
+                channels: Array<string>
+                roles: Array<string>
             },
             level_up_alerts: {
                 active: boolean
@@ -325,35 +328,35 @@ export interface ServerDocument extends Document {
             }
         },
         restoring: {
-            restore_roles: Boolean
-            restore_nicknames: Boolean
-            strict_roles: Array<String>
+            restore_roles: boolean
+            restore_nicknames: boolean
+            strict_roles: Array<string>
             data: Array<RestoringData>
         }
         music: {
             allowed: {
-                channels: Array<String>
-                roles: Array<String>
+                channels: Array<string>
+                roles: Array<string>
             }
             blocked: {
-                channels: Array<String>
-                roles: Array<String>
+                channels: Array<string>
+                roles: Array<string>
             }
-            queue_max_length: Number
-            track_max_duration: Number
-            default_volume: Number
-            allow_radio_playback: Boolean
-            disable_skip_vote: Boolean
+            queue_max_length: number
+            track_max_duration: number
+            default_volume: number
+            allow_radio_playback: boolean
+            disable_skip_vote: boolean
         }
         reports: {
-            active: Boolean
-            channel_id: String
+            active: boolean
+            channel_id: string
             emoji: {
-                animated: Boolean
-                id: String
-                name: String
+                animated: boolean
+                id: string
+                name: string
             }
-            minimum: Number
+            minimum: number
         }
         twitch: {
             custom_client_id: string
@@ -368,34 +371,34 @@ export interface ServerDocument extends Document {
     utility: {
         giveaways: Array<Giveaway>
     }
-    created_at: Number
-    modified_at: Number
-    activity_ping_at: Number
+    created_at: number
+    modified_at: number
+    activity_ping_at: number
 }
 
 export interface SystemCommandOptions {
-    name: String
-    inactive: Boolean
+    name: string
+    inactive: boolean
     throttle: {
         type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
-        uses: Number
-        duration: Number
+        uses: number
+        duration: number
     }
     delete_command: {
-        active: Boolean
-        after_ms: Number
+        active: boolean
+        after_ms: number
     }
     delete_reply: {
-        active: Boolean
-        after_ms: Number
+        active: boolean
+        after_ms: number
     }
     allowed: {
-        channels: Array<String>
-        roles: Array<String>
+        channels: Array<string>
+        roles: Array<string>
     }
     blocked: {
-        channels: Array<String>
-        roles: Array<String>
+        channels: Array<string>
+        roles: Array<string>
     }
 }
 
@@ -407,12 +410,12 @@ export interface CustomCommand {
     hidden: boolean
     components: CustomCommandComponent[]
     allowed: {
-        channels: Array<String>
-        roles: Array<String>
+        channels: Array<string>
+        roles: Array<string>
     }
     blocked: {
-        channels: Array<String>
-        roles: Array<String>
+        channels: Array<string>
+        roles: Array<string>
     }
     throttle: {
         type: 'NONE' | 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
@@ -491,24 +494,24 @@ export interface CustomCommandActionReply {
 }
 
 export interface ModerationCase {
-    case_id: Number
-    type: Number
-    timestamp: Number
-    reason: String
+    case_id: number
+    type: number
+    timestamp: number
+    reason: string
     target: {
-        id: String
-        name: String
+        id: string
+        name: string
     }
     executor: {
-        id: String
-        name: String
+        id: string
+        name: string
     }
 }
 
 export interface LogsWebhook {
-    id: String
-    token: String
-    channel_id: String
+    id: string
+    token: string
+    channel_id: string
 }
 
 export interface WarningsPenalty {
@@ -536,68 +539,68 @@ export interface ViolatorViolation {
 }
 
 export interface TemporaryBanEntry {
-    user_id: String
-    expires_timestamp: Number
+    user_id: string
+    expires_timestamp: number
 }
 
 export interface TemporaryBanConstructor {
-    user_id: String
-    guild_id: String
-    expires_timestamp: Number
-    reason: String
-    init?: Boolean
+    user_id: string
+    guild_id: string
+    expires_timestamp: number
+    reason: string
+    init?: boolean
 }
 
 export interface TemporaryMuteEntry {
-    user_id: String
-    role_id: String
-    expires_timestamp: Number
+    user_id: string
+    role_id: string
+    expires_timestamp: number
 }
 
 export interface TemporaryMuteConstructor {
-    user_id: String
-    guild_id: String
-    role_id: String
-    expires_timestamp: Number
-    reason: String
-    init?: Boolean
+    user_id: string
+    guild_id: string
+    role_id: string
+    expires_timestamp: number
+    reason: string
+    init?: boolean
 }
 
 export interface TemporaryRoleEntry {
-    user_id: String
-    role_id: String
-    unique_id: String
-    expires_timestamp: Number
+    user_id: string
+    role_id: string
+    unique_id: string
+    expires_timestamp: number
 }
 
 export interface TemporaryRoleConstructor {
-    user_id: String
-    guild_id: String
-    role_id: String
-    unique_id: String
-    expires_timestamp: Number
-    init?: Boolean
+    user_id: string
+    guild_id: string
+    role_id: string
+    unique_id: string
+    expires_timestamp: number
+    init?: boolean
 }
 
 export interface ReactionElement {
-    id: String
+    id: string
     type: 'CHANNEL' | 'ROLE'
     element: {
-        single: Boolean
-        global_single: Boolean
-        reverse: Boolean
-        lifespan: Number
+        single: boolean
+        global_single: boolean
+        reverse: boolean
+        lifespan: number
     }
     message: {
-        id: String
-        channel_id: String
+        id: string
+        channel_id: string
     }
     emoji: {
-        id: String
-        name: String
-        animated: Boolean
+        id: string
+        name: string
+        animated: boolean
     }
-    references: Array<String>
+    references: Array<string>
 }
 
 export interface LevelAward {
@@ -618,8 +621,8 @@ export interface LevelAward {
 }
 
 export interface VoiceRole {
-    role_id: String
-    bound_channels_id: Array<String>
+    role_id: string
+    bound_channels_id: Array<string>
 }
 
 export interface VoiceChannelTrigger {
@@ -645,15 +648,15 @@ interface VoiceChannelTriggerChildren {
 }
 
 export interface RestoringData {
-    user_id: String
-    roles: Array<String>
-    nickname: String | null
-    timestamp: Number
+    user_id: string
+    roles: Array<string>
+    nickname: string | null
+    timestamp: number
 }
 
 export interface UserDocument extends Document {
-    _id: String
-    flags: Number
+    _id: string
+    flags: number
     user: {
         username: string
         discriminator: string
@@ -661,120 +664,124 @@ export interface UserDocument extends Document {
         flags: number
     },
     profile: {
-        name: String
-        gender: Number
-        birth_date: Number
-        bio: String
-        views: Number
-        upvoters: Array<String>
+        name: string
+        gender: number
+        birth_date: number
+        bio: string
+        views: number
+        upvoters: Array<string>
     }
     boost: {
-        available: Boolean
-        type: Array<BoostType>
-        tier: Number
-        guilds: Array<BoostedGuild>
+        available?: boolean
+        points: number
+        lifetime_points: number
+        type?: Array<BoostType>
+        tier?: number
+        guilds?: Array<BoostedGuild>
     }
-    created_at: Number
-    modified_at: Number
+    created_at: number
+    modified_at: number
 }
 
 export type BoostType = 'DEVELOPER' | 'TEAM' | 'PATREON' | 'BOOSTY' | 'SERVER_BOOST' | 'CUSTOM' | 'GIVEAWAY_WINNER'
 
 export interface BoostedGuild {
-    id: String
-    timestamp: Number
+    id: string
+    timestamp: number
 }
 
 export interface CommandInfo {
-    fn: Function
-    name: String
-    group: String | null
-    description: String | null
-    aliases: Array<String> | null
-    subcommands: [] | null
-    uses: Number
-    guild_only: Boolean
-    developer_only: Boolean
-    premium_only: Boolean
-    private: Boolean
-    nsfw: Boolean
-    throttling: CommandThrottlingOptions | null
-    throttles: Map<String, CommandThrottledUser>
-    early_access: Number | null
-    self_permissions: import('discord.js').PermissionResolvable[]
-    user_permissions: import('discord.js').PermissionResolvable[]
-}
-
-export interface SubcommandInfo {
-    fn: Function
-    name: String
-    parent: import('./structures/Command')
-    description: String | null
-    aliases: Array<String> | null
-    premium_only: Boolean
-    private: Boolean
-    nsfw: Boolean
-    self_permissions: import('discord.js').PermissionResolvable
-    user_permissions: import('discord.js').PermissionResolvable
+    prefix(self: import('./Lacuna'), server: ServerDocument, message: import('discord.js').Message): Promise<boolean>
+    slash(self: import('./Lacuna'), server: ServerDocument, interaction: import('discord.js').CommandInteraction): Promise<boolean>
+    user(self: import('./Lacuna'), server: ServerDocument, interaction: import('discord.js').ContextMenuInteraction): Promise<boolean>
+    message(self: import('./Lacuna'), server: ServerDocument, interaction: import('discord.js').ContextMenuInteraction): Promise<boolean>
+    name: string
+    pretty_name?: string
+    description: string
+    type: 'CHAT_INPUT' | 'USER' | 'MESSAGE'
+    options: ApplicationCommandOptionData[]
+    default_permission: boolean
+    group?: 'GENERAL' | 'MODERATION' | 'MUSIC' | 'UTILITY'
+    subcommands?: Array<{
+        prefix(self: import('./Lacuna'), server: import('./Typings').ServerDocument, message: import('discord.js').Message): Promise<boolean>
+        slash(self: import('./Lacuna'), server: import('./Typings').ServerDocument, message: import('discord.js').CommandInteraction): Promise<boolean>
+        name: string
+    }>
+    uses: number
+    premium_only: boolean
+    private: boolean
+    throttling?: CommandThrottlingOptions
+    throttles?: Map<string, CommandThrottledUser>
+    permissions: {
+        self: import('discord.js').PermissionResolvable[]
+        user: import('discord.js').PermissionResolvable[]
+    }
 }
 
 interface CommandThrottlingOptions {
-    usages: Number
-    duration: Number
+    usages: number
+    duration: number
 }
 
 interface CommandThrottledUser {
-    usages: Number
-    throttled: Boolean
+    usages: number
+    throttled: boolean
     timeout: any
-    expires: Number
+    expires: number
 }
 
 export interface CommandExecutionData {
     command: {
-        name: String
-        uses: Number
+        name: string
+        uses: number
     },
     message: import('discord.js').Message
-    args: Array<String>
+    args: Array<string>
+}
+
+export interface EventInfo {
+    name: string
+    handler: Function
+    once?: boolean
+    initial?: boolean
 }
 
 export interface ModuleExecutionData {
-    module: String
+    module: string
     guild: {
-        id: String
-        name: String
+        id: string
+        name: string
     }
     target: {
-        id: String
-        name: String
+        id: string
+        name: string
     }
 }
 
 export interface PlayerQueue {
-    tracks: Array<import('@lavacord/discord.js').TrackData>
-    repeat: Boolean
-    volume: Number
-    skip_votes: Number
-    executor: String
+    tracks: Array<any>
+    repeat: boolean
+    volume: number
+    skip_votes: number
+    executor: string
 }
 
 export interface Patron extends Document {
-    _id: String
-    name: String
-    user_id: String
-    email: String
-    discord_id: String
-    last_charge_date: String
-    will_pay_amount_cents: Number
-    lifetime_support_cents: Number
-    patron_status: String
-    image_url: String
-    last_check_at: Number
+    _id: string
+    name: string
+    user_id: string
+    email: string
+    discord_id: string
+    last_charge_date: string
+    will_pay_amount_cents: number
+    lifetime_support_cents: number
+    patron_status: string
+    image_url: string
+    last_check_at: number
 }
 
 export interface ServerActivities extends Document {
-    _id: String
+    _id: string
     levels: Array<LevelActivities>
 }
 

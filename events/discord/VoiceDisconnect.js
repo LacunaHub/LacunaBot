@@ -7,19 +7,21 @@ const { DeleteTempVoice } = require('../../modules/VoiceManager')
  * @param {import('discord.js').VoiceState} state
  * @param {import('discord.js').VoiceChannel} channel
  */
-const execute = async (self, state, channel) => {
+const handler = async (self, state, channel) => {
     const server = await self.db.servers.fetch({ _id: state.guild.id })
 
     const locale = self.translator.locale(server.locale).modules
 
-    const connection = state.guild.me.voice.channel
+    const player = self.player.get(state.guild.id)
 
-    if (connection) {
-        const listeners = connection.members.filter(m => !m.user.bot)
+    if (player && channel?.id == player.voiceChannel) {
+        const listeners = channel.members.filter(m => !m.user.bot).size
 
-        if (!listeners.size && connection.id == state.member.voice.channelID) {
-            await self.player.wait(state.guild.id, true)
-            await self.player.queues.setPlaybackExecutor(state.guild.id, listeners.first() ? listeners.first().id : '')
+        if (!listeners) {
+            await player.pause(true)
+            await player.set('timeout', setTimeout(
+                () => player.destroy(), 15000//600000
+            ))
         }
     }
 
@@ -40,5 +42,5 @@ const execute = async (self, state, channel) => {
 
 module.exports = {
     name: 'voiceDisconnect',
-    fn: execute
+    handler
 }

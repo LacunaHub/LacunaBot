@@ -2,15 +2,12 @@
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').MessageReaction} reaction
  */
-const execute = async (self, reaction) => {
-    let partial = false
+const handler = async (self, reaction) => {
+    let partial = reaction.partial
 
-    if (reaction.partial) {
-        reaction = await reaction.fetch()
-        partial = true
-    }
+    reaction = partial ? (await reaction.fetch()) : reaction
 
-    const message = reaction.message
+    const message = reaction.message.partial ? (await reaction.message.fetch()) : reaction.message
 
     const server = await self.db.servers.fetch({ _id: message.guild.id })
     const element = server.modules.reactions.find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
@@ -32,5 +29,5 @@ const execute = async (self, reaction) => {
 
 module.exports = {
     name: 'messageReactionRemoveEmoji',
-    fn: execute
+    handler
 }

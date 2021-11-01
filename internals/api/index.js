@@ -16,8 +16,6 @@ app.use(morgan('[API] – [:date[iso]] ":method :url HTTP/:http-version" :status
 app.use(express.json())
 app.use(cors())
 
-app.use('/webhooks/patreon', require('./webhooks/patreon'))
-
 app.all('/*', async (req, res, next) => {
     const referer = req.headers['referer']
     const hosts = ['https://voidlacuna.ru', 'https://www.voidlacuna.ru', 'https://discord.com']

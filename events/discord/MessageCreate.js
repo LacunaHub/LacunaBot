@@ -1,53 +1,51 @@
-const help = require('../../commands/general/help')
 const { messageCreate } = require('../../modules/Levels')
 const Automoder = require('../../modules/Automoder')
 const { autoReact } = require('../../modules/Reactions')
 const CustomCommand = require('../../modules/CustomCommand')
-const { servers } = require('../../database/DatabaseManager')
+const { parseCommandArguments } = require('../../internals/utility/Utils')
 
 /**
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').Message} message
  */
-const execute = async (self, message) => {
-    if (message.author.bot || message.channel.type == 'dm') return null
+const handler = async (self, message) => {
+    if (message.author.bot || message.channel.type == 'DM') return false
 
     const server = await self.db.servers.fetch({ _id: message.guild.id })
 
-    if (message.member && message.member.roles.cache.has(server.moderation.roles.mute) && !message.member.hasPermission('MANAGE_MESSAGES')) {
+    if (server.server.blocked) {
+        await message.guild.leave()
+
+        return false
+    }
+
+    if (message.member && message.member.roles.cache.has(server.moderation.roles.mute) && !message.member.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_MESSAGES)) {
         const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
-        const has_permissions = message.channel.permissionsFor(mute_role.id).has('SEND_MESSAGES')
+        const has_permissions = message.channel.permissionsFor(mute_role.id).has(self.PERMISSIONS_FLAGS.SEND_MESSAGES)
 
         if (message.deletable && !message.deleted && !has_permissions) await message.delete()
 
         return false
     }
 
-    const splitted = message.content.split(' ')
-    const command_name = splitted[0].toLowerCase()
-    const args = splitted.slice(1).filter(arg => arg)
+    const splitted = message.content.split(/\s+/)
+    const command_name = splitted.shift().toLowerCase()
+    message.args = parseCommandArguments(splitted.join(' '))
 
-    const command = self.commands.get(command_name.slice(server.prefix.length)) || self.commands.find(c => c.aliases && c.aliases.includes(command_name.slice(server.prefix.length)))
+    const command = self.commands.find(c => c.name == command_name.slice(server.prefix.length) && c.is_prefix_command)
     const custom_command = server.commands.custom.find(c => !c.inactive && c.name == command_name.slice(server.prefix.length))
 
-    if (command) {
-        await command.execute(server, message, args)
+    if (command && (!server.commands.slash_commands || command.private)) {
+        await command.executePrefix(server, message)
     }
 
     if (custom_command && !command) {
-        const custom = new CustomCommand(custom_command, self, server, message, args)
+        const custom = new CustomCommand(custom_command, self, server, message)
 
         await custom.execute()
     }
 
-    if (message.mentions.has(self.user.id, { ignoreEveryone: true, ignoreRoles: true })) {
-        const mentioned = message.content.trim().startsWith(`<@${self.user.id}>`) || message.content.trim().length == `<@${self.user.id}>`.length
-        const mentioned_with_exclamation = message.content.trim().startsWith(`<@!${self.user.id}>`) || message.content.trim().length == `<@!${self.user.id}>`.length
-
-        if (mentioned || mentioned_with_exclamation) await help.fn(self, server, message, args)
-    }
-
-    if (!command) await messageCreate(self, server, message)
+    if (!command && !custom_command) await messageCreate(self, server, message)
 
     await Automoder.linksFilter(self, server, message)
     await Automoder.swearFilter(self, server, message)
@@ -61,6 +59,6 @@ const execute = async (self, message) => {
 }
 
 module.exports = {
-    name: 'message',
-    fn: execute
+    name: 'messageCreate',
+    handler
 }

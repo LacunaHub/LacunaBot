@@ -12,25 +12,23 @@ class Farewell {
         if (member.user.bot) return false
 
         if (server.modules.farewell.active) {
-            const replacer = new Replacer(self, server.modules.farewell.message, { guild: member.guild, member: member })
-            const content = await replacer.replace()
+            const replacer = new Replacer(self, null, { guild: member.guild, member: member })
+            const content = await replacer.replaceTemplateMessage(server.modules.farewell.message)
 
             if (server.modules.farewell.format == 'DM') {
-                await member.send(null, content).catch(self.logger.error)
+                await member.send(content).catch(self.logger.error)
             }
 
             if (server.modules.farewell.format == 'CHANNEL') {
                 const channel = member.guild.channels.cache.get(server.modules.farewell.channel_id)
 
-                if (channel) await channel.send(null, content).catch(self.logger.error)
+                if (channel) await channel.send(content).catch(self.logger.error)
             }
 
             await self.emit('moduleExecution', { module: 'Farewell', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
         }
 
         if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
-            if (member.user.bot) return false
-
             const data = server.modules.restoring.data.find(i => i.user_id == member.id)
 
             if (!data) {
@@ -57,6 +55,20 @@ class Farewell {
             }
 
             await self.emit('moduleExecution', { module: 'Restoring: Member Remove', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+        }
+
+        if (server.modules.restoring.data.length) {
+            const outdated = server.modules.restoring.data.filter(i => (Date.now() - i.timestamp) > 4838400000)
+
+            if (outdated.length) {
+                await self.db.servers.update({ _id: member.guild.id }, {
+                    $pull: {
+                        'modules.restoring.data': {
+                            user_id: { $in: outdated.map(i => i.user_id) }
+                        }
+                    }
+                })
+            }
         }
     }
 }

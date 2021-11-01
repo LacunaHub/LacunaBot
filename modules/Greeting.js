@@ -12,17 +12,17 @@ class Greeting {
         if (member.user.bot) return false
 
         if (server.modules.welcome.active) {
-            const replacer = new Replacer(self, server.modules.welcome.message, { guild: member.guild, member: member })
-            const content = await replacer.replace()
+            const replacer = new Replacer(self, null, { guild: member.guild, member: member })
+            const content = await replacer.replaceTemplateMessage(server.modules.welcome.message)
 
             if (server.modules.welcome.format == 'DM') {
-                await member.send(null, content).catch(self.logger.error)
+                await member.send(content).catch(self.logger.error)
             }
 
             if (server.modules.welcome.format == 'CHANNEL') {
                 const channel = member.guild.channels.cache.get(server.modules.welcome.channel_id)
 
-                if (channel) await channel.send(null, content).catch(self.logger.error)
+                if (channel) await channel.send(content).catch(self.logger.error)
             }
 
             await self.emit('moduleExecution', { module: 'Greeting', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
@@ -39,8 +39,6 @@ class Greeting {
         }
 
         if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
-            if (member.user.bot) return false
-
             const data = server.modules.restoring.data.find(d => d.user_id == member.id)
 
             if (data) {

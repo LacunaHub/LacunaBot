@@ -1,31 +1,24 @@
-const Giveaway = require('../../internals/structures/Giveaway')
 const { ReactionMenuRemove } = require('../../modules/Reactions')
-const Reports = require('../../modules/Reports')
 
 /**
  * @param {import('../../internals/Lacuna')} self
  * @param {import('discord.js').MessageReaction} reaction
  * @param {import('discord.js').User} user
  */
-const execute = async (self, reaction, user) => {
+const handler = async (self, reaction, user) => {
     if (self.user.id === user.id) return false
     
-    let partial = false
+    let partial = reaction.partial
 
-    if (reaction.partial) {
-        reaction = await reaction.fetch()
-        partial = true
-    }
+    reaction = partial ? (await reaction.fetch()) : reaction
 
-    const message = reaction.message
+    const message = reaction.message.partial ? (await reaction.message.fetch()) : reaction.message
 
-    if (message.channel.type == 'dm') return false
+    if (message.channel.type == 'DM') return false
 
     const server = await self.db.servers.fetch({ _id: message.guild.id })
 
     await ReactionMenuRemove(self, server, reaction, user)
-    await Reports.ReactionRemove(self, server, reaction)
-    await Giveaway.ReactionRemove(self, server, message, user.id)
 
     if (partial) {
         await message.reactions.cache.delete(reaction.emoji.id || reaction.emoji.name)
@@ -37,5 +30,5 @@ const execute = async (self, reaction, user) => {
 
 module.exports = {
     name: 'messageReactionRemove',
-    fn: execute
+    handler
 }

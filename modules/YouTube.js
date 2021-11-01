@@ -124,16 +124,12 @@ class YouTube {
                             })
 
                             const is_broadcast = await YouTube.isLiveBroadcast(video.video_id)
-
-                            const webhooks = await guild.fetchWebhooks()
-                            let webhook = webhooks.get(channel.alerts.webhook.id)
+                            let webhook = await self.fetchWebhook(channel.alerts.webhook.id, channel.alerts.webhook.token).catch(() => {})
 
                             if (!webhook) {
                                 try {
                                     webhook = await alert_channel.createWebhook(channel.channel.name, { avatar: channel.channel.thumbnail })
-                                } catch (err) {
-                                    return false
-                                }
+                                } catch (err) { return false }
 
                                 await self.db.servers.update({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
                                     $set: {
@@ -148,7 +144,7 @@ class YouTube {
                                 const replacer = new Replacer(self, `${has_link ? channel.alerts.broadcasts_message_template : `${channel.alerts.broadcasts_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
                                 const content = await replacer.replace()
 
-                                await webhook.send(content)
+                                await webhook.send({ content })
     
                                 await self.emit('moduleExecution', { module: 'YouTube: Broadcasts', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.name } })
                             }
@@ -158,7 +154,7 @@ class YouTube {
                                 const replacer = new Replacer(self, `${has_link ? channel.alerts.videos_message_template : `${channel.alerts.videos_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
                                 const content = await replacer.replace()
                                 
-                                await webhook.send(content)
+                                await webhook.send({ content })
     
                                 await self.emit('moduleExecution', { module: 'YouTube: Videos', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.display_name } })
                             }

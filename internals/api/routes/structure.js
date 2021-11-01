@@ -5,7 +5,7 @@ const numbro = require('numbro')
 const { version } = require('../../../package.json')
 
 const router = Router()
-const Utility = require('../../../database/schemas/Utility')
+const qdb = require('quick.db')
 
 router.get('/summary', async (req, res) => {
     const guilds = await ShardingManager.fetchClientValues('guilds.cache.size')
@@ -13,15 +13,14 @@ router.get('/summary', async (req, res) => {
     const channels = await ShardingManager.fetchClientValues('channels.cache.size')
     const pings = await ShardingManager.fetchClientValues('ws.ping')
     const uptimes = await ShardingManager.fetchClientValues('uptime')
-    const players = await ShardingManager.shards.first().eval('this.player.stats')
-    const util = await Utility.findOne({}, { 'charts.guilds': { $slice: -200 } }).lean()
+    const players = await ShardingManager.shards.first().eval('this.playerNodesStats')
+    const charts = qdb.get('charts')
 
     const cluster = {
         id: nou.os.hostname(),
         uptime: nou.os.uptime(),
         cpu: await nou.cpu.usage(),
-        memory: await nou.mem.used(),
-        drive: nou.os.platform() === 'win32' ? null : await nou.drive.used()
+        memory: await nou.mem.used()
     }
 
     const shards = ShardingManager.shards.map(shard => {
@@ -52,7 +51,7 @@ router.get('/summary', async (req, res) => {
                 drive_usage: cluster.drive ? cluster.drive.usedPercentage : 0
             }
         ],
-        charts: util.charts
+        charts
     })
 })
 

@@ -12,30 +12,37 @@ module.exports = async (self, server, guild, user) => {
 
         const log = guild.channels.cache.get(server.moderation.logs.types.guild_ban_add.channel_id)
 
-        const is_ok = log && guild.me.hasPermission('MANAGE_WEBHOOKS') && log.permissionsFor(guild.me).has('MANAGE_WEBHOOKS')
+        const is_ok = log && log.permissionsFor(guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
 
         if (is_ok) {
-            const webhooks = await guild.fetchWebhooks()
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
-            let webhook = logs_webhook ? webhooks.get(logs_webhook.id) : null
+            let webhook = logs_webhook ? (await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) : null
 
-            const audit = guild.me.hasPermission('VIEW_AUDIT_LOG') ? await guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_BAN_ADD' }) : null
+            const audit = guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_BAN_ADD' }) : null
             const executor = audit?.entries?.first()?.executor
             const reason = audit?.entries?.first()?.reason
 
             if (!webhook) {
+                if (logs_webhook) {
+                    await self.db.servers.update({ _id: guild.id }, {
+                        $pull: {
+                            'moderation.logs.webhooks': {
+                                channel_id: log.id
+                            }
+                        }
+                    })
+                }
+
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.commands.common.case_log.cases.BAN_ADD) })
-                } catch (err) {
-                    return false
-                }
+                } catch (err) { return false }
 
                 await self.db.servers.update({ _id: guild.id }, {
                     $push: {
                         'moderation.logs.webhooks': {
                             id: webhook.id,
                             token: webhook.token,
-                            channel_id: webhook.channelID
+                            channel_id: webhook.channelId
                         }
                     }
                 })
@@ -48,7 +55,7 @@ module.exports = async (self, server, guild, user) => {
                 .setTimestamp()
                 .setColor('#EF5350')
 
-            await webhook.send('', {
+            await webhook.send({
                 embeds: [embed],
                 avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
                 name: server.server.premium.available ? webhook.name : self.user.username

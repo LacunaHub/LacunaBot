@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const moment = require('moment')
-const { escapeRegEx, resolveObjectPath } = require('../internals/utility/Utils')
+const { escapeRegEx, resolveObjectPath, parseCommandArguments } = require('../internals/utility/Utils')
 
 class Replacer {
     /**
@@ -21,7 +21,7 @@ class Replacer {
     }
 
     replacers(string = this.string) {
-        const replacers = string.match(/{\s*([\w.]+)(\s+\|\s+[^\s]+)?\s*}/g) || []
+        const replacers = string.match(/{\s*([\d\s\w.,|"-+?!:@<>#%]+)\s*}/g) || []
         return replacers.map(replacer => replacer.replace(/{|}/g, '').trim())
     }
 
@@ -95,12 +95,13 @@ class Replacer {
 
         const activity = await this.self.db.activities.fetch({ _id: guild.id })
         const levels = activity.levels.find(level => level.user_id == member.id)
-        const server_owner = await guild.members.fetch(guild.ownerID)
+        const server_owner = await guild.members.fetch(guild.ownerId)
 
-        const args = message?.content?.split(' ')?.slice(1).filter(arg => arg)
+        const args = parseCommandArguments(message?.content?.split(' ')?.slice(1)?.join(' '))
 
         return {
             message: {
+                content: message?.content,
                 channel: {
                     name: message?.channel?.name,
                     id: message?.channel?.id,
@@ -110,8 +111,7 @@ class Replacer {
                     topic: message?.channel?.topic,
                     type: message?.channel?.type
                 },
-                content: message?.content,
-                args: Object.assign({}, { map: args.join(' '), ...args }),
+                args: args,
                 created_at: message?.createdTimestamp,
                 edited_at: message?.editedTimestamp,
                 id: message?.id,
@@ -127,7 +127,7 @@ class Replacer {
             guild: {
                 name: guild.name,
                 acronym: guild.nameAcronym,
-                afk_channel_id: guild?.afkChannelID,
+                afk_channel_id: guild?.afkChannelId,
                 banner: guild?.banner,
                 channels: {
                     total: guild.channels.cache.size,
@@ -151,7 +151,7 @@ class Replacer {
                     avatar: server_owner?.user?.displayAvatarURL(),
                     display_name: server_owner?.displayName,
                     tag: server_owner?.user?.tag,
-                    mention: `<@${guild.ownerID}>`,
+                    mention: `<@${guild.ownerId}>`,
                     nickname: server_owner?.nickname
                 },
                 boosters_count: guild.premiumSubscriptionCount || 0,
@@ -180,8 +180,8 @@ class Replacer {
                 },
                 voice: {
                     name: member.voice?.channel?.name,
-                    id: member.voice?.channelID,
-                    mention: member.voice ? `<#${member.voice.channelID}>` : null,
+                    id: member.voice?.channelId,
+                    mention: member.voice ? `<#${member.voice.channelId}>` : null,
                     full: member.voice?.channel?.full,
                     position: member.voice?.channel?.rawPosition
                 },
@@ -201,11 +201,19 @@ class Replacer {
 
         for (const replacer of this.replacers(string)) {
             const regex = new RegExp(`{\\s*${escapeRegEx(replacer)}\\s*}`, 'g')
-            const alternate = replacer.split(/\s+\|\s+/)
+            const raws = replacer.split(/\s+\|\s+/)
 
-            const replacement = resolveObjectPath(alternate[0], replacements)
+            for (const replacement of raws) {
+                const i = raws.indexOf(replacement)
+                let value = resolveObjectPath(replacement, replacements)
 
-            string = string.replace(regex, replacement ? replacement : alternate[1] ? resolveObjectPath(alternate[1].replace(/^\-/, ''), replacements) ?? (alternate[1].startsWith('-') ? alternate[1].replace(/^\-/, '') : null) : null)
+                if (typeof value === 'object') value = resolveObjectPath(`${replacement}.${Object.keys(value)[0]}`, replacements)
+
+                if (/".+"/.test(replacement)) raws[i] = replacement.substring(1, replacement.length - 1)
+                else raws[i] = value
+            }
+
+            string = string.replace(regex, () => { return raws.find(r => r) })
         }
 
         for (const snippet of this.codeSnippets(string)) {
@@ -216,11 +224,10 @@ class Replacer {
             try {
                 res = snippet.fn(...snippet.args.split(/;\s{0,1}/))
             } catch (err) {
-                console.log(err)
                 res = `\`${snippet.name}#${err.name}\``
             }
 
-            string = string.replace(regex, res)
+            string = string.replace(regex, () => { return res })
             this.self.logger.info(`(Replacer: ${snippet.name}): on ${this.shapers.guild.name}`)
         }
 
@@ -267,7 +274,7 @@ class Replacer {
             }
         }
 
-        return template.embed.active ? { content: content, embed: new MessageEmbed(embed) } : { content: content }
+        return template.embed.active ? { content: content, embeds: [new MessageEmbed(embed)] } : { content: content }
     }
 }
 

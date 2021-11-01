@@ -1,14 +1,13 @@
-const { Client, Collection } = require('discord.js')
+const { Client, Collection, Permissions } = require('discord.js')
 const { connect } = require('mongoose')
 const fs = require('fs-extra')
 const Utils = require('../internals/utility/Utils')
 
 const Command = require('./structures/Command')
-const Subcommand = require('./structures/Subcommand')
 const logger = require('./Logger')
 const DatabaseManager = require('../database/DatabaseManager')
-const Player = require('./structures/Player')
 const Translator = require('./locale/Translator')
+const qdb = require('quick.db')
 
 const TemporaryBan = require('./structures/TemporaryBan')
 const TemporaryMute = require('./structures/TemporaryMute')
@@ -17,6 +16,7 @@ const Giveaway = require('./structures/Giveaway')
 const Twitch = require('../modules/Twitch')
 const YouTube = require('../modules/YouTube')
 const Levels = require('../modules/Levels')
+const { resolveObjectPath } = require('../internals/utility/Utils')
 
 class Lacuna extends Client {
     /**
@@ -25,11 +25,12 @@ class Lacuna extends Client {
     constructor(options = {}) {
         super(options)
 
-        this.start_timestamp = null
-
-        this.application = null
-
         this.utils = Utils
+
+        /**
+         * @type {import('erela.js').Manager}
+         */
+        this.player = null
 
         /**
          * @type {Collection<String, Command}
@@ -60,9 +61,13 @@ class Lacuna extends Client {
 
         this.db = DatabaseManager
 
+        this.qdb = qdb
+
         this.translator = Translator
 
         this.player = null
+
+        this.PERMISSIONS_FLAGS = Permissions.FLAGS
 
         this.start()
     }
@@ -92,18 +97,34 @@ class Lacuna extends Client {
         }
     }
 
-    async start() {
-        this.start_timestamp = Date.now()
+    get playerNodesStats() {
+        const nodes = this.player.nodes
 
+        return nodes.map(node => {
+            return {
+                id: node.options.identifier,
+                connected: node.connected,
+                cpu_load: Math.round(node.stats.cpu.lavalinkLoad),
+                memory_usage: Math.round((node.stats.memory.used * 100) / node.stats.memory.reservable),
+                uptime: node.stats.uptime,
+                players: {
+                    playing: node.stats.playingPlayers,
+                    total: node.stats.players
+                }
+            }
+        })
+    }
+
+    async start() {
         await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
 
         await this.login(process.env.CLIENT_TOKEN)
 
-        this.loadCommands()
-        this.loadEvents()
+        await this.loadEvents(true)
 
-        this.player = new Player(this, { user: process.env.CLIENT_ID, shards: Number(process.env.CLIENT_MAX_SHARDS) })
-        this.application = await this.fetchApplication()
+        this.application = await this.application.fetch()
+
+        //await this.registerSlashCommands()
 
         await TemporaryBan.HandleEntries(this)
         await TemporaryMute.HandleEntries(this)
@@ -114,7 +135,7 @@ class Lacuna extends Client {
         await Levels.checkVoiceStates(this)
 
         process.on('unhandledRejection', error => {
-            const err = error.stack ? error.stack : error.message
+            const err = error?.stack ?? error.message
 
             this.logger.error('(Unhandled Rejection)', err)
 
@@ -126,96 +147,104 @@ class Lacuna extends Client {
         return Date.now()
     }
 
-    loadCommands() {
-        fs.readdir("./commands", async (err, files) => {
-            if (err) {
-                logger.error(err)
-            
-                return
-            }
-        
-            const dirs = files.filter(f => !f.includes('.'))
+    async registerSlashCommands(guild_id, lang) {
+        const locale = this.translator.locale(lang)
 
-            let progress = 0
-
-            dirs.forEach((dir) => {
-                fs.readdir(`./commands/${dir}`, (err, _files) => {
-                    if (err) {
-                        logger.error(err)
-
-                        return
-                    }
-        
-                    const js = _files.filter(f => f.endsWith('.js'))
-                    if (js.length <= 0) {
-                        logger.warn(`(Commands): Commands not found`)
-                    
-                        return
-                    }
-            
-
-                    js.forEach(file => {
-                        const command_config = require(`../commands/${dir}/${file}`)
-
-                        const command = new Command(this, command_config)
-
-                        if (command_config.subcommands) {
-                            for (const subcommand of command_config.subcommands) {
-                                new Subcommand(command, subcommand)
+        const slash = this.commands.filter(c => c.is_slash_command).map(c => {
+            return {
+                name: c.name,
+                description: resolveObjectPath(c.description, locale),
+                type: 'CHAT_INPUT',
+                options: c?.options?.map(option => {
+                    if (option.type == 'SUB_COMMAND') return {
+                        ...option,
+                        description: resolveObjectPath(option.description, locale),
+                        options: option.options.map(o => {
+                            return {
+                                ...o,
+                                name: resolveObjectPath(o.name, locale),
+                                description: resolveObjectPath(o.description, locale)
                             }
-                        }
+                        })
+                    }
 
-                        delete require.cache[require.resolve(`../commands/${dir}/${file}`)]
-                    })
-        
-                    progress++
-                    if (progress == dirs.length) logger.info(`(Commands): Loaded ${this.commands.size} commands in ${dirs.length} categories`)
-                })
-            })
+                    return {
+                        ...option,
+                        name: resolveObjectPath(option.name, locale),
+                        description: resolveObjectPath(option.description, locale)
+                    }
+                }) ?? []
+            }
         })
+
+        const message = this.commands.filter(c => c.is_message_command).map(c => {
+            return {
+                name: resolveObjectPath(c.pretty_name, locale),
+                type: 'MESSAGE'
+            }
+        })
+
+        const user = this.commands.filter(c => c.is_user_command).map(c => {
+            return {
+                name: resolveObjectPath(c.pretty_name, locale),
+                type: 'USER'
+            }
+        })
+
+        const commands = [ ...slash, ...message, ...user ]
+
+        return await this.application.commands.set(commands, guild_id)
     }
 
-    loadEvents() {
-        fs.readdir('./events', async (err, files) => {
-            if (err) {
-                logger.error(err)
+    loadCommands() {
+        const directories = fs.readdirSync('./commands', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
 
-                return
+        let amount = 0
+
+        for (const directory of directories) {
+            const dirs = fs.readdirSync(`./commands/${directory}`, { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
+
+            for (const dir of dirs) {
+                /**
+                 * @type {import('./Typings').CommandInfo}
+                 */
+                const index = require(`../commands/${directory}/${dir}`)
+
+                new Command(this, index)
+
+                delete require.cache[require.resolve(`../commands/${directory}/${dir}`)]
             }
 
-            const dirs = files.filter(f => !f.includes('.'))
+            amount += dirs.length
+        }
 
-            let progress = 0
-            let events = 0
+        this.logger.info(`(Commands): Loaded ${amount} commands from ${directories.length} categories`)
+    }
 
-            dirs.forEach(dir => {
-                fs.readdir(`./events/${dir}`, (err, _files) => {
-                    if (err) {
-                        logger.error(err)
-        
-                        return
-                    }
+    loadEvents(initial = false) {
+        const directories = fs.readdirSync('./events', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
 
-                    const js = _files.filter(f => f.endsWith('.js'))
-                    if (js.length <= 0) {
-                        logger.log(`(Events): Events not found`)
-                    
-                        return
-                    }
+        let amount = 0, total = 0
 
-                    js.forEach(file => {
-                        const event = require(`../events/${dir}/${file}`)
-        
-                        this.on(event.name, event.fn.bind(null, this))
-                        delete require.cache[require.resolve(`../events/${dir}/${file}`)]
-                    })
+        for (const directory of directories) {
+            const files = fs.readdirSync(`./events/${directory}`, { withFileTypes: true }).filter(dirent => dirent.isFile() && dirent.name.endsWith('.js')).map(dirent => dirent.name)
+            /**
+             * @type {import('./Typings').EventInfo[]}
+             */
+            let events = files.map(file => require(`../events/${directory}/${file}`))
+            events = events.filter(e => Boolean(e.initial) == initial)
 
-                    progress++
-                    events += js.length
-                    if (progress == dirs.length) logger.info(`(Events): Loaded ${events} events in ${progress} categories`)
-                })
-            })
-        })
+            for (const event of events) {
+                event.once ? this.once(event.name, event.handler.bind(null, this)) : this.on(event.name, event.handler.bind(null, this))
+            }
+
+            for (const file of files) delete require.cache[require.resolve(`../events/${directory}/${file}`)]
+
+            amount += events.length
+            total += files.length
+        }
+
+        this.logger.info(`(Events): Loaded ${amount} events of ${total}`)
     }
 }
 

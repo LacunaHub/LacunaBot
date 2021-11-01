@@ -116,15 +116,12 @@ class Twitch {
                                 })
                             }
 
-                            const webhooks = await guild.fetchWebhooks()
-                            let webhook = webhooks.get(broadcaster.alerts.webhook.id)
+                            let webhook = await self.fetchWebhook(broadcaster.alerts.webhook.id, broadcaster.alerts.webhook.token).catch(() => {})
 
                             if (!webhook) {
                                 try {
                                     webhook = await channel.createWebhook(stream.name, { avatar: stream.logo })
-                                } catch (err) {
-                                    return false
-                                }
+                                } catch (err) { return false }
 
                                 await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
                                     $set: {
@@ -149,7 +146,8 @@ class Twitch {
                                 content = await replacer.replace()
                             }
 
-                            const message = await webhook.send(content, {
+                            const message = await webhook.send({
+                                content,
                                 embeds: [embed],
                                 avatarURL: stream.logo,
                                 name: stream.name

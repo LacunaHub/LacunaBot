@@ -5,7 +5,7 @@ const RoleUpdate = require('../../modules/Logs/Role/RoleUpdate')
  * @param {import('discord.js').Role} before
  * @param {import('discord.js').Role} role
  */
-const execute = async (self, before, role) => {
+const handler = async (self, before, role) => {
     if (before.position != role.position) return false
 
     const server = await self.db.servers.find({ _id: role.guild.id })
@@ -19,5 +19,5 @@ const execute = async (self, before, role) => {
 
 module.exports = {
     name: 'roleUpdate',
-    fn: execute
+    handler
 }

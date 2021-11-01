@@ -55,7 +55,7 @@ class Reactions {
 
                     if (channels.size) {
                         try {
-                            for (const [, channel] of channels) await channel.createOverwrite(user.id, { VIEW_CHANNEL: element.element.reverse ? true : false }, locale.reactions.show_channels_reason)
+                            for (const [, channel] of channels) await channel.permissionOverwrites.create(user.id, { VIEW_CHANNEL: element.element.reverse ? true : false }, locale.reactions.show_channels_reason)
                         
                             await self.emit('moduleExecution', { module: 'Reactions: Show Channels', guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
                         } catch (err) {
@@ -150,7 +150,7 @@ class Reactions {
                     if (channels.size) {
                         try {
                             for (const [, channel] of channels) {
-                                const overwrites = channel.permissionOverwrites.find(p => p.id == user.id)
+                                const overwrites = channel.permissionOverwrites.cache.find(p => p.id == user.id)
         
                                 if (overwrites) {
                                     await overwrites.delete(element.element.reverse ? locale.reactions.hide_channels_reason : locale.reactions.show_channels_reason)

@@ -64,7 +64,7 @@ router.get('/callback', async (req, res) => {
 
 router.get('/add', async (req, res) => {
     const query = new URLSearchParams(req.query).toString()
-    await res.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=bot&permissions=844491870&${query}`)
+    await res.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=bot%20applications.commands&permissions=844491870&${query}`)
 })
 
 module.exports = router

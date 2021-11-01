@@ -1,4 +1,6 @@
+const { parseCommandArguments } = require('../../internals/utility/Utils')
 const Automoder = require('../../modules/Automoder')
+const CustomCommand = require('../../modules/CustomCommand')
 const MessageUpdate = require('../../modules/Logs/Message/MessageUpdate')
 
 /**
@@ -6,28 +8,32 @@ const MessageUpdate = require('../../modules/Logs/Message/MessageUpdate')
  * @param {import('discord.js').Message} before
  * @param {import('discord.js').Message} message
  */
-const execute = async (self, before, message) => {
-    let partial = false
+const handler = async (self, before, message) => {
+    let partial = before.partial || message.partial
 
-    if (before.partial) {
-        before = await before.fetch()
-        if (message.partial) message = await message.fetch()
-        partial = true
-    }
+    before = before.partial ? (await before.fetch()) : before
+    message = message.partial ? (await message.fetch()) : message
 
-    if (message.author.bot || message.channel.type == 'dm') return false
+    if (message.author.bot || message.channel.type == 'DM') return false
     if ((!before.embeds.length && message.embeds.length) || (!before.pinned && message.pinned)) return false
 
     const server = await self.db.servers.fetch({ _id: message.guild.id })
 
-    const splitted = message.content.split(' ')
-    const command_name = splitted[0].toLowerCase()
-    const args = splitted.slice(1).filter(arg => arg)
+    const splitted = message.content.split(/\s+/)
+    const command_name = splitted.shift().toLowerCase()
+    message.args = parseCommandArguments(splitted.join(' '))
 
-    const command = self.commands.get(command_name.slice(server.prefix.length)) || self.commands.find(c => c.aliases && c.aliases.includes(command_name.slice(server.prefix.length)))
+    const command = self.commands.find(c => c.name == command_name.slice(server.prefix.length) && c.is_prefix_command)
+    const custom_command = server.commands.custom.find(c => !c.inactive && c.name == command_name.slice(server.prefix.length))
 
-    if (command) {
-        await command.execute(server, message, args)
+    if (command && (!server.commands.slash_commands || command.private)) {
+        await command.executePrefix(server, message)
+    }
+
+    if (custom_command && !command) {
+        const custom = new CustomCommand(custom_command, self, server, message)
+
+        await custom.execute()
     }
 
     await Automoder.linksFilter(self, server, message)
@@ -43,5 +49,5 @@ const execute = async (self, before, message) => {
 
 module.exports = {
     name: 'messageUpdate',
-    fn: execute
+    handler
 }

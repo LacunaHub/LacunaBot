@@ -1,6 +1,6 @@
 const Replacer = require('./Replacer')
 const Canvas = require('canvas')
-const { MessageAttachment } = require('discord.js')
+const { MessageAttachment, CommandInteraction, Message, ContextMenuInteraction } = require('discord.js')
 const numbro = require('numbro')
 const { scheduleJob, RecurrenceRule, Range } = require('node-schedule')
 
@@ -94,10 +94,10 @@ class Levels {
     static async voiceAssign(self, server, state) {
         if (!server.modules.levels.voice) return false
 
-        if (server.modules.levels.blocked.channels.includes(state.channelID) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))) return false
-        if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channelID)) return false
+        if (server.modules.levels.blocked.channels.includes(state.channelId) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))) return false
+        if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channelId)) return false
         if (server.modules.levels.allowed.roles.length && !state.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id))) return false
-        if (state.guild.afkChannelID === state.channelID) return false
+        if (state.guild.afkChannelId === state.channelId) return false
 
         const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
@@ -292,17 +292,17 @@ class Levels {
             const congrats = await replacer.replaceTemplateMessage(direction.message)
 
             if (direction.format === 'CURRENT_CHANNEL' && refs.message) {
-                await refs.message.channel.send(null, congrats).catch(self.logger.error)
+                await refs.message.channel.send(congrats).catch(self.logger.error)
             }
 
             if (direction.format === 'DM') {
-                await member.send(null, congrats).catch(self.logger.error)
+                await member.send(congrats).catch(self.logger.error)
             }
 
             if (direction.format === 'CHANNEL') {
                 const channel = member.guild.channels.cache.get(direction.channel_id)
 
-                if (channel) await channel.send(null, congrats).catch(self.logger.error)
+                if (channel) await channel.send(congrats).catch(self.logger.error)
             }
 
             await self.emit('moduleExecution', { module: 'Levels: Level Up Alert', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
@@ -311,17 +311,16 @@ class Levels {
 
     /**
      * @param {import('../internals/Lacuna')} self
-     * @param {import('../internals/Typings').ServerDocument} server
-     * @param {import('discord.js').Message} message
-     * @param {string[]} args
+     * @param {import('discord.js').CommandInteraction | import('discord.js').Message} signal
      */
-    static async GenerateRankCard(self, message, args) {
-        const activity = await self.db.activities.fetch({ _id: message.guild.id })
+    static async GenerateRankCard(self, signal) {
+        const activity = await self.db.activities.fetch({ _id: signal.guild.id })
 
-        /**
-         * @type {import('discord.js').GuildMember}
-         */
-        const mention = message.mentions.members.first() || (self.utils.isSnowflake(args[0]) ? await message.guild.members._fetchSingle({ user: args[0], cache: false }) : null) || message.member
+        let mention
+
+        if (signal instanceof CommandInteraction) mention = signal.options?.getMember('пользователь') || signal.member
+        if (signal instanceof Message) mention = signal.mentions.members.first() || (signal.args[0] ? (await signal.guild.members.fetch(signal.args[0])) : null) || signal.member
+        if (signal instanceof ContextMenuInteraction) mention = await signal.guild.members.fetch(signal.targetId)
 
         const sorted = activity.levels.sort((a, b) => b.experience.total - a.experience.total)
         let level = sorted.find(lvl => lvl.user_id == mention.id)
@@ -363,7 +362,7 @@ class Levels {
         ctx.drawImage(avatar, 25, 25, 120, 120)
         ctx.restore()
 
-        ctx.strokeStyle = '#272E31'
+        ctx.strokeStyle = '#4F3454'
         ctx.beginPath()
         ctx.lineCap = "round"
         ctx.lineWidth = 20
@@ -376,7 +375,7 @@ class Levels {
         const percent = Math.floor((level.experience.current * 100) / formula)
         const progress = Math.floor(650 * percent / 100)
 
-        ctx.strokeStyle = '#00b4fc'
+        ctx.strokeStyle = '#DA70D6'
         ctx.beginPath()
         ctx.lineCap = "round"
         ctx.lineWidth = 20
@@ -386,7 +385,7 @@ class Levels {
 
         ctx.font = '25px Gotham Pro Medium'
         ctx.fillStyle = '#ffffff'
-        const username = mention.user.username
+        const username = mention.displayName
         const measure = ctx.measureText(username)
         ctx.fillText(measure.width > 400 ? 'Username' : username, 160, 70, 400)
 
@@ -434,8 +433,8 @@ class Levels {
 
         const voice_time = numbro(level.activity.voice.total_time).format({ output: 'time' })
         const m5 = ctx.measureText(voice_time)
-        ctx.fillText(voice_time, 620, 117)
-        ctx.drawImage(microphone, (615 - 25) - m5.width, 95, 25, 25)
+        ctx.fillText(voice_time, 620 - (m3.width / 2), 117)
+        ctx.drawImage(microphone, (615 - (m3.width / 2) - 25) - m5.width, 95, 25, 25)
 
         const current_xp_format = level.experience.current >= 1000 ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 2 }).toUpperCase() : Math.floor(level.experience.current)
         const next_xp_format = formula >= 1000 ? numbro(formula).format({ average: true, mantissa: 2 }).toUpperCase() : formula
@@ -474,7 +473,7 @@ class Levels {
                     const in_voice = activities.levels.filter(level => level.activity.voice.connected_at)
 
                     for (const user of in_voice) {
-                        const state = guild.voiceStates.cache.some(voice => voice?.member?.id == user.user_id && voice.channelID != guild.afkChannelID && voice?.channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)?.size > 1)
+                        const state = guild.voiceStates.cache.some(voice => voice?.member?.id == user.user_id && voice.channelId != guild.afkChannelId && voice?.channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)?.size > 1)
 
                         if (!state) {
                             const member = await guild.members._fetchSingle({ user: user.user_id })

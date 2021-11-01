@@ -1,6 +1,5 @@
 const { MessageEmbed, Collection } = require('discord.js')
 const { scheduleJob } = require('node-schedule')
-const moment = require('moment')
 const Logger = require('../Logger')
 
 class Giveaway {
@@ -28,8 +27,6 @@ class Giveaway {
         this.locale = data.locale || 'ru'
 
         this.schedule = null
-
-        this.interval = null
 
         if (Date.now() >= this.expiration_date.getTime() || this.expiration_date.getTime() - Date.now() <= 30000) {
             this.endMessage()
@@ -91,7 +88,6 @@ class Giveaway {
     }
 
     async start() {
-        //this.interval = setInterval(() => this.updateCountdown(), 120000)
         await this.toSchedule()
     }
 
@@ -112,24 +108,7 @@ class Giveaway {
         if (message && !message.deleted) await message.delete()
     }
 
-    async updateCountdown() {
-        const message = await this.getMessage()
-
-        if (!message || message.deleted) {
-            await this.end(false); return
-        }
-
-        const locale = this.self.translator.locale(this.locale).commands
-
-        const embed = new MessageEmbed(message.embeds[0])
-            .setFooter(this.self.translator.format(locale.giveaway.create.texts.giveaways_remains, moment(this.expiration_date).locale(this.locale).endOf().fromNow()))
-
-        await message.edit(message.content, embed)
-    }
-
     async end(scheduled = true) {
-        //await clearInterval(this.interval)
-
         if (scheduled) await this.endMessage(); else await this.deleteMessage()
 
         await this.deleteEntry()
@@ -154,12 +133,11 @@ class Giveaway {
             const winners = members.randomKey(this.winners_amount >= members.size ? members.size : this.winners_amount)
 
             const embed = new MessageEmbed(message.embeds[0])
-                .setDescription(this.self.translator.format(locale.giveaway.end.texts.winners, winners.map(w => `<@${w}>`).join('\n')))
-                .setFooter('\u200B')
+                .setDescription(this.self.translator.format(locale.giveaway.end.texts.winners, winners.map(w => `<@${w}>`).join(', ')))
                 .setColor(0xF04747)
 
-            await message.edit(`**${locale.giveaway.end.texts.giveaway_ended}**`, embed)
-            await message.reply(this.self.translator.format(locale.giveaway.end.texts.congrats, `${winners.map(w => `<@${w}>`)}`, `**${this.prize}**`), { allowedMentions: { repliedUser: false } })
+            await message.edit({ embeds: [embed], components: [] })
+            await message.reply({ content: this.self.translator.format(locale.giveaway.end.texts.congrats, `${winners.map(w => `<@${w}>`)}`, `**${this.prize}**`) })
 
             await members.clear()
         }
@@ -167,62 +145,50 @@ class Giveaway {
         else {
             const embed = new MessageEmbed(message.embeds[0])
                 .setDescription(locale.giveaway.end.texts.no_members)
-                .setFooter('\u200B')
                 .setColor(0xF04747)
 
-            await message.edit(`**${locale.giveaway.end.texts.giveaway_ended}**`, embed)
+            await message.edit({ embeds: [embed], components: [] })
         }
     }
 
     /**
      * @param {import('../Lacuna')} self
      * @param {import('../../internals/Typings').ServerDocument} server
-     * @param {import('discord.js').Message} message
-     * @param {string} user_id
+     * @param {import('discord.js').ButtonInteraction} interaction
      */
-    static async ReactionAdd(self, server, message, user_id) {
-        const giveaway = self.giveaways.find(g => g.message_id == message.id)
-        const ga_entry = server.utility.giveaways.find(g => g.message_id == message.id)
+    static async buttonPressed(self, server, interaction) {
+        const [ g, message_id ] = interaction.customId.split('-')
+        const giveaway = self.giveaways.find(g => g.message_id == message_id)
+        const entry = server.utility.giveaways.find(g => g.message_id == message_id)
 
-        if (giveaway && ga_entry) {
-            await self.db.servers.update({ _id: message.guild.id, 'utility.giveaways.message_id': message.id }, {
+        if (giveaway && entry) {
+            if (!entry.members.includes(interaction.user.id)) await self.db.servers.update({ _id: interaction.guild.id, 'utility.giveaways.message_id': message_id }, {
                 $push: {
-                    'utility.giveaways.$.members': user_id
+                    'utility.giveaways.$.members': interaction.user.id
                 }
             })
 
-            await giveaway.members.push(user_id)
+            if (!giveaway.members.includes(interaction.user.id)) {
+                await giveaway.members.push(interaction.user.id)
+            
+                const message = await giveaway.getMessage()
+
+                const embed = new MessageEmbed(message.embeds[0])
+                embed.fields[2].value = `${giveaway.members.length}`
+    
+                await message.edit({ embeds: [embed] })
+            }
         }
-    }
 
-    /**
-     * @param {import('../Lacuna')} self
-     * @param {import('../../internals/Typings').ServerDocument} server
-     * @param {import('discord.js').Message} message
-     * @param {string} user_id
-     */
-    static async ReactionRemove(self, server, message, user_id) {
-        const giveaway = self.giveaways.find(g => g.message_id == message.id)
-        const ga_entry = server.utility.giveaways.find(g => g.message_id == message.id)
-
-        if (giveaway && ga_entry) {
-            await self.db.servers.update({ _id: message.guild.id, 'utility.giveaways.message_id': message.id }, {
-                $pull: {
-                    'utility.giveaways.$.members': user_id
-                }
-            })
-
-            await giveaway.members.splice(giveaway.members.indexOf(user_id), 1)
-        }
+        await interaction.deferUpdate()
     }
 
     /**
      * @param {import('../Lacuna')} self
      */
     static async HandleEntries(self) {
-        let servers = await self.db.servers.findSome({ 'utility.giveaways.0': { $exists: true } })
-
-        servers = servers.filter(s => self.guilds.cache.has(s._id))
+        const guilds = self.guilds.cache.map(g => g.id)
+        const servers = await self.db.servers.findSome({ _id: { $in: guilds }, 'utility.giveaways.0': { $exists: true } })
 
         let entries = 0
 

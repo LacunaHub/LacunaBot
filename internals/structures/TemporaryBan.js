@@ -56,15 +56,7 @@ class TemporaryBan {
         const guild = this.self.guilds.cache.get(this.guild_id)
         if (!guild || !guild.available) return false
 
-        try {
-            await guild.members.ban(this.user_id, { reason: this.reason })
-        } catch (err) {
-            await this.self.logger.error('An error occurred', err)
-
-            return false
-        }
-
-        return true
+        await guild.members.ban(this.user_id, { reason: this.reason }).catch(() => {})
     }
 
     async delete() {
@@ -88,18 +80,15 @@ class TemporaryBan {
         const guild = this.self.guilds.cache.get(this.guild_id)
         if (!guild || !guild.available) return null
 
-        try {
-            await guild.members.unban(this.user_id)
-        } catch (err) {}
+        await guild.members.unban(this.user_id).catch(() => {})
     }
 
     /**
      * @param {import('../Lacuna')} self
      */
     static async HandleEntries(self) {
-        let servers = await self.db.servers.findSome({ 'moderation.tempbans.0': { $exists: true } })
-
-        servers = servers.filter(s => self.guilds.cache.has(s._id))
+        const guilds = self.guilds.cache.map(g => g.id)
+        const servers = await self.db.servers.findSome({ _id: { $in: guilds }, 'moderation.tempbans.0': { $exists: true } })
 
         let entries = 0
 
