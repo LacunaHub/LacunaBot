@@ -473,7 +473,18 @@ class Levels {
                     const in_voice = activities.levels.filter(level => level.activity.voice.connected_at)
 
                     for (const user of in_voice) {
-                        const state = guild.voiceStates.cache.some(voice => voice?.member?.id == user.user_id && voice.channelId != guild.afkChannelId && voice?.channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)?.size > 1)
+                        if ((Date.now() - user.activity.voice.connected_at) >= 43200000) {
+                            await self.db.activities.update({ _id: guild.id, 'levels.user_id': user.user_id }, {
+                                $set: {
+                                    'levels.$.activity.voice.connected_at': null,
+                                    'levels.$.activity.voice.disconnected_at': Date.now()
+                                }
+                            })
+                            
+                            return
+                        }
+                        
+                        const state = guild.voiceStates.cache.some(voice => voice?.member?.id == user.user_id && voice.channelID != guild.afkChannelID && voice?.channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)?.size > 1)
 
                         if (!state) {
                             const member = await guild.members._fetchSingle({ user: user.user_id })

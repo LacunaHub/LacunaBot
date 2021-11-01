@@ -79,9 +79,8 @@ class Twitch {
         rule.minute = new Range(0, 59, 5)
 
         const job = await scheduleJob(rule, async () => {
-            let servers = await self.db.servers.findSome({ 'modules.twitch.channels.0': { $exists: true } })
-
-            servers = servers.filter(server => self.guilds.cache.has(server._id))
+            const guilds = self.guilds.cache.map(g => g.id)
+            const servers = await self.db.servers.findSome({ _id: { $in: guilds }, 'modules.twitch.channels.0': { $exists: true } })
 
             await self.logger.info(`(Twitch): Scheduled check started for ${servers.length} servers`)
 
