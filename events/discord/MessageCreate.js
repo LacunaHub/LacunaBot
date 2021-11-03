@@ -18,6 +18,8 @@ const handler = async (self, message) => {
 
         return false
     }
+    
+    message.member = message.member.partial ? (await message.member.fetch()) : message.member
 
     if (message.member && message.member.roles.cache.has(server.moderation.roles.mute) && !message.member.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_MESSAGES)) {
         const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)

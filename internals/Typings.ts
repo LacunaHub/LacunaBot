@@ -679,6 +679,7 @@ export interface UserDocument extends Document {
         tier?: number
         guilds?: Array<BoostedGuild>
     }
+    bills: Bill[]
     created_at: number
     modified_at: number
 }
@@ -904,4 +905,47 @@ export interface AutoReaction {
 export interface BotExpert {
     id: string
     expires_timestamp: number
+}
+
+export interface Bill {
+    bill_id: string
+    site_id: string
+    amount: {
+        value: number
+        currency: string
+    }
+    status: {
+        value: 'WAITING' | 'PAID' | 'REJECTED' | 'EXPIRED'
+        changed_timestamp: number
+    }
+    custom_fields: CustomFieldsObject
+    customer?: {
+        email?: string
+        phone?: string
+        account?: string
+    }
+    comment?: string
+    creation_timestamp: number
+    pay_url: string
+    expiration_timestamp: number
+}
+
+export interface BillObject {
+    bill_id?: string
+    amount: AmountObject
+    expiration_timestamp?: number
+    custom_fields: CustomFieldsObject
+}
+
+export interface AmountObject {
+    value: string
+    currency: 'RUB' | 'KZT' | string
+}
+
+export interface CustomFieldsObject {
+    type: 'GUILD'
+    reference_id: string
+    user_id: string
+    pay_sources_filter?: string
+    theme_code?: string
 }

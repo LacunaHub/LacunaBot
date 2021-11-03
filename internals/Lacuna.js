@@ -124,8 +124,6 @@ class Lacuna extends Client {
 
         this.application = await this.application.fetch()
 
-        //await this.registerSlashCommands()
-
         await TemporaryBan.HandleEntries(this)
         await TemporaryMute.HandleEntries(this)
         await TemporaryRole.HandleEntries(this)

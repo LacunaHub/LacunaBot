@@ -8,7 +8,7 @@ const { resolveObjectPath } = require('../../internals/utility/Utils')
 const handler = async (self, interaction) => {
     if (!interaction.inGuild() || interaction.inRawGuild()) return false
 
-    const server = await self.db.servers.fetch({ _id: interaction.guild })
+    const server = await self.db.servers.fetch({ _id: interaction.guildId })
 
     if (interaction.isCommand()) {
         const command = self.commands.find(c => c.is_slash_command && c.name == interaction.commandName)

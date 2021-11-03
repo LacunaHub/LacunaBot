@@ -1,5 +1,6 @@
 const { Router } = require('express')
 const servers = require('../../../database/schemas/Servers')
+const users = require('../../../database/schemas/Users')
 const authorize = require('../utility/Authorize')
 const ShardingManager = require('../../utility/ShardingManager')
 const Translator = require('../../locale/Translator')
@@ -8,6 +9,7 @@ const Twitch = require('../../../modules/Twitch')
 const YouTube = require('../../../modules/YouTube')
 const qdb = require('quick.db')
 const { resolveObjectPath } = require('../../utility/Utils')
+const QiwiBill = require('../../structures/QiwiBill')
 
 const router = Router()
 
@@ -211,6 +213,69 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
             autoreactions: updated.modules.autoreactions
         }
     })
+})
+
+router.post('/:guild_id/get-pay-url', authorize, async (req, res) => {
+    const guild_id = req.params.guild_id
+    const user_id = req.headers['x-user-id']
+    const amount = Number(req.query.amount)
+
+    if (!guild_id || !user_id || (!amount || isNaN(amount))) {
+        await res.status(400).end()
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').ServerDocument}
+     */
+    const guild = await servers.findOne({ _id: guild_id }).lean()
+
+    if (!guild || guild.server.blocked) {
+        await res.status(404).end()
+
+        return
+    }
+
+    /**
+     * @type {import('../../Typings').UserDocument}
+     */
+    const user = await users.findOne({ _id: user_id }).lean()
+
+    if (!user) {
+        await res.status(404).end()
+
+        return
+    }
+
+    if (user.bills.filter(bill => (Date.now() - bill.creation_timestamp) < 600000).length >= 2) {
+        await res.status(425).end()
+
+        return
+    }
+
+    const data = {
+        amount: {
+            currency: 'RUB',
+            value: amount
+        },
+        custom_fields: {
+            type: 'GUILD',
+            reference_id: guild_id,
+            user_id: user_id
+        }
+    }
+
+    const bill = new QiwiBill(data)
+    const form = await bill.create()
+
+    if (!form || !form.payUrl) {
+        await res.status(400).end()
+
+        return
+    }
+
+    await res.status(200).send(`${form.payUrl}&successUrl=${encodeURIComponent(`${process.env.WEBSITE_URL}/guilds/${guild_id}/settings`)}`)
 })
 
 router.put('/:guild_id/reactions', authorize, authorize.permitted, async (req, res) => {

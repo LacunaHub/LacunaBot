@@ -21,6 +21,7 @@ const User = new Schema({
         points: { type: Number, default: 0 },
         lifetime_points: { type: Number, default: 0 }
     },
+    bills: { type: Array, default: [] },
     created_at: { type: Number, default: 0 },
     modified_at: { type: Number, default: 0 }
 }, { versionKey: false })

@@ -1,3 +1,4 @@
+const { servers } = require('../../../database/DatabaseManager')
 const { GenerateRankCard } = require('../../../modules/Levels')
 
 /**
@@ -7,6 +8,8 @@ const { GenerateRankCard } = require('../../../modules/Levels')
  */
 module.exports = async (self, server, interaction) => {
     const locale = self.translator.locale(server.locale).commands
+
+    console.log(server.modules.levels)
 
     if (!server.modules.levels.active && !server.modules.levels.voice) {
         await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.levels_is_disabled, `**${interaction.member.displayName}**`)}`, ephemeral: true })

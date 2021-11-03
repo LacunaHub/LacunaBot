@@ -111,7 +111,7 @@ class Replacer {
                     topic: message?.channel?.topic,
                     type: message?.channel?.type
                 },
-                args: args,
+                args: Object.assign({}, { map: args.join(' '), ...args }),
                 created_at: message?.createdTimestamp,
                 edited_at: message?.editedTimestamp,
                 id: message?.id,
@@ -127,19 +127,22 @@ class Replacer {
             guild: {
                 name: guild.name,
                 acronym: guild.nameAcronym,
-                afk_channel_id: guild?.afkChannelId,
-                banner: guild?.banner,
+                afk_channel_id: guild.afkChannelId,
+                system_channel_id: guild.systemChannelId,
+                public_updates_channel_id: guild.publicUpdatesChannelId,
+                rules_channel_id: guild.rulesChannelId,
+                banner: guild.banner,
                 channels: {
                     total: guild.channels.cache.size,
-                    text: guild.channels.cache.filter(channel => channel.type == 'text').size,
-                    voice: guild.channels.cache.filter(channel => channel.type == 'voice').size,
-                    news: guild.channels.cache.filter(channel => channel.type == 'news').size,
-                    category: guild.channels.cache.filter(channel => channel.type == 'category').size,
-                    store: guild.channels.cache.filter(channel => channel.type == 'store').size
+                    text: guild.channels.cache.filter(channel => channel.type == 'GUILD_TEXT').size,
+                    voice: guild.channels.cache.filter(channel => channel.type == 'GUILD_VOICE').size,
+                    news: guild.channels.cache.filter(channel => channel.type == 'GUILD_NEWS').size,
+                    category: guild.channels.cache.filter(channel => channel.type == 'GUILD_CATEGORY').size,
+                    store: guild.channels.cache.filter(channel => channel.type == 'GUILD_STORE').size
                 },
                 created_at: guild.createdTimestamp,
-                description: guild?.description,
-                icon: guild?.icon,
+                description: guild.description,
+                icon: guild.icon,
                 id: guild.id,
                 members: {
                     total: guild.memberCount,

@@ -11,7 +11,6 @@ const lacuna = new Lacuna({
             }
         ]
     },
-    messageCacheLifetime: 7200,
     intents: [
         'GUILDS',
         'GUILD_MEMBERS',
@@ -32,12 +31,12 @@ const lacuna = new Lacuna({
         })
 
         if (manager.name == 'UserManager') return new LimitedCollection({
-            maxSize: 25000,
+            maxSize: 30000,
             keepOverLimit: v => v.id == process.env.CLIENT_ID
         })
 
         if (manager.name == 'GuildMemberManager') return new LimitedCollection({
-            maxSize: 2500,
+            maxSize: 1500,
             sweepFilter: () => v => v.id != process.env.CLIENT_ID,
             sweepInterval: 300
         })

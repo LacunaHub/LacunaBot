@@ -78,7 +78,7 @@ class Twitch {
         const rule = new RecurrenceRule()
         rule.minute = new Range(0, 59, 5)
 
-        const job = await scheduleJob(rule, async () => {
+        const job = scheduleJob(rule, async () => {
             const guilds = self.guilds.cache.map(g => g.id)
             const servers = await self.db.servers.findSome({ _id: { $in: guilds }, 'modules.twitch.channels.0': { $exists: true } })
 
@@ -87,99 +87,101 @@ class Twitch {
             for (const server of servers) {
                 const broadcasters = server.modules.twitch.channels.sort((a, b) => a.channel.display_name - b.channel.display_name).filter(c => (Date.now() - c.last_check_timestamp) > 600000)
                 
-                await broadcasters.forEach(async (broadcaster, i) => {
-                    if (i > 1 && !server.server.premium.available) return false
+                broadcasters.forEach(async (broadcaster, i) => {
+                    setTimeout(async () => {
+                        if (i > 1 && !server.server.premium.available) return false
 
-                    const guild = self.guilds.cache.get(server._id)
-
-                    if (!guild || !guild.available) return false
-
-                    const channel = guild.channels.cache.get(broadcaster.alerts.channel_id)
-
-                    if (channel) {
-                        const stream = await Twitch.checkOnLive(broadcaster)
-
-                        if (stream && !broadcaster.live) {
+                        const guild = self.guilds.cache.get(server._id)
+    
+                        if (!guild || !guild.available) return false
+    
+                        const channel = guild.channels.cache.get(broadcaster.alerts.channel_id)
+    
+                        if (channel) {
+                            const stream = await Twitch.checkOnLive(broadcaster)
+    
+                            if (stream && !broadcaster.live) {
+                                await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                                    $set: {
+                                        'modules.twitch.channels.$.live': true
+                                    }
+                                })
+    
+                                if (stream.name != broadcaster.channel.display_name || stream.logo != broadcaster.channel.logo) {
+                                    await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                                        $set: {
+                                            'modules.twitch.channels.$.channel.display_name': stream.name,
+                                            'modules.twitch.channels.$.channel.logo': stream.logo
+                                        }
+                                    })
+                                }
+    
+                                let webhook = await self.fetchWebhook(broadcaster.alerts.webhook.id, broadcaster.alerts.webhook.token).catch(() => {})
+    
+                                if (!webhook) {
+                                    try {
+                                        webhook = await channel.createWebhook(stream.name, { avatar: stream.logo })
+                                    } catch (err) { return false }
+    
+                                    await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                                        $set: {
+                                            'modules.twitch.channels.$.alerts.webhook.id': webhook.id,
+                                            'modules.twitch.channels.$.alerts.webhook.token': webhook.token
+                                        }
+                                    })
+                                }
+    
+                                const embed = new MessageEmbed()
+                                    .setTitle(stream.status)
+                                    .setDescription(stream.game)
+                                    .setURL(stream.url)
+                                    .setThumbnail(stream.game_image)
+                                    .setImage(broadcaster.alerts.display_preview ? stream.preview : stream.banner)
+                                    .setColor(0x563194)
+    
+                                let content = broadcaster.alerts.message_template || null
+    
+                                if (content) {
+                                    const replacer = new Replacer(self, broadcaster.alerts.message_template, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
+                                    content = await replacer.replace()
+                                }
+    
+                                const message = await webhook.send({
+                                    content,
+                                    embeds: [embed],
+                                    avatarURL: stream.logo,
+                                    name: stream.name
+                                })
+    
+                                if (broadcaster.alerts.after_end.delete_alert && message.id) {
+                                    await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                                        $set: {
+                                            'modules.twitch.channels.$.alerts.after_end.message_id': message.id
+                                        }
+                                    })
+                                }
+    
+                                await self.emit('moduleExecution', { module: 'Twitch', guild: { id: guild.id, name: guild.name }, target: { id: broadcaster.channel.id, name: broadcaster.channel.display_name } })
+                            }
+    
+                            else if (!stream && broadcaster.live) {
+                                await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                                    $set: {
+                                        'modules.twitch.channels.$.live': false,
+                                        'modules.twitch.channels.$.alerts.after_end.message_id': ''
+                                    }
+                                })
+    
+                                if (broadcaster.alerts.after_end.delete_alert && broadcaster.alerts.after_end.message_id) await channel.bulkDelete([broadcaster.alerts.after_end.message_id])
+                            }
+    
                             await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
                                 $set: {
-                                    'modules.twitch.channels.$.live': true
+                                    'modules.twitch.channels.$.last_check_timestamp': Date.now()
                                 }
                             })
-
-                            if (stream.name != broadcaster.channel.display_name || stream.logo != broadcaster.channel.logo) {
-                                await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
-                                    $set: {
-                                        'modules.twitch.channels.$.channel.display_name': stream.name,
-                                        'modules.twitch.channels.$.channel.logo': stream.logo
-                                    }
-                                })
-                            }
-
-                            let webhook = await self.fetchWebhook(broadcaster.alerts.webhook.id, broadcaster.alerts.webhook.token).catch(() => {})
-
-                            if (!webhook) {
-                                try {
-                                    webhook = await channel.createWebhook(stream.name, { avatar: stream.logo })
-                                } catch (err) { return false }
-
-                                await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
-                                    $set: {
-                                        'modules.twitch.channels.$.alerts.webhook.id': webhook.id,
-                                        'modules.twitch.channels.$.alerts.webhook.token': webhook.token
-                                    }
-                                })
-                            }
-
-                            const embed = new MessageEmbed()
-                                .setTitle(stream.status)
-                                .setDescription(stream.game)
-                                .setURL(stream.url)
-                                .setThumbnail(stream.game_image)
-                                .setImage(broadcaster.alerts.display_preview ? stream.preview : stream.banner)
-                                .setColor(0x563194)
-
-                            let content = broadcaster.alerts.message_template || null
-
-                            if (content) {
-                                const replacer = new Replacer(self, broadcaster.alerts.message_template, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
-                                content = await replacer.replace()
-                            }
-
-                            const message = await webhook.send({
-                                content,
-                                embeds: [embed],
-                                avatarURL: stream.logo,
-                                name: stream.name
-                            })
-
-                            if (broadcaster.alerts.after_end.delete_alert && message.id) {
-                                await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
-                                    $set: {
-                                        'modules.twitch.channels.$.alerts.after_end.message_id': message.id
-                                    }
-                                })
-                            }
-
-                            await self.emit('moduleExecution', { module: 'Twitch', guild: { id: guild.id, name: guild.name }, target: { id: broadcaster.channel.id, name: broadcaster.channel.display_name } })
                         }
-
-                        else if (!stream && broadcaster.live) {
-                            await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
-                                $set: {
-                                    'modules.twitch.channels.$.live': false,
-                                    'modules.twitch.channels.$.alerts.after_end.message_id': ''
-                                }
-                            })
-
-                            if (broadcaster.alerts.after_end.delete_alert && broadcaster.alerts.after_end.message_id) await channel.bulkDelete([broadcaster.alerts.after_end.message_id])
-                        }
-
-                        await self.db.servers.update({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
-                            $set: {
-                                'modules.twitch.channels.$.last_check_timestamp': Date.now()
-                            }
-                        })
-                    }
+                    }, i * 1500)
                 })
             }
         })

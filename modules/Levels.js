@@ -81,7 +81,7 @@ class Levels {
             })
         }
 
-        await self.emit('moduleExecution', { module: 'Levels: Message Create', guild: { id: message.guild.id, name: message.guild.name }, target: { id: message.member.id, name: message.author.tag } })
+        await self.emit('moduleExecution', { module: 'Levels: Message Create', guild: { id: message.guild.id, name: message.guild.name }, target: { id: message.author.id, name: message.author.tag } })
 
         return true
     }
@@ -458,12 +458,11 @@ class Levels {
         const rule = new RecurrenceRule()
         rule.minute = new Range(0, 59, 20)
 
-        scheduleJob(rule, async () => {
+        const job = scheduleJob(rule, async () => {
             if (!self.readyTimestamp) return null
 
-            let servers = await self.db.servers.findSome({ 'modules.levels.voice': true })
-
-            servers = servers.filter(s => self.guilds.cache.has(s._id))
+            const guilds = self.guilds.cache.map(g => g.id)
+            const servers = await self.db.servers.findSome({ _id: { $in: guilds }, 'modules.levels.voice': true })
 
             for (const server of servers) {
                 const activities = await self.db.activities.find({ _id: server._id })
@@ -483,27 +482,31 @@ class Levels {
                             
                             return
                         }
-                        
-                        const state = guild.voiceStates.cache.some(voice => voice?.member?.id == user.user_id && voice.channelID != guild.afkChannelID && voice?.channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)?.size > 1)
 
-                        if (!state) {
-                            const member = await guild.members._fetchSingle({ user: user.user_id })
+                        const member = await guild.members.fetch(user.user_id).catch(() => {})
 
-                            if (member) await Levels.voiceCount(self, server, member)
-                        }
-                        
-                        else {
+                        if (!member) {
                             await self.db.activities.update({ _id: guild.id, 'levels.user_id': user.user_id }, {
                                 $set: {
                                     'levels.$.activity.voice.connected_at': null,
                                     'levels.$.activity.voice.disconnected_at': Date.now()
                                 }
                             })
+
+                            return
                         }
+
+                        const voice_state = member.voice.channelId && member.voice.channelId != guild.afkChannelId && member.voice.channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)?.size > 1
+
+                        if (!voice_state) await Levels.voiceCount(self, server, member)
                     }
                 }
             }
         })
+
+        await self.logger.info(`(Levels): Voice states check has been initialized`)
+
+        return job
     }
 }
 
