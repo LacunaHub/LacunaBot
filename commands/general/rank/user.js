@@ -1,4 +1,3 @@
-const { servers } = require('../../../database/DatabaseManager')
 const { GenerateRankCard } = require('../../../modules/Levels')
 
 /**
