@@ -39,6 +39,17 @@ module.exports = async (self, server, interaction) => {
         return false
     }
 
+    const entry = self.qdb.get(`reports.${target_id}`)
+    if (!entry) self.qdb.set(`reports.${target_id}`, { timestamp: target.createdTimestamp, users: [] })
+
+    if (entry?.users?.includes(interaction.user.id)) {
+        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.already_reported, `**${interaction.member.displayName}**`)}`, ephemeral: true })
+
+        return false
+    }
+
+    self.qdb.push(`reports.${target_id}.users`, interaction.user.id)
+
     const messages = await channel.messages.fetch({ limit: 50 }).catch(() => {})
     const report = messages?.find(m => m.author.id == self.user.id && m.embeds[0]?.footer?.text?.startsWith(`ID: ${target.id}`))
 
