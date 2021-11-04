@@ -14,7 +14,6 @@ module.exports = async (self, server, interaction) => {
 
     const embed = new MessageEmbed()
         .setAuthor(interaction.guild.name, interaction.guild.iconURL())
-        .addField(locale.server.texts.bonused, server.server.premium.available ? self._emojis.OK : self._emojis.ERROR)
         .addField(locale.server.texts.owner, server_owner.user.tag, true)
         .addField(locale.server.texts.id, interaction.guild.id, true)
         .addField(locale.server.texts.members.title, `${interaction.guild.memberCount} ${locale.server.texts.members.total}`, true)
@@ -26,7 +25,8 @@ module.exports = async (self, server, interaction) => {
         .addField('\u200B', '\u200B', true)
         .addField('\u200B', `${locale.server.texts.footer.server_created} <t:${created_ts}:d> – <t:${created_ts}:R>`)
 
-    if (interaction.guild.description) embed.setDescription(interaction.guild.description)
+    if (server.server.premium.available) embed.setDescription(`${self._emojis.DIAMOND} ${locale.server.texts.diamomded}`)
+    if (interaction.guild.description) embed.setDescription(embed.description ? `${embed.description}\n${interaction.guild.description}` : interaction.guild.description)
     
     await interaction.reply({ embeds: [embed] })
 

@@ -14,7 +14,6 @@ module.exports = async (self, server, message) => {
 
     const embed = new MessageEmbed()
         .setAuthor(message.guild.name, message.guild.iconURL())
-        .addField(locale.server.texts.bonused, server.server.premium.available ? self._emojis.OK : self._emojis.ERROR)
         .addField(locale.server.texts.owner, server_owner.user.tag, true)
         .addField(locale.server.texts.id, message.guild.id, true)
         .addField(locale.server.texts.members.title, `${message.guild.memberCount} ${locale.server.texts.members.total}`, true)
@@ -26,7 +25,8 @@ module.exports = async (self, server, message) => {
         .addField('\u200B', '\u200B', true)
         .addField('\u200B', `${locale.server.texts.footer.server_created} <t:${created_ts}:d> – <t:${created_ts}:R>`)
 
-    if (message.guild.description) embed.setDescription(message.guild.description)
+    if (server.server.premium.available) embed.setDescription(`${self._emojis.DIAMOND} ${locale.server.texts.diamomded}`)
+    if (message.guild.description) embed.setDescription(embed.description ? `${embed.description}\n${message.guild.description}` : message.guild.description)
     
     await message.reply({ embeds: [embed] })
 

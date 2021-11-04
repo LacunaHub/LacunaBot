@@ -3,6 +3,7 @@ const moment = require('moment')
 const { scheduleJob, RecurrenceRule, Range } = require('node-schedule')
 const db = require('../../database/DatabaseManager')
 const Diamonder = require('../structures/Diamonder')
+const logger = require('../Logger')
 
 /**
  * @param {import('../Typings').BillObject} data
@@ -86,6 +87,10 @@ async function syncBills() {
             }
         }
     })
+    
+    logger.info('Sync for Qiwi bills initialized')
+
+    return job
 }
 
 module.exports = { createBill, getBill, syncBills }

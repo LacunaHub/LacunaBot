@@ -7,8 +7,7 @@ const Server = new Schema({
     server: {
         premium: {
             available: { type: Boolean, default: false },
-            will_expire_on: { type: Number, default: 0 },
-            booster_id: { type: String, default: null }
+            will_expire_on: { type: Number, default: 0 }
         },
         blocked: { type: Boolean, default: false },
         bot_experts: { type: Array, default: [] }

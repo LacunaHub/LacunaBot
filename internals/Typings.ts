@@ -9,7 +9,6 @@ export interface ServerDocument extends Document {
         premium: {
             available: boolean
             will_expire_on: number
-            booster_id?: string
         }
         blocked: boolean
         bot_experts: BotExpert[]

@@ -1,4 +1,4 @@
-const { Client, Collection, Permissions } = require('discord.js')
+const { Client, Collection, Permissions, Util } = require('discord.js')
 const { connect } = require('mongoose')
 const fs = require('fs-extra')
 const Utils = require('../internals/utility/Utils')
@@ -73,26 +73,18 @@ class Lacuna extends Client {
     }
 
     get _emojis() {
+        const OK = '<:OK:905724948453134349>'
+        const ERROR = '<:ERROR:905724969827315732>'
+        const DIAMOND = '<:DIAMOND:905707582042288178>'
+
         return {
-            OK: '<:OK:761265867950260284>',
-            ERROR: '<:ERROR:761265867110481970>',
-            WARNING: '<:WARNING:761920271669395496>',
+            OK,
+            ERROR,
+            DIAMOND,
             details: {
-                OK: {
-                    animated: false,
-                    id: '761265867950260284',
-                    name: 'OK'
-                },
-                ERROR: {
-                    animated: false,
-                    id: '761265867110481970',
-                    name: 'ERROR'
-                },
-                WARNING: {
-                    animated: false,
-                    id: '761920271669395496',
-                    name: 'WARNING'
-                }
+                OK: Util.parseEmoji(OK),
+                ERROR: Util.parseEmoji(ERROR),
+                DIAMOND: Util.parseEmoji(DIAMOND)
             }
         }
     }
