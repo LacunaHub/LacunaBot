@@ -107,7 +107,7 @@ class Replacer {
                     id: message?.channel?.id,
                     mention: `<#${message?.channel?.id ?? '1'}>`,
                     nsfw: message?.channel?.nsfw,
-                    position: message?.channel?.rawPosition,
+                    position: message?.channel?.rawPosition?.toString(),
                     topic: message?.channel?.topic,
                     type: message?.channel?.type
                 },
@@ -119,9 +119,69 @@ class Replacer {
                 type: message?.type,
                 url: message?.url,
                 mentions: {
-                    users: Object.assign({}, { ...message?.mentions?.users?.map(m => `<@${m.id}>`) }),
-                    roles: Object.assign({}, { ...message?.mentions?.roles?.map(m => `<@&${m.id}>`) }),
-                    channels: Object.assign({}, { ...message?.mentions?.channels?.map(m => `<#${m.id}>`) })
+                    members: message?.mentions?.members?.size ? Object.assign(
+                        ...message?.mentions?.members?.map(
+                            (m, i, col) => ({
+                                [[ ...col.keys() ].indexOf(i)]: {
+                                    mention: `<@${m.id}>`,
+                                    username: m.user.username,
+                                    avatar: m.displayAvatarURL(),
+                                    discriminator: m.user.discriminator,
+                                    display_name: m.displayName,
+                                    id: m.id,
+                                    tag: m.user.tag,
+                                    created_at: m.user.createdTimestamp,
+                                    joined_at: m.joinedTimestamp,
+                                    nickname: m.nickname,
+                                    voice: {
+                                        name: m.voice?.channel?.name,
+                                        id: m.voice?.channelId,
+                                        mention: m.voice ? `<#${m.voice.channelId}>` : null,
+                                        full: m.voice?.channel?.full,
+                                        position: m.voice?.channel?.rawPosition?.toString()
+                                    },
+                                    roles: Object.assign(
+                                        ...m.roles.cache.map(
+                                            r => ({
+                                                [r.id]: {
+                                                    name: r.name,
+                                                    mention: `<@&${r.id}>`,
+                                                    id: r.id,
+                                                    position: r.rawPosition.toString(),
+                                                    color: r.hexColor,
+                                                    created_at: r.createdTimestamp
+                                                }
+                                            })
+                                        )
+                                    )
+                                }
+                            })
+                        )
+                    ) : {},
+                    roles: message?.mentions?.roles?.size ? Object.assign(
+                        ...message?.mentions?.roles?.map(
+                            (m, i, col) => ({
+                                [[ ...col.keys() ].indexOf(i)]: {
+                                    mention: `<@&${m.id}>`,
+                                    name: m.name,
+                                    id: m.id,
+                                    position: m.rawPosition.toString(),
+                                    color: m.hexColor,
+                                    created_at: m.createdTimestamp
+                                }
+                            })
+                        )
+                    ) : {},
+                    channels: message?.mentions?.channels?.size ? Object.assign(
+                        ...message?.mentions?.channels?.map(
+                            (m, i, col) => ({
+                                [[ ...col.keys() ].indexOf(i)]: {
+                                    mention: `<#${m.id}>`,
+                                    type: m.type
+                                }
+                            })
+                        )
+                    ) : {}
                 }
             },
             guild: {
@@ -186,9 +246,22 @@ class Replacer {
                     id: member.voice?.channelId,
                     mention: member.voice ? `<#${member.voice.channelId}>` : null,
                     full: member.voice?.channel?.full,
-                    position: member.voice?.channel?.rawPosition
+                    position: member.voice?.channel?.rawPosition?.toString()
                 },
-                roles: Object.assign(...member.roles.cache.map(r => ({ [r.id]: { id: r.id, name: r.name } })))
+                roles: Object.assign(
+                    ...member.roles.cache.map(
+                        r => ({
+                            [r.id]: {
+                                name: r.name,
+                                mention: `<@&${r.id}>`,
+                                id: r.id,
+                                position: r.rawPosition.toString(),
+                                color: r.hexColor,
+                                created_at: r.createdTimestamp
+                            }
+                        })
+                    )
+                )
             },
             subs: {
                 name: subs?.name ?? null,
