@@ -170,7 +170,7 @@ export interface ServerDocument extends Document {
                     }
                     add_roles: string[]
                     remove_roles: string[]
-                },
+                }
                 ignored: {
                     channels: string[]
                     roles: string[]
@@ -192,7 +192,7 @@ export interface ServerDocument extends Document {
                     }
                     add_roles: string[]
                     remove_roles: string[]
-                },
+                }
                 ignored: {
                     channels: string[]
                     roles: string[]
@@ -211,7 +211,7 @@ export interface ServerDocument extends Document {
                     }
                     add_roles: string[]
                     remove_roles: string[]
-                },
+                }
                 ignored: {
                     channels: string[]
                     roles: string[]
@@ -231,7 +231,7 @@ export interface ServerDocument extends Document {
                     }
                     add_roles: string[]
                     remove_roles: string[]
-                },
+                }
                 ignored: {
                     channels: string[]
                     roles: string[]
@@ -254,6 +254,20 @@ export interface ServerDocument extends Document {
                 ignored: {
                     roles: string[]
                     permissions: number
+                    bots: boolean
+                }
+            }
+            newbies: {
+                active: boolean
+                minimum_account_age: {
+                    value: number
+                    measure: 'MINUTES' | 'HOURS' | 'DAYS'
+                }
+                penalty: {
+                    action: number
+                    timer: number
+                    add_roles: string[]
+                    remove_roles: string[]
                 }
             }
         }
@@ -671,10 +685,10 @@ export interface UserDocument extends Document {
         views: number
         upvoters: Array<string>
     }
-    boost: {
+    boost?: {
         available?: boolean
-        points: number
-        lifetime_points: number
+        points?: number
+        lifetime_points?: number
         type?: Array<BoostType>
         tier?: number
         guilds?: Array<BoostedGuild>

@@ -540,18 +540,6 @@ class Guilds {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.emojis': data.moderation.automoder.nicknames.types.emojis } })
                         }
 
-                        if (typeof data.moderation.automoder.nicknames.types.links === 'boolean' && data.moderation.automoder.nicknames.types.links !== guild.moderation.automoder.nicknames.types.links) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.links': data.moderation.automoder.nicknames.types.links } })
-                        }
-
-                        if (typeof data.moderation.automoder.nicknames.types.regexp.pattern === 'string' && data.moderation.automoder.nicknames.types.regexp.pattern !== guild.moderation.automoder.nicknames.types.regexp.pattern) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.regexp.pattern': data.moderation.automoder.nicknames.types.regexp.pattern } })
-                        }
-
-                        if (Array.isArray(data.moderation.automoder.nicknames.types.regexp.flags)) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.regexp.flags': data.moderation.automoder.nicknames.types.regexp.flags } })
-                        }
-
                         if (Array.isArray(data.moderation.automoder.nicknames.types.contains)) {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.contains': data.moderation.automoder.nicknames.types.contains } })
                         }
@@ -564,6 +552,43 @@ class Guilds {
 
                         if (typeof data.moderation.automoder.nicknames.ignored.permissions === 'number' && data.moderation.automoder.nicknames.ignored.permissions !== guild.moderation.automoder.nicknames.ignored.permissions) {
                             await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.ignored.permissions': data.moderation.automoder.nicknames.ignored.permissions } })
+                        }
+
+                        if (typeof data.moderation.automoder.nicknames.ignored.bots === 'boolean' && data.moderation.automoder.nicknames.ignored.bots !== guild.moderation.automoder.nicknames.ignored.bots) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.ignored.bots': data.moderation.automoder.nicknames.ignored.bots } })
+                        }
+                    }
+                }
+
+                if (data.moderation.automoder.newbies) {
+                    if (typeof data.moderation.automoder.newbies.active === 'boolean' && data.moderation.automoder.newbies.active !== guild.moderation.automoder.newbies.active) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.active': data.moderation.automoder.newbies.active } })
+                    }
+
+                    if (typeof data.moderation.automoder.newbies.minimum_account_age?.value === 'number' && data.moderation.automoder.newbies.minimum_account_age.value !== guild.moderation.automoder.newbies.minimum_account_age.value) {
+                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.minimum_account_age.value': data.moderation.automoder.newbies.minimum_account_age.value } })
+                    }
+
+                    if (typeof data.moderation.automoder.newbies.minimum_account_age?.measure === 'string' && data.moderation.automoder.newbies.minimum_account_age.measure !== guild.moderation.automoder.newbies.minimum_account_age.measure) {
+                        if (['MINUTES', 'HOURS', 'DAYS'].includes(data.moderation.automoder.newbies.minimum_account_age.measure))
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.minimum_account_age.measure': data.moderation.automoder.newbies.minimum_account_age.measure } })
+                    }
+
+                    if (data.moderation.automoder.newbies.penalty) {
+                        if (typeof data.moderation.automoder.newbies.penalty.action === 'number' && data.moderation.automoder.newbies.penalty.action !== guild.moderation.automoder.newbies.penalty.action) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.penalty.action': data.moderation.automoder.newbies.penalty.action } })
+                        }
+
+                        if (typeof data.moderation.automoder.newbies.penalty.timer === 'number' && data.moderation.automoder.newbies.penalty.timer !== guild.moderation.automoder.newbies.penalty.timer) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.penalty.timer': data.moderation.automoder.newbies.penalty.timer } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.newbies.penalty.add_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.penalty.add_roles': data.moderation.automoder.newbies.penalty.add_roles } })
+                        }
+
+                        if (Array.isArray(data.moderation.automoder.newbies.penalty.remove_roles)) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.penalty.remove_roles': data.moderation.automoder.newbies.penalty.remove_roles } })
                         }
                     }
                 }

@@ -17,6 +17,7 @@ const handler = async (self, member) => {
 
     await GuildMemberAdd(self, server, member)
     await Automoder.updateNickname(self, server, member)
+    await Automoder.validateNewbie(self, server, member)
 
     return true
 }

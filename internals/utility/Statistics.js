@@ -9,7 +9,7 @@ class Statistics {
      */
     static async schedule(manager) {
         const rule = new RecurrenceRule()
-        rule.minute = new Range(0, 59, 2)
+        rule.minute = new Range(0, 59, 5)
 
         await scheduleJob(rule, async () => {
             if (!manager.shards.every(shard => shard.ready)) return null
@@ -21,6 +21,12 @@ class Statistics {
 
             qdb.push('charts.guilds', { n: guilds, ts: Date.now() })
             qdb.push('charts.pings', { d: pings, ts: Date.now() })
+
+            const g_charts = qdb.get('charts.guilds')
+            const p_charts = qdb.get('charts.pings')
+
+            qdb.set('charts.guilds', g_charts.filter(c => (Date.now() - c.ts) < 259200000))
+            qdb.set('charts.pings', p_charts.filter(c => (Date.now() - c.ts) < 259200000))
 
             await Statistics.sendGuildCount(guilds)
         })

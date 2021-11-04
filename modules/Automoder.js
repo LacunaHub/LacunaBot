@@ -481,6 +481,7 @@ class Automoder {
         const config = server.moderation.automoder.nicknames
 
         if (!config.active) return false
+        if (member.user.bot && config.ignored.bots) return false
         if (member.permissions.any(BigInt(config.ignored.permissions), false)) return false
 
         if (member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
@@ -493,7 +494,7 @@ class Automoder {
             name = adjectives[random]
         }
 
-        if (member.manageable && name !== member.displayName) {
+        if (member.manageable && name != member.displayName) {
             await member.setNickname(name, 'Автомодер: Модерирование никнеймов').catch(self.logger.error)
         
             await self.emit('moduleExecution', { module: 'Automoder: Nickname Moderation', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
@@ -523,19 +524,121 @@ class Automoder {
         if (types.contains.some(c => split.includes(c))) {
             types.contains.forEach(c => name = name.replace(c, ''))
         }
-        
-        if (types.regexp.pattern) {
-            let regexp = null
-            try {
-                regexp = new RegExp(types.regexp.pattern, types.regexp.flags.join(''))
-            } catch (err) {
-                regexp = null
-            }
-
-            if (regexp) name = name.replace(regexp, '')
-        }
 
         return name.trim()
+    }
+
+    /**
+     * @param {import('../internals/Lacuna')} self
+     * @param {import('../internals/Typings').ServerDocument} server
+     * @param {import('discord.js').GuildMember} member
+     */
+    static async validateNewbie(self, server, member) {
+        const config = server.moderation.automoder.newbies
+
+        if (!config.active) return false
+
+        const values = {
+            MINUTES: 60,
+            HOURS: 3600,
+            DAYS: 86400
+        }
+
+        const is_newbie = (Date.now() - member.user.createdTimestamp) / 1000 < config.minimum_account_age.value * values[config.minimum_account_age.measure]
+
+        if (is_newbie) {
+            const ban = (config.penalty.action & 1 << 0) === (1 << 0)
+            const mute = (config.penalty.action & 1 << 1) === (1 << 1)
+            const kick = (config.penalty.action & 1 << 4) === (1 << 4)
+            const edit_roles = (config.penalty.action & 1 << 6) === (1 << 6)
+
+            if (ban && (!mute && !kick)) {
+                if (config.penalty.timer) {
+                    const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+
+                    new TemporaryBan(self, {
+                        user_id: member.id,
+                        guild_id: member.guild.id,
+                        expires_timestamp: expires_timestamp,
+                        reason: `Автомодер: Модерирование новоприбывших (${moment(expires_timestamp).locale(server.locale).endOf().fromNow(true)})`,
+                        init: true
+                    })
+                }
+
+                else {
+                    await member.guild.members.ban(member.id, { reason: 'Автомодер: Модерирование новоприбывших' }).catch(self.logger.error)
+                }
+            }
+
+            if (mute && (!ban && !kick)) {
+                const mute_role = member.guild.roles.cache.get(server.moderation.roles.mute)
+                const tempmute = self.tempmutes.find(tm => tm.user_id == member.id)
+
+                if (mute_role && !tempmute && !mute_role.members.has(member.id)) {
+                    if (config.penalty.timer) {
+                        const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+
+                        new TemporaryMute(self, {
+                            user_id: member.id,
+                            guild_id: member.guild.id,
+                            role_id: mute_role.id,
+                            expires_timestamp: expires_timestamp,
+                            reason: `Автомодер: Модерирование новоприбывших (${moment(expires_timestamp).locale(server.locale).endOf().fromNow(true)})`,
+                            init: true
+                        })
+                    }
+
+                    else {
+                        if (server.moderation.roles.on_mute.remove_all_roles) {
+                            const current_roles = member.roles.cache.filter(r => r.editable && r.id != member.guild.id).map(r => r.id)
+                
+                            await self.db.servers.update({ _id: member.guild.id }, {
+                                $push: {
+                                    'moderation.roles.on_mute.returnable_roles': {
+                                        user_id: member.id,
+                                        roles: current_roles
+                                    }
+                                }
+                            })
+                
+                            const strict_roles = [...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)), ...member.roles.cache.filter(r => !r.editable).map(r => r.id)]
+                
+                            await member.roles.set([mute_role.id, ...strict_roles], 'Автомодер: Модерирование новоприбывших').catch(self.logger.error)
+                        }
+
+                        else {
+                            await member.roles.add(mute_role.id, 'Автомодер: Модерирование новоприбывших').catch(self.logger.error)
+                        }
+                    }
+                }
+            }
+
+            if (kick && (!ban && !mute)) {
+                if (member.kickable) await member.kick('Автомодер: Модерирование новоприбывших').catch(self.logger.error)
+            }
+
+            if (edit_roles && (!ban && !kick)) {
+                if (config.penalty?.add_roles?.length) {
+                    const editable = member.guild.roles.cache.filter(r => r.editable && config.penalty.add_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await member.roles.add(editable, 'Автомодер: Модерирование новоприбывших').catch(self.logger.error)
+                    }
+                }
+
+                if (config.penalty?.remove_roles?.length) {
+                    const editable = member.guild.roles.cache.filter(r => r.editable && config.penalty.remove_roles.includes(r.id))
+
+                    if (editable.size) {
+                        await member.roles.remove(editable, 'Автомодер: Модерирование новоприбывших').catch(self.logger.error)
+                    }
+                }
+            }
+
+            await self.emit('moduleExecution', { module: 'Automoder: Newbies Moderation', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+        
+            return true
+        }
     }
 }
 

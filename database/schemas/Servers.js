@@ -344,7 +344,21 @@ const Server = new Schema({
                 },
                 ignored: {
                     roles: { type: Array, default: [] },
-                    permissions: { type: Number, default: 8 }
+                    permissions: { type: Number, default: 8 },
+                    bots: { type: Boolean, default: false }
+                }
+            },
+            newbies: {
+                active: { type: Boolean, default: false },
+                minimum_account_age: {
+                    value: { type: Number, default: 12 },
+                    measure: { type: String, default: 'HOURS' }
+                },
+                penalty: {
+                    action: { type: Number, default: 0 },
+                    timer: { type: Number, default: 0 },
+                    add_roles: { type: Array, default: [] },
+                    remove_roles: { type: Array, default: [] }
                 }
             }
         },

@@ -17,10 +17,6 @@ const User = new Schema({
         views: { type: Number, default: 0 },
         upvoters: { type: Array, default: [] }
     },
-    boost: {
-        points: { type: Number, default: 0 },
-        lifetime_points: { type: Number, default: 0 }
-    },
     bills: { type: Array, default: [] },
     created_at: { type: Number, default: 0 },
     modified_at: { type: Number, default: 0 }

@@ -47,7 +47,7 @@ const handler = async (self, message) => {
         await custom.execute()
     }
 
-    if (!command && !custom_command) await messageCreate(self, server, message)
+    if (!command && !custom_command && ['DEFAULT', 'REPLY'].includes(message.type)) await messageCreate(self, server, message)
 
     await Automoder.linksFilter(self, server, message)
     await Automoder.swearFilter(self, server, message)
