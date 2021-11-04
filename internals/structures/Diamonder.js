@@ -25,6 +25,7 @@ class Diamonder {
 
     initialize() {
         this.schedule = scheduleJob(`${this.guild_id}:${this.expiration}`, this.expiration, () => this.expire())
+        logger.telegram.info(`(Diamonder): Guild ${this.guild_id} received a Diamond subscription`)
     }
 
     async expire() {
@@ -35,7 +36,7 @@ class Diamonder {
             }
         })
 
-        logger.info(`(Diamonder): Diamond on guild ${this.guild_id} was expired`)
+        logger.telegram.info(`(Diamonder): Diamond on guild ${this.guild_id} was expired`)
     }
 
     static async scheduleDiamonded() {
