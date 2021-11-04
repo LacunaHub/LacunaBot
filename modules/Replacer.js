@@ -277,7 +277,12 @@ class Replacer {
             }
         }
 
-        return template.embed.active ? { content: content, embeds: [new MessageEmbed(embed)] } : { content: content }
+        const returning = {}
+
+        if (content) returning['content'] = content
+        if (template.embed.active) returning['embeds'] = [ new MessageEmbed(embed) ]
+
+        return returning
     }
 }
 

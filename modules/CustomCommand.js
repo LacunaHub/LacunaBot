@@ -152,8 +152,6 @@ class CustomCommand {
                             }
                         }
 
-                        console.log(value)
-
                         if (value && component.condition.if_else.actions.length) {
                             for (const if_component of component.condition.if_else.actions) {
                                 if (if_component.action.type == 'REPLY') {

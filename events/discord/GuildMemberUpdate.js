@@ -34,7 +34,7 @@ const handler = async (self, before, member) => {
         await self.emit('roleMemberRemove', member, roles)
     }
 
-    if (member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED') && !member.pending) await Greeting.Handle(self, server, member)
+    if (member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED') && before.pending && !member.pending) await Greeting.Handle(self, server, member)
 
     await GuildMemberUpdate(self, server, before, member)
 
