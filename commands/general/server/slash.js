@@ -17,7 +17,7 @@ module.exports = async (self, server, interaction) => {
         .addField(locale.server.texts.owner, server_owner.user.tag, true)
         .addField(locale.server.texts.id, interaction.guild.id, true)
         .addField(locale.server.texts.members.title, `${interaction.guild.memberCount} ${locale.server.texts.members.total}`, true)
-        .addField(locale.server.texts.channels.title, `${interaction.guild.channels.cache.filter(c => c.type == 'text').size} ${locale.server.texts.channels.text}\n${interaction.guild.channels.cache.filter(c => c.type == 'voice').size} ${locale.server.texts.channels.voice}`, true)
+        .addField(locale.server.texts.channels.title, `${interaction.guild.channels.cache.filter(c => c.type == 'GUILD_TEXT').size} ${locale.server.texts.channels.text}\n${interaction.guild.channels.cache.filter(c => c.type == 'GUILD_VOICE').size} ${locale.server.texts.channels.voice}`, true)
         .addField(locale.server.texts.verification_level, locale.server.texts.verification_levels[interaction.guild.verificationLevel], true)
         .addField(locale.server.texts.afk_channel, interaction.guild?.afkChannel?.name ?? '-', true)
         .addField(locale.server.texts.roles, `${interaction.guild.roles.cache.size}`, true)
