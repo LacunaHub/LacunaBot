@@ -45,7 +45,7 @@ module.exports = async (self, server, interaction) => {
             /**
              * @type {import('discord.js').GuildMember}
              */
-            const member = await interaction.guild.members._fetchSingle({ user: level.user_id, cache: false })
+            const member = await interaction.guild.members.fetch(level.user_id).catch(() => {})
 
             const current_xp_format = level.experience.current >= 1000 ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 1 }).toUpperCase() : level.experience.current.toFixed(1)
             const total_xp_format = level.experience.total >= 1000 ? numbro(Math.floor(level.experience.total)).format({ average: true, mantissa: 1 }).toUpperCase() : level.experience.total.toFixed(1)
