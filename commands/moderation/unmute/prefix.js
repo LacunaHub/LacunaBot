@@ -10,7 +10,7 @@ module.exports = async (self, server, message) => {
     const locale = self.translator.locale(server.locale).commands
 
     const mention = message.mentions.members.first() || (message.args[0] ? (await message.guild.members.fetch(message.args[0])) : null)
-    const reason = message.args[1] ?? '-'
+    const reason = message.args.slice(1).join(' ') || '-'
 
     if (!mention) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_found, `**${message.member.displayName}**`)}` })

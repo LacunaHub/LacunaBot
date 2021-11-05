@@ -11,7 +11,7 @@ module.exports = async (self, server, message) => {
 
     const amount = isNaN(message.args[0]) ? 0 : Number(message.args[0])
     const mention = message.mentions.members.first() || (message.args[1] ? (await message.guild.members.fetch(message.args[1])) : null)
-    const reason = message.args[2] ?? '-'
+    const reason = message.args.slice(2).join(' ') || '-'
 
     if (!amount) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.prune.texts.no_amount_argument, `**${message.member.displayName}**`)}` })

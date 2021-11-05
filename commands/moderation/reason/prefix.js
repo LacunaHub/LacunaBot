@@ -9,7 +9,7 @@ module.exports = async (self, server, message) => {
     const locale = self.translator.locale(server.locale).commands
 
     const case_id = isNaN(message.args[0]) ? 0 : Number(message.args[0])
-    const reason = message.args[1]
+    const reason = message.args.slice(1).join(' ') || '-'
 
     if (!case_id) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.reason.texts.no_case_id, `**${message.member.displayName}**`)}` })

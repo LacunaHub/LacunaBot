@@ -14,9 +14,10 @@ module.exports = async (self, server, message) => {
 
     const mention = message.mentions.members.first() || (message.args[0] ? (await message.guild.members.fetch(message.args[0])) : null)
     let duration = message.args[1]
-    let reason = message.args[2] ?? '-'
-
+    
     duration = duration && ms(duration) ? ms(duration) : null
+
+    let reason = message.args.slice(duration ? 2 : 1).join(' ') || '-'
 
     if (!mention) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_not_found, `**${message.member.displayName}**`)}` })
