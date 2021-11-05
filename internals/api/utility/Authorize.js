@@ -74,7 +74,7 @@ module.exports.permitted = async function (req, res, next) {
         return
     }
 
-    const permissions = new Permissions(guild.permissions)
+    const permissions = new Permissions(BigInt(guild.permissions))
 
     if (!guild.owner && !permissions.has('ADMINISTRATOR')) {
         await res.status(403).send('Forbidden')
