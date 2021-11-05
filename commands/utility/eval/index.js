@@ -1,6 +1,6 @@
 const prefix = require('./prefix')
 
-const name = __dirname.split(/\\/).pop()
+const name = __dirname.split(/\\/).pop().split('/').pop()
 
 module.exports = {
     prefix,

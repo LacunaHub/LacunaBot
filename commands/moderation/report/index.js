@@ -1,7 +1,7 @@
 const message = require('./message')
 const slash = require('./slash')
 
-const name = __dirname.split(/\\/).pop()
+const name = __dirname.split(/\\/).pop().split('/').pop()
 
 module.exports = {
     message,

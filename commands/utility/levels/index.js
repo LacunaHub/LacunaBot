@@ -1,7 +1,7 @@
 const { setPrefix, resetPrefix } = require('./prefix')
 const { setSlash, resetSlash } = require('./slash')
 
-const name = __dirname.split(/\\/).pop()
+const name = __dirname.split(/\\/).pop().split('/').pop()
 
 module.exports = {
     prefix: async (self, server, message) => {
