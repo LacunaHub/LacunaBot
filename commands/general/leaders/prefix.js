@@ -1,6 +1,6 @@
 const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
 const numbro = require('numbro')
-const { chunkArray } = require('../../../internals/utility/Utils')
+const { chunkArray, isSnowflake } = require('../../../internals/utility/Utils')
 
 /**
  * @param {import('../../../internals/Lacuna')} self
@@ -28,7 +28,7 @@ module.exports = async (self, server, message) => {
     /**
      * @type {Array<import('../../internals/Typings').LevelActivities[]>}
      */
-    const chunks = chunkArray(sorted, 15)
+    const chunks = chunkArray(sorted, 9)
     let page = 0
 
     const embed = new MessageEmbed()
@@ -42,17 +42,12 @@ module.exports = async (self, server, message) => {
         for (const level of chunk) {
             const index = sorted.indexOf(level)
 
-            /**
-             * @type {import('discord.js').GuildMember}
-             */
-            const member = await message.guild.members.fetch(level.user_id).catch(() => {})
-
             const current_xp_format = level.experience.current >= 1000 ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 1 }).toUpperCase() : level.experience.current.toFixed(1)
             const total_xp_format = level.experience.total >= 1000 ? numbro(Math.floor(level.experience.total)).format({ average: true, mantissa: 1 }).toUpperCase() : level.experience.total.toFixed(1)
             const voice_time = numbro(level.activity.voice.total_time).format({ output: 'time' })
 
             current.push({
-                name: `#${index + 1} ${member?.displayName ?? '???'}`,
+                name: `#${index + 1} ${level.user_id}`,
                 value: `${self.translator.format(locale.leaders.texts.level, level.experience.level)} → :sparkles: ${current_xp_format} – ${total_xp_format}\n:incoming_envelope: ${level.activity.text.total_messages} :microphone2: ${voice_time}`,
                 inline: true
             })
@@ -75,17 +70,26 @@ module.exports = async (self, server, message) => {
                 .setDisabled(fields.length == 1)
         )
 
+    const field = fields[page]
+
+    for (const chunk of field) {
+        const [ index, user_id ] = chunk.name.split(' ')
+        const member = isSnowflake(user_id) ? (await message.guild.members.fetch(user_id).catch(() => {})) : user_id
+
+        chunk.name = `${index} ${member?.displayName ?? user_id}`
+    }
+
     /**
      * @type {import('discord.js').Message}
      */
     const _message = await message.reply({
-        embeds: [ embed.setFields(fields[page]).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+        embeds: [ embed.setFields(field).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
         components: [row]
     })
 
     const collector = _message.createMessageComponentCollector({
         filter: i => row.components.some(c => c.customId == i.customId) && i.user.id == message.author.id,
-        time: 30000
+        time: 60000
     })
 
     collector.on('collect', async i => {
@@ -99,8 +103,17 @@ module.exports = async (self, server, message) => {
             break
         }
 
+        const field = fields[page]
+
+        for (const chunk of field) {
+            const [ index, user_id ] = chunk.name.split(' ')
+            const member = isSnowflake(user_id) ? (await message.guild.members.fetch(user_id).catch(() => {})) : user_id
+    
+            chunk.name = `${index} ${member?.displayName ?? user_id}`
+        }
+
         await _message.edit({
-            embeds: [ embed.setFields(fields[page]).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+            embeds: [ embed.setFields(field).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
             components: [row]
         })
 
