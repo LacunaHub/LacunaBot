@@ -215,13 +215,13 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
     })
 })
 
-router.post('/:guild_id/get-pay-url', authorize, async (req, res) => {
+router.post('/:guild_id/get-pay-url', authorize, authorize.permitted, async (req, res) => {
     const guild_id = req.params.guild_id
     const user_id = req.headers['x-user-id']
     const amount = Number(req.query.amount)
 
     if (!guild_id || !user_id || (!amount || isNaN(amount))) {
-        await res.status(400).end()
+        await res.status(400).send('Bad request')
 
         return
     }
@@ -270,7 +270,7 @@ router.post('/:guild_id/get-pay-url', authorize, async (req, res) => {
     const form = await bill.create()
 
     if (!form || !form.payUrl) {
-        await res.status(400).end()
+        await res.status(400).send('No pay url')
 
         return
     }
