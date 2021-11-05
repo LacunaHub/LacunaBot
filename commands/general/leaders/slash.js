@@ -36,6 +36,8 @@ module.exports = async (self, server, interaction) => {
 
     const fields = []
 
+    if (!interaction.deferred) await interaction.deferReply({ ephemeral: true })
+
     for (const chunk of chunks) {
         const current = []
 
@@ -60,8 +62,6 @@ module.exports = async (self, server, interaction) => {
 
         fields.push(current)
     }
-
-    if (!interaction.deferred) await interaction.deferReply({ ephemeral: true })
 
     const row = new MessageActionRow()
         .addComponents(
