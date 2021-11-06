@@ -133,6 +133,18 @@ const Server = new Schema({
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
                 },
+                sticker_create: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                sticker_delete: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                sticker_update: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
                 thread_create: {
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
