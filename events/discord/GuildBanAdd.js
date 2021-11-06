@@ -3,26 +3,27 @@ const { GuildBanAdd, images } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self
- * @param {import('discord.js').Guild} guild
- * @param {import('discord.js').User} user
+ * @param {import('discord.js').GuildBan} ban
  */
-const handler = async (self, guild, user) => {
-    const server = await self.db.servers.fetch({ _id: guild.id })
+const handler = async (self, ban) => {
+    const server = await self.db.servers.find({ _id: ban.guild.id })
+
+    if (!server) return null
 
     const locale = self.translator.locale(server.locale)
 
-    const case_log = guild.channels.cache.get(server.moderation.case_log.channel_id)
+    const case_log = ban.guild.channels.cache.get(server.moderation.case_log.channel_id)
 
-    if (case_log && guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) && server.moderation.case_log.case_types.BAN_ADD) {
-        const audit = await guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_BAN_ADD' })
-        const entry = audit.entries.find(e => e.target.id == user.id)
+    if (case_log && ban.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) && server.moderation.case_log.case_types.BAN_ADD) {
+        const audit = await ban.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_BAN_ADD' })
+        const entry = audit.entries.find(e => e.target.id == ban.user.id)
 
         if (entry && (entry.executor.id != self.user.id || entry.reason?.includes('Автомодер:'))) {
             const case_id = server.moderation.case_log.cases.length + 1
     
             const embed = new MessageEmbed()
                 .setAuthor(locale.commands.common.case_log.cases.BAN_ADD, images.BAN_ADD)
-                .addField(locale.commands.common.case_log.target, `${user.tag}\n(${user.id})`, true)
+                .addField(locale.commands.common.case_log.target, `${ban.user.tag}\n(${ban.user.id})`, true)
                 .addField(locale.commands.common.case_log.executor, entry.executor.tag, true)
                 .addField(locale.commands.common.case_log.reason, entry.reason ?? '-')
                 .setFooter(self.translator.format(locale.commands.common.case_log.case, case_id))
@@ -31,7 +32,7 @@ const handler = async (self, guild, user) => {
             
             await case_log.send({ embeds: [embed] })
     
-            await self.db.servers.update({ _id: guild.id }, {
+            await self.db.servers.update({ _id: ban.guild.id }, {
                 $push: {
                     'moderation.case_log.cases': {
                         case_id: case_id,
@@ -39,8 +40,8 @@ const handler = async (self, guild, user) => {
                         timestamp: Date.now(),
                         reason: entry.reason ?? '-',
                         target: {
-                            id: user.id,
-                            name: user.tag
+                            id: ban.user.id,
+                            name: ban.user.tag
                         },
                         executor: {
                             id: entry.executor.id,
@@ -52,7 +53,7 @@ const handler = async (self, guild, user) => {
         }
     }
 
-    await GuildBanAdd(self, server, guild, user)
+    await GuildBanAdd(self, server, ban.guild, ban.user)
 
     return true
 }

@@ -12,7 +12,7 @@ const handler = async (self, player) => {
         const embed = new MessageEmbed(message.embeds[0])
             .setDescription(`${player.queue.current.title} \`[${numbro(player.queue.current.duration / 1000).format({ output: 'time' })}]\``)
             
-        embed.setFooter(embed.footer.text.replace(/:[\w\W]+/i, `: ${player.queue.current.requester}`))
+        if (embed.footer?.text) embed.setFooter(embed.footer.text.replace(/:[\w\W]+/i, `: ${player.queue.current.requester}`))
 
         await message.edit({ embeds: [embed] }).catch(() => { player.set('message', null); player.set('collector', null) })
         player.get('collector')?.resetTimer()
