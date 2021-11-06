@@ -36,7 +36,7 @@ router.get('/summary', async (req, res) => {
     })
 
     await res.status(200).json({
-        version: version,
+        version: version.split('.').slice(0, 2).join('.'),
         guilds: guilds.reduce((a, b) => a + b, 0),
         users: users.reduce((a, b) => a + b, 0),
         channels: channels.reduce((a, b) => a + b, 0),

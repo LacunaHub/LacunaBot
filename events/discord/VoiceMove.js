@@ -1,5 +1,5 @@
 const { voiceUnassign, voiceAssign } = require('../../modules/Levels')
-const VoiceMove = require('../../modules/Logs/Voice/VoiceMove')
+const { VoiceMove } = require('../../modules/Logs')
 const { CreateTempVoiceOnMove } = require('../../modules/VoiceManager')
 
 /**

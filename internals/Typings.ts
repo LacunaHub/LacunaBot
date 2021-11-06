@@ -58,6 +58,18 @@ export interface ServerDocument extends Document {
                     active: boolean
                     channel_id: string
                 }
+                emoji_create: {
+                    active: boolean
+                    channel_id: string
+                }
+                emoji_delete: {
+                    active: boolean
+                    channel_id: string
+                }
+                emoji_update: {
+                    active: boolean
+                    channel_id: string
+                }
                 guild_ban_add: {
                     active: boolean
                     channel_id: string
@@ -119,6 +131,30 @@ export interface ServerDocument extends Document {
                     channel_id: string
                 }
                 role_update: {
+                    active: boolean
+                    channel_id: string
+                }
+                sticker_create: {
+                    active: boolean
+                    channel_id: string
+                }
+                sticker_delete: {
+                    active: boolean
+                    channel_id: string
+                }
+                sticker_update: {
+                    active: boolean
+                    channel_id: string
+                }
+                thread_create: {
+                    active: boolean
+                    channel_id: string
+                }
+                thread_delete: {
+                    active: boolean
+                    channel_id: string
+                }
+                thread_update: {
                     active: boolean
                     channel_id: string
                 }

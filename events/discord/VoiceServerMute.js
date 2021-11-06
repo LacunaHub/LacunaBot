@@ -1,5 +1,5 @@
 const { voiceUnassign } = require('../../modules/Levels')
-const VoiceServerMute = require('../../modules/Logs/Voice/VoiceServerMute')
+const { VoiceServerMute } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

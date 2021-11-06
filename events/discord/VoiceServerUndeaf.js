@@ -1,5 +1,5 @@
 const { voiceAssign } = require('../../modules/Levels')
-const VoiceServerUndeaf = require('../../modules/Logs/Voice/VoiceServerUndeaf')
+const { VoiceServerUndeaf } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

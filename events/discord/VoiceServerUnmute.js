@@ -1,5 +1,5 @@
 const { voiceAssign } = require('../../modules/Levels')
-const VoiceServerUnmute = require('../../modules/Logs/Voice/VoiceServerUnmute')
+const { VoiceServerUnmute } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

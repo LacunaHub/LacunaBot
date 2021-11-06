@@ -1,6 +1,6 @@
 const Automoder = require('../../modules/Automoder')
 const Greeting = require('../../modules/Greeting')
-const GuildMemberAdd = require('../../modules/Logs/Guild/GuildMemberAdd')
+const { GuildMemberAdd } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

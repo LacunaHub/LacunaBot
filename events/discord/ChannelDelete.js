@@ -1,4 +1,4 @@
-const ChannelDelete = require('../../modules/Logs/Channel/ChannelDelete')
+const { ChannelDelete } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

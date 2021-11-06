@@ -7,7 +7,7 @@ const lacuna = new Lacuna({
         status: 'online',
         activities: [
             {
-                name: `voidlacuna.ru (v${version})`
+                name: `voidlacuna.ru (v${version.split('.').slice(0, 2).join('.')})`
             }
         ]
     },
@@ -31,13 +31,13 @@ const lacuna = new Lacuna({
         })
 
         if (manager.name == 'UserManager') return new LimitedCollection({
-            maxSize: 30000,
+            maxSize: 25000,
             keepOverLimit: v => v.id == process.env.CLIENT_ID
         })
 
         if (manager.name == 'GuildMemberManager') return new LimitedCollection({
             maxSize: 2000,
-            keepOverLimit: v => v.id == process.env.CLIENT_ID
+            keepOverLimit: v => v.id == process.env.CLIENT_ID || v.voice.channelId
         })
 
         return new Collection()

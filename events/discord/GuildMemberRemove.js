@@ -1,7 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const Farewell = require('../../modules/Farewell')
-const { images } = require('../../modules/Logs')
-const GuildMemberRemove = require('../../modules/Logs/Guild/GuildMemberRemove')
+const { GuildMemberRemove, images } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

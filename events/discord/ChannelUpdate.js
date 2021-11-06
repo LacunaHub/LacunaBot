@@ -1,5 +1,5 @@
 const { Permissions } = require('discord.js')
-const ChannelUpdate = require('../../modules/Logs/Channel/ChannelUpdate')
+const { ChannelUpdate } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

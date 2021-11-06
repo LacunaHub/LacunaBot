@@ -41,33 +41,30 @@ class VoiceManager {
             const replacer = new Replacer(self, trigger.default.name, { guild: state.guild, member: state.member, index: trigger.children.length + 1 })
             const name = await replacer.replace()
             const permissions = new Permissions(BigInt(trigger.default.permissions))
-
-            if (trigger.default.permissions) {
-                await state.channel.permissionOverwrites.create(state.member.id, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
-
-                if (trigger?.moderator_roles?.length) {
-                    const roles = trigger.moderator_roles.filter(mr => state.guild.roles.cache.some(r => r.editable && r.id == mr))
-
-                    for (const role of roles) {
-                        const overwrites = state.channel.permissionOverwrites.cache.find(p => p.id == role)
-
-                        if (overwrites) await overwrites.edit(permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
-                        else await state.channel.permissionOverwrites.create(role, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
-                    }
-                }
-            }
             
             const temp_voice = await state.guild.channels.create(truncateString(name, 100, '') || 'Voice', {
                 type: 'GUILD_VOICE',
-                permissionOverwrites: state.channel.permissionOverwrites.cache,
                 parent: parent && parent.manageable ? parent : null,
                 userLimit: trigger.default.limit,
                 bitrate: state.channel.bitrate
             })
 
-            if (trigger.default.position == 'TOP') await temp_voice.setPosition(0)
+            if (trigger.default.permissions) {
+                await temp_voice.permissionOverwrites.create(state.member.id, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
 
-            await state.channel.permissionOverwrites.cache.sweep(overwrite => overwrite.id == state.member.id || trigger?.moderator_roles?.includes(overwrite.id))
+                if (trigger?.moderator_roles?.length) {
+                    const roles = trigger.moderator_roles.filter(mr => state.guild.roles.cache.some(r => r.editable && r.id == mr))
+
+                    for (const role of roles) {
+                        const overwrites = temp_voice.permissionOverwrites.cache.find(p => p.id == role)
+
+                        if (overwrites) await overwrites.edit(permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
+                        else await temp_voice.permissionOverwrites.create(role, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
+                    }
+                }
+            }
+
+            if (trigger.default.position == 'TOP') await temp_voice.setPosition(0)
 
             await self.db.servers.update({ _id: state.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.id': trigger.id }, {
                 $push: {

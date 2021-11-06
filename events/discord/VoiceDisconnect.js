@@ -1,5 +1,5 @@
 const { voiceUnassign } = require('../../modules/Levels')
-const VoiceDisconnect = require('../../modules/Logs/Voice/VoiceDisconnect')
+const { VoiceDisconnect } = require('../../modules/Logs')
 const { DeleteTempVoice } = require('../../modules/VoiceManager')
 
 /**

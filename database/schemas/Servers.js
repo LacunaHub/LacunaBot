@@ -57,6 +57,18 @@ const Server = new Schema({
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
                 },
+                emoji_create: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                emoji_delete: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                emoji_update: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
                 guild_ban_add: {
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
@@ -118,6 +130,18 @@ const Server = new Schema({
                     channel_id: { type: String, default: '' }
                 },
                 role_update: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                thread_create: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                thread_delete: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                thread_update: {
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: '' }
                 },

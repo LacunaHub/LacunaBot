@@ -37,7 +37,7 @@ const handler = async (self, message) => {
     const command = self.commands.find(c => c.name == command_name.slice(server.prefix.length) && c.is_prefix_command)
     const custom_command = server.commands.custom.find(c => !c.inactive && c.name == command_name.slice(server.prefix.length))
 
-    if (command && (!server.commands.slash_commands || command.private)) {
+    if (command) {
         await command.executePrefix(server, message)
     }
 

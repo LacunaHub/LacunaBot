@@ -1,4 +1,4 @@
-const MessageDelete = require('../../modules/Logs/Message/MessageDelete')
+const { MessageDelete } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

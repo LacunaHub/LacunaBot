@@ -1,4 +1,4 @@
-const GuildUpdate = require('../../modules/Logs/Guild/GuildUpdate')
+const { GuildUpdate } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

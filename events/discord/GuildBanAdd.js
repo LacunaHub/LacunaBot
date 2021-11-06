@@ -1,6 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const { images } = require('../../modules/Logs')
-const GuildBanAdd = require('../../modules/Logs/Guild/GuildBanAdd')
+const { GuildBanAdd, images } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

@@ -1,5 +1,5 @@
 const { voiceAssign } = require('../../modules/Levels')
-const VoiceConnect = require('../../modules/Logs/Voice/VoiceConnect')
+const { VoiceConnect } = require('../../modules/Logs')
 const { CreateTempVoice } = require('../../modules/VoiceManager')
 
 /**

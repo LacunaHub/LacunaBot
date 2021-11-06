@@ -1,6 +1,5 @@
-const RoleMemberRemove = require('../../modules/Logs/Role/RoleMemberRemove')
+const { RoleMemberRemove, images } = require('../../modules/Logs')
 const { MessageEmbed } = require('discord.js')
-const { images } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

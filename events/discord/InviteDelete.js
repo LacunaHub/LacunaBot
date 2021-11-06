@@ -1,4 +1,4 @@
-const InviteDelete = require('../../modules/Logs/Guild/InviteDelete')
+const { InviteDelete } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self

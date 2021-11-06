@@ -1,28 +1,29 @@
 const { MessageEmbed } = require('discord.js')
+const numbro = require('numbro')
 
 /**
 * @param {import('../../../internals/Lacuna')} self
 * @param {import('../../../internals/Typings').ServerDocument} server
-* @param {import('discord.js').GuildChannel} channel
+* @param {import('discord.js').ThreadChannel} thread
 */
-module.exports = async (self, server, channel) => {
-    if (server.moderation.logs.types.channel_create.active) {
+module.exports = async (self, server, thread) => {
+    if (server.moderation.logs.types.thread_create.active) {
         const locale = self.translator.locale(server.locale).modules
 
-        const log = channel.guild.channels.cache.get(server.moderation.logs.types.channel_create.channel_id)
+        const log = thread.guild.channels.cache.get(server.moderation.logs.types.thread_create.channel_id)
 
-        const is_ok = log && log.permissionsFor(channel.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(thread.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
 
         if (is_ok) {
             const logs_webhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? (await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) : null
 
-            const audit = channel.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_CREATE' }) : null
+            const audit = thread.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await thread.guild.fetchAuditLogs({ limit: 1, type: 'THREAD_CREATE' }) : null
             const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
                 if (logs_webhook) {
-                    await self.db.servers.update({ _id: channel.guild.id }, {
+                    await self.db.servers.update({ _id: thread.guild.id }, {
                         $pull: {
                             'moderation.logs.webhooks': {
                                 channel_id: log.id
@@ -32,10 +33,10 @@ module.exports = async (self, server, channel) => {
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_create.title) })
+                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.thread_create.title) })
                 } catch (err) { return false }
 
-                await self.db.servers.update({ _id: channel.guild.id }, {
+                await self.db.servers.update({ _id: thread.guild.id }, {
                     $push: {
                         'moderation.logs.webhooks': {
                             id: webhook.id,
@@ -47,11 +48,11 @@ module.exports = async (self, server, channel) => {
             }
         
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.channel_create.title)
-                .setDescription(self.translator.format(locale.logs.channel_create.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `${locale.logs.channel_create.types[channel.type] ?? locale.logs.channel_create.types.UNKNOWN} <#${channel.id}>`))
-                .addField(locale.logs.common.category, channel?.parent?.name ?? '-', true)
-                .addField(locale.logs.common.position, channel.rawPosition.toString(), true)
-                .setFooter(channel.id)
+                .setTitle(locale.logs.thread_create.title)
+                .setDescription(self.translator.format(locale.logs.thread_create.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `<#${thread.id}>`))
+                .addField(locale.logs.common.channel, thread.parent?.id ? `<#${thread.parentId}>` : '-', true)
+                .addField(locale.logs.thread_create.auto_archive, numbro(thread.autoArchiveDuration * 60).format({ output: 'time' }), true)
+                .setFooter(thread.id)
                 .setTimestamp()
                 .setColor('#2FDF84')
 
@@ -61,7 +62,7 @@ module.exports = async (self, server, channel) => {
                 username: server.server.premium.available ? webhook.name : self.user.username
             })
 
-            await self.emit('moduleExecution', { module: 'Logs: Channel Create', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
+            await self.emit('moduleExecution', { module: 'Logs: Thread Create', guild: { id: thread.guild.id, name: thread.guild.name }, target: { id: thread.id, name: thread.name } })
         
             return true
         }

@@ -283,7 +283,7 @@ class Replacer {
                 const i = raws.indexOf(replacement)
                 let value = resolveObjectPath(replacement, replacements)
 
-                if (typeof value === 'object') value = resolveObjectPath(`${replacement}.${Object.keys(value)[0]}`, replacements)
+                if (typeof value === 'object' && value) value = resolveObjectPath(`${replacement}.${Object.keys(value)[0]}`, replacements)
 
                 if (/".+"/.test(replacement)) raws[i] = replacement.substring(1, replacement.length - 1)
                 else raws[i] = value

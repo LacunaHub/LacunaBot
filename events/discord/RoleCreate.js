@@ -1,4 +1,4 @@
-const RoleCreate = require('../../modules/Logs/Role/RoleCreate')
+const { RoleCreate } = require('../../modules/Logs')
 
 /**
  * @param {import('../../internals/Lacuna')} self
