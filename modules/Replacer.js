@@ -21,7 +21,7 @@ class Replacer {
     }
 
     replacers(string = this.string) {
-        const replacers = string.match(/{\s*([\d\s\w.,|"-+?!:@<>#%]+)\s*}/g) || []
+        const replacers = string.match(/{\s*([\d\sa-zа-яёй.,|"-+?!:@<>#%]+)\s*}/gi) || []
         return replacers.map(replacer => replacer.replace(/{|}/g, '').trim())
     }
 
@@ -244,7 +244,7 @@ class Replacer {
                 voice: {
                     name: member.voice?.channel?.name,
                     id: member.voice?.channelId,
-                    mention: member.voice ? `<#${member.voice.channelId}>` : null,
+                    mention: member.voice?.channelId ? `<#${member.voice.channelId}>` : null,
                     full: member.voice?.channel?.full,
                     position: member.voice?.channel?.rawPosition?.toString()
                 },
@@ -283,7 +283,7 @@ class Replacer {
                 const i = raws.indexOf(replacement)
                 let value = resolveObjectPath(replacement, replacements)
 
-                if (typeof value === 'object' && value) value = resolveObjectPath(`${replacement}.${Object.keys(value)[0]}`, replacements)
+                if (typeof value === 'object' && value != null) value = resolveObjectPath(`${replacement}.${Object.keys(value)[0]}`, replacements)
 
                 if (/".+"/.test(replacement)) raws[i] = replacement.substring(1, replacement.length - 1)
                 else raws[i] = value

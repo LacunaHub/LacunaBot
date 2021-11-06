@@ -20,6 +20,8 @@ class CustomCommand {
     }
 
     async execute() {
+        if (!this.message.content.startsWith(this.server.prefix)) return false
+
         if (this.command.blocked.channels.includes(this.message.channel.id) || this.message.member.roles.cache.some(r => this.command.blocked.roles.includes(r.id))) return false
         if (this.command.allowed.channels.length && !this.command.allowed.channels.includes(this.message.channel.id)) return false
         if (this.command.allowed.roles.length && !this.message.member.roles.cache.some(r => this.command.allowed.roles.includes(r.id))) return false
