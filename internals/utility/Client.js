@@ -36,9 +36,8 @@ const lacuna = new Lacuna({
         })
 
         if (manager.name == 'GuildMemberManager') return new LimitedCollection({
-            maxSize: 1500,
-            sweepFilter: () => v => v.id != process.env.CLIENT_ID,
-            sweepInterval: 300
+            maxSize: 2000,
+            keepOverLimit: v => v.id == process.env.CLIENT_ID
         })
 
         return new Collection()
