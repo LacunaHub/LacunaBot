@@ -47,7 +47,7 @@ module.exports = async (self, server, invite) => {
                 .setTitle(locale.logs.invite_delete.title)
                 .addField(locale.logs.common.invite_code, invite.code, true)
                 .addField(locale.logs.common.channel, `<#${invite.channel.id}>`, true)
-                .addField(locale.logs.common.invite_inviter, invite.inviter.tag ?? '-', true)
+                .addField(locale.logs.common.invite_inviter, invite.inviter?.tag ?? '-', true)
                 .setTimestamp()
                 .setColor('#EF5350')
 

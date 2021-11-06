@@ -110,7 +110,7 @@ module.exports = async (self, server, interaction) => {
             await mention.roles.add(mute_role, reason).catch(self.logger.error)
         }
 
-        if (mention.voice.channelId) mention.voice.kick(reason).catch(self.logger.error)
+        if (mention.voice.channelId) mention.voice.disconnect(reason).catch(self.logger.error)
     }
 
     if (case_log && server.moderation.case_log.case_types.MUTE_ADD) {
