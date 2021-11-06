@@ -21,7 +21,7 @@ class Replacer {
     }
 
     replacers(string = this.string) {
-        const replacers = string.match(/{\s*([\d\sa-zа-яёй.,|"-+?!:@<>#%]+)\s*}/gi) || []
+        const replacers = string.match(/{\s*([\d\sa-zа-яёй.,|"-+?!:@<>#%_]+)\s*}/gi) || []
         return replacers.map(replacer => replacer.replace(/{|}/g, '').trim())
     }
 
