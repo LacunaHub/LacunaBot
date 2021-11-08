@@ -20,7 +20,7 @@ const handler = async (self, state, channel) => {
         if (!listeners) {
             await player.pause(true)
             await player.set('timeout', setTimeout(
-                () => player.destroy(), 15000//600000
+                () => player.destroy(), 600000
             ))
         }
     }

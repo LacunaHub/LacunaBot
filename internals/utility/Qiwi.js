@@ -4,6 +4,10 @@ const { scheduleJob, RecurrenceRule, Range } = require('node-schedule')
 const db = require('../../database/DatabaseManager')
 const Diamonder = require('../structures/Diamonder')
 const logger = require('../Logger')
+const { REST } = require('@discordjs/rest')
+const { Routes } = require('discord-api-types/v9')
+
+const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
 /**
  * @param {import('../Typings').BillObject} data
@@ -81,6 +85,8 @@ async function syncBills() {
                             'server.premium.will_expire_on': period
                         }
                     })
+
+                    await rest.put(Routes.guildMemberRole(bill.custom_fields.reference_id, bill.custom_fields.user_id, bill.amount.value > 500 ? '896416992079265824' : '746825813806284866')).catch(() => {})
 
                     new Diamonder(bill.custom_fields.reference_id, period)
                 }

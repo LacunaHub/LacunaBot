@@ -13,7 +13,7 @@ class VoiceManager {
         const trigger_index = server.modules.voice_manager.temp_voice_channels.triggers.indexOf(trigger)
 
         if (trigger_index >= 2 && !server.server.premium.available) {
-            await state.kick()
+            await state.disconnect()
 
             return false
         }
@@ -44,6 +44,7 @@ class VoiceManager {
             
             const temp_voice = await state.guild.channels.create(truncateString(name, 100, '') || 'Voice', {
                 type: 'GUILD_VOICE',
+                permissionOverwrites: state.channel.permissionOverwrites.cache,
                 parent: parent && parent.manageable ? parent : null,
                 userLimit: trigger.default.limit,
                 bitrate: state.channel.bitrate
