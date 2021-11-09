@@ -102,6 +102,10 @@ class TemporaryRole {
         if (member && member.roles.cache.has(this.role_id)) {
             await member.roles.remove(this.role_id, 'Temporary Role').catch(() => {})
         }
+
+        else {
+            await this.deleteEntry()
+        }
     }
 
     /**

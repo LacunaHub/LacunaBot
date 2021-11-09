@@ -124,7 +124,7 @@ class TemporaryMute {
         /**
          * @type {import('discord.js').GuildMember}
          */
-        const member = await guild.members._fetchSingle({ user: this.user_id, cache: false })
+        const member = await guild.members.fetch(this.user_id).catch(() => {})
 
         if (member) {
             const returnable_roles = server.moderation.roles.on_mute.returnable_roles.find(r => r.user_id == member.id)
@@ -144,6 +144,10 @@ class TemporaryMute {
             await member.roles.remove(this.role_id, reason).catch(this.self.logger.error)
 
             return true
+        }
+
+        else {
+            await this.deleteEntry()
         }
     }
 
