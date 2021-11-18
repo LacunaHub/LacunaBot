@@ -1077,7 +1077,7 @@ class Guilds {
             }
         })
         
-        if (channel.alerts.webhook.id) await rest.delete(Routes.webhook(channel.alerts.webhook.id))
+        if (channel.alerts.webhook.id) await rest.delete(Routes.webhook(channel.alerts.webhook.id)).catch(() => {})
 
         return true
     }
@@ -1165,7 +1165,7 @@ class Guilds {
             }
         })
 
-        if (channel.alerts.webhook.id) await rest.delete(Routes.webhook(channel.alerts.webhook.id))
+        if (channel.alerts.webhook.id) await rest.delete(Routes.webhook(channel.alerts.webhook.id)).catch(() => {})
 
         return true
     }
