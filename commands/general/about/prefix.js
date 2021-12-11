@@ -21,7 +21,7 @@ module.exports = async (self, server, message) => {
 
     const embed = new MessageEmbed()
         .addField(locale.about.texts.developer, developer.tag, true)
-        .addField(locale.about.texts.version, `\`${version}\``, true)
+        .addField(locale.about.texts.version, `\`${version.split('.').slice(0, 2).join('.')}\``, true)
         .addField(locale.about.texts.latency, `${Math.round(self.ws.ping)}`, true)
         .addField(locale.about.texts.total_guilds, `${total_guilds}`, true)
         .addField(locale.about.texts.total_users, `${total_users}`, true)

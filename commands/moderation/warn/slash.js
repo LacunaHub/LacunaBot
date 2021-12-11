@@ -19,6 +19,12 @@ const addSlash = async (self, server, interaction) => {
         return false
     }
 
+    if (mention.id == interaction.member.id) {
+        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${interaction.member.displayName}**`)}` })
+
+        return false
+    }
+
     await Warnings.addInteracted(self, server, interaction, { target: mention, executor: interaction.member, reason: reason })
 
     await interaction.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.warn.add.texts.user_warned, `**${interaction.member.displayName}**`, `**${mention.user.tag}**`)}`, ephemeral: true })

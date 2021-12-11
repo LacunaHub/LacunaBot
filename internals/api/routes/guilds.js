@@ -56,6 +56,9 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
 
     const commands = qdb.get('commands').map(c => { return { ...c, description: resolveObjectPath(c.description, locale), options: [] } })
 
+    delete require.cache[require.resolve('../../../database/prices.json')]
+    const prices = require('../../../database/prices.json')
+
     await res.status(200).json({
         _id: guild._id,
         locale: guild.locale,
@@ -111,7 +114,8 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
                 channels: guild.modules.youtube.channels
             },
             autoreactions: guild.modules.autoreactions
-        }
+        },
+        prices
     })
 })
 
@@ -153,6 +157,9 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
     const locale = Translator.locale(guild.locale)
     
     const commands = qdb.get('commands').map(c => { return { ...c, description: resolveObjectPath(c.description, locale), options: [] } })
+
+    delete require.cache[require.resolve('../../../database/prices.json')]
+    const prices = require('../../../database/prices.json')
 
     const updated = await Guilds.updateSettings(guild, options, user_id)
 
@@ -211,7 +218,8 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
                 channels: updated.modules.youtube.channels
             },
             autoreactions: updated.modules.autoreactions
-        }
+        },
+        prices
     })
 })
 

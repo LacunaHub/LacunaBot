@@ -24,6 +24,12 @@ module.exports = async (self, server, interaction) => {
         return false
     }
 
+    if (mention.id == interaction.member.id) {
+        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${interaction.member.displayName}**`)}` })
+
+        return false
+    }
+
     const case_log = interaction.guild.channels.cache.get(server.moderation.case_log.channel_id)
     const case_id = server.moderation.case_log.cases.length + 1
 

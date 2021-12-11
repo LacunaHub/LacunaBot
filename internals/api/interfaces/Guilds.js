@@ -1149,7 +1149,7 @@ class Guilds {
 
     /**
      * @param {import('../../Typings').ServerDocument} server
-     * @param {number} channel_id
+     * @param {string} channel_id
      */
     static async removeYouTubeChannel(server, channel_id) {
         const channels = server.modules.youtube.channels

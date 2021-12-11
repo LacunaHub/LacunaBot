@@ -19,6 +19,12 @@ const addPrefix = async (self, server, message) => {
         return false
     }
 
+    if (mention.id == message.member.id) {
+        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${message.member.displayName}**`)}` })
+
+        return false
+    }
+
     await Warnings.add(self, server, message, { target: mention, executor: message.member, reason: reason })
 
     await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.warn.add.texts.user_warned, `**${message.member.displayName}**`, `**${mention.user.tag}**`)}` })

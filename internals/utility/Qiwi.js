@@ -73,8 +73,10 @@ async function syncBills() {
             if (update.status.value == 'PAID') {
                 const server = await db.servers.find({ _id: bill.custom_fields.reference_id })
 
-                const cost_one_month = 89
-                const months = Math.round(bill.amount.value / cost_one_month)
+                delete require.cache[require.resolve('../../database/prices.json')]
+                const prices = require('../../database/prices.json')
+
+                const months = prices.find(p => p.price == bill.amount.value)?.months ?? 0
 
                 if (months > 0) {
                     const period = server.server.premium.will_expire_on ? moment(server.server.premium.will_expire_on).add(months, 'M').valueOf() : moment().add(months, 'M').valueOf()
