@@ -88,7 +88,7 @@ async function syncBills() {
                         }
                     })
 
-                    await rest.put(Routes.guildMemberRole(bill.custom_fields.reference_id, bill.custom_fields.user_id, bill.amount.value > 500 ? '896416992079265824' : '746825813806284866')).catch(() => {})
+                    await rest.put(Routes.guildMemberRole('740586549145763960', bill.custom_fields.user_id, bill.amount.value > 500 ? '896416992079265824' : '746825813806284866')).catch(() => {})
 
                     new Diamonder(bill.custom_fields.reference_id, period)
                 }
