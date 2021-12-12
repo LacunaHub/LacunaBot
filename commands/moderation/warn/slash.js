@@ -20,7 +20,7 @@ const addSlash = async (self, server, interaction) => {
     }
 
     if (mention.id == interaction.member.id) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${interaction.member.displayName}**`)}` })
+        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${interaction.member.displayName}**`)}`, ephemeral: true })
 
         return false
     }
