@@ -67,8 +67,6 @@ class Command {
 
         if (this.private) return false
 
-        if (server.server.bot_experts.some(expert => expert.id === signal.member.id && expert.expires_timestamp > Date.now())) return true
-
         if (server.commands.permissions.blocked.channels.includes(signal.channel.id) && !signal.member.permissions.has('ADMINISTRATOR')) return false
 
         if ((server.commands.permissions.allowed.channels.length && !server.commands.permissions.allowed.channels.includes(signal.channel.id)) && !signal.member.permissions.has('ADMINISTRATOR')) return false
@@ -94,8 +92,6 @@ class Command {
         const command = server.commands.system.find(c => c.name == this.name)
 
         if (this.self.application.owner.members.some(m => m.id == signal.member.id)) return true
-
-        if (server.server.bot_experts.some(expert => expert.id === signal.member.id && expert.expires_timestamp > Date.now())) return true
 
         if (command) {
             if (command.allowed.roles.length && signal.member.roles.cache.some(r => command.allowed.roles.includes(r.id))) return true
