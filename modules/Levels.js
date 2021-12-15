@@ -3,6 +3,7 @@ const Canvas = require('canvas')
 const { MessageAttachment, CommandInteraction, Message, ContextMenuInteraction } = require('discord.js')
 const numbro = require('numbro')
 const { scheduleJob, RecurrenceRule, Range } = require('node-schedule')
+const { shadeColor } = require('../internals/utility/Utils')
 
 class Levels {
     /**
@@ -336,12 +337,22 @@ class Levels {
             }
         }
 
+        await mention.user?.fetch()
+
         const canvas = await Canvas.createCanvas(720, 256)
         const ctx = canvas.getContext('2d')
         
         ctx.save()
 
-        const rect_x = 720, rect_y = 256, border_radius = 40
+        let banner = mention.user?.banner
+
+        try {
+            if (banner) banner = await Canvas.loadImage(mention.user?.bannerURL({ format: 'png', size: 600 }))
+        } catch (err) {
+            banner = null
+        }
+
+        const rect_x = canvas.width, rect_y = canvas.height, border_radius = 40
 
         ctx.fillStyle = '#13191C'
         ctx.strokeStyle = '#13191C'
@@ -351,6 +362,19 @@ class Levels {
 
         ctx.strokeRect(border_radius / 2, border_radius / 2, rect_x - border_radius, rect_y - border_radius)
         ctx.fillRect(border_radius / 2, border_radius / 2, rect_x - border_radius, rect_y - border_radius)
+
+        if (banner) {
+            const width_ratio = 720 / banner.width, height_ratio = 256 / banner.height
+            const ratio = width_ratio > height_ratio ? width_ratio : height_ratio
+
+            ctx.save()
+            roundImage(ctx, 0, 0, 720, 256, border_radius / 2)
+            ctx.clip()
+            ctx.globalAlpha = 0.2
+            ctx.drawImage(banner, rect_x / 2 - (banner.width * ratio) / 2, rect_y / 2 - (banner.height * ratio) / 2, banner.width * ratio, banner.height * ratio)
+            ctx.globalAlpha = 1.0
+            ctx.restore()
+        }
 
         const avatar = await Canvas.loadImage(mention.user.displayAvatarURL({ format: 'png' }))
 
@@ -362,7 +386,10 @@ class Levels {
         ctx.drawImage(avatar, 25, 25, 120, 120)
         ctx.restore()
 
-        ctx.strokeStyle = '#4F3454'
+        const color = mention.user?.hexAccentColor ?? '#DA70D6'
+
+        ctx.globalAlpha = 0.5
+        ctx.strokeStyle = color
         ctx.beginPath()
         ctx.lineCap = "round"
         ctx.lineWidth = 20
@@ -370,12 +397,13 @@ class Levels {
         ctx.lineTo(685, 185)
         ctx.stroke()
         ctx.restore()
+        ctx.globalAlpha = 1.0
 
         const formula = 150 + (level.experience.level * level.experience.level * 8)
         const percent = Math.floor((level.experience.current * 100) / formula)
         const progress = Math.floor(650 * percent / 100)
 
-        ctx.strokeStyle = '#DA70D6'
+        ctx.strokeStyle = color
         ctx.beginPath()
         ctx.lineCap = "round"
         ctx.lineWidth = 20
@@ -387,10 +415,10 @@ class Levels {
         ctx.fillStyle = '#ffffff'
         const username = mention.displayName
         const measure = ctx.measureText(username)
-        ctx.fillText(measure.width > 400 ? 'Username' : username, 160, 70, 400)
+        ctx.fillText(measure.width > 450 ? 'Username' : username, 160, 70, 450)
 
-        ctx.fillStyle = '#545B5F'
-        ctx.fillText(`#${mention.user.discriminator}`, measure.width > 400 ? 160 + ctx.measureText('Username').width : 160 + measure.width, 70)
+        // ctx.fillStyle = '#545B5F'
+        // ctx.fillText(`#${mention.user.discriminator}`, measure.width > 400 ? 160 + ctx.measureText('Username').width : 160 + measure.width, 70)
 
         ctx.strokeStyle = '#545B5F'
         ctx.beginPath()
@@ -400,8 +428,6 @@ class Levels {
         ctx.lineTo(695, 85)
         ctx.stroke()
 
-        const place = await Canvas.loadImage('./assets/trophy.svg')
-        const lvl = await Canvas.loadImage('./assets/star.svg')
         const messages = await Canvas.loadImage('./assets/messages.png')
         const microphone = await Canvas.loadImage('./assets/microphone.png')
 
@@ -519,6 +545,19 @@ function neededTotalXp (level) {
     }
 
     return total
+}
+function roundImage(ctx, x, y, width, height, radius) {
+    ctx.beginPath()
+    ctx.moveTo(x + radius, y)
+    ctx.lineTo(x + width - radius, y)
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
+    ctx.lineTo(x + width, y + height - radius)
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+    ctx.lineTo(x + radius, y + height)
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
+    ctx.lineTo(x, y + radius)
+    ctx.quadraticCurveTo(x, y, x + radius, y)
+    ctx.closePath()
 }
 
 module.exports = Levels

@@ -11,7 +11,8 @@ export interface ServerDocument extends Document {
             will_expire_on: number
         }
         blocked: boolean
-        bot_experts: BotExpert[]
+        bot_experts?: BotExpert[]
+        bot_expert_roles: string[]
     }
     commands: {
         system: Array<SystemCommandOptions>
@@ -41,6 +42,36 @@ export interface ServerDocument extends Document {
                 PRUNE_MESSAGES: boolean
                 WARN_ADD: boolean
                 WARN_REMOVE: boolean
+            }
+            case_types_messages: {
+                BAN_ADD: {
+                    active: boolean
+                    dm_message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                }
+                KICK: {
+                    active: boolean
+                    dm_message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                }
+                MUTE_ADD: {
+                    active: boolean
+                    dm_message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                }
+                WARN_ADD: {
+                    active: boolean
+                    dm_message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                }
             }
         }
         logs: {
@@ -423,6 +454,7 @@ export interface ServerDocument extends Document {
     created_at: number
     modified_at: number
     activity_ping_at: number
+    change_log: ChangeLog[]
 }
 
 export interface SystemCommandOptions {
@@ -954,6 +986,12 @@ export interface AutoReaction {
 export interface BotExpert {
     id: string
     expires_timestamp: number
+}
+
+export interface ChangeLog {
+    user_id: string
+    changes: string[]
+    timestamp: number
 }
 
 export interface Bill {

@@ -166,13 +166,6 @@ class Warnings {
             }
         }
 
-        const dm_message = new MessageEmbed()
-            .setAuthor(locale.common.case_log.cases.WARN_ADD, images.WARN_ADD)
-            .addField(locale.common.case_log.server, message.guild.name, true)
-            .addField(locale.common.case_log.reason, reason ?? '-', true)
-            .setTimestamp()
-            .setColor('#EF5350')
-
         const case_log_message = new MessageEmbed()
             .setAuthor(locale.common.case_log.cases.WARN_ADD, images.WARN_ADD)
             .addField(locale.common.case_log.target, `${target.user.tag}\n(${target.id})`, true)
@@ -182,7 +175,12 @@ class Warnings {
             .setTimestamp()
             .setColor('#EF5350')
 
-        await target.send({ embeds: [dm_message] }).catch(self.logger.error)
+        if (server.moderation.case_log.case_types_messages.WARN_ADD.active) {
+            const replacer = new Replacer(self, null, { guild: message.guild, member: target, message, penalty: { reason } })
+            const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.WARN_ADD.dm_message)
+    
+            await target.send(dm_message).catch(self.logger.error)
+        }
 
         if (case_log && server.moderation.case_log.case_types.WARN_ADD) {
             await case_log.send({ embeds: [case_log_message] }).catch(self.logger.error)
@@ -367,13 +365,6 @@ class Warnings {
             }
         }
 
-        const dm_message = new MessageEmbed()
-            .setAuthor(locale.common.case_log.cases.WARN_ADD, images.WARN_ADD)
-            .addField(locale.common.case_log.server, interaction.guild.name, true)
-            .addField(locale.common.case_log.reason, reason, true)
-            .setTimestamp()
-            .setColor('#EF5350')
-
         const case_log_message = new MessageEmbed()
             .setAuthor(locale.common.case_log.cases.WARN_ADD, images.WARN_ADD)
             .addField(locale.common.case_log.target, `${target.user.tag}\n(${target.id})`, true)
@@ -383,7 +374,12 @@ class Warnings {
             .setTimestamp()
             .setColor('#EF5350')
 
-        await target.send({ embeds: [dm_message] }).catch(self.logger.error)
+        if (server.moderation.case_log.case_types_messages.WARN_ADD.active) {
+            const replacer = new Replacer(self, null, { guild: interaction.guild, member: target, penalty: { reason } })
+            const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.WARN_ADD.dm_message)
+    
+            await target.send(dm_message).catch(self.logger.error)
+        }
 
         if (case_log && server.moderation.case_log.case_types.WARN_ADD) {
             await case_log.send({ embeds: [case_log_message] }).catch(self.logger.error)

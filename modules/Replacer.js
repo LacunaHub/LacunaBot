@@ -56,6 +56,9 @@ class Replacer {
                     case 'DATE':
                         fn = DATE
                     break
+                    case 'DATENOW':
+                        fn = DATENOW
+                    break
                     case 'LOWER':
                         fn = LOWER
                     break
@@ -130,6 +133,7 @@ class Replacer {
                                     display_name: m.displayName,
                                     id: m.id,
                                     tag: m.user.tag,
+                                    bot: m.user.bot,
                                     created_at: m.user.createdTimestamp,
                                     joined_at: m.joinedTimestamp,
                                     nickname: m.nickname,
@@ -229,6 +233,7 @@ class Replacer {
                 display_name: member.displayName,
                 id: member.id,
                 tag: member.user.tag,
+                bot: member.user.bot,
                 mention: `<@${member.id}>`,
                 created_at: member.user.createdTimestamp,
                 joined_at: member.joinedTimestamp,
@@ -239,7 +244,9 @@ class Replacer {
                     current_xp: levels?.experience?.current ?? 0,
                     remaining_xp: levels ? Math.round((150 + (levels.experience.level * levels.experience.level * 8)) - levels.experience.current) : 0,
                     need_xp: levels ? 150 + (levels.experience.level * levels.experience.level * 8) : 0,
-                    total_xp: levels?.experience?.total ?? 0
+                    total_xp: levels?.experience?.total ?? 0,
+                    total_messages: levels?.activity?.text?.total_messages ?? 0,
+                    voice_time: levels?.activity?.voice?.total_time ?? 0
                 },
                 voice: {
                     name: member.voice?.channel?.name,
@@ -268,7 +275,10 @@ class Replacer {
                 title: subs?.title ?? null,
                 link: subs?.link ?? null
             },
-            index: this.shapers.index ?? 0
+            index: this.shapers.index ?? 0,
+            penalty: {
+                reason: this.shapers.penalty?.reason
+            }
         }
     }
 
@@ -376,6 +386,10 @@ function DATE(...args) {
     if (typeof locale !== 'string' || !['en', 'ru'].includes(locale)) locale = 'ru'
 
     return moment(timestamp).locale(locale).utcOffset(utc).format(format)
+}
+
+function DATENOW() {
+    return Date.now()
 }
 
 function LOWER(...args) {

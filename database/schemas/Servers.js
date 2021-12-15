@@ -10,7 +10,7 @@ const Server = new Schema({
             will_expire_on: { type: Number, default: 0 }
         },
         blocked: { type: Boolean, default: false },
-        bot_experts: { type: Array, default: [] }
+        bot_expert_roles: { type: Array, default: [] }
     },
     commands: {
         system: { type: Array, default: [] },
@@ -40,6 +40,128 @@ const Server = new Schema({
                 PRUNE_MESSAGES: { type: Boolean, default: true },
                 WARN_ADD: { type: Boolean, default: true },
                 WARN_REMOVE: { type: Boolean, default: true }
+            },
+            case_types_messages: {
+                BAN_ADD: {
+                    active: { type: Boolean, default: true },
+                    dm_message: {
+                        content: { type: String, default: '' },
+                        embed: {
+                            active: { type: Boolean, default: true },
+                            title: { type: String, default: null },
+                            description: { type: String, default: null },
+                            url: { type: String, default: null },
+                            timestamp: { type: String, default: 'DATENOW()' },
+                            color: { type: String, default: '#EF5350' },
+                            footer: {
+                                text: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            image: {
+                                url: { type: String, default: null }
+                            },
+                            thumbnail: {
+                                url: { type: String, default: null }
+                            },
+                            author: {
+                                name: { type: String, default: 'Блокировка выдана' },
+                                url: { type: String, default: null },
+                                icon_url: { type: String, default: 'https://i.imgur.com/qI02Ivf.png' }
+                            },
+                            fields: { type: Array, default: [ { name: 'Сервер', value: '{ guild.name }', inline: true }, { name: 'Причина', value: '{ penalty.reason }', inline: true } ] }
+                        }
+                    }
+                },
+                KICK: {
+                    active: { type: Boolean, default: true },
+                    dm_message: {
+                        content: { type: String, default: '' },
+                        embed: {
+                            active: { type: Boolean, default: false },
+                            title: { type: String, default: null },
+                            description: { type: String, default: null },
+                            url: { type: String, default: null },
+                            timestamp: { type: String, default: 'DATENOW()' },
+                            color: { type: String, default: '#EF5350' },
+                            footer: {
+                                text: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            image: {
+                                url: { type: String, default: null }
+                            },
+                            thumbnail: {
+                                url: { type: String, default: null }
+                            },
+                            author: {
+                                name: { type: String, default: 'Участник выгнан' },
+                                url: { type: String, default: null },
+                                icon_url: { type: String, default: 'https://i.imgur.com/RYVLGuy.png' }
+                            },
+                            fields: { type: Array, default: [ { name: 'Сервер', value: '{ guild.name }', inline: true }, { name: 'Причина', value: '{ penalty.reason }', inline: true } ] }
+                        }
+                    }
+                },
+                MUTE_ADD: {
+                    active: { type: Boolean, default: true },
+                    dm_message: {
+                        content: { type: String, default: '' },
+                        embed: {
+                            active: { type: Boolean, default: false },
+                            title: { type: String, default: null },
+                            description: { type: String, default: null },
+                            url: { type: String, default: null },
+                            timestamp: { type: String, default: 'DATENOW()' },
+                            color: { type: String, default: '#EF5350' },
+                            footer: {
+                                text: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            image: {
+                                url: { type: String, default: null }
+                            },
+                            thumbnail: {
+                                url: { type: String, default: null }
+                            },
+                            author: {
+                                name: { type: String, default: 'Заглушение выдано' },
+                                url: { type: String, default: null },
+                                icon_url: { type: String, default: 'https://i.imgur.com/t5FJ6Gw.png' }
+                            },
+                            fields: { type: Array, default: [ { name: 'Сервер', value: '{ guild.name }', inline: true }, { name: 'Причина', value: '{ penalty.reason }', inline: true } ] }
+                        }
+                    }
+                },
+                WARN_ADD: {
+                    active: { type: Boolean, default: true },
+                    dm_message: {
+                        content: { type: String, default: '' },
+                        embed: {
+                            active: { type: Boolean, default: false },
+                            title: { type: String, default: null },
+                            description: { type: String, default: null },
+                            url: { type: String, default: null },
+                            timestamp: { type: String, default: 'DATENOW()' },
+                            color: { type: String, default: '#EF5350' },
+                            footer: {
+                                text: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            image: {
+                                url: { type: String, default: null }
+                            },
+                            thumbnail: {
+                                url: { type: String, default: null }
+                            },
+                            author: {
+                                name: { type: String, default: 'Предупреждение выдано' },
+                                url: { type: String, default: null },
+                                icon_url: { type: String, default: 'https://i.imgur.com/R03G3G5.png' }
+                            },
+                            fields: { type: Array, default: [ { name: 'Сервер', value: '{ guild.name }', inline: true }, { name: 'Причина', value: '{ penalty.reason }', inline: true } ] }
+                        }
+                    }
+                }
             }
         },
         logs: {
@@ -583,7 +705,8 @@ const Server = new Schema({
     },
     created_at: { type: Number, default: 0 },
     modified_at: { type: Number, default: 0 },
-    activity_ping_at: { type: Number, default: 0 }
+    activity_ping_at: { type: Number, default: 0 },
+    change_log: { type: Array, default: [] }
 }, { versionKey: false })
 
 module.exports = model('Servers', Server)

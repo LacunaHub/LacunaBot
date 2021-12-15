@@ -4,7 +4,7 @@ const { Util, MessageEmbed } = require('discord.js')
 const { REST } = require('@discordjs/rest')
 const { Routes } = require('discord-api-types/v9')
 const qdb = require('quick.db')
-const { resolveObjectPath, createEnum } = require('../../utility/Utils')
+const { resolveObjectPath, createEnum, dotNotateObject } = require('../../utility/Utils')
 const Translator = require('../../locale/Translator')
 
 const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
@@ -12,9 +12,14 @@ const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 const command_option_types = createEnum([ null, 'SUB_COMMAND', 'SUB_COMMAND_GROUP', 'STRING', 'INTEGER', 'BOOLEAN', 'USER', 'CHANNEL', 'ROLE', 'MENTIONABLE', 'NUMBER' ])
 
 class Guilds {
-    static async isBotExpert(guild_id, id) {
+    static async isBotExpert(guild_id, user_id) {
+        /**
+         * @type {import('../../Typings').ServerDocument}
+         */
         const server = await Servers.findOne({ _id: guild_id })
-        return server ? server.server.bot_experts.some(expert => expert.id === id && expert.expires_timestamp > Date.now()) : false
+        const member = await rest.get(Routes.guildMember(guild_id, user_id)).catch(() => {})
+
+        return server && member ? member.roles.some(r => server.server.bot_expert_roles.includes(r)) : false
     }
 
     /**
@@ -35,6 +40,10 @@ class Guilds {
             if (locales.includes(data.locale)) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'locale': data.locale } })
             }
+        }
+
+        if (Array.isArray(data.server?.bot_expert_roles) && JSON.stringify(data.server.bot_expert_roles) != JSON.stringify(guild.server.bot_expert_roles)) {
+            await Servers.updateOne({ _id: guild._id }, { $set: { 'server.bot_expert_roles': data.server.bot_expert_roles } })
         }
 
         if (data.commands) {
@@ -131,6 +140,14 @@ class Guilds {
 
                     if (data_case_types.some((v, i) => v !== guild_case_types[i])) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.case_log.case_types': data.moderation.case_log.case_types } })
+                    }
+                }
+
+                if (typeof data.moderation.case_log.case_types_messages === 'object') {
+                    for (const type of Object.keys(data.moderation.case_log.case_types_messages)) {
+                        if (JSON.stringify(data.moderation.case_log.case_types_messages[type]) != JSON.stringify(guild.moderation.case_log.case_types_messages[type])) {
+                            await Servers.updateOne({ _id: guild._id }, { $set: { [`moderation.case_log.case_types_messages.${type}`]: data.moderation.case_log.case_types_messages[type] } })
+                        }
                     }
                 }
             }
@@ -894,6 +911,18 @@ class Guilds {
                 else await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.autoreactions': [] } })
             }
         }
+
+        const changes = [ ...new Set(Object.keys(dotNotateObject(data)).map(k => k.split('.').slice(0, 2).join('.'))) ]
+
+        await Servers.updateOne({ _id: guild._id }, {
+            $push: {
+                change_log: {
+                    $each: [ { user_id, changes, timestamp: Date.now() } ],
+                    $sort: { timestamp: 1 },
+                    $slice: -50
+                }
+            }
+        })
 
         return await Servers.findOne({ _id: guild._id }).lean()
     }

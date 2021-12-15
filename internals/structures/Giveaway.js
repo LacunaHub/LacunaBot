@@ -160,6 +160,7 @@ class Giveaway {
         const [ g, message_id ] = interaction.customId.split('-')
         const giveaway = self.giveaways.find(g => g.message_id == message_id)
         const entry = server.utility.giveaways.find(g => g.message_id == message_id)
+        const locale = self.translator.locale(server.locale)
 
         if (giveaway && entry) {
             if (!entry.members.includes(interaction.user.id)) await self.db.servers.update({ _id: interaction.guild.id, 'utility.giveaways.message_id': message_id }, {
@@ -177,10 +178,14 @@ class Giveaway {
                 embed.fields[2].value = `${giveaway.members.length}`
     
                 await message.edit({ embeds: [embed] })
+
+                await interaction.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.commands.giveaway.create.texts.participated, `**${interaction.user.username}**`, `**${giveaway.prize}**`)}`, ephemeral: true })
+            }
+
+            else {
+                await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.giveaway.create.texts.already_participating, `**${interaction.user.username}**`, `**${giveaway.prize}**`)}`, ephemeral: true })
             }
         }
-
-        await interaction.deferUpdate()
     }
 
     /**

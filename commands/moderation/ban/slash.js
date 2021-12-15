@@ -3,6 +3,7 @@ const ms = require('ms')
 const moment = require('moment')
 const { images } = require('../../../modules/Logs')
 const TemporaryBan = require('../../../internals/structures/TemporaryBan')
+const Replacer = require('../../../modules/Replacer')
 
 /**
  * @param {import('../../../internals/Lacuna')} self
@@ -46,13 +47,6 @@ module.exports = async (self, server, interaction) => {
         reason = `${reason} (${moment(Date.now() + duration).locale(server.locale).endOf().fromNow(true)})`
     }
 
-    const dm_message = new MessageEmbed()
-        .setAuthor(locale.common.case_log.cases.BAN_ADD, images.BAN_ADD)
-        .addField(locale.common.case_log.server, interaction.guild.name, true)
-        .addField(locale.common.case_log.reason, reason, true)
-        .setTimestamp()
-        .setColor('#EF5350')
-
     const case_log_message = new MessageEmbed()
         .setAuthor(locale.common.case_log.cases.BAN_ADD, images.BAN_ADD)
         .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
@@ -62,7 +56,12 @@ module.exports = async (self, server, interaction) => {
         .setTimestamp()
         .setColor('#EF5350')
 
-    await mention.send({ embeds: [dm_message] }).catch(self.logger.error)
+    if (server.moderation.case_log.case_types_messages.BAN_ADD.active) {
+        const replacer = new Replacer(self, null, { guild: interaction.guild, member: mention, penalty: { reason } })
+        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.BAN_ADD.dm_message)
+
+        await mention.send(dm_message).catch(self.logger.error)
+    }
 
     if (duration) {
         new TemporaryBan(self, {

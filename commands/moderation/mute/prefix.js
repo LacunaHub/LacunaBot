@@ -3,6 +3,7 @@ const ms = require('ms')
 const moment = require('moment')
 const TemporaryMute = require('../../../internals/structures/TemporaryMute')
 const { images } = require('../../../modules/Logs')
+const Replacer = require('../../../modules/Replacer')
 
 /**
  * @param {import('../../../internals/Lacuna')} self
@@ -66,13 +67,6 @@ module.exports = async (self, server, message) => {
         return false
     }
 
-    const dm_message = new MessageEmbed()
-        .setAuthor(locale.common.case_log.cases.MUTE_ADD, images.MUTE_ADD)
-        .addField(locale.common.case_log.server, message.guild.name, true)
-        .addField(locale.common.case_log.reason, reason, true)
-        .setTimestamp()
-        .setColor('#EF5350')
-
     const case_log_message = new MessageEmbed()
         .setAuthor(locale.common.case_log.cases.MUTE_ADD, images.MUTE_ADD)
         .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
@@ -82,7 +76,12 @@ module.exports = async (self, server, message) => {
         .setTimestamp()
         .setColor('#EF5350')
 
-    await mention.send({ embeds: [dm_message] }).catch(self.logger.error)
+    if (server.moderation.case_log.case_types_messages.MUTE_ADD.active) {
+        const replacer = new Replacer(self, null, { guild: message.guild, member: mention, message, penalty: { reason } })
+        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.MUTE_ADD.dm_message)
+
+        await mention.send(dm_message).catch(self.logger.error)
+    }
 
     if (duration) {
         new TemporaryMute(self, {

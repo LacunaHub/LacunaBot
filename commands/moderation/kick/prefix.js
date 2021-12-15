@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { images } = require('../../../modules/Logs')
+const Replacer = require('../../../modules/Replacer')
 
 /**
  * @param {import('../../../internals/Lacuna')} self
@@ -33,13 +34,6 @@ module.exports = async (self, server, message) => {
     const case_log = message.guild.channels.cache.get(server.moderation.case_log.channel_id)
     const case_id = server.moderation.case_log.cases.length + 1
 
-    const dm_message = new MessageEmbed()
-        .setAuthor(locale.common.case_log.cases.KICK, images.KICK)
-        .addField(locale.common.case_log.server, message.guild.name, true)
-        .addField(locale.common.case_log.reason, reason, true)
-        .setTimestamp()
-        .setColor('#EF5350')
-
     const case_log_message = new MessageEmbed()
         .setAuthor(locale.common.case_log.cases.KICK, images.KICK)
         .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
@@ -49,7 +43,12 @@ module.exports = async (self, server, message) => {
         .setTimestamp()
         .setColor('#EF5350')
 
-    await mention.send({ content: dm_message }).catch(self.logger.error)
+    if (server.moderation.case_log.case_types_messages.KICK.active) {
+        const replacer = new Replacer(self, null, { guild: message.guild, member: mention, message, penalty: { reason } })
+        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.KICK.dm_message)
+
+        await mention.send(dm_message).catch(self.logger.error)
+    }
 
     await mention.kick(reason).catch(self.logger.error)
 

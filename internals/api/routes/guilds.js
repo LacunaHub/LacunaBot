@@ -64,6 +64,9 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
         locale: guild.locale,
         prefix: guild.prefix,
         premium: guild.server.premium,
+        server: {
+            bot_expert_roles: guild.server.bot_expert_roles,
+        },
         commands: {
             ...guild.commands, list: commands
         },
@@ -77,7 +80,8 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
         moderation: {
             case_log: {
                 channel_id: guild.moderation.case_log.channel_id,
-                case_types: guild.moderation.case_log.case_types
+                case_types: guild.moderation.case_log.case_types,
+                case_types_messages: guild.moderation.case_log.case_types_messages
             },
             logs: {
                 types: guild.moderation.logs.types
@@ -115,7 +119,8 @@ router.get('/:guild_id/settings', authorize, authorize.permitted, async (req, re
             },
             autoreactions: guild.modules.autoreactions
         },
-        prices
+        prices,
+        change_log: guild.change_log.reverse()
     })
 })
 
@@ -168,6 +173,9 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
         locale: updated.locale,
         prefix: updated.prefix,
         premium: updated.server.premium,
+        server: {
+            bot_expert_roles: updated.server.bot_expert_roles,
+        },
         commands: {
             ...updated.commands, list: commands
         },
@@ -181,7 +189,8 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
         moderation: {
             case_log: {
                 channel_id: updated.moderation.case_log.channel_id,
-                case_types: updated.moderation.case_log.case_types
+                case_types: updated.moderation.case_log.case_types,
+                case_types_messages: updated.moderation.case_log.case_types_messages
             },
             logs: {
                 types: updated.moderation.logs.types
@@ -219,7 +228,8 @@ router.post('/:guild_id/settings', authorize, authorize.permitted, async (req, r
             },
             autoreactions: updated.modules.autoreactions
         },
-        prices
+        prices,
+        change_log: updated.change_log.reverse()
     })
 })
 

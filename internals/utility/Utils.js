@@ -174,6 +174,24 @@ class Utils {
 
         return obj
     }
+
+    static dotNotateObject(obj, target, prefix) {
+        target = target || {}, prefix = prefix || ''
+      
+        Object.keys(obj).forEach(function(key) {
+            if (typeof(obj[key]) === "object" && obj[key] !== null && !Array.isArray(obj[key])) {
+                Utils.dotNotateObject(obj[key],target,prefix + key + '.')
+            } else {
+                return target[prefix + key] = obj[key]
+            }
+        })
+      
+        return target
+    }
+
+    static shadeColor(color, amount) {
+        return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+    }
 }
 
 module.exports = Utils
