@@ -36,6 +36,7 @@ class Replacer {
             const available = [
                 'CHOOSE',
                 'DATE',
+                'DATENOW',
                 'LOWER',
                 'MATH',
                 'NUMDECL',
