@@ -1,0 +1,199 @@
+import { BaseGuildTextChannel, Collection, Message, MessageReaction, User } from 'discord.js'
+import { AutoReaction, ReactionElement, ServerDocument } from '../database/schemas/Servers'
+import Lacuna from '../internals/Lacuna'
+
+export function generateId() {
+    return `L${Math.random().toString(36).substring(2, 9).toUpperCase()}`
+}
+
+export function parseId(str: string) {
+    if (typeof str != 'string') throw new TypeError('STR_IS_NOT_STRING')
+
+    return str.match(/:[A-Z0-9]{9}/)?.toString() ?? null
+}
+
+export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction: MessageReaction, user: User): Promise<boolean> {
+    if (server.modules.reactions.length) {
+        const locale = self.translator.locale(server.locale).modules
+
+        const message = await reaction.message.fetch()
+        const element: ReactionElement = server.modules.reactions.find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
+
+        if (element) {
+            const member = await message.guild.members.fetch(user.id)
+
+            if (element.element.lifespan && Date.now() > element.element.lifespan) {
+                await self.db.servers.updateOne({ _id: message.guild.id }, {
+                    $pull: {
+                        'modules.reactions': {
+                            id: element.id
+                        }
+                    }
+                })
+
+                if (message.deletable) await reaction.remove()
+                message.reactions.cache.delete(reaction.emoji.id || reaction.emoji.name)
+
+                return false
+            }
+
+            if (element.type == 'CHANNEL') {
+                const channels = message.guild.channels.cache.filter(c => c.manageable && element.references.includes(c.id)) as Collection<string, BaseGuildTextChannel>
+
+                if (channels.size) {
+                    try {
+                        for (const [, channel] of channels) await channel.permissionOverwrites.create(user.id, { VIEW_CHANNEL: element.element.reverse ? true : false })
+                    
+                        self.emit('moduleExecution', { module: 'Reactions: Show Channels', guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+                    } catch (err) {
+                        self.logger.error('An error occurred', err)
+
+                        if (message.deletable) await reaction.users.remove(user.id)
+
+                        return false
+                    }
+                }
+            }
+
+            if (element.type == 'ROLE') {
+                const roles = message.guild.roles.cache.filter(r => r.editable && element.references.includes(r.id))
+
+                if (roles.size) {
+                    if (element.element.reverse && roles.some(r => member.roles.cache.has(r.id))) {
+                        try {
+                            await member.roles.remove(roles, locale.reactions.remove_roles_reason)
+
+                            self.emit('moduleExecution', { module: 'Reactions: Remove Roles', guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+                        } catch (err) {
+                            self.logger.error('An error occurred', err)
+
+                            if (message.deletable) await reaction.users.remove(user.id)
+
+                            return false
+                        }
+
+                        return true
+                    }
+
+                    if (element.element.single || element.element.global_single) {
+                        const single_elements: ReactionElement[] = server.modules.reactions.filter(r => r.element.global_single || (r.element.single && r.message.id == message.id))
+                        const has_single_element: boolean = single_elements.some(sr => sr.references.some(r => member.roles.cache.has(r)))
+
+                        if (has_single_element) {
+                            if (message.deletable) await reaction.users.remove(user.id)
+
+                            return false
+                        }
+
+                        try {
+                            await member.roles.add(roles, locale.reactions.add_roles_reason)
+                        } catch (err) {
+                            self.logger.error('An error occurred', err)
+
+                            if (message.deletable) await reaction.users.remove(user.id)
+
+                            return false
+                        }
+                    }
+
+                    else {
+                        try {
+                            await member.roles.add(roles, locale.reactions.add_roles_reason)
+                        } catch (err) {
+                            self.logger.error('An error occurred', err)
+
+                            if (message.deletable) await reaction.users.remove(user.id)
+
+                            return false
+                        }
+                    }
+
+                    self.emit('moduleExecution', { module: 'Reactions: Add Roles', guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+                }
+            }
+        }
+    }
+
+    return false
+}
+
+export async function reactionRemove(self: Lacuna, server: ServerDocument, reaction: MessageReaction, user: User) {
+    if (server.modules.reactions.length) {
+        const locale = self.translator.locale(server.locale).modules
+
+        const message = reaction.message
+        const element: ReactionElement = server.modules.reactions.find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
+
+        if (element) {
+            const member = await message.guild.members.fetch(user.id)
+
+            if (element.type == 'CHANNEL') {
+                const channels = message.guild.channels.cache.filter(c => c.manageable && element.references.includes(c.id)) as Collection<string, BaseGuildTextChannel>
+
+                if (channels.size) {
+                    try {
+                        for (const [, channel] of channels) {
+                            const overwrites = channel.permissionOverwrites.cache.find(p => p.id == user.id)
+    
+                            if (overwrites) {
+                                await overwrites.delete(element.element.reverse ? locale.reactions.hide_channels_reason : locale.reactions.show_channels_reason)
+        
+                                self.emit('moduleExecution', { module: `Reactions: ${element.element.reverse ? 'Hide Channels' : 'Show Channels'}`, guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+                            }
+                        }   
+                    } catch (err) {
+                        self.logger.error('An error occurred', err)
+
+                        return false
+                    }
+                }
+            }
+
+            if (element.type == 'ROLE') {
+                const roles = message.guild.roles.cache.filter(r => r.editable && element.references.includes(r.id))
+
+                if (roles.size) {
+                    try {
+                        if (element.element.reverse) await member.roles.add(roles, locale.reactions.add_roles_reason)
+                        else await member.roles.remove(roles, locale.reactions.remove_roles_reason)
+    
+                        await self.emit('moduleExecution', { module: `Reactions: ${element.element.reverse ? 'Add' : 'Remove'} Roles`, guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+                    } catch (err) {
+                        self.logger.error('An error occurred', err)
+
+                        return false
+                    }
+                }
+            }
+        }
+    }
+}
+
+export async function autoReact(server: ServerDocument, message: Message) {
+    const auto_reaction: AutoReaction = server.modules.autoreactions.find(ar => ar.channel_id == message.channel.id)
+
+    if (auto_reaction) {
+        if (auto_reaction.message_types && auto_reaction.message_types.length && !auto_reaction.message_types.includes(message.type)) return false
+
+        const content: string = message.content.toLowerCase()
+        const split: string[] = content.split(/\s{1,}/)
+
+        if ((auto_reaction.matches.length && !auto_reaction.matches.some(m => split.includes(m.toLowerCase()))) || (auto_reaction.exclude_matches.length && auto_reaction.exclude_matches.some(m => split.includes(m.toLowerCase())))) return false
+
+        for (const emoji of auto_reaction.reactions) {
+            await message.react(emoji.id || emoji.name)
+        }
+
+        return true
+    }
+
+    return false
+}
+
+export default {
+    generateId,
+    parseId,
+    reactionAdd,
+    reactionRemove,
+    autoReact
+}
