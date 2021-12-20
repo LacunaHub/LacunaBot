@@ -1,0 +1,215 @@
+import fetch from 'node-fetch'
+import ParserRSS from 'rss-parser'
+import moment from 'moment'
+import { scheduleJob, RecurrenceRule, Range, Job } from 'node-schedule'
+import Replacer from './Replacer'
+import Lacuna from '../internals/Lacuna'
+import { ServerDocument } from '../database/schemas/Servers'
+import { BaseGuildTextChannel } from 'discord.js'
+
+const rss = new ParserRSS()
+
+export async function searchChannels(term: string) {
+    term = term.startsWith('UC') ? `channelId=${term}` : `q=${encodeURI(term)}`
+
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&${term}&maxResults=15&type=channel&key=${process.env.GOOGLE_API_KEY}`, { method: 'GET' })
+
+    if (res.status === 200) {
+        const data: YouTubeSearchResponse = await res.json()
+
+        if (data.items && data.items.length) {
+            return data.items.map(item => {
+                return {
+                    id: item.id.channelId,
+                    name: item.snippet.channelTitle,
+                    thumbnail: item.snippet.thumbnails.medium.url
+                }
+            })
+        }
+
+        return []
+    }
+
+    return []
+}
+
+export async function checkVideos(channel_id: string) {
+    let feed
+
+    try {
+        feed = await rss.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${channel_id}`)
+    } catch (err) {
+        feed = null
+    }
+
+    const video = feed && feed.items[0] ? feed.items[0] : null
+
+    if (video) {
+        const today = moment(), published = video.pubDate
+
+        return {
+            author: video.author,
+            title: video.title,
+            video_id: video.id.replace('yt:video:', ''),
+            published: today.diff(published, 'hours'),
+            url: video.link
+        }
+    }
+}
+
+export async function isLiveBroadcast(video_id: string) {
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${video_id}&key=${process.env.GOOGLE_API_KEY}`, { method: 'GET' })
+
+    if (res.status === 200) {
+        const data = await res.json()
+        const video = data.items && data.items.length ? data.items[0] : null
+
+        if (video && video.snippet.liveBroadcastContent == 'live') return true
+
+        return false
+    }
+
+    return false
+}
+
+export function scheduleCheck(self: Lacuna): Job {
+    const rule = new RecurrenceRule()
+    rule.minute = new Range(0, 59, 5)
+
+    const job = scheduleJob(rule, async () => {
+        const guilds: string[] = self.guilds.cache.map(g => g.id)
+        const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'modules.youtube.channels.0': { $exists: true } })
+
+        let channel_count: number = 0
+
+        for (const server of servers) {
+            const channels = server.modules.youtube.channels.sort((a, b) => (a.channel.name as any) - (b.channel.name as any)).filter(c => (Date.now() - c.last_check_timestamp) > 600000 && (c.alerts.videos || c.alerts.broadcasts))
+            
+            channels.forEach(async (channel, i) => {
+                setTimeout(async () => {
+                    if (i > 1 && !server.server.premium.available) return false
+
+                    const guild = self.guilds.cache.get(server._id)
+
+                    if (!guild || !guild.available) return false
+
+                    const alert_channel = guild.channels.cache.get(channel.alerts.channel_id) as BaseGuildTextChannel
+
+                    if (alert_channel) {
+                        const video = await checkVideos(channel.channel.id)
+
+                        if (video && video.video_id != channel.last_video_id && video.published <= 2) {
+                            await self.db.servers.updateOne({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
+                                $set: {
+                                    'modules.youtube.channels.$.last_video_id': video.video_id
+                                }
+                            })
+
+                            const is_broadcast = await isLiveBroadcast(video.video_id)
+                            let webhook = await self.fetchWebhook(channel.alerts.webhook.id, channel.alerts.webhook.token).catch(() => {})
+
+                            if (!webhook) {
+                                try {
+                                    webhook = await alert_channel.createWebhook(channel.channel.name, { avatar: channel.channel.thumbnail })
+                                } catch (err) { return false }
+
+                                await self.db.servers.updateOne({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
+                                    $set: {
+                                        'modules.youtube.channels.$.alerts.webhook.id': webhook.id,
+                                        'modules.youtube.channels.$.alerts.webhook.token': webhook.token
+                                    }
+                                })
+                            }
+
+                            if (is_broadcast && channel.alerts.broadcasts) {
+                                const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.broadcasts_message_template)
+                                const replacer = new Replacer(self, `${has_link ? channel.alerts.broadcasts_message_template : `${channel.alerts.broadcasts_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
+                                const content = await replacer.replace()
+
+                                await webhook.send({ content })
+    
+                                self.emit('moduleExecution', { module: 'YouTube: Broadcasts', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.name } })
+                            }
+
+                            else if (channel.alerts.videos) {
+                                const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.videos_message_template)
+                                const replacer = new Replacer(self, `${has_link ? channel.alerts.videos_message_template : `${channel.alerts.videos_message_template}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
+                                const content = await replacer.replace()
+                                
+                                await webhook.send({ content })
+    
+                                self.emit('moduleExecution', { module: 'YouTube: Videos', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.name } })
+                            }
+                        }
+
+                        await self.db.servers.updateOne({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
+                            $set: {
+                                'modules.youtube.channels.$.last_check_timestamp': Date.now()
+                            }
+                        })
+                    }
+                }, i * 1500)
+            })
+
+            channel_count += channels.length
+        }
+
+        self.logger.info(`(YouTube): Checked ${channel_count} channels on ${servers.length} servers`)
+    })
+
+    self.logger.info(`(YouTube): Scheduled check has been initialized`)
+
+    return job
+}
+
+export interface YouTubeSearchResponse {
+    kind: string
+    etag: string
+    nextPageToken: string
+    prevPageToken: string
+    regionCode: string
+    pageInfo: {
+        totalResults: number
+        resultsPerPage: number
+    }
+    items: YouTubeSearchChannel[]
+}
+
+export interface YouTubeSearchChannel {
+    kind: string
+    etag: string
+    id: {
+        kind: string
+        videoId: string
+        channelId: string
+        playlistId: string
+    },
+    snippet: {
+        publishedAt: string
+        channelId: string
+        title: string
+        description: string
+        thumbnails: {
+            default: YouTubeChannelThumbnail
+            medium: YouTubeChannelThumbnail
+            high: YouTubeChannelThumbnail
+            standard: YouTubeChannelThumbnail
+            maxres: YouTubeChannelThumbnail
+        },
+        channelTitle: string
+        liveBroadcastContent: string
+    }
+}
+
+export interface YouTubeChannelThumbnail {
+    url: string
+    width: number
+    height: number
+}
+
+export default {
+    searchChannels,
+    checkVideos,
+    isLiveBroadcast,
+    scheduleCheck
+}

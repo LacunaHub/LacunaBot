@@ -107,3 +107,4 @@ package-lock.json
 database/playable-music-hosts.json
 database/prices.json
 json.sqlite
+data.json

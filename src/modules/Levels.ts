@@ -1,0 +1,526 @@
+import Replacer from './Replacer'
+import Canvas, { Image, NodeCanvasRenderingContext2D } from 'canvas'
+import { MessageAttachment, CommandInteraction, Message, ContextMenuInteraction, VoiceState, VoiceChannel, GuildMember, BaseGuildTextChannel, BaseGuildVoiceChannel } from 'discord.js'
+import numbro from 'numbro'
+import { scheduleJob, RecurrenceRule, Range, Job } from 'node-schedule'
+import Lacuna from '../internals/Lacuna'
+import { ServerDocument } from '../database/schemas/Servers'
+
+export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean> {
+    if (!server.modules.levels.active) return false
+
+    if (server.modules.levels.blocked.channels.includes(message.channel.id) || message.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))) return false
+    if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(message.channel.id)) return false
+    if (server.modules.levels.allowed.roles.length && !message.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id))) return false
+
+    const activity = await self.db.activities.fetch({ _id: message.guild.id })
+    let levels = activity.levels.find(level => level.user_id == message.author.id)
+    
+    if (!levels) {
+        const data = {
+            user_id: message.author.id,
+            experience: { total: 0, current: 0, level: 0 },
+            activity: {
+                text: { total_messages: 0, last_message_at: null },
+                voice: { total_time: 0, connected_at: null, disconnected_at: null }
+            }
+        }
+
+        await self.db.activities.updateOne({ _id: message.guild.id }, {
+            $push: { levels: data as never }
+        })
+
+        levels = data
+    }
+
+    if ((Date.now() - levels.activity.text.last_message_at) < 60000) return false
+
+    const current_xp: number = levels.experience.current, total_xp = levels.experience.total
+    const level: number = levels.experience.level, next_level = 150 + (level * level * 8)
+
+    const points: number = (Math.floor(Math.random() * 11) + 15) + level
+
+    if ((next_level - current_xp) <= points) {
+        await self.db.activities.updateOne({ _id: message.guild.id, 'levels.user_id': message.author.id }, {
+            $set: {
+                'levels.$.experience.level': level + 1,
+                'levels.$.experience.current': 0,
+                'levels.$.experience.total': total_xp + (next_level - current_xp),
+                'levels.$.activity.text.last_message_at': Date.now()
+            },
+            $inc: {
+                'levels.$.activity.text.total_messages': 1
+            }
+        })
+
+        await updateAwards(self, server, { member: message.member, level: level + 1 })
+        await sendLevelUpAlert(self, server, { message: message, level: level + 1 })
+    }
+
+    else {
+        await self.db.activities.updateOne({ _id: message.guild.id, 'levels.user_id': message.author.id }, {
+            $set: {
+                'levels.$.activity.text.last_message_at': Date.now()
+            },
+            $inc: {
+                'levels.$.experience.current': points,
+                'levels.$.experience.total': points,
+                'levels.$.activity.text.total_messages': 1
+            }
+        })
+    }
+
+    self.emit('moduleExecution', { module: 'Levels: Message Create', guild: { id: message.guild.id, name: message.guild.name }, target: { id: message.author.id, name: message.author.tag } })
+
+    return true
+}
+
+export async function voiceAssign(self: Lacuna, server: ServerDocument, state: VoiceState): Promise<boolean> {
+    if (!server.modules.levels.voice) return false
+
+    if (server.modules.levels.blocked.channels.includes(state.channelId) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))) return false
+    if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channelId)) return false
+    if (server.modules.levels.allowed.roles.length && !state.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id))) return false
+    if (state.guild.afkChannelId === state.channelId) return false
+
+    const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
+
+    if (members.size > 1) {
+        for (const [_, member] of members) {
+            const activity = await self.db.activities.fetch({ _id: member.guild.id })
+            let levels = activity.levels.find(level => level.user_id == member.id)
+            
+            if (!levels) {
+                const data = {
+                    user_id: member.id,
+                    experience: { total: 0, current: 0, level: 0 },
+                    activity: {
+                        text: { total_messages: 0, last_message_at: null },
+                        voice: { total_time: 0, connected_at: null, disconnected_at: null }
+                    }
+                }
+
+                await self.db.activities.updateOne({ _id: member.guild.id }, {
+                    $push: { levels: data as never }
+                })
+
+                levels = data
+            }
+
+            if (!levels.activity.voice.connected_at) {
+                await self.db.activities.updateOne({ _id: member.guild.id, 'levels.user_id': member.id }, {
+                    $set: {
+                        'levels.$.activity.voice.connected_at': Date.now(),
+                        'levels.$.activity.voice.disconnected_at': null
+                    }
+                })
+            }
+        }
+
+        self.emit('moduleExecution', { module: 'Levels: Voice Assign', guild: { id: state.member.guild.id, name: state.member.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
+
+        return true
+    }
+
+    return false
+}
+
+export async function voiceUnassign(self: Lacuna, server: ServerDocument, state: VoiceState, channel: BaseGuildVoiceChannel) {
+    const members = channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
+
+    if (members) {
+        if (members.size === 1) {
+            await voiceCount(self, server, state.member)
+            await voiceCount(self, server, members.first())
+        }
+
+        if (members.size >= 2) {
+            await voiceCount(self, server, state.member)
+        }
+    }
+}
+
+export async function voiceCount(self: Lacuna, server: ServerDocument, member: GuildMember): Promise<boolean> {
+    const activity = await self.db.activities.fetch({ _id: member.guild.id })
+    const levels = activity.levels.find(level => level.user_id == member.id)
+
+    if (!levels || !levels.activity.voice.connected_at) return false
+
+    const current_xp: number = levels.experience.current
+    const level: number = levels.experience.level, next_level: number = 150 + (level * level * 8)
+
+    const time: number = (Date.now() - levels.activity.voice.connected_at) / 1000
+    const points: number = ((time/60) * (time/60/60 <= 0 ? 1 : time/60/60) + ((5/100) * time)) * ((10/100) * level < 1 ? 1 : (10/100) * level)
+
+    if ((next_level - current_xp) <= points) {
+        let new_level: number, new_current_xp: number
+
+        for (new_level = level, new_current_xp = points + current_xp; new_current_xp >= neededXp(new_level); new_current_xp -= neededXp(new_level), new_level++) {}
+
+        await self.db.activities.updateOne({ _id: member.guild.id, 'levels.user_id': member.id }, {
+            $set: {
+                'levels.$.experience.level': new_level,
+                'levels.$.experience.current': Number(new_current_xp.toFixed(2)),
+                'levels.$.experience.total': Number((neededTotalXp(new_level) + new_current_xp).toFixed(2)),
+                'levels.$.activity.voice.connected_at': null,
+                'levels.$.activity.voice.disconnected_at': Date.now()
+            },
+            $inc: {
+                'levels.$.activity.voice.total_time': Number(time.toFixed(2))
+            }
+        })
+
+        await updateAwards(self, server, { member, level: new_level })
+        await sendLevelUpAlert(self, server, { member, level: new_level })
+    }
+
+    else {
+        await self.db.activities.updateOne({ _id: member.guild.id, 'levels.user_id': member.id }, {
+            $inc: {
+                'levels.$.experience.current': Number(points.toFixed(2)),
+                'levels.$.experience.total': Number(points.toFixed(2)),
+                'levels.$.activity.voice.total_time': Number(time.toFixed(2))
+            },
+            $set: {
+                'levels.$.activity.voice.connected_at': null,
+                'levels.$.activity.voice.disconnected_at': Date.now(),
+            }
+        })
+    }
+
+    self.emit('moduleExecution', { module: 'Levels: Voice Count', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+
+    return true
+}
+
+export async function updateAwards(self: Lacuna, server: ServerDocument, refs: { member: GuildMember, level: number }) {
+    const member = refs.member
+
+    const awards = server.modules.levels.awards.sort((a, b) => b.level - a.level)
+    const reward = awards.find(award => award.level === refs.level)
+
+    const less_awards = awards.filter(award => award.level < refs.level).sort((a, b) => b.level - a.level)
+    const less_reward = less_awards[0] || null
+
+    if (reward) {
+        if (reward.type === 'ROLE') {
+            const roles = member.guild.roles.cache.filter(r => r.editable && reward.references.includes(r.id))
+
+            if (roles.size) {
+                if (!roles.some(r => member.roles.cache.has(r.id))) await member.roles.add(roles).catch(self.logger.error)
+
+                if (less_reward && less_reward.single) {
+                    const less_roles = member.guild.roles.cache.filter(r => r.editable && less_reward.references.includes(r.id))
+
+                    if (less_roles.size) {
+                        if (less_roles.some(r => member.roles.cache.has(r.id))) await member.roles.remove(less_roles).catch(self.logger.error)
+                    }
+                }
+            }
+        }
+
+        self.emit('moduleExecution', { module: 'Levels: Update Awards', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+    }
+
+    if (!reward && less_reward) {
+        if (less_reward.type === 'ROLE') {
+            const roles = member.guild.roles.cache.filter(r => r.editable && less_reward.references.includes(r.id))
+
+            if (roles.size) {
+                if (!roles.some(r => member.roles.cache.has(r.id))) await member.roles.add(roles).catch(self.logger.error)
+
+                if (less_awards[1] && less_awards[1].single) {
+                    const less_roles = member.guild.roles.cache.filter(r => r.editable && less_awards[1].references.includes(r.id))
+
+                    if (less_roles.size) {
+                        if (less_roles.some(r => member.roles.cache.has(r.id))) await member.roles.remove(less_roles).catch(self.logger.error)
+                    }
+                }
+            }
+        }
+
+        self.emit('moduleExecution', { module: 'Levels: Update Less Awards', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+    }
+}
+
+export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, refs: { member?: GuildMember, message?: Message, level: number }) {
+    const member = refs.message ? refs.message.member : refs.member
+
+    const award = server.modules.levels.awards.find(a => a.level === refs.level)
+    const direction = award && award.alert && award.alert.active ? award.alert : server.modules.levels.level_up_alerts
+
+    if (direction.active) {
+        const replacer = new Replacer(self, null, { message: refs.message, guild: member.guild, member: member })
+        const congrats = await replacer.replaceTemplateMessage(direction.message)
+
+        if (direction.format === 'CURRENT_CHANNEL' && refs.message) {
+            await refs.message.channel.send(congrats).catch(self.logger.error)
+        }
+
+        if (direction.format === 'DM') {
+            await member.send(congrats).catch(self.logger.error)
+        }
+
+        if (direction.format === 'CHANNEL') {
+            const channel = member.guild.channels.cache.get(direction.channel_id) as BaseGuildTextChannel
+
+            if (channel) await channel.send(congrats).catch(self.logger.error)
+        }
+
+        self.emit('moduleExecution', { module: 'Levels: Level Up Alert', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+    }
+}
+
+export async function generateRankCard(self: Lacuna, signal: CommandInteraction | ContextMenuInteraction | Message): Promise<MessageAttachment> {
+    const activity = await self.db.activities.fetch({ _id: signal.guild.id })
+
+    let mention: GuildMember
+
+    if (signal instanceof CommandInteraction) mention = (signal.options?.getMember('пользователь') || signal.member) as GuildMember
+    if (signal instanceof Message) mention = signal.mentions.members.first() || (signal['args'][0] ? (await signal.guild.members.fetch(signal['args'][0])) : null) || signal.member
+    if (signal instanceof ContextMenuInteraction) mention = await signal.guild.members.fetch(signal.targetId)
+
+    const sorted = activity.levels.sort((a, b) => b.experience.total - a.experience.total)
+    let level = sorted.find(lvl => lvl.user_id == mention.id)
+
+    if (!level) {
+        level = {
+            user_id: mention.id,
+            experience: { total: 0, current: 0, level: 0 },
+            activity: {
+                text: { total_messages: 0, last_message_at: null },
+                voice: { total_time: 0, connected_at: null, disconnected_at: null }
+            }
+        }
+    }
+
+    await mention.user?.fetch()
+
+    const canvas = await Canvas.createCanvas(720, 256)
+    const ctx = canvas.getContext('2d')
+    
+    ctx.save()
+
+    let banner: Image
+
+    try {
+        if (mention.user?.banner) banner = await Canvas.loadImage(mention.user?.bannerURL({ format: 'png', size: 600 }))
+    } catch (err) {
+        banner = null
+    }
+
+    const rect_x = canvas.width, rect_y = canvas.height, border_radius = 40
+
+    ctx.fillStyle = '#13191C'
+    ctx.strokeStyle = '#13191C'
+    ctx.fillRect(rect_x, rect_y, rect_x, rect_y)
+    ctx.lineJoin = 'round'
+    ctx.lineWidth = border_radius
+
+    ctx.strokeRect(border_radius / 2, border_radius / 2, rect_x - border_radius, rect_y - border_radius)
+    ctx.fillRect(border_radius / 2, border_radius / 2, rect_x - border_radius, rect_y - border_radius)
+
+    if (banner) {
+        const width_ratio = 720 / banner.width, height_ratio = 256 / banner.height
+        const ratio = width_ratio > height_ratio ? width_ratio : height_ratio
+
+        ctx.save()
+        roundImage(ctx, 0, 0, 720, 256, border_radius / 2)
+        ctx.clip()
+        ctx.globalAlpha = 0.2
+        ctx.drawImage(banner, rect_x / 2 - (banner.width * ratio) / 2, rect_y / 2 - (banner.height * ratio) / 2, banner.width * ratio, banner.height * ratio)
+        ctx.globalAlpha = 1.0
+        ctx.restore()
+    }
+
+    const avatar = await Canvas.loadImage(mention.user.displayAvatarURL({ format: 'png' }))
+
+    ctx.beginPath()
+    ctx.arc(85, 85, 60, 0, Math.PI * 2, true)
+    ctx.closePath()
+    ctx.clip()
+
+    ctx.drawImage(avatar, 25, 25, 120, 120)
+    ctx.restore()
+
+    const color = mention.user?.hexAccentColor ?? '#DA70D6'
+
+    ctx.globalAlpha = 0.5
+    ctx.strokeStyle = color
+    ctx.beginPath()
+    ctx.lineCap = "round"
+    ctx.lineWidth = 20
+    ctx.moveTo(35, 185)
+    ctx.lineTo(685, 185)
+    ctx.stroke()
+    ctx.restore()
+    ctx.globalAlpha = 1.0
+
+    const formula = 150 + (level.experience.level * level.experience.level * 8)
+    const percent = Math.floor((level.experience.current * 100) / formula)
+    const progress = Math.floor(650 * percent / 100)
+
+    ctx.strokeStyle = color
+    ctx.beginPath()
+    ctx.lineCap = "round"
+    ctx.lineWidth = 20
+    ctx.moveTo(35, 185)
+    ctx.lineTo(35 + progress, 185)
+    ctx.stroke()
+
+    ctx.font = '25px Gotham Pro Medium'
+    ctx.fillStyle = '#ffffff'
+    const username = mention.displayName
+    const measure = ctx.measureText(username)
+    ctx.fillText(measure.width > 450 ? 'Username' : username, 160, 70, 450)
+
+    // ctx.fillStyle = '#545B5F'
+    // ctx.fillText(`#${mention.user.discriminator}`, measure.width > 400 ? 160 + ctx.measureText('Username').width : 160 + measure.width, 70)
+
+    ctx.strokeStyle = '#545B5F'
+    ctx.beginPath()
+    ctx.lineCap = "round"
+    ctx.lineWidth = 1
+    ctx.moveTo(160, 85)
+    ctx.lineTo(695, 85)
+    ctx.stroke()
+
+    const messages = await Canvas.loadImage('./assets/messages.png')
+    const microphone = await Canvas.loadImage('./assets/microphone.png')
+
+    ctx.font = '25px Gotham Pro Medium'
+    ctx.fillStyle = '#ffffff'
+
+    ctx.textAlign = 'end'
+    const m2 = ctx.measureText(`#${sorted.indexOf(level) + 1}`)
+    ctx.fillText(`#${sorted.indexOf(level) + 1}`, 695, 70)
+    ctx.font = '20px Gotham Pro Medium'
+    ctx.fillStyle = '#545B5F'
+    ctx.fillText('TOP', 690 - m2.width, 70)
+    //ctx.drawImage(place, (690 - 25) - m2.width, 48, 25, 25)
+
+    ctx.textAlign = 'start'
+    const m4 = ctx.measureText('LV.')
+    ctx.fillText('LV.', 160, 117)
+    ctx.font = '25px Gotham Pro Medium'
+    ctx.fillStyle = '#ffffff'
+    ctx.fillText(`${level.experience.level}`, 165 + m4.width, 117)
+    //ctx.drawImage(lvl, 160, 95, 25, 25)
+
+    ctx.font = '22px Gotham Pro Medium'
+    ctx.fillStyle = '#545B5F'
+    ctx.textAlign = 'end'
+    const m3 = ctx.measureText(`${level.activity.text.total_messages}`)
+    ctx.fillText(`${level.activity.text.total_messages}`, 695, 117)
+    ctx.drawImage(messages, (690 - 25) - m3.width, 95, 25, 25)
+
+    const voice_time = numbro(level.activity.voice.total_time).format({ output: 'time' })
+    const m5 = ctx.measureText(voice_time)
+    ctx.fillText(voice_time, 620 - (m3.width / 2), 117)
+    ctx.drawImage(microphone, (615 - (m3.width / 2) - 25) - m5.width, 95, 25, 25)
+
+    const current_xp_format = level.experience.current >= 1000 ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 2 }).toUpperCase() : Math.floor(level.experience.current)
+    const next_xp_format = formula >= 1000 ? numbro(formula).format({ average: true, mantissa: 2 }).toUpperCase() : formula
+
+    ctx.textBaseline = 'top'
+    ctx.font = '20px Gotham Pro Medium'
+    ctx.fillStyle = '#ffffff'
+    ctx.textAlign = 'start'
+    ctx.fillText(`${current_xp_format}`, 25, 205)
+
+    ctx.textAlign = 'end'
+    ctx.fillText(`${next_xp_format}`, 695, 205)
+
+    return new MessageAttachment(canvas.toBuffer(), `lacuna-rank-${Date.now()}.png`)
+}
+
+export function checkVoiceStates(self: Lacuna): Job {
+    const rule = new RecurrenceRule()
+    rule.minute = new Range(0, 59, 20)
+
+    const job = scheduleJob(rule, async () => {
+        if (!self.readyTimestamp) return null
+
+        const guilds = self.guilds.cache.map(g => g.id)
+        const servers = await self.db.servers.find({ _id: { $in: guilds }, 'modules.levels.voice': true })
+
+        for (const server of servers) {
+            const activities = await self.db.activities.findOne({ _id: server._id })
+
+            if (activities) {
+                const guild = self.guilds.cache.get(server._id)
+                const in_voice = activities.levels.filter(level => level.activity.voice.connected_at)
+
+                for (const user of in_voice) {
+                    if ((Date.now() - user.activity.voice.connected_at) >= 43200000) {
+                        await self.db.activities.updateOne({ _id: guild.id, 'levels.user_id': user.user_id }, {
+                            $set: {
+                                'levels.$.activity.voice.connected_at': null,
+                                'levels.$.activity.voice.disconnected_at': Date.now()
+                            }
+                        })
+                        
+                        return
+                    }
+
+                    const member = await guild.members.fetch(user.user_id).catch(() => {})
+
+                    if (!member) {
+                        await self.db.activities.updateOne({ _id: guild.id, 'levels.user_id': user.user_id }, {
+                            $set: {
+                                'levels.$.activity.voice.connected_at': null,
+                                'levels.$.activity.voice.disconnected_at': Date.now()
+                            }
+                        })
+
+                        return
+                    }
+
+                    const voice_state = member.voice.channelId && member.voice.channelId != guild.afkChannelId && member.voice.channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)?.size > 1
+
+                    if (!voice_state) await voiceCount(self, server, member)
+                }
+            }
+        }
+    })
+
+    self.logger.info(`(Levels): Voice states check has been initialized`)
+
+    return job
+}
+
+function neededXp(level: number): number { return 150 + (level * level * 8) }
+function neededTotalXp(level: number): number {
+    let total = 0
+
+    for (let i = 0; i < level; i++) {
+        total += 150 + (i * i * 8)
+    }
+
+    return total
+}
+
+function roundImage(ctx: NodeCanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
+    ctx.beginPath()
+    ctx.moveTo(x + radius, y)
+    ctx.lineTo(x + width - radius, y)
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
+    ctx.lineTo(x + width, y + height - radius)
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+    ctx.lineTo(x + radius, y + height)
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
+    ctx.lineTo(x, y + radius)
+    ctx.quadraticCurveTo(x, y, x + radius, y)
+    ctx.closePath()
+}
+
+export default {
+    messageCreate,
+    voiceAssign,
+    voiceUnassign,
+    voiceCount,
+    updateAwards,
+    sendLevelUpAlert,
+    generateRankCard,
+    checkVoiceStates
+}

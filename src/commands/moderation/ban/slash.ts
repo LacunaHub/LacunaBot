@@ -1,0 +1,103 @@
+import { BaseGuildTextChannel, CommandInteraction, GuildMember, MessageEmbed } from 'discord.js'
+import ms from 'ms'
+import moment from 'moment'
+import { images } from '../../../modules/Logs'
+import TemporaryBan from '../../../internals/structures/TemporaryBan'
+import Replacer from '../../../modules/Replacer'
+import Lacuna from '../../../internals/Lacuna'
+import { ServerDocument } from '../../../database/schemas/Servers'
+
+export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+    const locale = self.translator.locale(server.locale).commands
+
+    const mention = interaction.options?.getMember('пользователь') as GuildMember
+    let duration = interaction.options?.getString('длительность') as any
+    let reason = interaction.options?.getString('причина') ?? '-'
+
+    duration = duration && ms(duration) ? ms(duration) : null
+
+    if (!mention) {
+        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+
+        return false
+    }
+
+    if (!mention.bannable) {
+        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.cant_ban_user, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+
+        return false
+    }
+
+    if (mention.id == (interaction.member as any).id) {
+        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+
+        return false
+    }
+
+    const case_log = interaction.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
+    const case_id: number = server.moderation.case_log.cases.length + 1
+
+    if (duration) {
+        if (duration < ms('1m')) duration = ms('1m')
+        else if (duration > ms('2y')) duration = ms('2y')
+
+        reason = `${reason} (${moment(Date.now() + duration).locale(server.locale).fromNow(true)})`
+    }
+
+    const case_log_message = new MessageEmbed()
+        .setAuthor(locale.common.case_log.cases.BAN_ADD, images.BAN_ADD)
+        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
+        .addField(locale.common.case_log.executor, interaction.user.tag, true)
+        .addField(locale.common.case_log.reason, reason)
+        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setTimestamp()
+        .setColor('#EF5350')
+
+    if (server.moderation.case_log.case_types_messages.BAN_ADD.active) {
+        const replacer = new Replacer(self, null, { guild: interaction.guild, member: mention, penalty: { reason } })
+        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.BAN_ADD.dm_message)
+
+        await mention.send(dm_message).catch(self.logger.error)
+    }
+
+    if (duration) {
+        new TemporaryBan(self, {
+            user_id: mention.id,
+            guild_id: interaction.guild.id,
+            expires_timestamp: Date.now() + duration,
+            reason: reason,
+            initial: true
+        })
+    }
+
+    else {
+        await interaction.guild.members.ban(mention, { reason: reason }).catch(self.logger.error)
+    }
+
+    if (case_log && server.moderation.case_log.case_types.BAN_ADD) {
+        await case_log.send({ embeds: [case_log_message] }).catch(self.logger.error)
+    
+        await self.db.servers.updateOne({ _id: interaction.guild.id }, {
+            $push: {
+                'moderation.case_log.cases': {
+                    case_id: case_id,
+                    type: 1 << 0,
+                    timestamp: Date.now(),
+                    reason: reason,
+                    target: {
+                        id: mention.id,
+                        name: mention.user.tag
+                    },
+                    executor: {
+                        id: interaction.user.id,
+                        name: interaction.user.tag
+                    }
+                }
+            }
+        })
+    }
+
+    await interaction.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.ban.texts.user_banned, `**${(interaction.member as any).displayName}**`, `**${mention.user.tag}**`)}`, ephemeral: true })
+
+    return true
+}
