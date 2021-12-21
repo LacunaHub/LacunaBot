@@ -13,7 +13,8 @@ router.get('/', getState)
 
 async function getState(ctx: Context) {
     const guilds = await sharding.fetchClientValues('guilds.cache.size') as number[]
-    const users = await sharding.fetchClientValues('users.cache.size') as number[]
+    const users = await sharding.broadcastEval(self => self.guilds.cache.reduce((x, y) => x + y.memberCount, 0))
+    const cached_users = await sharding.fetchClientValues('users.cache.size') as number[]
     const channels = await sharding.fetchClientValues('channels.cache.size') as number[]
     const pings = await sharding.fetchClientValues('ws.ping') as number[]
     const uptimes = await sharding.fetchClientValues('uptime') as number[]
@@ -35,6 +36,7 @@ async function getState(ctx: Context) {
             uptime: numbro(uptimes[shard.id] / 1000).format({ output: 'time' }),
             guilds: guilds[shard.id],
             users: users[shard.id],
+            cached_users: cached_users[shard.id],
             channels: channels[shard.id]
         }
     })
@@ -44,6 +46,7 @@ async function getState(ctx: Context) {
         version: version.split('.').slice(0, 2).join('.'),
         guilds: guilds.reduce((a, b) => a + b, 0),
         users: users.reduce((a, b) => a + b, 0),
+        cached_users: cached_users.reduce((a, b) => a + b, 0),
         channels: channels.reduce((a, b) => a + b, 0),
         shards: shards,
         players: players,

@@ -3,6 +3,7 @@ import logger from '../Logger'
 import { scheduleJob, RecurrenceRule, Range, Job } from 'node-schedule'
 import qdb from 'quick.db'
 import ShardingManager from './ShardingManager'
+import Lacuna from '../Lacuna'
 
 export function scheduleStatsCollect(sharding: ShardingManager) {
     const rule = new RecurrenceRule()
@@ -12,18 +13,21 @@ export function scheduleStatsCollect(sharding: ShardingManager) {
         if (!sharding.shards.every(shard => shard.ready)) return null
 
         const guildsSize: number[] = await sharding.fetchClientValues('guilds.cache.size') as number[]
+        const commandUses = await sharding.broadcastEval((self: Lacuna) => self.commands.filter(c => c.is_slash_command).map(c => { return { name: c.name, uses: c.uses } }))
 
         const guilds: number = guildsSize.reduce((a, b) => a + b, 0)
         const pings: number[] = await sharding.fetchClientValues('ws.ping') as number[]
+        const commands = commandUses.flat().reduce((x, y) => { x[y.name] = x[y.name] ? x[y.name] + y.uses : y.uses; return x }, {})
 
         qdb.push('charts.guilds', { n: guilds, ts: Date.now() })
         qdb.push('charts.pings', { d: pings, ts: Date.now() })
+        qdb.push('charts.command_uses', { d: commands, ts: Date.now() })
 
-        const g_charts: GuildsChart[] = qdb.get('charts.guilds')
-        const p_charts: PingsChart[] = qdb.get('charts.pings')
+        const charts: { guilds: GuildsChart[], pings: PingsChart[], command_uses: any[] } = qdb.get('charts')
 
-        qdb.set('charts.guilds', g_charts.filter(c => (Date.now() - c.ts) < 259200000))
-        qdb.set('charts.pings', p_charts.filter(c => (Date.now() - c.ts) < 64800000))
+        qdb.set('charts.guilds', charts.guilds.filter(c => (Date.now() - c.ts) < 259200000))
+        qdb.set('charts.pings', charts.pings.filter(c => (Date.now() - c.ts) < 64800000))
+        qdb.set('charts.command_uses', charts.command_uses.filter(c => (Date.now() - c.ts) < 64800000))
 
         await sendGuildCount(guilds)
     })
