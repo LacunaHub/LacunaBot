@@ -27,7 +27,7 @@ export function scheduleStatsCollect(sharding: ShardingManager) {
 
         qdb.set('charts.guilds', charts.guilds.filter(c => (Date.now() - c.ts) < 259200000))
         qdb.set('charts.pings', charts.pings.filter(c => (Date.now() - c.ts) < 64800000))
-        qdb.set('charts.command_uses', charts.command_uses.filter(c => (Date.now() - c.ts) < 64800000))
+        qdb.set('charts.command_uses', charts.command_uses.filter(c => (Date.now() - c.ts) < 36000000))
 
         await sendGuildCount(guilds)
     })

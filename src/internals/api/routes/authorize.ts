@@ -34,7 +34,7 @@ async function callback(ctx: Context) {
 
     ctx.cookies
         .set('user_id', user.id, cookieOptions)
-        .set('user_username', user.username, cookieOptions)
+        .set('user_username', encodeURIComponent(user.username), cookieOptions)
         .set('user_discriminator', user.discriminator, cookieOptions)
         
     if (user.avatar) ctx.cookies.set('user_avatar', user.avatar, cookieOptions)
