@@ -50,7 +50,8 @@
                 "CREATE_PRIVATE_THREADS": "Создавать приватные ветки",
                 "USE_EXTERNAL_STICKERS": "Использовать внешние стикеры",
                 "SEND_MESSAGES_IN_THREADS": "Отправлять сообщения в ветках",
-                "START_EMBEDDED_ACTIVITIES": "Начать встроенную активность"
+                "START_EMBEDDED_ACTIVITIES": "Начать встроенную активность",
+                "MODERATE_MEMBERS": "Модерировать участников"
             },
             "case_log": {
                 "cases": {

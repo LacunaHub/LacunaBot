@@ -5,7 +5,7 @@ import numbro from 'numbro'
 const handler = async (self, player: Player) => {
     const message = player.get<Message>('message')
 
-    if (message && !message.deleted) {
+    if (message) {
         const embed = new MessageEmbed(message.embeds[0])
             .setDescription(`${player.queue.current.title} \`[${numbro(player.queue.current.duration / 1000).format({ output: 'time' })}]\``)
             

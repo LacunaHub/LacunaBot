@@ -37,7 +37,7 @@ const handler = async (self: Lacuna, member: GuildMember, roles: Collection<stri
             const case_id: number = server.moderation.case_log.cases.length + 1
 
             const embed = new MessageEmbed()
-                .setAuthor(locale.commands.common.case_log.cases.MUTE_REMOVE, images.MUTE_REMOVE)
+                .setAuthor({ name: locale.commands.common.case_log.cases.MUTE_REMOVE, iconURL: images.MUTE_REMOVE })
                 .addField(locale.commands.common.case_log.target, `${member.user.tag}\n(${member.id})`, true)
                 .addField(locale.commands.common.case_log.executor, entry.executor.tag, true)
                 .addField(locale.commands.common.case_log.reason, entry.reason ?? '-')

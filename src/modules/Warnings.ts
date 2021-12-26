@@ -159,7 +159,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
     }
 
     const case_log_message = new MessageEmbed()
-        .setAuthor(locale.common.case_log.cases.WARN_ADD, images.WARN_ADD)
+        .setAuthor({ name: locale.common.case_log.cases.WARN_ADD, iconURL: images.WARN_ADD })
         .addField(locale.common.case_log.target, `${target.user.tag}\n(${target.id})`, true)
         .addField(locale.common.case_log.executor, executor.user.tag, true)
         .addField(locale.common.case_log.reason, reason ?? '-')

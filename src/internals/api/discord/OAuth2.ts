@@ -1,3 +1,4 @@
+import { GuildFeatures } from 'discord.js'
 import fetch from 'node-fetch'
 import { URLSearchParams } from 'url'
 
@@ -40,10 +41,10 @@ export default class OAuth2 {
             body: new URLSearchParams(payload)
         })
 
-        return await res.json()
+        return res.json()
     }
 
-    async getUser(access_token: string) {
+    async getUser(access_token: string): Promise<OAuth2User> {
         const res = await fetch('https://discord.com/api/users/@me', {
             method: 'GET',
             headers: {
@@ -52,19 +53,10 @@ export default class OAuth2 {
             }
         })
 
-        return await res.json()
+        return res.json()
     }
 
-    async getUserGuilds(access_token: string) {
-        const options = {
-            method: 'GET',
-            url: 'https://discord.com/api/users/@me/guilds',
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-                'Content-Type': 'application/json'
-            }
-        }
-
+    async getUserGuilds(access_token: string): Promise<OAuth2Guild[]> {
         const res = await fetch('https://discord.com/api/users/@me/guilds', {
             method: 'GET',
             headers: {
@@ -73,6 +65,30 @@ export default class OAuth2 {
             }
         })
 
-        return await res.json()
+        return res.json()
     }
+}
+
+export interface OAuth2User {
+    id: string
+    username: string
+    avatar: string | null
+    discriminator: string
+    public_flags: number
+    flags: number
+    banner: string | null
+    banner_color: string
+    accent_color: number | null
+    locale: string
+    mfa_enabled: boolean
+}
+
+export interface OAuth2Guild {
+    id: string
+    name: string
+    icon: string | null
+    owner: boolean
+    permissions: number
+    features: GuildFeatures[]
+    permissions_new: string
 }

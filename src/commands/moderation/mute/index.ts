@@ -30,7 +30,7 @@ export default {
     ],
     group: 'MODERATION',
     permissions: {
-        self: ['EMBED_LINKS', 'MANAGE_ROLES'],
-        user: ['MANAGE_ROLES']
+        self: ['EMBED_LINKS', 'MANAGE_ROLES', 'MODERATE_MEMBERS'],
+        user: ['MODERATE_MEMBERS']
     }
 }

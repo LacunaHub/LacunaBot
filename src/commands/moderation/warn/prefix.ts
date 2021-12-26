@@ -92,7 +92,7 @@ export async function removePrefix(self: Lacuna, server: ServerDocument, message
     const case_id: number = server.moderation.case_log.cases.length + 1
 
     const case_log_message = new MessageEmbed()
-        .setAuthor(locale.common.case_log.cases.WARN_REMOVE, images.WARN_REMOVE)
+        .setAuthor({ name: locale.common.case_log.cases.WARN_REMOVE, iconURL: images.WARN_REMOVE })
         .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, message.member.user.tag, true)
         .addField(locale.common.case_log.reason, reason)

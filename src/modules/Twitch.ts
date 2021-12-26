@@ -167,7 +167,7 @@ export function scheduleCheck(self: Lacuna): Job {
                             }
                         })
                     }
-                }, i * 1500)
+                }, i * 2000)
             })
 
             broadcaster_count += broadcasters.length

@@ -22,7 +22,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         return false
     }
 
-    if (message.deletable && !message.deleted) await message.delete()
+    if (message.deletable) await message.delete()
 
     let _message: Message
 
@@ -39,13 +39,13 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         _message = await message.channel.send({ content: `${self._emojis.OK} | ${self.translator.format(locale.prune.texts.messages_pruned, `**${message.member.displayName}**`, deleted.size)}` })
     }
 
-    setTimeout(async () => { if (!_message.deleted) await _message.delete() }, 2000)
+    setTimeout(async () => await _message.delete(), 2000)
 
     const case_log = message.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
     const case_id: number = server.moderation.case_log.cases.length + 1
 
     const case_log_message = new MessageEmbed()
-        .setAuthor(locale.common.case_log.cases.PRUNE, images.PRUNE_MESSAGES)
+        .setAuthor({ name: locale.common.case_log.cases.PRUNE, iconURL: images.PRUNE_MESSAGES })
         .addField(locale.common.case_log.target, mention ? mention.user.tag : locale.common.texts.none, true)
         .addField(locale.common.case_log.executor, message.member.user.tag, true)
         .addField(locale.common.case_log.reason, `${reason} (<#${message.channel.id}>)`)

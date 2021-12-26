@@ -128,7 +128,7 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
                 }
             })
 
-            if (channel.deletable && !channel.deleted) await channel.delete()
+            if (channel.deletable) await channel.delete()
 
             self.emit('moduleExecution', { module: 'Temp Voice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
         }
@@ -164,7 +164,7 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
                 }
             })
 
-            if (channel.deletable && !channel.deleted) await channel.delete()
+            if (channel.deletable) await channel.delete()
 
             self.emit('moduleExecution', { module: 'Temp Voice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
         }

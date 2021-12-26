@@ -197,7 +197,7 @@ export default class CustomCommand {
                                 if (if_component.action.type == 'ADD_REACTIONS') {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'ADD_REACTIONS').indexOf(if_component)
                 
-                                    if (i < 2 && if_component.action.add_reactions.length && !this.message.deleted) {
+                                    if (i < 2 && if_component.action.add_reactions.length) {
                                         for (let raw_reaction of if_component.action.add_reactions.slice(0, 5)) {
                                             const reaction = Util.parseEmoji(raw_reaction)
                                             await this.message.react(reaction.id || reaction.name).catch(this.self.logger.error)
@@ -229,7 +229,7 @@ export default class CustomCommand {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'DELETE_REQUEST').indexOf(if_component)
                 
                                     if (i == 0 && if_component.action.delete_request >= 0) {
-                                        if (this.message.deletable && !this.message.deleted) {
+                                        if (this.message.deletable) {
                                             const timeout = if_component.action.delete_request
                 
                                             if (!isNaN(timeout)) setTimeout(() => this.message.delete().catch(this.self.logger.error), timeout ? timeout * 1000 : 0)
@@ -285,7 +285,7 @@ export default class CustomCommand {
                 if (component.action.type == 'ADD_REACTIONS') {
                     const i = this.command.components.filter(c => c.action?.type == 'ADD_REACTIONS').indexOf(component)
 
-                    if (i < 2 && component.action.add_reactions.length && !this.message.deleted) {
+                    if (i < 2 && component.action.add_reactions.length) {
                         for (let raw_reaction of component.action.add_reactions.slice(0, 5)) {
                             const reaction = Util.parseEmoji(raw_reaction)
                             await this.message.react(reaction.id || reaction.name).catch(this.self.logger.error)
@@ -317,7 +317,7 @@ export default class CustomCommand {
                     const i = this.command.components.filter(c => c.action?.type == 'DELETE_REQUEST').indexOf(component)
 
                     if (i == 0 && component.action.delete_request >= 0) {
-                        if (this.message.deletable && !this.message.deleted) {
+                        if (this.message.deletable) {
                             const timeout = component.action.delete_request
 
                             if (!isNaN(timeout)) setTimeout(() => this.message.delete().catch(this.self.logger.error), timeout ? timeout * 1000 : 0)

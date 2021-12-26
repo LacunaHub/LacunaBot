@@ -4,7 +4,7 @@ import { Player } from 'erela.js'
 const handler = async (self, player: Player) => {
     const message = player.get<Message>('message')
 
-    if (message && !message.deleted) {
+    if (message) {
         await message.edit({ components: [] }).catch(() => {})
     }
 

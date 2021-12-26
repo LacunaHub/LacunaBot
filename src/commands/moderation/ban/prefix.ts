@@ -46,7 +46,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     }
 
     const case_log_message = new MessageEmbed()
-        .setAuthor(locale.common.case_log.cases.BAN_ADD, images.BAN_ADD)
+        .setAuthor({ name: locale.common.case_log.cases.BAN_ADD, iconURL: images.BAN_ADD })
         .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, message.member.user.tag, true)
         .addField(locale.common.case_log.reason, reason)

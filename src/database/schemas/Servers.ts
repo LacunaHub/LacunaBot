@@ -535,7 +535,8 @@ export default model<ServerDocument>(
                 }
             },
             tempbans: { type: Array, default: [] },
-            tempmutes: { type: Array, default: [] }
+            tempmutes: { type: Array, default: [] },
+            use_timeout_mute: { type: Boolean, default: false }
         },
         modules: {
             welcome: {
@@ -1062,6 +1063,7 @@ export interface ServerDocument extends Document {
         },
         tempbans: TemporaryBanEntry[]
         tempmutes: TemporaryMuteEntry[]
+        use_timeout_mute: boolean
     }
     modules: {
         welcome: {

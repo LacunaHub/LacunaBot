@@ -39,7 +39,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const case_id: number = server.moderation.case_log.cases.length + 1
 
     const case_log_message = new MessageEmbed()
-        .setAuthor(locale.common.case_log.cases.PRUNE, images.PRUNE_MESSAGES)
+        .setAuthor({ name: locale.common.case_log.cases.PRUNE, iconURL: images.PRUNE_MESSAGES })
         .addField(locale.common.case_log.target, mention ? mention.user.tag : locale.common.texts.none, true)
         .addField(locale.common.case_log.executor, interaction.user.tag, true)
         .addField(locale.common.case_log.reason, `${reason} (<#${interaction.channel.id}>)`)

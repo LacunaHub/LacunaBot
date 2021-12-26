@@ -1,5 +1,5 @@
 import { Permissions } from 'discord.js'
-import OAuth2 from '../discord/OAuth2'
+import OAuth2, { OAuth2Guild, OAuth2User } from '../discord/OAuth2'
 import { sharding } from '../../../index'
 import { isBotExpert } from '../interfaces/Guilds'
 import { Context, Next } from 'koa'
@@ -16,11 +16,9 @@ export async function authorize(ctx: Context, next: Next) {
         return
     }
 
-    let user
+    const user = await oauth2.getUser(access_token).catch(() => {}) as OAuth2User
     
-    try {
-        user = await oauth2.getUser(access_token)
-    } catch (err) {
+    if (!user) {
         ctx.status = 403; ctx.body = 'Forbidden'
 
         return
@@ -32,15 +30,8 @@ export async function authorize(ctx: Context, next: Next) {
 }
 
 export async function checkPermissions(ctx: Context, next: Next) {
-    const access_token = ctx.request.headers.authorization
     const guild_id = ctx.params.guild_id
     const user_id = ctx.request.headers['user-id'] as string
-
-    if (!access_token || access_token === 'null') {
-        ctx.status = 401; ctx.body = 'Unauthorized'
-
-        return
-    }
 
     if (!guild_id) {
         ctx.status = 400; ctx.body = 'Bad Request'
@@ -48,22 +39,20 @@ export async function checkPermissions(ctx: Context, next: Next) {
         return
     }
 
-    let guilds
+    const guilds = await oauth2.getUserGuilds(ctx.request.headers.authorization).catch(() => {}) as OAuth2Guild[]
     
-    try {
-        guilds = await oauth2.getUserGuilds(access_token)
-    } catch (err) {
+    if (!guilds) {
         ctx.status = 403; ctx.body = 'Forbidden'
 
         return
     }
 
     const guild = guilds.find(g => g.id == guild_id)
-    const owner = await sharding.shards.first().eval(`this.application.owner.members.some(m => m.id == ${user_id})`)
-    const expert = await isBotExpert(guild_id, user_id)
 
-    if (owner || expert) {
-        ctx.request.headers['partial-guild'] = guild
+    const is_root_user = (await db.json.get()).rootUsers.includes(user_id)
+
+    if (is_root_user) {
+        ctx.request.headers['partial-guild'] = JSON.stringify(guild ?? {})
 
         await next()
 
@@ -77,14 +66,15 @@ export async function checkPermissions(ctx: Context, next: Next) {
     }
 
     const permissions = new Permissions(BigInt(guild.permissions))
+    const is_bot_expert = await isBotExpert(guild_id, user_id)
 
-    if (!guild.owner && !permissions.has('ADMINISTRATOR')) {
+    if (!guild.owner && !permissions.has('ADMINISTRATOR') && !is_bot_expert) {
         ctx.status = 403; ctx.body = 'Forbidden'
 
         return
     }
 
-    ctx.request.headers['partial-guild'] = guild
+    ctx.request.headers['partial-guild'] = JSON.stringify(guild)
 
     await next()
 }
@@ -100,12 +90,6 @@ export async function passKnownReferrers(ctx: Context, next: Next) {
     }
 
     if (!referer || !hosts.some(host => referer.includes(host))) {
-        ctx.status = 503; ctx.body = 'Service Unavailable'
-
-        return
-    }
-
-    if (!sharding.shards.every(shard => shard.ready)) {
         ctx.status = 503; ctx.body = 'Service Unavailable'
 
         return

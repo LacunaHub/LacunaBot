@@ -18,50 +18,62 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     const case_log = message.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
     const case_id: number = server.moderation.case_log.cases.length + 1
 
-    const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
-    const tempmute = self.tempmutes.find(m => m.user_id == mention.id)
+    if (server.moderation.use_timeout_mute) {
+        if (!mention.communicationDisabledUntilTimestamp) {
+            await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_muted, `**${message.member.displayName}**`)}` })
+    
+            return false
+        }
 
-    if (!mute_role?.members?.has(mention.id)) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_muted, `**${message.member.displayName}**`)}` })
-
-        return false
+        await mention.disableCommunicationUntil(null, reason).catch(() => {})
     }
 
-    if (!mute_role.editable) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.cant_remove_role, `**${message.member.displayName}**`)}` })
+    else {
+        const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
+        const tempmute = self.tempmutes.find(m => m.user_id == mention.id)
+    
+        if (!mute_role?.members?.has(mention.id)) {
+            await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_muted, `**${message.member.displayName}**`)}` })
+    
+            return false
+        }
+    
+        if (!mute_role.editable) {
+            await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.cant_remove_role, `**${message.member.displayName}**`)}` })
+    
+            return false
+        }
 
-        return false
+        if (tempmute) await tempmute.delete(false)
+        else {
+            const returnable_roles = server.moderation.roles.on_mute.returnable_roles.find(r => r.user_id == mention.id)
+    
+            if (returnable_roles) {
+                await self.db.servers.updateOne({ _id: message.guild.id }, {
+                    $pull: {
+                        'moderation.roles.on_mute.returnable_roles': {
+                            user_id: mention.id
+                        }
+                    }
+                })
+    
+                await mention.roles.add(returnable_roles.roles.filter(r => mention.guild.roles.cache.has(r)))
+            }
+    
+            await mention.roles.remove(mute_role.id, reason).catch(self.logger.error)
+    
+            if (mention.voice?.serverMute) await mention.voice.setMute(false, reason).catch(self.logger.error)
+        }
     }
 
     const case_log_message = new MessageEmbed()
-        .setAuthor(locale.common.case_log.cases.MUTE_REMOVE, images.MUTE_REMOVE)
+        .setAuthor({ name: locale.common.case_log.cases.MUTE_REMOVE, iconURL: images.MUTE_REMOVE })
         .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, message.member.user.tag, true)
         .addField(locale.common.case_log.reason, reason)
         .setFooter(self.translator.format(locale.common.case_log.case, case_id))
         .setTimestamp()
         .setColor('#2FDF84')
-
-    if (tempmute) await tempmute.delete(false)
-    else {
-        const returnable_roles = server.moderation.roles.on_mute.returnable_roles.find(r => r.user_id == mention.id)
-
-        if (returnable_roles) {
-            await self.db.servers.updateOne({ _id: message.guild.id }, {
-                $pull: {
-                    'moderation.roles.on_mute.returnable_roles': {
-                        user_id: mention.id
-                    }
-                }
-            })
-
-            await mention.roles.add(returnable_roles.roles.filter(r => mention.guild.roles.cache.has(r)))
-        }
-
-        await mention.roles.remove(mute_role.id, reason).catch(self.logger.error)
-
-        if (mention.voice?.serverMute) await mention.voice.setMute(false, reason).catch(self.logger.error)
-    }
 
     if (case_log && server.moderation.case_log.case_types.MUTE_REMOVE) {
         await case_log.send({ embeds: [case_log_message] }).catch(self.logger.error)

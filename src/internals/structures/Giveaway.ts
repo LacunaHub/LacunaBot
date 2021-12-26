@@ -106,7 +106,7 @@ export default class Giveaway {
     async deleteMessage() {
         const message = await this.getMessage()
         
-        if (message && !message.deleted) await message.delete()
+        if (message) await message.delete()
     }
 
     async end(scheduled = true) {
@@ -120,7 +120,7 @@ export default class Giveaway {
     async endMessage() {
         const message = await this.getMessage()
 
-        if (!message || message.deleted) {
+        if (!message) {
             await this.end(false); return
         }
 

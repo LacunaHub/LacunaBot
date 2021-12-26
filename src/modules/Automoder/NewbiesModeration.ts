@@ -1,5 +1,6 @@
 import { GuildMember } from 'discord.js'
 import moment from 'moment'
+import ms from 'ms'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
@@ -45,43 +46,51 @@ export default async function(self: Lacuna, server: ServerDocument, member: Guil
         }
 
         if (mute && (!ban && !kick)) {
-            const mute_role = member.guild.roles.cache.get(server.moderation.roles.mute)
-            const tempmute = self.tempmutes.find(tm => tm.user_id == member.id)
+            if (server.moderation.use_timeout_mute) {
+                const expires_timestamp: number = Date.now() + (config.penalty.timer ? (config.penalty.timer * 1000) : ms('2h'))
 
-            if (mute_role && !tempmute && !mute_role.members.has(member.id)) {
-                if (config.penalty.timer) {
-                    const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
-
-                    new TemporaryMute(self, {
-                        user_id: member.id,
-                        guild_id: member.guild.id,
-                        role_id: mute_role.id,
-                        expires_timestamp: expires_timestamp,
-                        reason: `${reason} (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
-                        initial: true
-                    })
-                }
-
-                else {
-                    if (server.moderation.roles.on_mute.remove_all_roles) {
-                        const current_roles: string[] = member.roles.cache.filter(r => r.editable && r.id != member.guild.id).map(r => r.id)
+                await member.disableCommunicationUntil(expires_timestamp, reason).catch(() => {})
+            }
             
-                        await self.db.servers.updateOne({ _id: member.guild.id }, {
-                            $push: {
-                                'moderation.roles.on_mute.returnable_roles': {
-                                    user_id: member.id,
-                                    roles: current_roles
-                                }
-                            }
+            else {
+                const mute_role = member.guild.roles.cache.get(server.moderation.roles.mute)
+                const tempmute = self.tempmutes.find(tm => tm.user_id == member.id)
+    
+                if (mute_role && !tempmute && !mute_role.members.has(member.id)) {
+                    if (config.penalty.timer) {
+                        const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+    
+                        new TemporaryMute(self, {
+                            user_id: member.id,
+                            guild_id: member.guild.id,
+                            role_id: mute_role.id,
+                            expires_timestamp: expires_timestamp,
+                            reason: `${reason} (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
+                            initial: true
                         })
-            
-                        const strict_roles: string[] = [...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)), ...member.roles.cache.filter(r => !r.editable).map(r => r.id)]
-            
-                        await member.roles.set([mute_role.id, ...strict_roles], reason).catch(self.logger.error)
                     }
-
+    
                     else {
-                        await member.roles.add(mute_role.id, reason).catch(self.logger.error)
+                        if (server.moderation.roles.on_mute.remove_all_roles) {
+                            const current_roles: string[] = member.roles.cache.filter(r => r.editable && r.id != member.guild.id).map(r => r.id)
+                
+                            await self.db.servers.updateOne({ _id: member.guild.id }, {
+                                $push: {
+                                    'moderation.roles.on_mute.returnable_roles': {
+                                        user_id: member.id,
+                                        roles: current_roles
+                                    }
+                                }
+                            })
+                
+                            const strict_roles: string[] = [...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)), ...member.roles.cache.filter(r => !r.editable).map(r => r.id)]
+                
+                            await member.roles.set([mute_role.id, ...strict_roles], reason).catch(self.logger.error)
+                        }
+    
+                        else {
+                            await member.roles.add(mute_role.id, reason).catch(self.logger.error)
+                        }
                     }
                 }
             }

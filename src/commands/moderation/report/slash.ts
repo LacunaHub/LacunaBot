@@ -52,7 +52,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!report) {
         const embed = new MessageEmbed()
-            .setAuthor(target.author.tag, target.author.displayAvatarURL())
+            .setAuthor({ name: target.author.tag, iconURL: target.author.displayAvatarURL() })
             .addField('Канал сообщения', `<#${target.channelId}>`, true)
             .addField('Количество репортов', '1', true)
             .setFooter(`ID: ${target.id}`)

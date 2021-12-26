@@ -25,14 +25,10 @@ export default new Lacuna({
     ],
     partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
     makeCache: manager => {
-        if (manager.name == 'MessageManager') return new LimitedCollection({
-            maxSize: 50,
-            sweepFilter: () => v => (Date.now() - v.createdTimestamp) > 3600000,
-            sweepInterval: 120
-        })
+        if (manager.name == 'MessageManager') return new LimitedCollection({ maxSize: 25 })
 
         if (manager.name == 'UserManager') return new LimitedCollection({
-            maxSize: 20000,
+            maxSize: 15000,
             keepOverLimit: v => v.id == process.env.CLIENT_ID
         })
 
@@ -41,6 +37,14 @@ export default new Lacuna({
             keepOverLimit: v => v.id == process.env.CLIENT_ID || v.voice.channelId
         })
 
+        if (manager.name == 'GuildInviteManager') return new LimitedCollection({ maxSize: 5 })
+
         return new Collection()
+    },
+    sweepers: {
+        messages: {
+            interval: 60,
+            filter: () => v => (Date.now() - v.createdTimestamp) > 1800000
+        }
     }
 })

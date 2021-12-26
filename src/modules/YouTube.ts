@@ -148,7 +148,7 @@ export function scheduleCheck(self: Lacuna): Job {
                             }
                         })
                     }
-                }, i * 1500)
+                }, i * 2000)
             })
 
             channel_count += channels.length

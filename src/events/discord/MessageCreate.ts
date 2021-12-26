@@ -24,7 +24,7 @@ const handler = async (self: Lacuna, message: Message) => {
         const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
         const has_permissions = message.channel.permissionsFor(mute_role.id).has(self.PERMISSIONS_FLAGS.SEND_MESSAGES)
 
-        if (message.deletable && !message.deleted && !has_permissions) await message.delete()
+        if (message.deletable && !has_permissions) await message.delete()
 
         return false
     }

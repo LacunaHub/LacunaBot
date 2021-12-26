@@ -90,7 +90,7 @@ export default class Lacuna extends Client {
             return {
                 id: node.options.identifier,
                 connected: node.connected,
-                cpu_load: Math.round(node.stats.cpu.lavalinkLoad),
+                cpu_load: Number(node.stats.cpu.lavalinkLoad.toFixed(2)),
                 memory_usage: Math.round((node.stats.memory.used * 100) / node.stats.memory.reservable),
                 uptime: node.stats.uptime,
                 players: {

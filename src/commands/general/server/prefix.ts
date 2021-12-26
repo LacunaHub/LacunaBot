@@ -10,7 +10,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     const created_ts = Math.round(message.guild.createdTimestamp / 1000)
 
     const embed = new MessageEmbed()
-        .setAuthor(message.guild.name, message.guild.iconURL())
+        .setAuthor({ name: message.guild.name, iconURL: message.guild.iconURL() })
         .addField(locale.server.texts.owner, server_owner.user.tag, true)
         .addField(locale.server.texts.id, message.guild.id, true)
         .addField(locale.server.texts.members.title, `${message.guild.memberCount} ${locale.server.texts.members.total}`, true)

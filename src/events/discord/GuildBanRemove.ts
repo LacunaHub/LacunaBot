@@ -18,7 +18,7 @@ const handler = async (self: Lacuna, ban: GuildBan) => {
             const case_id: number = server.moderation.case_log.cases.length + 1
     
             const embed = new MessageEmbed()
-                .setAuthor(locale.commands.common.case_log.cases.BAN_REMOVE, images.BAN_REMOVE)
+                .setAuthor({ name: locale.commands.common.case_log.cases.BAN_REMOVE, iconURL: images.BAN_REMOVE })
                 .addField(locale.commands.common.case_log.target, `${ban.user.tag}\n(${ban.user.id})`, true)
                 .addField(locale.commands.common.case_log.executor, entry.executor.tag, true)
                 .addField(locale.commands.common.case_log.reason, entry.reason ?? '')

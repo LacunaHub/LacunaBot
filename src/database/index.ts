@@ -127,4 +127,5 @@ export interface JsonData {
     playableMusicHosts: string[]
     diamondPrices: Array<{ months: number, price: number, discount: number }>
     allowedApiHosts: string[]
+    rootUsers: string[]
 }

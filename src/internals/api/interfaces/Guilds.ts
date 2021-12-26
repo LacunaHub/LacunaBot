@@ -600,6 +600,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
             }
         }
+
+        if (typeof data.moderation.use_timeout_mute == 'boolean' && data.moderation.use_timeout_mute !== guild.moderation.use_timeout_mute) {
+            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.use_timeout_mute': data.moderation.use_timeout_mute } })
+        }
     }
 
     if (data.modules) {

@@ -1,5 +1,6 @@
 import { Message } from 'discord.js'
 import moment from 'moment'
+import ms from 'ms'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
@@ -26,7 +27,7 @@ export default async function(self: Lacuna, server: ServerDocument, message: Mes
         const delete_referral_invites = config.delete_referral_invites && links.some(link => link.includes('discord.gg'))
 
         if (config.delete_all_links && !delete_referral_invites && !config.allowed_registry.some(reg => links.some(link => link.includes(reg)))) {
-            if (message.deletable && !message.deleted) await message.delete()
+            if (message.deletable) await message.delete()
 
             await penalty(self, server, message)
 
@@ -40,7 +41,7 @@ export default async function(self: Lacuna, server: ServerDocument, message: Mes
         const is_referral = invites ? invites.some(i => !guild_invites.some(k => k.url == `https://${i}`)) : false
         
         if (is_referral) {
-            if (message.deletable && !message.deleted) await message.delete().catch(self.logger.error)
+            if (message.deletable) await message.delete().catch(self.logger.error)
 
             await penalty(self, server, message)
 
@@ -87,43 +88,51 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
     }
 
     if (mute && (!ban && !kick)) {
-        const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
-        const tempmute = self.tempmutes.find(tm => tm.user_id == message.author.id)
+        if (server.moderation.use_timeout_mute) {
+            const expires_timestamp: number = Date.now() + (config.penalty.timer ? (config.penalty.timer * 1000) : ms('2h'))
 
-        if (mute_role && !tempmute && !mute_role.members.has(message.author.id)) {
-            if (config.penalty.timer) {
-                const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+            await message.member.disableCommunicationUntil(expires_timestamp, reason).catch(() => {})
+        }
 
-                new TemporaryMute(self, {
-                    user_id: message.author.id,
-                    guild_id: message.guild.id,
-                    role_id: mute_role.id,
-                    expires_timestamp: expires_timestamp,
-                    reason: `${reason} (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
-                    initial: true
-                })
-            }
-
-            else {
-                if (server.moderation.roles.on_mute.remove_all_roles) {
-                    const current_roles: string[] = message.member.roles.cache.filter(r => r.editable && r.id != message.guild.id).map(r => r.id)
-        
-                    await self.db.servers.updateOne({ _id: message.guild.id }, {
-                        $push: {
-                            'moderation.roles.on_mute.returnable_roles': {
-                                user_id: message.author.id,
-                                roles: current_roles
-                            }
-                        }
+        else {
+            const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
+            const tempmute = self.tempmutes.find(tm => tm.user_id == message.author.id)
+    
+            if (mute_role && !tempmute && !mute_role.members.has(message.author.id)) {
+                if (config.penalty.timer) {
+                    const expires_timestamp = Date.now() + (config.penalty.timer * 1000)
+    
+                    new TemporaryMute(self, {
+                        user_id: message.author.id,
+                        guild_id: message.guild.id,
+                        role_id: mute_role.id,
+                        expires_timestamp: expires_timestamp,
+                        reason: `${reason} (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
+                        initial: true
                     })
-        
-                    const strict_roles: string[] = [...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)), ...message.member.roles.cache.filter(r => !r.editable).map(r => r.id)]
-        
-                    await message.member.roles.set([mute_role.id, ...strict_roles], reason).catch(self.logger.error)
                 }
-
+    
                 else {
-                    await message.member.roles.add(mute_role.id, reason).catch(self.logger.error)
+                    if (server.moderation.roles.on_mute.remove_all_roles) {
+                        const current_roles: string[] = message.member.roles.cache.filter(r => r.editable && r.id != message.guild.id).map(r => r.id)
+            
+                        await self.db.servers.updateOne({ _id: message.guild.id }, {
+                            $push: {
+                                'moderation.roles.on_mute.returnable_roles': {
+                                    user_id: message.author.id,
+                                    roles: current_roles
+                                }
+                            }
+                        })
+            
+                        const strict_roles: string[] = [...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)), ...message.member.roles.cache.filter(r => !r.editable).map(r => r.id)]
+            
+                        await message.member.roles.set([mute_role.id, ...strict_roles], reason).catch(self.logger.error)
+                    }
+    
+                    else {
+                        await message.member.roles.add(mute_role.id, reason).catch(self.logger.error)
+                    }
                 }
             }
         }
@@ -163,7 +172,7 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
     }
 
     if (!config.penalty.action || delete_message) {
-        if (message.deletable && !message.deleted) await message.delete().catch(self.logger.error)
+        if (message.deletable) await message.delete().catch(self.logger.error)
 
         return true
     }

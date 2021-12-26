@@ -1,8 +1,6 @@
 import Router from '@koa/router'
 import { Context } from 'koa'
 import { ReactionElement, ServerDocument, TwitchChannel, VoiceChannelTrigger, YouTubeChannel } from '../../../database/schemas/Servers'
-import { sharding } from '../../../index'
-import { GuildChannel } from 'discord.js'
 import translator from '../../locale'
 import { resolveObjectPath } from '../../utility/Utils'
 import db from '../../../database'
@@ -11,8 +9,12 @@ import Guilds from '../interfaces/Guilds'
 import { authorize, checkPermissions } from '../utility/Authorize'
 import { searchChannels as searchTwitchChannels } from '../../../modules/Twitch'
 import { searchChannels as searchYouTubeChannels } from '../../../modules/YouTube'
+import { REST } from '@discordjs/rest'
+import { Routes } from 'discord-api-types/v9'
+import { Constants } from 'discord.js'
 
 const router: Router = new Router({ prefix: '/guilds' })
+const dsc = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
 router.use(authorize)
 
@@ -41,19 +43,24 @@ async function getSettings(ctx: Context) {
         return
     }
 
-    const guild = (await sharding.broadcastEval(
-        (self, ctx) => {
-            const guild = self.guilds.cache.get(ctx.guild_id)
-            const channels = guild?.channels?.cache?.sort((a: GuildChannel, b: GuildChannel) => (a.parentId as any) - (b.parentId as any) || (a.position as any) - (b.position as any))
-            const roles = guild?.roles?.cache?.filter(r => !r.managed)?.sort((a, b) => b.rawPosition - a.rawPosition)?.map(r => {
-                return { ...r, higher: !r.editable, guild: null }
-            })
-            const emojis = self.emojis.cache.filter(e => e.guild.id == ctx.guild_id)
-            const permissions = guild?.me?.permissions?.toArray()
+    const selfMember = await dsc.get(Routes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {}) as any
 
-            return guild ? Object.assign({}, { channels, roles, emojis, permissions }) : null
-        }, { context: { guild_id } })
-    ).filter(data => data)[0]
+    if (!selfMember) {
+        ctx.status = 406; ctx.body = 'Not Acceptable'
+
+        return
+    }
+
+    const guildChannels = await dsc.get(Routes.guildChannels(guild_id)).catch(() => {}) as any[] ?? []
+    const guildRoles = await dsc.get(Routes.guildRoles(guild_id)).catch(() => {}) as any[] ?? []
+    const guildEmojis = await dsc.get(Routes.guildEmojis(guild_id)).catch(() => {}) as any[] ?? []
+
+    const selfRoles = selfMember ? guildRoles.filter(r => selfMember.roles.includes(r.id)) : []
+    const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
+
+    const channels = guildChannels.sort((a, b) => a.parent_id - b.parent_id || a.position - b.position).map(c => { return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' } })
+    const roles = guildRoles.filter(r => !r.tags?.bot_id).sort((a, b) => b.position - a.position).map(r => { return { id: r.id, name: r.name, color: r.color, position: r.position, managed: r.managed, higher: !selfHighestRole || selfHighestRole.position <= r.position } })
+    const emojis = guildEmojis.map(e => { return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` } })
 
     const locale = translator.locale(server.locale)
 
@@ -73,11 +80,10 @@ async function getSettings(ctx: Context) {
             ...server.commands, list: commands
         },
         guild: {
-            ...partial,
-            channels: guild.channels,
-            roles: guild.roles.filter(r => r.id != guild_id),
-            emojis: guild.emojis,
-            permissions: guild.permissions
+            ...JSON.parse(partial),
+            channels: channels,
+            roles: roles.filter(r => r.id != guild_id),
+            emojis: emojis
         },
         moderation: {
             case_log: {
@@ -98,7 +104,8 @@ async function getSettings(ctx: Context) {
                     strict_roles: server.moderation.roles.on_mute.strict_roles
                 }
             },
-            automoder: server.moderation.automoder
+            automoder: server.moderation.automoder,
+            use_timeout_mute: server.moderation.use_timeout_mute
         },
         modules: {
             welcome: server.modules.welcome,
@@ -140,19 +147,24 @@ async function updateSettings(ctx: Context) {
         return
     }
 
-    const guild = (await sharding.broadcastEval(
-        (self, ctx) => {
-            const guild = self.guilds.cache.get(ctx.guild_id)
-            const channels = guild?.channels?.cache?.sort((a: GuildChannel, b: GuildChannel) => (a.parentId as any) - (b.parentId as any) || (a.position as any) - (b.position as any))
-            const roles = guild?.roles?.cache?.filter(r => !r.managed)?.sort((a, b) => b.rawPosition - a.rawPosition)?.map(r => {
-                return { ...r, higher: !r.editable, guild: null }
-            })
-            const emojis = self.emojis.cache.filter(e => e.guild.id == ctx.guild_id)
-            const permissions = guild?.me?.permissions?.toArray()
+    const selfMember = await dsc.get(Routes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {}) as any
 
-            return guild ? Object.assign({}, { channels, roles, emojis, permissions }) : null
-        }, { context: { guild_id } })
-    ).filter(data => data)[0]
+    if (!selfMember) {
+        ctx.status = 406; ctx.body = 'Not Acceptable'
+
+        return
+    }
+
+    const guildChannels = await dsc.get(Routes.guildChannels(guild_id)).catch(() => {}) as any[] ?? []
+    const guildRoles = await dsc.get(Routes.guildRoles(guild_id)).catch(() => {}) as any[] ?? []
+    const guildEmojis = await dsc.get(Routes.guildEmojis(guild_id)).catch(() => {}) as any[] ?? []
+
+    const selfRoles = selfMember ? guildRoles.filter(r => selfMember.roles.includes(r.id)) : []
+    const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
+
+    const channels = guildChannels.sort((a, b) => a.parent_id - b.parent_id || a.position - b.position).map(c => { return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' } })
+    const roles = guildRoles.filter(r => !r.tags?.bot_id).sort((a, b) => b.position - a.position).map(r => { return { id: r.id, name: r.name, color: r.color, position: r.position, managed: r.managed, higher: !selfHighestRole || selfHighestRole.position <= r.position } })
+    const emojis = guildEmojis.map(e => { return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` } })
 
     const locale = translator.locale(server.locale)
 
@@ -174,11 +186,10 @@ async function updateSettings(ctx: Context) {
             ...server.commands, list: commands
         },
         guild: {
-            ...partial,
-            channels: guild.channels,
-            roles: guild.roles.filter(r => r.id != guild_id),
-            emojis: guild.emojis,
-            permissions: guild.permissions
+            ...JSON.parse(partial),
+            channels: channels,
+            roles: roles.filter(r => r.id != guild_id),
+            emojis: emojis
         },
         moderation: {
             case_log: {
@@ -199,7 +210,8 @@ async function updateSettings(ctx: Context) {
                     strict_roles: server.moderation.roles.on_mute.strict_roles
                 }
             },
-            automoder: server.moderation.automoder
+            automoder: server.moderation.automoder,
+            use_timeout_mute: server.moderation.use_timeout_mute
         },
         modules: {
             welcome: server.modules.welcome,
@@ -480,3 +492,7 @@ async function removeVoiceTrigger(ctx: Context) {
 }
 
 export default router
+
+function compareRolePositions(first, second) {
+    return first.position === second.position ? second.id - first.id : first.position - second.position
+}

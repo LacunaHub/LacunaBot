@@ -1,14 +1,16 @@
+import { REST } from '@discordjs/rest'
 import Router from '@koa/router'
+import { Routes } from 'discord-api-types/v9'
 import { Permissions } from 'discord.js'
 import { Context } from 'koa'
 import db from '../../../database'
 import { UserDocument } from '../../../database/schemas/Users'
-import { sharding } from '../../../index'
-import OAuth2 from '../discord/OAuth2'
+import OAuth2, { OAuth2Guild } from '../discord/OAuth2'
 import { authorize } from '../utility/Authorize'
 
 const router: Router = new Router({ prefix: '/users' })
 const oauth = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
+const dsc = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
 router.get('/@me', authorize, getMe)
 
@@ -29,7 +31,7 @@ async function getMe(ctx: Context) {
         return
     }
 
-    let guilds = await oauth.getUserGuilds(ctx.request.headers.authorization).catch(() => {})
+    let guilds = await oauth.getUserGuilds(ctx.request.headers.authorization).catch(() => {}) as OAuth2Guild[]
 
     if (!guilds) {
         ctx.status = 400; ctx.body = 'Bad Request'
@@ -44,11 +46,9 @@ async function getMe(ctx: Context) {
     })
 
     for (const guild of guilds) {
-        const joined = await sharding.broadcastEval((self, ctx) => {
-            return self.guilds.cache.has(ctx.guild.id)
-        }, { context: { guild } })
+        const me = await dsc.get(Routes.guildMember(guild.id, process.env.CLIENT_ID)).catch(() => {}) as any
 
-        guild.joined = joined.some(i => i)
+        guild['joined'] = Boolean(me)
     }
 
     ctx.status = 200
