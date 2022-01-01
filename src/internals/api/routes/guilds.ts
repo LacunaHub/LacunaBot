@@ -55,7 +55,7 @@ async function getSettings(ctx: Context) {
     const guildRoles = await dsc.get(Routes.guildRoles(guild_id)).catch(() => {}) as any[] ?? []
     const guildEmojis = await dsc.get(Routes.guildEmojis(guild_id)).catch(() => {}) as any[] ?? []
 
-    const selfRoles = selfMember ? guildRoles.filter(r => selfMember.roles.includes(r.id)) : []
+    const selfRoles = selfMember ? guildRoles.filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID) : []
     const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
 
     const channels = guildChannels.sort((a, b) => a.parent_id - b.parent_id || a.position - b.position).map(c => { return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' } })
@@ -159,7 +159,7 @@ async function updateSettings(ctx: Context) {
     const guildRoles = await dsc.get(Routes.guildRoles(guild_id)).catch(() => {}) as any[] ?? []
     const guildEmojis = await dsc.get(Routes.guildEmojis(guild_id)).catch(() => {}) as any[] ?? []
 
-    const selfRoles = selfMember ? guildRoles.filter(r => selfMember.roles.includes(r.id)) : []
+    const selfRoles = selfMember ? guildRoles.filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID) : []
     const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
 
     const channels = guildChannels.sort((a, b) => a.parent_id - b.parent_id || a.position - b.position).map(c => { return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' } })
