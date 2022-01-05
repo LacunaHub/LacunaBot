@@ -125,10 +125,10 @@ export function scheduleCheck(self: Lacuna): Job {
                                 .setImage(broadcaster.alerts.display_preview ? stream.preview : stream.banner)
                                 .setColor(0x563194)
 
-                            let content = broadcaster.alerts.message_template || null
+                            let content = (broadcaster.alerts.message_template ?? broadcaster.alerts.message.content) || null
 
                             if (content) {
-                                const replacer = new Replacer(self, broadcaster.alerts.message_template, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
+                                const replacer = new Replacer(self, (broadcaster.alerts.message_template ?? broadcaster.alerts.message.content), { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
                                 content = await replacer.replace()
                             }
 

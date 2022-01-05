@@ -1024,7 +1024,7 @@ export async function addTwitchChannel(server: ServerDocument, channel: Partial<
                 },
                 alerts: {
                     channel_id: channel.alerts.channel_id,
-                    message_template: channel.alerts.message_template,
+                    message: channel.alerts.message,
                     display_preview: channel.alerts.display_preview,
                     after_end: {
                         delete_alert: channel.alerts.after_end.delete_alert,
@@ -1051,7 +1051,7 @@ export async function editTwitchChannel(server: ServerDocument, channel: Partial
     await Servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': channel.channel.id }, {
         $set: {
             'modules.twitch.channels.$.alerts.channel_id': channel.alerts.channel_id,
-            'modules.twitch.channels.$.alerts.message_template': channel.alerts.message_template,
+            'modules.twitch.channels.$.alerts.message': channel.alerts.message ?? { content: '' },
             'modules.twitch.channels.$.alerts.display_preview': channel.alerts.display_preview,
             'modules.twitch.channels.$.alerts.after_end.delete_alert': channel.alerts.after_end.delete_alert
         }
@@ -1103,8 +1103,8 @@ export async function addYouTubeChannel(server: ServerDocument, channel: Partial
                 },
                 alerts: {
                     channel_id: channel.alerts.channel_id,
-                    videos_message_template: channel.alerts.videos_message_template,
-                    broadcasts_message_template: channel.alerts.broadcasts_message_template,
+                    videos_message: channel.alerts.videos_message,
+                    broadcasts_message: channel.alerts.broadcasts_message,
                     videos: channel.alerts.videos,
                     broadcasts: channel.alerts.broadcasts,
                     webhook: {
@@ -1128,8 +1128,8 @@ export async function editYouTubeChannel(server: ServerDocument, channel: Partia
     await Servers.updateOne({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
         $set: {
             'modules.youtube.channels.$.alerts.channel_id': channel.alerts.channel_id,
-            'modules.youtube.channels.$.alerts.videos_message_template': channel.alerts.videos_message_template,
-            'modules.youtube.channels.$.alerts.broadcasts_message_template': channel.alerts.broadcasts_message_template,
+            'modules.youtube.channels.$.alerts.videos_message': channel.alerts.videos_message ?? { content: '' },
+            'modules.youtube.channels.$.alerts.broadcasts_message': channel.alerts.broadcasts_message ?? { content: '' },
             'modules.youtube.channels.$.alerts.videos': channel.alerts.videos,
             'modules.youtube.channels.$.alerts.broadcasts': channel.alerts.broadcasts
         }

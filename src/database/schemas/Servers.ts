@@ -1432,7 +1432,11 @@ export interface TwitchChannel {
     }
     alerts: {
         channel_id: string
+        /** @deprecated */
         message_template: string
+        message: {
+            content: string
+        }
         display_preview: boolean
         after_end: {
             delete_alert: boolean
@@ -1456,8 +1460,16 @@ export interface YouTubeChannel {
     }
     alerts: {
         channel_id: string
+        /** @deprecated */
         videos_message_template: string
+        /** @deprecated */
         broadcasts_message_template: string
+        videos_message: {
+            content: string
+        }
+        broadcasts_message: {
+            content: string
+        }
         videos: boolean
         broadcasts: boolean
         webhook: {
