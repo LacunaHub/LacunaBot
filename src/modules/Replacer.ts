@@ -19,7 +19,7 @@ export default class Replacer {
     }
 
     replacers(string: string = this.string): string[] {
-        const replacers = string.match(/{\s*([\d\sa-zа-яёй.,|"-+?!:@<>#%_]+)\s*}/gi) || []
+        const replacers = string.match(/{\s*[^}]+\s*}/gi) || []
         return replacers.map(replacer => replacer.replace(/{|}/g, '').trim())
     }
 
