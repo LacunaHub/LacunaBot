@@ -74,7 +74,7 @@ export async function isLiveBroadcast(video_id: string) {
 
 export function scheduleCheck(self: Lacuna): Job {
     const rule = new RecurrenceRule()
-    rule.minute = new Range(4, 54, 10)
+    rule.minute = new Range(4, 59, 10)
 
     const job = scheduleJob(rule, async () => {
         const guilds: string[] = self.guilds.cache.map(g => g.id)
