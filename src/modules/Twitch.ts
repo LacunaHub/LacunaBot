@@ -1,13 +1,9 @@
 import { BaseGuildTextChannel, MessageEmbed } from 'discord.js'
 import fetch from 'node-fetch'
 import { scheduleJob, RecurrenceRule, Range, Job } from 'node-schedule'
-import db from '../database'
 import { ServerDocument, TwitchChannel } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
-import LacunaSharding from '../internals/utility/ShardingManager'
-import { chunkArray } from '../internals/utility/Utils'
 import Replacer from './Replacer'
-import logger from '../internals/Logger'
 
 export async function searchChannels(query: string) {
     const res = await fetch(`https://api.twitch.tv/kraken/search/channels?query=${encodeURI(query)}`, {
