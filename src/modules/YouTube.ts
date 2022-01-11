@@ -74,7 +74,7 @@ export async function isLiveBroadcast(video_id: string) {
 
 export function scheduleCheck(self: Lacuna): Job {
     const rule = new RecurrenceRule()
-    rule.minute = new Range(0, 59, 5)
+    rule.minute = new Range(4, 54, 10)
 
     const job = scheduleJob(rule, async () => {
         const guilds: string[] = self.guilds.cache.map(g => g.id)
@@ -83,9 +83,11 @@ export function scheduleCheck(self: Lacuna): Job {
         let channel_count: number = 0
 
         for (const server of servers) {
-            const channels = server.modules.youtube.channels.sort((a, b) => (a.channel.name as any) - (b.channel.name as any)).filter(c => (Date.now() - c.last_check_timestamp) > 600000 && (c.alerts.videos || c.alerts.broadcasts))
-            
-            channels.forEach(async (channel, i) => {
+            const channels = server.modules.youtube.channels.sort((a, b) => (a.channel.name as any) - (b.channel.name as any)).filter(c => c.alerts.videos || c.alerts.broadcasts)
+
+            for (const channel of channels) {
+                const i = channels.indexOf(channel)
+
                 setTimeout(async () => {
                     if (i > 1 && !server.server.premium.available) return false
 
@@ -149,7 +151,7 @@ export function scheduleCheck(self: Lacuna): Job {
                         })
                     }
                 }, i * 2000)
-            })
+            }
 
             channel_count += channels.length
         }

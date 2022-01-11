@@ -1,9 +1,13 @@
 import { BaseGuildTextChannel, MessageEmbed } from 'discord.js'
 import fetch from 'node-fetch'
 import { scheduleJob, RecurrenceRule, Range, Job } from 'node-schedule'
+import db from '../database'
 import { ServerDocument, TwitchChannel } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
+import LacunaSharding from '../internals/utility/ShardingManager'
+import { chunkArray } from '../internals/utility/Utils'
 import Replacer from './Replacer'
+import logger from '../internals/Logger'
 
 export async function searchChannels(query: string) {
     const res = await fetch(`https://api.twitch.tv/kraken/search/channels?query=${encodeURI(query)}`, {
@@ -62,18 +66,20 @@ export async function checkOnLive(channel: TwitchChannel) {
 
 export function scheduleCheck(self: Lacuna): Job {
     const rule = new RecurrenceRule()
-    rule.minute = new Range(0, 59, 5)
+    rule.minute = new Range(0, 59, 10)
 
     const job = scheduleJob(rule, async () => {
         const guilds: string[] = self.guilds.cache.map(g => g.id)
         const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'modules.twitch.channels.0': { $exists: true } })
 
-        let broadcaster_count: number = 0
+        let channels_count: number = 0
 
         for (const server of servers) {
-            const broadcasters = server.modules.twitch.channels.sort((a, b) => (a.channel.display_name as any) - (b.channel.display_name as any)).filter(c => (Date.now() - c.last_check_timestamp) > 600000)
-            
-            broadcasters.forEach(async (broadcaster, i) => {
+            const channels = server.modules.twitch.channels.sort((a, b) => (a.channel.display_name as any) - (b.channel.display_name as any))
+
+            for (const channel of channels) {
+                const i = channels.indexOf(channel)
+
                 setTimeout(async () => {
                     if (i > 1 && !server.server.premium.available) return false
 
@@ -81,20 +87,20 @@ export function scheduleCheck(self: Lacuna): Job {
 
                     if (!guild || !guild.available) return false
 
-                    const channel = guild.channels.cache.get(broadcaster.alerts.channel_id) as BaseGuildTextChannel
+                    const textChannel = guild.channels.cache.get(channel.alerts.channel_id) as BaseGuildTextChannel
 
-                    if (channel) {
-                        const stream = await checkOnLive(broadcaster)
+                    if (textChannel) {
+                        const stream = await checkOnLive(channel)
 
-                        if (stream && !broadcaster.live) {
-                            await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                        if (stream && !channel.live) {  
+                            await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': channel.channel.id }, {
                                 $set: {
                                     'modules.twitch.channels.$.live': true
                                 }
                             })
 
-                            if (stream.name != broadcaster.channel.display_name || stream.logo != broadcaster.channel.logo) {
-                                await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                            if (stream.name != channel.channel.display_name || stream.logo != channel.channel.logo) {
+                                await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': channel.channel.id }, {
                                     $set: {
                                         'modules.twitch.channels.$.channel.display_name': stream.name,
                                         'modules.twitch.channels.$.channel.logo': stream.logo
@@ -102,14 +108,14 @@ export function scheduleCheck(self: Lacuna): Job {
                                 })
                             }
 
-                            let webhook = await self.fetchWebhook(broadcaster.alerts.webhook.id, broadcaster.alerts.webhook.token).catch(() => {})
+                            let webhook = await self.fetchWebhook(channel.alerts.webhook.id, channel.alerts.webhook.token).catch(() => {})
 
                             if (!webhook) {
                                 try {
-                                    webhook = await channel.createWebhook(stream.name, { avatar: stream.logo })
+                                    webhook = await textChannel.createWebhook(stream.name, { avatar: stream.logo })
                                 } catch (err) { return false }
 
-                                await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                                await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': channel.channel.id }, {
                                     $set: {
                                         'modules.twitch.channels.$.alerts.webhook.id': webhook.id,
                                         'modules.twitch.channels.$.alerts.webhook.token': webhook.token
@@ -122,13 +128,13 @@ export function scheduleCheck(self: Lacuna): Job {
                                 .setDescription(stream.game)
                                 .setURL(stream.url)
                                 .setThumbnail(stream.game_image)
-                                .setImage(broadcaster.alerts.display_preview ? stream.preview : stream.banner)
+                                .setImage(channel.alerts.display_preview ? stream.preview : stream.banner)
                                 .setColor(0x563194)
 
-                            let content = (broadcaster.alerts.message_template ?? broadcaster.alerts.message.content) || null
+                            let content = (channel.alerts.message_template ?? channel.alerts.message.content) || null
 
                             if (content) {
-                                const replacer = new Replacer(self, (broadcaster.alerts.message_template ?? broadcaster.alerts.message.content), { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
+                                const replacer = new Replacer(self, (channel.alerts.message_template ?? channel.alerts.message.content), { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
                                 content = await replacer.replace()
                             }
 
@@ -139,41 +145,41 @@ export function scheduleCheck(self: Lacuna): Job {
                                 username: stream.name
                             })
 
-                            if (broadcaster.alerts.after_end.delete_alert && message.id) {
-                                await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                            if (channel.alerts.after_end.delete_alert && message.id) {
+                                await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': channel.channel.id }, {
                                     $set: {
                                         'modules.twitch.channels.$.alerts.after_end.message_id': message.id
                                     }
                                 })
                             }
 
-                            self.emit('moduleExecution', { module: 'Twitch', guild: { id: guild.id, name: guild.name }, target: { id: broadcaster.channel.id, name: broadcaster.channel.display_name } })
+                            self.emit('moduleExecution', { module: 'Twitch', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.display_name } })
                         }
 
-                        else if (!stream && broadcaster.live) {
-                            await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                        else if (!stream && channel.live) {
+                            await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': channel.channel.id }, {
                                 $set: {
                                     'modules.twitch.channels.$.live': false,
                                     'modules.twitch.channels.$.alerts.after_end.message_id': ''
                                 }
                             })
 
-                            if (broadcaster.alerts.after_end.delete_alert && broadcaster.alerts.after_end.message_id) await channel.bulkDelete([broadcaster.alerts.after_end.message_id])
+                            if (channel.alerts.after_end.delete_alert && channel.alerts.after_end.message_id) await textChannel.bulkDelete([channel.alerts.after_end.message_id])
                         }
 
-                        await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': broadcaster.channel.id }, {
+                        await self.db.servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': channel.channel.id }, {
                             $set: {
                                 'modules.twitch.channels.$.last_check_timestamp': Date.now()
                             }
                         })
                     }
                 }, i * 2000)
-            })
+            }
 
-            broadcaster_count += broadcasters.length
+            channels_count += channels.length
         }
 
-        self.logger.info(`(Twitch): Checked ${broadcaster_count} channels on ${servers.length} servers`)
+        self.logger.info(`(Twitch): Checked ${channels_count} channels on ${servers.length} servers`)
     })
 
     self.logger.info(`(Twitch): Scheduled check has been initialized`)

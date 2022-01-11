@@ -33,7 +33,7 @@ export default new Lacuna({
         })
 
         if (manager.name == 'GuildMemberManager') return new LimitedCollection({
-            maxSize: 2000,
+            maxSize: 1000,
             keepOverLimit: v => v.id == process.env.CLIENT_ID || v.voice.channelId
         })
 
