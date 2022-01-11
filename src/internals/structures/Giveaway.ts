@@ -193,11 +193,11 @@ export async function handleEntries(self: Lacuna): Promise<number> {
         for (const server of servers) {
             const giveaways: GiveawayOptions[] = server.utility.giveaways
 
-            entries++
-
             for (const giveaway of giveaways) {
                 new Giveaway(self, { message_id: giveaway.message_id, channel_id: giveaway.channel_id, guild_id: server._id, prize: giveaway.prize, winners_amount: giveaway.winners_amount, members: giveaway.members, expiration_date: new Date(giveaway.expiration_date), locale: giveaway.locale })
             }
+
+            entries += giveaways.length
         }
     }
 

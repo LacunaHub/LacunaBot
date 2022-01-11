@@ -19,7 +19,7 @@ async function getState(ctx: Context) {
     }
     
     const guilds = await sharding.fetchClientValues('guilds.cache.size') as number[]
-    const users = await sharding.broadcastEval(self => self.guilds.cache.reduce((x, y) => x + y.memberCount, 0))
+    const users = await sharding.broadcastEval(self => self.guilds.cache.reduce((x, y) => x + y.memberCount, 0)) as number[]
     const cached_users = await sharding.fetchClientValues('users.cache.size') as number[]
     const channels = await sharding.fetchClientValues('channels.cache.size') as number[]
     const pings = await sharding.fetchClientValues('ws.ping') as number[]

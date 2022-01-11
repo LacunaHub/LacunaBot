@@ -16,7 +16,7 @@ import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './st
 
 import locale from './locale'
 import { checkVoiceStates } from '../modules/Levels'
-import { scheduleCheck as scheduleTwitchCheck } from '../modules/Twitch'
+import { Twitch } from '../modules/Twitch'
 import { scheduleCheck as scheduleYouTubeCheck } from '../modules/YouTube'
 
 export default class Lacuna extends Client {
@@ -30,6 +30,7 @@ export default class Lacuna extends Client {
     public tempbans: Collection<string, TemporaryBan>
     public tempmutes: Collection<string, TemporaryMute>
     public temproles: Collection<string, TemporaryRole>
+    public twitchChannels: Collection<string, Twitch>
     public translator: typeof locale
     public utils: typeof Utils
     public PERMISSIONS_FLAGS: PermissionFlags
@@ -56,6 +57,8 @@ export default class Lacuna extends Client {
         this.tempmutes = new Collection()
 
         this.temproles = new Collection()
+
+        this.twitchChannels = new Collection()
 
         this.translator = locale
 
@@ -116,7 +119,6 @@ export default class Lacuna extends Client {
         await handleTemporaryRoleEntries(this)
         
         checkVoiceStates(this)
-        scheduleTwitchCheck(this)
         scheduleYouTubeCheck(this)
 
         process.on('unhandledRejection', error => {

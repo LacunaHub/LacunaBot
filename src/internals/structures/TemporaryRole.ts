@@ -123,11 +123,11 @@ export async function handleEntries(self: Lacuna): Promise<number> {
         for (const server of servers) {
             const temproles = server.moderation.roles.temporary
 
-            entries++
-
             for (const role of temproles) {
                 new TemporaryRole(self, { user_id: role.user_id, guild_id: server._id, role_id: role.role_id, unique_id: role.unique_id, expires_timestamp: role.expires_timestamp })
             }
+
+            entries += temproles.length
         }
     }
 

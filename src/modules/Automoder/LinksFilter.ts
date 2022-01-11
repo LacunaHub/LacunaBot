@@ -8,7 +8,7 @@ import TemporaryMute from '../../internals/structures/TemporaryMute'
 import Replacer from '../Replacer'
 import { addWarn } from '../Warnings'
 
-const reason = 'Автомодер: Анти-капс'
+const reason = 'Автомодер: Фильтрация ссылок'
 
 export default async function(self: Lacuna, server: ServerDocument, message: Message) {
     const config = server.moderation.automoder.links_filter

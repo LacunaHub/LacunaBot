@@ -101,11 +101,11 @@ export async function handleEntries(self: Lacuna): Promise<number> {
         for (const server of servers) {
             const tempbans = server.moderation.tempbans
 
-            entries++
-
             for (const ban of tempbans) {
                 new TemporaryBan(self, { user_id: ban.user_id, guild_id: server._id, expires_timestamp: ban.expires_timestamp })
             }
+
+            entries += tempbans.length
         }
     }
 

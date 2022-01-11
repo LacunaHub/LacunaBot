@@ -159,11 +159,11 @@ export async function handleEntries(self: Lacuna): Promise<number> {
         for (const server of servers) {
             const tempmutes = server.moderation.tempmutes
 
-            entries++
-
             for (const mute of tempmutes) {
                 new TemporaryMute(self, { user_id: mute.user_id, guild_id: server._id, role_id: mute.role_id, expires_timestamp: mute.expires_timestamp })
             }
+
+            entries += tempmutes.length
         }
     }
 
