@@ -1,6 +1,5 @@
 import { BaseGuildTextChannel, MessageEmbed } from 'discord.js'
 import fetch from 'node-fetch'
-import { scheduleJob, RecurrenceRule, Range, Job } from 'node-schedule'
 import { ServerDocument, TwitchChannel } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
