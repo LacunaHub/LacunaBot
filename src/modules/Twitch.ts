@@ -250,7 +250,7 @@ export async function handleEntries(self: Lacuna) {
 
         for (const channel of channels) {
             const i = channels.indexOf(channel)
-            setTimeout(() => new Twitch(self, server._id, channel), i * (Math.round(Math.random() * 8000) + 2000))
+            setTimeout(() => new Twitch(self, server._id, channel), i * (Math.round(Math.random() * 5000) + 2000))
         }
 
         entries += channels.length

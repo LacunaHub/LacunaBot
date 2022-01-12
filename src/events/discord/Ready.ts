@@ -1,6 +1,5 @@
 import { Manager } from 'erela.js'
 import Lacuna from '../../internals/Lacuna'
-import { handleEntries as handleTwitchEntries } from '../../modules/Twitch'
 
 const handler = async (self: Lacuna) => {
     const [ identifier, host, port, password ] = process.env.WINTER_MUSIC_NODE.split(':')
@@ -36,8 +35,6 @@ const handler = async (self: Lacuna) => {
 
     self.loadCommands()
     self.loadEvents()
-
-    handleTwitchEntries(self)
 
     const start_ms = Date.now() - self.readyTimestamp
 

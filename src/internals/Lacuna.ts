@@ -16,7 +16,7 @@ import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './st
 
 import locale from './locale'
 import { checkVoiceStates } from '../modules/Levels'
-import { Twitch } from '../modules/Twitch'
+import { Twitch, handleEntries as handleTwitchEntries } from '../modules/Twitch'
 import { scheduleCheck as scheduleYouTubeCheck } from '../modules/YouTube'
 
 export default class Lacuna extends Client {
@@ -113,12 +113,13 @@ export default class Lacuna extends Client {
 
         this.application = await this.application.fetch()
 
-        await handleGiveawayEntries(this)
-        await handleTemporaryBanEntries(this)
-        await handleTemporaryMuteEntries(this)
-        await handleTemporaryRoleEntries(this)
+        handleGiveawayEntries(this)
+        handleTemporaryBanEntries(this)
+        handleTemporaryMuteEntries(this)
+        handleTemporaryRoleEntries(this)
         
         checkVoiceStates(this)
+        handleTwitchEntries(this)
         scheduleYouTubeCheck(this)
 
         process.on('unhandledRejection', error => {
