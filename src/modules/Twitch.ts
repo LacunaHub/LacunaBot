@@ -85,12 +85,21 @@ export class Twitch {
         this.self.twitchChannels.set(`${this.id}:${this.guild_id}`, this)
     }
 
-    public async existsAndCorrect() {
+    public async fetch() {
         const server = await this.self.db.servers.findOne({ _id: this.guild_id })
         const channels = server.modules.twitch.channels
 
+        const exists = channels.some(c => c.channel.id == this.id)
+
+        if (exists) {
+            const channel = channels.find(c => c.channel.id == this.id)
+
+            if (channel.alerts.channel_id != this.alerts_channel_id) this.alerts_channel_id = channel.alerts.channel_id
+            if (channel.alerts.message.content != this.alerts_message_content) this.alerts_message_content = channel.alerts.message.content
+        }
+
         return {
-            exists: channels.some(c => c.channel.id == this.id),
+            exists,
             correct: channels.findIndex(c => c.channel.id == this.id) <= (server.server.premium.available ? 9 : 1)
         }
     }
@@ -123,7 +132,7 @@ export class Twitch {
     }
 
     public async check() {
-        const { exists, correct } = await this.existsAndCorrect()
+        const { exists, correct } = await this.fetch()
 
         if (!exists) { this.delete(); return false }
         if (!correct) return false

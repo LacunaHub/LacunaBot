@@ -1,10 +1,9 @@
 import fetch from 'node-fetch'
 import ParserRSS from 'rss-parser'
 import moment from 'moment'
-import { scheduleJob, RecurrenceRule, Range, Job } from 'node-schedule'
 import Replacer from './Replacer'
 import Lacuna from '../internals/Lacuna'
-import { ServerDocument } from '../database/schemas/Servers'
+import { ServerDocument, YouTubeChannel } from '../database/schemas/Servers'
 import { BaseGuildTextChannel } from 'discord.js'
 
 const rss = new ParserRSS()
@@ -33,135 +32,238 @@ export async function searchChannels(term: string) {
     return []
 }
 
-export async function checkVideos(channel_id: string) {
-    let feed
+export class YouTube {
+    public self: Lacuna
+    public guild_id: string
+    public last_video_id: string
+    public id: string
+    public name: string
+    public thumbnail: string
+    public alerts_channel_id: string
+    public alerts_videos_message_content: string
+    public alerts_broadcasts_message_content: string
+    public alerts_about_videos: boolean
+    public alerts_about_broadcasts: boolean
+    public alerts_webhook_id: string
+    public alerts_webhook_token: string
+    private interval: NodeJS.Timer
 
-    try {
-        feed = await rss.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${channel_id}`)
-    } catch (err) {
-        feed = null
+    constructor(self: Lacuna, guild_id: string, channel: YouTubeChannel) {
+        this.self = self
+
+        this.guild_id = guild_id
+
+        this.last_video_id = channel.last_video_id
+
+        this.id = channel.channel.id
+
+        this.name = channel.channel.name
+
+        this.thumbnail = channel.channel.thumbnail
+
+        this.alerts_channel_id = channel.alerts.channel_id
+
+        this.alerts_videos_message_content = (channel.alerts.videos_message_template ?? channel.alerts.videos_message.content) || null
+
+        this.alerts_broadcasts_message_content = (channel.alerts.broadcasts_message_template ?? channel.alerts.broadcasts_message.content) || null
+
+        this.alerts_about_videos = Boolean(channel.alerts.videos)
+
+        this.alerts_about_broadcasts = Boolean(channel.alerts.broadcasts)
+
+        this.alerts_webhook_id = channel.alerts.webhook.id
+
+        this.alerts_webhook_token = channel.alerts.webhook.token
+
+        this.interval = null
+
+        this.initialize()
     }
 
-    const video = feed && feed.items[0] ? feed.items[0] : null
+    private initialize() {
+        this.interval = setInterval(() => this.check(), 300000)
+        this.self.youtubeChannels.set(`${this.id}:${this.guild_id}`, this)
+    }
 
-    if (video) {
-        const today = moment(), published = video.pubDate
+    public async fetch() {
+        const server = await this.self.db.servers.findOne({ _id: this.guild_id })
+        const channels = server.modules.youtube.channels
+
+        const exists = channels.some(c => c.channel.id == this.id)
+
+        if (exists) {
+            const channel = channels.find(c => c.channel.id == this.id)
+
+            if (channel.alerts.channel_id != this.alerts_channel_id) this.alerts_channel_id = channel.alerts.channel_id
+            if (channel.alerts.videos != this.alerts_about_videos) this.alerts_about_videos = Boolean(channel.alerts.videos)
+            if (channel.alerts.broadcasts != this.alerts_about_broadcasts) this.alerts_about_broadcasts = Boolean(channel.alerts.broadcasts)
+            if (channel.alerts.videos_message.content != this.alerts_videos_message_content) this.alerts_videos_message_content = channel.alerts.videos_message.content
+            if (channel.alerts.broadcasts_message.content != this.alerts_broadcasts_message_content) this.alerts_broadcasts_message_content = channel.alerts.broadcasts_message.content
+        }
 
         return {
-            author: video.author,
-            title: video.title,
-            video_id: video.id.replace('yt:video:', ''),
-            published: today.diff(published, 'hours'),
-            url: video.link
+            exists,
+            correct: channels.findIndex(c => c.channel.id == this.id) <= (server.server.premium.available ? 9 : 1)
         }
     }
-}
 
-export async function isLiveBroadcast(video_id: string) {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${video_id}&key=${process.env.GOOGLE_API_KEY}`, { method: 'GET' })
+    public async getLastVideo() {
+        let feed
 
-    if (res.status === 200) {
-        const data = await res.json()
-        const video = data.items && data.items.length ? data.items[0] : null
+        try {
+            feed = await rss.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${this.id}`)
+        } catch (err) {
+            feed = null
+        }
+    
+        const video = feed && feed.items[0] ? feed.items[0] : null
+    
+        if (video) {
+            const today = moment(), published = video.pubDate, video_id = video.id.replace('yt:video:', '')
+    
+            return {
+                author: video.author,
+                title: video.title,
+                video_id: video_id,
+                published: today.diff(published, 'hours'),
+                url: video.link
+            }
+        }
+    }
 
-        if (video && video.snippet.liveBroadcastContent == 'live') return true
+    public async isBroadcast(video_id: string) {
+        const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${video_id}&key=${process.env.GOOGLE_API_KEY}`, { method: 'GET' })
 
+        if (res.status === 200) {
+            const data = await res.json()
+            const video = data.items && data.items.length ? data.items[0] : null
+    
+            if (video && video.snippet.liveBroadcastContent == 'live') return true
+    
+            return false
+        }
+    
         return false
     }
 
-    return false
-}
+    public async check() {
+        const { exists, correct } = await this.fetch()
 
-export function scheduleCheck(self: Lacuna): Job {
-    const rule = new RecurrenceRule()
-    rule.minute = new Range(4, 59, 10)
+        if (!exists) { this.delete(); return false }
+        if (!correct) return false
 
-    const job = scheduleJob(rule, async () => {
-        const guilds: string[] = self.guilds.cache.map(g => g.id)
-        const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'modules.youtube.channels.0': { $exists: true } })
+        const guild = this.self.guilds.cache.get(this.guild_id)
 
-        let channel_count: number = 0
+        if (!guild || !guild.available) return false
 
-        for (const server of servers) {
-            const channels = server.modules.youtube.channels.sort((a, b) => (a.channel.name as any) - (b.channel.name as any)).filter(c => c.alerts.videos || c.alerts.broadcasts)
+        const textChannel = guild.channels.cache.get(this.alerts_channel_id) as BaseGuildTextChannel
 
-            for (const channel of channels) {
-                const i = channels.indexOf(channel)
+        if (textChannel) {
+            const video = await this.getLastVideo()
 
-                setTimeout(async () => {
-                    if (i > 1 && !server.server.premium.available) return false
+            if (video && video.video_id != this.last_video_id && video.published <= 2) {
+                this.last_video_id = video.video_id
 
-                    const guild = self.guilds.cache.get(server._id)
-
-                    if (!guild || !guild.available) return false
-
-                    const alert_channel = guild.channels.cache.get(channel.alerts.channel_id) as BaseGuildTextChannel
-
-                    if (alert_channel) {
-                        const video = await checkVideos(channel.channel.id)
-
-                        if (video && video.video_id != channel.last_video_id && video.published <= 2) {
-                            await self.db.servers.updateOne({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
-                                $set: {
-                                    'modules.youtube.channels.$.last_video_id': video.video_id
-                                }
-                            })
-
-                            const is_broadcast = await isLiveBroadcast(video.video_id)
-                            let webhook = await self.fetchWebhook(channel.alerts.webhook.id, channel.alerts.webhook.token).catch(() => {})
-
-                            if (!webhook) {
-                                try {
-                                    webhook = await alert_channel.createWebhook(channel.channel.name, { avatar: channel.channel.thumbnail })
-                                } catch (err) { return false }
-
-                                await self.db.servers.updateOne({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
-                                    $set: {
-                                        'modules.youtube.channels.$.alerts.webhook.id': webhook.id,
-                                        'modules.youtube.channels.$.alerts.webhook.token': webhook.token
-                                    }
-                                })
-                            }
-
-                            if (is_broadcast && channel.alerts.broadcasts) {
-                                const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.broadcasts_message_template ?? channel.alerts.broadcasts_message.content)
-                                const replacer = new Replacer(self, `${has_link ? (channel.alerts.broadcasts_message_template ?? channel.alerts.broadcasts_message.content) : `${channel.alerts.broadcasts_message_template ?? channel.alerts.broadcasts_message.content}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
-                                const content = await replacer.replace()
-
-                                await webhook.send({ content })
-    
-                                self.emit('moduleExecution', { module: 'YouTube: Broadcasts', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.name } })
-                            }
-
-                            else if (channel.alerts.videos) {
-                                const has_link = /{\s*(subs.link)\s*}/g.test(channel.alerts.videos_message_template ?? channel.alerts.videos_message.content)
-                                const replacer = new Replacer(self, `${has_link ? (channel.alerts.videos_message_template ?? channel.alerts.videos_message.content) : `${channel.alerts.videos_message_template ?? channel.alerts.videos_message.content}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
-                                const content = await replacer.replace()
-                                
-                                await webhook.send({ content })
-    
-                                self.emit('moduleExecution', { module: 'YouTube: Videos', guild: { id: guild.id, name: guild.name }, target: { id: channel.channel.id, name: channel.channel.name } })
-                            }
-                        }
-
-                        await self.db.servers.updateOne({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
-                            $set: {
-                                'modules.youtube.channels.$.last_check_timestamp': Date.now()
-                            }
-                        })
+                await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.youtube.channels.channel.id': this.id }, {
+                    $set: {
+                        'modules.youtube.channels.$.last_video_id': video.video_id
                     }
-                }, i * 2000)
+                })
+
+                const is_broadcast = await this.isBroadcast(video.video_id)
+                let webhook = await this.self.fetchWebhook(this.alerts_webhook_id, this.alerts_webhook_token).catch(() => {})
+
+                if (!webhook) {
+                    try {
+                        webhook = await textChannel.createWebhook(this.name, { avatar: this.thumbnail })
+                    } catch (err) { return false }
+
+                    this.alerts_webhook_id = webhook.id
+                    this.alerts_webhook_token = webhook.token
+
+                    await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.youtube.channels.channel.id': this.id }, {
+                        $set: {
+                            'modules.youtube.channels.$.alerts.webhook.id': webhook.id,
+                            'modules.youtube.channels.$.alerts.webhook.token': webhook.token
+                        }
+                    })
+                }
+
+                if (is_broadcast && this.alerts_about_broadcasts) {
+                    const has_link = /{\s*(subs.link)\s*}/g.test(this.alerts_broadcasts_message_content ?? '')
+                    const replacer = new Replacer(this.self, `${has_link ? this.alerts_broadcasts_message_content : `${this.alerts_broadcasts_message_content}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
+                    const content = await replacer.replace()
+
+                    await webhook.send({ content })
+
+                    this.self.emit('moduleExecution', { module: 'YouTube Broadcasts', guild: { id: guild.id, name: guild.name }, target: { id: this.id, name: this.name } })
+                }
+
+                else if (this.alerts_about_videos) {
+                    const has_link = /{\s*(subs.link)\s*}/g.test(this.alerts_videos_message_content ?? '')
+                    const replacer = new Replacer(this.self, `${has_link ? this.alerts_videos_message_content : `${this.alerts_videos_message_content}\n${video.url}`}`, { guild: guild, member: guild.me, subs: { name: video.author, title: video.title, link: video.url } })
+                    const content = await replacer.replace()
+                    
+                    await webhook.send({ content })
+
+                    this.self.emit('moduleExecution', { module: 'YouTube Videos', guild: { id: guild.id, name: guild.name }, target: { id: this.id, name: this.name } })
+                }
             }
 
-            channel_count += channels.length
+            await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.youtube.channels.channel.id': this.id }, {
+                $set: {
+                    'modules.youtube.channels.$.last_check_timestamp': Date.now()
+                }
+            })
+        }
+    }
+
+    public delete() {
+        clearInterval(this.interval)
+        this.self.youtubeChannels.delete(`${this.id}:${this.guild_id}`)
+        this.self.logger.log(`(YouTube): "${this.name}" (${this.id}) has been deleted`)
+    }
+}
+
+export async function handleEntries(self: Lacuna) {
+    const guilds: string[] = self.guilds.cache.map(g => g.id)
+    const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'modules.youtube.channels.0': { $exists: true } })
+
+    let entries = 0
+
+    for (const server of servers) {
+        const channels = server.modules.youtube.channels
+
+        for (const channel of channels) {
+            const i = channels.indexOf(channel)
+            setTimeout(() => new YouTube(self, server._id, channel), i * (Math.round(Math.random() * 5000) + 2000))
         }
 
-        self.logger.info(`(YouTube): Checked ${channel_count} channels on ${servers.length} servers`)
-    })
+        entries += channels.length
+    }
 
-    self.logger.info(`(YouTube): Scheduled check has been initialized`)
+    setInterval(() => addNewEntries(self), 150000)
 
-    return job
+    self.logger.log(`(YouTube): Loaded ${entries} youtube channels from ${servers.length} servers`)
+}
+
+export async function addNewEntries(self: Lacuna) {
+    const guilds: string[] = self.guilds.cache.map(g => g.id)
+    const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'modules.youtube.channels.0': { $exists: true } })
+
+    let entries = 0
+
+    for (const server of servers) {
+        const channels = server.modules.youtube.channels
+
+        for (const channel of channels) {
+            const entry = self.youtubeChannels.get(`${channel.channel.id}:${server._id}`)
+
+            if (!entry) { new YouTube(self, server._id, channel); entries++ }
+        }
+    }
+
+    if (entries) self.logger.log(`(YouTube): Added ${entries} new youtube channels from ${servers.length} servers`)
 }
 
 export interface YouTubeSearchResponse {
@@ -211,7 +313,7 @@ export interface YouTubeChannelThumbnail {
 
 export default {
     searchChannels,
-    checkVideos,
-    isLiveBroadcast,
-    scheduleCheck
+    YouTube,
+    handleEntries,
+    addNewEntries
 }
