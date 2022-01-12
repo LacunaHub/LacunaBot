@@ -25,7 +25,7 @@ export default new Lacuna({
     ],
     partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'REACTION'],
     makeCache: manager => {
-        if (manager.name == 'GuildBanManager') return new LimitedCollection({ maxSize: 5 })
+        if (manager.name == 'GuildBanManager') return new LimitedCollection({ maxSize: 20 })
 
         if (manager.name == 'GuildInviteManager') return new LimitedCollection({ maxSize: 20 })
 
@@ -33,8 +33,6 @@ export default new Lacuna({
             maxSize: 1000,
             keepOverLimit: v => v.id == process.env.CLIENT_ID || v.voice.channelId
         })
-
-        if (manager.name == 'GuildStickerManager') return new LimitedCollection({ maxSize: 0 })
 
         if (manager.name == 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
 
