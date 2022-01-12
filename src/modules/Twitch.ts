@@ -165,6 +165,9 @@ export class Twitch {
                         webhook = await textChannel.createWebhook(stream.name, { avatar: stream.logo })
                     } catch (err) { return false }
 
+                    this.alerts_webhook_id = webhook.id
+                    this.alerts_webhook_token = webhook.token
+
                     await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.twitch.channels.channel.id': this.id }, {
                         $set: {
                             'modules.twitch.channels.$.alerts.webhook.id': webhook.id,
