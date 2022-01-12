@@ -19,14 +19,14 @@ export default class Replacer {
     }
 
     replacers(string: string = this.string): string[] {
-        const replacers = string.match(/{\s*[^}]+\s*}/gi) || []
+        const replacers = string.match(/{(?!-)\s*[^{}]+\s*}/gi) || []
         return replacers.map(replacer => replacer.replace(/{|}/g, '').trim())
     }
 
     codeSnippets(string: string = this.string) {
-        const snippets: string[] = string.match(/{\-\s*[A-Z]+\([^\-}]*\)\s*\-}/g) || []
+        const snippets: string[] = string.match(/{\-\s*[A-Z]+\([^{}]*\)\s*\-}/g) || []
         return snippets.map((snippet: string) => {
-            snippet = snippet.replace(/{-\s*|\s*-}/g, '')
+            snippet = snippet.replace(/{-|-}/g, '').trim()
 
             const name: string = snippet.match(/^[A-Z]+/).toString()
             const args: string = snippet.match(/\([^\-}]*\)$/).toString().replace(/^\(/, '').replace(/\)$/, '')
@@ -205,7 +205,7 @@ export default class Replacer {
                 },
                 created_at: guild.createdTimestamp,
                 description: guild.description,
-                icon: guild.icon,
+                icon: guild.iconURL(),
                 id: guild.id,
                 members: {
                     total: guild.memberCount,
