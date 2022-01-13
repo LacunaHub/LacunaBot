@@ -29,7 +29,7 @@ export default class Replacer {
             snippet = snippet.replace(/{-|-}/g, '').trim()
 
             const name: string = snippet.match(/^[A-Z]+/).toString()
-            const args: string = snippet.match(/\([^\-}]*\)$/).toString().replace(/^\(/, '').replace(/\)$/, '')
+            const args: string = snippet.match(/\([^{}]*\)$/).toString().replace(/^\(/, '').replace(/\)$/, '')
 
             const available: string[] = [
                 'CHOOSE',
@@ -302,7 +302,7 @@ export default class Replacer {
         }
 
         for (const snippet of this.codeSnippets(string)) {
-            const regex = new RegExp(`{-\\s*${escapeRegexp(snippet.name)}\([^\-}]*\)\\s*-}`, 'g')
+            const regex = new RegExp(`{-\\s*${escapeRegexp(snippet.name)}\([^{}]*\)\\s*-}`, 'g')
 
             let res: string
 
