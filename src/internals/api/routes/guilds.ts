@@ -126,7 +126,8 @@ async function getSettings(ctx: Context) {
             youtube: {
                 channels: server.modules.youtube.channels
             },
-            autoreactions: server.modules.autoreactions
+            autoreactions: server.modules.autoreactions,
+            economy: server.modules.economy
         },
         prices,
         change_log: server.change_log.reverse()
@@ -135,7 +136,6 @@ async function getSettings(ctx: Context) {
 
 async function updateSettings(ctx: Context) {
     const guild_id = ctx.params.guild_id
-    const partial = ctx.request.headers['partial-guild'] as any
     const user_id = ctx.headers['user-id'] as string
     const data = ctx.request.body as Partial<ServerDocument>
 
@@ -155,17 +155,6 @@ async function updateSettings(ctx: Context) {
         return
     }
 
-    const guildChannels = await dsc.get(Routes.guildChannels(guild_id)).catch(() => {}) as any[] ?? []
-    const guildRoles = await dsc.get(Routes.guildRoles(guild_id)).catch(() => {}) as any[] ?? []
-    const guildEmojis = await dsc.get(Routes.guildEmojis(guild_id)).catch(() => {}) as any[] ?? []
-
-    const selfRoles = selfMember ? guildRoles.filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID) : []
-    const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
-
-    const channels = guildChannels.sort((a, b) => a.parent_id - b.parent_id || a.position - b.position).map(c => { return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' } })
-    const roles = guildRoles.filter(r => !r.tags?.bot_id).sort((a, b) => b.position - a.position).map(r => { return { id: r.id, name: r.name, color: r.color, position: r.position, managed: r.managed, higher: !selfHighestRole || selfHighestRole.position <= r.position } })
-    const emojis = guildEmojis.map(e => { return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` } })
-
     const locale = translator.locale(server.locale)
 
     const commands = qdb.get('commands').map(c => { return { ...c, description: resolveObjectPath(c.description, locale), options: [] } })
@@ -184,12 +173,6 @@ async function updateSettings(ctx: Context) {
         },
         commands: {
             ...server.commands, list: commands
-        },
-        guild: {
-            ...JSON.parse(partial),
-            channels: channels,
-            roles: roles.filter(r => r.id != guild_id),
-            emojis: emojis
         },
         moderation: {
             case_log: {
@@ -232,7 +215,8 @@ async function updateSettings(ctx: Context) {
             youtube: {
                 channels: server.modules.youtube.channels
             },
-            autoreactions: server.modules.autoreactions
+            autoreactions: server.modules.autoreactions,
+            economy: server.modules.economy
         },
         prices,
         change_log: server.change_log.reverse()

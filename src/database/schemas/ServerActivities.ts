@@ -5,16 +5,18 @@ export default model<ServerActivitiesDocument>(
     new Schema<ServerActivitiesDocument>({
         _id: { type: String },
         levels: { type: Array, default: [] },
+        wallets: { type: Array, default: [] },
         created_at: { type: Number, default: () => Date.now() }
     }, { versionKey: false })
 )
 
 export interface ServerActivitiesDocument extends Document {
     _id: string
-    levels: LevelActivities[]
+    levels: Level[],
+    wallets: Wallet[]
 }
 
-export interface LevelActivities {
+export interface Level {
     user_id: string
     experience: {
         total: number
@@ -33,3 +35,27 @@ export interface LevelActivities {
         }
     }
 }
+
+export interface Wallet {
+    user_id: string
+    currencies: WalletCurrency[]
+    transactions: WalletTransaction[]
+    activity: {
+        last_message_at: number
+        voice_connected_at: number
+    }
+}
+
+export interface WalletCurrency {
+    id: string
+    amount: number
+}
+
+export interface WalletTransaction {
+    type: WalletTransactionType
+    amount: number
+    details: string
+    timestamp: number
+}
+
+export type WalletTransactionType = 'PURCHASE' | 'SALE' | 'TRANSFER_TO' | 'TRANSFER_FROM' | 'EXCHANGE'

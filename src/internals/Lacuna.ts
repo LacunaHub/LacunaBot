@@ -154,7 +154,8 @@ export default class Lacuna extends Client {
                             return {
                                 ...o,
                                 name: this.utils.resolveObjectPath(o.name, locale),
-                                description: this.utils.resolveObjectPath(o.description, locale)
+                                description: this.utils.resolveObjectPath(o.description, locale),
+                                choices: option.choices?.length ? option.choices.map(oc => { return { ...oc, name: this.utils.resolveObjectPath(oc.name, locale) } }) : null
                             }
                         })
                     }
@@ -162,7 +163,8 @@ export default class Lacuna extends Client {
                     return {
                         ...option,
                         name: this.utils.resolveObjectPath(option.name, locale),
-                        description: this.utils.resolveObjectPath(option.description, locale)
+                        description: this.utils.resolveObjectPath(option.description, locale),
+                        choices: option.choices?.length ? option.choices.map(oc => { return { ...oc, name: this.utils.resolveObjectPath(oc.name, locale) } }) : null
                     }
                 }) ?? []
             }

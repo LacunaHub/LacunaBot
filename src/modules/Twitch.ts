@@ -195,8 +195,10 @@ export class Twitch {
 
                 let content = this.alerts_message_content
 
+                console.log(typeof content, this.alerts_message_content.length)
+
                 if (content) {
-                    const replacer = new Replacer(this.self, this.alerts_message_content, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
+                    const replacer = new Replacer(this.self, content, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
                     content = await replacer.replace()
                 }
 

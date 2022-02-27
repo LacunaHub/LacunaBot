@@ -272,6 +272,12 @@ export interface CommandOption {
     description: string
     required: boolean
     options?: CommandOption[]
+    choices?: CommandOptionChoice[]
+}
+
+export interface CommandOptionChoice {
+    name: string
+    value: string | number
 }
 
 export interface CommandSubcommand {

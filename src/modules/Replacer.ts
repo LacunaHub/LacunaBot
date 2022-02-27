@@ -1,7 +1,7 @@
 import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageEmbed } from 'discord.js'
 import moment from 'moment'
 import { MessageEmbed as IMessageEmbed } from '../database/schemas/Servers'
-import { LevelActivities, ServerActivitiesDocument } from '../database/schemas/ServerActivities'
+import { Level, ServerActivitiesDocument } from '../database/schemas/ServerActivities'
 import Lacuna from '../internals/Lacuna'
 import { escapeRegexp, resolveObjectPath, parseCommandArguments } from '../internals/utility/Utils'
 
@@ -96,7 +96,7 @@ export default class Replacer {
         const subs = this.shapers.subs
 
         const activity: ServerActivitiesDocument = await this.self.db.activities.fetch({ _id: guild.id })
-        const levels: LevelActivities = activity.levels.find(level => level.user_id == member.id)
+        const levels: Level = activity.levels.find(level => level.user_id == member.id)
         const server_owner: GuildMember = await guild.members.fetch(guild.ownerId)
 
         const args: string[] = parseCommandArguments(message?.content?.split(' ')?.slice(1)?.join(' '))
@@ -194,7 +194,7 @@ export default class Replacer {
                 system_channel_id: guild.systemChannelId,
                 public_updates_channel_id: guild.publicUpdatesChannelId,
                 rules_channel_id: guild.rulesChannelId,
-                banner: guild.banner,
+                banner: guild.bannerURL(),
                 channels: {
                     total: guild.channels.cache.size,
                     text: guild.channels.cache.filter(channel => channel.type == 'GUILD_TEXT').size,
@@ -222,7 +222,7 @@ export default class Replacer {
                 },
                 boosters_count: guild.premiumSubscriptionCount || 0,
                 boost_tier: guild.premiumTier,
-                splash: guild.splash,
+                splash: guild.splashURL(),
                 vanity_url: guild.vanityURLCode ? `https://discord.gg/${guild.vanityURLCode}` : null
             },
             member: {

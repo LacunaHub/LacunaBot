@@ -64,21 +64,23 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                             ...option,
                             type: command_option_types[option.type],
                             description: resolveObjectPath(option.description, locale),
-                            options: option.options.map(o => {
+                            options: option.options?.map(o => {
                                 return {
                                     ...o,
                                     type: command_option_types[o.type],
                                     name: resolveObjectPath(o.name, locale),
-                                    description: resolveObjectPath(o.description, locale)
+                                    description: resolveObjectPath(o.description, locale),
+                                    choices: option.choices?.length ? option.choices.map(oc => { return { ...oc, name: resolveObjectPath(oc.name, locale) } }) : null
                                 }
-                            })
+                            }) ?? []
                         }
     
                         return {
                             ...option,
                             type: command_option_types[option.type],
                             name: resolveObjectPath(option.name, locale),
-                            description: resolveObjectPath(option.description, locale)
+                            description: resolveObjectPath(option.description, locale),
+                            choices: option.choices?.length ? option.choices.map(oc => { return { ...oc, name: resolveObjectPath(oc.name, locale) } }) : null
                         }
                     }) ?? []
                 }
@@ -102,7 +104,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
             const res = await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guild._id), {
                 body: commands
-            }).catch(() => {})
+            }).catch(console.error)
 
             if (typeof res != 'undefined' && typeof data.commands.slash_commands == 'boolean') {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.slash_commands': data.commands.slash_commands } })
@@ -844,7 +846,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
         if (data.modules.music) {
             if (Array.isArray(data.modules.music.allowed.channels)) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.music.allowed.channels': data.modules.music.allowed.channels } })
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.music.allowed.channels': data.modules.music.allowed.channels } })
             }
 
             if (Array.isArray(data.modules.music.blocked.channels)) {
@@ -903,6 +905,20 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             }
 
             else await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.autoreactions': [] } })
+        }
+
+        if (data.modules.economy) {
+            if (typeof data.modules.economy.active == 'boolean' && data.modules.economy.active !== guild.modules.economy.active) {
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.active': data.modules.economy.active } })
+            }
+
+            if (Array.isArray(data.modules.economy.currencies) && data.modules.economy.currencies.length && JSON.stringify(data.modules.economy.currencies) !== JSON.stringify(guild.modules.economy.currencies)) {
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.currencies': data.modules.economy.currencies } })
+            }
+
+            if (Array.isArray(data.modules.economy.store.items) && JSON.stringify(data.modules.economy.store.items) !== JSON.stringify(guild.modules.economy.store.items)) {
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.store.items': data.modules.economy.store.items } })
+            }
         }
     }
 

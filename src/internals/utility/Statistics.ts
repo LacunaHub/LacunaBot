@@ -29,7 +29,7 @@ export function scheduleStatsCollect(sharding: ShardingManager) {
         qdb.set('charts.pings', charts.pings.filter(c => (Date.now() - c.ts) < 64800000))
         qdb.set('charts.command_uses', charts.command_uses.filter(c => (Date.now() - c.ts) < 36000000))
 
-        await sendGuildCount(guilds)
+        if (process.env.CLIENT_ID == '740585412560420914') await sendGuildCount(guilds)
     })
 
     logger.info(`(Utility): Guilds chart update schedule has been initialized`)

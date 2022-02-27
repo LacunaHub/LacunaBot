@@ -2,6 +2,7 @@ import { GuildMember } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
+import { generateSimpleId } from '../utility/UID'
 
 export default class TemporaryRole {
     public self: Lacuna
@@ -21,7 +22,7 @@ export default class TemporaryRole {
 
         this.role_id = options.role_id
 
-        this.unique_id = options.unique_id
+        this.unique_id = options.unique_id ?? generateSimpleId(6)
 
         this.expires = new Date(options.expires_timestamp)
 
@@ -140,7 +141,7 @@ export interface TemporaryRoleOptions {
     user_id: string
     guild_id: string
     role_id: string
-    unique_id: string
+    unique_id?: string
     expires_timestamp: number
     initial?: boolean
 }

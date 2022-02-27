@@ -1,6 +1,6 @@
 import Replacer from './Replacer'
 import Canvas, { Image, NodeCanvasRenderingContext2D } from 'canvas'
-import { MessageAttachment, CommandInteraction, Message, ContextMenuInteraction, VoiceState, VoiceChannel, GuildMember, BaseGuildTextChannel, BaseGuildVoiceChannel } from 'discord.js'
+import { MessageAttachment, CommandInteraction, Message, ContextMenuInteraction, VoiceState, GuildMember, BaseGuildTextChannel, BaseGuildVoiceChannel } from 'discord.js'
 import numbro from 'numbro'
 import { scheduleJob, RecurrenceRule, Range, Job } from 'node-schedule'
 import Lacuna from '../internals/Lacuna'

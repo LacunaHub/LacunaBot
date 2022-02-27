@@ -1,3 +1,4 @@
+import { MessageButtonStyle } from 'discord.js'
 import { model, Schema, Document } from 'mongoose'
 
 export default model<ServerDocument>(
@@ -701,7 +702,42 @@ export default model<ServerDocument>(
                 custom_api_key: { type: String, default: '' },
                 channels: { type: Array, default: [] }
             },
-            autoreactions: { type: Array, default: [] }
+            autoreactions: { type: Array, default: [] },
+            economy: {
+                active: { type: Boolean, default: false },
+                reset_wallet_on_leave: { type: Boolean, default: false },
+                currencies: {
+                    type: Array,
+                    default: [
+                        {
+                            id: 'DEFAULT',
+                            name: 'Cash',
+                            symbol: '$',
+                            options: [],
+                            income: {
+                                messages: {
+                                    range_per_message: [1, 5],
+                                    rate_limit_per_user: 60
+                                },
+                                voice_channels: {
+                                    range_per_minute: [0.2, 1]
+                                },
+                                allowed: {
+                                    channels: [],
+                                    roles: []
+                                },
+                                blocked: {
+                                    channels: [],
+                                    roles: []
+                                }
+                            }
+                        }
+                    ]
+                },
+                store: {
+                    items: { type: Array, default: [] }
+                }
+            }
         },
         utility: {
             giveaways: { type: Array, default: [] }
@@ -1159,6 +1195,14 @@ export interface ServerDocument extends Document {
             channels: YouTubeChannel[]
         }
         autoreactions: AutoReaction[]
+        economy: {
+            active: boolean
+            reset_wallet_on_leave: boolean
+            currencies: EconomyCurrency[]
+            store: {
+                items: EconomyStoreItem[]
+            }
+        }
     }
     utility: {
         giveaways: Giveaway[]
@@ -1370,6 +1414,29 @@ export interface ReactionElement {
     references: string[]
 }
 
+export interface InteractiveMessageComponent {
+    id: string
+    message: {
+        content: string
+        embed: MessageEmbed
+    }
+    rows: InteractiveButtonComponent[]
+}
+
+export interface InteractiveButtonComponent {
+    id: string
+    type: 'CHANNEL' | 'ROLE'
+    label: string
+    style: MessageButtonStyle
+    emoji: {
+        id: string
+        name: string
+        animated: boolean
+    }
+    url: string
+    references: string[]
+}
+
 export interface LevelAward {
     id: string
     type: 'CHANNEL' | 'ROLE'
@@ -1486,6 +1553,53 @@ export interface AutoReaction {
     matches: string[]
     exclude_matches: string[]
 }
+
+export interface EconomyCurrency {
+    id: string
+    name: string
+    symbol: string
+    options: string[]
+    income: {
+        messages: {
+            range_per_message: number[]
+            rate_limit_per_user: number
+        }
+        voice_channels: {
+            range_per_minute: number[]
+        }
+        allowed: {
+            channels: string[]
+            roles: string[]
+        }
+        blocked: {
+            channels: string[]
+            roles: string[]
+        }
+    }
+}
+
+export interface EconomyStoreItem {
+    id: string
+    name: string
+    type: 'CHANNEL' | 'ROLE'
+    description: string
+    options: EconomyStoreItemOptions[]
+    purchase_price: number
+    selling_price?: number
+    currency_id: string
+    quantity?: number
+    references: string[]
+    references_duration?: {
+        value: 1
+        measure: 'MINUTES' | 'HOURS' | 'DAYS'
+    }
+    custom_purchase_reply?: {
+        content: string
+        embed: MessageEmbed
+    }
+}
+
+export type EconomyStoreItemOptions = 'SELLABLE' | 'LIMITED_QUANTITY' | 'TEMPORARY_REFERENCES' | 'CUSTOM_PURCHASE_REPLY'
 
 export interface Giveaway {
     message_id: string

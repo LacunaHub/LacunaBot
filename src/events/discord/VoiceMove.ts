@@ -1,7 +1,8 @@
 import { VoiceState } from 'discord.js'
 import { ServerDocument, VoiceRole } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { voiceUnassign, voiceAssign } from '../../modules/Levels'
+import { voiceUnassign as levelsVoiceUnassign, voiceAssign as levelsVoiceAssign } from '../../modules/Levels'
+import { voiceUnassign as economyVoiceUnassign, voiceAssign as economyVoiceAssign } from '../../modules/Economy'
 import { VoiceMove } from '../../modules/Logs'
 import { createTemporaryVoiceOnMove } from '../../modules/VoiceManager'
 
@@ -52,8 +53,11 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
         if (voice_roles.size) await state.member.roles.add(voice_roles, locale.voice_manager.voice_remove_roles_reason).catch(self.logger.error)
     }
 
-    await voiceUnassign(self, server, before, before.channel)
-    await voiceAssign(self, server, state)
+    await levelsVoiceUnassign(self, server, before, before.channel)
+    await levelsVoiceAssign(self, server, state)
+
+    await economyVoiceUnassign(self, server, before, before.channel)
+    await economyVoiceAssign(self, server, state)
 
     await createTemporaryVoiceOnMove(self, server, before, state)
     await VoiceMove(self, server, before, state)

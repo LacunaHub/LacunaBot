@@ -70,6 +70,16 @@ const handler = async (self: Lacuna, member: GuildMember) => {
         })
     }
 
+    if (server.modules.economy.reset_wallet_on_leave) {
+        await self.db.activities.updateOne({ _id: member.guild.id }, {
+            $pull: {
+                wallets: {
+                    user_id: member.id
+                } as never
+            }
+        })
+    }
+
     return true
 }
 

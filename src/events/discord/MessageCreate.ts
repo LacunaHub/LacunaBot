@@ -1,4 +1,5 @@
-import { messageCreate } from '../../modules/Levels'
+import { messageCreate as addLevelPoints } from '../../modules/Levels'
+import { messageCreate as addWalletCash } from '../../modules/Economy'
 import { autoReact } from '../../modules/Reactions'
 import CustomCommand from '../../modules/CustomCommand'
 import { parseCommandArguments } from '../../internals/utility/Utils'
@@ -46,7 +47,10 @@ const handler = async (self: Lacuna, message: Message) => {
         await custom.execute()
     }
 
-    if (!command && !custom_command && ['DEFAULT', 'REPLY'].includes(message.type)) await messageCreate(self, server, message)
+    if (!command && !custom_command && ['DEFAULT', 'REPLY'].includes(message.type)) {
+        await addLevelPoints(self, server, message)
+        await addWalletCash(self, server, message)
+    }
 
     await antiCaps(self, server, message)
     await linksFilter(self, server, message)
