@@ -214,35 +214,34 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         }
 
                         if (data.moderation.automoder.links_filter.penalty.message.embed) {
-                            if (data.moderation.automoder.links_filter.penalty.message.embed.fields.length)
-                                data.moderation.automoder.links_filter.penalty.message.embed.fields = data.moderation.automoder.links_filter.penalty.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
-
-                            const embed = new MessageEmbed(data.moderation.automoder.links_filter.penalty.message.embed as any)
+                            const newEmbed = data.moderation.automoder.links_filter.penalty.message.embed
+                            const oldEmbed = guild.moderation.automoder.links_filter.penalty.message.embed
+        
                             await Servers.updateOne({ _id: guild._id }, {
                                 $set: {
                                     'moderation.automoder.links_filter.penalty.message.embed': {
-                                        active: data.moderation.automoder.links_filter.penalty.message.embed.active,
-                                        title: embed.title,
-                                        description: embed.description,
-                                        url: embed.url,
-                                        timestamp: data.moderation.automoder.links_filter.penalty.message.embed.timestamp,
-                                        color: data.moderation.automoder.links_filter.penalty.message.embed.color,
+                                        active: newEmbed.active ?? oldEmbed.active,
+                                        title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                        description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                        url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                        timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                        color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
                                         footer: {
-                                            text: embed.footer.text,
-                                            icon_url: embed.footer.iconURL
+                                            text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                            icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
                                         },
                                         image: {
-                                            url: embed.image.url
+                                            url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
                                         },
                                         thumbnail: {
-                                            url: embed.thumbnail.url
+                                            url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
                                         },
                                         author: {
-                                            name: embed.author.name,
-                                            url: embed.author.url,
-                                            icon_url: embed.author.iconURL
+                                            name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                            url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                            icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                                         },
-                                        fields: embed.fields
+                                        fields: newEmbed.fields ?? oldEmbed.fields
                                     }
                                 }
                             })
@@ -297,35 +296,34 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         }
 
                         if (data.moderation.automoder.swear_filter.penalty.message.embed) {
-                            if (data.moderation.automoder.swear_filter.penalty.message.embed.fields.length)
-                                data.moderation.automoder.swear_filter.penalty.message.embed.fields = data.moderation.automoder.swear_filter.penalty.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
-
-                            const embed = new MessageEmbed(data.moderation.automoder.swear_filter.penalty.message.embed as any)
+                            const newEmbed = data.moderation.automoder.swear_filter.penalty.message.embed
+                            const oldEmbed = guild.moderation.automoder.swear_filter.penalty.message.embed
+        
                             await Servers.updateOne({ _id: guild._id }, {
                                 $set: {
                                     'moderation.automoder.swear_filter.penalty.message.embed': {
-                                        active: data.moderation.automoder.swear_filter.penalty.message.embed.active,
-                                        title: embed.title,
-                                        description: embed.description,
-                                        url: embed.url,
-                                        timestamp: data.moderation.automoder.swear_filter.penalty.message.embed.timestamp,
-                                        color: data.moderation.automoder.swear_filter.penalty.message.embed.color,
+                                        active: newEmbed.active ?? oldEmbed.active,
+                                        title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                        description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                        url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                        timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                        color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
                                         footer: {
-                                            text: embed.footer.text,
-                                            icon_url: embed.footer.iconURL
+                                            text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                            icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
                                         },
                                         image: {
-                                            url: embed.image.url
+                                            url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
                                         },
                                         thumbnail: {
-                                            url: embed.thumbnail.url
+                                            url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
                                         },
                                         author: {
-                                            name: embed.author.name,
-                                            url: embed.author.url,
-                                            icon_url: embed.author.iconURL
+                                            name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                            url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                            icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                                         },
-                                        fields: embed.fields
+                                        fields: newEmbed.fields ?? oldEmbed.fields
                                     }
                                 }
                             })
@@ -380,35 +378,34 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         }
 
                         if (data.moderation.automoder.users_slowdown.penalty.message.embed) {
-                            if (data.moderation.automoder.users_slowdown.penalty.message.embed.fields.length)
-                                data.moderation.automoder.users_slowdown.penalty.message.embed.fields = data.moderation.automoder.users_slowdown.penalty.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
-
-                            const embed = new MessageEmbed(data.moderation.automoder.users_slowdown.penalty.message.embed as any)
+                            const newEmbed = data.moderation.automoder.users_slowdown.penalty.message.embed
+                            const oldEmbed = guild.moderation.automoder.users_slowdown.penalty.message.embed
+        
                             await Servers.updateOne({ _id: guild._id }, {
                                 $set: {
                                     'moderation.automoder.users_slowdown.penalty.message.embed': {
-                                        active: data.moderation.automoder.users_slowdown.penalty.message.embed.active,
-                                        title: embed.title,
-                                        description: embed.description,
-                                        url: embed.url,
-                                        timestamp: data.moderation.automoder.users_slowdown.penalty.message.embed.timestamp,
-                                        color: data.moderation.automoder.users_slowdown.penalty.message.embed.color,
+                                        active: newEmbed.active ?? oldEmbed.active,
+                                        title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                        description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                        url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                        timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                        color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
                                         footer: {
-                                            text: embed.footer.text,
-                                            icon_url: embed.footer.iconURL
+                                            text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                            icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
                                         },
                                         image: {
-                                            url: embed.image.url
+                                            url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
                                         },
                                         thumbnail: {
-                                            url: embed.thumbnail.url
+                                            url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
                                         },
                                         author: {
-                                            name: embed.author.name,
-                                            url: embed.author.url,
-                                            icon_url: embed.author.iconURL
+                                            name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                            url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                            icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                                         },
-                                        fields: embed.fields
+                                        fields: newEmbed.fields ?? oldEmbed.fields
                                     }
                                 }
                             })
@@ -468,35 +465,34 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         }
 
                         if (data.moderation.automoder.anti_caps.penalty.message.embed) {
-                            if (data.moderation.automoder.anti_caps.penalty.message.embed.fields.length)
-                                data.moderation.automoder.anti_caps.penalty.message.embed.fields = data.moderation.automoder.anti_caps.penalty.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
-
-                            const embed = new MessageEmbed(data.moderation.automoder.anti_caps.penalty.message.embed as any)
+                            const newEmbed = data.moderation.automoder.anti_caps.penalty.message.embed
+                            const oldEmbed = guild.moderation.automoder.anti_caps.penalty.message.embed
+        
                             await Servers.updateOne({ _id: guild._id }, {
                                 $set: {
                                     'moderation.automoder.anti_caps.penalty.message.embed': {
-                                        active: data.moderation.automoder.anti_caps.penalty.message.embed.active,
-                                        title: embed.title,
-                                        description: embed.description,
-                                        url: embed.url,
-                                        timestamp: data.moderation.automoder.anti_caps.penalty.message.embed.timestamp,
-                                        color: data.moderation.automoder.anti_caps.penalty.message.embed.color,
+                                        active: newEmbed.active ?? oldEmbed.active,
+                                        title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                        description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                        url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                        timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                        color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
                                         footer: {
-                                            text: embed.footer.text,
-                                            icon_url: embed.footer.iconURL
+                                            text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                            icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
                                         },
                                         image: {
-                                            url: embed.image.url
+                                            url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
                                         },
                                         thumbnail: {
-                                            url: embed.thumbnail.url
+                                            url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
                                         },
                                         author: {
-                                            name: embed.author.name,
-                                            url: embed.author.url,
-                                            icon_url: embed.author.iconURL
+                                            name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                            url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                            icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                                         },
-                                        fields: embed.fields
+                                        fields: newEmbed.fields ?? oldEmbed.fields
                                     }
                                 }
                             })
@@ -630,35 +626,34 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
 
                 if (data.modules.welcome.message.embed) {
-                    if (data.modules.welcome.message.embed.fields.length)
-                        data.modules.welcome.message.embed.fields = data.modules.welcome.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
+                    const newEmbed = data.modules.welcome.message.embed
+                    const oldEmbed = guild.modules.welcome.message.embed
 
-                    const embed = new MessageEmbed(data.modules.welcome.message.embed as any)
                     await Servers.updateOne({ _id: guild._id }, {
                         $set: {
                             'modules.welcome.message.embed': {
-                                active: data.modules.welcome.message.embed.active,
-                                title: embed.title,
-                                description: embed.description,
-                                url: embed.url,
-                                timestamp: data.modules.welcome.message.embed.timestamp,
-                                color: data.modules.welcome.message.embed.color,
+                                active: newEmbed.active ?? oldEmbed.active,
+                                title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
                                 footer: {
-                                    text: embed.footer.text,
-                                    icon_url: embed.footer.iconURL
+                                    text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                    icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
                                 },
                                 image: {
-                                    url: embed.image.url
+                                    url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
                                 },
                                 thumbnail: {
-                                    url: embed.thumbnail.url
+                                    url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
                                 },
                                 author: {
-                                    name: embed.author.name,
-                                    url: embed.author.url,
-                                    icon_url: embed.author.iconURL
+                                    name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                    url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                    icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                                 },
-                                fields: embed.fields
+                                fields: newEmbed.fields ?? oldEmbed.fields
                             }
                         }
                     })
@@ -697,35 +692,34 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
 
                 if (data.modules.farewell.message.embed) {
-                    if (data.modules.farewell.message.embed.fields.length)
-                        data.modules.farewell.message.embed.fields = data.modules.farewell.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
+                    const newEmbed = data.modules.farewell.message.embed
+                    const oldEmbed = guild.modules.farewell.message.embed
 
-                    const embed = new MessageEmbed(data.modules.farewell.message.embed as any)
                     await Servers.updateOne({ _id: guild._id }, {
                         $set: {
                             'modules.farewell.message.embed': {
-                                active: data.modules.farewell.message.embed.active,
-                                title: embed.title,
-                                description: embed.description,
-                                url: embed.url,
-                                timestamp: data.modules.farewell.message.embed.timestamp,
-                                color: data.modules.farewell.message.embed.color,
+                                active: newEmbed.active ?? oldEmbed.active,
+                                title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
                                 footer: {
-                                    text: embed.footer.text,
-                                    icon_url: embed.footer.iconURL
+                                    text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                    icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
                                 },
                                 image: {
-                                    url: embed.image.url
+                                    url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
                                 },
                                 thumbnail: {
-                                    url: embed.thumbnail.url
+                                    url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
                                 },
                                 author: {
-                                    name: embed.author.name,
-                                    url: embed.author.url,
-                                    icon_url: embed.author.iconURL
+                                    name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                    url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                    icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                                 },
-                                fields: embed.fields
+                                fields: newEmbed.fields ?? oldEmbed.fields
                             }
                         }
                     })
@@ -789,35 +783,34 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     }
 
                     if (data.modules.levels.level_up_alerts.message.embed) {
-                        if (data.modules.levels.level_up_alerts.message.embed.fields.length)
-                            data.modules.levels.level_up_alerts.message.embed.fields = data.modules.levels.level_up_alerts.message.embed.fields.filter(field => field.name && field.value && typeof field.inline === 'boolean')
-
-                        const embed = new MessageEmbed(data.modules.levels.level_up_alerts.message.embed as any)
+                        const newEmbed = data.modules.levels.level_up_alerts.message.embed
+                        const oldEmbed = guild.modules.levels.level_up_alerts.message.embed
+    
                         await Servers.updateOne({ _id: guild._id }, {
                             $set: {
                                 'modules.levels.level_up_alerts.message.embed': {
-                                    active: data.modules.levels.level_up_alerts.message.embed.active,
-                                    title: embed.title,
-                                    description: embed.description,
-                                    url: embed.url,
-                                    timestamp: data.modules.levels.level_up_alerts.message.embed.timestamp,
-                                    color: data.modules.levels.level_up_alerts.message.embed.color,
+                                    active: newEmbed.active ?? oldEmbed.active,
+                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
                                     footer: {
-                                        text: embed.footer.text,
-                                        icon_url: embed.footer.iconURL
+                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
                                     },
                                     image: {
-                                        url: embed.image.url
+                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
                                     },
                                     thumbnail: {
-                                        url: embed.thumbnail.url
+                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
                                     },
                                     author: {
-                                        name: embed.author.name,
-                                        url: embed.author.url,
-                                        icon_url: embed.author.iconURL
+                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                                     },
-                                    fields: embed.fields
+                                    fields: newEmbed.fields ?? oldEmbed.fields
                                 }
                             }
                         })
@@ -882,14 +875,6 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             if (typeof data.modules.reports.channel_id === 'string' && data.modules.reports.channel_id !== guild.modules.reports.channel_id) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.reports.channel_id': data.modules.reports.channel_id } })
             }
-
-            if (typeof data.modules.reports.emoji === 'object' && data.modules.reports.emoji.name !== guild.modules.reports.emoji.name) {
-                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.reports.emoji': data.modules.reports.emoji } })
-            }
-
-            if (data.modules.reports.minimum && typeof data.modules.reports.minimum === 'number' && data.modules.reports.minimum !== guild.modules.reports.minimum) {
-                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.reports.minimum': data.modules.reports.minimum } })
-            }
         }
 
         if (data.modules.autoreactions) {
@@ -916,13 +901,13 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.currencies': data.modules.economy.currencies } })
             }
 
-            if (Array.isArray(data.modules.economy.store.items) && JSON.stringify(data.modules.economy.store.items) !== JSON.stringify(guild.modules.economy.store.items)) {
+            if (Array.isArray(data.modules.economy.store?.items) && JSON.stringify(data.modules.economy.store.items) !== JSON.stringify(guild.modules.economy.store.items)) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.store.items': data.modules.economy.store.items } })
             }
         }
     }
 
-    const changes = [ ...new Set(Object.keys(dotNotateObject(data)).map(k => k.split('.').slice(0, 2).join('.'))) ]
+    const changes = [ ...new Set(Object.keys(dotNotateObject(data)).map(k => k.split('.').slice(0, 3).join('.'))) ]
 
     await Servers.updateOne({ _id: guild._id }, {
         $push: {
@@ -934,7 +919,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
         }
     })
 
-    return await Servers.findOne({ _id: guild._id }).lean()
+    return await Servers.findOne({ _id: guild._id })
 }
 
 export async function addReactionElement(server: ServerDocument, reaction: Partial<ReactionElement>) {
@@ -978,7 +963,7 @@ export async function addReactionElement(server: ServerDocument, reaction: Parti
         }
     })
 
-    const updated = await Servers.findOne({ _id: server._id }).lean()
+    const updated = await Servers.findOne({ _id: server._id })
     return updated.modules.reactions.find(r => r.id == element_id)
 }
 
@@ -1055,7 +1040,7 @@ export async function addTwitchChannel(server: ServerDocument, channel: Partial<
         }
     })
 
-    const updated = await Servers.findOne({ _id: server._id }).lean()
+    const updated = await Servers.findOne({ _id: server._id })
     return updated.modules.twitch.channels.find(c => c.channel.id == channel.channel.id)
 }
 
@@ -1080,14 +1065,14 @@ export async function removeTwitchChannel(server: ServerDocument, channel_id: nu
     channel_id = Number(channel_id)
 
     const channels = server.modules.twitch.channels
-    const channel = channels.find(c => c.channel.id == channel_id)
+    const channel = channels.find(c => String(c.channel.id) == String(channel_id))
 
     if (!channel) return 'twitch_channel_not_found'
 
     await Servers.updateOne({ _id: server._id }, {
         $pull: {
             'modules.twitch.channels': {
-                'channel.id': channel_id
+                'channel.id': channel.channel.id
             }
         }
     })
@@ -1132,7 +1117,7 @@ export async function addYouTubeChannel(server: ServerDocument, channel: Partial
         }
     })
 
-    const updated = await Servers.findOne({ _id: server._id }).lean()
+    const updated = await Servers.findOne({ _id: server._id })
     return updated.modules.youtube.channels.find(c => c.channel.id == channel.channel.id)
 }
 

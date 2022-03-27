@@ -299,7 +299,7 @@ async function searchTwitch(ctx: Context) {
     const added = server.modules.twitch.channels
 
     ctx.status = 200
-    ctx.body = channels.filter(channel => !added.some(c => c.channel.id == channel.id))
+    ctx.body = channels.filter(channel => !added.some(c => String(c.channel.id) == channel.id))
 }
 
 async function addOrEditTwitch(ctx: Context) {

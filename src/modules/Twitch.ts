@@ -5,23 +5,23 @@ import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
 
 export async function searchChannels(query: string) {
-    const res = await fetch(`https://api.twitch.tv/kraken/search/channels?query=${encodeURI(query)}`, {
+    const res = await fetch(`https://api.twitch.tv/helix/search/channels?query=${encodeURI(query)}`, {
         method: 'GET',
         headers: {
-            'Client-ID': process.env.TWITCH_CLIENT_ID,
-            Accept: 'application/vnd.twitchtv.v5+json'
+            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            'Client-Id': process.env.TWITCH_CLIENT_ID
         }
     })
 
     if (res.status === 200) {
         const data: TwitchSearchResponse = await res.json()
 
-        if (data.channels && data.channels.length) {
-            return data.channels.map(channel => {
+        if (data.data && data.data.length) {
+            return data.data.map(channel => {
                 return {
-                    id: channel._id,
+                    id: channel.id,
                     display_name: channel.display_name,
-                    logo: channel.logo
+                    logo: channel.thumbnail_url
                 }
             })
         }
@@ -105,27 +105,26 @@ export class Twitch {
     }
 
     public async getStream() {
-        const res = await fetch(`https://api.twitch.tv/kraken/streams/${this.id}`, {
+        const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${this.id}`, {
             method: 'GET',
             headers: {
-                'Client-ID': process.env.TWITCH_CLIENT_ID,
-                Accept: 'application/vnd.twitchtv.v5+json'
+                Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+                'Client-Id': process.env.TWITCH_CLIENT_ID
             }
         })
     
         if (res.status === 200) {
             const data: TwitchStreamResponse = await res.json()
+            const stream = data.data[0]
     
-            if (data.stream) {
+            if (stream) {
                 return {
-                    name: data.stream.channel.display_name,
-                    logo: data.stream.channel.logo,
-                    url: data.stream.channel.url,
-                    status: data.stream.channel.status,
-                    game: data.stream.game,
-                    game_image: `https://static-cdn.jtvnw.net/ttv-boxart/${encodeURI(data.stream.game)}-144x192.jpg`,
-                    preview: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${data.stream.channel.name}-${Math.floor(Math.random() * 81) + 1200}x${Math.floor(Math.random() * 21) + 700}.jpg`,
-                    banner: data.stream.channel.video_banner
+                    name: stream.user_name,
+                    url: `https://twitch.tv/${stream.user_login}`,
+                    status: stream.title,
+                    game: stream.game_name,
+                    game_image: `https://static-cdn.jtvnw.net/ttv-boxart/${encodeURI(stream.game_name)}-144x192.jpg`,
+                    preview: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${stream.user_login}-${Math.floor(Math.random() * 81) + 1200}x${Math.floor(Math.random() * 21) + 700}.jpg`
                 }
             }
         }
@@ -155,14 +154,12 @@ export class Twitch {
                     }
                 })
 
-                if (stream.name != this.display_name || stream.logo != this.logo) {
+                if (stream.name != this.display_name) {
                     this.display_name = stream.name
-                    this.logo = stream.logo
 
                     await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.twitch.channels.channel.id': this.id }, {
                         $set: {
-                            'modules.twitch.channels.$.channel.display_name': stream.name,
-                            'modules.twitch.channels.$.channel.logo': stream.logo
+                            'modules.twitch.channels.$.channel.display_name': stream.name
                         }
                     })
                 }
@@ -171,7 +168,7 @@ export class Twitch {
 
                 if (!webhook) {
                     try {
-                        webhook = await textChannel.createWebhook(stream.name, { avatar: stream.logo })
+                        webhook = await textChannel.createWebhook(stream.name)
                     } catch (err) { return false }
 
                     this.alerts_webhook_id = webhook.id
@@ -190,7 +187,7 @@ export class Twitch {
                     .setDescription(stream.game)
                     .setURL(stream.url)
                     .setThumbnail(stream.game_image)
-                    .setImage(this.alerts_display_preview ? stream.preview : stream.banner)
+                    .setImage(this.alerts_display_preview ? stream.preview : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg')
                     .setColor(0x563194)
 
                 let content = this.alerts_message_content
@@ -205,7 +202,6 @@ export class Twitch {
                 const message = await webhook.send({
                     content,
                     embeds: [embed],
-                    avatarURL: stream.logo,
                     username: stream.name
                 })
 
@@ -295,49 +291,42 @@ export async function addNewEntries(self: Lacuna) {
 }
 
 export interface TwitchSearchResponse {
-    _total: number
-    channels?: TwitchSearchChannel[]
+    data: TwitchSearchChannel[]
+    pagination: { cursor: string }
 }
 
 export interface TwitchSearchChannel {
-    _id: number
     broadcaster_language: string
-    created_at: string
+    broadcaster_login: string
     display_name: string
-    followers: number,
-    game: string
-    language: string
-    logo: string
-    mature: boolean
-    name: string
-    partner: boolean,
-    profile_banner: string
-    profile_banner_background_color?: string
-    status: string
-    updated_at: string
-    url: string
-    video_banner: string
-    views: number
+    game_id: string
+    game_name: string
+    id: string
+    is_live: boolean
+    tag_ids: any[]
+    thumbnail_url: string
+    title: string
+    started_at: string
 }
 
 export interface TwitchStreamResponse {
-    stream: {
-        _id: number
-        average_fps: number
-        channel: TwitchSearchChannel
-        created_at: string
-        delay: number
-        game: string
-        is_playlist: boolean
-        preview: {
-            large: string
-            medium: string
-            small: string
-            template: string
-        },
-        video_height: number,
-        viewers: number
-    }
+    data: Array<{
+        id: string
+        user_id: string
+        user_login: string
+        user_name: string
+        game_id: string
+        game_name: string
+        type: string
+        title: string
+        viewer_count: number
+        started_at: string
+        language: string
+        thumbnail_url: string
+        tag_ids: any[]
+        is_mature: boolean
+    }>
+    pagination: { cursor: string }
 }
 
 export default {
