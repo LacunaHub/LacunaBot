@@ -48,7 +48,7 @@ export default async function(self: Lacuna, server: ServerDocument, role: Role):
                 .setDescription(self.translator.format(locale.logs.role_delete.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `**${role.name}**`))
                 .addField(locale.logs.role_create.color, `\`${role.hexColor}\``, true)
                 .addField(locale.logs.common.position, role.rawPosition.toString(), true)
-                .setFooter(role.id)
+                .setFooter({ text: role.id })
                 .setTimestamp()
                 .setColor('#EF5350')
 

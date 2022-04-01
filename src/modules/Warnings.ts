@@ -163,7 +163,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
         .addField(locale.common.case_log.target, `${target.user.tag}\n(${target.id})`, true)
         .addField(locale.common.case_log.executor, executor.user.tag, true)
         .addField(locale.common.case_log.reason, reason ?? '-')
-        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setFooter({ text: self.translator.format(locale.common.case_log.case, case_id) })
         .setTimestamp()
         .setColor('#EF5350')
 

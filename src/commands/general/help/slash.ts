@@ -34,7 +34,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         const embed = new MessageEmbed()
             .setTitle(locale.commands.help.texts.title)
             .setDescription(self.translator.format(locale.commands.help.texts.description, `\`/\``))
-            .setFooter(self.translator.format(locale.commands.help.texts.use_help_for_detail_info, '/'))
+            .setFooter({ text: self.translator.format(locale.commands.help.texts.use_help_for_detail_info, '/') })
 
         const components = new MessageActionRow()
             .addComponents(

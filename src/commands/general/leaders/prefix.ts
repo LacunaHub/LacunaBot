@@ -140,7 +140,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     const field = fields[page]
 
     const _message = await message.reply({
-        embeds: [ embed.setFields(field).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+        embeds: [ embed.setFields(field).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
         components: [row]
     })
 
@@ -171,7 +171,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         }
 
         await _message.edit({
-            embeds: [ embed.setFields(field).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+            embeds: [ embed.setFields(field).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
             components: [row]
         })
 

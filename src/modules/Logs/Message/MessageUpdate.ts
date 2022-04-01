@@ -51,7 +51,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Mess
                 .addField(locale.logs.common.channel, `<#${message.channel.id}>`, true)
                 .addField(locale.logs.common.before_changes, before_content || `\`[${locale.logs.message_delete.attachment}]\``)
                 .addField(locale.logs.common.after_changes, content || `\`[${locale.logs.message_delete.attachment}]\``)
-                .setFooter(message.id)
+                .setFooter({ text: message.id })
                 .setTimestamp()
                 .setColor('#FFA726')
 

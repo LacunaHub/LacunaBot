@@ -43,7 +43,7 @@ export default async function(self: Lacuna, server: ServerDocument, state: Voice
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.voice_connect.title)
                 .setDescription(self.translator.format(locale.logs.voice_connect.template, `**${state.member.user.tag}**`, `<#${state?.channelId ?? '1'}>`))
-                .setFooter(state.member.id)
+                .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#2FDF84')
 

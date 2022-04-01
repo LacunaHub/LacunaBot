@@ -121,7 +121,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
     const row = new MessageActionRow()
 
     const message = await interaction.editReply({
-        embeds: [ embed.setFields(fields[page]).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+        embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
         components: [
             row.setComponents(
                 new MessageSelectMenu({
@@ -148,7 +148,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
             await i.deferUpdate()
 
             await i.editReply({
-                embeds: [ embed.setFields(fields[page]).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+                embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
                 components: [
                     row.setComponents(
                         new MessageSelectMenu({

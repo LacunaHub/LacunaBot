@@ -49,7 +49,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         .addField(locale.common.case_log.target, mention ? mention.user.tag : locale.common.texts.none, true)
         .addField(locale.common.case_log.executor, message.member.user.tag, true)
         .addField(locale.common.case_log.reason, `${reason} (<#${message.channel.id}>)`)
-        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setFooter({ text: self.translator.format(locale.common.case_log.case, case_id) })
         .setTimestamp()
         .setColor('#EF5350')
 

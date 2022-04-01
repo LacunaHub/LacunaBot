@@ -46,7 +46,7 @@ export default async function(self: Lacuna, server: ServerDocument, sticker: Sti
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.sticker_delete.title)
                 .setDescription(self.translator.format(locale.logs.sticker_delete.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `**${sticker.name}**`))
-                .setFooter(sticker.id)
+                .setFooter({ text: sticker.id })
                 .setTimestamp()
                 .setColor('#EF5350')
 

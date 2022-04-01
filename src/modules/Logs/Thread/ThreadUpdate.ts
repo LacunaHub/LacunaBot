@@ -50,7 +50,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Thre
                     .setDescription(self.translator.format(locale.logs.thread_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.thread_update.types.name, `<#${thread.id}>`)))
                     .addField(locale.logs.common.before_changes, before.name, true)
                     .addField(locale.logs.common.after_changes, thread.name, true)
-                    .setFooter(thread.id)
+                    .setFooter({ text: thread.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -67,7 +67,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Thre
                     .setDescription(self.translator.format(locale.logs.thread_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.thread_update.types.auto_archive, `<#${thread.id}>`)))
                     .addField(locale.logs.common.before_changes, numbro(before.autoArchiveDuration as number * 60).format({ output: 'time' }), true)
                     .addField(locale.logs.common.after_changes, numbro(thread.autoArchiveDuration as number * 60).format({ output: 'time' }), true)
-                    .setFooter(thread.id)
+                    .setFooter({ text: thread.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 

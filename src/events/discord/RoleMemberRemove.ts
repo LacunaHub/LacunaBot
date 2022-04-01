@@ -41,7 +41,7 @@ const handler = async (self: Lacuna, member: GuildMember, roles: Collection<stri
                 .addField(locale.commands.common.case_log.target, `${member.user.tag}\n(${member.id})`, true)
                 .addField(locale.commands.common.case_log.executor, entry.executor.tag, true)
                 .addField(locale.commands.common.case_log.reason, entry.reason ?? '-')
-                .setFooter(self.translator.format(locale.commands.common.case_log.case, case_id))
+                .setFooter({ text: self.translator.format(locale.commands.common.case_log.case, case_id) })
                 .setTimestamp()
                 .setColor('#2FDF84')
 

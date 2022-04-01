@@ -49,7 +49,7 @@ export default async function(self: Lacuna, server: ServerDocument, thread: Thre
                 .setDescription(self.translator.format(locale.logs.thread_create.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `<#${thread.id}>`))
                 .addField(locale.logs.common.channel, thread.parent?.id ? `<#${thread.parentId}>` : '-', true)
                 .addField(locale.logs.thread_create.auto_archive, numbro(thread.autoArchiveDuration as number * 60).format({ output: 'time' }), true)
-                .setFooter(thread.id)
+                .setFooter({ text: thread.id })
                 .setTimestamp()
                 .setColor('#2FDF84')
 

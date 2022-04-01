@@ -46,7 +46,7 @@ export default async function(self: Lacuna, server: ServerDocument, emoji: Guild
             const embed = new MessageEmbed()
                 .setTitle(locale.logs.emoji_create.title)
                 .setDescription(self.translator.format(locale.logs.emoji_create.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`))
-                .setFooter(emoji.id)
+                .setFooter({ text: emoji.id })
                 .setTimestamp()
                 .setColor('#2FDF84')
 

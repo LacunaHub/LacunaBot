@@ -45,7 +45,7 @@ export default async function(self: Lacuna, server: ServerDocument, state: Voice
                 .addField(state.member.user.bot ? locale.logs.common.bot : locale.logs.common.user, `${state.member.user.tag}`, true)
                 .addField(locale.logs.common.channel, `<#${state.channelId}>`, true)
                 .addField('\u200B', '\u200B', true)
-                .setFooter(state.member.id)
+                .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#FFA726')
 

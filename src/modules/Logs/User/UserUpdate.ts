@@ -46,7 +46,7 @@ export default async function(self: Lacuna, server: ServerDocument, guild: Guild
                     .setDescription(self.translator.format(locale.logs.user_update.types.username, `**${user.tag}**`))
                     .addField(locale.logs.common.before_changes, before.username, true)
                     .addField(locale.logs.common.after_changes, user.username, true)
-                    .setFooter(user.id)
+                    .setFooter({ text: user.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -63,7 +63,7 @@ export default async function(self: Lacuna, server: ServerDocument, guild: Guild
                     .setDescription(self.translator.format(locale.logs.user_update.types.discriminator, `**${user.tag}**`))
                     .addField(locale.logs.common.before_changes, before.discriminator, true)
                     .addField(locale.logs.common.after_changes, user.discriminator, true)
-                    .setFooter(user.id)
+                    .setFooter({ text: user.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 

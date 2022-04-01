@@ -71,7 +71,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, message.member.user.tag, true)
         .addField(locale.common.case_log.reason, reason)
-        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setFooter({ text: self.translator.format(locale.common.case_log.case, case_id) })
         .setTimestamp()
         .setColor('#2FDF84')
 

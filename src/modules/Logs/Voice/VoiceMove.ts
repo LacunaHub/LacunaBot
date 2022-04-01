@@ -45,7 +45,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Voic
                 .setDescription(self.translator.format(locale.logs.voice_move.template, `**${state.member.user.tag}**`))
                 .addField(locale.logs.voice_move.old_channel, `<#${before.channelId}>`, true)
                 .addField(locale.logs.voice_move.new_channel, `<#${state.channelId}>`, true)
-                .setFooter(state.member.id)
+                .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#FFA726')
 

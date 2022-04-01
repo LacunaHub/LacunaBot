@@ -47,7 +47,7 @@ export default async function(self: Lacuna, server: ServerDocument, member: Guil
                 .setTitle(locale.logs.role_member_add.title)
                 .setDescription(self.translator.format(locale.logs.role_member_add.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `**${member.user.tag}**`))
                 .addField(locale.logs.common.roles, roles.map(role => `<@&${role.id}>`).join(', '), true)
-                .setFooter(member.id)
+                .setFooter({ text: member.id })
                 .setTimestamp()
                 .setColor('#2FDF84')
 

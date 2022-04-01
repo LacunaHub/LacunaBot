@@ -49,7 +49,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Role
                     .setDescription(self.translator.format(locale.modules.logs.role_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, self.translator.format(locale.modules.logs.role_update.types.name, `<@&${role.id}>`)))
                     .addField(locale.modules.logs.common.before_changes, before.name, true)
                     .addField(locale.modules.logs.common.after_changes, role.name, true)
-                    .setFooter(role.id)
+                    .setFooter({ text: role.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -66,7 +66,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Role
                     .setDescription(self.translator.format(locale.modules.logs.role_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, self.translator.format(locale.modules.logs.role_update.types.color, `<@&${role.id}>`)))
                     .addField(locale.modules.logs.common.before_changes, `\`${before.hexColor}\``, true)
                     .addField(locale.modules.logs.common.after_changes, `\`${role.hexColor}\``, true)
-                    .setFooter(role.id)
+                    .setFooter({ text: role.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -78,8 +78,8 @@ export default async function(self: Lacuna, server: ServerDocument, before: Role
             }
             
             if (before.permissions != role.permissions) {
-                const before_permissions = before.permissions.toArray(false)
-                const permissions = role.permissions.toArray(false)
+                const before_permissions = before.permissions.toArray()
+                const permissions = role.permissions.toArray()
 
                 if (before_permissions.length < permissions.length) {
                     const perms = permissions.filter(p => !before_permissions.includes(p))
@@ -88,7 +88,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Role
                         .setTitle(locale.modules.logs.role_update.title)
                         .setDescription(self.translator.format(locale.modules.logs.role_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, self.translator.format(locale.modules.logs.role_update.types.permissions, `<@&${role.id}>`)))
                         .addField(locale.modules.logs.role_update.types.permissions_added, perms.map(p => locale.commands.common.permissions[p]).join(', '), true)
-                        .setFooter(role.id)
+                        .setFooter({ text: role.id })
                         .setTimestamp()
                         .setColor('#FFA726')
 
@@ -106,7 +106,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Role
                         .setTitle(locale.modules.logs.role_update.title)
                         .setDescription(self.translator.format(locale.modules.logs.role_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, self.translator.format(locale.modules.logs.role_update.types.permissions, `<@&${role.id}>`)))
                         .addField(locale.modules.logs.role_update.types.permissions_removed, perms.map(p => locale.commands.common.permissions[p]).join(', '), true)
-                        .setFooter(role.id)
+                        .setFooter({ text: role.id })
                         .setTimestamp()
                         .setColor('#FFA726')
 

@@ -48,7 +48,7 @@ export default async function(self: Lacuna, server: ServerDocument, channel: Gui
                 .setDescription(self.translator.format(locale.logs.channel_create.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `${locale.logs.channel_create.types[channel.type] ?? locale.logs.channel_create.types.UNKNOWN} <#${channel.id}>`))
                 .addField(locale.logs.common.category, channel?.parent?.name ?? '-', true)
                 .addField(locale.logs.common.position, channel.rawPosition.toString(), true)
-                .setFooter(channel.id)
+                .setFooter({ text: channel.id })
                 .setTimestamp()
                 .setColor('#2FDF84')
 

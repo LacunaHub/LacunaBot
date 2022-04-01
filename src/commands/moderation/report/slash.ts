@@ -55,7 +55,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
             .setAuthor({ name: target.author.tag, iconURL: target.author.displayAvatarURL() })
             .addField('Канал сообщения', `<#${target.channelId}>`, true)
             .addField('Количество репортов', '1', true)
-            .setFooter(`ID: ${target.id}`)
+            .setFooter({ text: `ID: ${target.id}` })
             .setTimestamp(target.createdTimestamp)
 
         if (target.attachments.filter(file => Boolean(file.width)).size > 0) embed.setImage(target.attachments.first().proxyURL)

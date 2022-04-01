@@ -25,7 +25,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         .addField(locale.about.texts.os_uptime, numbro(os.uptime()).format({ output: 'time' }), true)
         .addField(locale.about.texts.shard_uptime, numbro(self.uptime / 1000).format({ output: 'time' }), true)
         .addField('\u200B', '\u200B', true)
-        .setFooter(`© ${(self.application.owner as Team).name}`, (self.application.owner as Team).iconURL())
+        .setFooter({ text: `© ${(self.application.owner as Team).name}`, iconURL: (self.application.owner as Team).iconURL() })
 
     const components = new MessageActionRow()
         .addComponents(

@@ -110,7 +110,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         const embed = new MessageEmbed()
             .setTitle(locale.play.texts.player)
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
-            .setFooter(self.translator.format(locale.play.texts.added_by, track.requester))
+            .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
 
         message = await interaction.editReply({ embeds: [embed], components: [row] }) as Message
     }
@@ -141,7 +141,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         const embed = new MessageEmbed()
             .setTitle(locale.play.texts.player)
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
-            .setFooter(self.translator.format(locale.play.texts.added_by, track.requester))
+            .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
 
         if (player.playing) await interaction.editReply({ content: `${self._emojis.OK} | ${self.translator.format(locale.play.texts.added_to_queue, `**${(interaction.member as any).displayName}**`, `**${track.title}**`)}` })
 

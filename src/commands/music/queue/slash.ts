@@ -54,7 +54,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         )
 
     const message = await interaction.editReply({
-        embeds: [ embed.setFields(fields[page]).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+        embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
         components: [row]
     }) as Message
 
@@ -77,7 +77,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         await i.deferUpdate()
         await i.editReply({
-            embeds: [ embed.setFields(fields[page]).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+            embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
             components: [row]
         }).catch(() => {})
 

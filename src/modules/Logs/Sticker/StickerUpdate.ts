@@ -49,7 +49,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Stic
                     .setDescription(self.translator.format(locale.logs.sticker_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.sticker_update.types.name, `**${sticker.name}**`)))
                     .addField(locale.logs.common.before_changes, before.name, true)
                     .addField(locale.logs.common.after_changes, sticker.name, true)
-                    .setFooter(sticker.id)
+                    .setFooter({ text: sticker.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 

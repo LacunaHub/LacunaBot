@@ -50,7 +50,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
                     .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.name_update, `<#${channel.id}>`)))
                     .addField(locale.logs.common.before_changes, before.name, true)
                     .addField(locale.logs.common.after_changes, channel.name, true)
-                    .setFooter(channel.id)
+                    .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -67,7 +67,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
                     .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.topic_update, `<#${channel.id}>`)))
                     .addField(locale.logs.common.before_changes, before.topic ?? '-', true)
                     .addField(locale.logs.common.after_changes, channel.topic ?? '-', true)
-                    .setFooter(channel.id)
+                    .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -84,7 +84,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
                     .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.rate_limit_update, `<#${channel.id}>`)))
                     .addField(locale.logs.common.before_changes, (before as TextChannel).rateLimitPerUser ? numbro((before as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-', true)
                     .addField(locale.logs.common.after_changes, (channel as TextChannel).rateLimitPerUser ? numbro((channel as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-', true)
-                    .setFooter(channel.id)
+                    .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -101,7 +101,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
                     .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.parent_update, `<#${channel.id}>`)))
                     .addField(locale.logs.common.before_changes, before?.parent?.name ?? '-', true)
                     .addField(locale.logs.common.after_changes, channel?.parent?.name ?? '-', true)
-                    .setFooter(channel.id)
+                    .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -118,7 +118,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
                     .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.bitrate_update, `<#${channel.id}>`)))
                     .addField(locale.logs.common.before_changes, `${before.bitrate / 1000}kbps`, true)
                     .addField(locale.logs.common.after_changes, `${channel.bitrate / 1000}kbps`, true)
-                    .setFooter(channel.id)
+                    .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -135,7 +135,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
                     .setDescription(self.translator.format(locale.logs.channel_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.channel_update.user_limit_update, `<#${channel.id}>`)))
                     .addField(locale.logs.common.before_changes, before.userLimit.toString(), true)
                     .addField(locale.logs.common.after_changes, channel.userLimit.toString(), true)
-                    .setFooter(channel.id)
+                    .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 

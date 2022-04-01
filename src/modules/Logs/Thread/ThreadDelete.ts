@@ -47,7 +47,7 @@ export default async function(self: Lacuna, server: ServerDocument, thread: Thre
                 .setTitle(locale.logs.thread_delete.title)
                 .setDescription(self.translator.format(locale.logs.thread_delete.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `**${thread.name}**`))
                 .addField(locale.logs.common.channel, thread.parent?.id ? `<#${thread.parentId}>` : '-', true)
-                .setFooter(thread.id)
+                .setFooter({ text: thread.id })
                 .setTimestamp()
                 .setColor('#EF5350')
 

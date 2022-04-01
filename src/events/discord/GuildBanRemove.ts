@@ -22,7 +22,7 @@ const handler = async (self: Lacuna, ban: GuildBan) => {
                 .addField(locale.commands.common.case_log.target, `${ban.user.tag}\n(${ban.user.id})`, true)
                 .addField(locale.commands.common.case_log.executor, entry.executor.tag, true)
                 .addField(locale.commands.common.case_log.reason, entry.reason ?? '')
-                .setFooter(self.translator.format(locale.commands.common.case_log.case, case_id))
+                .setFooter({ text: self.translator.format(locale.commands.common.case_log.case, case_id) })
                 .setTimestamp()
                 .setColor('#2FDF84')
             

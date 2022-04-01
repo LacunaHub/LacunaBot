@@ -49,7 +49,7 @@ export default async function(self: Lacuna, server: ServerDocument, message: Mes
                 .addField(locale.logs.common.sender, `${message.author.tag}\n(${message.author.id})`, true)
                 .addField(locale.logs.common.channel, `<#${message.channel.id}>`, true)
                 .addField(locale.logs.message_delete.content, content || `\`[${locale.logs.message_delete.attachment}]\``)
-                .setFooter(message.id)
+                .setFooter({ text: message.id })
                 .setTimestamp()
                 .setColor('#EF5350')
 

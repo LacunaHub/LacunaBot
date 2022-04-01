@@ -96,7 +96,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
         .addField(locale.common.case_log.executor, interaction.user.tag, true)
         .addField(locale.common.case_log.reason, reason)
-        .setFooter(self.translator.format(locale.common.case_log.case, case_id))
+        .setFooter({ text: self.translator.format(locale.common.case_log.case, case_id) })
         .setTimestamp()
         .setColor('#2FDF84')
 

@@ -49,7 +49,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
                     .setDescription(self.translator.format(locale.logs.emoji_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.emoji_update.types.name, `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`)))
                     .addField(locale.logs.common.before_changes, before.name, true)
                     .addField(locale.logs.common.after_changes, emoji.name, true)
-                    .setFooter(emoji.id)
+                    .setFooter({ text: emoji.id })
                     .setTimestamp()
                     .setColor('#FFA726')
 

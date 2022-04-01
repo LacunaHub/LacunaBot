@@ -119,7 +119,7 @@ export async function itemsPrefix(self: Lacuna, server: ServerDocument, message:
     const row = new MessageActionRow()
 
     const _message = await message.reply({
-        embeds: [ embed.setFields(fields[page]).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+        embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
         components: [
             row.setComponents(
                 new MessageSelectMenu({
@@ -146,7 +146,7 @@ export async function itemsPrefix(self: Lacuna, server: ServerDocument, message:
             await i.deferUpdate()
 
             await _message.edit({
-                embeds: [ embed.setFields(fields[page]).setFooter(self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length)) ],
+                embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
                 components: [
                     row.setComponents(
                         new MessageSelectMenu({

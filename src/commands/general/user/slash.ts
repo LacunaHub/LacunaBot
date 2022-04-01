@@ -17,7 +17,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         .addField(locale.user.texts.account_created, `<t:${created_ts}:d> – <t:${created_ts}:R>`, true)
         .addField(locale.user.texts.member_joined, `<t:${joined_ts}:d> – <t:${joined_ts}:R>`, true)
         .addField(`${locale.user.texts.roles} [${mention.roles.cache.filter(r => r.id != interaction.guild.id).size}]`, mention.roles.cache.filter(r => r.id != interaction.guild.id).map(role => `<@&${role.id}>`).join(' ') || '-')
-        .setFooter(`ID: ${mention.id}`)
+        .setFooter({ text: `ID: ${mention.id}` })
 
     const row = new MessageActionRow()
         .addComponents(
