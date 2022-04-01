@@ -13,12 +13,12 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
 
     const mention = (interaction.options?.getMember(locale.wallet.balance.options.user.name) ?? interaction.member) as GuildMember
 
-    const activities = await self.db.activities.findOne({ _id: interaction.guild.id })
-    let wallet = activities.wallets.find(w => w.user_id == mention.id)
+    const user = await self.db.users.findOne({ _id: mention.id })
+    let wallet = user?.activities?.wallets?.find(i => i.guild_id == interaction.guildId)
 
     if (!wallet) {
         wallet = {
-            user_id: mention.id,
+            guild_id: interaction.guildId,
             currencies: [],
             transactions: [],
             activity: {
@@ -69,12 +69,12 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
-    const activities = await self.db.activities.findOne({ _id: interaction.guildId })
-    let wallet = activities.wallets.find(w => w.user_id == interaction.user.id)
+    const user = await self.db.users.findOne({ _id: interaction.user.id })
+    let wallet = user?.activities?.wallets?.find(i => i.guild_id == interaction.guildId)
 
     if (!wallet) {
         wallet = {
-            user_id: interaction.user.id,
+            guild_id: interaction.guildId,
             currencies: [],
             transactions: [],
             activity: {
@@ -93,11 +93,25 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
-    let mention_wallet = activities.wallets.find(w => w.user_id == mention.id)
+    let mention_user = await self.db.users.findOne({ _id: mention.id })
+
+    if (!mention_user) {
+        mention_user = await self.db.users.create({
+            _id: mention.id,
+            user: {
+                username: mention.user.username,
+                discriminator: mention.user.discriminator,
+                avatar: mention.user.avatar,
+                flags: mention.user.flags?.bitfield ?? 0
+            }
+        } as any)
+    }
+
+    let mention_wallet = mention_user.activities.wallets.find(i => i.guild_id == interaction.guildId)
 
     if (!mention_wallet) {
         mention_wallet = {
-            user_id: mention.id,
+            guild_id: interaction.guildId,
             currencies: [],
             transactions: [],
             activity: {
@@ -106,17 +120,17 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
             }
         }
 
-        await self.db.activities.updateOne({ _id: interaction.guildId }, {
-            $push: { wallets: mention_wallet as never }
+        await self.db.users.updateOne({ _id: mention.id }, {
+            $push: { 'activities.wallets': mention_wallet as never }
         })
     }
 
-    await self.db.activities.updateOne({ _id: interaction.guildId, wallets: { $elemMatch: { user_id: interaction.user.id, 'currencies.id': currency_id } } }, {
+    await self.db.users.updateOne({ _id: interaction.user.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } }, {
         $inc: {
-            'wallets.$[user].currencies.$[currency].amount': -amount
+            'activities.wallets.$[guild].currencies.$[currency].amount': -amount
         },
         $push: {
-            'wallets.$[user].transactions': {
+            'activities.wallets.$[guild].transactions': {
                 $each: [
                     {
                         type: 'TRANSFER_TO',
@@ -129,15 +143,15 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
                 $slice: 512
             }
         }
-    }, { arrayFilters: [ { 'user.user_id': interaction.user.id }, { 'currency.id': currency_id } ] })
+    }, { arrayFilters: [ { 'guild.guild_id': interaction.guildId }, { 'currency.id': currency_id } ] })
 
     if (mention_wallet.currencies.some(c => c.id == currency_id)) {
-        await self.db.activities.updateOne({ _id: interaction.guildId, wallets: { $elemMatch: { user_id: mention.id, 'currencies.id': currency_id } } }, {
+        await self.db.users.updateOne({ _id: mention.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } }, {
             $inc: {
-                'wallets.$[user].currencies.$[currency].amount': amount
+                'activities.wallets.$[guild].currencies.$[currency].amount': amount
             },
             $push: {
-                'wallets.$[user].transactions': {
+                'activities.wallets.$[guild].transactions': {
                     $each: [
                         {
                             type: 'TRANSFER_FROM',
@@ -150,16 +164,16 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
                     $slice: 512
                 }
             }
-        }, { arrayFilters: [ { 'user.user_id': mention.id }, { 'currency.id': currency_id } ] })
+        }, { arrayFilters: [ { 'guild.guild_id': interaction.guildId }, { 'currency.id': currency_id } ] })
     }
 
     else {
-        await self.db.activities.updateOne({ _id: interaction.guildId, 'wallets.user_id': mention.id }, {
+        await self.db.users.updateOne({ _id: mention.id, 'activities.wallets.guild_id': interaction.guildId }, {
             $push: {
-                'wallets.$.currencies': {
+                'activities.wallets.$.currencies': {
                     id: currency_id, amount
                 },
-                'wallets.$.transactions': {
+                'activities.wallets.$.transactions': {
                     $each: [
                         {
                             type: 'TRANSFER_FROM',

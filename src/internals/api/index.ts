@@ -35,12 +35,14 @@ import authorize from './routes/authorize'
 import guilds from './routes/guilds'
 import payments from './routes/payments'
 import state from './routes/state'
+import subscriptions from './routes/subscriptions'
 import users from './routes/users'
 
 app.use(authorize.routes()).use(authorize.allowedMethods())
 app.use(guilds.routes()).use(guilds.allowedMethods())
 app.use(payments.routes()).use(payments.allowedMethods())
 app.use(state.routes()).use(state.allowedMethods())
+app.use(subscriptions.routes()).use(subscriptions.allowedMethods())
 app.use(users.routes()).use(users.allowedMethods())
 
 export default app

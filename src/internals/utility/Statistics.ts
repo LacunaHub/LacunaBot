@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import logger from '../Logger'
-import { scheduleJob, RecurrenceRule, Range, Job } from 'node-schedule'
+import { scheduleJob, RecurrenceRule, Range } from 'node-schedule'
 import qdb from 'quick.db'
 import ShardingManager from './ShardingManager'
 import Lacuna from '../Lacuna'
@@ -54,15 +54,6 @@ export async function sendGuildCount(guilds: number) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ server_count: guilds })
-    })
-
-    await fetch(`https://api.server-discord.com/v2/bots/${process.env.CLIENT_ID}/stats`, {
-        method: 'POST',
-        headers: {
-            Authorization: `SDC ${process.env.BOTSSD_API_KEY}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ servers: guilds, shards: 0 })
     })
 
     logger.log(`(Statistics): Guild count has been sent`)

@@ -7,7 +7,7 @@ export default async function farewell(self: Lacuna, server: ServerDocument, mem
     if (member.user.bot) return false
 
     if (server.modules.farewell.active) {
-        const replacer = new Replacer(self, null, { guild: member.guild, member: member })
+        const replacer = new Replacer(null, { guild: member.guild, member: member })
         const content = await replacer.replaceTemplateMessage(server.modules.farewell.message)
 
         if (server.modules.farewell.format == 'DM') {

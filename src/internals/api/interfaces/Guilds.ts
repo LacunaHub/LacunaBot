@@ -1,11 +1,15 @@
 import Servers, { ReactionElement, ServerDocument, TwitchChannel, VoiceChannelTrigger, YouTubeChannel } from '../../../database/schemas/Servers'
+import db from '../../../database'
 import { generateId } from '../../../modules/Reactions'
-import { Util, MessageEmbed } from 'discord.js'
+import { Util } from 'discord.js'
 import { REST } from '@discordjs/rest'
 import { Routes } from 'discord-api-types/v9'
+import { DataResolver } from 'discord.js'
 import qdb from 'quick.db'
 import { resolveObjectPath, createEnum, dotNotateObject } from '../../utility/Utils'
 import translator from '../../locale'
+import { eventSubSubscribe, eventSubUnsubscribe, ITwitchIncomingWebhook } from '../../../modules/Twitch'
+import { hubSubscribe } from '../../../modules/YouTube'
 
 const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
@@ -1003,157 +1007,193 @@ export async function removeReactionElement(server: ServerDocument, reaction_id:
     return true
 }
 
-export async function addTwitchChannel(server: ServerDocument, channel: Partial<TwitchChannel>) {
-    const channels = server.modules.twitch.channels
+export async function createTwitchSubscription(server: ServerDocument, subscription: any) {
+    const subscriptions = server.modules.subscriptions.twitch
 
-    if (channels.length >= 2 && !server.server.premium.available) return 'twitch_channels_limit_reached_no_premium'
+    if (subscriptions.length >= 1 && !server.server.premium.available) return 'twitch_channels_limit_reached_no_premium'
 
-    if (channels.length >= 10) return 'twitch_channels_limit_reached'
+    if (subscriptions.length >= 10) return 'twitch_channels_limit_reached'
 
-    if (channels.some(c => c.channel.id == channel.channel.id)) return 'twitch_channel_already_added'
+    if (subscriptions.some(s => s.broadcaster_id == subscription.broadcaster.id)) return 'twitch_channel_already_added'
 
-    await Servers.updateOne({ _id: server._id }, {
+    const twitchSub = await db.twitchSubs.findOne({ broadcaster_id: subscription.broadcaster.id })
+
+    if (!twitchSub) {
+        const eventSubResponse = await eventSubSubscribe('stream.online', subscription.broadcaster.id)
+        let eventSub: ITwitchIncomingWebhook['subscription']
+
+        if (eventSubResponse.ok) {
+            const { data } = await eventSubResponse.json()
+
+            eventSub = data[0]
+        }
+
+        if (!eventSub) return 'twitch_subscribe_error'
+
+        await db.twitchSubs.create({
+            _id: eventSub.id,
+            broadcaster_id: subscription.broadcaster.id,
+            broadcaster_login: subscription.broadcaster.login,
+            broadcaster_name: subscription.broadcaster.name,
+            broadcaster_thumbnail_url: subscription.broadcaster.thumbnail
+        } as any)
+    }
+
+    const webhook = await rest.post(Routes.channelWebhooks(subscription.notification_channel_id), {
+        body: {
+            name: subscription.broadcaster.name,
+            avatar: await DataResolver.resolveImage(subscription.broadcaster.thumbnail)
+        }
+    })
+    .catch(() => {}) as any
+
+    const data = {
+        broadcaster_id: subscription.broadcaster.id,
+        broadcaster_name: subscription.broadcaster.name,
+        broadcaster_thumbnail_url: subscription.broadcaster.thumbnail,
+        notification_channel_id: subscription.notification_channel_id,
+        notification_message: subscription.notification_message,
+        webhook_id: webhook?.id ?? null,
+        webhook_token: webhook?.token ?? null,
+        display_stream_preview: subscription.display_stream_preview
+    }
+
+    await db.servers.updateOne({ _id: server._id }, {
         $push: {
-            'modules.twitch.channels': {
-                active: true,
-                live: false,
-                last_check_timestamp: 0,
-                channel: {
-                    id: channel.channel.id,
-                    display_name: channel.channel.display_name,
-                    logo: channel.channel.logo
-                },
-                alerts: {
-                    channel_id: channel.alerts.channel_id,
-                    message: channel.alerts.message,
-                    display_preview: channel.alerts.display_preview,
-                    after_end: {
-                        delete_alert: channel.alerts.after_end.delete_alert,
-                        message_id: ''
-                    },
-                    webhook: {
-                        id: '',
-                        token: ''
-                    }
-                }
-            }
+            'modules.subscriptions.twitch': data
         }
     })
 
-    const updated = await Servers.findOne({ _id: server._id })
-    return updated.modules.twitch.channels.find(c => c.channel.id == channel.channel.id)
+    return data
 }
 
-export async function editTwitchChannel(server: ServerDocument, channel: Partial<TwitchChannel>) {
-    const channels = server.modules.twitch.channels
+export async function updateTwitchSubscription(server: ServerDocument, subscription: any) {
+    const subscriptions = server.modules.subscriptions.twitch
 
-    if (!channels.some(c => c.channel.id == channel.channel.id)) return 'twitch_channel_not_found'
+    if (!subscriptions.some(s => s.broadcaster_id == subscription.broadcaster_id)) return 'twitch_channel_not_found'
 
-    await Servers.updateOne({ _id: server._id, 'modules.twitch.channels.channel.id': channel.channel.id }, {
+    await db.servers.updateOne({ _id: server._id, 'modules.subscriptions.twitch.broadcaster_id': subscription.broadcaster_id }, {
         $set: {
-            'modules.twitch.channels.$.alerts.channel_id': channel.alerts.channel_id,
-            'modules.twitch.channels.$.alerts.message': channel.alerts.message ?? { content: '' },
-            'modules.twitch.channels.$.alerts.display_preview': channel.alerts.display_preview,
-            'modules.twitch.channels.$.alerts.after_end.delete_alert': channel.alerts.after_end.delete_alert
+            'modules.subscriptions.twitch.$.notification_channel_id': subscription.notification_channel_id,
+            'modules.subscriptions.twitch.$.notification_message': subscription.notification_message,
+            'modules.subscriptions.twitch.$.display_stream_preview': subscription.display_stream_preview
         }
     })
-
-    return channel
 }
 
-export async function removeTwitchChannel(server: ServerDocument, channel_id: number) {
-    channel_id = Number(channel_id)
+export async function deleteTwitchSubscription(server: ServerDocument, subscription: any) {
+    const subscriptions = server.modules.subscriptions.twitch
+    const sub = subscriptions.find(s => s.broadcaster_id == subscription.broadcaster_id)
 
-    const channels = server.modules.twitch.channels
-    const channel = channels.find(c => String(c.channel.id) == String(channel_id))
-
-    if (!channel) return 'twitch_channel_not_found'
+    if (!sub) return 'twitch_channel_not_found'
 
     await Servers.updateOne({ _id: server._id }, {
         $pull: {
-            'modules.twitch.channels': {
-                'channel.id': channel.channel.id
+            'modules.subscriptions.twitch': {
+                broadcaster_id: sub.broadcaster_id
             }
         }
     })
+
+    const subscribedGuilds = await db.servers.find({ 'modules.subscriptions.twitch.broadcaster_id': sub.broadcaster_id })
+
+    if (!subscribedGuilds.length) {
+        const twitchSub = await db.twitchSubs.findOne({ broadcaster_id: sub.broadcaster_id })
+
+        await eventSubUnsubscribe(twitchSub?._id).catch(() => {})
+        await db.twitchSubs.deleteMany({ broadcaster_id: sub.broadcaster_id })
+    }
     
-    if (channel.alerts.webhook.id) await rest.delete(Routes.webhook(channel.alerts.webhook.id)).catch(() => {})
-
-    return true
+    if (sub.webhook_id) await rest.delete(Routes.webhook(sub.webhook_id, sub.webhook_token)).catch(() => {})
 }
 
-export async function addYouTubeChannel(server: ServerDocument, channel: Partial<YouTubeChannel>) {
-    const channels = server.modules.youtube.channels
+export async function createYouTubeSubscription(server: ServerDocument, subscription: any) {
+    const subscriptions = server.modules.subscriptions.youtube
 
-    if (channels.length >= 2 && !server.server.premium.available) return 'youtube_channels_limit_reached_no_premium'
+    if (subscriptions.length >= 1 && !server.server.premium.available) return 'youtube_channels_limit_reached_no_premium'
 
-    if (channels.length >= 10) return 'youtube_channels_limit_reached'
+    if (subscriptions.length >= 10) return 'youtube_channels_limit_reached'
 
-    if (channels.some(c => c.channel.id == channel.channel.id)) return 'youtube_channel_already_added'
+    if (subscriptions.some(s => s.channel_id == subscription.channel.id)) return 'youtube_channel_already_added'
 
-    await Servers.updateOne({ _id: server._id }, {
+    const youtubeSub = await db.youtubeSubs.findOne({ _id: subscription.channel.id })
+
+    if (!youtubeSub) {
+        const hubSubscribeResponse = await hubSubscribe(subscription.channel.id)
+
+        if (hubSubscribeResponse.ok) {
+            await db.youtubeSubs.create({
+                _id: subscription.channel.id,
+                channel_name: subscription.channel.name,
+                channel_thumbnail_url: subscription.channel.thumbnail,
+            } as any)
+        }
+
+        else return 'youtube_subscribe_error'
+    }
+
+    const webhook = await rest.post(Routes.channelWebhooks(subscription.notification_channel_id), {
+        body: {
+            name: subscription.channel.name,
+            avatar: await DataResolver.resolveImage(subscription.channel.thumbnail)
+        }
+    })
+    .catch(() => {}) as any
+
+    const data = {
+        channel_id: subscription.channel.id,
+        channel_name: subscription.channel.name,
+        channel_thumbnail_url: subscription.channel.thumbnail,
+        notification_channel_id: subscription.notification_channel_id,
+        notification_message: subscription.notification_message,
+        webhook_id: webhook?.id ?? null,
+        webhook_token: webhook?.token ?? null
+    }
+
+    await db.servers.updateOne({ _id: server._id }, {
         $push: {
-            'modules.youtube.channels': {
-                active: true,
-                last_video_id: '',
-                last_check_timestamp: 0,
-                channel: {
-                    id: channel.channel.id,
-                    name: channel.channel.name,
-                    thumbnail: channel.channel.thumbnail
-                },
-                alerts: {
-                    channel_id: channel.alerts.channel_id,
-                    videos_message: channel.alerts.videos_message,
-                    broadcasts_message: channel.alerts.broadcasts_message,
-                    videos: channel.alerts.videos,
-                    broadcasts: channel.alerts.broadcasts,
-                    webhook: {
-                        id: '',
-                        token: ''
-                    }
-                }
-            }
+            'modules.subscriptions.youtube': data
         }
     })
 
-    const updated = await Servers.findOne({ _id: server._id })
-    return updated.modules.youtube.channels.find(c => c.channel.id == channel.channel.id)
+    return data
 }
 
-export async function editYouTubeChannel(server: ServerDocument, channel: Partial<YouTubeChannel>) {
-    const channels = server.modules.youtube.channels
+export async function updateYouTubeSubscription(server: ServerDocument, subscription: any) {
+    const subscriptions = server.modules.subscriptions.youtube
 
-    if (!channels.some(c => c.channel.id == channel.channel.id)) return 'youtube_channel_not_found'
+    if (!subscriptions.some(s => s.channel_id == subscription.channel_id)) return 'youtube_channel_not_found'
 
-    await Servers.updateOne({ _id: server._id, 'modules.youtube.channels.channel.id': channel.channel.id }, {
+    await db.servers.updateOne({ _id: server._id, 'modules.subscriptions.youtube.channel_id': subscription.channel_id }, {
         $set: {
-            'modules.youtube.channels.$.alerts.channel_id': channel.alerts.channel_id,
-            'modules.youtube.channels.$.alerts.videos_message': channel.alerts.videos_message ?? { content: '' },
-            'modules.youtube.channels.$.alerts.broadcasts_message': channel.alerts.broadcasts_message ?? { content: '' },
-            'modules.youtube.channels.$.alerts.videos': channel.alerts.videos,
-            'modules.youtube.channels.$.alerts.broadcasts': channel.alerts.broadcasts
+            'modules.subscriptions.youtube.$.notification_channel_id': subscription.notification_channel_id,
+            'modules.subscriptions.youtube.$.notification_message': subscription.notification_message
         }
     })
-
-    return channel
 }
 
-export async function removeYouTubeChannel(server: ServerDocument, channel_id: string) {
-    const channels = server.modules.youtube.channels
-    const channel = channels.find(c => c.channel.id == channel_id)
+export async function deleteYouTubeSubscription(server: ServerDocument, subscription: any) {
+    const subscriptions = server.modules.subscriptions.youtube
+    const sub = subscriptions.find(s => s.channel_id == subscription.channel_id)
 
-    if (!channel) return 'youtube_channel_not_found'
+    if (!sub) return 'youtube_channel_not_found'
 
-    await Servers.updateOne({ _id: server._id }, {
+    await db.servers.updateOne({ _id: server._id }, {
         $pull: {
-            'modules.youtube.channels': {
-                'channel.id': channel_id
+            'modules.subscriptions.youtube': {
+                channel_id: sub.channel_id
             }
         }
     })
 
-    if (channel.alerts.webhook.id) await rest.delete(Routes.webhook(channel.alerts.webhook.id)).catch(() => {})
+    const subscribedGuilds = await db.servers.find({ 'modules.subscriptions.youtube.channel_id': sub.channel_id })
+
+    if (!subscribedGuilds.length) {
+        await hubSubscribe(sub.channel_id, 'unsubscribe').catch(() => {})
+        await db.youtubeSubs.deleteOne({ _id: sub.channel_id })
+    }
+    
+    if (sub.webhook_id) await rest.delete(Routes.webhook(sub.webhook_id, sub.webhook_token)).catch(() => {})
 
     return true
 }
@@ -1215,13 +1255,13 @@ export default {
     addReactionElement,
     editReactionElement,
     removeReactionElement,
-    addTwitchChannel,
-    editTwitchChannel,
-    removeTwitchChannel,
+    createTwitchSubscription,
+    updateTwitchSubscription,
+    deleteTwitchSubscription,
     addVoiceTrigger,
     editVoiceTrigger,
     removeVoiceTrigger,
-    addYouTubeChannel,
-    editYouTubeChannel,
-    removeYouTubeChannel
+    createYouTubeSubscription,
+    updateYouTubeSubscription,
+    deleteYouTubeSubscription
 }

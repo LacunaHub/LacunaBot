@@ -2,7 +2,7 @@ import { MessageButtonStyle } from 'discord.js'
 import { model, Schema, Document } from 'mongoose'
 
 export default model<ServerDocument>(
-    'Servers',
+    'servers',
     new Schema<ServerDocument>({
         _id: { type: String },
         locale: { type: String, default: 'ru' },
@@ -694,14 +694,6 @@ export default model<ServerDocument>(
                 },
                 minimum: { type: Number, default: 3 }
             },
-            twitch: {
-                custom_client_id: { type: String, default: '' },
-                channels: { type: Array, default: [] }
-            },
-            youtube: {
-                custom_api_key: { type: String, default: '' },
-                channels: { type: Array, default: [] }
-            },
             autoreactions: { type: Array, default: [] },
             economy: {
                 active: { type: Boolean, default: false },
@@ -737,6 +729,10 @@ export default model<ServerDocument>(
                 store: {
                     items: { type: Array, default: [] }
                 }
+            },
+            subscriptions: {
+                twitch: { type: Array, default: [] },
+                youtube: { type: Array, default: [] }
             }
         },
         utility: {
@@ -1186,10 +1182,12 @@ export interface ServerDocument extends Document {
             }
             minimum: number
         }
+        /** @deprecated */
         twitch: {
             custom_client_id: string
             channels: TwitchChannel[]
         }
+        /** @deprecated */
         youtube: {
             custom_api_key: string
             channels: YouTubeChannel[]
@@ -1202,6 +1200,10 @@ export interface ServerDocument extends Document {
             store: {
                 items: EconomyStoreItem[]
             }
+        }
+        subscriptions: {
+            twitch: ITwitchSubscription[],
+            youtube: IYouTubeSubscription[]
         }
     }
     utility: {
@@ -1488,6 +1490,7 @@ export interface RestoringData {
     timestamp: number
 }
 
+/** @deprecated */
 export interface TwitchChannel {
     active: boolean
     live: boolean
@@ -1516,6 +1519,28 @@ export interface TwitchChannel {
     }
 }
 
+export interface ITwitchSubscription {
+    broadcaster_id: string
+    broadcaster_name: string
+    broadcaster_thumbnail_url: string
+    notification_channel_id: string
+    notification_message: { content: string }
+    webhook_id: string
+    webhook_token: string
+    display_stream_preview: boolean
+}
+
+export interface IYouTubeSubscription {
+    channel_id: string
+    channel_name: string
+    channel_thumbnail_url: string
+    notification_channel_id: string
+    notification_message: { content: string }
+    webhook_id: string
+    webhook_token: string
+}
+
+/** @deprecated */
 export interface YouTubeChannel {
     active: boolean
     last_video_id: string

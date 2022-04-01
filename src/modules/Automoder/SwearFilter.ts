@@ -127,7 +127,7 @@ export default async function(self: Lacuna, server: ServerDocument, message: Mes
         }
 
         if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
-            const replacer = new Replacer(self, null, { message: message, guild: message.guild, member: message.member })
+            const replacer = new Replacer(null, { message: message, guild: message.guild, member: message.member })
             const content = await replacer.replaceTemplateMessage(config.penalty.message)
 
             await message.channel.send(content).catch(self.logger.error)

@@ -7,8 +7,6 @@ import db from '../../../database'
 import qdb from 'quick.db'
 import Guilds from '../interfaces/Guilds'
 import { authorize, checkPermissions } from '../utility/Authorize'
-import { searchChannels as searchTwitchChannels } from '../../../modules/Twitch'
-import { searchChannels as searchYouTubeChannels } from '../../../modules/YouTube'
 import { REST } from '@discordjs/rest'
 import { Routes } from 'discord-api-types/v9'
 import { Constants } from 'discord.js'
@@ -22,12 +20,8 @@ router.get('/:guild_id/settings', checkPermissions, getSettings)
 router.post('/:guild_id/settings', checkPermissions, updateSettings)
 router.post('/:guild_id/reactions/:method', checkPermissions, addOrEditReaction)
 router.delete('/:guild_id/reactions/:reaction_id', checkPermissions, removeReaction)
-router.get('/:guild_id/twitch/search', checkPermissions, searchTwitch)
-router.post('/:guild_id/twitch/:method', checkPermissions, addOrEditTwitch)
-router.delete('/:guild_id/twitch/:channel_id', checkPermissions, removeTwitch)
-router.get('/:guild_id/youtube/search', checkPermissions, searchYouTube)
-router.post('/:guild_id/youtube/:method', checkPermissions, addOrEditYouTube)
-router.delete('/:guild_id/youtube/:channel_id', checkPermissions, removeYouTube)
+router.post('/:guild_id/subscriptions/twitch/:method', checkPermissions, updateTwitchSubscriptions)
+router.post('/:guild_id/subscriptions/youtube/:method', checkPermissions, updateYouTubeSubscriptions)
 router.post('/:guild_id/voice-triggers/:method', checkPermissions, addOrEditVoiceTrigger)
 router.delete('/:guild_id/voice-triggers/:channel_id', checkPermissions, removeVoiceTrigger)
 
@@ -120,14 +114,9 @@ async function getSettings(ctx: Context) {
             reports: server.modules.reports,
             music: server.modules.music,
             reactions: server.modules.reactions,
-            twitch: {
-                channels: server.modules.twitch.channels
-            },
-            youtube: {
-                channels: server.modules.youtube.channels
-            },
             autoreactions: server.modules.autoreactions,
-            economy: server.modules.economy
+            economy: server.modules.economy,
+            subscriptions: server.modules.subscriptions
         },
         prices,
         change_log: server.change_log.reverse()
@@ -209,14 +198,9 @@ async function updateSettings(ctx: Context) {
             reports: server.modules.reports,
             music: server.modules.music,
             reactions: server.modules.reactions,
-            twitch: {
-                channels: server.modules.twitch.channels
-            },
-            youtube: {
-                channels: server.modules.youtube.channels
-            },
             autoreactions: server.modules.autoreactions,
-            economy: server.modules.economy
+            economy: server.modules.economy,
+            subscriptions: server.modules.subscriptions
         },
         prices,
         change_log: server.change_log.reverse()
@@ -270,162 +254,72 @@ async function removeReaction(ctx: Context) {
     ctx.status = 204
 }
 
-async function searchTwitch(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const query = ctx.query.q as string
-
-    if (!guild_id || !query) {
-        ctx.status = 400; ctx.body = 'Bad Request'
-
-        return
-    }
-
-    const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
-
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
-
-        return
-    }
-
-    const channels = await searchTwitchChannels(query)
-
-    if (!channels || !channels.length) {
-        ctx.status = 404; ctx.body = 'Not Found'
-
-        return
-    }
-
-    const added = server.modules.twitch.channels
-
-    ctx.status = 200
-    ctx.body = channels.filter(channel => !added.some(c => String(c.channel.id) == channel.id))
-}
-
-async function addOrEditTwitch(ctx: Context) {
+async function updateTwitchSubscriptions(ctx: Context) {
     const guild_id: string = ctx.params.guild_id
     const method: string = ctx.params.method
-    const options = ctx.request.body as TwitchChannel | Partial<TwitchChannel>
+    const data = ctx.request.body
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
+    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
 
-        return
+    let result: any
+
+    switch(method) {
+        case 'create':
+            result = await Guilds.createTwitchSubscription(server, data)
+        break
+
+        case 'update':
+            result = await Guilds.updateTwitchSubscription(server, data)
+        break
+
+        case 'delete':
+            result = await Guilds.deleteTwitchSubscription(server, data)
+        break
+
+        default:
+            result = 'unknown_method'
     }
 
-    const result = method == 'add' ? (await Guilds.addTwitchChannel(server, options)) : (await Guilds.editTwitchChannel(server, options as TwitchChannel))
-
-    if (typeof result === 'string') {
-        ctx.status = 400; ctx.body = result
-
-        return
-    }
-
-    ctx.status = 200; ctx.body = result
-}
-
-async function removeTwitch(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const channel_id: number = Number(ctx.params.channel_id)
-
-    const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
-
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
-
-        return
-    }
-
-    const result = await Guilds.removeTwitchChannel(server, channel_id)
-
-    if (typeof result === 'string') {
-        ctx.status = 400; ctx.body = result
-
-        return
-    }
-
-    ctx.status = 204
-}
-
-async function searchYouTube(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const query = ctx.query.q as string
-
-    if (!guild_id || !query) {
-        ctx.status = 400; ctx.body = 'Bad Request'
-
-        return
-    }
-
-    const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
-
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
-
-        return
-    }
-
-    const channels = await searchYouTubeChannels(query)
-
-    if (!channels || !channels.length) {
-        ctx.status = 404; ctx.body = 'Not Found'
-
-        return
-    }
-
-    const added = server.modules.youtube.channels
+    if (typeof result == 'string') ctx.throw(400, result)
 
     ctx.status = 200
-    ctx.body = channels.filter(channel => !added.some(c => c.channel.id == channel.id))
+    ctx.body = result
 }
 
-async function addOrEditYouTube(ctx: Context) {
+async function updateYouTubeSubscriptions(ctx: Context) {
     const guild_id: string = ctx.params.guild_id
     const method: string = ctx.params.method
-    const options = ctx.request.body as YouTubeChannel | Partial<YouTubeChannel>
+    const data = ctx.request.body
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
+    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
 
-        return
+    let result: any
+
+    switch(method) {
+        case 'create':
+            result = await Guilds.createYouTubeSubscription(server, data)
+        break
+
+        case 'update':
+            result = await Guilds.updateYouTubeSubscription(server, data)
+        break
+
+        case 'delete':
+            result = await Guilds.deleteYouTubeSubscription(server, data)
+        break
+
+        default:
+            result = 'unknown_method'
     }
 
-    const result = method == 'add' ? (await Guilds.addYouTubeChannel(server, options)) : (await Guilds.editYouTubeChannel(server, options as YouTubeChannel))
+    if (typeof result == 'string') ctx.throw(400, result)
 
-    if (typeof result === 'string') {
-        ctx.status = 400; ctx.body = result
-
-        return
-    }
-
-    ctx.status = 200; ctx.body = result
-}
-
-async function removeYouTube(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const channel_id: string = ctx.params.channel_id
-
-    const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
-
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
-
-        return
-    }
-
-    const result = await Guilds.removeYouTubeChannel(server, channel_id)
-
-    if (typeof result === 'string') {
-        ctx.status = 400; ctx.body = result
-
-        return
-    }
-
-    ctx.status = 204
+    ctx.status = 200
+    ctx.body = result
 }
 
 async function addOrEditVoiceTrigger(ctx: Context) {

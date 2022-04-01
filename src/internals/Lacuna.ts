@@ -15,9 +15,6 @@ import TemporaryMute, { handleEntries as handleTemporaryMuteEntries } from './st
 import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole'
 
 import locale from './locale'
-import { checkVoiceStates } from '../modules/Levels'
-import { Twitch, handleEntries as handleTwitchEntries } from '../modules/Twitch'
-import { YouTube, handleEntries as handleYouTubeEntries } from '../modules/YouTube'
 
 export default class Lacuna extends Client {
     public logger: typeof logger
@@ -30,8 +27,6 @@ export default class Lacuna extends Client {
     public tempbans: Collection<string, TemporaryBan>
     public tempmutes: Collection<string, TemporaryMute>
     public temproles: Collection<string, TemporaryRole>
-    public twitchChannels: Collection<string, Twitch>
-    public youtubeChannels: Collection<string, YouTube>
     public translator: typeof locale
     public utils: typeof Utils
     public PERMISSIONS_FLAGS: PermissionFlags
@@ -58,10 +53,6 @@ export default class Lacuna extends Client {
         this.tempmutes = new Collection()
 
         this.temproles = new Collection()
-
-        this.twitchChannels = new Collection()
-
-        this.youtubeChannels = new Collection()
 
         this.translator = locale
 
@@ -120,10 +111,6 @@ export default class Lacuna extends Client {
         handleTemporaryBanEntries(this)
         handleTemporaryMuteEntries(this)
         handleTemporaryRoleEntries(this)
-        
-        checkVoiceStates(this)
-        handleTwitchEntries(this)
-        handleYouTubeEntries(this)
 
         process.on('unhandledRejection', error => {
             const err = (error as any)?.stack ?? (error as any).message

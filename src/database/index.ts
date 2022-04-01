@@ -1,25 +1,27 @@
 import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose'
-import ServerActivities, { ServerActivitiesDocument } from './schemas/ServerActivities'
+import Activities, { IActivities } from './schemas/Activities'
 import Servers, { ServerDocument } from './schemas/Servers'
+import TwitchSubs, { ITwitchSub } from './schemas/TwitchSubs'
 import Users, { UserDocument } from './schemas/Users'
+import YouTubeSubs, { IYouTubeSub } from './schemas/YouTubeSubs'
 
 export default {
     activities: {
-        async create(doc: ServerActivitiesDocument) {
-            return await ServerActivities.create(doc)
+        async create(doc: IActivities) {
+            return await Activities.create(doc)
         },
-        async deleteMany(filter: FilterQuery<ServerActivitiesDocument>, options?: QueryOptions) {
-            return await ServerActivities.deleteMany(filter, options)
+        async deleteMany(filter: FilterQuery<IActivities>, options?: QueryOptions) {
+            return await Activities.deleteMany(filter, options)
         },
-        async deleteOne(filter: FilterQuery<ServerActivitiesDocument>, options?: QueryOptions) {
-            return await ServerActivities.deleteOne(filter, options)
+        async deleteOne(filter: FilterQuery<IActivities>, options?: QueryOptions) {
+            return await Activities.deleteOne(filter, options)
         },
-        async fetch(filter: FilterQuery<ServerActivitiesDocument>) {
-            let document = await ServerActivities.findOne(filter)
+        async fetch(filter: FilterQuery<IActivities>) {
+            let document = await Activities.findOne(filter)
 
             if (!document) {
                 try {
-                    document = await ServerActivities.create(filter as any)
+                    document = await Activities.create(filter as any)
                 } catch (err) {
                     document = null
                 }
@@ -27,17 +29,17 @@ export default {
 
             return document
         },
-        async find(filter: FilterQuery<ServerActivitiesDocument>) {
-            return await ServerActivities.find(filter)
+        async find(filter: FilterQuery<IActivities>) {
+            return await Activities.find(filter)
         },
-        async findOne(filter: FilterQuery<ServerActivitiesDocument>, projection?: any, options?: QueryOptions) {
-            return await ServerActivities.findOne(filter, projection, options)
+        async findOne(filter: FilterQuery<IActivities>, projection?: any, options?: QueryOptions) {
+            return await Activities.findOne(filter, projection, options)
         },
-        async updateMany(filter: FilterQuery<ServerActivitiesDocument>, update?: UpdateQuery<ServerActivitiesDocument>, options?: QueryOptions) {
-            return await ServerActivities.updateMany(filter, update, options)
+        async updateMany(filter: FilterQuery<IActivities>, update?: UpdateQuery<IActivities>, options?: QueryOptions) {
+            return await Activities.updateMany(filter, update, options)
         },
-        async updateOne(filter: FilterQuery<ServerActivitiesDocument>, update?: UpdateQuery<ServerActivitiesDocument>, options?: QueryOptions) {
-            return await ServerActivities.updateOne(filter, update, options)
+        async updateOne(filter: FilterQuery<IActivities>, update?: UpdateQuery<IActivities>, options?: QueryOptions) {
+            return await Activities.updateOne(filter, update, options)
         }
     },
 
@@ -75,6 +77,54 @@ export default {
         },
         async updateOne(filter: FilterQuery<ServerDocument>, update?: UpdateQuery<ServerDocument>, options?: QueryOptions) {
             return await Servers.updateOne(filter, update, options)
+        }
+    },
+
+    twitchSubs: {
+        async create(doc: ITwitchSub) {
+            return await TwitchSubs.create(doc)
+        },
+        async deleteMany(filter: FilterQuery<ITwitchSub>, options?: QueryOptions) {
+            return await TwitchSubs.deleteMany(filter, options)
+        },
+        async deleteOne(filter: FilterQuery<ITwitchSub>, options?: QueryOptions) {
+            return await TwitchSubs.deleteOne(filter, options)
+        },
+        async find(filter: FilterQuery<ITwitchSub>) {
+            return await TwitchSubs.find(filter)
+        },
+        async findOne(filter: FilterQuery<ITwitchSub>, projection?: any, options?: QueryOptions) {
+            return await TwitchSubs.findOne(filter, projection, options)
+        },
+        async updateMany(filter: FilterQuery<ITwitchSub>, update?: UpdateQuery<ITwitchSub>, options?: QueryOptions) {
+            return await TwitchSubs.updateMany(filter, update, options)
+        },
+        async updateOne(filter: FilterQuery<ITwitchSub>, update?: UpdateQuery<ITwitchSub>, options?: QueryOptions) {
+            return await TwitchSubs.updateOne(filter, update, options)
+        }
+    },
+
+    youtubeSubs: {
+        async create(doc: IYouTubeSub) {
+            return await YouTubeSubs.create(doc)
+        },
+        async deleteMany(filter: FilterQuery<IYouTubeSub>, options?: QueryOptions) {
+            return await YouTubeSubs.deleteMany(filter, options)
+        },
+        async deleteOne(filter: FilterQuery<IYouTubeSub>, options?: QueryOptions) {
+            return await YouTubeSubs.deleteOne(filter, options)
+        },
+        async find(filter: FilterQuery<IYouTubeSub>) {
+            return await YouTubeSubs.find(filter)
+        },
+        async findOne(filter: FilterQuery<IYouTubeSub>, projection?: any, options?: QueryOptions) {
+            return await YouTubeSubs.findOne(filter, projection, options)
+        },
+        async updateMany(filter: FilterQuery<IYouTubeSub>, update?: UpdateQuery<IYouTubeSub>, options?: QueryOptions) {
+            return await YouTubeSubs.updateMany(filter, update, options)
+        },
+        async updateOne(filter: FilterQuery<IYouTubeSub>, update?: UpdateQuery<IYouTubeSub>, options?: QueryOptions) {
+            return await YouTubeSubs.updateOne(filter, update, options)
         }
     },
 
@@ -127,5 +177,6 @@ export interface JsonData {
     playableMusicHosts: string[]
     diamondPrices: Array<{ months: number, price: number, discount: number }>
     allowedApiHosts: string[]
+    allowedApiUrls: string[]
     rootUsers: string[]
 }

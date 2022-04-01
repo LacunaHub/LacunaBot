@@ -1,18 +1,16 @@
 import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageEmbed } from 'discord.js'
 import moment from 'moment'
 import { MessageEmbed as IMessageEmbed } from '../database/schemas/Servers'
-import { Level, ServerActivitiesDocument } from '../database/schemas/ServerActivities'
-import Lacuna from '../internals/Lacuna'
+import { Level, IActivities } from '../database/schemas/Activities'
 import { escapeRegexp, resolveObjectPath, parseCommandArguments } from '../internals/utility/Utils'
+import db from '../database'
+import logger from '../internals/Logger'
 
 export default class Replacer {
-    public self: Lacuna
     public string: string
     public shapers: ReplacerShapers
 
-    constructor(self: Lacuna, string: string, shapers: ReplacerShapers) {
-        this.self = self
-
+    constructor(string?: string, shapers?: ReplacerShapers) {
         this.string = string
 
         this.shapers = shapers
@@ -93,10 +91,15 @@ export default class Replacer {
         const message = this.shapers.message
         const guild = this.shapers.guild
         const member = this.shapers.member
-        const subs = this.shapers.subs
 
-        const activity: ServerActivitiesDocument = await this.self.db.activities.fetch({ _id: guild.id })
-        const levels: Level = activity.levels.find(level => level.user_id == member.id)
+        const activities = (await db.users.find({ 'activities.levels.guild_id': guild.id }))
+            .map(i => ({
+                user: { id: i._id, ...i.user },
+                level: i.activities.levels.find(i => i.guild_id == guild.id),
+                wallet: i.activities.wallets.find(i => i.guild_id == guild.id)
+            })
+        )
+        const memberLevel = activities.find(i => i.user.id == member.id)
         const server_owner: GuildMember = await guild.members.fetch(guild.ownerId)
 
         const args: string[] = parseCommandArguments(message?.content?.split(' ')?.slice(1)?.join(' '))
@@ -239,13 +242,13 @@ export default class Replacer {
                 nickname: member.nickname,
                 premium_since: member.premiumSinceTimestamp,
                 level: {
-                    rank: levels?.experience?.level ?? 0,
-                    current_xp: levels?.experience?.current ?? 0,
-                    remaining_xp: levels ? Math.round((150 + (levels.experience.level * levels.experience.level * 8)) - levels.experience.current) : 0,
-                    need_xp: levels ? 150 + (levels.experience.level * levels.experience.level * 8) : 0,
-                    total_xp: levels?.experience?.total ?? 0,
-                    total_messages: levels?.activity?.text?.total_messages ?? 0,
-                    voice_time: levels?.activity?.voice?.total_time ?? 0
+                    rank: memberLevel?.level?.experience?.level ?? 0,
+                    current_xp: memberLevel?.level?.experience?.current ?? 0,
+                    remaining_xp: memberLevel?.level ? Math.round((150 + (memberLevel.level.experience.level * memberLevel.level.experience.level * 8)) - memberLevel.level.experience.current) : 0,
+                    need_xp: memberLevel?.level ? 150 + (memberLevel.level.experience.level * memberLevel.level.experience.level * 8) : 0,
+                    total_xp: memberLevel?.level?.experience?.total ?? 0,
+                    total_messages: memberLevel?.level?.activity?.total_messages ?? 0,
+                    voice_time: memberLevel?.level?.activity?.total_voice_time ?? 0
                 },
                 voice: {
                     name: member.voice?.channel?.name,
@@ -269,11 +272,6 @@ export default class Replacer {
                     )
                 )
             },
-            subs: {
-                name: subs?.name ?? null,
-                title: subs?.title ?? null,
-                link: subs?.link ?? null
-            },
             index: this.shapers.index ?? 0,
             penalty: {
                 reason: this.shapers.penalty?.reason
@@ -281,8 +279,8 @@ export default class Replacer {
         }
     }
 
-    async replace(string: string = this.string) {
-        const replacements = await this.replacements()
+    async replace(string: string = this.string, customReplacements?: {}) {
+        const replacements = customReplacements ?? await this.replacements()
 
         for (const replacer of this.replacers(string)) {
             const regex = new RegExp(`{\\s*${escapeRegexp(replacer)}\\s*}`, 'g')
@@ -313,7 +311,7 @@ export default class Replacer {
             }
 
             string = string.replace(regex, () => { return res })
-            this.self.logger.info(`(Replacer: ${snippet.name}): on ${this.shapers.guild.name}`)
+            logger.info(`(Replacer: ${snippet.name}): on ${this.shapers.guild.name}`)
         }
 
         return string

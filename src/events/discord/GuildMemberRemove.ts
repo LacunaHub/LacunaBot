@@ -61,23 +61,27 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     await GuildMemberRemove(self, server, member)
 
     if (server.modules.levels.reset_on_leave) {
-        await self.db.activities.updateOne({ _id: member.guild.id }, {
-            $pull: {
-                'levels': {
-                    user_id: member.id
-                } as never
-            }
-        })
+        const user = await self.db.users.findOne({ _id: member.id })
+
+        if (user?.activities?.levels?.some(i => i.guild_id == member.guild.id)) {
+            await self.db.users.updateOne({ _id: member.id }, {
+                $pull: {
+                    'activities.levels': { guild_id: member.guild.id } as never
+                }
+            })
+        }
     }
 
     if (server.modules.economy.reset_wallet_on_leave) {
-        await self.db.activities.updateOne({ _id: member.guild.id }, {
-            $pull: {
-                wallets: {
-                    user_id: member.id
-                } as never
-            }
-        })
+        const user = await self.db.users.findOne({ _id: member.id })
+
+        if (user?.activities?.wallets?.some(i => i.guild_id == member.guild.id)) {
+            await self.db.users.updateOne({ _id: member.id }, {
+                $pull: {
+                    wallets: { guild_id: member.guild.id } as never
+                }
+            })
+        }
     }
 
     return true

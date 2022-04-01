@@ -1,18 +1,30 @@
 import { BaseGuildTextChannel, BaseGuildVoiceChannel, Collection, Guild, GuildMember, Message, VoiceState } from 'discord.js'
 import { EconomyStoreItem, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
-import db from '../database'
 import TemporaryRole from '../internals/structures/TemporaryRole'
 
 export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message) {
     if (!server.modules.economy.active || !server.modules.economy.currencies.length) return false
 
-    const activities = await self.db.activities.fetch({ _id: message.guildId })
-    let wallet = activities.wallets.find(w => w.user_id == message.author.id)
+    let user = await self.db.users.findOne({ _id: message.author.id })
+
+    if (!user) {
+        user = await self.db.users.create({
+            _id: message.author.id,
+            user: {
+                username: message.author.username,
+                discriminator: message.author.discriminator,
+                avatar: message.author.avatar,
+                flags: message.author.flags?.bitfield ?? 0
+            }
+        } as any)
+    }
+
+    let wallet = user.activities.wallets.find(i => i.guild_id == message.guildId)
 
     if (!wallet) {
-        const data = wallet = {
-            user_id: message.author.id,
+        wallet = {
+            guild_id: message.guildId,
             currencies: [],
             transactions: [],
             activity: {
@@ -21,8 +33,8 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
             }
         }
 
-        await self.db.activities.updateOne({ _id: message.guildId }, {
-            $push: { wallets: data as never }
+        await self.db.users.updateOne({ _id: message.author.id }, {
+            $push: { 'activities.wallets': wallet as never }
         })
     }
 
@@ -37,25 +49,23 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
         const amount: number = Math.random() * (currency.income.messages.range_per_message[1] - currency.income.messages.range_per_message[0]) + currency.income.messages.range_per_message[0]
         
         if (wallet.currencies.some(c => c.id == currency.id)) {
-            await self.db.activities.updateOne({ _id: message.guildId, wallets: { $elemMatch: { user_id: message.author.id, 'currencies.id': currency.id } } }, {
+            await self.db.users.updateOne({ _id: message.author.id, 'activities.wallets': { $elemMatch: { guild_id: message.guildId, 'currencies.id': currency.id } } }, {
                 $inc: {
-                    'wallets.$[user].currencies.$[currency].amount': amount
+                    'activities.wallets.$[guild].currencies.$[currency].amount': amount
                 },
                 $set: {
-                    'wallets.$[user].activity.last_message_at': Date.now()
+                    'activities.wallets.$[guild].activity.last_message_at': Date.now()
                 }
-            }, { arrayFilters: [ { 'user.user_id': message.author.id }, { 'currency.id': currency.id } ] })
+            }, { arrayFilters: [ { 'guild.guild_id': message.guildId }, { 'currency.id': currency.id } ] })
         }
 
         else {
-            await self.db.activities.updateOne({ _id: message.guildId, 'wallets.user_id': message.author.id }, {
+            await self.db.users.updateOne({ _id: message.author.id, 'activities.wallets.guild_id': message.guildId }, {
                 $push: {
-                    'wallets.$.currencies': {
-                        id: currency.id, amount
-                    }
+                    'activities.wallets.$.currencies': { id: currency.id, amount }
                 },
                 $set: {
-                    'wallets.$.activity.last_message_at': Date.now()
+                    'activities.wallets.$.activity.last_message_at': Date.now()
                 }
             })
         }
@@ -69,12 +79,25 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
 
     if (members.size > 1) {
         for (const [, member] of members) {
-            const activities = await self.db.activities.fetch({ _id: state.guild.id })
-            let wallet = activities.wallets.find(w => w.user_id == member.id)
+            let user = await self.db.users.findOne({ _id: member.id })
+
+            if (!user) {
+                user = await self.db.users.create({
+                    _id: member.id,
+                    user: {
+                        username: member.user.username,
+                        discriminator: member.user.discriminator,
+                        avatar: member.avatar,
+                        flags: member.user.flags?.bitfield ?? 0
+                    }
+                } as any)
+            }
+        
+            let wallet = user.activities.wallets.find(i => i.guild_id == member.guild.id)
         
             if (!wallet) {
-                const data = wallet = {
-                    user_id: member.id,
+                wallet = {
+                    guild_id: member.guild.id,
                     currencies: [],
                     transactions: [],
                     activity: {
@@ -83,15 +106,15 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
                     }
                 }
         
-                await self.db.activities.updateOne({ _id: state.guild.id }, {
-                    $push: { wallets: data as never }
+                await self.db.users.updateOne({ _id: member.id }, {
+                    $push: { 'activities.wallets': wallet as never }
                 })
             }
 
-            if (!wallet.activity.voice_connected_at) {
-                await self.db.activities.updateOne({ _id: state.guild.id, 'wallets.user_id': member.id }, {
+            if (!wallet.activity.voice_connected_at || (Date.now() - wallet.activity.voice_connected_at) > 36_000_000) {
+                await self.db.users.updateOne({ _id: member.id, 'activities.wallets.guild_id': member.guild.id }, {
                     $set: {
-                        'wallets.$.activity.voice_connected_at': Date.now()
+                        'activities.wallets.$.activity.voice_connected_at': Date.now()
                     }
                 })
             }
@@ -111,10 +134,10 @@ export async function voiceUnassign(self: Lacuna, server: ServerDocument, state:
 
 export async function voiceCount(self: Lacuna, server: ServerDocument, members: GuildMember[], channel: BaseGuildVoiceChannel) {
     for (const member of members) {
-        const activities = await self.db.activities.fetch({ _id: server._id })
-        const wallet = activities.wallets.find(w => w.user_id == member.id)
+        const user = await self.db.users.findOne({ _id: member.user.id })
+        const wallet = user?.activities?.wallets?.find(i => i.guild_id == server._id)
 
-        if (!wallet || !wallet.activity.voice_connected_at) continue
+        if (!wallet?.activity?.voice_connected_at) continue
 
         const time: number = (Date.now() - wallet.activity.voice_connected_at) / 60000
 
@@ -127,25 +150,23 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
             const amount: number = (Math.random() * (currency.income.voice_channels.range_per_minute[1] - currency.income.voice_channels.range_per_minute[0]) + currency.income.voice_channels.range_per_minute[0]) * time
 
             if (wallet.currencies.some(c => c.id == currency.id)) {
-                await self.db.activities.updateOne({ _id: server._id, wallets: { $elemMatch: { user_id: member.id, 'currencies.id': currency.id } } }, {
+                await self.db.users.updateOne({ _id: member.user.id, 'activities.wallets': { $elemMatch: { guild_id: server._id, 'currencies.id': currency.id } } }, {
                     $inc: {
-                        'wallets.$[user].currencies.$[currency].amount': amount
+                        'activities.wallets.$[guild].currencies.$[currency].amount': amount
                     },
                     $set: {
-                        'wallets.$[user].activity.voice_connected_at': 0
+                        'activities.wallets.$[guild].activity.voice_connected_at': 0
                     }
-                }, { arrayFilters: [ { 'user.user_id': member.id }, { 'currency.id': currency.id } ] })
+                }, { arrayFilters: [ { 'guild.guild_id': server._id }, { 'currency.id': currency.id } ] })
             }
     
             else {
-                await self.db.activities.updateOne({ _id: server._id, 'wallets.user_id': member.id }, {
+                await self.db.users.updateOne({ _id: member.user.id, 'activities.wallets.guild_id': server._id }, {
                     $push: {
-                        'wallets.$.currencies': {
-                            id: currency.id, amount
-                        }
+                        'activities.wallets.$.currencies': { id: currency.id, amount }
                     },
                     $set: {
-                        'wallets.$.activity.voice_connected_at': 0
+                        'activities.wallets.$.activity.voice_connected_at': 0
                     }
                 })
             }
@@ -156,12 +177,25 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
 }
 
 export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: Guild, member: GuildMember) {
-    const activities = await db.activities.findOne({ _id: guild.id })
-    let wallet = activities.wallets.find(w => w.user_id == member.id)
+    let user = await self.db.users.findOne({ _id: member.id })
+
+    if (!user) {
+        user = await self.db.users.create({
+            _id: guild.id,
+            user: {
+                username: member.user.username,
+                discriminator: member.user.discriminator,
+                avatar: member.user.avatar,
+                flags: member.user.flags?.bitfield ?? 0
+            }
+        } as any)
+    }
+
+    let wallet = user.activities.wallets.find(i => i.guild_id == guild.id)
 
     if (!wallet) {
-        const data = wallet = {
-            user_id: member.id,
+        wallet = {
+            guild_id: guild.id,
             currencies: [],
             transactions: [],
             activity: {
@@ -170,8 +204,8 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
             }
         }
 
-        await db.activities.updateOne({ _id: guild.id }, {
-            $push: { wallets: data as never }
+        await self.db.users.updateOne({ _id: member.id }, {
+            $push: { 'activities.wallets': wallet as never }
         })
     }
 
@@ -219,12 +253,12 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
         }
     }
 
-    await db.activities.updateOne({ _id: guild.id, wallets: { $elemMatch: { user_id: member.id, 'currencies.id': item.currency_id } } }, {
+    await self.db.users.updateOne({ _id: member.id, 'activities.wallets': { $elemMatch: { guild_id: guild.id, 'currencies.id': item.currency_id } } }, {
         $inc: {
-            'wallets.$[user].currencies.$[currency].amount': -item.purchase_price
+            'activities.wallets.$[guild].currencies.$[currency].amount': -item.purchase_price
         },
         $push: {
-            'wallets.$[user].transactions': {
+            'activities.wallets.$[guild].transactions': {
                 $each: [
                     {
                         type: 'PURCHASE',
@@ -237,9 +271,9 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
                 $slice: 512
             }
         }
-    }, { arrayFilters: [ { 'user.user_id': member.id }, { 'currency.id': item.currency_id } ] })
+    }, { arrayFilters: [ { 'guild.guild_id': guild.id }, { 'currency.id': item.currency_id } ] })
 
-    if (item.options.includes('LIMITED_QUANTITY')) await db.servers.updateOne({ _id: guild.id, 'modules.economy.store.items.id': item.id }, {
+    if (item.options.includes('LIMITED_QUANTITY')) await self.db.servers.updateOne({ _id: guild.id, 'modules.economy.store.items.id': item.id }, {
         $inc: {
             'modules.economy.store.items.$.quantity': -1
         }

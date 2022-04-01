@@ -1,3 +1,5 @@
+import { parseString } from 'xml2js'
+
 const snowflakeRegexp = /\d{17,20}/
 
 export function truncateArray(array: any[], limit: number = 15, separator: string = '\n'): string {
@@ -166,6 +168,14 @@ export function createEnum(keys: any[]): {} {
 
 export function shadeColor(color: string, amount: number): string {
     return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substring(-2))
+}
+
+export function convertXml2Json(str: Buffer, options = {}) {
+    return new Promise((resolve, reject) => {
+        parseString(str, options, (err, result) => {
+            err ? reject(err) : resolve(result)
+        })
+    })
 }
 
 export default {

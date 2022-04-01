@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember, Message, MessageActionRow, MessageEmbed, MessageSelectMenu } from 'discord.js'
+import { Message, MessageActionRow, MessageEmbed, MessageSelectMenu } from 'discord.js'
 import { EconomyStoreItem, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
@@ -48,7 +48,7 @@ export async function buyPrefix(self: Lacuna, server: ServerDocument, message: M
 
     if (result == 'SUCCESS') {
         if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-            const replacer = new Replacer(self, null, { guild: message.guild, member: message.member })
+            const replacer = new Replacer(null, { guild: message.guild, member: message.member })
             const content = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
             try {
@@ -173,7 +173,7 @@ export async function itemsPrefix(self: Lacuna, server: ServerDocument, message:
 
             if (result == 'SUCCESS') {
                 if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-                    const replacer = new Replacer(self, null, { guild: message.guild, member: message.member })
+                    const replacer = new Replacer(null, { guild: message.guild, member: message.member })
                     const content = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
         
                     try {

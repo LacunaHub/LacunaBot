@@ -1,8 +1,8 @@
 import { Schema, model, Document } from 'mongoose'
 
-export default model<ServerActivitiesDocument>(
-    'ServerActivities',
-    new Schema<ServerActivitiesDocument>({
+export default model<IActivities>(
+    'activities',
+    new Schema<IActivities>({
         _id: { type: String },
         levels: { type: Array, default: [] },
         wallets: { type: Array, default: [] },
@@ -10,7 +10,7 @@ export default model<ServerActivitiesDocument>(
     }, { versionKey: false })
 )
 
-export interface ServerActivitiesDocument extends Document {
+export interface IActivities extends Document {
     _id: string
     levels: Level[],
     wallets: Wallet[]

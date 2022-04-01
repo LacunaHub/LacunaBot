@@ -34,7 +34,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
         }
 
         const parent = trigger.default.category_id ? state.guild.channels.cache.filter(c => c.type == 'GUILD_CATEGORY').get(trigger.default.category_id) : state.channel.parent
-        const replacer = new Replacer(self, trigger.default.name, { guild: state.guild, member: state.member, index: trigger.children.length + 1 })
+        const replacer = new Replacer(trigger.default.name, { guild: state.guild, member: state.member, index: trigger.children.length + 1 })
         const name = await replacer.replace()
         const permissions = new Permissions(BigInt(trigger.default.permissions))
         

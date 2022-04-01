@@ -3,6 +3,7 @@ import { scheduleStatsCollect } from './Statistics'
 import { syncBills as syncQiwiBills } from './Qiwi'
 import Diamonder, { createDiamonders } from '../structures/Diamonder'
 import { Job } from 'node-schedule'
+import { hubRefreshSubscriptions } from '../../modules/YouTube'
 
 export default class LacunaSharding extends ShardingManager {
     public readiness: number[]
@@ -22,5 +23,6 @@ export default class LacunaSharding extends ShardingManager {
         this.stats_collect_schedule = scheduleStatsCollect(this)
 
         createDiamonders(this)
+        hubRefreshSubscriptions()
     }
 }

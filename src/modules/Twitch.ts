@@ -1,11 +1,63 @@
-import { BaseGuildTextChannel, MessageEmbed } from 'discord.js'
 import fetch from 'node-fetch'
-import { ServerDocument, TwitchChannel } from '../database/schemas/Servers'
-import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
+import db from '../database'
+import { REST } from '@discordjs/rest'
+import { Routes } from 'discord-api-types/v9'
+import logger from '../internals/Logger'
+
+const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
 export async function searchChannels(query: string) {
-    const res = await fetch(`https://api.twitch.tv/helix/search/channels?query=${encodeURI(query)}`, {
+    const response = await fetch(`https://api.twitch.tv/helix/search/channels?query=${encodeURI(query)}`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            'Client-Id': process.env.TWITCH_CLIENT_ID
+        }
+    })
+
+    if (response.ok) {
+        const { data } = await response.json() as TwitchSearchResponse
+
+        return data?.length ? data.map(i => ({ id: i.id, name: i.display_name, login: i.broadcaster_login, thumbnail: i.thumbnail_url })) : []
+    }
+
+    return []
+}
+
+export function eventSubSubscribe(type: string, user_id: string) {
+    return fetch(`https://api.twitch.tv/helix/eventsub/subscriptions`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            'Client-Id': process.env.TWITCH_CLIENT_ID,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type,
+            version: '1',
+            condition: { broadcaster_user_id: user_id },
+            transport: {
+                method: 'webhook',
+                callback: `${process.env.API_URL}/subscriptions/twitch/eventsub-webhook`,
+                secret: process.env.TWITCH_SIGNING_SECRET
+            }
+        })
+    })
+}
+
+export function eventSubUnsubscribe(subscription_id: string) {
+    return fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscription_id}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            'Client-Id': process.env.TWITCH_CLIENT_ID,
+        }
+    })
+}
+
+export async function getStream(user_id: string) {
+    const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${user_id}`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
@@ -14,288 +66,104 @@ export async function searchChannels(query: string) {
     })
 
     if (res.status === 200) {
-        const data: TwitchSearchResponse = await res.json()
+        const { data } = await res.json() as TwitchStreamResponse
+        const stream = data[0]
 
-        if (data.data && data.data.length) {
-            return data.data.map(channel => {
-                return {
-                    id: channel.id,
-                    display_name: channel.display_name,
-                    logo: channel.thumbnail_url
-                }
-            })
+        if (stream) {
+            return {
+                user_name: stream.user_name,
+                url: `https://twitch.tv/${stream.user_login}`,
+                title: stream.title,
+                game: stream.game_name,
+                game_image: `https://static-cdn.jtvnw.net/ttv-boxart/${encodeURI(stream.game_name)}-144x192.jpg`,
+                preview: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${stream.user_login}-${Math.floor(Math.random() * 81) + 1200}x${Math.floor(Math.random() * 21) + 700}.jpg`
+            }
         }
-
-        return []
     }
-
-    return []
 }
 
-export class Twitch {
-    public self: Lacuna
-    public guild_id: string
-    public is_live: boolean
-    public id: number
-    public display_name: string
-    public logo: string
-    public alerts_channel_id: string
-    public alerts_message_content: string
-    public alerts_display_preview: boolean
-    public delete_alert_after_end: boolean
-    public alert_message_id: string
-    public alerts_webhook_id: string
-    public alerts_webhook_token: string
-    private interval: NodeJS.Timer
+export async function handleIncomingWebhook(messageId: string, data: ITwitchIncomingWebhook) {
+    if (data.subscription.type == 'stream.online') {
+        const subscription = await db.twitchSubs.findOne({ _id: data.subscription.id })
 
-    constructor(self: Lacuna, guild_id: string, channel: TwitchChannel) {
-        this.self = self
+        if (!subscription) return null
 
-        this.guild_id = guild_id
+        if (subscription.last_eventsub_message_id == messageId) return null
+        else await db.twitchSubs.updateOne({ _id: data.subscription.id }, { $set: { 'last_eventsub_message_id': messageId } })
 
-        this.is_live = channel.live
+        logger.info(`(Twitch Eventsub): Handling incoming webhook from subscription "${data.subscription.id}"`)
 
-        this.id = channel.channel.id
+        const subscribedGuilds = await db.servers.find({ 'modules.subscriptions.twitch.broadcaster_id': data.event.broadcaster_user_id })
 
-        this.display_name = channel.channel.display_name
+        if (!subscribedGuilds.length) {
+            await eventSubUnsubscribe(data.subscription.id).catch(() => {})
+            await db.twitchSubs.deleteOne({ _id: data.subscription.id })
 
-        this.logo = channel.channel.logo
-
-        this.alerts_channel_id = channel.alerts.channel_id
-
-        this.alerts_message_content = (channel.alerts.message_template ?? channel.alerts.message.content) || null
-
-        this.alerts_display_preview = channel.alerts.display_preview
-
-        this.delete_alert_after_end = channel.alerts.after_end.delete_alert
-
-        this.alert_message_id = channel.alerts.after_end.message_id
-
-        this.alerts_webhook_id = channel.alerts.webhook.id
-
-        this.alerts_webhook_token = channel.alerts.webhook.token
-
-        this.interval = null
-
-        this.initialize()
-    }
-
-    private initialize() {
-        this.interval = setInterval(() => this.check(), 300000)
-        this.self.twitchChannels.set(`${this.id}:${this.guild_id}`, this)
-    }
-
-    public async fetch() {
-        const server = await this.self.db.servers.findOne({ _id: this.guild_id })
-        const channels = server.modules.twitch.channels
-
-        const exists = channels.some(c => c.channel.id == this.id)
-
-        if (exists) {
-            const channel = channels.find(c => c.channel.id == this.id)
-
-            if (channel.alerts.channel_id != this.alerts_channel_id) this.alerts_channel_id = channel.alerts.channel_id
-            if (channel.alerts.message.content != this.alerts_message_content) this.alerts_message_content = channel.alerts.message.content
+            return
         }
 
-        return {
-            exists,
-            correct: channels.findIndex(c => c.channel.id == this.id) <= (server.server.premium.available ? 9 : 1)
-        }
-    }
+        const stream = await getStream(data.event.broadcaster_user_id)
 
-    public async getStream() {
-        const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${this.id}`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
-                'Client-Id': process.env.TWITCH_CLIENT_ID
-            }
-        })
-    
-        if (res.status === 200) {
-            const data: TwitchStreamResponse = await res.json()
-            const stream = data.data[0]
-    
-            if (stream) {
-                return {
-                    name: stream.user_name,
-                    url: `https://twitch.tv/${stream.user_login}`,
-                    status: stream.title,
-                    game: stream.game_name,
-                    game_image: `https://static-cdn.jtvnw.net/ttv-boxart/${encodeURI(stream.game_name)}-144x192.jpg`,
-                    preview: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${stream.user_login}-${Math.floor(Math.random() * 81) + 1200}x${Math.floor(Math.random() * 21) + 700}.jpg`
-                }
-            }
-        }
-    }
+        if (!stream) return null
 
-    public async check() {
-        const { exists, correct } = await this.fetch()
+        for (const guild of subscribedGuilds) {
+            const guildSubscription = guild.modules.subscriptions.twitch.find(i => i.broadcaster_id == data.event.broadcaster_user_id)
 
-        if (!exists) { this.delete(); return false }
-        if (!correct) return false
+            let webhook = await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
+                .catch(() => {}) as any
 
-        const guild = this.self.guilds.cache.get(this.guild_id)
+            if (!webhook) {
+                webhook = await rest.post(Routes.channelWebhooks(guildSubscription.notification_channel_id), {
+                    body: {
+                        name: data.event.broadcaster_user_name
+                    }
+                })
+                .catch(() => {})
 
-        if (!guild || !guild.available) return false
-
-        const textChannel = this.self.channels.cache.get(this.alerts_channel_id) as BaseGuildTextChannel
-
-        if (textChannel) {
-            const stream = await this.getStream()
-
-            if (stream && !this.is_live) {
-                this.is_live = true
-
-                await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.twitch.channels.channel.id': this.id }, {
+                if (webhook) await db.servers.updateOne({ _id: guild._id, 'modules.subscriptions.twitch.broadcaster_id': data.event.broadcaster_user_id }, {
                     $set: {
-                        'modules.twitch.channels.$.live': true
+                        'modules.subscriptions.twitch.$.webhook_id': webhook.id,
+                        'modules.subscriptions.twitch.$.webhook_token': webhook.token
                     }
                 })
 
-                if (stream.name != this.display_name) {
-                    this.display_name = stream.name
-
-                    await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.twitch.channels.channel.id': this.id }, {
-                        $set: {
-                            'modules.twitch.channels.$.channel.display_name': stream.name
-                        }
-                    })
-                }
-
-                let webhook = await this.self.fetchWebhook(this.alerts_webhook_id, this.alerts_webhook_token).catch(() => {})
-
-                if (!webhook) {
-                    try {
-                        webhook = await textChannel.createWebhook(stream.name)
-                    } catch (err) { return false }
-
-                    this.alerts_webhook_id = webhook.id
-                    this.alerts_webhook_token = webhook.token
-
-                    await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.twitch.channels.channel.id': this.id }, {
-                        $set: {
-                            'modules.twitch.channels.$.alerts.webhook.id': webhook.id,
-                            'modules.twitch.channels.$.alerts.webhook.token': webhook.token
-                        }
-                    })
-                }
-
-                const embed = new MessageEmbed()
-                    .setTitle(stream.status)
-                    .setDescription(stream.game)
-                    .setURL(stream.url)
-                    .setThumbnail(stream.game_image)
-                    .setImage(this.alerts_display_preview ? stream.preview : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg')
-                    .setColor(0x563194)
-
-                let content = this.alerts_message_content
-
-                console.log(typeof content, this.alerts_message_content.length)
-
-                if (content) {
-                    const replacer = new Replacer(this.self, content, { guild: guild, member: guild.me, subs: { name: stream.name, title: stream.status, link: stream.url } })
-                    content = await replacer.replace()
-                }
-
-                const message = await webhook.send({
-                    content,
-                    embeds: [embed],
-                    username: stream.name
-                })
-
-                if (this.delete_alert_after_end && message.id) {
-                    this.alert_message_id = message.id
-
-                    await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.twitch.channels.channel.id': this.id }, {
-                        $set: {
-                            'modules.twitch.channels.$.alerts.after_end.message_id': message.id
-                        }
-                    })
-                }
-
-                this.self.emit('moduleExecution', { module: 'Twitch', guild: { id: guild.id, name: guild.name }, target: { id: this.id, name: this.display_name } })
+                else continue
             }
 
-            else if (!stream && this.is_live) {
-                this.is_live = false
+            let notificationText = guildSubscription.notification_message.content || null
 
-                await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.twitch.channels.channel.id': this.id }, {
-                    $set: {
-                        'modules.twitch.channels.$.live': false,
-                        'modules.twitch.channels.$.alerts.after_end.message_id': ''
-                    }
+            if (notificationText) {
+                const replacer = new Replacer()
+                notificationText = await replacer.replace(notificationText, {
+                    subs: { name: stream.user_name, title: stream.title, link: stream.url }
                 })
-
-                if (this.delete_alert_after_end && this.alert_message_id) {
-                    this.alert_message_id = ''
-                    await textChannel.bulkDelete([this.alert_message_id])
-                }
             }
 
-            await this.self.db.servers.updateOne({ _id: this.guild_id, 'modules.twitch.channels.channel.id': this.id }, {
-                $set: {
-                    'modules.twitch.channels.$.last_check_timestamp': Date.now()
+            await rest.post(Routes.webhook(webhook.id, webhook.token), {
+                body: {
+                    content: notificationText,
+                    embeds: [
+                        {
+                            title: stream.title,
+                            description: stream.game,
+                            url: stream.url,
+                            thumbnail: { url: stream.game_image },
+                            image: { url: guildSubscription.display_stream_preview ? stream.preview : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg' }
+                        }
+                    ]
                 }
             })
+            .catch(() => {})
         }
     }
-
-    public delete() {
-        clearInterval(this.interval)
-        this.self.twitchChannels.delete(`${this.id}:${this.guild_id}`)
-        this.self.logger.log(`(Twitch): "${this.display_name}" (${this.id}) has been deleted`)
-    }
-}
-
-export async function handleEntries(self: Lacuna) {
-    const guilds: string[] = self.guilds.cache.map(g => g.id)
-    const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'modules.twitch.channels.0': { $exists: true } })
-
-    let entries = 0
-
-    for (const server of servers) {
-        const channels = server.modules.twitch.channels
-
-        for (const channel of channels) {
-            const i = channels.indexOf(channel)
-            setTimeout(() => new Twitch(self, server._id, channel), i * (Math.round(Math.random() * 5000) + 2000))
-        }
-
-        entries += channels.length
-    }
-
-    setInterval(() => addNewEntries(self), 150000)
-
-    self.logger.log(`(Twitch): Loaded ${entries} twitch channels from ${servers.length} servers`)
-}
-
-export async function addNewEntries(self: Lacuna) {
-    const guilds: string[] = self.guilds.cache.map(g => g.id)
-    const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'modules.twitch.channels.0': { $exists: true } })
-
-    let entries = 0
-
-    for (const server of servers) {
-        const channels = server.modules.twitch.channels
-
-        for (const channel of channels) {
-            const entry = self.twitchChannels.get(`${channel.channel.id}:${server._id}`)
-
-            if (!entry) { new Twitch(self, server._id, channel); entries++ }
-        }
-    }
-
-    if (entries) self.logger.log(`(Twitch): Added ${entries} new twitch channels from ${servers.length} servers`)
 }
 
 export interface TwitchSearchResponse {
-    data: TwitchSearchChannel[]
+    data: TwitchSearchResponseData[]
     pagination: { cursor: string }
 }
 
-export interface TwitchSearchChannel {
+export interface TwitchSearchResponseData {
     broadcaster_language: string
     broadcaster_login: string
     display_name: string
@@ -310,28 +178,54 @@ export interface TwitchSearchChannel {
 }
 
 export interface TwitchStreamResponse {
-    data: Array<{
-        id: string
-        user_id: string
-        user_login: string
-        user_name: string
-        game_id: string
-        game_name: string
-        type: string
-        title: string
-        viewer_count: number
-        started_at: string
-        language: string
-        thumbnail_url: string
-        tag_ids: any[]
-        is_mature: boolean
-    }>
+    data: TwitchStreamResponseData[]
     pagination: { cursor: string }
+}
+
+export interface TwitchStreamResponseData {
+    id: string
+    user_id: string
+    user_login: string
+    user_name: string
+    game_id: string
+    game_name: string
+    type: string
+    title: string
+    viewer_count: number
+    started_at: string
+    language: string
+    thumbnail_url: string
+    tag_ids: any[]
+    is_mature: boolean
+}
+
+export interface ITwitchIncomingWebhook {
+    subscription: {
+        id: string
+        status: string
+        type: string
+        version: string
+        condition: { broadcaster_user_id: string }
+        transport: {
+            method: string
+            callback: string
+        }
+        created_at: string
+        cost: number
+    }
+    event: {
+        id: string
+        broadcaster_user_id: string
+        broadcaster_user_login: string
+        broadcaster_user_name: string
+        type: string
+        started_at: string
+    }
 }
 
 export default {
     searchChannels,
-    Twitch,
-    handleEntries,
-    addNewEntries
+    eventSubSubscribe,
+    eventSubUnsubscribe,
+    handleIncomingWebhook
 }

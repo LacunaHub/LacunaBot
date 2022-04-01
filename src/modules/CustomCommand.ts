@@ -30,8 +30,8 @@ export default class CustomCommand {
         for (const component of this.command.components) {
             if (component.type == 'CONDITION') {
                 if (component.condition.type == 'COMPARE') {
-                    const replacer_left = new Replacer(this.self, component.condition.compare.left, { message: this.message, guild: this.message.guild, member: this.message.member })
-                    const replacer_right = new Replacer(this.self, component.condition.compare.right, { message: this.message, guild: this.message.guild, member: this.message.member })
+                    const replacer_left = new Replacer(component.condition.compare.left, { message: this.message, guild: this.message.guild, member: this.message.member })
+                    const replacer_right = new Replacer(component.condition.compare.right, { message: this.message, guild: this.message.guild, member: this.message.member })
 
                     component.condition.compare.left = await replacer_left.replace()
                     component.condition.compare.right = await replacer_right.replace()
@@ -94,8 +94,8 @@ export default class CustomCommand {
                     if (component.condition.if_else.condition.type) {
                         let value = false
 
-                        const replacer_left = new Replacer(this.self, component.condition.if_else.condition.compare.left, { message: this.message, guild: this.message.guild, member: this.message.member })
-                        const replacer_right = new Replacer(this.self, component.condition.if_else.condition.compare.right, { message: this.message, guild: this.message.guild, member: this.message.member })
+                        const replacer_left = new Replacer(component.condition.if_else.condition.compare.left, { message: this.message, guild: this.message.guild, member: this.message.member })
+                        const replacer_right = new Replacer(component.condition.if_else.condition.compare.right, { message: this.message, guild: this.message.guild, member: this.message.member })
     
                         component.condition.if_else.condition.compare.left = await replacer_left.replace()
                         component.condition.if_else.condition.compare.right = await replacer_right.replace()
@@ -161,7 +161,7 @@ export default class CustomCommand {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'REPLY').indexOf(if_component)
                 
                                     if (i < 2 && (if_component.action.reply.message.content || if_component.action.reply.message.embed.active)) {
-                                        const replacer = new Replacer(this.self, null, { guild: this.message.guild, message: this.message, member: this.message.member })
+                                        const replacer = new Replacer(null, { guild: this.message.guild, message: this.message, member: this.message.member })
                                         const content = await replacer.replaceTemplateMessage({ content: if_component.action.reply.message.content, embed: if_component.action.reply.message.embed })
                 
                                         if (if_component.action.reply.format == 'CURRENT_CHANNEL') {
@@ -209,7 +209,7 @@ export default class CustomCommand {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'FORWARD_TO_COMMAND').indexOf(if_component)
                 
                                     if (i == 0 && if_component.action.forward_to_command) {
-                                        const replacer = new Replacer(this.self, if_component.action.forward_to_command, { message: this.message, guild: this.message.guild, member: this.message.member })
+                                        const replacer = new Replacer(if_component.action.forward_to_command, { message: this.message, guild: this.message.guild, member: this.message.member })
                                         const replaced = await replacer.replace()
                             
                                         const splitted = replaced.split(/\s+/)
@@ -249,7 +249,7 @@ export default class CustomCommand {
                     const i = this.command.components.filter(c => c.action?.type == 'REPLY').indexOf(component)
 
                     if (i < 2 && (component.action.reply.message.content || component.action.reply.message.embed.active)) {
-                        const replacer = new Replacer(this.self, null, { guild: this.message.guild, message: this.message, member: this.message.member })
+                        const replacer = new Replacer(null, { guild: this.message.guild, message: this.message, member: this.message.member })
                         const content = await replacer.replaceTemplateMessage({ content: component.action.reply.message.content, embed: component.action.reply.message.embed })
 
                         if (component.action.reply.format == 'CURRENT_CHANNEL') {
@@ -297,7 +297,7 @@ export default class CustomCommand {
                     const i = this.command.components.filter(c => c.action?.type == 'FORWARD_TO_COMMAND').indexOf(component)
 
                     if (i == 0 && component.action.forward_to_command) {
-                        const replacer = new Replacer(this.self, component.action.forward_to_command, { message: this.message, guild: this.message.guild, member: this.message.member })
+                        const replacer = new Replacer(component.action.forward_to_command, { message: this.message, guild: this.message.guild, member: this.message.member })
                         const replaced = await replacer.replace()
             
                         const splitted = replaced.split(/\s+/)

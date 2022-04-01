@@ -8,7 +8,7 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
     if (member.user.bot) return false
 
     if (server.modules.welcome.active) {
-        const replacer = new Replacer(self, null, { guild: member.guild, member: member })
+        const replacer = new Replacer(null, { guild: member.guild, member: member })
         const content = await replacer.replaceTemplateMessage(server.modules.welcome.message)
 
         if (server.modules.welcome.format == 'DM') {

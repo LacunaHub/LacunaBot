@@ -141,7 +141,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
         }
 
         if (send_message) {
-            const replacer = new Replacer(self, null, { message: signal instanceof Message ? signal : undefined, guild: signal.guild, member: target })
+            const replacer = new Replacer(null, { message: signal instanceof Message ? signal : undefined, guild: signal.guild, member: target })
             const content = await replacer.replaceTemplateMessage(penalty.message)
 
             await signal.channel.send(content).catch(self.logger.error)
@@ -168,7 +168,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
         .setColor('#EF5350')
 
     if (server.moderation.case_log.case_types_messages.WARN_ADD.active) {
-        const replacer = new Replacer(self, null, { guild: signal.guild, member: target, message: signal instanceof Message ? signal : undefined, penalty: { reason } })
+        const replacer = new Replacer(null, { guild: signal.guild, member: target, message: signal instanceof Message ? signal : undefined, penalty: { reason } })
         const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.WARN_ADD.dm_message)
 
         await target.send(dm_message).catch(self.logger.error)

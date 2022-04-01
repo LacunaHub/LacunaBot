@@ -2,23 +2,18 @@ import { model, Schema, Document } from 'mongoose'
 import { Bill } from '../../internals/utility/Qiwi'
 
 export default model<UserDocument>(
-    'Users',
+    'users',
     new Schema<UserDocument>({
         _id: { type: String },
-        flags: { type: Number, default: 0 },
         user: {
-            username: { type: String, default: '' },
-            discriminator: { type: String, default: '' },
-            avatar: { type: String, default: '' },
+            username: { type: String, default: null },
+            discriminator: { type: String, default: null },
+            avatar: { type: String, default: null },
             flags: { type: Number, default: 0 }
         },
-        profile: {
-            name: { type: String, default: '' },
-            gender: { type: Number, default: 0 },
-            birth_date: { type: Number, default: 0 },
-            bio: { type: String, default: '' },
-            views: { type: Number, default: 0 },
-            upvoters: { type: Array, default: [] }
+        activities: {
+            levels: { type: Array, default: [] },
+            wallets: { type: Array, default: [] }
         },
         bills: { type: Array, default: [] },
         created_at: { type: Number, default: () => Date.now() },
@@ -28,22 +23,58 @@ export default model<UserDocument>(
 
 export interface UserDocument extends Document {
     _id: string
+    /** @deprecated */
     flags: number
     user: {
         username: string
         discriminator: string
         avatar: string
         flags: number
-    },
-    profile: {
-        name: string
-        gender: number
-        birth_date: number
-        bio: string
-        views: number
-        upvoters: string[]
+    }
+    activities: {
+        levels: IUserLevel[]
+        wallets: IUserWallet[]
     }
     bills: Bill[]
     created_at: number
     modified_at: number
 }
+
+export interface IUserLevel {
+    guild_id: string
+    experience: {
+        total: number
+        current: number
+        level: number
+    }
+    activity: {
+        total_messages: number
+        last_message_at: number
+        total_voice_time: number
+        voice_connected_at: number
+    }
+}
+
+export interface IUserWallet {
+    guild_id: string
+    currencies: IWalletCurrency[]
+    transactions: IWalletTransaction[]
+    activity: {
+        last_message_at: number
+        voice_connected_at: number
+    }
+}
+
+export interface IWalletCurrency {
+    id: string
+    amount: number
+}
+
+export interface IWalletTransaction {
+    type: WalletTransactionType
+    amount: number
+    details: string
+    timestamp: number
+}
+
+export type WalletTransactionType = 'PURCHASE' | 'SALE' | 'TRANSFER_TO' | 'TRANSFER_FROM' | 'EXCHANGE'

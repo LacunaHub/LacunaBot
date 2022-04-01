@@ -7,7 +7,7 @@ export async function setLevelPrefix(self: Lacuna, server: ServerDocument, messa
     const locale = self.translator.locale(server.locale).commands
 
     const mention = message.mentions.members.first() || (message['args'][0] ? (await message.guild.members.fetch(message['args'][0]).catch(() => {})) : null)
-    const level = Number(message['args'][1])
+    const set_level = Number(message['args'][1])
 
     if (!mention) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['set-level'].texts.no_mention, `**${message.member.displayName}**`)}` })
@@ -15,7 +15,7 @@ export async function setLevelPrefix(self: Lacuna, server: ServerDocument, messa
         return false
     }
 
-    if (!level || level < 1 || level > 2500) {
+    if (!set_level || set_level < 1 || set_level > 2500) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['set-level'].texts.no_level, `**${message.member.displayName}**`)}` })
 
         return false
@@ -23,22 +23,37 @@ export async function setLevelPrefix(self: Lacuna, server: ServerDocument, messa
 
     let total_xp = 0
 
-    for (let i = 0; i < level; i++) {
+    for (let i = 0; i < set_level; i++) {
         total_xp = total_xp + (150 + (i * i * 8))
     }
 
-    const activity = await self.db.activities.fetch({ _id: message.guild.id })
-    const levels = activity.levels.find(level => level.user_id == mention.id)
+    let user = await self.db.users.findOne({ _id: mention.id })
+
+    if (!user) {
+        user = await self.db.users.create({
+            _id: mention.id,
+            user: {
+                username: mention.user.username,
+                discriminator: mention.user.discriminator,
+                avatar: mention.user.avatar,
+                flags: mention.user.flags?.bitfield ?? 0
+            }
+        } as any)
+    }
+
+    const level = user.activities.levels.find(i => i.guild_id == message.guildId)
     
-    if (!levels) {
-        await self.db.activities.updateOne({ _id: message.guild.id }, {
+    if (!level) {
+        await self.db.users.updateOne({ _id: mention.id }, {
             $push: {
-                levels: {
-                    user_id: mention.id,
-                    experience: { total: total_xp, current: 0, level: level },
+                'activities.levels': {
+                    guild_id: message.guildId,
+                    experience: { total: total_xp, current: 0, level: set_level },
                     activity: {
-                        text: { total_messages: 0, last_message_at: null },
-                        voice: { total_time: 0, connected_at: null, disconnected_at: null }
+                        total_messages: 0,
+                        last_message_at: null,
+                        total_voice_time: 0,
+                        voice_connected_at: null
                     }
                 } as never
             }
@@ -46,16 +61,16 @@ export async function setLevelPrefix(self: Lacuna, server: ServerDocument, messa
     }
 
     else {
-        await self.db.activities.updateOne({ _id: message.guild.id, 'levels.user_id': mention.id }, {
+        await self.db.users.updateOne({ _id: mention.id, 'activities.levels.guild_id': message.guildId }, {
             $set: {
-                'levels.$.experience.level': level,
-                'levels.$.experience.current': 0,
-                'levels.$.experience.total': total_xp
+                'activities.levels.$.experience.level': set_level,
+                'activities.levels.$.experience.current': 0,
+                'activities.levels.$.experience.total': total_xp
             }
         })
     }
 
-    await updateAwards(self, server, { member: mention, level })
+    await updateAwards(self, server, { member: mention, level: set_level })
 
     await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.activities['set-level'].texts.set_success, `**${message.member.displayName}**`)}` })
 
@@ -85,12 +100,25 @@ export async function setWalletBalancePrefix(self: Lacuna, server: ServerDocumen
 
     if (amount < -INT32_MAX || amount > INT32_MAX) amount = amount > INT32_MAX ? INT32_MAX : -INT32_MAX
 
-    const activities = await self.db.activities.findOne({ _id: message.guildId })
-    let wallet = activities.wallets.find(w => w.user_id == mention.id)
+    let user = await self.db.users.findOne({ _id: mention.id })
+
+    if (!user) {
+        user = await self.db.users.create({
+            _id: mention.id,
+            user: {
+                username: mention.user.username,
+                discriminator: mention.user.discriminator,
+                avatar: mention.user.avatar,
+                flags: mention.user.flags?.bitfield ?? 0
+            }
+        } as any)
+    }
+
+    let wallet = user.activities.wallets.find(i => i.guild_id == message.guildId)
 
     if (!wallet) {
         wallet = {
-            user_id: mention.id,
+            guild_id: message.guildId,
             currencies: [],
             transactions: [],
             activity: {
@@ -99,8 +127,8 @@ export async function setWalletBalancePrefix(self: Lacuna, server: ServerDocumen
             }
         }
 
-        await self.db.activities.updateOne({ _id: message.guildId }, {
-            $push: { wallets: wallet as never }
+        await self.db.users.updateOne({ _id: mention.id }, {
+            $push: { 'activities.wallets': wallet as never }
         })
     }
 
@@ -108,17 +136,17 @@ export async function setWalletBalancePrefix(self: Lacuna, server: ServerDocumen
     const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id == currency_id)
     
     if (wallet.currencies.some(c => c.id == currency_id)) {
-        await self.db.activities.updateOne({ _id: server._id, wallets: { $elemMatch: { user_id: mention.id, 'currencies.id': currency_id } } }, {
+        await self.db.users.updateOne({ _id: mention.id, 'activities.wallets': { $elemMatch: { guild_id: message.guildId, 'currencies.id': currency_id } } }, {
             $set: {
-                'wallets.$[user].currencies.$[currency].amount': amount
+                'activities.wallets.$[guild].currencies.$[currency].amount': amount
             }
-        }, { arrayFilters: [ { 'user.user_id': mention.id }, { 'currency.id': currency_id } ] })
+        }, { arrayFilters: [ { 'guild.guild_id': message.guildId }, { 'currency.id': currency_id } ] })
     }
 
     else {
-        await self.db.activities.updateOne({ _id: server._id, 'wallets.user_id': mention.id }, {
+        await self.db.users.updateOne({ _id: mention.id, 'activities.wallets.guild_id': message.guildId }, {
             $push: {
-                'wallets.$.currencies': {
+                'activities.wallets.$.currencies': {
                     id: currency_id, amount
                 }
             }
@@ -135,9 +163,9 @@ export async function setWalletBalancePrefix(self: Lacuna, server: ServerDocumen
 export async function resetWalletPrefix(self: Lacuna, server: ServerDocument, message: Message) {
     const locale = self.translator.locale(server.locale).commands
 
-    const activities = await self.db.activities.findOne({ _id: message.guildId })
+    const activities = await self.db.users.find({ 'activities.wallets.guild_id': message.guildId })
 
-    if (!activities.wallets.length) {
+    if (!activities.length) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['reset-all-wallets'].texts.nothing_to_reset, `**${message.member.displayName}**`)}` })
 
         return false
@@ -176,9 +204,9 @@ export async function resetWalletPrefix(self: Lacuna, server: ServerDocument, me
 
             switch(i.customId) {
                 case 'confirm':
-                    await self.db.activities.updateOne({ _id: message.guildId }, {
-                        $set: {
-                            wallets: []
+                    await self.db.users.updateMany({ 'activities.wallets.guild_id': message.guildId }, {
+                        $pull: {
+                            'activities.wallets': { guild_id: message.guildId }
                         }
                     })
                     
@@ -195,11 +223,9 @@ export async function resetWalletPrefix(self: Lacuna, server: ServerDocument, me
     }
 
     else {
-        await self.db.activities.updateOne({ _id: message.guildId }, {
+        await self.db.users.updateOne({ _id: member?.id ?? member_id }, {
             $pull: {
-                wallets: {
-                    user_id: member?.id ?? member_id
-                } as never
+                'activities.wallets': { guild_id: message.guildId }
             }
         })
 
@@ -222,19 +248,17 @@ export async function resetLevelPrefix(self: Lacuna, server: ServerDocument, mes
     }
 
     if (member_id == 'all') {
-        await self.db.activities.updateOne({ _id: message.guild.id }, {
-            $set: {
-                levels: []
+        await self.db.users.updateMany({ 'activities.levels.guild_id': message.guildId }, {
+            $pull: {
+                'activities.levels': { guild_id: message.guildId }
             }
         })
     }
 
     else {
-        await self.db.activities.updateOne({ _id: message.guild.id }, {
+        await self.db.users.updateOne({ _id: member?.id ?? member_id }, {
             $pull: {
-                levels: {
-                    user_id: member?.id ?? member_id
-                } as never
+                'activities.levels': { guild_id: message.guildId }
             }
         })
     }

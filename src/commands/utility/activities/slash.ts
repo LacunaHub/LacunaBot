@@ -7,7 +7,7 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
     const locale = self.translator.locale(server.locale).commands
 
     const mention = interaction.options?.getMember(locale.activities['set-level'].options.user.name) as GuildMember
-    const level = interaction.options?.getInteger(locale.activities['set-level'].options.level.name)
+    const set_level = interaction.options?.getInteger(locale.activities['set-level'].options.level.name)
 
     if (!mention) {
         await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['set-level'].texts.no_mention, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
@@ -15,7 +15,7 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
-    if (!level || level < 1 || level > 2500) {
+    if (!set_level || set_level < 1 || set_level > 2500) {
         await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['set-level'].texts.no_level, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
 
         return false
@@ -23,22 +23,37 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
 
     let total_xp = 0
 
-    for (let i = 0; i < level; i++) {
+    for (let i = 0; i < set_level; i++) {
         total_xp = total_xp + (150 + (i * i * 8))
     }
 
-    const activity = await self.db.activities.fetch({ _id: interaction.guild.id })
-    const levels = activity.levels.find(level => level.user_id == mention.id)
+    let user = await self.db.users.findOne({ _id: mention.id })
+
+    if (!user) {
+        user = await self.db.users.create({
+            _id: mention.id,
+            user: {
+                username: mention.user.username,
+                discriminator: mention.user.discriminator,
+                avatar: mention.user.avatar,
+                flags: mention.user.flags?.bitfield ?? 0
+            }
+        } as any)
+    }
+
+    const level = user.activities.levels.find(i => i.guild_id == interaction.guildId)
     
-    if (!levels) {
-        await self.db.activities.updateOne({ _id: interaction.guild.id }, {
+    if (!level) {
+        await self.db.users.updateOne({ _id: mention.id }, {
             $push: {
-                levels: {
-                    user_id: mention.id,
-                    experience: { total: total_xp, current: 0, level: level },
+                'activities.levels': {
+                    guild_id: interaction.guildId,
+                    experience: { total: total_xp, current: 0, level: set_level },
                     activity: {
-                        text: { total_messages: 0, last_message_at: null },
-                        voice: { total_time: 0, connected_at: null, disconnected_at: null }
+                        total_messages: 0,
+                        last_message_at: null,
+                        total_voice_time: 0,
+                        voice_connected_at: null
                     }
                 } as never
             }
@@ -46,16 +61,16 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
     }
 
     else {
-        await self.db.activities.updateOne({ _id: interaction.guild.id, 'levels.user_id': mention.id }, {
+        await self.db.users.updateOne({ _id: mention.id, 'activities.levels.guild_id': interaction.guildId }, {
             $set: {
-                'levels.$.experience.level': level,
-                'levels.$.experience.current': 0,
-                'levels.$.experience.total': total_xp
+                'activities.levels.$.experience.level': set_level,
+                'activities.levels.$.experience.current': 0,
+                'activities.levels.$.experience.total': total_xp
             }
         })
     }
 
-    await Levels.updateAwards(self, server, { member: mention, level })
+    await Levels.updateAwards(self, server, { member: mention, level: set_level })
 
     await interaction.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.activities['set-level'].texts.set_success, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
 
@@ -85,12 +100,25 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
 
     if (amount < -INT32_MAX || amount > INT32_MAX) amount = amount > INT32_MAX ? INT32_MAX : -INT32_MAX
 
-    const activities = await self.db.activities.findOne({ _id: interaction.guild.id })
-    let wallet = activities.wallets.find(w => w.user_id == mention.id)
+    let user = await self.db.users.findOne({ _id: mention.id })
+
+    if (!user) {
+        user = await self.db.users.create({
+            _id: mention.id,
+            user: {
+                username: mention.user.username,
+                discriminator: mention.user.discriminator,
+                avatar: mention.user.avatar,
+                flags: mention.user.flags?.bitfield ?? 0
+            }
+        } as any)
+    }
+
+    let wallet = user.activities.wallets.find(i => i.guild_id == interaction.guildId)
 
     if (!wallet) {
         wallet = {
-            user_id: mention.id,
+            guild_id: interaction.guildId,
             currencies: [],
             transactions: [],
             activity: {
@@ -99,8 +127,8 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
             }
         }
 
-        await self.db.activities.updateOne({ _id: interaction.guild.id }, {
-            $push: { wallets: wallet as never }
+        await self.db.users.updateOne({ _id: mention.id }, {
+            $push: { 'activities.wallets': wallet as never }
         })
     }
 
@@ -108,17 +136,17 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id == currency_id)
     
     if (wallet.currencies.some(c => c.id == currency_id)) {
-        await self.db.activities.updateOne({ _id: server._id, wallets: { $elemMatch: { user_id: mention.id, 'currencies.id': currency_id } } }, {
+        await self.db.users.updateOne({ _id: mention.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } }, {
             $set: {
-                'wallets.$[user].currencies.$[currency].amount': amount
+                'activities.wallets.$[guild].currencies.$[currency].amount': amount
             }
-        }, { arrayFilters: [ { 'user.user_id': mention.id }, { 'currency.id': currency_id } ] })
+        }, { arrayFilters: [ { 'guild.guild_id': interaction.guildId }, { 'currency.id': currency_id } ] })
     }
 
     else {
-        await self.db.activities.updateOne({ _id: server._id, 'wallets.user_id': mention.id }, {
+        await self.db.users.updateOne({ _id: mention.id, 'activities.wallets.guild_id': interaction.guildId }, {
             $push: {
-                'wallets.$.currencies': {
+                'activities.wallets.$.currencies': {
                     id: currency_id, amount
                 }
             }
@@ -135,9 +163,9 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
 export async function resetWalletSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
     const locale = self.translator.locale(server.locale).commands
 
-    const activities = await self.db.activities.findOne({ _id: interaction.guildId })
+    const activities = await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId })
 
-    if (!activities.wallets.length) {
+    if (!activities.length) {
         await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['reset-wallet'].texts.nothing_to_reset, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
 
         return false
@@ -178,9 +206,9 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
 
             switch(i.customId) {
                 case 'confirm':
-                    await self.db.activities.updateOne({ _id: interaction.guildId }, {
-                        $set: {
-                            wallets: []
+                    await self.db.users.updateMany({ 'activities.wallets.guild_id': interaction.guildId }, {
+                        $pull: {
+                            'activities.wallets': { guild_id: interaction.guildId }
                         }
                     })
                     
@@ -197,11 +225,9 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
     }
 
     else {
-        await self.db.activities.updateOne({ _id: interaction.guildId }, {
+        await self.db.users.updateOne({ _id: member?.id ?? member_id }, {
             $pull: {
-                wallets: {
-                    user_id: member?.id ?? member_id
-                } as never
+                'activities.wallets': { guild_id: interaction.guildId }
             }
         })
 
@@ -224,19 +250,17 @@ export async function resetLevelSlash(self: Lacuna, server: ServerDocument, inte
     }
 
     if (member_id == 'all') {
-        await self.db.activities.updateOne({ _id: interaction.guild.id }, {
-            $set: {
-                levels: []
+        await self.db.users.updateMany({ 'activities.levels.guild_id': interaction.guildId }, {
+            $pull: {
+                'activities.levels': { guild_id: interaction.guildId }
             }
         })
     }
 
     else {
-        await self.db.activities.updateOne({ _id: interaction.guild.id }, {
+        await self.db.users.updateOne({ _id: member?.id ?? member_id }, {
             $pull: {
-                levels: {
-                    user_id: member?.id ?? member_id
-                } as never
+                'activities.levels': { guild_id: interaction.guildId }
             }
         })
     }
