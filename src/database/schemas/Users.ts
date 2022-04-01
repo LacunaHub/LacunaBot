@@ -16,8 +16,7 @@ export default model<UserDocument>(
             wallets: { type: Array, default: [] }
         },
         bills: { type: Array, default: [] },
-        created_at: { type: Number, default: () => Date.now() },
-        modified_at: { type: Number, default: 0 }
+        created_at: { type: Number, default: () => Date.now() }
     }, { versionKey: false })
 )
 

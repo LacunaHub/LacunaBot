@@ -18,16 +18,6 @@ export default model<ServerDocument>(
         commands: {
             system: { type: Array, default: [] },
             custom: { type: Array, default: [] },
-            permissions: {
-                allowed: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
-                },
-                blocked: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
-                }
-            },
             slash_commands: { type: Boolean, default: false }
         },
         moderation: {
@@ -686,13 +676,7 @@ export default model<ServerDocument>(
             statistics: { type: Array, default: [] },
             reports: {
                 active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' },
-                emoji: {
-                    animated: { type: Boolean, default: false },
-                    id: { type: String, default: '' },
-                    name: { type: String, default: '' }
-                },
-                minimum: { type: Number, default: 3 }
+                channel_id: { type: String, default: '' }
             },
             autoreactions: { type: Array, default: [] },
             economy: {
@@ -739,7 +723,6 @@ export default model<ServerDocument>(
             giveaways: { type: Array, default: [] }
         },
         created_at: { type: Number, default: () => Date.now() },
-        modified_at: { type: Number, default: 0 },
         activity_ping_at: { type: Number, default: () => Date.now() },
         change_log: { type: Array, default: [] }
     }, { versionKey: false })
@@ -760,6 +743,7 @@ export interface ServerDocument extends Document {
     commands: {
         system: SystemCommand[]
         custom: CustomCommand[]
+        /** @deprecated */
         permissions: {
             allowed: {
                 channels: string[]
@@ -1210,6 +1194,7 @@ export interface ServerDocument extends Document {
         giveaways: Giveaway[]
     }
     created_at: number
+    /** @deprecated */
     modified_at: number
     activity_ping_at: number
     change_log: ChangeLog[]

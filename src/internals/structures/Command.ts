@@ -87,10 +87,6 @@ export default class Command {
 
         if (this.private) return false
 
-        if (server.commands.permissions.blocked.channels.includes(signal.channel.id) && !(signal.member as GuildMember).permissions.has('ADMINISTRATOR')) return false
-
-        if ((server.commands.permissions.allowed.channels.length && !server.commands.permissions.allowed.channels.includes(signal.channel.id)) && !(signal.member as GuildMember).permissions.has('ADMINISTRATOR')) return false
-
         if (command) {
             if (command.inactive) return false
 

@@ -150,7 +150,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
     if (player.state != 'CONNECTED') player.connect()
 
-    if (!player.playing && !player.paused) {
+    if (!player.playing && !player.paused && !player.queue.size) {
         if (!player.get('message')) player.set('message', _message)
 
         await player.play()

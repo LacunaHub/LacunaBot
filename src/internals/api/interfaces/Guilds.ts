@@ -46,7 +46,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
         }
 
         if (Array.isArray(data.commands.custom)) {
-            data.commands.custom = data.commands.custom.slice(0, 249)
+            data.commands.custom = data.commands.custom.slice(0, 100)
             data.commands.custom = [ ...new Map(data.commands.custom.map(c => [c.name.toLowerCase(), c])).values() ]
             
             await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.custom': data.commands.custom } })
@@ -178,7 +178,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
         if (data.moderation.warnings) {
             if (Array.isArray(data.moderation.warnings.penalties))
-                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.warnings.penalties': data.moderation.warnings.penalties } })
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.warnings.penalties': data.moderation.warnings.penalties.slice(0, 100) } })
         }
 
         if (data.moderation.automoder) {
@@ -822,7 +822,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
 
                 if (Array.isArray(data.modules.levels.awards)) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.awards': data.modules.levels.awards } })
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.awards': data.modules.levels.awards.slice(0, (guild.server.premium.available ? 200 : 20)) } })
                 }
             }
         }
@@ -865,9 +865,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
         if (data.modules.voice_manager) {
             if (Array.isArray(data.modules.voice_manager.voice_roles)) {
-                if (data.modules.voice_manager.voice_roles.length <= 100) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.voice_roles': data.modules.voice_manager.voice_roles } })
-                }
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.voice_roles': data.modules.voice_manager.voice_roles.slice(0, (guild.server.premium.available ? 20 : 2)) } })
             }
         }
 
@@ -882,8 +880,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
         }
 
         if (data.modules.autoreactions) {
-            if (data.modules.autoreactions.length && data.modules.autoreactions.length <= 30) {
-                for (const reaction of data.modules.autoreactions) {
+            if (data.modules.autoreactions.length) {
+                for (const reaction of data.modules.autoreactions.slice(0, (guild.server.premium.available ? 20 : 2))) {
                     reaction.reactions.filter(emoji => !emoji.name).forEach(emoji => {
                         const index = reaction.reactions.indexOf(emoji)
                         reaction.reactions[index] = Util.parseEmoji(emoji as any)
@@ -902,11 +900,11 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             }
 
             if (Array.isArray(data.modules.economy.currencies) && data.modules.economy.currencies.length && JSON.stringify(data.modules.economy.currencies) !== JSON.stringify(guild.modules.economy.currencies)) {
-                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.currencies': data.modules.economy.currencies } })
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.currencies': data.modules.economy.currencies.slice(0, 2) } })
             }
 
             if (Array.isArray(data.modules.economy.store?.items) && JSON.stringify(data.modules.economy.store.items) !== JSON.stringify(guild.modules.economy.store.items)) {
-                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.store.items': data.modules.economy.store.items } })
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.store.items': data.modules.economy.store.items.slice(0, (guild.server.premium.available ? 200 : 20)) } })
             }
         }
     }
@@ -930,9 +928,9 @@ export async function addReactionElement(server: ServerDocument, reaction: Parti
     const element_id = generateId(), emoji = Util.parseEmoji(reaction.emoji as any)
     const elements = server.modules.reactions
 
-    if (elements.length >= 100 && !server.server.premium.available) return 'reactions_limit_reached_no_premium'
+    if (elements.length >= 20 && !server.server.premium.available) return 'reactions_limit_reached_no_premium'
 
-    if (elements.length >= 250) return 'reactions_limit_reached'
+    if (elements.length >= 200) return 'reactions_limit_reached'
     
     if (elements.some(r => r.message.id == reaction.message.id && r.emoji.name == emoji.name)) return 'emoji_already_used'
 
@@ -1203,7 +1201,7 @@ export async function addVoiceTrigger(server: ServerDocument, trigger: VoiceChan
 
     if (triggers.length >= 2 && !server.server.premium.available) return 'voice_triggers_limit_reached_no_premium'
 
-    if (triggers.length >= 30) return 'voice_triggers_limit_reached'
+    if (triggers.length >= 20) return 'voice_triggers_limit_reached'
 
     if (triggers.some(t => t.channel_id == trigger.channel_id)) return 'voice_trigger_already_added'
 
