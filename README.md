@@ -141,6 +141,7 @@ db.createUser(
         pwd: "password", // passwordPrompt() - запрос на ввод пароля после выполнения метода
         roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
     }
+)
 ```
 
 Этот метод требует указать имя и пароль пользователя, а также любые роли, которые будет иметь пользователь. Напомним, что MongoDB хранит свои данные в виде документов JSON. Поэтому при создании нового пользователя все, что вы делаете, — это создаете документ для хранения соответствующих данных пользователя в форме отдельных полей.
@@ -168,6 +169,20 @@ security:
 
 ```
 sudo systemctl restart mongod
+```
+
+## Автоматический рестарт демона MongoDB
+
+```
+nano /lib/systemd/system/mongod.service
+```
+
+Добавьте `Restart=always` под `service`
+
+Перезагрузите демон
+
+```
+sudo systemctl daemon-reload
 ```
 
 ## Установка PM2
