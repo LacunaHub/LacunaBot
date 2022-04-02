@@ -187,7 +187,7 @@ export default class Command {
 
 
     async executePrefix(server: ServerDocument, message: Message): Promise<boolean> {
-        if (!message.content.startsWith(server.prefix)) return false
+        if (!message.content.startsWith(server.prefix) || !server.commands.prefix_commands) return false
 
         const locale = this.self.translator.locale(server.locale)
 

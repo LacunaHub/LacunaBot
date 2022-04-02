@@ -1,56 +1,56 @@
 import { BaseGuildVoiceChannel, CategoryChannelResolvable, Permissions, VoiceChannel, VoiceState } from 'discord.js'
-import { ServerDocument, VoiceChannelTrigger, VoiceChannelTriggerChildren } from '../database/schemas/Servers'
+import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import { truncateString } from '../internals/utility/Utils'
 import Replacer from './Replacer'
 
 export async function createTemporaryVoice(self: Lacuna, server: ServerDocument, state: VoiceState) {
-    const trigger: VoiceChannelTrigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.channel_id == state.channelId)
-    const trigger_index: number = server.modules.voice_manager.temp_voice_channels.triggers.indexOf(trigger)
+    const autovoice = server.modules.voice_manager.autovoices.find(i => i.channel_id == state.channelId)
+    const autovoiceIndex = server.modules.voice_manager.autovoices.indexOf(autovoice)
 
-    if (trigger_index >= 2 && !server.server.premium.available) {
+    if (autovoiceIndex >= 2 && !server.server.premium.available) {
         await state.disconnect()
 
         return false
     }
 
-    if (trigger && state.guild.me.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_CHANNELS)) {
-        const children = trigger.children.find(c => c.owner_id == state.member.id)
+    if (autovoice && state.guild.me.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_CHANNELS)) {
+        const child = autovoice.children.find(c => c.owner_id == state.member.id)
 
-        if (children) {
-            const channel = state.guild.channels.cache.get(children.channel_id)
+        if (child) {
+            const channel = state.guild.channels.cache.get(child.channel_id)
 
-            if (channel && channel.manageable) await state.member.voice.setChannel(children.channel_id)
+            if (channel && channel.manageable) await state.member.voice.setChannel(child.channel_id)
 
             self.emit('moduleExecution', { module: 'Temp Voice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
 
             return true
         }
 
-        if ((trigger.allowed_roles?.length && !state.member.roles.cache.some(r => trigger.allowed_roles?.includes(r.id))) || state.member.roles.cache.some(r => trigger.blocked_roles?.includes(r.id))) {
+        if ((autovoice.allowed_roles?.length && !state.member.roles.cache.some(r => autovoice.allowed_roles?.includes(r.id))) || state.member.roles.cache.some(r => autovoice.blocked_roles?.includes(r.id))) {
             await state.disconnect()
 
             return false
         }
 
-        const parent = trigger.default.category_id ? state.guild.channels.cache.filter(c => c.type == 'GUILD_CATEGORY').get(trigger.default.category_id) : state.channel.parent
-        const replacer = new Replacer(trigger.default.name, { guild: state.guild, member: state.member, index: trigger.children.length + 1 })
+        const parent = autovoice.default.category_id ? state.guild.channels.cache.filter(c => c.type == 'GUILD_CATEGORY').get(autovoice.default.category_id) : state.channel.parent
+        const replacer = new Replacer(autovoice.default.name, { guild: state.guild, member: state.member, index: autovoice.children.length + 1 })
         const name = await replacer.replace()
-        const permissions = new Permissions(BigInt(trigger.default.permissions))
+        const permissions = new Permissions(BigInt(autovoice.default.permissions))
         
         const temp_voice = await state.guild.channels.create(truncateString(name, 100, '') || 'Voice', {
             type: 'GUILD_VOICE',
             permissionOverwrites: state.channel.permissionOverwrites.cache,
             parent: parent && parent.manageable ? parent as CategoryChannelResolvable : null,
-            userLimit: trigger.default.limit,
+            userLimit: autovoice.default.limit,
             bitrate: state.channel.bitrate
         })
 
-        if (trigger.default.permissions) {
+        if (autovoice.default.permissions) {
             await temp_voice.permissionOverwrites.create(state.member.id, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
 
-            if (trigger?.moderator_roles?.length) {
-                const roles = trigger.moderator_roles.filter(mr => state.guild.roles.cache.some(r => r.editable && r.id == mr))
+            if (autovoice?.moderator_roles?.length) {
+                const roles = autovoice.moderator_roles.filter(mr => state.guild.roles.cache.some(r => r.editable && r.id == mr))
 
                 for (const role of roles) {
                     const overwrites = temp_voice.permissionOverwrites.cache.find(p => p.id == role)
@@ -61,11 +61,11 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             }
         }
 
-        if (trigger.default.position == 'TOP') await temp_voice.setPosition(0)
+        if (autovoice.default.position == 'TOP') await temp_voice.setPosition(0)
 
-        await self.db.servers.updateOne({ _id: state.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.id': trigger.id }, {
+        await self.db.servers.updateOne({ _id: state.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id }, {
             $push: {
-                'modules.voice_manager.temp_voice_channels.triggers.$.children': {
+                'modules.voice_manager.autovoices.$.children': {
                     channel_id: temp_voice.id,
                     owner_id: state.member.id,
                     created_at: Date.now()
@@ -86,16 +86,16 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
 }
 
 export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDocument, before: VoiceState, state: VoiceState) {
-    const trigger: VoiceChannelTrigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.channel_id == state.channelId)
-    const before_trigger: VoiceChannelTrigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.children.some(c => c.channel_id == before.channelId))
+    const autovoice = server.modules.voice_manager.autovoices.find(i => i.channel_id == state.channelId)
+    const beforeAutovoice = server.modules.voice_manager.autovoices.find(i => i.children.some(c => c.channel_id == before.channelId))
 
-    if (trigger && state.guild.me.permissions.has('MANAGE_CHANNELS')) {
-        const children: VoiceChannelTriggerChildren = trigger.children.find(c => c.owner_id == state.member.id)
+    if (autovoice && state.guild.me.permissions.has('MANAGE_CHANNELS')) {
+        const child = autovoice.children.find(c => c.owner_id == state.member.id)
 
-        if (children) {
-            const channel = state.guild.channels.cache.get(children.channel_id)
+        if (child) {
+            const channel = state.guild.channels.cache.get(child.channel_id)
 
-            if (channel && channel.manageable) await state.setChannel(children.channel_id)
+            if (channel && channel.manageable) await state.setChannel(child.channel_id)
 
             self.emit('moduleExecution', { module: 'Temp Voice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
 
@@ -107,23 +107,23 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
         return true
     }
 
-    if (before_trigger && state.guild.me.permissions.has('MANAGE_CHANNELS')) {
-        const trigger_children: VoiceChannelTriggerChildren = before_trigger.children.find(c => c.channel_id == before.channelId)
-        const channel = state.guild.channels.cache.get(trigger_children.channel_id) as BaseGuildVoiceChannel
+    if (beforeAutovoice && state.guild.me.permissions.has('MANAGE_CHANNELS')) {
+        const child = beforeAutovoice.children.find(c => c.channel_id == before.channelId)
+        const channel = state.guild.channels.cache.get(child.channel_id) as BaseGuildVoiceChannel
 
-        if (channel && state.channelId == before_trigger.channel_id && trigger_children.owner_id == state.member.id) {
-            if (channel.manageable) await state.setChannel(trigger_children.channel_id, '')
+        if (channel && state.channelId == beforeAutovoice.channel_id && child.owner_id == state.member.id) {
+            if (channel.manageable) await state.setChannel(child.channel_id, '')
 
             self.emit('moduleExecution', { module: 'Temp Voice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
 
             return true
         }
 
-        if (trigger_children && channel && !channel.members.size) {
-            await self.db.servers.updateOne({ _id: state.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.id': before_trigger.id }, {
+        if (child && channel && !channel.members.size) {
+            await self.db.servers.updateOne({ _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutovoice.id }, {
                 $pull: {
-                    'modules.voice_manager.temp_voice_channels.triggers.$.children': {
-                        channel_id: trigger_children.channel_id
+                    'modules.voice_manager.autovoices.$.children': {
+                        channel_id: child.channel_id
                     }
                 }
             })
@@ -133,12 +133,12 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
             self.emit('moduleExecution', { module: 'Temp Voice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
         }
 
-        else if (trigger_children && channel && channel.members.size) {
-            const children_index = before_trigger.children.indexOf(trigger_children)
+        else if (child && channel && channel.members.size) {
+            const children_index = beforeAutovoice.children.indexOf(child)
 
-            await self.db.servers.updateOne({ _id: state.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.id': before_trigger.id }, {
+            await self.db.servers.updateOne({ _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutovoice.id }, {
                 $set: {
-                    [`modules.voice_manager.temp_voice_channels.triggers.$.children.${children_index}.owner_id`]: channel.members.first().id
+                    [`modules.voice_manager.autovoices.$.children.${children_index}.owner_id`]: channel.members.first().id
                 }
             })
         }
@@ -150,16 +150,16 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
 }
 
 export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument, channel: VoiceChannel) {
-    const trigger: VoiceChannelTrigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.children.some(c => c.channel_id == channel?.id))
+    const autovoice = server.modules.voice_manager.autovoices.find(i => i.children.some(c => c.channel_id == channel?.id))
 
-    if (trigger && channel.guild.me.permissions.has('MANAGE_CHANNELS')) {
-        const trigger_children: VoiceChannelTriggerChildren = trigger.children.find(c => c.channel_id == channel.id)
+    if (autovoice && channel.guild.me.permissions.has('MANAGE_CHANNELS')) {
+        const child = autovoice.children.find(c => c.channel_id == channel.id)
 
-        if (trigger_children && !channel.members.size) {
-            await self.db.servers.updateOne({ _id: channel.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.id': trigger.id }, {
+        if (child && !channel.members.size) {
+            await self.db.servers.updateOne({ _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id }, {
                 $pull: {
-                    'modules.voice_manager.temp_voice_channels.triggers.$.children': {
-                        channel_id: trigger_children.channel_id
+                    'modules.voice_manager.autovoices.$.children': {
+                        channel_id: child.channel_id
                     }
                 }
             })
@@ -169,19 +169,19 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
             self.emit('moduleExecution', { module: 'Temp Voice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
         }
 
-        else if (trigger_children && channel.members.size) {
-            const children_index: number = trigger.children.indexOf(trigger_children)
+        else if (child && channel.members.size) {
+            const childIndex: number = autovoice.children.indexOf(child)
 
-            await self.db.servers.updateOne({ _id: channel.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.id': trigger.id }, {
+            await self.db.servers.updateOne({ _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id }, {
                 $set: {
-                    [`modules.voice_manager.temp_voice_channels.triggers.$.children.${children_index}.owner_id`]: channel.members.first().id
+                    [`modules.voice_manager.autovoices.$.children.${childIndex}.owner_id`]: channel.members.first().id
                 }
             })
 
-            const overwrites = channel.permissionOverwrites.cache.find(p => p.id === trigger_children.owner_id)
+            const overwrites = channel.permissionOverwrites.cache.find(p => p.id === child.owner_id)
             if (overwrites) await overwrites.delete()
 
-            const permissions = new Permissions(BigInt(trigger.default.permissions))
+            const permissions = new Permissions(BigInt(autovoice.default.permissions))
             await channel.permissionOverwrites.create(channel.members.first().id, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
         }
     

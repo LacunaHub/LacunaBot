@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, Collection, Message, MessageReaction, User } from 'discord.js'
-import { AutoReaction, ReactionElement, ServerDocument } from '../database/schemas/Servers'
+import { AutoReaction, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 
 export function generateId() {
@@ -17,7 +17,9 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
         const locale = self.translator.locale(server.locale).modules
 
         const message = await reaction.message.fetch()
-        const element: ReactionElement = server.modules.reactions.find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
+        const element = server.modules.reactions
+            .slice(0, (server.server.premium.available ? 200 : 50))
+            .find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
 
         if (element) {
             const member = await message.guild.members.fetch(user.id)
@@ -76,7 +78,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                     }
 
                     if (element.element.single || element.element.global_single) {
-                        const single_elements: ReactionElement[] = server.modules.reactions.filter(r => r.element.global_single || (r.element.single && r.message.id == message.id))
+                        const single_elements = server.modules.reactions.filter(r => r.element.global_single || (r.element.single && r.message.id == message.id))
                         const has_single_element: boolean = single_elements.some(sr => sr.references.some(r => member.roles.cache.has(r)))
 
                         if (has_single_element) {
@@ -122,7 +124,9 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
         const locale = self.translator.locale(server.locale).modules
 
         const message = reaction.message
-        const element: ReactionElement = server.modules.reactions.find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
+        const element = server.modules.reactions
+            .slice(0, (server.server.premium.available ? 200 : 50))
+            .find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
 
         if (element) {
             const member = await message.guild.members.fetch(user.id)
@@ -170,7 +174,9 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
 }
 
 export async function autoReact(server: ServerDocument, message: Message) {
-    const auto_reaction: AutoReaction = server.modules.autoreactions.find(ar => ar.channel_id == message.channel.id)
+    const auto_reaction: AutoReaction = server.modules.autoreactions
+        .slice(0, (server.server.premium.available ? 20 : 2))
+        .find(ar => ar.channel_id == message.channel.id)
 
     if (auto_reaction) {
         if (auto_reaction.message_types && auto_reaction.message_types.length && !auto_reaction.message_types.includes(message.type)) return false

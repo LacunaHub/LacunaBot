@@ -107,7 +107,11 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
         if (!stream) return null
 
         for (const guild of subscribedGuilds) {
-            const guildSubscription = guild.modules.subscriptions.twitch.find(i => i.broadcaster_id == data.event.broadcaster_user_id)
+            const guildSubscription = guild.modules.subscriptions.twitch
+                .slice(0, (guild.server.premium.available ? 10 : 1))
+                .find(i => i.broadcaster_id == data.event.broadcaster_user_id)
+
+            if (!guildSubscription) continue
 
             let webhook = await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
                 .catch(() => {}) as any

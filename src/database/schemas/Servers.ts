@@ -18,7 +18,8 @@ export default model<ServerDocument>(
         commands: {
             system: { type: Array, default: [] },
             custom: { type: Array, default: [] },
-            slash_commands: { type: Boolean, default: false }
+            slash_commands: { type: Boolean, default: false },
+            prefix_commands: { type: Boolean, default: true }
         },
         moderation: {
             case_log: {
@@ -648,9 +649,7 @@ export default model<ServerDocument>(
             },
             voice_manager: {
                 voice_roles: { type: Array, default: [] },
-                temp_voice_channels: {
-                    triggers: { type: Array, default: [] }
-                }
+                autovoices: { type: Array, default: [] }
             },
             restoring: {
                 restore_roles: { type: Boolean, default: false },
@@ -755,6 +754,7 @@ export interface ServerDocument extends Document {
             }
         }
         slash_commands: boolean
+        prefix_commands: boolean
     }
     moderation: {
         case_log: {
@@ -1131,9 +1131,11 @@ export interface ServerDocument extends Document {
         },
         voice_manager: {
             voice_roles: VoiceRole[]
+            /** @deprecated */
             temp_voice_channels: {
-                triggers: VoiceChannelTrigger[]
+                triggers: any[]
             }
+            autovoices: IAutoVoice[]
         },
         restoring: {
             restore_roles: boolean
@@ -1446,7 +1448,7 @@ export interface VoiceRole {
     bound_channels_id: string[]
 }
 
-export interface VoiceChannelTrigger {
+export interface IAutoVoice {
     id: string
     channel_id: string
     default: {
@@ -1459,10 +1461,10 @@ export interface VoiceChannelTrigger {
     allowed_roles: string[]
     blocked_roles: string[]
     moderator_roles: string[]
-    children: VoiceChannelTriggerChildren[]
+    children: IAutoVoiceChild[]
 }
 
-export interface VoiceChannelTriggerChildren {
+export interface IAutoVoiceChild {
     channel_id: string
     owner_id: string
     created_at: number

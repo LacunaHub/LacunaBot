@@ -75,7 +75,11 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
     const videoUrl = `https://www.youtube.com/watch?v=${data.videoId}`
 
     for (const guild of subscribedGuilds) {
-        const guildSubscription = guild.modules.subscriptions.youtube.find(i => i.channel_id == data.channelId)
+        const guildSubscription = guild.modules.subscriptions.youtube
+            .slice(0, (guild.server.premium.available ? 10 : 1))
+            .find(i => i.channel_id == data.channelId)
+
+        if (!guildSubscription) continue
 
         let webhook = await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
             .catch(() => {}) as any

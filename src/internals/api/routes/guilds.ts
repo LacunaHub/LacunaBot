@@ -1,6 +1,6 @@
 import Router from '@koa/router'
 import { Context } from 'koa'
-import { ReactionElement, ServerDocument, TwitchChannel, VoiceChannelTrigger, YouTubeChannel } from '../../../database/schemas/Servers'
+import { ReactionElement, ServerDocument, IAutoVoice } from '../../../database/schemas/Servers'
 import translator from '../../locale'
 import { resolveObjectPath } from '../../utility/Utils'
 import db from '../../../database'
@@ -22,8 +22,8 @@ router.post('/:guild_id/reactions/:method', checkPermissions, addOrEditReaction)
 router.delete('/:guild_id/reactions/:reaction_id', checkPermissions, removeReaction)
 router.post('/:guild_id/subscriptions/twitch/:method', checkPermissions, updateTwitchSubscriptions)
 router.post('/:guild_id/subscriptions/youtube/:method', checkPermissions, updateYouTubeSubscriptions)
-router.post('/:guild_id/voice-triggers/:method', checkPermissions, addOrEditVoiceTrigger)
-router.delete('/:guild_id/voice-triggers/:channel_id', checkPermissions, removeVoiceTrigger)
+router.post('/:guild_id/autovoices/:method', checkPermissions, addOrUpdateAutoVoice)
+router.delete('/:guild_id/autovoices/:channel_id', checkPermissions, removeAutoVoice)
 
 async function getSettings(ctx: Context) {
     const guild_id: string = ctx.params.guild_id
@@ -322,49 +322,33 @@ async function updateYouTubeSubscriptions(ctx: Context) {
     ctx.body = result
 }
 
-async function addOrEditVoiceTrigger(ctx: Context) {
+async function addOrUpdateAutoVoice(ctx: Context) {
     const guild_id: string = ctx.params.guild_id
     const method: string = ctx.params.method
-    const options = ctx.request.body as VoiceChannelTrigger | Partial<VoiceChannelTrigger>
+    const options = ctx.request.body as IAutoVoice | Partial<IAutoVoice>
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
+    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
 
-        return
-    }
+    const result = method == 'add' ? (await Guilds.addAutoVoice(server, options as IAutoVoice)) : (await Guilds.updateAutoVoice(server, options))
 
-    const result = method == 'add' ? (await Guilds.addVoiceTrigger(server, options as VoiceChannelTrigger)) : (await Guilds.editVoiceTrigger(server, options))
-
-    if (typeof result === 'string') {
-        ctx.status = 400; ctx.body = result
-
-        return
-    }
+    if (typeof result === 'string') ctx.throw(400, result)
 
     ctx.status = 200; ctx.body = result
 }
 
-async function removeVoiceTrigger(ctx: Context) {
+async function removeAutoVoice(ctx: Context) {
     const guild_id: string = ctx.params.guild_id
     const channel_id: string = ctx.params.channel_id
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
+    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
 
-        return
-    }
+    const result = await Guilds.removeAutoVoice(server, channel_id)
 
-    const result = await Guilds.removeVoiceTrigger(server, channel_id)
-
-    if (typeof result === 'string') {
-        ctx.status = 400; ctx.body = result
-
-        return
-    }
+    if (typeof result === 'string') ctx.throw(400, result)
 
     ctx.status = 204
 }

@@ -7,7 +7,7 @@ import { hubRefreshSubscriptions } from '../../modules/YouTube'
 
 export default class LacunaSharding extends ShardingManager {
     public readiness: number[]
-    public diamodned: Map<string, Diamonder>
+    public diamonded: Map<string, Diamonder>
     public qiwi_bills_schedule: Job
     public stats_collect_schedule: Job
 
@@ -16,7 +16,7 @@ export default class LacunaSharding extends ShardingManager {
 
         this.readiness = []
 
-        this.diamodned = new Map()
+        this.diamonded = new Map()
 
         this.qiwi_bills_schedule = syncQiwiBills()
 

@@ -1,4 +1,4 @@
-import Servers, { ReactionElement, ServerDocument, TwitchChannel, VoiceChannelTrigger, YouTubeChannel } from '../../../database/schemas/Servers'
+import Servers, { IAutoVoice, ReactionElement, ServerDocument } from '../../../database/schemas/Servers'
 import db from '../../../database'
 import { generateId } from '../../../modules/Reactions'
 import { Util } from 'discord.js'
@@ -822,7 +822,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
 
                 if (Array.isArray(data.modules.levels.awards)) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.awards': data.modules.levels.awards.slice(0, (guild.server.premium.available ? 200 : 20)) } })
+                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.awards': data.modules.levels.awards.slice(0, (guild.server.premium.available ? 200 : 50)) } })
                 }
             }
         }
@@ -904,7 +904,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             }
 
             if (Array.isArray(data.modules.economy.store?.items) && JSON.stringify(data.modules.economy.store.items) !== JSON.stringify(guild.modules.economy.store.items)) {
-                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.store.items': data.modules.economy.store.items.slice(0, (guild.server.premium.available ? 200 : 20)) } })
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.store.items': data.modules.economy.store.items.slice(0, (guild.server.premium.available ? 200 : 50)) } })
             }
         }
     }
@@ -928,7 +928,7 @@ export async function addReactionElement(server: ServerDocument, reaction: Parti
     const element_id = generateId(), emoji = Util.parseEmoji(reaction.emoji as any)
     const elements = server.modules.reactions
 
-    if (elements.length >= 20 && !server.server.premium.available) return 'reactions_limit_reached_no_premium'
+    if (elements.length >= 50 && !server.server.premium.available) return 'reactions_limit_reached_no_premium'
 
     if (elements.length >= 200) return 'reactions_limit_reached'
     
@@ -1196,50 +1196,48 @@ export async function deleteYouTubeSubscription(server: ServerDocument, subscrip
     return true
 }
 
-export async function addVoiceTrigger(server: ServerDocument, trigger: VoiceChannelTrigger) {
-    const triggers = server.modules.voice_manager.temp_voice_channels.triggers
+export async function addAutoVoice(server: ServerDocument, autovoice: IAutoVoice) {
+    const autovoices = server.modules.voice_manager.autovoices
 
-    if (triggers.length >= 2 && !server.server.premium.available) return 'voice_triggers_limit_reached_no_premium'
+    if (autovoices.length >= 2 && !server.server.premium.available) return 'autovoices_limit_reached_no_premium'
+    if (autovoices.length >= 20) return 'autovoices_limit_reached'
+    if (autovoices.some(i => i.channel_id == autovoice.channel_id)) return 'autovoice_already_added'
 
-    if (triggers.length >= 20) return 'voice_triggers_limit_reached'
-
-    if (triggers.some(t => t.channel_id == trigger.channel_id)) return 'voice_trigger_already_added'
-
-    await Servers.updateOne({ _id: server._id }, {
+    await db.servers.updateOne({ _id: server._id }, {
         $push: {
-            'modules.voice_manager.temp_voice_channels.triggers': trigger
+            'modules.voice_manager.autovoices': autovoice
         }
     })
 
-    return trigger
+    return autovoice
 }
 
-export async function editVoiceTrigger(server: ServerDocument, trigger: Partial<VoiceChannelTrigger>) {
-    const triggers = server.modules.voice_manager.temp_voice_channels.triggers
+export async function updateAutoVoice(server: ServerDocument, autovoice: Partial<IAutoVoice>) {
+    const autovoices = server.modules.voice_manager.autovoices
 
-    if (!triggers.some(t => t.channel_id == trigger.channel_id)) return 'voice_trigger_not_found'
+    if (!autovoices.some(i => i.channel_id == autovoice.channel_id)) return 'autovoice_not_found'
 
-    await Servers.updateOne({ _id: server._id, 'modules.voice_manager.temp_voice_channels.triggers.channel_id': trigger.channel_id }, {
+    await db.servers.updateOne({ _id: server._id, 'modules.voice_manager.autovoices.channel_id': autovoice.channel_id }, {
         $set: {
-            'modules.voice_manager.temp_voice_channels.triggers.$.default': trigger.default,
-            'modules.voice_manager.temp_voice_channels.triggers.$.allowed_roles': trigger.allowed_roles ?? [],
-            'modules.voice_manager.temp_voice_channels.triggers.$.blocked_roles': trigger.blocked_roles ?? [],
-            'modules.voice_manager.temp_voice_channels.triggers.$.moderator_roles': trigger.moderator_roles ?? []
+            'modules.voice_manager.autovoices.$.default': autovoice.default,
+            'modules.voice_manager.autovoices.$.allowed_roles': autovoice.allowed_roles ?? [],
+            'modules.voice_manager.autovoices.$.blocked_roles': autovoice.blocked_roles ?? [],
+            'modules.voice_manager.autovoices.$.moderator_roles': autovoice.moderator_roles ?? []
         }
     })
 
-    return trigger
+    return autovoice
 }
 
-export async function removeVoiceTrigger(server: ServerDocument, channel_id: string) {
-    const triggers = server.modules.voice_manager.temp_voice_channels.triggers
-    const trigger = triggers.find(t => t.channel_id == channel_id)
+export async function removeAutoVoice(server: ServerDocument, channel_id: string) {
+    const autovoices = server.modules.voice_manager.autovoices
+    const autovoice = autovoices.find(i => i.channel_id == channel_id)
 
-    if (!trigger) return 'voice_trigger_not_found'
+    if (!autovoice) return 'autovoice_not_found'
 
-    await Servers.updateOne({ _id: server._id }, {
+    await db.servers.updateOne({ _id: server._id }, {
         $pull: {
-            'modules.voice_manager.temp_voice_channels.triggers': {
+            'modules.voice_manager.autovoices': {
                 channel_id: channel_id
             }
         }
@@ -1256,9 +1254,9 @@ export default {
     createTwitchSubscription,
     updateTwitchSubscription,
     deleteTwitchSubscription,
-    addVoiceTrigger,
-    editVoiceTrigger,
-    removeVoiceTrigger,
+    addAutoVoice,
+    updateAutoVoice,
+    removeAutoVoice,
     createYouTubeSubscription,
     updateYouTubeSubscription,
     deleteYouTubeSubscription

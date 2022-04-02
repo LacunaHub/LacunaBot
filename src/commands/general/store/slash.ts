@@ -28,7 +28,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
-    const item = server.modules.economy.store.items.find(i => i.id == sku)
+    const item = server.modules.economy.store.items.slice(0, (server.server.premium.available ? 200 : 50)).find(i => i.id == sku)
 
     if (!item) {
         await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.store.buy.texts.item_not_found, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
@@ -80,7 +80,9 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
     }
     
     let page: number = interaction.options?.getInteger(locale.store.items.options.page.name) ? (interaction.options.getInteger(locale.store.items.options.page.name) - 1) : 0
-    const chunks: Array<EconomyStoreItem[]> = chunkArray(server.modules.economy.store.items.filter(i => !i.options.includes('LIMITED_QUANTITY') || i.quantity > 0), 8)
+    const chunks: Array<EconomyStoreItem[]> = chunkArray(
+        server.modules.economy.store.items.slice(0, (server.server.premium.available ? 200 : 50)).filter(i => !i.options.includes('LIMITED_QUANTITY') || i.quantity > 0), 8
+    )
 
     if ((page + 1) > chunks.length) page = chunks.length - 1
 
@@ -164,7 +166,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
         else {
             await i.deferUpdate()
 
-            const item = server.modules.economy.store.items.find(i => i.id == value)
+            const item = server.modules.economy.store.items.slice(0, (server.server.premium.available ? 200 : 50)).find(i => i.id == value)
             const result = await purchaseItem(item, self, interaction.guild, interaction.member as GuildMember)
 
             if (result == 'INSUFFICIENT_FUNDS') {

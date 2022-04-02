@@ -1,5 +1,5 @@
 import { DMChannel, GuildChannel } from 'discord.js'
-import { ServerDocument, VoiceChannelTrigger, VoiceChannelTriggerChildren } from '../../database/schemas/Servers'
+import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { ChannelDelete } from '../../modules/Logs'
 
@@ -11,25 +11,24 @@ const handler = async (self: Lacuna, channel: DMChannel | GuildChannel) => {
     if (!server) return false
 
     if (channel.type == 'GUILD_VOICE') {
-        const trigger: VoiceChannelTrigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.channel_id == channel.id)
-        const trigger_children: VoiceChannelTrigger = server.modules.voice_manager.temp_voice_channels.triggers.find(t => t.children.some(c => c.channel_id == channel.id))
+        const autovoice = server.modules.voice_manager.autovoices.find(i => i.channel_id == channel.id)
+        const autovoiceChildren = server.modules.voice_manager.autovoices.find(i => i.children.some(c => c.channel_id == channel.id))
+        const tempVoice = autovoiceChildren ? autovoiceChildren.children.find(c => c.channel_id == channel.id) : null
 
-        const temp_voice: VoiceChannelTriggerChildren = trigger_children ? trigger_children.children.find(c => c.channel_id == channel.id) : null
-
-        if (trigger) {
+        if (autovoice) {
             await self.db.servers.updateOne({ _id: channel.guild.id }, {
                 $pull: {
-                    'modules.voice_manager.temp_voice_channels.triggers': {
+                    'modules.voice_manager.autovoices': {
                         channel_id: channel.id
                     }
                 }
             })
         }
 
-        if (temp_voice) {
-            await self.db.servers.updateOne({ _id: channel.guild.id, 'modules.voice_manager.temp_voice_channels.triggers.children.channel_id': channel.id }, {
+        if (tempVoice) {
+            await self.db.servers.updateOne({ _id: channel.guild.id, 'modules.voice_manager.autovoices.children.channel_id': channel.id }, {
                 $pull: {
-                    'modules.voice_manager.temp_voice_channels.triggers.$.children': {
+                    'modules.voice_manager.autovoices.$.children': {
                         channel_id: channel.id
                     }
                 }

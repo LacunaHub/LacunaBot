@@ -29,7 +29,7 @@ export default class Diamonder {
 
     initialize() {
         this.schedule = scheduleJob(`${this.guild_id}:${this.expiration}`, this.expiration, () => this.expire())
-        this.sharding.diamodned.set(this.guild_id, this)
+        this.sharding.diamonded.set(this.guild_id, this)
         logger.telegram.info(`(Diamonder): Guild ${this.guild_id} received a Diamond subscription`)
     }
 

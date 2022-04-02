@@ -91,7 +91,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 }
 
 export async function voiceAssign(self: Lacuna, server: ServerDocument, state: VoiceState): Promise<boolean> {
-    if (!server.modules.levels.voice || !server.server.premium.available) return false
+    if (!server.modules.levels.voice) return false
 
     if (server.modules.levels.blocked.channels.includes(state.channelId) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))) return false
     if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channelId)) return false
@@ -217,46 +217,40 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
 export async function updateAwards(self: Lacuna, server: ServerDocument, refs: { member: GuildMember, level: number }) {
     const member = refs.member
 
-    const awards = server.modules.levels.awards.sort((a, b) => b.level - a.level)
-    const reward = awards.find(award => award.level === refs.level)
+    const awards = server.modules.levels.awards
+        .slice(0, (server.server.premium.available ? 200 : 50))
+        .sort((a, b) => b.level - a.level)
+    const award = awards.find(i => i.level == refs.level)
 
-    const less_awards = awards.filter(award => award.level < refs.level).sort((a, b) => b.level - a.level)
-    const less_reward = less_awards[0] || null
+    const prevAwards = awards.filter(i => i.level < refs.level)
+    const prevAward = prevAwards[0]
 
-    if (reward) {
-        if (reward.type === 'ROLE') {
-            const roles = member.guild.roles.cache.filter(r => r.editable && reward.references.includes(r.id))
+    if (award) {
+        if (award.type == 'ROLE') {
+            const roles = member.guild.roles.cache.filter(r => r.editable && award.references.includes(r.id))
 
-            if (roles.size) {
-                if (!roles.some(r => member.roles.cache.has(r.id))) await member.roles.add(roles).catch(self.logger.error)
+            if (roles.size) await member.roles.add(roles).catch(self.logger.error)
 
-                if (less_reward && less_reward.single) {
-                    const less_roles = member.guild.roles.cache.filter(r => r.editable && less_reward.references.includes(r.id))
+            if (prevAward?.single) {
+                const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevAward.references.includes(r.id))
 
-                    if (less_roles.size) {
-                        if (less_roles.some(r => member.roles.cache.has(r.id))) await member.roles.remove(less_roles).catch(self.logger.error)
-                    }
-                }
+                if (prevRoles.size) await member.roles.remove(prevRoles).catch(self.logger.error)
             }
         }
 
         self.emit('moduleExecution', { module: 'Levels: Update Awards', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
     }
 
-    if (!reward && less_reward) {
-        if (less_reward.type === 'ROLE') {
-            const roles = member.guild.roles.cache.filter(r => r.editable && less_reward.references.includes(r.id))
+    if (!award && prevAward) {
+        if (prevAward.type === 'ROLE') {
+            const roles = member.guild.roles.cache.filter(r => r.editable && prevAward.references.includes(r.id))
 
-            if (roles.size) {
-                if (!roles.some(r => member.roles.cache.has(r.id))) await member.roles.add(roles).catch(self.logger.error)
+            if (roles.size) await member.roles.add(roles).catch(self.logger.error)
 
-                if (less_awards[1] && less_awards[1].single) {
-                    const less_roles = member.guild.roles.cache.filter(r => r.editable && less_awards[1].references.includes(r.id))
+            if (prevAwards[1]?.single) {
+                const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevAwards[1].references.includes(r.id))
 
-                    if (less_roles.size) {
-                        if (less_roles.some(r => member.roles.cache.has(r.id))) await member.roles.remove(less_roles).catch(self.logger.error)
-                    }
-                }
+                if (prevRoles.size) await member.roles.remove(prevRoles).catch(self.logger.error)
             }
         }
 
@@ -267,7 +261,7 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
 export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, refs: { member?: GuildMember, message?: Message, level: number }) {
     const member = refs.message ? refs.message.member : refs.member
 
-    const award = server.modules.levels.awards.find(a => a.level === refs.level)
+    const award = server.modules.levels.awards.find(a => a.level == refs.level)
     const direction = award && award.alert && award.alert.active ? award.alert : server.modules.levels.level_up_alerts
 
     if (direction.active) {

@@ -28,7 +28,7 @@ export async function buyPrefix(self: Lacuna, server: ServerDocument, message: M
         return false
     }
 
-    const item = server.modules.economy.store.items.find(i => i.id == sku)
+    const item = server.modules.economy.store.items.slice(0, (server.server.premium.available ? 200 : 50)).find(i => i.id == sku)
 
     if (!item) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.store.buy.texts.item_not_found, `**${message.member.displayName}**`)}` })
@@ -80,7 +80,9 @@ export async function itemsPrefix(self: Lacuna, server: ServerDocument, message:
     }
     
     let page: number = isNaN(message['args'][0]) ? 0 : Number(message['args'][0]) - 1
-    const chunks: Array<EconomyStoreItem[]> = chunkArray(server.modules.economy.store.items.filter(i => !i.options.includes('LIMITED_QUANTITY') || i.quantity > 0), 8)
+    const chunks: Array<EconomyStoreItem[]> = chunkArray(
+        server.modules.economy.store.items.slice(0, (server.server.premium.available ? 200 : 50)).filter(i => !i.options.includes('LIMITED_QUANTITY') || i.quantity > 0), 8
+    )
 
     if ((page + 1) > chunks.length) page = chunks.length - 1
 
@@ -160,7 +162,7 @@ export async function itemsPrefix(self: Lacuna, server: ServerDocument, message:
         }
 
         else {
-            const item = server.modules.economy.store.items.find(i => i.id == value)
+            const item = server.modules.economy.store.items.slice(0, (server.server.premium.available ? 200 : 50)).find(i => i.id == value)
             const result = await purchaseItem(item, self, message.guild, message.member)
 
             if (result == 'INSUFFICIENT_FUNDS') {

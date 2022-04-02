@@ -1,5 +1,5 @@
 import { VoiceChannel, VoiceState } from 'discord.js'
-import { ServerDocument, VoiceRole } from '../../database/schemas/Servers'
+import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { voiceUnassign as levelsVoiceUnassign } from '../../modules/Levels'
 import { voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
@@ -24,7 +24,9 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
         }
     }
 
-    const voice_roles_bound: VoiceRole[] = server.modules.voice_manager.voice_roles.filter(r => !r.bound_channels_id.length || r.bound_channels_id.includes(channel.id))
+    const voice_roles_bound = server.modules.voice_manager.voice_roles
+        .slice(0, (server.server.premium.available ? 20 : 2))
+        .filter(r => !r.bound_channels_id.length || r.bound_channels_id.includes(channel.id))
 
     if (voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && voice_roles_bound.some(b => b.role_id == r.id))
