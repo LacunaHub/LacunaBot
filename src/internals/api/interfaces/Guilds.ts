@@ -899,6 +899,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.active': data.modules.economy.active } })
             }
 
+            if (typeof data.modules.economy.reset_wallet_on_leave == 'boolean' && data.modules.economy.reset_wallet_on_leave !== guild.modules.economy.reset_wallet_on_leave) {
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.reset_wallet_on_leave': data.modules.economy.reset_wallet_on_leave } })
+            }
+
             if (Array.isArray(data.modules.economy.currencies) && data.modules.economy.currencies.length && JSON.stringify(data.modules.economy.currencies) !== JSON.stringify(guild.modules.economy.currencies)) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.currencies': data.modules.economy.currencies.slice(0, 2) } })
             }
