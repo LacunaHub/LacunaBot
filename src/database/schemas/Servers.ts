@@ -71,7 +71,7 @@ export default model<ServerDocument>(
                         dm_message: {
                             content: { type: String, default: '' },
                             embed: {
-                                active: { type: Boolean, default: false },
+                                active: { type: Boolean, default: true },
                                 title: { type: String, default: null },
                                 description: { type: String, default: null },
                                 url: { type: String, default: null },
@@ -101,7 +101,7 @@ export default model<ServerDocument>(
                         dm_message: {
                             content: { type: String, default: '' },
                             embed: {
-                                active: { type: Boolean, default: false },
+                                active: { type: Boolean, default: true },
                                 title: { type: String, default: null },
                                 description: { type: String, default: null },
                                 url: { type: String, default: null },
@@ -131,7 +131,7 @@ export default model<ServerDocument>(
                         dm_message: {
                             content: { type: String, default: '' },
                             embed: {
-                                active: { type: Boolean, default: false },
+                                active: { type: Boolean, default: true },
                                 title: { type: String, default: null },
                                 description: { type: String, default: null },
                                 url: { type: String, default: null },
