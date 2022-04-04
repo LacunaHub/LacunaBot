@@ -1128,7 +1128,7 @@ export async function updateTwitchSubscription(server: ServerDocument, subscript
     })
 
     if (sub.notification_channel_id != subscription.notification_channel_id) {
-        await rest.patch(Routes.webhook(sub.webhook_id, sub.webhook_token), {
+        await rest.patch(Routes.webhook(sub.webhook_id), {
             body: {
                 channel_id: subscription.notification_channel_id
             }
@@ -1228,7 +1228,7 @@ export async function updateYouTubeSubscription(server: ServerDocument, subscrip
     })
 
     if (sub.notification_channel_id != subscription.notification_channel_id) {
-        await rest.patch(Routes.webhook(sub.webhook_id, sub.webhook_token), {
+        await rest.patch(Routes.webhook(sub.webhook_id), {
             body: {
                 channel_id: subscription.notification_channel_id
             }
