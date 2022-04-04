@@ -1115,8 +1115,9 @@ export async function createTwitchSubscription(server: ServerDocument, subscript
 
 export async function updateTwitchSubscription(server: ServerDocument, subscription: any) {
     const subscriptions = server.modules.subscriptions.twitch
+    const sub = subscriptions.find(i => i.broadcaster_id == subscription.broadcaster_id)
 
-    if (!subscriptions.some(s => s.broadcaster_id == subscription.broadcaster_id)) return 'twitch_channel_not_found'
+    if (!sub) return 'twitch_channel_not_found'
 
     await db.servers.updateOne({ _id: server._id, 'modules.subscriptions.twitch.broadcaster_id': subscription.broadcaster_id }, {
         $set: {
@@ -1125,6 +1126,14 @@ export async function updateTwitchSubscription(server: ServerDocument, subscript
             'modules.subscriptions.twitch.$.display_stream_preview': subscription.display_stream_preview
         }
     })
+
+    if (sub.notification_channel_id != subscription.notification_channel_id) {
+        await rest.patch(Routes.webhook(sub.webhook_id, sub.webhook_token), {
+            body: {
+                channel_id: subscription.notification_channel_id
+            }
+        }).catch(() => {})
+    }
 }
 
 export async function deleteTwitchSubscription(server: ServerDocument, subscription: any) {
@@ -1207,8 +1216,9 @@ export async function createYouTubeSubscription(server: ServerDocument, subscrip
 
 export async function updateYouTubeSubscription(server: ServerDocument, subscription: any) {
     const subscriptions = server.modules.subscriptions.youtube
+    const sub = subscriptions.find(i => i.channel_id == subscription.channel_id)
 
-    if (!subscriptions.some(s => s.channel_id == subscription.channel_id)) return 'youtube_channel_not_found'
+    if (!sub) return 'youtube_channel_not_found'
 
     await db.servers.updateOne({ _id: server._id, 'modules.subscriptions.youtube.channel_id': subscription.channel_id }, {
         $set: {
@@ -1216,6 +1226,14 @@ export async function updateYouTubeSubscription(server: ServerDocument, subscrip
             'modules.subscriptions.youtube.$.notification_message': subscription.notification_message
         }
     })
+
+    if (sub.notification_channel_id != subscription.notification_channel_id) {
+        await rest.patch(Routes.webhook(sub.webhook_id, sub.webhook_token), {
+            body: {
+                channel_id: subscription.notification_channel_id
+            }
+        }).catch(() => {})
+    }
 }
 
 export async function deleteYouTubeSubscription(server: ServerDocument, subscription: any) {
