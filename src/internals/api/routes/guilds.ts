@@ -49,12 +49,20 @@ async function getSettings(ctx: Context) {
     const guildRoles = await dsc.get(Routes.guildRoles(guild_id)).catch(() => {}) as any[] ?? []
     const guildEmojis = await dsc.get(Routes.guildEmojis(guild_id)).catch(() => {}) as any[] ?? []
 
-    const selfRoles = selfMember ? guildRoles.filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID) : []
+    const selfRoles = selfMember ? guildRoles
+        .sort((a, b) => a.position - b.position)
+        .filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID) : []
     const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
 
-    const channels = guildChannels.sort((a, b) => a.parent_id - b.parent_id || a.position - b.position).map(c => { return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' } })
-    const roles = guildRoles.filter(r => !r.tags?.bot_id).sort((a, b) => b.position - a.position).map(r => { return { id: r.id, name: r.name, color: r.color, position: r.position, managed: r.managed, higher: !selfHighestRole || selfHighestRole.position <= r.position } })
-    const emojis = guildEmojis.map(e => { return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` } })
+    const channels = guildChannels
+        .sort((a, b) => a.parent_id - b.parent_id || a.position - b.position)
+        .map(c => { return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' } })
+    const roles = guildRoles
+        .filter(r => !r.tags?.bot_id)
+        .sort((a, b) => b.position - a.position)
+        .map(r => { return { id: r.id, name: r.name, color: r.color, position: r.position, managed: r.managed, higher: !selfHighestRole || selfHighestRole.position <= r.position } })
+    const emojis = guildEmojis
+        .map(e => { return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` } })
 
     const locale = translator.locale(server.locale)
 

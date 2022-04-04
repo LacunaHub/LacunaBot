@@ -130,19 +130,63 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.case_log.channel_id': data.moderation.case_log.channel_id || '' } })
             }
 
-            if (typeof data.moderation.case_log.case_types == 'object') {
-                const data_case_types = Object.values(data.moderation.case_log.case_types)
-                const guild_case_types = Object.values(guild.moderation.case_log.case_types)
-
-                if (data_case_types.some((v, i) => v !== guild_case_types[i])) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.case_log.case_types': data.moderation.case_log.case_types } })
-                }
+            if (typeof data.moderation.case_log.case_types == 'object' && data.moderation.case_log.case_types !== null) {
+                await Servers.updateOne({ _id: guild._id }, {
+                    $set: {
+                        'moderation.case_log.case_types': {
+                            BAN_ADD: Boolean(data.moderation.case_log.case_types.BAN_ADD ?? guild.moderation.case_log.case_types.BAN_ADD),
+                            BAN_REMOVE: Boolean(data.moderation.case_log.case_types.BAN_REMOVE ?? guild.moderation.case_log.case_types.BAN_REMOVE),
+                            KICK: Boolean(data.moderation.case_log.case_types.KICK ?? guild.moderation.case_log.case_types.KICK),
+                            MUTE_ADD: Boolean(data.moderation.case_log.case_types.MUTE_ADD ?? guild.moderation.case_log.case_types.MUTE_ADD),
+                            MUTE_REMOVE: Boolean(data.moderation.case_log.case_types.MUTE_REMOVE ?? guild.moderation.case_log.case_types.MUTE_REMOVE),
+                            PRUNE_MESSAGES: Boolean(data.moderation.case_log.case_types.PRUNE_MESSAGES ?? guild.moderation.case_log.case_types.PRUNE_MESSAGES),
+                            WARN_ADD: Boolean(data.moderation.case_log.case_types.WARN_ADD ?? guild.moderation.case_log.case_types.WARN_ADD),
+                            WARN_REMOVE: Boolean(data.moderation.case_log.case_types.WARN_REMOVE ?? guild.moderation.case_log.case_types.WARN_REMOVE)
+                        }
+                    }
+                })
             }
 
             if (typeof data.moderation.case_log.case_types_messages == 'object') {
                 for (const type of Object.keys(data.moderation.case_log.case_types_messages)) {
                     if (JSON.stringify(data.moderation.case_log.case_types_messages[type]) != JSON.stringify(guild.moderation.case_log.case_types_messages[type])) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { [`moderation.case_log.case_types_messages.${type}`]: data.moderation.case_log.case_types_messages[type] } })
+                        const curr = data.moderation.case_log.case_types_messages[type]
+                        const prev = guild.moderation.case_log.case_types_messages[type]
+
+                        await Servers.updateOne({ _id: guild._id }, {
+                            $set: {
+                                [`moderation.case_log.case_types_messages.${type}`]: {
+                                    active: curr.active ?? prev.active,
+                                    dm_message: {
+                                        content: curr.dm_message?.content ?? prev.dm_message.content,
+                                        embed: {
+                                            active: curr.dm_message?.embed?.active ?? prev.dm_message.embed.active,
+                                            title: typeof curr.dm_message?.embed?.title == 'undefined' ? prev.dm_message.embed.title : curr.dm_message.embed.title,
+                                            description: typeof curr.dm_message?.embed?.description == 'undefined' ? prev.dm_message.embed.description : curr.dm_message.embed.description,
+                                            url: typeof curr.dm_message?.embed?.url == 'undefined' ? prev.dm_message.embed.url : curr.dm_message.embed.url,
+                                            timestamp: typeof curr.dm_message?.embed?.timestamp == 'undefined' ? prev.dm_message.embed.timestamp : curr.dm_message.embed.timestamp,
+                                            color: typeof curr.dm_message?.embed?.color == 'undefined' ? prev.dm_message.embed.color : curr.dm_message.embed.color,
+                                            footer: {
+                                                text: typeof curr.dm_message?.embed?.footer?.text == 'undefined' ? prev.dm_message.embed.footer.text : curr.dm_message.embed.footer.text,
+                                                icon_url: typeof curr.dm_message?.embed?.footer?.icon_url == 'undefined' ? prev.dm_message.embed.footer.icon_url : curr.dm_message.embed.footer.icon_url
+                                            },
+                                            image: {
+                                                url: typeof curr.dm_message?.embed?.image?.url == 'undefined' ? prev.dm_message.embed.image.url : curr.dm_message.embed.image.url
+                                            },
+                                            thumbnail: {
+                                                url: typeof curr.dm_message?.embed?.thumbnail?.url == 'undefined' ? prev.dm_message.embed.thumbnail.url : curr.dm_message.embed.thumbnail.url
+                                            },
+                                            author: {
+                                                name: typeof curr.dm_message?.embed?.author?.name == 'undefined' ? prev.dm_message.embed.author.name : curr.dm_message.embed.author.name,
+                                                url: typeof curr.dm_message?.embed?.author?.url == 'undefined' ? prev.dm_message.embed.author.url : curr.dm_message.embed.author.url,
+                                                icon_url: typeof curr.dm_message?.embed?.author?.icon_url == 'undefined' ? prev.dm_message.embed.author.icon_url : curr.dm_message.embed.author.icon_url
+                                            },
+                                            fields: curr.dm_message?.embed?.fields ?? prev.dm_message.embed.fields
+                                        }
+                                    }
+                                }
+                            }
+                        })
                     }
                 }
             }
@@ -820,10 +864,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         })
                     }
                 }
+            }
 
-                if (Array.isArray(data.modules.levels.awards)) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.awards': data.modules.levels.awards.slice(0, (guild.server.premium.available ? 200 : 50)) } })
-                }
+            if (Array.isArray(data.modules.levels.awards)) {
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.awards': data.modules.levels.awards.slice(0, (guild.server.premium.available ? 200 : 50)) } })
             }
         }
 
@@ -842,11 +886,11 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
         }
 
         if (data.modules.music) {
-            if (Array.isArray(data.modules.music.allowed.channels)) {
+            if (Array.isArray(data.modules.music.allowed?.channels)) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.music.allowed.channels': data.modules.music.allowed.channels } })
             }
 
-            if (Array.isArray(data.modules.music.blocked.channels)) {
+            if (Array.isArray(data.modules.music.blocked?.channels)) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.music.blocked.channels': data.modules.music.blocked.channels } })
             }
 

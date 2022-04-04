@@ -799,6 +799,13 @@ export interface ServerDocument extends Document {
                         embed: MessageEmbed
                     }
                 }
+                [key: string]: {
+                    active: boolean
+                    dm_message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                }
             }
         }
         logs: {

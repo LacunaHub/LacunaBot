@@ -90,7 +90,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
         return false
     }
 
-    if (!amount) {
+    if (!amount && typeof amount !== 'number') {
         await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['set-wallet-balance'].texts.no_amount, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
 
         return false

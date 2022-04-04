@@ -115,7 +115,7 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
 
         await rest.post(Routes.webhook(webhook.id, webhook.token), {
             body: {
-                content: hasVideoUrl ? notificationText : `${notificationText}\n${videoUrl}`
+                content: hasVideoUrl ? notificationText : (notificationText ? `${notificationText}\n${videoUrl}` : videoUrl)
             }
         })
         .catch(() => {})

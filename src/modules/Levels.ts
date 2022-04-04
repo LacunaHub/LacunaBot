@@ -156,7 +156,7 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
 }
 
 export async function voiceUnassign(self: Lacuna, server: ServerDocument, state: VoiceState, channel: BaseGuildVoiceChannel) {
-    if (!server.modules.levels.voice || !server.server.premium.available) return false
+    if (!server.modules.levels.voice) return false
 
     const members = channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
