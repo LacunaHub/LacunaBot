@@ -231,7 +231,7 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
 
             if (roles.size) await member.roles.add(roles).catch(self.logger.error)
 
-            if (prevAward?.single) {
+            for (const prevAward of prevAwards.filter(i => i.single)) {
                 const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevAward.references.includes(r.id))
 
                 if (prevRoles.size) await member.roles.remove(prevRoles).catch(self.logger.error)
@@ -247,8 +247,8 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
 
             if (roles.size) await member.roles.add(roles).catch(self.logger.error)
 
-            if (prevAwards[1]?.single) {
-                const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevAwards[1].references.includes(r.id))
+            for (const prevPrevAward of prevAwards.slice(1).filter(i => i.single)) {
+                const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevPrevAward.references.includes(r.id))
 
                 if (prevRoles.size) await member.roles.remove(prevRoles).catch(self.logger.error)
             }
