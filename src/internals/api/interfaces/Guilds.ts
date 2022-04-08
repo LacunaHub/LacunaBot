@@ -198,7 +198,14 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
                 for (const log of data_logs) {
                     if (data.moderation.logs.types[log].active != guild.moderation.logs.types[log].active || data.moderation.logs.types[log].channel_id != guild.moderation.logs.types[log].channel_id) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { [`moderation.logs.types.${log}`]: { active: data.moderation.logs.types[log].active, channel_id: data.moderation.logs.types[log].channel_id } } })
+                        await Servers.updateOne({ _id: guild._id }, {
+                            $set: {
+                                [`moderation.logs.types.${log}`]: {
+                                    active: Boolean(data.moderation.logs.types[log].active ?? guild.moderation.logs.types[log].active),
+                                    channel_id: data.moderation.logs.types[log].channel_id ?? guild.moderation.logs.types[log].channel_id
+                                }
+                            }
+                        })
                     }
                 }
             }
