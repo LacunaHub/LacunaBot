@@ -122,6 +122,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.slash_commands': data.commands.slash_commands } })
             }
         }
+
+        if (typeof data.commands.prefix_commands === 'boolean' && data.commands.prefix_commands !== guild.commands.prefix_commands) {
+            await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.prefix_commands': data.commands.prefix_commands } })
+        }
     }
 
     if (data.moderation) {
