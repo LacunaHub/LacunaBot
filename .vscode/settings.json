@@ -1,0 +1,8 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": false,
+    "cSpell.language": "en,ru",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    }
+}

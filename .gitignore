@@ -103,7 +103,6 @@ dist
 .tern-port
 
 package-lock.json
-.vscode/
 database/playable-music-hosts.json
 database/prices.json
 json.sqlite
