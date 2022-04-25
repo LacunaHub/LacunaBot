@@ -1,15 +1,16 @@
-import Router from '@koa/router'
-import { Context } from 'koa'
-import { ReactionElement, ServerDocument, IAutoVoice } from '../../../database/schemas/Servers'
-import translator from '../../locale'
-import { resolveObjectPath } from '../../utility/Utils'
-import db from '../../../database'
-import qdb from 'quick.db'
-import Guilds from '../interfaces/Guilds'
-import { authorize, checkPermissions } from '../utility/Authorize'
 import { REST } from '@discordjs/rest'
+import Router from '@koa/router'
 import { Routes } from 'discord-api-types/v9'
 import { Constants } from 'discord.js'
+import { Context } from 'koa'
+import qdb from 'quick.db'
+import db from '../../../database'
+import { IAutoVoice, ReactionElement, ServerDocument } from '../../../database/schemas/Servers'
+import translator from '../../locale'
+import { resolveObjectPath } from '../../utility/Utils'
+import apiInterfaces from '../interfaces'
+import Guilds from '../interfaces/Guilds'
+import { authorize, checkPermissions } from '../utility/Authorize'
 
 const router: Router = new Router({ prefix: '/guilds' })
 const dsc = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
@@ -18,6 +19,7 @@ router.use(authorize)
 
 router.get('/:guild_id/settings', checkPermissions, getSettings)
 router.post('/:guild_id/settings', checkPermissions, updateSettings)
+router.post('/:guild_id/interactive-messages/:method', checkPermissions, updateInteractiveMessages)
 router.post('/:guild_id/reactions/:method', checkPermissions, addOrEditReaction)
 router.delete('/:guild_id/reactions/:reaction_id', checkPermissions, removeReaction)
 router.post('/:guild_id/subscriptions/twitch/:method', checkPermissions, updateTwitchSubscriptions)
@@ -31,19 +33,11 @@ async function getSettings(ctx: Context) {
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
-
-        return
-    }
+    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
 
     const selfMember = await dsc.get(Routes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {}) as any
 
-    if (!selfMember) {
-        ctx.status = 406; ctx.body = 'Not Acceptable'
-
-        return
-    }
+    if (!selfMember) ctx.throw(406, 'Not Acceptable')
 
     const guildChannels = await dsc.get(Routes.guildChannels(guild_id)).catch(() => {}) as any[] ?? []
     const guildRoles = await dsc.get(Routes.guildRoles(guild_id)).catch(() => {}) as any[] ?? []
@@ -124,7 +118,8 @@ async function getSettings(ctx: Context) {
             reactions: server.modules.reactions,
             autoreactions: server.modules.autoreactions,
             economy: server.modules.economy,
-            subscriptions: server.modules.subscriptions
+            subscriptions: server.modules.subscriptions,
+            interactive_messages: server.modules.interactive_messages
         },
         prices,
         change_log: server.change_log.reverse()
@@ -138,19 +133,11 @@ async function updateSettings(ctx: Context) {
 
     let server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
-
-        return
-    }
+    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
 
     const selfMember = await dsc.get(Routes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {}) as any
 
-    if (!selfMember) {
-        ctx.status = 406; ctx.body = 'Not Acceptable'
-
-        return
-    }
+    if (!selfMember) ctx.throw(406, 'Not Acceptable')
 
     const locale = translator.locale(server.locale)
 
@@ -208,11 +195,50 @@ async function updateSettings(ctx: Context) {
             reactions: server.modules.reactions,
             autoreactions: server.modules.autoreactions,
             economy: server.modules.economy,
-            subscriptions: server.modules.subscriptions
+            subscriptions: server.modules.subscriptions,
+            interactive_messages: server.modules.interactive_messages
         },
         prices,
         change_log: server.change_log.reverse()
     }
+}
+
+async function updateInteractiveMessages(ctx: Context) {
+    const guild_id: string = ctx.params.guild_id
+    const method: string = ctx.params.method
+    const data = ctx.request.body
+
+    if (!data) ctx.throw(400, 'Bad Request')
+
+    const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
+
+    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
+
+    let response: any
+
+    try {
+        switch(method) {
+            case 'create':
+                response = await apiInterfaces.im.createInteractiveMessage(server, data)
+            break
+
+            case 'update':
+                response = await apiInterfaces.im.updateInteractiveMessage(server, data)
+            break
+
+            case 'delete':
+                response = await apiInterfaces.im.deleteInteractiveMessage(server, data)
+            break
+
+            default:
+                throw new Error('UNKNOWN_METHOD')
+        }
+    } catch (err) {
+        ctx.throw(400, err.message)
+    }
+
+    ctx.status = 200
+    ctx.body = response
 }
 
 async function addOrEditReaction(ctx: Context) {
