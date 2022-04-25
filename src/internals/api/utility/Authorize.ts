@@ -1,8 +1,8 @@
 import { Permissions } from 'discord.js'
-import OAuth2, { OAuth2Guild, OAuth2User } from '../discord/OAuth2'
-import { isBotExpert } from '../interfaces/Guilds'
 import { Context, Next } from 'koa'
 import db from '../../../database'
+import OAuth2, { OAuth2Guild, OAuth2User } from '../discord/OAuth2'
+import { isBotExpert } from '../interfaces/Guilds'
 
 const oauth2 = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
 
@@ -58,7 +58,7 @@ export async function passKnownReferrers(ctx: Context, next: Next) {
     const referer = ctx.request.headers.referer
     const { allowedApiHosts: hosts, allowedApiUrls: urls } = await db.json.get()
 
-    if (ctx.hostname == 'localhost') {
+    if (process.env.NODE_ENV === 'development') {
         await next()
 
         return

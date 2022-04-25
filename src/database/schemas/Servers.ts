@@ -1,5 +1,5 @@
 import { MessageButtonStyle } from 'discord.js'
-import { model, Schema, Document } from 'mongoose'
+import { Document, model, Schema } from 'mongoose'
 
 export default model<ServerDocument>(
     'servers',
@@ -716,7 +716,8 @@ export default model<ServerDocument>(
             subscriptions: {
                 twitch: { type: Array, default: [] },
                 youtube: { type: Array, default: [] }
-            }
+            },
+            interactive_messages: { type: Array, default: [] }
         },
         utility: {
             giveaways: { type: Array, default: [] }
@@ -1198,6 +1199,7 @@ export interface ServerDocument extends Document {
             twitch: ITwitchSubscription[],
             youtube: IYouTubeSubscription[]
         }
+        interactive_messages: InteractiveMessage[]
     }
     utility: {
         giveaways: Giveaway[]
@@ -1410,28 +1412,119 @@ export interface ReactionElement {
     references: string[]
 }
 
-export interface InteractiveMessageComponent {
+export interface InteractiveMessage {
     id: string
+    channel_id: string
     message: {
         content: string
         embed: MessageEmbed
     }
-    rows: InteractiveButtonComponent[]
+    components: (InteractiveMessageButtonComponent | InteractiveMessageSelectMenuComponent)[][]
+    reactions: InteractiveMessageReaction[]
 }
 
-export interface InteractiveButtonComponent {
+export interface InteractiveMessageButtonComponent {
     id: string
-    type: 'CHANNEL' | 'ROLE'
-    label: string
-    style: MessageButtonStyle
+    type: 'BUTTON'
+    options: InteractiveMessageComponentOption[]
+    appearance: {
+        label: string
+        style: MessageButtonStyle
+        emoji: {
+            id: string
+            name: string
+            animated: boolean
+        }
+        url: string
+        disabled: boolean
+    }
+    ephemeral_reply?: {
+        content: string
+        embed: MessageEmbed
+    }
+    modify_roles?: {
+        add: string[]
+        remove: string[]
+        reversible_add: boolean
+        reversible_remove: boolean
+        duration: number
+    }
+    overwrite_channel_permissions?: {
+        channels: string[]
+        permissions: {
+            [key: string]: boolean
+        }
+        reversible: boolean
+    }
+}
+
+export interface InteractiveMessageSelectMenuComponent {
+    id: string
+    type: 'SELECT_MENU'
+    placeholder: string
+    _options: InteractiveMessageSelectMenuComponentOption[]
+    disabled: boolean
+}
+
+export interface InteractiveMessageSelectMenuComponentOption {
+    options: InteractiveMessageComponentOption[]
+    appearance: {
+        label: string
+        value: string
+        description: string
+        emoji: {
+            id: string
+            name: string
+            animated: boolean
+        }
+    }
+    ephemeral_reply?: {
+        content: string
+        embed: MessageEmbed
+    }
+    modify_roles?: {
+        add: string[]
+        remove: string[]
+        reversible_add: boolean
+        reversible_remove: boolean
+        duration: number
+    }
+    overwrite_channel_permissions?: {
+        channels: string[]
+        permissions: {
+            [key: string]: boolean
+        }
+        reversible: boolean
+    }
+}
+
+export type InteractiveMessageComponentOption = 'EPHEMERAL_REPLY' | 'MODIFY_ROLES' | 'OVERWRITE_CHANNEL_PERMISSIONS'
+
+export interface InteractiveMessageReaction {
+    id: string
+    options: InteractiveMessageReactionOption[]
     emoji: {
         id: string
         name: string
         animated: boolean
     }
-    url: string
-    references: string[]
+    modify_roles?: {
+        add: string[]
+        remove: string[]
+        reversible_add: boolean
+        reversible_remove: boolean
+        duration: number
+    }
+    overwrite_channel_permissions?: {
+        channels: string[]
+        permissions: {
+            [key: string]: boolean
+        }
+        reversible: boolean
+    }
 }
+
+export type InteractiveMessageReactionOption = 'MODIFY_ROLES' | 'OVERWRITE_CHANNEL_PERMISSIONS'
 
 export interface LevelAward {
     id: string
