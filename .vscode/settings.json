@@ -1,6 +1,6 @@
 {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": true,
     "cSpell.language": "en,ru",
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
