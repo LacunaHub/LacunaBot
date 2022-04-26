@@ -1,8 +1,7 @@
 import { CommandInteraction, GuildMember } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
-import { caseLog } from '../../../modules/Moderation'
-import { addWarn } from '../../../modules/Warnings'
+import { caseLog, warnings } from '../../../modules/Moderation'
 
 export async function addSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
     const locale = self.translator.locale(server.locale).commands
@@ -28,7 +27,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
-    await addWarn(self, server, interaction, { target: mention, executor: interaction.member as GuildMember, reason: reason })
+    await warnings.addWarn(self, server, interaction, { target: mention, executor: interaction.member as GuildMember, reason: reason })
 
     await interaction.reply({
         content: `${self._emojis.OK} | ${self.translator.format(locale.warn.add.texts.user_warned, `**${(interaction.member as any).displayName}**`, `**${mention.user.tag}**`)}`,

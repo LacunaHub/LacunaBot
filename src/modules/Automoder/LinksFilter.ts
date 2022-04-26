@@ -6,7 +6,7 @@ import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
 import TemporaryMute from '../../internals/structures/TemporaryMute'
 import Replacer from '../Replacer'
-import { addWarn } from '../Warnings'
+import { warnings } from '../Moderation'
 
 const reason = 'Автомодер: Фильтрация ссылок'
 
@@ -161,7 +161,7 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
     }
 
     if (warn) {
-        await addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason: reason })
+        await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason: reason })
     }
 
     if (send_message && (config.penalty.message.content || config.penalty.message.embed.active)) {
