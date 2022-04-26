@@ -1,4 +1,6 @@
-import { MessageEmbed, MessageActionRow, MessageButton, ContextMenuInteraction, BaseGuildTextChannel } from 'discord.js'
+import { BaseGuildTextChannel, ContextMenuInteraction, MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu } from 'discord.js'
+import moment from 'moment'
+import ms from 'ms'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { truncateString } from '../../../internals/utility/Utils'
@@ -7,7 +9,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
     const locale = self.translator.locale(server.locale).commands
 
     if (!server.modules.reports.active || !server.modules.reports.channel_id) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.reports_disabled_or_no_channel, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.reports_disabled_or_no_channel, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -15,7 +20,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
     const channel = interaction.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
 
     if (!channel) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.channel_not_found, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.channel_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -23,7 +31,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
     const target = await interaction.channel.messages.fetch(interaction.targetId).catch(() => {})
 
     if (!target) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.no_message, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.no_message, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -32,7 +43,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
     if (!entry) self.qdb.set(`reports.${interaction.targetId}`, { timestamp: target.createdTimestamp, users: [] })
 
     if (entry?.users?.includes(interaction.user.id)) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.already_reported, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.already_reported, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -45,26 +59,43 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
     if (!report) {
         const embed = new MessageEmbed()
             .setAuthor({ name: target.author.tag, iconURL: target.author.displayAvatarURL() })
-            .addField('Канал сообщения', `<#${target.channelId}>`, true)
-            .addField('Количество репортов', '1', true)
+            .addField(locale.report.texts.message_channel, `<#${target.channelId}>`, true)
+            .addField(locale.report.texts.report_count, '1', true)
             .setFooter({ text: `ID: ${target.id}` })
             .setTimestamp(target.createdTimestamp)
 
         if (target.attachments.filter(file => Boolean(file.width)).size > 0) embed.setImage(target.attachments.first().proxyURL)
         if (target.content) embed.setDescription(`${truncateString(target.content, 768)}${target.embeds[0] ? `\n\`[${locale.report.texts.attachments}]\`` : ''}`)
 
-        const row = new MessageActionRow()
-            .addComponents(
-                new MessageButton()
-                    .setLabel(locale.report.texts.jump_to_message)
-                    .setStyle('LINK')
-                    .setURL(target.url)
+        const selectMenuOptions = ['indefinitely', '10m', '30m', '1h', '2h', '5h', '12h', '1d', '3d', '7d', '14d'].map(i => {
+            return {
+                label:
+                    i == 'indefinitely'
+                        ? locale.common.texts.indefinitely.toLowerCase()
+                        : moment(Date.now() + ms(i))
+                              .locale(server.locale)
+                              .fromNow(true),
+                value: i
+            }
+        })
+
+        const rows = [
+            new MessageActionRow().addComponents(
+                new MessageButton().setCustomId(`R-KICK-${target.author.id}`).setLabel(locale.report.texts.quick_actions.KICK).setStyle('DANGER'),
+                new MessageButton().setCustomId(`R-WARN-${target.author.id}`).setLabel(locale.report.texts.quick_actions.WARN).setStyle('PRIMARY'),
+                new MessageButton().setCustomId(`R-SKIP-${target.author.id}`).setLabel(locale.report.texts.quick_actions.IGNORE).setStyle('SECONDARY'),
+                new MessageButton().setLabel(locale.report.texts.jump_to_message).setStyle('LINK').setURL(target.url)
+            ),
+            new MessageActionRow().addComponents(
+                new MessageSelectMenu().setCustomId(`R-BAN-${target.author.id}`).setPlaceholder(locale.report.texts.quick_actions.BAN).setOptions(selectMenuOptions)
+            ),
+            new MessageActionRow().addComponents(
+                new MessageSelectMenu().setCustomId(`R-MUTE-${target.author.id}`).setPlaceholder(locale.report.texts.quick_actions.MUTE).setOptions(selectMenuOptions.slice(1))
             )
+        ]
 
-        await channel.send({ embeds: [embed], components: [row] }).catch(self.logger.error)
-    }
-
-    else {
+        await channel.send({ embeds: [embed], components: rows }).catch(self.logger.error)
+    } else {
         const embed = new MessageEmbed(report.embeds[0])
         const count = embed.fields[1].value
 
@@ -73,7 +104,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
         await report.edit({ embeds: [embed] }).catch(self.logger.error)
     }
 
-    await interaction.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.report.texts.report_confirm, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+    await interaction.reply({
+        content: `${self._emojis.OK} | ${self.translator.format(locale.report.texts.report_confirm, `**${(interaction.member as any).displayName}**`)}`,
+        ephemeral: true
+    })
 
     return true
 }

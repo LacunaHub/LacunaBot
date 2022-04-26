@@ -4,6 +4,7 @@ import Lacuna from '../../internals/Lacuna'
 import { buttonPressed } from '../../internals/structures/Giveaway'
 import { resolveObjectPath } from '../../internals/utility/Utils'
 import Replacer from '../../modules/Replacer'
+import reports from '../../modules/Reports'
 
 const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMenuInteraction | ButtonInteraction) => {
     if (!interaction.inGuild() || interaction.inRawGuild()) return false
@@ -28,53 +29,61 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
     if (interaction.isButton()) {
         if (/GIVEAWAY\-\d+/.test(interaction.customId)) {
             await buttonPressed(self, server, interaction)
-        } else {
-            const im = server.modules.interactive_messages.slice(0, server.server.premium.available ? 50 : 5).find(i => i.id == interaction.message.id)
 
-            if (im) {
-                await interaction.deferUpdate()
+            return true
+        }
 
-                const buttons = im.components.flat().filter(i => i.type == 'BUTTON')
-                const button = buttons.find(i => i.id == interaction.customId) as InteractiveMessageButtonComponent
+        if (/R\-\w+\-\d+/.test(interaction.customId)) {
+            await reports.buttonPressed(self, server, interaction)
 
-                if (button?.options?.includes('EPHEMERAL_REPLY') && button?.ephemeral_reply) {
-                    const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
-                    const content = await replacer.replaceTemplateMessage(button.ephemeral_reply)
+            return true
+        }
 
-                    await interaction.followUp({ ...content, ephemeral: true }).catch(() => {})
+        const im = server.modules.interactive_messages.slice(0, server.server.premium.available ? 50 : 5).find(i => i.id == interaction.message.id)
+
+        if (im) {
+            await interaction.deferUpdate()
+
+            const buttons = im.components.flat().filter(i => i.type == 'BUTTON')
+            const button = buttons.find(i => i.id == interaction.customId) as InteractiveMessageButtonComponent
+
+            if (button?.options?.includes('EPHEMERAL_REPLY') && button?.ephemeral_reply) {
+                const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
+                const content = await replacer.replaceTemplateMessage(button.ephemeral_reply)
+
+                await interaction.followUp({ ...content, ephemeral: true }).catch(() => {})
+            }
+
+            if (button?.options?.includes('MODIFY_ROLES') && button?.modify_roles) {
+                const addRoles = interaction.guild.roles.cache.filter(i => i.editable && button.modify_roles.add.includes(i.id)).first(8)
+                const removeRoles = interaction.guild.roles.cache.filter(i => i.editable && button.modify_roles.remove.includes(i.id)).first(8)
+
+                if (addRoles.length) {
+                    const hasRoles = button.modify_roles.reversible_add && interaction.member.roles.cache.hasAny(...addRoles.map(i => i.id))
+
+                    if (hasRoles) await interaction.member.roles.remove(addRoles).catch(() => {})
+                    else await interaction.member.roles.add(addRoles).catch(() => {})
                 }
 
-                if (button?.options?.includes('MODIFY_ROLES') && button?.modify_roles) {
-                    const addRoles = interaction.guild.roles.cache.filter(i => i.editable && button.modify_roles.add.includes(i.id)).first(8)
-                    const removeRoles = interaction.guild.roles.cache.filter(i => i.editable && button.modify_roles.remove.includes(i.id)).first(8)
+                if (removeRoles.length) {
+                    const missingRoles = button.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
 
-                    if (addRoles.length) {
-                        const hasRoles = button.modify_roles.reversible_add && interaction.member.roles.cache.hasAny(...addRoles.map(i => i.id))
-
-                        if (hasRoles) await interaction.member.roles.remove(addRoles).catch(() => {})
-                        else await interaction.member.roles.add(addRoles).catch(() => {})
-                    }
-
-                    if (removeRoles.length) {
-                        const missingRoles = button.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
-
-                        if (missingRoles) await interaction.member.roles.add(removeRoles).catch(() => {})
-                        else await interaction.member.roles.remove(removeRoles).catch(() => {})
-                    }
+                    if (missingRoles) await interaction.member.roles.add(removeRoles).catch(() => {})
+                    else await interaction.member.roles.remove(removeRoles).catch(() => {})
                 }
+            }
 
-                if (button?.options?.includes('OVERWRITE_CHANNEL_PERMISSIONS') && button?.overwrite_channel_permissions) {
-                    // prettier-ignore
-                    const channels = interaction.guild.channels.cache.filter(i => i.manageable && button.overwrite_channel_permissions.channels.includes(i.id)) as Collection<string, GuildChannel>
+            if (button?.options?.includes('OVERWRITE_CHANNEL_PERMISSIONS') && button?.overwrite_channel_permissions) {
+                // prettier-ignore
+                const channels = interaction.guild.channels.cache.filter(i => i.manageable && button.overwrite_channel_permissions.channels.includes(i.id)) as Collection<string, GuildChannel>
 
-                    for (const channel of channels.first(8)) {
-                        const overwrites = channel.permissionOverwrites.cache.get(interaction.user.id)
+                for (const channel of channels.first(8)) {
+                    const overwrites = channel.permissionOverwrites.cache.get(interaction.user.id)
 
-                        if (overwrites && button.overwrite_channel_permissions.reversible) {
-                            await overwrites.delete().catch(() => {})
-                        } else {
-                            await channel.permissionOverwrites.create(interaction.user.id, button.overwrite_channel_permissions.permissions).catch(() => {})
-                        }
+                    if (overwrites && button.overwrite_channel_permissions.reversible) {
+                        await overwrites.delete().catch(() => {})
+                    } else {
+                        await channel.permissionOverwrites.create(interaction.user.id, button.overwrite_channel_permissions.permissions).catch(() => {})
                     }
                 }
             }
@@ -82,6 +91,12 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
     }
 
     if (interaction.isSelectMenu()) {
+        if (/R\-\w+\-\d+/.test(interaction.customId)) {
+            await reports.optionSelected(self, server, interaction)
+
+            return true
+        }
+
         const im = server.modules.interactive_messages.slice(0, server.server.premium.available ? 50 : 5).find(i => i.id == interaction.message.id)
 
         if (im) {
@@ -135,6 +150,8 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
             }
         }
     }
+
+    return true
 }
 
 export default {
