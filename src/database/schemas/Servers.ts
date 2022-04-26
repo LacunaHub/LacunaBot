@@ -24,6 +24,7 @@ export default model<ServerDocument>(
         moderation: {
             case_log: {
                 cases: { type: Array, default: [] },
+                case_count: { type: Number, default: 0 },
                 channel_id: { type: String, default: '' },
                 case_types: {
                     BAN_ADD: { type: Boolean, default: true },
@@ -760,6 +761,7 @@ export interface ServerDocument extends Document {
     moderation: {
         case_log: {
             cases: ModerationCase[]
+            case_count: number
             channel_id: string
             case_types: {
                 BAN_ADD: boolean
@@ -1330,7 +1332,7 @@ export interface CustomCommandActionReply {
 
 export interface ModerationCase {
     case_id: number
-    type: number
+    type: number | string
     timestamp: number
     reason: string
     target: {
