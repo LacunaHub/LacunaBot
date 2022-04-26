@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember, Message } from 'discord.js'
+import { ButtonInteraction, CommandInteraction, GuildMember, Message } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
 import { ServerDocument, WarningsPenalty, WarningsViolator } from '../../database/schemas/Servers'
@@ -9,7 +9,7 @@ import { generateSimpleId } from '../../internals/utility/UID'
 import { caseLog } from './'
 import Replacer from './../Replacer'
 
-export async function addWarn(self: Lacuna, server: ServerDocument, signal: Message | CommandInteraction, options: WarnOptions) {
+export async function addWarn(self: Lacuna, server: ServerDocument, signal: Message | CommandInteraction | ButtonInteraction, options: WarnOptions) {
     const target = options.target,
         executor = options.executor,
         reason = options.reason
@@ -180,7 +180,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
     }
 
     if (server.moderation.case_log.case_types_messages.WARN_ADD.active) {
-        const replacer = new Replacer(null, { guild: signal.guild, member: target, message: signal instanceof Message ? signal : undefined, penalty: { reason } })
+        const replacer = new Replacer(null, { guild: signal.guild, member: target, message: signal instanceof Message ? signal : undefined, penalty: { reason: reason ?? '-' } })
         const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.WARN_ADD.dm_message)
 
         await target.send(dm_message).catch(self.logger.error)
@@ -192,5 +192,5 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
 export interface WarnOptions {
     target: GuildMember
     executor: GuildMember
-    reason: string
+    reason?: string
 }

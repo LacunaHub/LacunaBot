@@ -4,5 +4,6 @@
     "cSpell.language": "en,ru",
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
-    }
+    },
+    "cSpell.words": ["bannable", "kickable"]
 }
