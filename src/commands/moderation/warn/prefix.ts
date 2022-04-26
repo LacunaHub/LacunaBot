@@ -1,13 +1,13 @@
-import { BaseGuildTextChannel, Message, MessageEmbed } from 'discord.js'
+import { Message } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
-import { images } from '../../../modules/Logs'
+import { caseLog } from '../../../modules/Moderation'
 import { addWarn } from '../../../modules/Warnings'
 
-export async function addPrefix (self: Lacuna, server: ServerDocument, message: Message) {
+export async function addPrefix(self: Lacuna, server: ServerDocument, message: Message) {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.members.first() || (message['args'][0] ? (await message.guild.members.fetch(message['args'][0])) : null)
+    const mention = message.mentions.members.first() || (message['args'][0] ? await message.guild.members.fetch(message['args'][0]) : null)
     const reason = message['args'].slice(1).join(' ') || '-'
 
     if (!mention) {
@@ -24,7 +24,9 @@ export async function addPrefix (self: Lacuna, server: ServerDocument, message: 
 
     await addWarn(self, server, message, { target: mention, executor: message.member, reason: reason })
 
-    await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.warn.add.texts.user_warned, `**${message.member.displayName}**`, `**${mention.user.tag}**`)}` })
+    await message.reply({
+        content: `${self._emojis.OK} | ${self.translator.format(locale.warn.add.texts.user_warned, `**${message.member.displayName}**`, `**${mention.user.tag}**`)}`
+    })
 
     return true
 }
@@ -32,7 +34,7 @@ export async function addPrefix (self: Lacuna, server: ServerDocument, message: 
 export async function removePrefix(self: Lacuna, server: ServerDocument, message: Message) {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.members.first() || (message['args'][0] ? (await message.guild.members.fetch(message['args'][0])) : null)
+    const mention = message.mentions.members.first() || (message['args'][0] ? await message.guild.members.fetch(message['args'][0]) : null)
     const warn_id = message['args'][1]
     const reason = message['args'].slice(2).join(' ') || '-'
 
@@ -51,77 +53,50 @@ export async function removePrefix(self: Lacuna, server: ServerDocument, message
     const violator = server.moderation.warnings.violators.find(v => v.user_id == mention.id)
 
     if (!violator || !violator.violations.length) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.no_violator_or_violations, `**${message.member.displayName}**`)}` })
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.no_violator_or_violations, `**${message.member.displayName}**`)}`
+        })
 
         return false
     }
 
     if (warn_id === 'all') {
-        await self.db.servers.updateOne({ _id: message.guild.id }, {
-            $pull: {
-                'moderation.warnings.violators': {
-                    user_id: mention.id
+        await self.db.servers.updateOne(
+            { _id: message.guild.id },
+            {
+                $pull: {
+                    'moderation.warnings.violators': {
+                        user_id: mention.id
+                    }
                 }
             }
-        })
+        )
 
         await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.warn.remove.texts.warns_removed_all, `**${message.member.displayName}**`)}` })
-    }
-
-    else {
-        const violation = violator.violations.find((v, i) => v.id == warn_id || (i + 1) == warn_id)
+    } else {
+        const violation = violator.violations.find((v, i) => v.id == warn_id || i + 1 == warn_id)
 
         if (!violation) {
             await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.invalid_warn_id, `**${message.member.displayName}**`)}` })
-    
+
             return false
         }
-    
-        await self.db.servers.updateOne({ _id: message.guild.id, 'moderation.warnings.violators.user_id': mention.id }, {
-            $pull: {
-                'moderation.warnings.violators.$.violations': {
-                    id: violation.id
+
+        await self.db.servers.updateOne(
+            { _id: message.guild.id, 'moderation.warnings.violators.user_id': mention.id },
+            {
+                $pull: {
+                    'moderation.warnings.violators.$.violations': {
+                        id: violation.id
+                    }
                 }
             }
-        })
+        )
 
         await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.warn.remove.texts.warn_removed, `**${message.member.displayName}**`)}` })
     }
 
-    const case_log = message.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
-    const case_id: number = server.moderation.case_log.cases.length + 1
-
-    const case_log_message = new MessageEmbed()
-        .setAuthor({ name: locale.common.case_log.cases.WARN_REMOVE, iconURL: images.WARN_REMOVE })
-        .addField(locale.common.case_log.target, `${mention.user.tag}\n(${mention.id})`, true)
-        .addField(locale.common.case_log.executor, message.member.user.tag, true)
-        .addField(locale.common.case_log.reason, reason)
-        .setFooter({ text: self.translator.format(locale.common.case_log.case, case_id) })
-        .setTimestamp()
-        .setColor('#2FDF84')
-
-    if (case_log && server.moderation.case_log.case_types.WARN_REMOVE) {
-        await case_log.send({ embeds: [case_log_message] }).catch(self.logger.error)
-    
-        await self.db.servers.updateOne({ _id: message.guild.id }, {
-            $push: {
-                'moderation.case_log.cases': {
-                    case_id: case_id,
-                    type: 1 << 9,
-                    timestamp: Date.now(),
-                    reason: reason,
-                    target: {
-                        id: mention.id,
-                        name: mention.user.tag
-                    },
-                    executor: {
-                        id: message.member.id,
-                        name: message.member.user.tag
-                    }
-                }
-            }
-        })
-    }
+    await caseLog.createCaseEntry(server, message.guild, { type: 'WARN_REMOVE', target: mention.user, executor: message.author, reason })
 
     return true
 }
