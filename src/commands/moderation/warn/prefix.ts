@@ -1,8 +1,7 @@
 import { Message } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
-import { caseLog } from '../../../modules/Moderation'
-import { addWarn } from '../../../modules/Warnings'
+import { caseLog, warnings } from '../../../modules/Moderation'
 
 export async function addPrefix(self: Lacuna, server: ServerDocument, message: Message) {
     const locale = self.translator.locale(server.locale).commands
@@ -22,7 +21,7 @@ export async function addPrefix(self: Lacuna, server: ServerDocument, message: M
         return false
     }
 
-    await addWarn(self, server, message, { target: mention, executor: message.member, reason: reason })
+    await warnings.addWarn(self, server, message, { target: mention, executor: message.member, reason: reason })
 
     await message.reply({
         content: `${self._emojis.OK} | ${self.translator.format(locale.warn.add.texts.user_warned, `**${message.member.displayName}**`, `**${mention.user.tag}**`)}`

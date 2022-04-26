@@ -1,12 +1,13 @@
 import { CommandInteraction, GuildMember, Message } from 'discord.js'
 import moment from 'moment'
-import { ServerDocument, WarningsPenalty, WarningsViolator } from '../database/schemas/Servers'
-import Lacuna from '../internals/Lacuna'
-import TemporaryBan from '../internals/structures/TemporaryBan'
-import TemporaryMute from '../internals/structures/TemporaryMute'
-import { generateSimpleId } from '../internals/utility/UID'
-import { caseLog } from './Moderation'
-import Replacer from './Replacer'
+import ms from 'ms'
+import { ServerDocument, WarningsPenalty, WarningsViolator } from '../../database/schemas/Servers'
+import Lacuna from '../../internals/Lacuna'
+import TemporaryBan from '../../internals/structures/TemporaryBan'
+import TemporaryMute from '../../internals/structures/TemporaryMute'
+import { generateSimpleId } from '../../internals/utility/UID'
+import { caseLog } from './'
+import Replacer from './../Replacer'
 
 export async function addWarn(self: Lacuna, server: ServerDocument, signal: Message | CommandInteraction, options: WarnOptions) {
     const target = options.target,
@@ -28,7 +29,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
                             {
                                 id: generateSimpleId(5),
                                 timestamp: timestamp,
-                                reason: reason || ''
+                                reason: reason ?? null
                             }
                         ]
                     }
@@ -43,7 +44,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
                     'moderation.warnings.violators.$.violations': {
                         id: generateSimpleId(5),
                         timestamp: timestamp,
-                        reason: reason || ''
+                        reason: reason ?? null
                     }
                 }
             }
@@ -75,45 +76,61 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
         }
 
         if (mute && !ban && !kick) {
-            const mute_role = signal.guild.roles.cache.get(server.moderation.roles.mute)
-            const tempmute = self.tempmutes.find(tm => tm.user_id == target.user.id)
+            if (server.moderation.use_timeout_mute) {
+                let duration = penalty.duration * 1000
 
-            if (mute_role && !tempmute && !mute_role.members.has(target.user.id)) {
-                if (penalty.duration) {
-                    const expires_timestamp = Date.now() + penalty.duration * 1000
+                if (duration < ms('1m')) duration = ms('1m')
+                else if (duration > ms('28d')) duration = ms('28d')
 
-                    new TemporaryMute(self, {
-                        user_id: target.user.id,
-                        guild_id: signal.guild.id,
-                        role_id: mute_role.id,
-                        expires_timestamp: expires_timestamp,
-                        reason: `Автомодер: Предупреждение (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
-                        initial: true
-                    })
-                } else {
-                    if (server.moderation.roles.on_mute.remove_all_roles) {
-                        const current_roles: string[] = target.roles.cache.filter(r => r.editable && r.id != signal.guild.id).map(r => r.id)
+                await target
+                    .disableCommunicationUntil(
+                        Date.now() + duration,
+                        `Автомодер: Предупреждение (${moment(Date.now() + duration)
+                            .locale(server.locale)
+                            .fromNow(true)})`
+                    )
+                    .catch(() => {})
+            } else {
+                const mute_role = signal.guild.roles.cache.get(server.moderation.roles.mute)
+                const tempmute = self.tempmutes.find(tm => tm.user_id == target.user.id)
 
-                        await self.db.servers.updateOne(
-                            { _id: signal.guild.id },
-                            {
-                                $push: {
-                                    'moderation.roles.on_mute.returnable_roles': {
-                                        user_id: target.id,
-                                        roles: current_roles
+                if (mute_role && !tempmute && !mute_role.members.has(target.user.id)) {
+                    if (penalty.duration) {
+                        const expires_timestamp = Date.now() + penalty.duration * 1000
+
+                        new TemporaryMute(self, {
+                            user_id: target.user.id,
+                            guild_id: signal.guild.id,
+                            role_id: mute_role.id,
+                            expires_timestamp: expires_timestamp,
+                            reason: `Автомодер: Предупреждение (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
+                            initial: true
+                        })
+                    } else {
+                        if (server.moderation.roles.on_mute.remove_all_roles) {
+                            const current_roles: string[] = target.roles.cache.filter(r => r.editable && r.id != signal.guild.id).map(r => r.id)
+
+                            await self.db.servers.updateOne(
+                                { _id: signal.guild.id },
+                                {
+                                    $push: {
+                                        'moderation.roles.on_mute.returnable_roles': {
+                                            user_id: target.id,
+                                            roles: current_roles
+                                        }
                                     }
                                 }
-                            }
-                        )
+                            )
 
-                        const strict_roles: string[] = [
-                            ...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)),
-                            ...target.roles.cache.filter(r => !r.editable).map(r => r.id)
-                        ]
+                            const strict_roles: string[] = [
+                                ...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)),
+                                ...target.roles.cache.filter(r => !r.editable).map(r => r.id)
+                            ]
 
-                        await target.roles.set([mute_role.id, ...strict_roles], reason).catch(self.logger.error)
-                    } else {
-                        await target.roles.add(mute_role.id, 'Автомодер: Предупреждение').catch(self.logger.error)
+                            await target.roles.set([mute_role.id, ...strict_roles], reason).catch(self.logger.error)
+                        } else {
+                            await target.roles.add(mute_role.id, 'Автомодер: Предупреждение').catch(self.logger.error)
+                        }
                     }
                 }
             }
@@ -176,8 +193,4 @@ export interface WarnOptions {
     target: GuildMember
     executor: GuildMember
     reason: string
-}
-
-export default {
-    addWarn
 }
