@@ -22,7 +22,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
 
             if (channel && channel.manageable) await state.member.voice.setChannel(child.channel_id)
 
-            self.emit('moduleExecution', { module: 'Temp Voice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
+            self.emit('moduleExecution', { module: 'Autovoice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
 
             return true
         }
@@ -77,7 +77,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
 
         if (moveable) await state.setChannel(temp_voice.id)
 
-        self.emit('moduleExecution', { module: 'Temp Voice: Create', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
+        self.emit('moduleExecution', { module: 'Autovoice: Create', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
     
         return true
     }
@@ -89,7 +89,7 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
     const autovoice = server.modules.voice_manager.autovoices.find(i => i.channel_id == state.channelId)
     const beforeAutovoice = server.modules.voice_manager.autovoices.find(i => i.children.some(c => c.channel_id == before.channelId))
 
-    if (autovoice && state.guild.me.permissions.has('MANAGE_CHANNELS')) {
+    if (autovoice && state.guild.me.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_CHANNELS)) {
         const child = autovoice.children.find(c => c.owner_id == state.member.id)
 
         if (child) {
@@ -97,24 +97,22 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
 
             if (channel && channel.manageable) await state.setChannel(child.channel_id)
 
-            self.emit('moduleExecution', { module: 'Temp Voice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
+            self.emit('moduleExecution', { module: 'Autovoice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
 
             return true
         }
 
         await createTemporaryVoice(self, server, state)
-    
-        return true
     }
 
-    if (beforeAutovoice && state.guild.me.permissions.has('MANAGE_CHANNELS')) {
+    if (beforeAutovoice && state.guild.me.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_CHANNELS)) {
         const child = beforeAutovoice.children.find(c => c.channel_id == before.channelId)
         const channel = state.guild.channels.cache.get(child.channel_id) as BaseGuildVoiceChannel
 
         if (channel && state.channelId == beforeAutovoice.channel_id && child.owner_id == state.member.id) {
             if (channel.manageable) await state.setChannel(child.channel_id, '')
 
-            self.emit('moduleExecution', { module: 'Temp Voice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
+            self.emit('moduleExecution', { module: 'Autovoice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
 
             return true
         }
@@ -130,7 +128,7 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
 
             if (channel.deletable) await channel.delete()
 
-            self.emit('moduleExecution', { module: 'Temp Voice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
+            self.emit('moduleExecution', { module: 'Autovoice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
         }
 
         else if (child && channel && channel.members.size) {
@@ -142,17 +140,15 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
                 }
             })
         }
-
-        return true
     }
 
-    return false
+    return true
 }
 
 export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument, channel: VoiceChannel) {
     const autovoice = server.modules.voice_manager.autovoices.find(i => i.children.some(c => c.channel_id == channel?.id))
 
-    if (autovoice && channel.guild.me.permissions.has('MANAGE_CHANNELS')) {
+    if (autovoice && channel.guild.me.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_CHANNELS)) {
         const child = autovoice.children.find(c => c.channel_id == channel.id)
 
         if (child && !channel.members.size) {
@@ -166,7 +162,7 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
 
             if (channel.deletable) await channel.delete()
 
-            self.emit('moduleExecution', { module: 'Temp Voice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
+            self.emit('moduleExecution', { module: 'Autovoice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
         }
 
         else if (child && channel.members.size) {
