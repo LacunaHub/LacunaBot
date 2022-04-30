@@ -46,6 +46,10 @@ const handler = async (self: Lacuna, member: GuildMember, roles: Collection<stri
         }
     }
 
+    const temprole = self.temproles.find(i => i.user_id == member.id)
+
+    if (temprole && roles.some(i => i.id == temprole.role_id)) await temprole.delete()
+
     await RoleMemberRemove(self, server, member, roles)
 
     return true
