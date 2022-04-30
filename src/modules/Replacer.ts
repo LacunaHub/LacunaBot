@@ -1,10 +1,9 @@
 import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageEmbed } from 'discord.js'
 import moment from 'moment'
-import { MessageEmbed as IMessageEmbed } from '../database/schemas/Servers'
-import { Level, IActivities } from '../database/schemas/Activities'
-import { escapeRegexp, resolveObjectPath, parseCommandArguments } from '../internals/utility/Utils'
 import db from '../database'
+import { MessageEmbed as IMessageEmbed } from '../database/schemas/Servers'
 import logger from '../internals/Logger'
+import { escapeRegexp, parseCommandArguments, resolveObjectPath } from '../internals/utility/Utils'
 
 export default class Replacer {
     public string: string
@@ -33,6 +32,7 @@ export default class Replacer {
                 'CHOOSE',
                 'DATE',
                 'DATENOW',
+                'FIXNUM',
                 'LOWER',
                 'MATH',
                 'NUMDECL',
@@ -55,6 +55,9 @@ export default class Replacer {
                     break
                     case 'DATENOW':
                         fn = DATENOW
+                    break
+                    case 'FIXNUM':
+                        fn = FIXNUM
                     break
                     case 'LOWER':
                         fn = LOWER
@@ -92,14 +95,14 @@ export default class Replacer {
         const guild = this.shapers.guild
         const member = this.shapers.member
 
-        const activities = (await db.users.find({ 'activities.levels.guild_id': guild.id }))
+        const activities = (await db.users.find({ $or: [{ 'activities.levels.guild_id': guild.id }, { 'activities.wallets.guild_id': guild.id }] }))
             .map(i => ({
                 user: { id: i._id, ...i.user },
                 level: i.activities.levels.find(i => i.guild_id == guild.id),
                 wallet: i.activities.wallets.find(i => i.guild_id == guild.id)
             })
         )
-        const memberLevel = activities.find(i => i.user.id == member.id)
+        const memberActivity = activities.find(i => i.user.id == member.id)
         const server_owner: GuildMember = await guild.members.fetch(guild.ownerId)
 
         const args: string[] = parseCommandArguments(message?.content?.split(' ')?.slice(1)?.join(' '))
@@ -124,70 +127,72 @@ export default class Replacer {
                 type: message?.type,
                 url: message?.url,
                 mentions: {
-                    members: message?.mentions?.members?.size ? Object.assign({},
-                        ...message?.mentions?.members?.map(
-                            (m, i, col) => ({
-                                [[ ...col.keys() ].indexOf(i)]: {
-                                    mention: `<@${m.id}>`,
-                                    username: m.user.username,
-                                    avatar: m.displayAvatarURL(),
-                                    discriminator: m.user.discriminator,
-                                    display_name: m.displayName,
-                                    id: m.id,
-                                    tag: m.user.tag,
-                                    bot: m.user.bot,
-                                    created_at: m.user.createdTimestamp,
-                                    joined_at: m.joinedTimestamp,
-                                    nickname: m.nickname,
-                                    voice: {
-                                        name: m.voice?.channel?.name,
-                                        id: m.voice?.channelId,
-                                        mention: m.voice ? `<#${m.voice.channelId}>` : null,
-                                        full: m.voice?.channel?.full,
-                                        position: m.voice?.channel?.rawPosition?.toString()
-                                    },
-                                    roles: Object.assign({},
-                                        ...m.roles.cache.map(
-                                            r => ({
-                                                [r.id]: {
-                                                    name: r.name,
-                                                    mention: `<@&${r.id}>`,
-                                                    id: r.id,
-                                                    position: r.rawPosition.toString(),
-                                                    color: r.hexColor,
-                                                    created_at: r.createdTimestamp
-                                                }
-                                            })
-                                        )
-                                    )
-                                }
-                            })
-                        )
-                    ) : {},
-                    roles: message?.mentions?.roles?.size ? Object.assign({},
-                        ...message?.mentions?.roles?.map(
-                            (m, i, col) => ({
-                                [[ ...col.keys() ].indexOf(i)]: {
-                                    mention: `<@&${m.id}>`,
-                                    name: m.name,
-                                    id: m.id,
-                                    position: m.rawPosition.toString(),
-                                    color: m.hexColor,
-                                    created_at: m.createdTimestamp
-                                }
-                            })
-                        )
-                    ) : {},
-                    channels: message?.mentions?.channels?.size ? Object.assign({},
-                        ...message?.mentions?.channels?.map(
-                            (m, i, col) => ({
-                                [[ ...col.keys() ].indexOf(i)]: {
-                                    mention: `<#${m.id}>`,
-                                    type: m.type
-                                }
-                            })
-                        )
-                    ) : {}
+                    members: message?.mentions?.members?.size
+                        ? Object.assign(
+                              {},
+                              ...message?.mentions?.members?.map((m, i, col) => ({
+                                  [[...col.keys()].indexOf(i)]: {
+                                      mention: `<@${m.id}>`,
+                                      username: m.user.username,
+                                      avatar: m.displayAvatarURL(),
+                                      discriminator: m.user.discriminator,
+                                      display_name: m.displayName,
+                                      id: m.id,
+                                      tag: m.user.tag,
+                                      bot: m.user.bot,
+                                      created_at: m.user.createdTimestamp,
+                                      joined_at: m.joinedTimestamp,
+                                      nickname: m.nickname,
+                                      voice: {
+                                          name: m.voice?.channel?.name,
+                                          id: m.voice?.channelId,
+                                          mention: m.voice ? `<#${m.voice.channelId}>` : null,
+                                          full: m.voice?.channel?.full,
+                                          position: m.voice?.channel?.rawPosition?.toString()
+                                      },
+                                      roles: Object.assign(
+                                          {},
+                                          ...m.roles.cache.map(r => ({
+                                              [r.id]: {
+                                                  name: r.name,
+                                                  mention: `<@&${r.id}>`,
+                                                  id: r.id,
+                                                  position: r.rawPosition.toString(),
+                                                  color: r.hexColor,
+                                                  created_at: r.createdTimestamp
+                                              }
+                                          }))
+                                      )
+                                  }
+                              }))
+                          )
+                        : {},
+                    roles: message?.mentions?.roles?.size
+                        ? Object.assign(
+                              {},
+                              ...message?.mentions?.roles?.map((m, i, col) => ({
+                                  [[...col.keys()].indexOf(i)]: {
+                                      mention: `<@&${m.id}>`,
+                                      name: m.name,
+                                      id: m.id,
+                                      position: m.rawPosition.toString(),
+                                      color: m.hexColor,
+                                      created_at: m.createdTimestamp
+                                  }
+                              }))
+                          )
+                        : {},
+                    channels: message?.mentions?.channels?.size
+                        ? Object.assign(
+                              {},
+                              ...message?.mentions?.channels?.map((m, i, col) => ({
+                                  [[...col.keys()].indexOf(i)]: {
+                                      mention: `<#${m.id}>`,
+                                      type: m.type
+                                  }
+                              }))
+                          )
+                        : {}
                 }
             },
             guild: {
@@ -203,8 +208,7 @@ export default class Replacer {
                     text: guild.channels.cache.filter(channel => channel.type == 'GUILD_TEXT').size,
                     voice: guild.channels.cache.filter(channel => channel.type == 'GUILD_VOICE').size,
                     news: guild.channels.cache.filter(channel => channel.type == 'GUILD_NEWS').size,
-                    category: guild.channels.cache.filter(channel => channel.type == 'GUILD_CATEGORY').size,
-                    store: guild.channels.cache.filter(channel => channel.type == 'GUILD_STORE').size
+                    category: guild.channels.cache.filter(channel => channel.type == 'GUILD_CATEGORY').size
                 },
                 created_at: guild.createdTimestamp,
                 description: guild.description,
@@ -242,14 +246,26 @@ export default class Replacer {
                 nickname: member.nickname,
                 premium_since: member.premiumSinceTimestamp,
                 level: {
-                    rank: memberLevel?.level?.experience?.level ?? 0,
-                    current_xp: memberLevel?.level?.experience?.current ?? 0,
-                    remaining_xp: memberLevel?.level ? Math.round((150 + (memberLevel.level.experience.level * memberLevel.level.experience.level * 8)) - memberLevel.level.experience.current) : 0,
-                    need_xp: memberLevel?.level ? 150 + (memberLevel.level.experience.level * memberLevel.level.experience.level * 8) : 0,
-                    total_xp: memberLevel?.level?.experience?.total ?? 0,
-                    total_messages: memberLevel?.level?.activity?.total_messages ?? 0,
-                    voice_time: memberLevel?.level?.activity?.total_voice_time ?? 0
+                    rank: memberActivity?.level?.experience?.level ?? 0,
+                    current_xp: memberActivity?.level?.experience?.current ?? 0,
+                    remaining_xp: memberActivity?.level
+                        ? Math.round(150 + memberActivity.level.experience.level * memberActivity.level.experience.level * 8 - memberActivity.level.experience.current)
+                        : 0,
+                    need_xp: memberActivity?.level ? 150 + memberActivity.level.experience.level * memberActivity.level.experience.level * 8 : 0,
+                    total_xp: memberActivity?.level?.experience?.total ?? 0,
+                    total_messages: memberActivity?.level?.activity?.total_messages ?? 0,
+                    voice_time: memberActivity?.level?.activity?.total_voice_time ?? 0
                 },
+                wallet: Object.assign(
+                    {},
+                    {
+                        ...(memberActivity?.wallet?.currencies
+                            ?.reduce((x, y) => {
+                                return y.id === 'DEFAULT' ? [y, ...x] : [...x, y]
+                            }, [])
+                            ?.map(i => i.amount) ?? [0])
+                    }
+                ),
                 voice: {
                     name: member.voice?.channel?.name,
                     id: member.voice?.channelId,
@@ -257,19 +273,18 @@ export default class Replacer {
                     full: member.voice?.channel?.full,
                     position: member.voice?.channel?.rawPosition?.toString()
                 },
-                roles: Object.assign({},
-                    ...member.roles.cache.map(
-                        r => ({
-                            [r.id]: {
-                                name: r.name,
-                                mention: `<@&${r.id}>`,
-                                id: r.id,
-                                position: r.rawPosition.toString(),
-                                color: r.hexColor,
-                                created_at: r.createdTimestamp
-                            }
-                        })
-                    )
+                roles: Object.assign(
+                    {},
+                    ...member.roles.cache.map(r => ({
+                        [r.id]: {
+                            name: r.name,
+                            mention: `<@&${r.id}>`,
+                            id: r.id,
+                            position: r.rawPosition.toString(),
+                            color: r.hexColor,
+                            created_at: r.createdTimestamp
+                        }
+                    }))
                 )
             },
             index: this.shapers.index ?? 0,
@@ -386,6 +401,15 @@ function DATE(...args: string[]) {
 
 function DATENOW() {
     return Date.now()
+}
+
+function FIXNUM(...args: string[]) {
+    let number = Number(args[0]), digits = Number(args[1])
+
+    if (isNaN(number)) return 0
+    if (isNaN(digits) || (digits < 0 || digits > 20)) digits = 0
+
+    return number.toFixed(digits)
 }
 
 function LOWER(...args: string[]) {
