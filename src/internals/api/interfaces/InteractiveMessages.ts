@@ -263,7 +263,7 @@ function resolveMessageComponents(components: (InteractiveMessageButtonComponent
                                     i.id &&
                                     Array.isArray(i._options) &&
                                     i._options.length &&
-                                    i._options.every(ii => ii.appearance.label && ii.appearance.description)
+                                    i._options.every(ii => ii.appearance.label && ii.appearance.value)
                             )
                     })
                     .map(i => {
