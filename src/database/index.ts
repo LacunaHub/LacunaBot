@@ -1,48 +1,10 @@
 import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose'
-import Activities, { IActivities } from './schemas/Activities'
 import Servers, { ServerDocument } from './schemas/Servers'
 import TwitchSubs, { ITwitchSub } from './schemas/TwitchSubs'
 import Users, { UserDocument } from './schemas/Users'
 import YouTubeSubs, { IYouTubeSub } from './schemas/YouTubeSubs'
 
 export default {
-    activities: {
-        async create(doc: IActivities) {
-            return await Activities.create(doc)
-        },
-        async deleteMany(filter: FilterQuery<IActivities>, options?: QueryOptions) {
-            return await Activities.deleteMany(filter, options)
-        },
-        async deleteOne(filter: FilterQuery<IActivities>, options?: QueryOptions) {
-            return await Activities.deleteOne(filter, options)
-        },
-        async fetch(filter: FilterQuery<IActivities>) {
-            let document = await Activities.findOne(filter)
-
-            if (!document) {
-                try {
-                    document = await Activities.create(filter as any)
-                } catch (err) {
-                    document = null
-                }
-            }
-
-            return document
-        },
-        async find(filter: FilterQuery<IActivities>) {
-            return await Activities.find(filter)
-        },
-        async findOne(filter: FilterQuery<IActivities>, projection?: any, options?: QueryOptions) {
-            return await Activities.findOne(filter, projection, options)
-        },
-        async updateMany(filter: FilterQuery<IActivities>, update?: UpdateQuery<IActivities>, options?: QueryOptions) {
-            return await Activities.updateMany(filter, update, options)
-        },
-        async updateOne(filter: FilterQuery<IActivities>, update?: UpdateQuery<IActivities>, options?: QueryOptions) {
-            return await Activities.updateOne(filter, update, options)
-        }
-    },
-
     servers: {
         async create(doc: ServerDocument) {
             return await Servers.create(doc)

@@ -1,9 +1,9 @@
-import Replacer from './Replacer'
 import Canvas, { Image, NodeCanvasRenderingContext2D } from 'canvas'
-import { MessageAttachment, CommandInteraction, Message, ContextMenuInteraction, VoiceState, GuildMember, BaseGuildTextChannel, BaseGuildVoiceChannel } from 'discord.js'
+import { BaseGuildTextChannel, BaseGuildVoiceChannel, CommandInteraction, ContextMenuInteraction, GuildMember, Message, MessageAttachment, VoiceState } from 'discord.js'
 import numbro from 'numbro'
-import Lacuna from '../internals/Lacuna'
 import { ServerDocument } from '../database/schemas/Servers'
+import Lacuna from '../internals/Lacuna'
+import Replacer from './Replacer'
 
 export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean> {
     if (!server.modules.levels.active) return false
@@ -29,17 +29,14 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
     let level = user.activities.levels.find(i => i.guild_id == message.guildId)
 
     if (!level) {
-        const activity = await self.db.activities.findOne({ _id: message.guildId })
-        const old_level = activity?.levels?.find(i => i.user_id == message.author.id)
-
         level = {
             guild_id: message.guildId,
-            experience: old_level?.experience ?? { total: 0, current: 0, level: 0 },
+            experience: { total: 0, current: 0, level: 0 },
             activity: {
-                total_messages: old_level?.activity?.text?.total_messages ?? 0,
-                last_message_at: old_level?.activity?.text?.last_message_at ?? null,
-                total_voice_time: old_level?.activity?.voice?.total_time ?? 0,
-                voice_connected_at: old_level?.activity?.voice?.connected_at ?? null
+                total_messages: 0,
+                last_message_at: null,
+                total_voice_time: 0,
+                voice_connected_at: null
             }
         }
 
@@ -119,17 +116,14 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
             let level = user.activities.levels.find(i => i.guild_id == server._id)
         
             if (!level) {
-                const activity = await self.db.activities.findOne({ _id: server._id })
-                const old_level = activity?.levels?.find(i => i.user_id == member.id)
-        
                 level = {
                     guild_id: server._id,
-                    experience: old_level?.experience ?? { total: 0, current: 0, level: 0 },
+                    experience: { total: 0, current: 0, level: 0 },
                     activity: {
-                        total_messages: old_level?.activity?.text?.total_messages ?? 0,
-                        last_message_at: old_level?.activity?.text?.last_message_at ?? null,
-                        total_voice_time: old_level?.activity?.voice?.total_time ?? 0,
-                        voice_connected_at: old_level?.activity?.voice?.connected_at ?? null
+                        total_messages: 0,
+                        last_message_at: null,
+                        total_voice_time: 0,
+                        voice_connected_at: null
                     }
                 }
         
@@ -300,17 +294,14 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
     let level = sorted.find(i => i.user_id == mention.id)
 
     if (!level) {
-        const activity = await self.db.activities.findOne({ _id: signal.guildId })
-        const old_level = activity?.levels?.find(i => i.user_id == mention.id)
-
         level = {
             guild_id: signal.guildId,
-            experience: old_level?.experience ?? { total: 0, current: 0, level: 0 },
+            experience: { total: 0, current: 0, level: 0 },
             activity: {
-                total_messages: old_level?.activity?.text?.total_messages ?? 0,
-                last_message_at: old_level?.activity?.text?.last_message_at ?? null,
-                total_voice_time: old_level?.activity?.voice?.total_time ?? 0,
-                voice_connected_at: old_level?.activity?.voice?.connected_at ?? null
+                total_messages: 0,
+                last_message_at: null,
+                total_voice_time: 0,
+                voice_connected_at: null
             },
             user_id: mention.id
         }
