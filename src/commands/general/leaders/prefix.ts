@@ -1,6 +1,5 @@
 import { MessageEmbed, MessageActionRow, MessageButton, Message } from 'discord.js'
 import numbro from 'numbro'
-import { Level, Wallet } from '../../../database/schemas/Activities'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import { IUserLevel, IUserWallet } from '../../../database/schemas/Users'
 import Lacuna from '../../../internals/Lacuna'
