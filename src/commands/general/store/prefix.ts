@@ -135,6 +135,7 @@ export async function itemsPrefix(self: Lacuna, server: ServerDocument, message:
 
     const collector = _message.createMessageComponentCollector({
         componentType: 'SELECT_MENU',
+        filter: i => i.user.id == message.author.id,
         time: 180000
     })
 
