@@ -113,7 +113,7 @@ export function syncBills(): Job {
                 {
                     $set: {
                         'status.value': update.status.value,
-                        'status.changed_timestamp': update.status.changedDateTime
+                        'status.changed_timestamp': new Date(update.status.changedDateTime).getTime()
                     }
                 }
             )
