@@ -1,10 +1,35 @@
 import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose'
+import Bills, { IBill } from './schemas/Bills'
 import Servers, { ServerDocument } from './schemas/Servers'
 import TwitchSubs, { ITwitchSub } from './schemas/TwitchSubs'
 import Users, { UserDocument } from './schemas/Users'
 import YouTubeSubs, { IYouTubeSub } from './schemas/YouTubeSubs'
 
 export default {
+    bills: {
+        async create(doc: IBill) {
+            return await Bills.create(doc)
+        },
+        async deleteMany(filter: FilterQuery<IBill>, options?: QueryOptions) {
+            return await Bills.deleteMany(filter, options)
+        },
+        async deleteOne(filter: FilterQuery<IBill>, options?: QueryOptions) {
+            return await Bills.deleteOne(filter, options)
+        },
+        async find(filter: FilterQuery<IBill>) {
+            return await Bills.find(filter)
+        },
+        async findOne(filter: FilterQuery<IBill>, projection?: any, options?: QueryOptions) {
+            return await Bills.findOne(filter, projection, options)
+        },
+        async updateMany(filter: FilterQuery<IBill>, update?: UpdateQuery<IBill>, options?: QueryOptions) {
+            return await Bills.updateMany(filter, update, options)
+        },
+        async updateOne(filter: FilterQuery<IBill>, update?: UpdateQuery<IBill>, options?: QueryOptions) {
+            return await Bills.updateOne(filter, update, options)
+        }
+    },
+  
     servers: {
         async create(doc: ServerDocument) {
             return await Servers.create(doc)
@@ -137,7 +162,11 @@ export default {
 
 export interface JsonData {
     playableMusicHosts: string[]
-    diamondPrices: Array<{ months: number, price: number, discount: number }>
+    diamondPrices: Array<{
+        months: number
+        prices: { [key: string]: number }
+        discounts: { [key: string]: number }
+    }>
     allowedApiHosts: string[]
     allowedApiUrls: string[]
     rootUsers: string[]

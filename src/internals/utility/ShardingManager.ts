@@ -1,28 +1,33 @@
 import { ShardingManager, ShardingManagerOptions } from 'discord.js'
-import { scheduleStatsCollect } from './Statistics'
-import { syncBills as syncQiwiBills } from './Qiwi'
-import Diamonder, { createDiamonders } from '../structures/Diamonder'
 import { Job } from 'node-schedule'
 import { hubRefreshSubscriptions } from '../../modules/YouTube'
+import DiamondGuild, { handleDiamondGuilds } from '../structures/DiamondGuild'
+import Patron, { handlePatrons } from '../structures/Patron'
+import { syncBills as syncQiwiBills } from './Qiwi'
+import { scheduleStatsCollect } from './Statistics'
 
 export default class LacunaSharding extends ShardingManager {
     public readiness: number[]
-    public diamonded: Map<string, Diamonder>
-    public qiwi_bills_schedule: Job
-    public stats_collect_schedule: Job
+    public diamondGuilds: Map<string, DiamondGuild>
+    public patrons: Map<string, Patron>
+    public qiwiBillsSchedule: Job
+    public statsCollectorSchedule: Job
 
     constructor(file: string, options: ShardingManagerOptions) {
         super(file, options)
 
         this.readiness = []
 
-        this.diamonded = new Map()
+        this.diamondGuilds = new Map()
 
-        this.qiwi_bills_schedule = syncQiwiBills()
+        this.patrons = new Map()
 
-        this.stats_collect_schedule = scheduleStatsCollect(this)
+        this.qiwiBillsSchedule = syncQiwiBills()
 
-        createDiamonders(this)
+        this.statsCollectorSchedule = scheduleStatsCollect(this)
+
+        handleDiamondGuilds(this)
+        handlePatrons(this)
         hubRefreshSubscriptions()
     }
 }

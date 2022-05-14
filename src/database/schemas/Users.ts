@@ -1,5 +1,4 @@
-import { model, Schema, Document } from 'mongoose'
-import { Bill } from '../../internals/utility/Qiwi'
+import { Document, model, Schema } from 'mongoose'
 
 export default model<UserDocument>(
     'users',
@@ -11,11 +10,15 @@ export default model<UserDocument>(
             avatar: { type: String, default: null },
             flags: { type: Number, default: 0 }
         },
+        premium: {
+            available: { type: Boolean, default: false },
+            expiration_timestamp: { type: Number, default: null },
+            last_charge_timestamp: { type: Number, default: null }
+        },
         activities: {
             levels: { type: Array, default: [] },
             wallets: { type: Array, default: [] }
         },
-        bills: { type: Array, default: [] },
         created_at: { type: Number, default: () => Date.now() }
     }, { versionKey: false })
 )
@@ -30,13 +33,16 @@ export interface UserDocument extends Document {
         avatar: string
         flags: number
     }
+    premium: {
+        available: boolean
+        expiration_timestamp: number
+        last_charge_timestamp: number
+    }
     activities: {
         levels: IUserLevel[]
         wallets: IUserWallet[]
     }
-    bills: Bill[]
     created_at: number
-    modified_at: number
 }
 
 export interface IUserLevel {
