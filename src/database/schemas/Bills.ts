@@ -10,7 +10,7 @@ export default model<IBill>(
             currency: { type: String, required: true, uppercase: true },
             status: {
                 value: { type: String, required: true, uppercase: true },
-                changed_timestamp: { type: String, required: true }
+                changed_timestamp: { type: Number, required: true }
             },
             custom_fields: {
                 type: { type: String, required: true, uppercase: true },
