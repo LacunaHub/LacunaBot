@@ -1,4 +1,3 @@
-import { REST } from '@discordjs/rest'
 import moment from 'moment'
 import fetch from 'node-fetch'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
@@ -9,8 +8,6 @@ import logger from '../Logger'
 import DiamondGuild from '../structures/DiamondGuild'
 import Patron from '../structures/Patron'
 import discord from './DiscordUtils'
-
-const rest: REST = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
 export class Bill {
     public bill_id: string
