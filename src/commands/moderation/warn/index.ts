@@ -60,7 +60,7 @@ export default {
                     required: false
                 }
             ]
-        },
+        }
     ],
     group: 'MODERATION',
     subcommands: [

@@ -8,7 +8,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const mention = interaction.options?.getMember('пользователь') as GuildMember
 
     if (!mention) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -16,13 +19,16 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const violator = server.moderation.warnings.violators.find(v => v.user_id == mention.id)
 
     if (!violator || !violator.violations.length) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.no_violations, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.no_violations, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
 
-    const last_24_hours = violator.violations.filter(v => (Date.now() - v.timestamp) < 86400000)
-    const last_7_days = violator.violations.filter(v => (Date.now() - v.timestamp) < 604800000)
+    const last_24_hours = violator.violations.filter(v => Date.now() - v.timestamp < 86400000)
+    const last_7_days = violator.violations.filter(v => Date.now() - v.timestamp < 604800000)
     const last_10_violations = violator.violations.slice(Math.max(violator.violations.length - 10, 0)).sort((a, b) => a.timestamp - b.timestamp)
 
     const embed = new MessageEmbed()
@@ -30,7 +36,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         .addField(locale.violations.texts.last_24_hours, `${last_24_hours.length}`, true)
         .addField(locale.violations.texts.last_7_days, `${last_7_days.length}`, true)
         .addField(locale.violations.texts.total, `${violator.violations.length}`, true)
-        .addField(locale.violations.texts.last_10_violations, last_10_violations.map((v, i) => `${i + 1}. **${v.reason || locale.common.texts.none}** – <t:${Math.round(v.timestamp / 1000)}:R> \`${v.id}\``).join('\n'))
+        .addField(
+            locale.violations.texts.last_10_violations,
+            last_10_violations.map((v, i) => `${i + 1}. **${v.reason || locale.common.texts.none}** – <t:${Math.round(v.timestamp / 1000)}:R> \`${v.id}\``).join('\n')
+        )
 
     await interaction.reply({ embeds: [embed], ephemeral: true })
 

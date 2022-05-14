@@ -13,6 +13,6 @@ export default {
 
 export interface ModuleExecutionData {
     module: string
-    guild: { name: string, id: string }
-    target: { name: string, id: string }
+    guild: { name: string; id: string }
+    target: { name: string; id: string }
 }

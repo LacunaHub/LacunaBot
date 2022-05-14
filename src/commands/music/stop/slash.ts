@@ -8,13 +8,19 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const player = self.player.get(interaction.guild.id)
 
     if (!player) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
 
     if (player.voiceChannel != (interaction.member as any).voice.channelId) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.repeat.texts.different_voice, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.repeat.texts.different_voice, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }

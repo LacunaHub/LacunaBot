@@ -18,20 +18,23 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
 
         const message = await reaction.message.fetch()
         const element = server.modules.reactions
-            .slice(0, (server.server.premium.available ? 200 : 50))
+            .slice(0, server.server.premium.available ? 200 : 50)
             .find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
 
         if (element) {
             const member = await message.guild.members.fetch(user.id)
 
             if (element.element.lifespan && Date.now() > element.element.lifespan) {
-                await self.db.servers.updateOne({ _id: message.guild.id }, {
-                    $pull: {
-                        'modules.reactions': {
-                            id: element.id
+                await self.db.servers.updateOne(
+                    { _id: message.guild.id },
+                    {
+                        $pull: {
+                            'modules.reactions': {
+                                id: element.id
+                            }
                         }
                     }
-                })
+                )
 
                 if (message.deletable) await reaction.remove()
                 message.reactions.cache.delete(reaction.emoji.id || reaction.emoji.name)
@@ -45,8 +48,12 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                 if (channels.size) {
                     try {
                         for (const [, channel] of channels) await channel.permissionOverwrites.create(user.id, { VIEW_CHANNEL: element.element.reverse ? true : false })
-                    
-                        self.emit('moduleExecution', { module: 'Reactions: Show Channels', guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+
+                        self.emit('moduleExecution', {
+                            module: 'Reactions: Show Channels',
+                            guild: { id: message.guild.id, name: message.guild.name },
+                            target: { id: member.id, name: member.user.tag }
+                        })
                     } catch (err) {
                         self.logger.error('An error occurred', err)
 
@@ -65,7 +72,11 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         try {
                             await member.roles.remove(roles, locale.reactions.remove_roles_reason)
 
-                            self.emit('moduleExecution', { module: 'Reactions: Remove Roles', guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+                            self.emit('moduleExecution', {
+                                module: 'Reactions: Remove Roles',
+                                guild: { id: message.guild.id, name: message.guild.name },
+                                target: { id: member.id, name: member.user.tag }
+                            })
                         } catch (err) {
                             self.logger.error('An error occurred', err)
 
@@ -96,9 +107,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
 
                             return false
                         }
-                    }
-
-                    else {
+                    } else {
                         try {
                             await member.roles.add(roles, locale.reactions.add_roles_reason)
                         } catch (err) {
@@ -110,7 +119,11 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         }
                     }
 
-                    self.emit('moduleExecution', { module: 'Reactions: Add Roles', guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+                    self.emit('moduleExecution', {
+                        module: 'Reactions: Add Roles',
+                        guild: { id: message.guild.id, name: message.guild.name },
+                        target: { id: member.id, name: member.user.tag }
+                    })
                 }
             }
         }
@@ -125,7 +138,7 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
 
         const message = reaction.message
         const element = server.modules.reactions
-            .slice(0, (server.server.premium.available ? 200 : 50))
+            .slice(0, server.server.premium.available ? 200 : 50)
             .find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
 
         if (element) {
@@ -138,13 +151,17 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                     try {
                         for (const [, channel] of channels) {
                             const overwrites = channel.permissionOverwrites.cache.find(p => p.id == user.id)
-    
+
                             if (overwrites) {
                                 await overwrites.delete(element.element.reverse ? locale.reactions.hide_channels_reason : locale.reactions.show_channels_reason)
-        
-                                self.emit('moduleExecution', { module: `Reactions: ${element.element.reverse ? 'Hide Channels' : 'Show Channels'}`, guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+
+                                self.emit('moduleExecution', {
+                                    module: `Reactions: ${element.element.reverse ? 'Hide Channels' : 'Show Channels'}`,
+                                    guild: { id: message.guild.id, name: message.guild.name },
+                                    target: { id: member.id, name: member.user.tag }
+                                })
                             }
-                        }   
+                        }
                     } catch (err) {
                         self.logger.error('An error occurred', err)
 
@@ -160,8 +177,12 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                     try {
                         if (element.element.reverse) await member.roles.add(roles, locale.reactions.add_roles_reason)
                         else await member.roles.remove(roles, locale.reactions.remove_roles_reason)
-    
-                        await self.emit('moduleExecution', { module: `Reactions: ${element.element.reverse ? 'Add' : 'Remove'} Roles`, guild: { id: message.guild.id, name: message.guild.name }, target: { id: member.id, name: member.user.tag } })
+
+                        await self.emit('moduleExecution', {
+                            module: `Reactions: ${element.element.reverse ? 'Add' : 'Remove'} Roles`,
+                            guild: { id: message.guild.id, name: message.guild.name },
+                            target: { id: member.id, name: member.user.tag }
+                        })
                     } catch (err) {
                         self.logger.error('An error occurred', err)
 
@@ -174,9 +195,7 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
 }
 
 export async function autoReact(server: ServerDocument, message: Message) {
-    const auto_reaction: AutoReaction = server.modules.autoreactions
-        .slice(0, (server.server.premium.available ? 20 : 2))
-        .find(ar => ar.channel_id == message.channel.id)
+    const auto_reaction: AutoReaction = server.modules.autoreactions.slice(0, server.server.premium.available ? 20 : 2).find(ar => ar.channel_id == message.channel.id)
 
     if (auto_reaction) {
         if (auto_reaction.message_types && auto_reaction.message_types.length && !auto_reaction.message_types.includes(message.type)) return false
@@ -184,7 +203,11 @@ export async function autoReact(server: ServerDocument, message: Message) {
         const content: string = message.content.toLowerCase()
         const split: string[] = content.split(/\s{1,}/)
 
-        if ((auto_reaction.matches.length && !auto_reaction.matches.some(m => split.includes(m.toLowerCase()))) || (auto_reaction.exclude_matches.length && auto_reaction.exclude_matches.some(m => split.includes(m.toLowerCase())))) return false
+        if (
+            (auto_reaction.matches.length && !auto_reaction.matches.some(m => split.includes(m.toLowerCase()))) ||
+            (auto_reaction.exclude_matches.length && auto_reaction.exclude_matches.some(m => split.includes(m.toLowerCase())))
+        )
+            return false
 
         for (const emoji of auto_reaction.reactions) {
             await message.react(emoji.id || emoji.name)

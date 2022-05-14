@@ -3,620 +3,599 @@ import { Document, model, Schema } from 'mongoose'
 
 export default model<ServerDocument>(
     'servers',
-    new Schema<ServerDocument>({
-        _id: { type: String },
-        locale: { type: String, default: 'ru' },
-        prefix: { type: String, default: '!' },
-        server: {
-            premium: {
-                available: { type: Boolean, default: false },
-                will_expire_on: { type: Number, default: 0 }
+    new Schema<ServerDocument>(
+        {
+            _id: { type: String },
+            locale: { type: String, default: 'ru' },
+            prefix: { type: String, default: '!' },
+            server: {
+                premium: {
+                    available: { type: Boolean, default: false },
+                    will_expire_on: { type: Number, default: 0 }
+                },
+                blocked: { type: Boolean, default: false },
+                bot_expert_roles: { type: Array, default: [] }
             },
-            blocked: { type: Boolean, default: false },
-            bot_expert_roles: { type: Array, default: [] }
-        },
-        commands: {
-            system: { type: Array, default: [] },
-            custom: { type: Array, default: [] },
-            slash_commands: { type: Boolean, default: false },
-            prefix_commands: { type: Boolean, default: true }
-        },
-        moderation: {
-            case_log: {
-                cases: { type: Array, default: [] },
-                case_count: { type: Number, default: 0 },
-                channel_id: { type: String, default: '' },
-                case_types: {
-                    BAN_ADD: { type: Boolean, default: true },
-                    BAN_REMOVE: { type: Boolean, default: true },
-                    KICK: { type: Boolean, default: true },
-                    MUTE_ADD: { type: Boolean, default: true },
-                    MUTE_REMOVE: { type: Boolean, default: true },
-                    PRUNE_MESSAGES: { type: Boolean, default: true },
-                    WARN_ADD: { type: Boolean, default: true },
-                    WARN_REMOVE: { type: Boolean, default: true }
-                },
-                case_types_messages: {
-                    BAN_ADD: {
-                        active: { type: Boolean, default: true },
-                        dm_message: {
-                            content: { type: String, default: '' },
-                            embed: {
-                                active: { type: Boolean, default: true },
-                                title: { type: String, default: null },
-                                description: { type: String, default: null },
-                                url: { type: String, default: null },
-                                timestamp: { type: String, default: 'DATENOW()' },
-                                color: { type: String, default: '#EF5350' },
-                                footer: {
-                                    text: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                image: {
-                                    url: { type: String, default: null }
-                                },
-                                thumbnail: {
-                                    url: { type: String, default: null }
-                                },
-                                author: {
-                                    name: { type: String, default: 'Блокировка выдана' },
-                                    url: { type: String, default: null },
-                                    icon_url: { type: String, default: 'https://i.imgur.com/qI02Ivf.png' }
-                                },
-                                fields: { type: Array, default: [ { name: 'Сервер', value: '{ guild.name }', inline: true }, { name: 'Причина', value: '{ penalty.reason }', inline: true } ] }
-                            }
-                        }
-                    },
-                    KICK: {
-                        active: { type: Boolean, default: true },
-                        dm_message: {
-                            content: { type: String, default: '' },
-                            embed: {
-                                active: { type: Boolean, default: true },
-                                title: { type: String, default: null },
-                                description: { type: String, default: null },
-                                url: { type: String, default: null },
-                                timestamp: { type: String, default: 'DATENOW()' },
-                                color: { type: String, default: '#EF5350' },
-                                footer: {
-                                    text: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                image: {
-                                    url: { type: String, default: null }
-                                },
-                                thumbnail: {
-                                    url: { type: String, default: null }
-                                },
-                                author: {
-                                    name: { type: String, default: 'Участник выгнан' },
-                                    url: { type: String, default: null },
-                                    icon_url: { type: String, default: 'https://i.imgur.com/RYVLGuy.png' }
-                                },
-                                fields: { type: Array, default: [ { name: 'Сервер', value: '{ guild.name }', inline: true }, { name: 'Причина', value: '{ penalty.reason }', inline: true } ] }
-                            }
-                        }
-                    },
-                    MUTE_ADD: {
-                        active: { type: Boolean, default: true },
-                        dm_message: {
-                            content: { type: String, default: '' },
-                            embed: {
-                                active: { type: Boolean, default: true },
-                                title: { type: String, default: null },
-                                description: { type: String, default: null },
-                                url: { type: String, default: null },
-                                timestamp: { type: String, default: 'DATENOW()' },
-                                color: { type: String, default: '#EF5350' },
-                                footer: {
-                                    text: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                image: {
-                                    url: { type: String, default: null }
-                                },
-                                thumbnail: {
-                                    url: { type: String, default: null }
-                                },
-                                author: {
-                                    name: { type: String, default: 'Заглушение выдано' },
-                                    url: { type: String, default: null },
-                                    icon_url: { type: String, default: 'https://i.imgur.com/t5FJ6Gw.png' }
-                                },
-                                fields: { type: Array, default: [ { name: 'Сервер', value: '{ guild.name }', inline: true }, { name: 'Причина', value: '{ penalty.reason }', inline: true } ] }
-                            }
-                        }
-                    },
-                    WARN_ADD: {
-                        active: { type: Boolean, default: true },
-                        dm_message: {
-                            content: { type: String, default: '' },
-                            embed: {
-                                active: { type: Boolean, default: true },
-                                title: { type: String, default: null },
-                                description: { type: String, default: null },
-                                url: { type: String, default: null },
-                                timestamp: { type: String, default: 'DATENOW()' },
-                                color: { type: String, default: '#EF5350' },
-                                footer: {
-                                    text: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                image: {
-                                    url: { type: String, default: null }
-                                },
-                                thumbnail: {
-                                    url: { type: String, default: null }
-                                },
-                                author: {
-                                    name: { type: String, default: 'Предупреждение выдано' },
-                                    url: { type: String, default: null },
-                                    icon_url: { type: String, default: 'https://i.imgur.com/R03G3G5.png' }
-                                },
-                                fields: { type: Array, default: [ { name: 'Сервер', value: '{ guild.name }', inline: true }, { name: 'Причина', value: '{ penalty.reason }', inline: true } ] }
-                            }
-                        }
-                    }
-                }
+            commands: {
+                system: { type: Array, default: [] },
+                custom: { type: Array, default: [] },
+                slash_commands: { type: Boolean, default: false },
+                prefix_commands: { type: Boolean, default: true }
             },
-            logs: {
-                webhooks: { type: Array, default: [] },
-                types: {
-                    channel_create: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
+            moderation: {
+                case_log: {
+                    cases: { type: Array, default: [] },
+                    case_count: { type: Number, default: 0 },
+                    channel_id: { type: String, default: '' },
+                    case_types: {
+                        BAN_ADD: { type: Boolean, default: true },
+                        BAN_REMOVE: { type: Boolean, default: true },
+                        KICK: { type: Boolean, default: true },
+                        MUTE_ADD: { type: Boolean, default: true },
+                        MUTE_REMOVE: { type: Boolean, default: true },
+                        PRUNE_MESSAGES: { type: Boolean, default: true },
+                        WARN_ADD: { type: Boolean, default: true },
+                        WARN_REMOVE: { type: Boolean, default: true }
                     },
-                    channel_delete: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    channel_update: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    emoji_create: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    emoji_delete: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    emoji_update: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    guild_ban_add: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    guild_ban_remove: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    guild_member_add: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    guild_member_remove: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    guild_member_update: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    guild_update: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    invite_create: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    invite_delete: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    message_delete: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    message_delete_bulk: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    message_update: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    role_create: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    role_delete: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    role_member_add: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    role_member_remove: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    role_update: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    sticker_create: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    sticker_delete: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    sticker_update: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    thread_create: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    thread_delete: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    thread_update: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    user_update: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    voice_connect: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    voice_disconnect: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    voice_move: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    voice_server_mute: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    voice_server_unmute: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    voice_server_deaf: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    },
-                    voice_server_undeaf: {
-                        active: { type: Boolean, default: false },
-                        channel_id: { type: String, default: '' }
-                    }
-                }
-            },
-            automoder: {
-                swear_filter: {
-                    active: { type: Boolean, default: false },
-                    registry: { type: Array, default: [] },
-                    penalty: {
-                        action: { type: Number, default: 0 },
-                        timer: { type: Number, default: 0 },
-                        message: {
-                            content: { type: String, default: '' },
-                            embed: {
-                                active: { type: Boolean, default: false },
-                                title: { type: String, default: null },
-                                description: { type: String, default: null },
-                                url: { type: String, default: null },
-                                timestamp: { type: String, default: null },
-                                color: { type: String, default: null },
-                                footer: {
-                                    text: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                image: {
-                                    url: { type: String, default: null }
-                                },
-                                thumbnail: {
-                                    url: { type: String, default: null }
-                                },
-                                author: {
-                                    name: { type: String, default: null },
+                    case_types_messages: {
+                        BAN_ADD: {
+                            active: { type: Boolean, default: true },
+                            dm_message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: true },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
                                     url: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                fields: { type: Array, default: [] }
+                                    timestamp: { type: String, default: 'DATENOW()' },
+                                    color: { type: String, default: '#EF5350' },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: 'Блокировка выдана' },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: 'https://i.imgur.com/qI02Ivf.png' }
+                                    },
+                                    fields: {
+                                        type: Array,
+                                        default: [
+                                            { name: 'Сервер', value: '{ guild.name }', inline: true },
+                                            { name: 'Причина', value: '{ penalty.reason }', inline: true }
+                                        ]
+                                    }
+                                }
                             }
                         },
-                        add_roles: { type: Array, default: [] },
-                        remove_roles: { type: Array, default: [] }
-                    },
-                    ignored: {
-                        channels: { type: Array, default: [] },
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Number, default: 8 }
-                    }
-                },
-                links_filter: {
-                    active: { type: Boolean, default: false },
-                    registry: { type: Array, default: [] },
-                    allowed_registry: { type: Array, default: [] },
-                    delete_all_links: { type: Boolean, default: false },
-                    delete_referral_invites: { type: Boolean, default: false },
-                    penalty: {
-                        action: { type: Number, default: 0 },
-                        timer: { type: Number, default: 0 },
-                        message: {
-                            content: { type: String, default: '' },
-                            embed: {
-                                active: { type: Boolean, default: false },
-                                title: { type: String, default: null },
-                                description: { type: String, default: null },
-                                url: { type: String, default: null },
-                                timestamp: { type: String, default: null },
-                                color: { type: String, default: null },
-                                footer: {
-                                    text: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                image: {
-                                    url: { type: String, default: null }
-                                },
-                                thumbnail: {
-                                    url: { type: String, default: null }
-                                },
-                                author: {
-                                    name: { type: String, default: null },
+                        KICK: {
+                            active: { type: Boolean, default: true },
+                            dm_message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: true },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
                                     url: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                fields: { type: Array, default: [] }
+                                    timestamp: { type: String, default: 'DATENOW()' },
+                                    color: { type: String, default: '#EF5350' },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: 'Участник выгнан' },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: 'https://i.imgur.com/RYVLGuy.png' }
+                                    },
+                                    fields: {
+                                        type: Array,
+                                        default: [
+                                            { name: 'Сервер', value: '{ guild.name }', inline: true },
+                                            { name: 'Причина', value: '{ penalty.reason }', inline: true }
+                                        ]
+                                    }
+                                }
                             }
                         },
-                        add_roles: { type: Array, default: [] },
-                        remove_roles: { type: Array, default: [] }
-                    },
-                    ignored: {
-                        channels: { type: Array, default: [] },
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Number, default: 8 }
-                    }
-                },
-                users_slowdown: {
-                    active: { type: Boolean, default: false },
-                    messages_limit: { type: Array, default: 3 },
-                    penalty: {
-                        action: { type: Number, default: 0 },
-                        timer: { type: Number, default: 0 },
-                        message: {
-                            content: { type: String, default: '' },
-                            embed: {
-                                active: { type: Boolean, default: false },
-                                title: { type: String, default: null },
-                                description: { type: String, default: null },
-                                url: { type: String, default: null },
-                                timestamp: { type: String, default: null },
-                                color: { type: String, default: null },
-                                footer: {
-                                    text: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                image: {
-                                    url: { type: String, default: null }
-                                },
-                                thumbnail: {
-                                    url: { type: String, default: null }
-                                },
-                                author: {
-                                    name: { type: String, default: null },
+                        MUTE_ADD: {
+                            active: { type: Boolean, default: true },
+                            dm_message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: true },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
                                     url: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                fields: { type: Array, default: [] }
+                                    timestamp: { type: String, default: 'DATENOW()' },
+                                    color: { type: String, default: '#EF5350' },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: 'Заглушение выдано' },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: 'https://i.imgur.com/t5FJ6Gw.png' }
+                                    },
+                                    fields: {
+                                        type: Array,
+                                        default: [
+                                            { name: 'Сервер', value: '{ guild.name }', inline: true },
+                                            { name: 'Причина', value: '{ penalty.reason }', inline: true }
+                                        ]
+                                    }
+                                }
                             }
                         },
-                        add_roles: { type: Array, default: [] },
-                        remove_roles: { type: Array, default: [] }
-                    },
-                    ignored: {
-                        channels: { type: Array, default: [] },
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Number, default: 8 }
-                    }
-                },
-                anti_caps: {
-                    active: { type: Boolean, default: false },
-                    percentage_of_caps: { type: Number, default: 70 },
-                    minimum_content_length: { type: Number, default: 10 },
-                    penalty: {
-                        action: { type: Number, default: 0 },
-                        timer: { type: Number, default: 0 },
-                        message: {
-                            content: { type: String, default: '' },
-                            embed: {
-                                active: { type: Boolean, default: false },
-                                title: { type: String, default: null },
-                                description: { type: String, default: null },
-                                url: { type: String, default: null },
-                                timestamp: { type: String, default: null },
-                                color: { type: String, default: null },
-                                footer: {
-                                    text: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                image: {
-                                    url: { type: String, default: null }
-                                },
-                                thumbnail: {
-                                    url: { type: String, default: null }
-                                },
-                                author: {
-                                    name: { type: String, default: null },
+                        WARN_ADD: {
+                            active: { type: Boolean, default: true },
+                            dm_message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: true },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
                                     url: { type: String, default: null },
-                                    icon_url: { type: String, default: null }
-                                },
-                                fields: { type: Array, default: [] }
+                                    timestamp: { type: String, default: 'DATENOW()' },
+                                    color: { type: String, default: '#EF5350' },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: 'Предупреждение выдано' },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: 'https://i.imgur.com/R03G3G5.png' }
+                                    },
+                                    fields: {
+                                        type: Array,
+                                        default: [
+                                            { name: 'Сервер', value: '{ guild.name }', inline: true },
+                                            { name: 'Причина', value: '{ penalty.reason }', inline: true }
+                                        ]
+                                    }
+                                }
                             }
-                        },
-                        add_roles: { type: Array, default: [] },
-                        remove_roles: { type: Array, default: [] }
-                    },
-                    ignored: {
-                        channels: { type: Array, default: [] },
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Number, default: 8 }
+                        }
                     }
                 },
-                nicknames: {
-                    active: { type: Boolean, default: false },
+                logs: {
+                    webhooks: { type: Array, default: [] },
                     types: {
-                        special_characters: { type: Boolean, default: false },
-                        zalgo: { type: Boolean, default: false },
-                        diacritics: { type: Boolean, default: false },
-                        emojis: { type: Boolean, default: false },
-                        regexp: {
-                            pattern: { type: String, default: '' },
-                            flags: { type: Array, default: [] }
+                        channel_create: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
                         },
-                        contains: { type: Array, default: [] }
-                    },
-                    ignored: {
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Number, default: 8 },
-                        bots: { type: Boolean, default: false }
+                        channel_delete: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        channel_update: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        emoji_create: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        emoji_delete: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        emoji_update: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        guild_ban_add: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        guild_ban_remove: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        guild_member_add: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        guild_member_remove: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        guild_member_update: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        guild_update: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        invite_create: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        invite_delete: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        message_delete: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        message_delete_bulk: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        message_update: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        role_create: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        role_delete: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        role_member_add: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        role_member_remove: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        role_update: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        sticker_create: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        sticker_delete: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        sticker_update: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        thread_create: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        thread_delete: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        thread_update: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        user_update: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        voice_connect: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        voice_disconnect: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        voice_move: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        voice_server_mute: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        voice_server_unmute: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        voice_server_deaf: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        },
+                        voice_server_undeaf: {
+                            active: { type: Boolean, default: false },
+                            channel_id: { type: String, default: '' }
+                        }
                     }
                 },
-                newbies: {
-                    active: { type: Boolean, default: false },
-                    minimum_account_age: {
-                        value: { type: Number, default: 12 },
-                        measure: { type: String, default: 'HOURS' }
-                    },
-                    penalty: {
-                        action: { type: Number, default: 0 },
-                        timer: { type: Number, default: 0 },
-                        add_roles: { type: Array, default: [] },
-                        remove_roles: { type: Array, default: [] }
-                    }
-                }
-            },
-            warnings: {
-                penalties: { type: Array, default: [] },
-                violators: { type: Array, default: [] }
-            },
-            roles: {
-                mute: { type: String, default: '' },
-                temporary: { type: Array, default: [] },
-                on_mute: {
-                    remove_all_roles: { type: Boolean, default: false },
-                    strict_roles: { type: Array, default: [] },
-                    returnable_roles: { type: Array, default: [] }
-                }
-            },
-            tempbans: { type: Array, default: [] },
-            tempmutes: { type: Array, default: [] },
-            use_timeout_mute: { type: Boolean, default: false }
-        },
-        modules: {
-            welcome: {
-                active: { type: Boolean, default: false },
-                format: { type: String, default: 'DM' },
-                channel_id: { type: String, default: '' },
-                message: {
-                    content: { type: String, default: '' },
-                    embed: {
+                automoder: {
+                    swear_filter: {
                         active: { type: Boolean, default: false },
-                        title: { type: String, default: null },
-                        description: { type: String, default: null },
-                        url: { type: String, default: null },
-                        timestamp: { type: String, default: null },
-                        color: { type: String, default: null },
-                        footer: {
-                            text: { type: String, default: null },
-                            icon_url: { type: String, default: null }
+                        registry: { type: Array, default: [] },
+                        penalty: {
+                            action: { type: Number, default: 0 },
+                            timer: { type: Number, default: 0 },
+                            message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: false },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
+                                    url: { type: String, default: null },
+                                    timestamp: { type: String, default: null },
+                                    color: { type: String, default: null },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: null },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    fields: { type: Array, default: [] }
+                                }
+                            },
+                            add_roles: { type: Array, default: [] },
+                            remove_roles: { type: Array, default: [] }
                         },
-                        image: {
-                            url: { type: String, default: null }
-                        },
-                        thumbnail: {
-                            url: { type: String, default: null }
-                        },
-                        author: {
-                            name: { type: String, default: null },
-                            url: { type: String, default: null },
-                            icon_url: { type: String, default: null }
-                        },
-                        fields: { type: Array, default: [] }
-                    }
-                },
-                initial_roles: {
-                    active: { type: Boolean, default: false },
-                    roles: { type: Array, default: [] }
-                }
-            },
-            farewell: {
-                active: { type: Boolean, default: false },
-                format: { type: String, default: 'DM' },
-                channel_id: { type: String, default: '' },
-                message: {
-                    content: { type: String, default: '' },
-                    embed: {
+                        ignored: {
+                            channels: { type: Array, default: [] },
+                            roles: { type: Array, default: [] },
+                            permissions: { type: Number, default: 8 }
+                        }
+                    },
+                    links_filter: {
                         active: { type: Boolean, default: false },
-                        title: { type: String, default: null },
-                        description: { type: String, default: null },
-                        url: { type: String, default: null },
-                        timestamp: { type: String, default: null },
-                        color: { type: String, default: null },
-                        footer: {
-                            text: { type: String, default: null },
-                            icon_url: { type: String, default: null }
+                        registry: { type: Array, default: [] },
+                        allowed_registry: { type: Array, default: [] },
+                        delete_all_links: { type: Boolean, default: false },
+                        delete_referral_invites: { type: Boolean, default: false },
+                        penalty: {
+                            action: { type: Number, default: 0 },
+                            timer: { type: Number, default: 0 },
+                            message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: false },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
+                                    url: { type: String, default: null },
+                                    timestamp: { type: String, default: null },
+                                    color: { type: String, default: null },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: null },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    fields: { type: Array, default: [] }
+                                }
+                            },
+                            add_roles: { type: Array, default: [] },
+                            remove_roles: { type: Array, default: [] }
                         },
-                        image: {
-                            url: { type: String, default: null }
+                        ignored: {
+                            channels: { type: Array, default: [] },
+                            roles: { type: Array, default: [] },
+                            permissions: { type: Number, default: 8 }
+                        }
+                    },
+                    users_slowdown: {
+                        active: { type: Boolean, default: false },
+                        messages_limit: { type: Array, default: 3 },
+                        penalty: {
+                            action: { type: Number, default: 0 },
+                            timer: { type: Number, default: 0 },
+                            message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: false },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
+                                    url: { type: String, default: null },
+                                    timestamp: { type: String, default: null },
+                                    color: { type: String, default: null },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: null },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    fields: { type: Array, default: [] }
+                                }
+                            },
+                            add_roles: { type: Array, default: [] },
+                            remove_roles: { type: Array, default: [] }
                         },
-                        thumbnail: {
-                            url: { type: String, default: null }
+                        ignored: {
+                            channels: { type: Array, default: [] },
+                            roles: { type: Array, default: [] },
+                            permissions: { type: Number, default: 8 }
+                        }
+                    },
+                    anti_caps: {
+                        active: { type: Boolean, default: false },
+                        percentage_of_caps: { type: Number, default: 70 },
+                        minimum_content_length: { type: Number, default: 10 },
+                        penalty: {
+                            action: { type: Number, default: 0 },
+                            timer: { type: Number, default: 0 },
+                            message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: false },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
+                                    url: { type: String, default: null },
+                                    timestamp: { type: String, default: null },
+                                    color: { type: String, default: null },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: null },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    fields: { type: Array, default: [] }
+                                }
+                            },
+                            add_roles: { type: Array, default: [] },
+                            remove_roles: { type: Array, default: [] }
                         },
-                        author: {
-                            name: { type: String, default: null },
-                            url: { type: String, default: null },
-                            icon_url: { type: String, default: null }
+                        ignored: {
+                            channels: { type: Array, default: [] },
+                            roles: { type: Array, default: [] },
+                            permissions: { type: Number, default: 8 }
+                        }
+                    },
+                    nicknames: {
+                        active: { type: Boolean, default: false },
+                        types: {
+                            special_characters: { type: Boolean, default: false },
+                            zalgo: { type: Boolean, default: false },
+                            diacritics: { type: Boolean, default: false },
+                            emojis: { type: Boolean, default: false },
+                            regexp: {
+                                pattern: { type: String, default: '' },
+                                flags: { type: Array, default: [] }
+                            },
+                            contains: { type: Array, default: [] }
                         },
-                        fields: { type: Array, default: [] }
+                        ignored: {
+                            roles: { type: Array, default: [] },
+                            permissions: { type: Number, default: 8 },
+                            bots: { type: Boolean, default: false }
+                        }
+                    },
+                    newbies: {
+                        active: { type: Boolean, default: false },
+                        minimum_account_age: {
+                            value: { type: Number, default: 12 },
+                            measure: { type: String, default: 'HOURS' }
+                        },
+                        penalty: {
+                            action: { type: Number, default: 0 },
+                            timer: { type: Number, default: 0 },
+                            add_roles: { type: Array, default: [] },
+                            remove_roles: { type: Array, default: [] }
+                        }
                     }
-                }
+                },
+                warnings: {
+                    penalties: { type: Array, default: [] },
+                    violators: { type: Array, default: [] }
+                },
+                roles: {
+                    mute: { type: String, default: '' },
+                    temporary: { type: Array, default: [] },
+                    on_mute: {
+                        remove_all_roles: { type: Boolean, default: false },
+                        strict_roles: { type: Array, default: [] },
+                        returnable_roles: { type: Array, default: [] }
+                    }
+                },
+                tempbans: { type: Array, default: [] },
+                tempmutes: { type: Array, default: [] },
+                use_timeout_mute: { type: Boolean, default: false }
             },
-            reactions: { type: Array, default: [] },
-            levels: {
-                active: { type: Boolean, default: false },
-                voice: { type: Boolean, default: false },
-                single_roles: { type: Boolean },
-                reset_on_leave: { type: Boolean, default: false },
-                blocked: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
-                },
-                allowed: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
-                },
-                level_up_alerts: {
+            modules: {
+                welcome: {
                     active: { type: Boolean, default: false },
-                    format: { type: String, default: 'CURRENT_CHANNEL' },
+                    format: { type: String, default: 'DM' },
+                    channel_id: { type: String, default: '' },
+                    message: {
+                        content: { type: String, default: '' },
+                        embed: {
+                            active: { type: Boolean, default: false },
+                            title: { type: String, default: null },
+                            description: { type: String, default: null },
+                            url: { type: String, default: null },
+                            timestamp: { type: String, default: null },
+                            color: { type: String, default: null },
+                            footer: {
+                                text: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            image: {
+                                url: { type: String, default: null }
+                            },
+                            thumbnail: {
+                                url: { type: String, default: null }
+                            },
+                            author: {
+                                name: { type: String, default: null },
+                                url: { type: String, default: null },
+                                icon_url: { type: String, default: null }
+                            },
+                            fields: { type: Array, default: [] }
+                        }
+                    },
+                    initial_roles: {
+                        active: { type: Boolean, default: false },
+                        roles: { type: Array, default: [] }
+                    }
+                },
+                farewell: {
+                    active: { type: Boolean, default: false },
+                    format: { type: String, default: 'DM' },
                     channel_id: { type: String, default: '' },
                     message: {
                         content: { type: String, default: '' },
@@ -646,87 +625,135 @@ export default model<ServerDocument>(
                         }
                     }
                 },
-                awards: { type: Array, default: [] }
-            },
-            voice_manager: {
-                voice_roles: { type: Array, default: [] },
-                autovoices: { type: Array, default: [] }
-            },
-            restoring: {
-                restore_roles: { type: Boolean, default: false },
-                restore_nicknames: { type: Boolean, default: false },
-                strict_roles: { type: Array, default: [] },
-                data: { type: Array, default: [] }
-            },
-            music: {
-                allowed: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
-                },
-                blocked: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
-                },
-                queue_max_length: { type: Number, default: 15 },
-                track_max_duration: { type: Number, default: 0 },
-                default_volume: { type: Number, default: 100 },
-                allow_radio_playback: { type: Boolean, default: false },
-                disable_skip_vote: { type: Boolean, default: false }
-            },
-            statistics: { type: Array, default: [] },
-            reports: {
-                active: { type: Boolean, default: false },
-                channel_id: { type: String, default: '' }
-            },
-            autoreactions: { type: Array, default: [] },
-            economy: {
-                active: { type: Boolean, default: false },
-                reset_wallet_on_leave: { type: Boolean, default: false },
-                currencies: {
-                    type: Array,
-                    default: [
-                        {
-                            id: 'DEFAULT',
-                            name: 'Cash',
-                            symbol: '$',
-                            options: [],
-                            income: {
-                                messages: {
-                                    range_per_message: [1, 5],
-                                    rate_limit_per_user: 60
+                reactions: { type: Array, default: [] },
+                levels: {
+                    active: { type: Boolean, default: false },
+                    voice: { type: Boolean, default: false },
+                    single_roles: { type: Boolean },
+                    reset_on_leave: { type: Boolean, default: false },
+                    blocked: {
+                        channels: { type: Array, default: [] },
+                        roles: { type: Array, default: [] }
+                    },
+                    allowed: {
+                        channels: { type: Array, default: [] },
+                        roles: { type: Array, default: [] }
+                    },
+                    level_up_alerts: {
+                        active: { type: Boolean, default: false },
+                        format: { type: String, default: 'CURRENT_CHANNEL' },
+                        channel_id: { type: String, default: '' },
+                        message: {
+                            content: { type: String, default: '' },
+                            embed: {
+                                active: { type: Boolean, default: false },
+                                title: { type: String, default: null },
+                                description: { type: String, default: null },
+                                url: { type: String, default: null },
+                                timestamp: { type: String, default: null },
+                                color: { type: String, default: null },
+                                footer: {
+                                    text: { type: String, default: null },
+                                    icon_url: { type: String, default: null }
                                 },
-                                voice_channels: {
-                                    range_per_minute: [0.2, 1]
+                                image: {
+                                    url: { type: String, default: null }
                                 },
-                                allowed: {
-                                    channels: [],
-                                    roles: []
+                                thumbnail: {
+                                    url: { type: String, default: null }
                                 },
-                                blocked: {
-                                    channels: [],
-                                    roles: []
-                                }
+                                author: {
+                                    name: { type: String, default: null },
+                                    url: { type: String, default: null },
+                                    icon_url: { type: String, default: null }
+                                },
+                                fields: { type: Array, default: [] }
                             }
                         }
-                    ]
+                    },
+                    awards: { type: Array, default: [] }
                 },
-                store: {
-                    items: { type: Array, default: [] }
-                }
+                voice_manager: {
+                    voice_roles: { type: Array, default: [] },
+                    autovoices: { type: Array, default: [] }
+                },
+                restoring: {
+                    restore_roles: { type: Boolean, default: false },
+                    restore_nicknames: { type: Boolean, default: false },
+                    strict_roles: { type: Array, default: [] },
+                    data: { type: Array, default: [] }
+                },
+                music: {
+                    allowed: {
+                        channels: { type: Array, default: [] },
+                        roles: { type: Array, default: [] }
+                    },
+                    blocked: {
+                        channels: { type: Array, default: [] },
+                        roles: { type: Array, default: [] }
+                    },
+                    queue_max_length: { type: Number, default: 15 },
+                    track_max_duration: { type: Number, default: 0 },
+                    default_volume: { type: Number, default: 100 },
+                    allow_radio_playback: { type: Boolean, default: false },
+                    disable_skip_vote: { type: Boolean, default: false }
+                },
+                statistics: { type: Array, default: [] },
+                reports: {
+                    active: { type: Boolean, default: false },
+                    channel_id: { type: String, default: '' }
+                },
+                autoreactions: { type: Array, default: [] },
+                economy: {
+                    active: { type: Boolean, default: false },
+                    reset_wallet_on_leave: { type: Boolean, default: false },
+                    currencies: {
+                        type: Array,
+                        default: [
+                            {
+                                id: 'DEFAULT',
+                                name: 'Cash',
+                                symbol: '$',
+                                options: [],
+                                income: {
+                                    messages: {
+                                        range_per_message: [1, 5],
+                                        rate_limit_per_user: 60
+                                    },
+                                    voice_channels: {
+                                        range_per_minute: [0.2, 1]
+                                    },
+                                    allowed: {
+                                        channels: [],
+                                        roles: []
+                                    },
+                                    blocked: {
+                                        channels: [],
+                                        roles: []
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    store: {
+                        items: { type: Array, default: [] }
+                    }
+                },
+                subscriptions: {
+                    twitch: { type: Array, default: [] },
+                    youtube: { type: Array, default: [] }
+                },
+                interactive_messages: { type: Array, default: [] }
             },
-            subscriptions: {
-                twitch: { type: Array, default: [] },
-                youtube: { type: Array, default: [] }
+            utility: {
+                giveaways: { type: Array, default: [] }
             },
-            interactive_messages: { type: Array, default: [] }
+            created_at: { type: Number, default: () => Date.now() },
+            activity_ping_at: { type: Number, default: () => Date.now() },
+            change_log: { type: Array, default: [] }
         },
-        utility: {
-            giveaways: { type: Array, default: [] }
-        },
-        created_at: { type: Number, default: () => Date.now() },
-        activity_ping_at: { type: Number, default: () => Date.now() },
-        change_log: { type: Array, default: [] }
-    }, { versionKey: false })
+        { versionKey: false }
+    )
 )
 
 export interface ServerDocument extends Document {
@@ -883,7 +910,7 @@ export interface ServerDocument extends Document {
                     channel_id: string
                 }
                 role_create: {
-                    active: boolean,
+                    active: boolean
                     channel_id: string
                 }
                 role_delete: {
@@ -1077,16 +1104,16 @@ export interface ServerDocument extends Document {
         warnings: {
             penalties: WarningsPenalty[]
             violators: WarningsViolator[]
-        },
+        }
         roles: {
             mute: string
             temporary: TemporaryRoleEntry[]
             on_mute: {
                 remove_all_roles: boolean
                 strict_roles: string[]
-                returnable_roles: Array<{ user_id: string, roles: string[] }>
+                returnable_roles: Array<{ user_id: string; roles: string[] }>
             }
-        },
+        }
         tempbans: TemporaryBanEntry[]
         tempmutes: TemporaryMuteEntry[]
         use_timeout_mute: boolean
@@ -1104,7 +1131,7 @@ export interface ServerDocument extends Document {
                 active: boolean
                 roles: string[]
             }
-        },
+        }
         farewell: {
             active: boolean
             format: 'DM' | 'CHANNEL'
@@ -1113,7 +1140,7 @@ export interface ServerDocument extends Document {
                 content: string
                 embed: MessageEmbed
             }
-        },
+        }
         reactions: ReactionElement[]
         levels: {
             active: boolean
@@ -1123,11 +1150,11 @@ export interface ServerDocument extends Document {
             blocked: {
                 channels: string[]
                 roles: string[]
-            },
+            }
             allowed: {
                 channels: string[]
                 roles: string[]
-            },
+            }
             level_up_alerts: {
                 active: boolean
                 format: 'DM' | 'CHANNEL' | 'CURRENT_CHANNEL'
@@ -1136,9 +1163,9 @@ export interface ServerDocument extends Document {
                     content: string
                     embed: MessageEmbed
                 }
-            },
+            }
             awards: LevelAward[]
-        },
+        }
         voice_manager: {
             voice_roles: VoiceRole[]
             /** @deprecated */
@@ -1146,7 +1173,7 @@ export interface ServerDocument extends Document {
                 triggers: any[]
             }
             autovoices: IAutoVoice[]
-        },
+        }
         restoring: {
             restore_roles: boolean
             restore_nicknames: boolean
@@ -1198,7 +1225,7 @@ export interface ServerDocument extends Document {
             }
         }
         subscriptions: {
-            twitch: ITwitchSubscription[],
+            twitch: ITwitchSubscription[]
             youtube: IYouTubeSubscription[]
         }
         interactive_messages: InteractiveMessage[]
@@ -1600,7 +1627,7 @@ export interface TwitchChannel {
         after_end: {
             delete_alert: boolean
             message_id: string
-        },
+        }
         webhook: {
             id: string
             token: string
@@ -1662,7 +1689,7 @@ export interface YouTubeChannel {
 
 export interface AutoReaction {
     channel_id: string
-    reactions: Array<{ animated: boolean, id: string, name: string }>
+    reactions: Array<{ animated: boolean; id: string; name: string }>
     message_types: string[]
     matches: string[]
     exclude_matches: string[]
@@ -1742,18 +1769,18 @@ export interface MessageEmbed {
     footer: {
         text?: string
         icon_url?: string
-    },
+    }
     image: {
         url?: string
-    },
+    }
     thumbnail: {
         url?: string
-    },
+    }
     author: {
         name?: string
         url?: string
         icon_url?: string
-    },
+    }
     fields: MessageEmbedFields[]
 }
 

@@ -1,8 +1,8 @@
 import { VoiceChannel, VoiceState } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { voiceUnassign as levelsVoiceUnassign } from '../../modules/Levels'
 import { voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
+import { voiceUnassign as levelsVoiceUnassign } from '../../modules/Levels'
 import { VoiceDisconnect } from '../../modules/Logs'
 import { deleteTemporaryVoice } from '../../modules/VoiceManager'
 
@@ -18,14 +18,15 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
 
         if (!listeners) {
             player.pause(true)
-            player.set('timeout', setTimeout(
-                () => player.destroy(), 600000
-            ))
+            player.set(
+                'timeout',
+                setTimeout(() => player.destroy(), 600000)
+            )
         }
     }
 
     const voice_roles_bound = server.modules.voice_manager.voice_roles
-        .slice(0, (server.server.premium.available ? 20 : 2))
+        .slice(0, server.server.premium.available ? 20 : 2)
         .filter(r => !r.bound_channels_id.length || r.bound_channels_id.includes(channel.id))
 
     if (voice_roles_bound.length) {

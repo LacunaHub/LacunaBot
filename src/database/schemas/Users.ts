@@ -2,25 +2,28 @@ import { Document, model, Schema } from 'mongoose'
 
 export default model<UserDocument>(
     'users',
-    new Schema<UserDocument>({
-        _id: { type: String },
-        user: {
-            username: { type: String, default: null },
-            discriminator: { type: String, default: null },
-            avatar: { type: String, default: null },
-            flags: { type: Number, default: 0 }
+    new Schema<UserDocument>(
+        {
+            _id: { type: String },
+            user: {
+                username: { type: String, default: null },
+                discriminator: { type: String, default: null },
+                avatar: { type: String, default: null },
+                flags: { type: Number, default: 0 }
+            },
+            premium: {
+                available: { type: Boolean, default: false },
+                expiration_timestamp: { type: Number, default: null },
+                last_charge_timestamp: { type: Number, default: null }
+            },
+            activities: {
+                levels: { type: Array, default: [] },
+                wallets: { type: Array, default: [] }
+            },
+            created_at: { type: Number, default: () => Date.now() }
         },
-        premium: {
-            available: { type: Boolean, default: false },
-            expiration_timestamp: { type: Number, default: null },
-            last_charge_timestamp: { type: Number, default: null }
-        },
-        activities: {
-            levels: { type: Array, default: [] },
-            wallets: { type: Array, default: [] }
-        },
-        created_at: { type: Number, default: () => Date.now() }
-    }, { versionKey: false })
+        { versionKey: false }
+    )
 )
 
 export interface UserDocument extends Document {

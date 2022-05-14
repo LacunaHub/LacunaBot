@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, Message, PermissionResolvable, Util } from 'discord.js'
-import { ServerDocument, CustomCommand as ICustomCommand } from '../database/schemas/Servers'
+import { CustomCommand as ICustomCommand, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import { parseCommandArguments } from '../internals/utility/Utils'
 import Replacer from './Replacer'
@@ -94,9 +94,17 @@ export default class CustomCommand {
                     if (component.condition.if_else.condition.type) {
                         let value = false
 
-                        const replacer_left = new Replacer(component.condition.if_else.condition.compare.left, { message: this.message, guild: this.message.guild, member: this.message.member })
-                        const replacer_right = new Replacer(component.condition.if_else.condition.compare.right, { message: this.message, guild: this.message.guild, member: this.message.member })
-    
+                        const replacer_left = new Replacer(component.condition.if_else.condition.compare.left, {
+                            message: this.message,
+                            guild: this.message.guild,
+                            member: this.message.member
+                        })
+                        const replacer_right = new Replacer(component.condition.if_else.condition.compare.right, {
+                            message: this.message,
+                            guild: this.message.guild,
+                            member: this.message.member
+                        })
+
                         component.condition.if_else.condition.compare.left = await replacer_left.replace()
                         component.condition.if_else.condition.compare.right = await replacer_right.replace()
 
@@ -136,12 +144,12 @@ export default class CustomCommand {
                                 }
                             }
                         }
-        
+
                         if (component.condition.if_else.condition.type == 'USER') {
                             if (component.condition.if_else.condition.user.condition == 'HAS_ROLES') {
                                 value = component.condition.if_else.condition.user.roles.some(v => this.message.member.roles.cache.has(v))
                             }
-        
+
                             if (component.condition.if_else.condition.user.condition == 'MISSING_ROLES') {
                                 value = component.condition.if_else.condition.user.roles.some(v => !this.message.member.roles.cache.has(v))
                             }
@@ -159,44 +167,47 @@ export default class CustomCommand {
                             for (const if_component of component.condition.if_else.actions) {
                                 if (if_component.action.type == 'REPLY') {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'REPLY').indexOf(if_component)
-                
+
                                     if (i < 2 && (if_component.action.reply.message.content || if_component.action.reply.message.embed.active)) {
                                         const replacer = new Replacer(null, { guild: this.message.guild, message: this.message, member: this.message.member })
-                                        const content = await replacer.replaceTemplateMessage({ content: if_component.action.reply.message.content, embed: if_component.action.reply.message.embed })
-                
+                                        const content = await replacer.replaceTemplateMessage({
+                                            content: if_component.action.reply.message.content,
+                                            embed: if_component.action.reply.message.embed
+                                        })
+
                                         if (if_component.action.reply.format == 'CURRENT_CHANNEL') {
                                             await this.message.channel.send({ ...content, tts: if_component.action.reply.message.tts }).catch(this.self.logger.error)
                                         }
-                
+
                                         if (if_component.action.reply.format == 'CHANNEL' && if_component.action.reply.channel_id) {
                                             const channel = this.message.guild.channels.cache.get(if_component.action.reply.channel_id) as BaseGuildTextChannel
-                
+
                                             if (channel) await channel.send({ ...content, tts: if_component.action.reply.message.tts }).catch(this.self.logger.error)
                                         }
                                     }
                                 }
-                
+
                                 if (if_component.action.type == 'MODIFY_ROLES') {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'MODIFY_ROLES').indexOf(if_component)
-                
+
                                     if (i < 2 && (if_component.action.modify_roles.add.length || if_component.action.modify_roles.remove.length)) {
                                         if (if_component.action.modify_roles.add.length) {
                                             const editable = this.message.guild.roles.cache.filter(r => r.editable && if_component.action.modify_roles.add.includes(r.id))
-                
+
                                             if (editable.size) await this.message.member.roles.add(editable).catch(this.self.logger.error)
                                         }
-                
+
                                         if (if_component.action.modify_roles.remove.length) {
                                             const editable = this.message.guild.roles.cache.filter(r => r.editable && if_component.action.modify_roles.remove.includes(r.id))
-                
+
                                             if (editable.size) await this.message.member.roles.remove(editable).catch(this.self.logger.error)
                                         }
                                     }
                                 }
-                
+
                                 if (if_component.action.type == 'ADD_REACTIONS') {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'ADD_REACTIONS').indexOf(if_component)
-                
+
                                     if (i < 2 && if_component.action.add_reactions.length) {
                                         for (let raw_reaction of if_component.action.add_reactions.slice(0, 5)) {
                                             const reaction = Util.parseEmoji(raw_reaction)
@@ -204,34 +215,38 @@ export default class CustomCommand {
                                         }
                                     }
                                 }
-                
+
                                 if (if_component.action.type == 'FORWARD_TO_COMMAND') {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'FORWARD_TO_COMMAND').indexOf(if_component)
-                
+
                                     if (i == 0 && if_component.action.forward_to_command) {
-                                        const replacer = new Replacer(if_component.action.forward_to_command, { message: this.message, guild: this.message.guild, member: this.message.member })
+                                        const replacer = new Replacer(if_component.action.forward_to_command, {
+                                            message: this.message,
+                                            guild: this.message.guild,
+                                            member: this.message.member
+                                        })
                                         const replaced = await replacer.replace()
-                            
+
                                         const splitted = replaced.split(/\s+/)
                                         const name = splitted.shift().toLowerCase()
                                         const args = this.message['args']
                                         this.message['args'] = parseCommandArguments(splitted.join(' '))
-                            
+
                                         const command = this.self.commands.find(c => c.name == name && c.is_prefix_command)
-                            
+
                                         if (command) await command.executePrefix(this.server, this.message)
 
                                         this.message['args'] = args
                                     }
                                 }
-                
+
                                 if (if_component.action.type == 'DELETE_REQUEST') {
                                     const i = component.condition.if_else.actions.filter(c => c.action.type == 'DELETE_REQUEST').indexOf(if_component)
-                
+
                                     if (i == 0 && if_component.action.delete_request >= 0) {
                                         if (this.message.deletable) {
                                             const timeout = if_component.action.delete_request
-                
+
                                             if (!isNaN(timeout)) setTimeout(() => this.message.delete().catch(this.self.logger.error), timeout ? timeout * 1000 : 0)
                                         }
                                     }
@@ -299,14 +314,14 @@ export default class CustomCommand {
                     if (i == 0 && component.action.forward_to_command) {
                         const replacer = new Replacer(component.action.forward_to_command, { message: this.message, guild: this.message.guild, member: this.message.member })
                         const replaced = await replacer.replace()
-            
+
                         const splitted = replaced.split(/\s+/)
                         const name = splitted.shift().toLowerCase()
                         const args = this.message['args']
                         this.message['args'] = parseCommandArguments(splitted.join(' '))
-            
+
                         const command = this.self.commands.find(c => c.name == name && c.is_prefix_command)
-            
+
                         if (command) await command.executePrefix(this.server, this.message)
 
                         this.message['args'] = args

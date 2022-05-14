@@ -7,23 +7,32 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
     const locale = self.translator.locale(server.locale).commands
 
     if (!server.modules.levels.active && !server.modules.levels.voice) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.levels_is_disabled, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.levels_is_disabled, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
 
     let attachment: MessageAttachment
-    
+
     try {
         attachment = await generateRankCard(self, interaction)
     } catch (err) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.error_on_render, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.error_on_render, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
 
     if (!attachment) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.no_rank_card, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.no_rank_card, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }

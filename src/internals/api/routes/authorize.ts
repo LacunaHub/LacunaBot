@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 import { Context } from 'koa'
-import OAuth2 from '../discord/OAuth2'
 import db from '../../../database'
+import OAuth2 from '../discord/OAuth2'
 
 const router: Router = new Router({ prefix: '/authorize', methods: ['GET'] })
 const oauth = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
@@ -36,7 +36,7 @@ async function callback(ctx: Context) {
         .set('user_id', user.id, cookieOptions)
         .set('user_username', encodeURIComponent(user.username), cookieOptions)
         .set('user_discriminator', user.discriminator, cookieOptions)
-        
+
     if (user.avatar) ctx.cookies.set('user_avatar', user.avatar, cookieOptions)
 
     const entry = await db.users.findOne({ _id: user.id })
@@ -51,9 +51,7 @@ async function callback(ctx: Context) {
                 flags: user.public_flags
             }
         } as any)
-    }
-
-    else {
+    } else {
         if (entry.user.avatar !== user.avatar) {
             await db.users.updateOne({ _id: user.id }, { $set: { 'user.avatar': user.avatar } })
         }

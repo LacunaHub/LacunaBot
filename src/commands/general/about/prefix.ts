@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageActionRow, MessageButton, Message, Team } from 'discord.js'
+import { Message, MessageActionRow, MessageButton, MessageEmbed, Team } from 'discord.js'
 import numbro from 'numbro'
 import os from 'os'
 import { ServerDocument } from '../../../database/schemas/Servers'
@@ -9,10 +9,10 @@ const { version } = require('../../../../package.json')
 export default async (self: Lacuna, server: ServerDocument, message: Message) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const total_guilds = await self.shard.fetchClientValues('guilds.cache.size') as number[]
+    const total_guilds = (await self.shard.fetchClientValues('guilds.cache.size')) as number[]
     const total_users = self.guilds.cache.reduce((x, y) => x + y.memberCount, 0)
-    const cached_users = await self.shard.fetchClientValues('users.cache.size') as number[]
-    
+    const cached_users = (await self.shard.fetchClientValues('users.cache.size')) as number[]
+
     const developer = await self.users.fetch((self.application.owner as Team).ownerId)
 
     const embed = new MessageEmbed()
@@ -27,13 +27,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         .addField('\u200B', '\u200B', true)
         .setFooter({ text: `© ${(self.application.owner as Team).name}`, iconURL: (self.application.owner as Team).iconURL() })
 
-    const components = new MessageActionRow()
-        .addComponents(
-            new MessageButton()
-                .setStyle('LINK')
-                .setLabel(locale.about.texts.state)
-                .setURL('https://www.voidlacuna.ru/state')
-        )
+    const components = new MessageActionRow().addComponents(new MessageButton().setStyle('LINK').setLabel(locale.about.texts.state).setURL('https://www.voidlacuna.ru/state'))
 
     await message.reply({ embeds: [embed], components: [components] })
 

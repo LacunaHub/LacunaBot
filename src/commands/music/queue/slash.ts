@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageActionRow, MessageButton, CommandInteraction, Message } from 'discord.js'
+import { CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
 import { Queue } from 'erela.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../../../database/schemas/Servers'
@@ -11,7 +11,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const player = self.player.get(interaction.guild.id)
 
     if (!player || !player.queue.size) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -39,24 +42,23 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!interaction.deferred) await interaction.deferReply({ ephemeral: true })
 
-    const row = new MessageActionRow()
-        .addComponents(
-            new MessageButton()
-                .setCustomId('backward')
-                .setStyle('SECONDARY')
-                .setLabel('Previous')
-                .setDisabled(fields.length == 1),
-            new MessageButton()
-                .setCustomId('forward')
-                .setStyle('SECONDARY')
-                .setLabel('Next')
-                .setDisabled(fields.length == 1)
-        )
+    const row = new MessageActionRow().addComponents(
+        new MessageButton()
+            .setCustomId('backward')
+            .setStyle('SECONDARY')
+            .setLabel('Previous')
+            .setDisabled(fields.length == 1),
+        new MessageButton()
+            .setCustomId('forward')
+            .setStyle('SECONDARY')
+            .setLabel('Next')
+            .setDisabled(fields.length == 1)
+    )
 
-    const message = await interaction.editReply({
-        embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
+    const message = (await interaction.editReply({
+        embeds: [embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, page + 1, chunks.length) })],
         components: [row]
-    }) as Message
+    })) as Message
 
     const collector = message.createMessageComponentCollector({
         componentType: 'BUTTON',
@@ -67,19 +69,21 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     collector.on('collect', async i => {
         switch (i.customId) {
             case row.components[0].customId:
-                page = page <= 0 ? (fields.length - 1) : (page - 1)
-            break
+                page = page <= 0 ? fields.length - 1 : page - 1
+                break
 
             case row.components[1].customId:
-                page = (page + 1) >= fields.length ? 0 : (page + 1)
-            break
+                page = page + 1 >= fields.length ? 0 : page + 1
+                break
         }
 
         await i.deferUpdate()
-        await i.editReply({
-            embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
-            components: [row]
-        }).catch(() => {})
+        await i
+            .editReply({
+                embeds: [embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, page + 1, chunks.length) })],
+                components: [row]
+            })
+            .catch(() => {})
 
         collector.resetTimer()
     })

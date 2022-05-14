@@ -11,8 +11,8 @@ export async function authorize(ctx: Context, next: Next) {
 
     if (!access_token || access_token === 'null') ctx.throw(401, 'Unauthorized')
 
-    const user = await oauth2.getUser(access_token).catch(() => {}) as OAuth2User
-    
+    const user = (await oauth2.getUser(access_token).catch(() => {})) as OAuth2User
+
     if (!user) ctx.throw(403, 'Forbidden')
 
     ctx.request.headers['user-id'] = user.id
@@ -26,8 +26,8 @@ export async function checkPermissions(ctx: Context, next: Next) {
 
     if (!guild_id) ctx.throw(400, 'Bad Request')
 
-    const guilds = await oauth2.getUserGuilds(ctx.request.headers.authorization).catch(() => {}) as OAuth2Guild[]
-    
+    const guilds = (await oauth2.getUserGuilds(ctx.request.headers.authorization).catch(() => {})) as OAuth2Guild[]
+
     if (!guilds) ctx.throw(403, 'Forbidden')
 
     const guild = guilds.find(g => g.id == guild_id)

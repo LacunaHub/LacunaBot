@@ -3,7 +3,7 @@ import numbro from 'numbro'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async function(self: Lacuna, server: ServerDocument, before: ThreadChannel, thread: ThreadChannel): Promise<boolean> {
+export default async function (self: Lacuna, server: ServerDocument, before: ThreadChannel, thread: ThreadChannel): Promise<boolean> {
     if (server.moderation.logs.types.thread_update.active) {
         const locale = self.translator.locale(server.locale).modules
 
@@ -13,41 +13,58 @@ export default async function(self: Lacuna, server: ServerDocument, before: Thre
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
-            let webhook = logs_webhook ? (await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook : null
+            let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
             const audit = thread.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await thread.guild.fetchAuditLogs({ limit: 1, type: 'THREAD_UPDATE' }) : null
             const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
                 if (logs_webhook) {
-                    await self.db.servers.updateOne({ _id: thread.guild.id }, {
-                        $pull: {
-                            'moderation.logs.webhooks': {
-                                channel_id: log.id
+                    await self.db.servers.updateOne(
+                        { _id: thread.guild.id },
+                        {
+                            $pull: {
+                                'moderation.logs.webhooks': {
+                                    channel_id: log.id
+                                }
                             }
                         }
-                    })
+                    )
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.thread_update.title) })
-                } catch (err) { return false }
+                    webhook = await log.createWebhook(`${self.user.username}`, {
+                        avatar: self.user.displayAvatarURL(),
+                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.thread_update.title)
+                    })
+                } catch (err) {
+                    return false
+                }
 
-                await self.db.servers.updateOne({ _id: thread.guild.id }, {
-                    $push: {
-                        'moderation.logs.webhooks': {
-                            id: webhook.id,
-                            token: webhook.token,
-                            channel_id: webhook.channelId
+                await self.db.servers.updateOne(
+                    { _id: thread.guild.id },
+                    {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelId
+                            }
                         }
                     }
-                })
+                )
             }
 
             if (before.name != thread.name) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.thread_update.title)
-                    .setDescription(self.translator.format(locale.logs.thread_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.thread_update.types.name, `<#${thread.id}>`)))
+                    .setDescription(
+                        self.translator.format(
+                            locale.logs.thread_update.template,
+                            `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
+                            self.translator.format(locale.logs.thread_update.types.name, `<#${thread.id}>`)
+                        )
+                    )
                     .addField(locale.logs.common.before_changes, before.name, true)
                     .addField(locale.logs.common.after_changes, thread.name, true)
                     .setFooter({ text: thread.id })
@@ -64,9 +81,15 @@ export default async function(self: Lacuna, server: ServerDocument, before: Thre
             if (before.autoArchiveDuration != thread.autoArchiveDuration) {
                 const embed = new MessageEmbed()
                     .setTitle(locale.logs.thread_update.title)
-                    .setDescription(self.translator.format(locale.logs.thread_update.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, self.translator.format(locale.logs.thread_update.types.auto_archive, `<#${thread.id}>`)))
-                    .addField(locale.logs.common.before_changes, numbro(before.autoArchiveDuration as number * 60).format({ output: 'time' }), true)
-                    .addField(locale.logs.common.after_changes, numbro(thread.autoArchiveDuration as number * 60).format({ output: 'time' }), true)
+                    .setDescription(
+                        self.translator.format(
+                            locale.logs.thread_update.template,
+                            `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
+                            self.translator.format(locale.logs.thread_update.types.auto_archive, `<#${thread.id}>`)
+                        )
+                    )
+                    .addField(locale.logs.common.before_changes, numbro((before.autoArchiveDuration as number) * 60).format({ output: 'time' }), true)
+                    .addField(locale.logs.common.after_changes, numbro((thread.autoArchiveDuration as number) * 60).format({ output: 'time' }), true)
                     .setFooter({ text: thread.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -79,7 +102,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Thre
             }
 
             self.emit('moduleExecution', { module: 'Logs: Thread Update', guild: { id: thread.guild.id, name: thread.guild.name }, target: { id: thread.id, name: thread.name } })
-        
+
             return true
         }
     }

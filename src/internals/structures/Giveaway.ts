@@ -1,4 +1,4 @@
-import { MessageEmbed, Collection, BaseGuildTextChannel, Message, ButtonInteraction } from 'discord.js'
+import { BaseGuildTextChannel, ButtonInteraction, Collection, Message, MessageEmbed } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
@@ -19,7 +19,7 @@ export default class Giveaway {
         this.self = self
 
         this.message_id = options.message_id
-        
+
         this.channel_id = options.channel_id
 
         this.guild_id = options.guild_id
@@ -65,19 +65,22 @@ export default class Giveaway {
     }
 
     async createEntry() {
-        await this.self.db.servers.updateOne({ _id: this.guild_id }, {
-            $push: {
-                'utility.giveaways': {
-                    message_id: this.message_id,
-                    channel_id: this.channel_id,
-                    guild_id: this.guild_id,
-                    prize: this.prize,
-                    winners_amount: this.winners_amount,
-                    members: this.members,
-                    expiration_date: this.expiration_date.getTime()
+        await this.self.db.servers.updateOne(
+            { _id: this.guild_id },
+            {
+                $push: {
+                    'utility.giveaways': {
+                        message_id: this.message_id,
+                        channel_id: this.channel_id,
+                        guild_id: this.guild_id,
+                        prize: this.prize,
+                        winners_amount: this.winners_amount,
+                        members: this.members,
+                        expiration_date: this.expiration_date.getTime()
+                    }
                 }
             }
-        })
+        )
     }
 
     async toSchedule() {
@@ -94,23 +97,27 @@ export default class Giveaway {
     }
 
     async deleteEntry() {
-        await this.self.db.servers.updateOne({ _id: this.guild_id }, {
-            $pull: {
-                'utility.giveaways': {
-                    message_id: this.message_id
+        await this.self.db.servers.updateOne(
+            { _id: this.guild_id },
+            {
+                $pull: {
+                    'utility.giveaways': {
+                        message_id: this.message_id
+                    }
                 }
             }
-        })
+        )
     }
 
     async deleteMessage() {
         const message = await this.getMessage()
-        
+
         if (message) await message.delete()
     }
 
     async end(scheduled = true) {
-        if (scheduled) await this.endMessage(); else await this.deleteMessage()
+        if (scheduled) await this.endMessage()
+        else await this.deleteMessage()
 
         await this.deleteEntry()
         this.schedule.cancel()
@@ -121,7 +128,8 @@ export default class Giveaway {
         const message = await this.getMessage()
 
         if (!message) {
-            await this.end(false); return
+            await this.end(false)
+            return
         }
 
         const locale = this.self.translator.locale(this.locale).commands
@@ -139,12 +147,8 @@ export default class Giveaway {
             await message.reply({ content: this.self.translator.format(locale.giveaway.end.texts.congrats, `${winners.map(w => `<@${w}>`)}`, `**${this.prize}**`) })
 
             members.clear()
-        }
-
-        else {
-            const embed = new MessageEmbed(message.embeds[0])
-                .setDescription(locale.giveaway.end.texts.no_members)
-                .setColor('#EF5350')
+        } else {
+            const embed = new MessageEmbed(message.embeds[0]).setDescription(locale.giveaway.end.texts.no_members).setColor('#EF5350')
 
             await message.edit({ embeds: [embed], components: [] })
         }
@@ -152,21 +156,25 @@ export default class Giveaway {
 }
 
 export async function buttonPressed(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
-    const [ , message_id ] = interaction.customId.split('-')
+    const [, message_id] = interaction.customId.split('-')
     const giveaway = self.giveaways.find(g => g.message_id == message_id)
     const entry: GiveawayOptions = server.utility.giveaways.find(g => g.message_id == message_id)
     const locale = self.translator.locale(server.locale)
 
     if (giveaway && entry) {
-        if (!entry.members.includes(interaction.user.id)) await self.db.servers.updateOne({ _id: interaction.guild.id, 'utility.giveaways.message_id': message_id }, {
-            $push: {
-                'utility.giveaways.$.members': interaction.user.id
-            }
-        })
+        if (!entry.members.includes(interaction.user.id))
+            await self.db.servers.updateOne(
+                { _id: interaction.guild.id, 'utility.giveaways.message_id': message_id },
+                {
+                    $push: {
+                        'utility.giveaways.$.members': interaction.user.id
+                    }
+                }
+            )
 
         if (!giveaway.members.includes(interaction.user.id)) {
             await giveaway.members.push(interaction.user.id)
-        
+
             const message = await giveaway.getMessage()
 
             const embed = new MessageEmbed(message.embeds[0])
@@ -174,11 +182,23 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
 
             await message.edit({ embeds: [embed] })
 
-            await interaction.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.commands.giveaway.create.texts.participated, `**${interaction.user.username}**`, `**${giveaway.prize}**`)}`, ephemeral: true })
-        }
-
-        else {
-            await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.giveaway.create.texts.already_participating, `**${interaction.user.username}**`, `**${giveaway.prize}**`)}`, ephemeral: true })
+            await interaction.reply({
+                content: `${self._emojis.OK} | ${self.translator.format(
+                    locale.commands.giveaway.create.texts.participated,
+                    `**${interaction.user.username}**`,
+                    `**${giveaway.prize}**`
+                )}`,
+                ephemeral: true
+            })
+        } else {
+            await interaction.reply({
+                content: `${self._emojis.ERROR} | ${self.translator.format(
+                    locale.commands.giveaway.create.texts.already_participating,
+                    `**${interaction.user.username}**`,
+                    `**${giveaway.prize}**`
+                )}`,
+                ephemeral: true
+            })
         }
     }
 }
@@ -194,7 +214,16 @@ export async function handleEntries(self: Lacuna): Promise<number> {
             const giveaways: GiveawayOptions[] = server.utility.giveaways
 
             for (const giveaway of giveaways) {
-                new Giveaway(self, { message_id: giveaway.message_id, channel_id: giveaway.channel_id, guild_id: server._id, prize: giveaway.prize, winners_amount: giveaway.winners_amount, members: giveaway.members, expiration_date: new Date(giveaway.expiration_date), locale: giveaway.locale })
+                new Giveaway(self, {
+                    message_id: giveaway.message_id,
+                    channel_id: giveaway.channel_id,
+                    guild_id: server._id,
+                    prize: giveaway.prize,
+                    winners_amount: giveaway.winners_amount,
+                    members: giveaway.members,
+                    expiration_date: new Date(giveaway.expiration_date),
+                    locale: giveaway.locale
+                })
             }
 
             entries += giveaways.length

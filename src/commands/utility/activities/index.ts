@@ -1,5 +1,5 @@
-import { setLevelPrefix, setWalletBalancePrefix, resetWalletPrefix, resetLevelPrefix } from './prefix'
-import { setLevelSlash, setWalletBalanceSlash, resetWalletSlash, resetLevelSlash } from './slash'
+import { resetLevelPrefix, resetWalletPrefix, setLevelPrefix, setWalletBalancePrefix } from './prefix'
+import { resetLevelSlash, resetWalletSlash, setLevelSlash, setWalletBalanceSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
@@ -54,7 +54,7 @@ export default {
                     description: `commands.${name}.set-wallet-balance.options.amount.description`,
                     required: true,
                     min_value: -(Math.pow(2, 31) - 1),
-                    max_value: (Math.pow(2, 31) - 1)
+                    max_value: Math.pow(2, 31) - 1
                 },
                 {
                     type: 'STRING',

@@ -1,8 +1,8 @@
 import { VoiceState } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { voiceAssign as levelsVoiceAssign } from '../../modules/Levels'
 import { voiceAssign as economyVoiceAssign } from '../../modules/Economy'
+import { voiceAssign as levelsVoiceAssign } from '../../modules/Levels'
 import { VoiceConnect } from '../../modules/Logs'
 import { createTemporaryVoice } from '../../modules/VoiceManager'
 
@@ -29,7 +29,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
     }
 
     const voice_roles_bound = server.modules.voice_manager.voice_roles
-        .slice(0, (server.server.premium.available ? 20 : 2))
+        .slice(0, server.server.premium.available ? 20 : 2)
         .filter(r => !r.bound_channels_id.length || r.bound_channels_id.includes(state.channelId))
 
     if (voice_roles_bound.length) {
@@ -44,7 +44,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
     if ((mute_role && state.member.roles.cache.has(mute_role.id)) || tempmute) {
         if (state.member.manageable) await state.setMute(true).catch(() => {})
     }
-    
+
     await levelsVoiceAssign(self, server, state)
     await economyVoiceAssign(self, server, state)
 

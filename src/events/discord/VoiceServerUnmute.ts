@@ -1,8 +1,8 @@
 import { VoiceState } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { voiceAssign as levelsVoiceAssign } from '../../modules/Levels'
 import { voiceAssign as economyVoiceAssign } from '../../modules/Economy'
+import { voiceAssign as levelsVoiceAssign } from '../../modules/Levels'
 import { VoiceServerUnmute } from '../../modules/Logs'
 
 const handler = async (self: Lacuna, state: VoiceState) => {

@@ -1,6 +1,6 @@
-import Lacuna from '../Lacuna'
+import { BaseGuildTextChannel, CommandInteraction, ContextMenuInteraction, GuildMember, Message, Team } from 'discord.js'
 import { ServerDocument, SystemCommand } from '../../database/schemas/Servers'
-import { CommandInteraction, ContextMenuInteraction, Message, ApplicationCommandOptionData, PermissionResolvable, Team, GuildMember, BaseGuildTextChannel } from 'discord.js'
+import Lacuna from '../Lacuna'
 
 export default class Command {
     public self: Lacuna
@@ -121,16 +121,23 @@ export default class Command {
     async executeSlash(server: ServerDocument, interaction: CommandInteraction): Promise<boolean> {
         const locale = this.self.translator.locale(server.locale)
 
-        const denied: boolean = this.denied(server, interaction), allowed: boolean = this.allowed(server, interaction)
+        const denied: boolean = this.denied(server, interaction),
+            allowed: boolean = this.allowed(server, interaction)
 
         if (!denied || !allowed) {
-            await interaction.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.command_denied, `**${interaction.user.tag}**`)}`, ephemeral: true })
+            await interaction.reply({
+                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.command_denied, `**${interaction.user.tag}**`)}`,
+                ephemeral: true
+            })
 
             return false
         }
 
         if (this.premium_only && !server.server.premium.available) {
-            await interaction.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${interaction.user.tag}**`)}`, ephemeral: true })
+            await interaction.reply({
+                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${interaction.user.tag}**`)}`,
+                ephemeral: true
+            })
 
             return false
         }
@@ -156,16 +163,23 @@ export default class Command {
     async executeContext(server: ServerDocument, interaction: ContextMenuInteraction): Promise<boolean> {
         const locale = this.self.translator.locale(server.locale)
 
-        const denied: boolean = this.denied(server, interaction), allowed: boolean = this.allowed(server, interaction)
+        const denied: boolean = this.denied(server, interaction),
+            allowed: boolean = this.allowed(server, interaction)
 
         if (!denied || !allowed) {
-            await interaction.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.command_denied, `**${interaction.user.tag}**`)}`, ephemeral: true })
+            await interaction.reply({
+                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.command_denied, `**${interaction.user.tag}**`)}`,
+                ephemeral: true
+            })
 
             return false
         }
 
         if (this.premium_only && !server.server.premium.available) {
-            await interaction.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${interaction.user.tag}**`)}`, ephemeral: true })
+            await interaction.reply({
+                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${interaction.user.tag}**`)}`,
+                ephemeral: true
+            })
 
             return false
         }
@@ -185,13 +199,13 @@ export default class Command {
         return true
     }
 
-
     async executePrefix(server: ServerDocument, message: Message): Promise<boolean> {
         if (!message.content.startsWith(server.prefix) || !server.commands.prefix_commands) return false
 
         const locale = this.self.translator.locale(server.locale)
 
-        const denied: boolean = this.denied(server, message), allowed: boolean = this.allowed(server, message)
+        const denied: boolean = this.denied(server, message),
+            allowed: boolean = this.allowed(server, message)
 
         if (!denied || !allowed) return false
 
@@ -199,13 +213,27 @@ export default class Command {
             const missing = (message.channel as BaseGuildTextChannel).permissionsFor(message.guild.me).missing(this.permissions.self as any)
 
             if (missing.includes('SEND_MESSAGES')) {
-                await message.author.send({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.missing_send_messages, `**${message.member.displayName}**`, `<#${message.channelId}>`)}` }).catch(() => {})
+                await message.author
+                    .send({
+                        content: `${this.self._emojis.ERROR} | ${this.self.translator.format(
+                            locale.commands.common.texts.missing_send_messages,
+                            `**${message.member.displayName}**`,
+                            `<#${message.channelId}>`
+                        )}`
+                    })
+                    .catch(() => {})
 
                 return false
             }
 
             if (missing) {
-                await message.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.missing_permissions, `**${message.member.displayName}**`, missing.map(p => `\`${locale.commands.common.permissions[p]?.toLowerCase()}\``).join(', '))}` })
+                await message.reply({
+                    content: `${this.self._emojis.ERROR} | ${this.self.translator.format(
+                        locale.commands.common.texts.missing_permissions,
+                        `**${message.member.displayName}**`,
+                        missing.map(p => `\`${locale.commands.common.permissions[p]?.toLowerCase()}\``).join(', ')
+                    )}`
+                })
 
                 return false
             }
@@ -225,10 +253,8 @@ export default class Command {
             message['args'] = (message as any).args.slice(1)
 
             await subcommand.prefix(this.self, server, message)
-        }
+        } else await this.prefix(this.self, server, message)
 
-        else await this.prefix(this.self, server, message)
-        
         this.self.emit('commandExecution', {
             command: subcommand ? `${this.name} ${subcommand.name}` : this.name,
             guild: { name: message.guild.name, id: message.guild.id },

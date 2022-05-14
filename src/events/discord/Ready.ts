@@ -2,7 +2,7 @@ import { Manager } from 'erela.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna) => {
-    const [ identifier, host, port, password ] = process.env.WINTER_MUSIC_NODE.split(':')
+    const [identifier, host, port, password] = process.env.WINTER_MUSIC_NODE.split(':')
 
     self.player = new Manager({
         nodes: [
@@ -23,13 +23,13 @@ const handler = async (self: Lacuna) => {
             if (guild) guild.shard.send(payload)
         }
     })
-    .on('nodeConnect', node => self.emit('nodeConnect', node))
-    .on('nodeDisconnect', (node, reason) => self.emit('nodeDisconnect', node, reason))
-    .on('nodeError', (node, error) => self.emit('nodeError', node, error))
-    .on('nodeReconnect', node => self.emit('nodeReconnect', node))
-    .on('playerDestroy', player => self.emit('playerDestroy', player))
-    .on('queueEnd', player => self.emit('queueEnd', player))
-    .on('trackEnd', player => self.emit('trackEnd', player))
+        .on('nodeConnect', node => self.emit('nodeConnect', node))
+        .on('nodeDisconnect', (node, reason) => self.emit('nodeDisconnect', node, reason))
+        .on('nodeError', (node, error) => self.emit('nodeError', node, error))
+        .on('nodeReconnect', node => self.emit('nodeReconnect', node))
+        .on('playerDestroy', player => self.emit('playerDestroy', player))
+        .on('queueEnd', player => self.emit('queueEnd', player))
+        .on('trackEnd', player => self.emit('trackEnd', player))
 
     self.player.init(self.user.id)
 

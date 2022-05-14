@@ -71,7 +71,7 @@ export {
     VoiceServerDeaf,
     VoiceServerMute,
     VoiceServerUndeaf,
-    VoiceServerUnmute,
+    VoiceServerUnmute
 }
 
 export const images = {

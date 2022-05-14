@@ -22,12 +22,19 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
 
             if (channel && channel.manageable) await state.member.voice.setChannel(child.channel_id)
 
-            self.emit('moduleExecution', { module: 'Autovoice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
+            self.emit('moduleExecution', {
+                module: 'Autovoice: Move',
+                guild: { id: state.guild.id, name: state.guild.name },
+                target: { id: state.member.id, name: state.member.user.tag }
+            })
 
             return true
         }
 
-        if ((autovoice.allowed_roles?.length && !state.member.roles.cache.some(r => autovoice.allowed_roles?.includes(r.id))) || state.member.roles.cache.some(r => autovoice.blocked_roles?.includes(r.id))) {
+        if (
+            (autovoice.allowed_roles?.length && !state.member.roles.cache.some(r => autovoice.allowed_roles?.includes(r.id))) ||
+            state.member.roles.cache.some(r => autovoice.blocked_roles?.includes(r.id))
+        ) {
             await state.disconnect()
 
             return false
@@ -37,17 +44,23 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
         const replacer = new Replacer(autovoice.default.name, { guild: state.guild, member: state.member, index: autovoice.children.length + 1 })
         const name = await replacer.replace()
         const permissions = new Permissions(BigInt(autovoice.default.permissions))
-        
+
         const temp_voice = await state.guild.channels.create(truncateString(name, 100, '') || 'Voice', {
             type: 'GUILD_VOICE',
             permissionOverwrites: state.channel.permissionOverwrites.cache,
-            parent: parent && parent.manageable ? parent as CategoryChannelResolvable : null,
+            parent: parent && parent.manageable ? (parent as CategoryChannelResolvable) : null,
             userLimit: autovoice.default.limit,
             bitrate: state.channel.bitrate
         })
 
         if (autovoice.default.permissions) {
-            await temp_voice.permissionOverwrites.create(state.member.id, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
+            await temp_voice.permissionOverwrites.create(
+                state.member.id,
+                permissions.toArray().reduce((obj, k) => {
+                    obj[k] = true
+                    return obj
+                }, {})
+            )
 
             if (autovoice?.moderator_roles?.length) {
                 const roles = autovoice.moderator_roles.filter(mr => state.guild.roles.cache.some(r => r.editable && r.id == mr))
@@ -55,30 +68,50 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
                 for (const role of roles) {
                     const overwrites = temp_voice.permissionOverwrites.cache.find(p => p.id == role)
 
-                    if (overwrites) await overwrites.edit(permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
-                    else await temp_voice.permissionOverwrites.create(role, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
+                    if (overwrites)
+                        await overwrites.edit(
+                            permissions.toArray().reduce((obj, k) => {
+                                obj[k] = true
+                                return obj
+                            }, {})
+                        )
+                    else
+                        await temp_voice.permissionOverwrites.create(
+                            role,
+                            permissions.toArray().reduce((obj, k) => {
+                                obj[k] = true
+                                return obj
+                            }, {})
+                        )
                 }
             }
         }
 
         if (autovoice.default.position == 'TOP') await temp_voice.setPosition(0)
 
-        await self.db.servers.updateOne({ _id: state.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id }, {
-            $push: {
-                'modules.voice_manager.autovoices.$.children': {
-                    channel_id: temp_voice.id,
-                    owner_id: state.member.id,
-                    created_at: Date.now()
+        await self.db.servers.updateOne(
+            { _id: state.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id },
+            {
+                $push: {
+                    'modules.voice_manager.autovoices.$.children': {
+                        channel_id: temp_voice.id,
+                        owner_id: state.member.id,
+                        created_at: Date.now()
+                    }
                 }
             }
-        })
+        )
 
         const moveable: boolean = state.channel.permissionsFor(self.user.id).has(self.PERMISSIONS_FLAGS.MOVE_MEMBERS)
 
         if (moveable) await state.setChannel(temp_voice.id)
 
-        self.emit('moduleExecution', { module: 'Autovoice: Create', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
-    
+        self.emit('moduleExecution', {
+            module: 'Autovoice: Create',
+            guild: { id: state.guild.id, name: state.guild.name },
+            target: { id: state.member.id, name: state.member.user.tag }
+        })
+
         return true
     }
 
@@ -97,7 +130,11 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
 
             if (channel && channel.manageable) await state.setChannel(child.channel_id)
 
-            self.emit('moduleExecution', { module: 'Autovoice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
+            self.emit('moduleExecution', {
+                module: 'Autovoice: Move',
+                guild: { id: state.guild.id, name: state.guild.name },
+                target: { id: state.member.id, name: state.member.user.tag }
+            })
 
             return true
         }
@@ -112,33 +149,41 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
         if (channel && state.channelId == beforeAutovoice.channel_id && child.owner_id == state.member.id) {
             if (channel.manageable) await state.setChannel(child.channel_id, '')
 
-            self.emit('moduleExecution', { module: 'Autovoice: Move', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
+            self.emit('moduleExecution', {
+                module: 'Autovoice: Move',
+                guild: { id: state.guild.id, name: state.guild.name },
+                target: { id: state.member.id, name: state.member.user.tag }
+            })
 
             return true
         }
 
         if (child && channel && !channel.members.size) {
-            await self.db.servers.updateOne({ _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutovoice.id }, {
-                $pull: {
-                    'modules.voice_manager.autovoices.$.children': {
-                        channel_id: child.channel_id
+            await self.db.servers.updateOne(
+                { _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutovoice.id },
+                {
+                    $pull: {
+                        'modules.voice_manager.autovoices.$.children': {
+                            channel_id: child.channel_id
+                        }
                     }
                 }
-            })
+            )
 
             if (channel.deletable) await channel.delete()
 
             self.emit('moduleExecution', { module: 'Autovoice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
-        }
-
-        else if (child && channel && channel.members.size) {
+        } else if (child && channel && channel.members.size) {
             const children_index = beforeAutovoice.children.indexOf(child)
 
-            await self.db.servers.updateOne({ _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutovoice.id }, {
-                $set: {
-                    [`modules.voice_manager.autovoices.$.children.${children_index}.owner_id`]: channel.members.first().id
+            await self.db.servers.updateOne(
+                { _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutovoice.id },
+                {
+                    $set: {
+                        [`modules.voice_manager.autovoices.$.children.${children_index}.owner_id`]: channel.members.first().id
+                    }
                 }
-            })
+            )
         }
     }
 
@@ -152,35 +197,45 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
         const child = autovoice.children.find(c => c.channel_id == channel.id)
 
         if (child && !channel.members.size) {
-            await self.db.servers.updateOne({ _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id }, {
-                $pull: {
-                    'modules.voice_manager.autovoices.$.children': {
-                        channel_id: child.channel_id
+            await self.db.servers.updateOne(
+                { _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id },
+                {
+                    $pull: {
+                        'modules.voice_manager.autovoices.$.children': {
+                            channel_id: child.channel_id
+                        }
                     }
                 }
-            })
+            )
 
             if (channel.deletable) await channel.delete()
 
             self.emit('moduleExecution', { module: 'Autovoice: Delete', guild: { id: channel.guild.id, name: channel.guild.name }, target: { id: channel.id, name: channel.name } })
-        }
-
-        else if (child && channel.members.size) {
+        } else if (child && channel.members.size) {
             const childIndex: number = autovoice.children.indexOf(child)
 
-            await self.db.servers.updateOne({ _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id }, {
-                $set: {
-                    [`modules.voice_manager.autovoices.$.children.${childIndex}.owner_id`]: channel.members.first().id
+            await self.db.servers.updateOne(
+                { _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id },
+                {
+                    $set: {
+                        [`modules.voice_manager.autovoices.$.children.${childIndex}.owner_id`]: channel.members.first().id
+                    }
                 }
-            })
+            )
 
             const overwrites = channel.permissionOverwrites.cache.find(p => p.id === child.owner_id)
             if (overwrites) await overwrites.delete()
 
             const permissions = new Permissions(BigInt(autovoice.default.permissions))
-            await channel.permissionOverwrites.create(channel.members.first().id, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {}))
+            await channel.permissionOverwrites.create(
+                channel.members.first().id,
+                permissions.toArray().reduce((obj, k) => {
+                    obj[k] = true
+                    return obj
+                }, {})
+            )
         }
-    
+
         return true
     }
 

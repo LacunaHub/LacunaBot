@@ -22,13 +22,16 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     if (player.trackRepeat) {
         player.setTrackRepeat(false)
         player.setQueueRepeat(true)
-    }
-
-    else {
+    } else {
         player.setTrackRepeat(true)
     }
 
-    await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(player.trackRepeat ? locale.repeat.texts.track_repeat : locale.repeat.texts.queue_repeat, `**${message.member.displayName}**`)}` })
+    await message.reply({
+        content: `${self._emojis.OK} | ${self.translator.format(
+            player.trackRepeat ? locale.repeat.texts.track_repeat : locale.repeat.texts.queue_repeat,
+            `**${message.member.displayName}**`
+        )}`
+    })
 
     return true
 }

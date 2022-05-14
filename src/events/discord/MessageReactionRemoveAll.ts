@@ -7,13 +7,16 @@ const handler = async (self: Lacuna, message: Message) => {
     const elements: ReactionElement[] = server.modules.reactions.filter(r => r.message.id == message.id)
 
     if (elements.length) {
-        await self.db.servers.updateOne({ _id: message.guild.id }, {
-            $pull: {
-                'modules.reactions': {
-                    'message.id': message.id
+        await self.db.servers.updateOne(
+            { _id: message.guild.id },
+            {
+                $pull: {
+                    'modules.reactions': {
+                        'message.id': message.id
+                    }
                 }
             }
-        })
+        )
     }
 
     message.reactions.cache.clear()

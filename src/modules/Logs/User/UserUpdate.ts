@@ -2,7 +2,7 @@ import { BaseGuildTextChannel, Guild, MessageEmbed, User, Webhook } from 'discor
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async function(self: Lacuna, server: ServerDocument, guild: Guild, before: User, user: User): Promise<boolean> {
+export default async function (self: Lacuna, server: ServerDocument, guild: Guild, before: User, user: User): Promise<boolean> {
     if (server.moderation.logs.types.user_update.active) {
         const locale = self.translator.locale(server.locale).modules
 
@@ -12,32 +12,43 @@ export default async function(self: Lacuna, server: ServerDocument, guild: Guild
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
-            let webhook = logs_webhook ? (await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook : null
+            let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
             if (!webhook) {
                 if (logs_webhook) {
-                    await self.db.servers.updateOne({ _id: guild.id }, {
-                        $pull: {
-                            'moderation.logs.webhooks': {
-                                channel_id: log.id
+                    await self.db.servers.updateOne(
+                        { _id: guild.id },
+                        {
+                            $pull: {
+                                'moderation.logs.webhooks': {
+                                    channel_id: log.id
+                                }
                             }
                         }
-                    })
+                    )
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.user_update.title) })
-                } catch (err) { return false }
+                    webhook = await log.createWebhook(`${self.user.username}`, {
+                        avatar: self.user.displayAvatarURL(),
+                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.user_update.title)
+                    })
+                } catch (err) {
+                    return false
+                }
 
-                await self.db.servers.updateOne({ _id: guild.id }, {
-                    $push: {
-                        'moderation.logs.webhooks': {
-                            id: webhook.id,
-                            token: webhook.token,
-                            channel_id: webhook.channelId
+                await self.db.servers.updateOne(
+                    { _id: guild.id },
+                    {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelId
+                            }
                         }
                     }
-                })
+                )
             }
 
             if (before.username != user.username) {
@@ -75,7 +86,7 @@ export default async function(self: Lacuna, server: ServerDocument, guild: Guild
             }
 
             self.emit('moduleExecution', { module: 'Logs: User Update', guild: { id: guild.id, name: guild.name }, target: { id: user.username, name: user.id } })
-        
+
             return true
         }
     }

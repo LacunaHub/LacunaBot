@@ -1,23 +1,22 @@
-import Servers, { IAutoVoice, ReactionElement, ServerDocument } from '../../../database/schemas/Servers'
-import db from '../../../database'
-import { generateId } from '../../../modules/Reactions'
-import { Util } from 'discord.js'
 import { REST } from '@discordjs/rest'
 import { Routes } from 'discord-api-types/v9'
-import { DataResolver } from 'discord.js'
+import { DataResolver, Util } from 'discord.js'
 import qdb from 'quick.db'
-import { resolveObjectPath, createEnum, dotNotateObject } from '../../utility/Utils'
-import translator from '../../locale'
+import db from '../../../database'
+import Servers, { IAutoVoice, ReactionElement, ServerDocument } from '../../../database/schemas/Servers'
+import { generateId } from '../../../modules/Reactions'
 import { eventSubSubscribe, eventSubUnsubscribe, ITwitchIncomingWebhook } from '../../../modules/Twitch'
 import { hubSubscribe } from '../../../modules/YouTube'
+import translator from '../../locale'
+import { createEnum, dotNotateObject, resolveObjectPath } from '../../utility/Utils'
 
 const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
-const command_option_types = createEnum([ null, 'SUB_COMMAND', 'SUB_COMMAND_GROUP', 'STRING', 'INTEGER', 'BOOLEAN', 'USER', 'CHANNEL', 'ROLE', 'MENTIONABLE', 'NUMBER' ])
+const command_option_types = createEnum([null, 'SUB_COMMAND', 'SUB_COMMAND_GROUP', 'STRING', 'INTEGER', 'BOOLEAN', 'USER', 'CHANNEL', 'ROLE', 'MENTIONABLE', 'NUMBER'])
 
 export async function isBotExpert(guild_id: string, user_id: string): Promise<boolean> {
     const server: ServerDocument = await Servers.findOne({ _id: guild_id })
-    const member = await rest.get(Routes.guildMember(guild_id, user_id)).catch(() => {}) as any
+    const member = (await rest.get(Routes.guildMember(guild_id, user_id)).catch(() => {})) as any
 
     return server && member ? member.roles.some(r => server.server.bot_expert_roles.includes(r)) : false
 }
@@ -25,14 +24,14 @@ export async function isBotExpert(guild_id: string, user_id: string): Promise<bo
 export async function updateSettings(guild: ServerDocument, data: Partial<ServerDocument>, user_id: string): Promise<ServerDocument> {
     if (typeof data.prefix == 'string' && data.prefix != guild.prefix) {
         if (data.prefix.length && data.prefix.length <= 3 && !['/'].includes(data.prefix)) {
-            await Servers.updateOne({ _id: guild._id }, { $set: { 'prefix': data.prefix } })
+            await Servers.updateOne({ _id: guild._id }, { $set: { prefix: data.prefix } })
         }
     }
 
     if (typeof data.locale == 'string' && data.locale != guild.locale) {
         const locales = ['ru', 'en']
         if (locales.includes(data.locale)) {
-            await Servers.updateOne({ _id: guild._id }, { $set: { 'locale': data.locale } })
+            await Servers.updateOne({ _id: guild._id }, { $set: { locale: data.locale } })
         }
     }
 
@@ -47,8 +46,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
         if (Array.isArray(data.commands.custom)) {
             data.commands.custom = data.commands.custom.slice(0, 100)
-            data.commands.custom = [ ...new Map(data.commands.custom.map(c => [c.name.toLowerCase(), c])).values() ]
-            
+            data.commands.custom = [...new Map(data.commands.custom.map(c => [c.name.toLowerCase(), c])).values()]
+
             await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.custom': data.commands.custom } })
         }
 
@@ -58,57 +57,76 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
             let commands = qdb.get('commands')
 
-            const slash = commands.filter(c => c.is_slash_command && !data_commands.find(sc => sc.name == c.name)?.inactive).map(c => {
-                return {
-                    name: c.name,
-                    description: resolveObjectPath(c.description, locale),
-                    type: 1,
-                    options: c?.options?.map(option => {
-                        if (option.type == 'SUB_COMMAND') return {
-                            ...option,
-                            type: command_option_types[option.type],
-                            description: resolveObjectPath(option.description, locale),
-                            options: option.options?.map(o => {
+            const slash = commands
+                .filter(c => c.is_slash_command && !data_commands.find(sc => sc.name == c.name)?.inactive)
+                .map(c => {
+                    return {
+                        name: c.name,
+                        description: resolveObjectPath(c.description, locale),
+                        type: 1,
+                        options:
+                            c?.options?.map(option => {
+                                if (option.type == 'SUB_COMMAND')
+                                    return {
+                                        ...option,
+                                        type: command_option_types[option.type],
+                                        description: resolveObjectPath(option.description, locale),
+                                        options:
+                                            option.options?.map(o => {
+                                                return {
+                                                    ...o,
+                                                    type: command_option_types[o.type],
+                                                    name: resolveObjectPath(o.name, locale),
+                                                    description: resolveObjectPath(o.description, locale),
+                                                    choices: option.choices?.length
+                                                        ? option.choices.map(oc => {
+                                                              return { ...oc, name: resolveObjectPath(oc.name, locale) }
+                                                          })
+                                                        : null
+                                                }
+                                            }) ?? []
+                                    }
+
                                 return {
-                                    ...o,
-                                    type: command_option_types[o.type],
-                                    name: resolveObjectPath(o.name, locale),
-                                    description: resolveObjectPath(o.description, locale),
-                                    choices: option.choices?.length ? option.choices.map(oc => { return { ...oc, name: resolveObjectPath(oc.name, locale) } }) : null
+                                    ...option,
+                                    type: command_option_types[option.type],
+                                    name: resolveObjectPath(option.name, locale),
+                                    description: resolveObjectPath(option.description, locale),
+                                    choices: option.choices?.length
+                                        ? option.choices.map(oc => {
+                                              return { ...oc, name: resolveObjectPath(oc.name, locale) }
+                                          })
+                                        : null
                                 }
                             }) ?? []
-                        }
-    
-                        return {
-                            ...option,
-                            type: command_option_types[option.type],
-                            name: resolveObjectPath(option.name, locale),
-                            description: resolveObjectPath(option.description, locale),
-                            choices: option.choices?.length ? option.choices.map(oc => { return { ...oc, name: resolveObjectPath(oc.name, locale) } }) : null
-                        }
-                    }) ?? []
-                }
-            })
+                    }
+                })
 
-            const message = commands.filter(c => c.is_message_command && !data_commands.find(sc => sc.name == c.name)?.inactive).map(c => {
-                return {
-                    name: resolveObjectPath(c.pretty_name, locale),
-                    type: 3
-                }
-            })
+            const message = commands
+                .filter(c => c.is_message_command && !data_commands.find(sc => sc.name == c.name)?.inactive)
+                .map(c => {
+                    return {
+                        name: resolveObjectPath(c.pretty_name, locale),
+                        type: 3
+                    }
+                })
 
-            const user = commands.filter(c => c.is_user_command && !data_commands.find(sc => sc.name == c.name)?.inactive).map(c => {
-                return {
-                    name: resolveObjectPath(c.pretty_name, locale),
-                    type: 2
-                }
-            })
+            const user = commands
+                .filter(c => c.is_user_command && !data_commands.find(sc => sc.name == c.name)?.inactive)
+                .map(c => {
+                    return {
+                        name: resolveObjectPath(c.pretty_name, locale),
+                        type: 2
+                    }
+                })
 
-            commands = [ ...slash, ...message, ...user ]
+            commands = [...slash, ...message, ...user]
 
-            const res = await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guild._id), {
-                body: commands
-            }).catch(console.error)
+            const res = await rest
+                .put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guild._id), {
+                    body: commands
+                })
+                .catch(console.error)
 
             if (typeof res != 'undefined' && typeof data.commands.slash_commands == 'boolean') {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.slash_commands': data.commands.slash_commands } })
@@ -117,7 +135,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
         if (typeof data.commands.slash_commands == 'boolean' && !data.commands.slash_commands) {
             const res = await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guild._id), { body: [] }).catch(() => {})
-            
+
             if (typeof res != 'undefined') {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'commands.slash_commands': data.commands.slash_commands } })
             }
@@ -130,25 +148,31 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
     if (data.moderation) {
         if (data.moderation.case_log) {
-            if ((typeof data.moderation.case_log.channel_id == 'string' || data.moderation.case_log.channel_id === null) && data.moderation.case_log.channel_id != guild.moderation.case_log.channel_id) {
+            if (
+                (typeof data.moderation.case_log.channel_id == 'string' || data.moderation.case_log.channel_id === null) &&
+                data.moderation.case_log.channel_id != guild.moderation.case_log.channel_id
+            ) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.case_log.channel_id': data.moderation.case_log.channel_id || '' } })
             }
 
             if (typeof data.moderation.case_log.case_types == 'object' && data.moderation.case_log.case_types !== null) {
-                await Servers.updateOne({ _id: guild._id }, {
-                    $set: {
-                        'moderation.case_log.case_types': {
-                            BAN_ADD: Boolean(data.moderation.case_log.case_types.BAN_ADD ?? guild.moderation.case_log.case_types.BAN_ADD),
-                            BAN_REMOVE: Boolean(data.moderation.case_log.case_types.BAN_REMOVE ?? guild.moderation.case_log.case_types.BAN_REMOVE),
-                            KICK: Boolean(data.moderation.case_log.case_types.KICK ?? guild.moderation.case_log.case_types.KICK),
-                            MUTE_ADD: Boolean(data.moderation.case_log.case_types.MUTE_ADD ?? guild.moderation.case_log.case_types.MUTE_ADD),
-                            MUTE_REMOVE: Boolean(data.moderation.case_log.case_types.MUTE_REMOVE ?? guild.moderation.case_log.case_types.MUTE_REMOVE),
-                            PRUNE_MESSAGES: Boolean(data.moderation.case_log.case_types.PRUNE_MESSAGES ?? guild.moderation.case_log.case_types.PRUNE_MESSAGES),
-                            WARN_ADD: Boolean(data.moderation.case_log.case_types.WARN_ADD ?? guild.moderation.case_log.case_types.WARN_ADD),
-                            WARN_REMOVE: Boolean(data.moderation.case_log.case_types.WARN_REMOVE ?? guild.moderation.case_log.case_types.WARN_REMOVE)
+                await Servers.updateOne(
+                    { _id: guild._id },
+                    {
+                        $set: {
+                            'moderation.case_log.case_types': {
+                                BAN_ADD: Boolean(data.moderation.case_log.case_types.BAN_ADD ?? guild.moderation.case_log.case_types.BAN_ADD),
+                                BAN_REMOVE: Boolean(data.moderation.case_log.case_types.BAN_REMOVE ?? guild.moderation.case_log.case_types.BAN_REMOVE),
+                                KICK: Boolean(data.moderation.case_log.case_types.KICK ?? guild.moderation.case_log.case_types.KICK),
+                                MUTE_ADD: Boolean(data.moderation.case_log.case_types.MUTE_ADD ?? guild.moderation.case_log.case_types.MUTE_ADD),
+                                MUTE_REMOVE: Boolean(data.moderation.case_log.case_types.MUTE_REMOVE ?? guild.moderation.case_log.case_types.MUTE_REMOVE),
+                                PRUNE_MESSAGES: Boolean(data.moderation.case_log.case_types.PRUNE_MESSAGES ?? guild.moderation.case_log.case_types.PRUNE_MESSAGES),
+                                WARN_ADD: Boolean(data.moderation.case_log.case_types.WARN_ADD ?? guild.moderation.case_log.case_types.WARN_ADD),
+                                WARN_REMOVE: Boolean(data.moderation.case_log.case_types.WARN_REMOVE ?? guild.moderation.case_log.case_types.WARN_REMOVE)
+                            }
                         }
                     }
-                })
+                )
             }
 
             if (typeof data.moderation.case_log.case_types_messages == 'object') {
@@ -157,40 +181,66 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         const curr = data.moderation.case_log.case_types_messages[type]
                         const prev = guild.moderation.case_log.case_types_messages[type]
 
-                        await Servers.updateOne({ _id: guild._id }, {
-                            $set: {
-                                [`moderation.case_log.case_types_messages.${type}`]: {
-                                    active: curr.active ?? prev.active,
-                                    dm_message: {
-                                        content: curr.dm_message?.content ?? prev.dm_message.content,
-                                        embed: {
-                                            active: curr.dm_message?.embed?.active ?? prev.dm_message.embed.active,
-                                            title: typeof curr.dm_message?.embed?.title == 'undefined' ? prev.dm_message.embed.title : curr.dm_message.embed.title,
-                                            description: typeof curr.dm_message?.embed?.description == 'undefined' ? prev.dm_message.embed.description : curr.dm_message.embed.description,
-                                            url: typeof curr.dm_message?.embed?.url == 'undefined' ? prev.dm_message.embed.url : curr.dm_message.embed.url,
-                                            timestamp: typeof curr.dm_message?.embed?.timestamp == 'undefined' ? prev.dm_message.embed.timestamp : curr.dm_message.embed.timestamp,
-                                            color: typeof curr.dm_message?.embed?.color == 'undefined' ? prev.dm_message.embed.color : curr.dm_message.embed.color,
-                                            footer: {
-                                                text: typeof curr.dm_message?.embed?.footer?.text == 'undefined' ? prev.dm_message.embed.footer.text : curr.dm_message.embed.footer.text,
-                                                icon_url: typeof curr.dm_message?.embed?.footer?.icon_url == 'undefined' ? prev.dm_message.embed.footer.icon_url : curr.dm_message.embed.footer.icon_url
-                                            },
-                                            image: {
-                                                url: typeof curr.dm_message?.embed?.image?.url == 'undefined' ? prev.dm_message.embed.image.url : curr.dm_message.embed.image.url
-                                            },
-                                            thumbnail: {
-                                                url: typeof curr.dm_message?.embed?.thumbnail?.url == 'undefined' ? prev.dm_message.embed.thumbnail.url : curr.dm_message.embed.thumbnail.url
-                                            },
-                                            author: {
-                                                name: typeof curr.dm_message?.embed?.author?.name == 'undefined' ? prev.dm_message.embed.author.name : curr.dm_message.embed.author.name,
-                                                url: typeof curr.dm_message?.embed?.author?.url == 'undefined' ? prev.dm_message.embed.author.url : curr.dm_message.embed.author.url,
-                                                icon_url: typeof curr.dm_message?.embed?.author?.icon_url == 'undefined' ? prev.dm_message.embed.author.icon_url : curr.dm_message.embed.author.icon_url
-                                            },
-                                            fields: curr.dm_message?.embed?.fields ?? prev.dm_message.embed.fields
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            {
+                                $set: {
+                                    [`moderation.case_log.case_types_messages.${type}`]: {
+                                        active: curr.active ?? prev.active,
+                                        dm_message: {
+                                            content: curr.dm_message?.content ?? prev.dm_message.content,
+                                            embed: {
+                                                active: curr.dm_message?.embed?.active ?? prev.dm_message.embed.active,
+                                                title: typeof curr.dm_message?.embed?.title == 'undefined' ? prev.dm_message.embed.title : curr.dm_message.embed.title,
+                                                description:
+                                                    typeof curr.dm_message?.embed?.description == 'undefined'
+                                                        ? prev.dm_message.embed.description
+                                                        : curr.dm_message.embed.description,
+                                                url: typeof curr.dm_message?.embed?.url == 'undefined' ? prev.dm_message.embed.url : curr.dm_message.embed.url,
+                                                timestamp:
+                                                    typeof curr.dm_message?.embed?.timestamp == 'undefined' ? prev.dm_message.embed.timestamp : curr.dm_message.embed.timestamp,
+                                                color: typeof curr.dm_message?.embed?.color == 'undefined' ? prev.dm_message.embed.color : curr.dm_message.embed.color,
+                                                footer: {
+                                                    text:
+                                                        typeof curr.dm_message?.embed?.footer?.text == 'undefined'
+                                                            ? prev.dm_message.embed.footer.text
+                                                            : curr.dm_message.embed.footer.text,
+                                                    icon_url:
+                                                        typeof curr.dm_message?.embed?.footer?.icon_url == 'undefined'
+                                                            ? prev.dm_message.embed.footer.icon_url
+                                                            : curr.dm_message.embed.footer.icon_url
+                                                },
+                                                image: {
+                                                    url:
+                                                        typeof curr.dm_message?.embed?.image?.url == 'undefined' ? prev.dm_message.embed.image.url : curr.dm_message.embed.image.url
+                                                },
+                                                thumbnail: {
+                                                    url:
+                                                        typeof curr.dm_message?.embed?.thumbnail?.url == 'undefined'
+                                                            ? prev.dm_message.embed.thumbnail.url
+                                                            : curr.dm_message.embed.thumbnail.url
+                                                },
+                                                author: {
+                                                    name:
+                                                        typeof curr.dm_message?.embed?.author?.name == 'undefined'
+                                                            ? prev.dm_message.embed.author.name
+                                                            : curr.dm_message.embed.author.name,
+                                                    url:
+                                                        typeof curr.dm_message?.embed?.author?.url == 'undefined'
+                                                            ? prev.dm_message.embed.author.url
+                                                            : curr.dm_message.embed.author.url,
+                                                    icon_url:
+                                                        typeof curr.dm_message?.embed?.author?.icon_url == 'undefined'
+                                                            ? prev.dm_message.embed.author.icon_url
+                                                            : curr.dm_message.embed.author.icon_url
+                                                },
+                                                fields: curr.dm_message?.embed?.fields ?? prev.dm_message.embed.fields
+                                            }
                                         }
                                     }
                                 }
                             }
-                        })
+                        )
                     }
                 }
             }
@@ -201,15 +251,21 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 const data_logs = Object.keys(data.moderation.logs.types)
 
                 for (const log of data_logs) {
-                    if (data.moderation.logs.types[log].active != guild.moderation.logs.types[log].active || data.moderation.logs.types[log].channel_id != guild.moderation.logs.types[log].channel_id) {
-                        await Servers.updateOne({ _id: guild._id }, {
-                            $set: {
-                                [`moderation.logs.types.${log}`]: {
-                                    active: Boolean(data.moderation.logs.types[log].active ?? guild.moderation.logs.types[log].active),
-                                    channel_id: data.moderation.logs.types[log].channel_id ?? guild.moderation.logs.types[log].channel_id
+                    if (
+                        data.moderation.logs.types[log].active != guild.moderation.logs.types[log].active ||
+                        data.moderation.logs.types[log].channel_id != guild.moderation.logs.types[log].channel_id
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            {
+                                $set: {
+                                    [`moderation.logs.types.${log}`]: {
+                                        active: Boolean(data.moderation.logs.types[log].active ?? guild.moderation.logs.types[log].active),
+                                        channel_id: data.moderation.logs.types[log].channel_id ?? guild.moderation.logs.types[log].channel_id
+                                    }
                                 }
                             }
-                        })
+                        )
                     }
                 }
             }
@@ -221,7 +277,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             }
 
             if (data.moderation.roles.on_mute) {
-                if (typeof data.moderation.roles.on_mute.remove_all_roles === 'boolean' && data.moderation.roles.on_mute.remove_all_roles !== guild.moderation.roles.on_mute.remove_all_roles) {
+                if (
+                    typeof data.moderation.roles.on_mute.remove_all_roles === 'boolean' &&
+                    data.moderation.roles.on_mute.remove_all_roles !== guild.moderation.roles.on_mute.remove_all_roles
+                ) {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.roles.on_mute.remove_all_roles': data.moderation.roles.on_mute.remove_all_roles } })
                 }
 
@@ -238,7 +297,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
         if (data.moderation.automoder) {
             if (data.moderation.automoder.links_filter) {
-                if (typeof data.moderation.automoder.links_filter.active === 'boolean' && data.moderation.automoder.links_filter.active !== guild.moderation.automoder.links_filter.active) {
+                if (
+                    typeof data.moderation.automoder.links_filter.active === 'boolean' &&
+                    data.moderation.automoder.links_filter.active !== guild.moderation.automoder.links_filter.active
+                ) {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.active': data.moderation.automoder.links_filter.active } })
                 }
 
@@ -247,92 +309,149 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
 
                 if (Array.isArray(data.moderation.automoder.links_filter.allowed_registry)) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.allowed_registry': data.moderation.automoder.links_filter.allowed_registry } })
+                    await Servers.updateOne(
+                        { _id: guild._id },
+                        { $set: { 'moderation.automoder.links_filter.allowed_registry': data.moderation.automoder.links_filter.allowed_registry } }
+                    )
                 }
 
-                if (typeof data.moderation.automoder.links_filter.delete_all_links === 'boolean' && data.moderation.automoder.links_filter.delete_all_links !== guild.moderation.automoder.links_filter.delete_all_links) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.delete_all_links': data.moderation.automoder.links_filter.delete_all_links } })
+                if (
+                    typeof data.moderation.automoder.links_filter.delete_all_links === 'boolean' &&
+                    data.moderation.automoder.links_filter.delete_all_links !== guild.moderation.automoder.links_filter.delete_all_links
+                ) {
+                    await Servers.updateOne(
+                        { _id: guild._id },
+                        { $set: { 'moderation.automoder.links_filter.delete_all_links': data.moderation.automoder.links_filter.delete_all_links } }
+                    )
                 }
 
-                if (typeof data.moderation.automoder.links_filter.delete_referral_invites === 'boolean' && data.moderation.automoder.links_filter.delete_referral_invites !== guild.moderation.automoder.links_filter.delete_referral_invites) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.delete_referral_invites': data.moderation.automoder.links_filter.delete_referral_invites } })
+                if (
+                    typeof data.moderation.automoder.links_filter.delete_referral_invites === 'boolean' &&
+                    data.moderation.automoder.links_filter.delete_referral_invites !== guild.moderation.automoder.links_filter.delete_referral_invites
+                ) {
+                    await Servers.updateOne(
+                        { _id: guild._id },
+                        { $set: { 'moderation.automoder.links_filter.delete_referral_invites': data.moderation.automoder.links_filter.delete_referral_invites } }
+                    )
                 }
 
                 if (data.moderation.automoder.links_filter.penalty) {
-                    if (typeof data.moderation.automoder.links_filter.penalty.action === 'number' && data.moderation.automoder.links_filter.penalty.action !== guild.moderation.automoder.links_filter.penalty.action) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.action': data.moderation.automoder.links_filter.penalty.action } })
+                    if (
+                        typeof data.moderation.automoder.links_filter.penalty.action === 'number' &&
+                        data.moderation.automoder.links_filter.penalty.action !== guild.moderation.automoder.links_filter.penalty.action
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.links_filter.penalty.action': data.moderation.automoder.links_filter.penalty.action } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.links_filter.penalty.timer === 'number' && data.moderation.automoder.links_filter.penalty.timer !== guild.moderation.automoder.links_filter.penalty.timer) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.timer': data.moderation.automoder.links_filter.penalty.timer } })
+                    if (
+                        typeof data.moderation.automoder.links_filter.penalty.timer === 'number' &&
+                        data.moderation.automoder.links_filter.penalty.timer !== guild.moderation.automoder.links_filter.penalty.timer
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.links_filter.penalty.timer': data.moderation.automoder.links_filter.penalty.timer } }
+                        )
                     }
 
                     if (data.moderation.automoder.links_filter.penalty.message) {
-                        if (typeof data.moderation.automoder.links_filter.penalty.message.content === 'string' && data.moderation.automoder.links_filter.penalty.message.content !== guild.moderation.automoder.links_filter.penalty.message.content) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.message.content': data.moderation.automoder.links_filter.penalty.message.content } })
+                        if (
+                            typeof data.moderation.automoder.links_filter.penalty.message.content === 'string' &&
+                            data.moderation.automoder.links_filter.penalty.message.content !== guild.moderation.automoder.links_filter.penalty.message.content
+                        ) {
+                            await Servers.updateOne(
+                                { _id: guild._id },
+                                { $set: { 'moderation.automoder.links_filter.penalty.message.content': data.moderation.automoder.links_filter.penalty.message.content } }
+                            )
                         }
 
                         if (data.moderation.automoder.links_filter.penalty.message.embed) {
                             const newEmbed = data.moderation.automoder.links_filter.penalty.message.embed
                             const oldEmbed = guild.moderation.automoder.links_filter.penalty.message.embed
-        
-                            await Servers.updateOne({ _id: guild._id }, {
-                                $set: {
-                                    'moderation.automoder.links_filter.penalty.message.embed': {
-                                        active: newEmbed.active ?? oldEmbed.active,
-                                        title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                        description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                        url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                        timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                        color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                        footer: {
-                                            text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                            icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                        },
-                                        image: {
-                                            url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                        },
-                                        thumbnail: {
-                                            url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                        },
-                                        author: {
-                                            name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                            url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                            icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                        },
-                                        fields: newEmbed.fields ?? oldEmbed.fields
+
+                            await Servers.updateOne(
+                                { _id: guild._id },
+                                {
+                                    $set: {
+                                        'moderation.automoder.links_filter.penalty.message.embed': {
+                                            active: newEmbed.active ?? oldEmbed.active,
+                                            title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                            description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                            url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                            timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                            color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                            footer: {
+                                                text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                                icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                            },
+                                            image: {
+                                                url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                            },
+                                            thumbnail: {
+                                                url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                            },
+                                            author: {
+                                                name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                                url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                                icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                            },
+                                            fields: newEmbed.fields ?? oldEmbed.fields
+                                        }
                                     }
                                 }
-                            })
+                            )
                         }
                     }
 
                     if (Array.isArray(data.moderation.automoder.links_filter.penalty.add_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.add_roles': data.moderation.automoder.links_filter.penalty.add_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.links_filter.penalty.add_roles': data.moderation.automoder.links_filter.penalty.add_roles } }
+                        )
                     }
 
                     if (Array.isArray(data.moderation.automoder.links_filter.penalty.remove_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.penalty.remove_roles': data.moderation.automoder.links_filter.penalty.remove_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.links_filter.penalty.remove_roles': data.moderation.automoder.links_filter.penalty.remove_roles } }
+                        )
                     }
                 }
 
                 if (data.moderation.automoder.links_filter.ignored) {
                     if (Array.isArray(data.moderation.automoder.links_filter.ignored.channels)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.ignored.channels': data.moderation.automoder.links_filter.ignored.channels } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.links_filter.ignored.channels': data.moderation.automoder.links_filter.ignored.channels } }
+                        )
                     }
 
                     if (Array.isArray(data.moderation.automoder.links_filter.ignored.roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.ignored.roles': data.moderation.automoder.links_filter.ignored.roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.links_filter.ignored.roles': data.moderation.automoder.links_filter.ignored.roles } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.links_filter.ignored.permissions === 'number' && data.moderation.automoder.links_filter.ignored.permissions !== guild.moderation.automoder.links_filter.ignored.permissions) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.links_filter.ignored.permissions': data.moderation.automoder.links_filter.ignored.permissions } })
+                    if (
+                        typeof data.moderation.automoder.links_filter.ignored.permissions === 'number' &&
+                        data.moderation.automoder.links_filter.ignored.permissions !== guild.moderation.automoder.links_filter.ignored.permissions
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.links_filter.ignored.permissions': data.moderation.automoder.links_filter.ignored.permissions } }
+                        )
                     }
                 }
             }
 
             if (data.moderation.automoder.swear_filter) {
-                if (typeof data.moderation.automoder.swear_filter.active === 'boolean' && data.moderation.automoder.swear_filter.active !== guild.moderation.automoder.swear_filter.active) {
+                if (
+                    typeof data.moderation.automoder.swear_filter.active === 'boolean' &&
+                    data.moderation.automoder.swear_filter.active !== guild.moderation.automoder.swear_filter.active
+                ) {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.active': data.moderation.automoder.swear_filter.active } })
                 }
 
@@ -341,156 +460,243 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
 
                 if (data.moderation.automoder.swear_filter.penalty) {
-                    if (typeof data.moderation.automoder.swear_filter.penalty.action === 'number' && data.moderation.automoder.swear_filter.penalty.action !== guild.moderation.automoder.swear_filter.penalty.action) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.action': data.moderation.automoder.swear_filter.penalty.action } })
+                    if (
+                        typeof data.moderation.automoder.swear_filter.penalty.action === 'number' &&
+                        data.moderation.automoder.swear_filter.penalty.action !== guild.moderation.automoder.swear_filter.penalty.action
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.swear_filter.penalty.action': data.moderation.automoder.swear_filter.penalty.action } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.swear_filter.penalty.timer === 'number' && data.moderation.automoder.swear_filter.penalty.timer !== guild.moderation.automoder.swear_filter.penalty.timer) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.timer': data.moderation.automoder.swear_filter.penalty.timer } })
+                    if (
+                        typeof data.moderation.automoder.swear_filter.penalty.timer === 'number' &&
+                        data.moderation.automoder.swear_filter.penalty.timer !== guild.moderation.automoder.swear_filter.penalty.timer
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.swear_filter.penalty.timer': data.moderation.automoder.swear_filter.penalty.timer } }
+                        )
                     }
 
                     if (data.moderation.automoder.swear_filter.penalty.message) {
-                        if (typeof data.moderation.automoder.swear_filter.penalty.message.content === 'string' && data.moderation.automoder.swear_filter.penalty.message.content !== guild.moderation.automoder.swear_filter.penalty.message.content) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.message.content': data.moderation.automoder.swear_filter.penalty.message.content } })
+                        if (
+                            typeof data.moderation.automoder.swear_filter.penalty.message.content === 'string' &&
+                            data.moderation.automoder.swear_filter.penalty.message.content !== guild.moderation.automoder.swear_filter.penalty.message.content
+                        ) {
+                            await Servers.updateOne(
+                                { _id: guild._id },
+                                { $set: { 'moderation.automoder.swear_filter.penalty.message.content': data.moderation.automoder.swear_filter.penalty.message.content } }
+                            )
                         }
 
                         if (data.moderation.automoder.swear_filter.penalty.message.embed) {
                             const newEmbed = data.moderation.automoder.swear_filter.penalty.message.embed
                             const oldEmbed = guild.moderation.automoder.swear_filter.penalty.message.embed
-        
-                            await Servers.updateOne({ _id: guild._id }, {
-                                $set: {
-                                    'moderation.automoder.swear_filter.penalty.message.embed': {
-                                        active: newEmbed.active ?? oldEmbed.active,
-                                        title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                        description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                        url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                        timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                        color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                        footer: {
-                                            text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                            icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                        },
-                                        image: {
-                                            url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                        },
-                                        thumbnail: {
-                                            url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                        },
-                                        author: {
-                                            name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                            url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                            icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                        },
-                                        fields: newEmbed.fields ?? oldEmbed.fields
+
+                            await Servers.updateOne(
+                                { _id: guild._id },
+                                {
+                                    $set: {
+                                        'moderation.automoder.swear_filter.penalty.message.embed': {
+                                            active: newEmbed.active ?? oldEmbed.active,
+                                            title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                            description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                            url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                            timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                            color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                            footer: {
+                                                text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                                icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                            },
+                                            image: {
+                                                url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                            },
+                                            thumbnail: {
+                                                url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                            },
+                                            author: {
+                                                name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                                url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                                icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                            },
+                                            fields: newEmbed.fields ?? oldEmbed.fields
+                                        }
                                     }
                                 }
-                            })
+                            )
                         }
                     }
 
                     if (Array.isArray(data.moderation.automoder.swear_filter.penalty.add_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.add_roles': data.moderation.automoder.swear_filter.penalty.add_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.swear_filter.penalty.add_roles': data.moderation.automoder.swear_filter.penalty.add_roles } }
+                        )
                     }
 
                     if (Array.isArray(data.moderation.automoder.swear_filter.penalty.remove_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.penalty.remove_roles': data.moderation.automoder.swear_filter.penalty.remove_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.swear_filter.penalty.remove_roles': data.moderation.automoder.swear_filter.penalty.remove_roles } }
+                        )
                     }
                 }
 
                 if (data.moderation.automoder.swear_filter.ignored) {
                     if (Array.isArray(data.moderation.automoder.swear_filter.ignored.channels)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.ignored.channels': data.moderation.automoder.swear_filter.ignored.channels } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.swear_filter.ignored.channels': data.moderation.automoder.swear_filter.ignored.channels } }
+                        )
                     }
 
                     if (Array.isArray(data.moderation.automoder.swear_filter.ignored.roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.ignored.roles': data.moderation.automoder.swear_filter.ignored.roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.swear_filter.ignored.roles': data.moderation.automoder.swear_filter.ignored.roles } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.swear_filter.ignored.permissions === 'number' && data.moderation.automoder.swear_filter.ignored.permissions !== guild.moderation.automoder.swear_filter.ignored.permissions) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.swear_filter.ignored.permissions': data.moderation.automoder.swear_filter.ignored.permissions } })
+                    if (
+                        typeof data.moderation.automoder.swear_filter.ignored.permissions === 'number' &&
+                        data.moderation.automoder.swear_filter.ignored.permissions !== guild.moderation.automoder.swear_filter.ignored.permissions
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.swear_filter.ignored.permissions': data.moderation.automoder.swear_filter.ignored.permissions } }
+                        )
                     }
                 }
             }
 
             if (data.moderation.automoder.users_slowdown) {
-                if (typeof data.moderation.automoder.users_slowdown.active === 'boolean' && data.moderation.automoder.users_slowdown.active !== guild.moderation.automoder.users_slowdown.active) {
+                if (
+                    typeof data.moderation.automoder.users_slowdown.active === 'boolean' &&
+                    data.moderation.automoder.users_slowdown.active !== guild.moderation.automoder.users_slowdown.active
+                ) {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.active': data.moderation.automoder.users_slowdown.active } })
                 }
 
-                if (typeof data.moderation.automoder.users_slowdown.messages_limit === 'number' && data.moderation.automoder.users_slowdown.messages_limit !== guild.moderation.automoder.users_slowdown.messages_limit) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.messages_limit': data.moderation.automoder.users_slowdown.messages_limit } })
+                if (
+                    typeof data.moderation.automoder.users_slowdown.messages_limit === 'number' &&
+                    data.moderation.automoder.users_slowdown.messages_limit !== guild.moderation.automoder.users_slowdown.messages_limit
+                ) {
+                    await Servers.updateOne(
+                        { _id: guild._id },
+                        { $set: { 'moderation.automoder.users_slowdown.messages_limit': data.moderation.automoder.users_slowdown.messages_limit } }
+                    )
                 }
 
                 if (data.moderation.automoder.users_slowdown.penalty) {
-                    if (typeof data.moderation.automoder.users_slowdown.penalty.action === 'number' && data.moderation.automoder.users_slowdown.penalty.action !== guild.moderation.automoder.users_slowdown.penalty.action) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.action': data.moderation.automoder.users_slowdown.penalty.action } })
+                    if (
+                        typeof data.moderation.automoder.users_slowdown.penalty.action === 'number' &&
+                        data.moderation.automoder.users_slowdown.penalty.action !== guild.moderation.automoder.users_slowdown.penalty.action
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.users_slowdown.penalty.action': data.moderation.automoder.users_slowdown.penalty.action } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.users_slowdown.penalty.timer === 'number' && data.moderation.automoder.users_slowdown.penalty.timer !== guild.moderation.automoder.users_slowdown.penalty.timer) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.timer': data.moderation.automoder.users_slowdown.penalty.timer } })
+                    if (
+                        typeof data.moderation.automoder.users_slowdown.penalty.timer === 'number' &&
+                        data.moderation.automoder.users_slowdown.penalty.timer !== guild.moderation.automoder.users_slowdown.penalty.timer
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.users_slowdown.penalty.timer': data.moderation.automoder.users_slowdown.penalty.timer } }
+                        )
                     }
 
                     if (data.moderation.automoder.users_slowdown.penalty.message) {
-                        if (typeof data.moderation.automoder.users_slowdown.penalty.message.content === 'string' && data.moderation.automoder.users_slowdown.penalty.message.content !== guild.moderation.automoder.users_slowdown.penalty.message.content) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.message.content': data.moderation.automoder.users_slowdown.penalty.message.content } })
+                        if (
+                            typeof data.moderation.automoder.users_slowdown.penalty.message.content === 'string' &&
+                            data.moderation.automoder.users_slowdown.penalty.message.content !== guild.moderation.automoder.users_slowdown.penalty.message.content
+                        ) {
+                            await Servers.updateOne(
+                                { _id: guild._id },
+                                { $set: { 'moderation.automoder.users_slowdown.penalty.message.content': data.moderation.automoder.users_slowdown.penalty.message.content } }
+                            )
                         }
 
                         if (data.moderation.automoder.users_slowdown.penalty.message.embed) {
                             const newEmbed = data.moderation.automoder.users_slowdown.penalty.message.embed
                             const oldEmbed = guild.moderation.automoder.users_slowdown.penalty.message.embed
-        
-                            await Servers.updateOne({ _id: guild._id }, {
-                                $set: {
-                                    'moderation.automoder.users_slowdown.penalty.message.embed': {
-                                        active: newEmbed.active ?? oldEmbed.active,
-                                        title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                        description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                        url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                        timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                        color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                        footer: {
-                                            text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                            icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                        },
-                                        image: {
-                                            url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                        },
-                                        thumbnail: {
-                                            url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                        },
-                                        author: {
-                                            name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                            url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                            icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                        },
-                                        fields: newEmbed.fields ?? oldEmbed.fields
+
+                            await Servers.updateOne(
+                                { _id: guild._id },
+                                {
+                                    $set: {
+                                        'moderation.automoder.users_slowdown.penalty.message.embed': {
+                                            active: newEmbed.active ?? oldEmbed.active,
+                                            title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                            description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                            url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                            timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                            color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                            footer: {
+                                                text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                                icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                            },
+                                            image: {
+                                                url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                            },
+                                            thumbnail: {
+                                                url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                            },
+                                            author: {
+                                                name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                                url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                                icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                            },
+                                            fields: newEmbed.fields ?? oldEmbed.fields
+                                        }
                                     }
                                 }
-                            })
+                            )
                         }
                     }
 
                     if (Array.isArray(data.moderation.automoder.users_slowdown.penalty.add_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.add_roles': data.moderation.automoder.users_slowdown.penalty.add_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.users_slowdown.penalty.add_roles': data.moderation.automoder.users_slowdown.penalty.add_roles } }
+                        )
                     }
 
                     if (Array.isArray(data.moderation.automoder.users_slowdown.penalty.remove_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.penalty.remove_roles': data.moderation.automoder.users_slowdown.penalty.remove_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.users_slowdown.penalty.remove_roles': data.moderation.automoder.users_slowdown.penalty.remove_roles } }
+                        )
                     }
                 }
 
                 if (data.moderation.automoder.users_slowdown.ignored) {
                     if (Array.isArray(data.moderation.automoder.users_slowdown.ignored.channels)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.ignored.channels': data.moderation.automoder.users_slowdown.ignored.channels } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.users_slowdown.ignored.channels': data.moderation.automoder.users_slowdown.ignored.channels } }
+                        )
                     }
 
                     if (Array.isArray(data.moderation.automoder.users_slowdown.ignored.roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.ignored.roles': data.moderation.automoder.users_slowdown.ignored.roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.users_slowdown.ignored.roles': data.moderation.automoder.users_slowdown.ignored.roles } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.users_slowdown.ignored.permissions === 'number' && data.moderation.automoder.users_slowdown.ignored.permissions !== guild.moderation.automoder.users_slowdown.ignored.permissions) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.users_slowdown.ignored.permissions': data.moderation.automoder.users_slowdown.ignored.permissions } })
+                    if (
+                        typeof data.moderation.automoder.users_slowdown.ignored.permissions === 'number' &&
+                        data.moderation.automoder.users_slowdown.ignored.permissions !== guild.moderation.automoder.users_slowdown.ignored.permissions
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.users_slowdown.ignored.permissions': data.moderation.automoder.users_slowdown.ignored.permissions } }
+                        )
                     }
                 }
             }
@@ -500,84 +706,129 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.active': data.moderation.automoder.anti_caps.active } })
                 }
 
-                if (typeof data.moderation.automoder.anti_caps.percentage_of_caps === 'number' && data.moderation.automoder.anti_caps.percentage_of_caps !== guild.moderation.automoder.anti_caps.percentage_of_caps) {
+                if (
+                    typeof data.moderation.automoder.anti_caps.percentage_of_caps === 'number' &&
+                    data.moderation.automoder.anti_caps.percentage_of_caps !== guild.moderation.automoder.anti_caps.percentage_of_caps
+                ) {
                     if (data.moderation.automoder.anti_caps.percentage_of_caps >= 1 && data.moderation.automoder.anti_caps.percentage_of_caps <= 100)
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.percentage_of_caps': data.moderation.automoder.anti_caps.percentage_of_caps } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.anti_caps.percentage_of_caps': data.moderation.automoder.anti_caps.percentage_of_caps } }
+                        )
                 }
 
-                if (typeof data.moderation.automoder.anti_caps.minimum_content_length === 'number' && data.moderation.automoder.anti_caps.minimum_content_length !== guild.moderation.automoder.anti_caps.minimum_content_length) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.minimum_content_length': data.moderation.automoder.anti_caps.minimum_content_length } })
+                if (
+                    typeof data.moderation.automoder.anti_caps.minimum_content_length === 'number' &&
+                    data.moderation.automoder.anti_caps.minimum_content_length !== guild.moderation.automoder.anti_caps.minimum_content_length
+                ) {
+                    await Servers.updateOne(
+                        { _id: guild._id },
+                        { $set: { 'moderation.automoder.anti_caps.minimum_content_length': data.moderation.automoder.anti_caps.minimum_content_length } }
+                    )
                 }
 
                 if (data.moderation.automoder.anti_caps.penalty) {
-                    if (typeof data.moderation.automoder.anti_caps.penalty.action === 'number' && data.moderation.automoder.anti_caps.penalty.action !== guild.moderation.automoder.anti_caps.penalty.action) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.action': data.moderation.automoder.anti_caps.penalty.action } })
+                    if (
+                        typeof data.moderation.automoder.anti_caps.penalty.action === 'number' &&
+                        data.moderation.automoder.anti_caps.penalty.action !== guild.moderation.automoder.anti_caps.penalty.action
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.anti_caps.penalty.action': data.moderation.automoder.anti_caps.penalty.action } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.anti_caps.penalty.timer === 'number' && data.moderation.automoder.anti_caps.penalty.timer !== guild.moderation.automoder.anti_caps.penalty.timer) {
+                    if (
+                        typeof data.moderation.automoder.anti_caps.penalty.timer === 'number' &&
+                        data.moderation.automoder.anti_caps.penalty.timer !== guild.moderation.automoder.anti_caps.penalty.timer
+                    ) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.timer': data.moderation.automoder.anti_caps.penalty.timer } })
                     }
 
                     if (data.moderation.automoder.anti_caps.penalty.message) {
-                        if (typeof data.moderation.automoder.anti_caps.penalty.message.content === 'string' && data.moderation.automoder.anti_caps.penalty.message.content !== guild.moderation.automoder.anti_caps.penalty.message.content) {
-                            await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.message.content': data.moderation.automoder.anti_caps.penalty.message.content } })
+                        if (
+                            typeof data.moderation.automoder.anti_caps.penalty.message.content === 'string' &&
+                            data.moderation.automoder.anti_caps.penalty.message.content !== guild.moderation.automoder.anti_caps.penalty.message.content
+                        ) {
+                            await Servers.updateOne(
+                                { _id: guild._id },
+                                { $set: { 'moderation.automoder.anti_caps.penalty.message.content': data.moderation.automoder.anti_caps.penalty.message.content } }
+                            )
                         }
 
                         if (data.moderation.automoder.anti_caps.penalty.message.embed) {
                             const newEmbed = data.moderation.automoder.anti_caps.penalty.message.embed
                             const oldEmbed = guild.moderation.automoder.anti_caps.penalty.message.embed
-        
-                            await Servers.updateOne({ _id: guild._id }, {
-                                $set: {
-                                    'moderation.automoder.anti_caps.penalty.message.embed': {
-                                        active: newEmbed.active ?? oldEmbed.active,
-                                        title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                        description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                        url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                        timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                        color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                        footer: {
-                                            text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                            icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                        },
-                                        image: {
-                                            url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                        },
-                                        thumbnail: {
-                                            url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                        },
-                                        author: {
-                                            name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                            url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                            icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                        },
-                                        fields: newEmbed.fields ?? oldEmbed.fields
+
+                            await Servers.updateOne(
+                                { _id: guild._id },
+                                {
+                                    $set: {
+                                        'moderation.automoder.anti_caps.penalty.message.embed': {
+                                            active: newEmbed.active ?? oldEmbed.active,
+                                            title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                            description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                            url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                            timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                            color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                            footer: {
+                                                text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                                icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                            },
+                                            image: {
+                                                url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                            },
+                                            thumbnail: {
+                                                url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                            },
+                                            author: {
+                                                name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                                url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                                icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                            },
+                                            fields: newEmbed.fields ?? oldEmbed.fields
+                                        }
                                     }
                                 }
-                            })
+                            )
                         }
                     }
 
                     if (Array.isArray(data.moderation.automoder.anti_caps.penalty.add_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.add_roles': data.moderation.automoder.anti_caps.penalty.add_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.anti_caps.penalty.add_roles': data.moderation.automoder.anti_caps.penalty.add_roles } }
+                        )
                     }
 
                     if (Array.isArray(data.moderation.automoder.anti_caps.penalty.remove_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.penalty.remove_roles': data.moderation.automoder.anti_caps.penalty.remove_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.anti_caps.penalty.remove_roles': data.moderation.automoder.anti_caps.penalty.remove_roles } }
+                        )
                     }
                 }
 
                 if (data.moderation.automoder.anti_caps.ignored) {
                     if (Array.isArray(data.moderation.automoder.anti_caps.ignored.channels)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.ignored.channels': data.moderation.automoder.anti_caps.ignored.channels } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.anti_caps.ignored.channels': data.moderation.automoder.anti_caps.ignored.channels } }
+                        )
                     }
 
                     if (Array.isArray(data.moderation.automoder.anti_caps.ignored.roles)) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.ignored.roles': data.moderation.automoder.anti_caps.ignored.roles } })
                     }
 
-                    if (typeof data.moderation.automoder.anti_caps.ignored.permissions === 'number' && data.moderation.automoder.anti_caps.ignored.permissions !== guild.moderation.automoder.anti_caps.ignored.permissions) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.anti_caps.ignored.permissions': data.moderation.automoder.anti_caps.ignored.permissions } })
+                    if (
+                        typeof data.moderation.automoder.anti_caps.ignored.permissions === 'number' &&
+                        data.moderation.automoder.anti_caps.ignored.permissions !== guild.moderation.automoder.anti_caps.ignored.permissions
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.anti_caps.ignored.permissions': data.moderation.automoder.anti_caps.ignored.permissions } }
+                        )
                     }
                 }
             }
@@ -588,24 +839,45 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
 
                 if (data.moderation.automoder.nicknames.types) {
-                    if (typeof data.moderation.automoder.nicknames.types.special_characters === 'boolean' && data.moderation.automoder.nicknames.types.special_characters !== guild.moderation.automoder.nicknames.types.special_characters) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.special_characters': data.moderation.automoder.nicknames.types.special_characters } })
+                    if (
+                        typeof data.moderation.automoder.nicknames.types.special_characters === 'boolean' &&
+                        data.moderation.automoder.nicknames.types.special_characters !== guild.moderation.automoder.nicknames.types.special_characters
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.nicknames.types.special_characters': data.moderation.automoder.nicknames.types.special_characters } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.nicknames.types.zalgo === 'boolean' && data.moderation.automoder.nicknames.types.zalgo !== guild.moderation.automoder.nicknames.types.zalgo) {
+                    if (
+                        typeof data.moderation.automoder.nicknames.types.zalgo === 'boolean' &&
+                        data.moderation.automoder.nicknames.types.zalgo !== guild.moderation.automoder.nicknames.types.zalgo
+                    ) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.zalgo': data.moderation.automoder.nicknames.types.zalgo } })
                     }
 
-                    if (typeof data.moderation.automoder.nicknames.types.diacritics === 'boolean' && data.moderation.automoder.nicknames.types.diacritics !== guild.moderation.automoder.nicknames.types.diacritics) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.diacritics': data.moderation.automoder.nicknames.types.diacritics } })
+                    if (
+                        typeof data.moderation.automoder.nicknames.types.diacritics === 'boolean' &&
+                        data.moderation.automoder.nicknames.types.diacritics !== guild.moderation.automoder.nicknames.types.diacritics
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.nicknames.types.diacritics': data.moderation.automoder.nicknames.types.diacritics } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.nicknames.types.emojis === 'boolean' && data.moderation.automoder.nicknames.types.emojis !== guild.moderation.automoder.nicknames.types.emojis) {
+                    if (
+                        typeof data.moderation.automoder.nicknames.types.emojis === 'boolean' &&
+                        data.moderation.automoder.nicknames.types.emojis !== guild.moderation.automoder.nicknames.types.emojis
+                    ) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.emojis': data.moderation.automoder.nicknames.types.emojis } })
                     }
 
                     if (Array.isArray(data.moderation.automoder.nicknames.types.contains)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.types.contains': data.moderation.automoder.nicknames.types.contains } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.nicknames.types.contains': data.moderation.automoder.nicknames.types.contains } }
+                        )
                     }
                 }
 
@@ -614,11 +886,20 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.ignored.roles': data.moderation.automoder.nicknames.ignored.roles } })
                     }
 
-                    if (typeof data.moderation.automoder.nicknames.ignored.permissions === 'number' && data.moderation.automoder.nicknames.ignored.permissions !== guild.moderation.automoder.nicknames.ignored.permissions) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.ignored.permissions': data.moderation.automoder.nicknames.ignored.permissions } })
+                    if (
+                        typeof data.moderation.automoder.nicknames.ignored.permissions === 'number' &&
+                        data.moderation.automoder.nicknames.ignored.permissions !== guild.moderation.automoder.nicknames.ignored.permissions
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.nicknames.ignored.permissions': data.moderation.automoder.nicknames.ignored.permissions } }
+                        )
                     }
 
-                    if (typeof data.moderation.automoder.nicknames.ignored.bots === 'boolean' && data.moderation.automoder.nicknames.ignored.bots !== guild.moderation.automoder.nicknames.ignored.bots) {
+                    if (
+                        typeof data.moderation.automoder.nicknames.ignored.bots === 'boolean' &&
+                        data.moderation.automoder.nicknames.ignored.bots !== guild.moderation.automoder.nicknames.ignored.bots
+                    ) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.nicknames.ignored.bots': data.moderation.automoder.nicknames.ignored.bots } })
                     }
                 }
@@ -629,30 +910,54 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.active': data.moderation.automoder.newbies.active } })
                 }
 
-                if (typeof data.moderation.automoder.newbies.minimum_account_age?.value === 'number' && data.moderation.automoder.newbies.minimum_account_age.value !== guild.moderation.automoder.newbies.minimum_account_age.value) {
-                    await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.minimum_account_age.value': data.moderation.automoder.newbies.minimum_account_age.value } })
+                if (
+                    typeof data.moderation.automoder.newbies.minimum_account_age?.value === 'number' &&
+                    data.moderation.automoder.newbies.minimum_account_age.value !== guild.moderation.automoder.newbies.minimum_account_age.value
+                ) {
+                    await Servers.updateOne(
+                        { _id: guild._id },
+                        { $set: { 'moderation.automoder.newbies.minimum_account_age.value': data.moderation.automoder.newbies.minimum_account_age.value } }
+                    )
                 }
 
-                if (typeof data.moderation.automoder.newbies.minimum_account_age?.measure === 'string' && data.moderation.automoder.newbies.minimum_account_age.measure !== guild.moderation.automoder.newbies.minimum_account_age.measure) {
+                if (
+                    typeof data.moderation.automoder.newbies.minimum_account_age?.measure === 'string' &&
+                    data.moderation.automoder.newbies.minimum_account_age.measure !== guild.moderation.automoder.newbies.minimum_account_age.measure
+                ) {
                     if (['MINUTES', 'HOURS', 'DAYS'].includes(data.moderation.automoder.newbies.minimum_account_age.measure))
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.minimum_account_age.measure': data.moderation.automoder.newbies.minimum_account_age.measure } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.newbies.minimum_account_age.measure': data.moderation.automoder.newbies.minimum_account_age.measure } }
+                        )
                 }
 
                 if (data.moderation.automoder.newbies.penalty) {
-                    if (typeof data.moderation.automoder.newbies.penalty.action === 'number' && data.moderation.automoder.newbies.penalty.action !== guild.moderation.automoder.newbies.penalty.action) {
+                    if (
+                        typeof data.moderation.automoder.newbies.penalty.action === 'number' &&
+                        data.moderation.automoder.newbies.penalty.action !== guild.moderation.automoder.newbies.penalty.action
+                    ) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.penalty.action': data.moderation.automoder.newbies.penalty.action } })
                     }
 
-                    if (typeof data.moderation.automoder.newbies.penalty.timer === 'number' && data.moderation.automoder.newbies.penalty.timer !== guild.moderation.automoder.newbies.penalty.timer) {
+                    if (
+                        typeof data.moderation.automoder.newbies.penalty.timer === 'number' &&
+                        data.moderation.automoder.newbies.penalty.timer !== guild.moderation.automoder.newbies.penalty.timer
+                    ) {
                         await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.penalty.timer': data.moderation.automoder.newbies.penalty.timer } })
                     }
 
                     if (Array.isArray(data.moderation.automoder.newbies.penalty.add_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.penalty.add_roles': data.moderation.automoder.newbies.penalty.add_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.newbies.penalty.add_roles': data.moderation.automoder.newbies.penalty.add_roles } }
+                        )
                     }
 
                     if (Array.isArray(data.moderation.automoder.newbies.penalty.remove_roles)) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'moderation.automoder.newbies.penalty.remove_roles': data.moderation.automoder.newbies.penalty.remove_roles } })
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'moderation.automoder.newbies.penalty.remove_roles': data.moderation.automoder.newbies.penalty.remove_roles } }
+                        )
                     }
                 }
             }
@@ -688,34 +993,37 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     const newEmbed = data.modules.welcome.message.embed
                     const oldEmbed = guild.modules.welcome.message.embed
 
-                    await Servers.updateOne({ _id: guild._id }, {
-                        $set: {
-                            'modules.welcome.message.embed': {
-                                active: newEmbed.active ?? oldEmbed.active,
-                                title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                footer: {
-                                    text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                    icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                },
-                                image: {
-                                    url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                },
-                                thumbnail: {
-                                    url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                },
-                                author: {
-                                    name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                    url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                    icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                },
-                                fields: newEmbed.fields ?? oldEmbed.fields
+                    await Servers.updateOne(
+                        { _id: guild._id },
+                        {
+                            $set: {
+                                'modules.welcome.message.embed': {
+                                    active: newEmbed.active ?? oldEmbed.active,
+                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                    footer: {
+                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                    },
+                                    image: {
+                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                    },
+                                    thumbnail: {
+                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                    },
+                                    author: {
+                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                    },
+                                    fields: newEmbed.fields ?? oldEmbed.fields
+                                }
                             }
                         }
-                    })
+                    )
                 }
             }
 
@@ -754,34 +1062,37 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     const newEmbed = data.modules.farewell.message.embed
                     const oldEmbed = guild.modules.farewell.message.embed
 
-                    await Servers.updateOne({ _id: guild._id }, {
-                        $set: {
-                            'modules.farewell.message.embed': {
-                                active: newEmbed.active ?? oldEmbed.active,
-                                title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                footer: {
-                                    text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                    icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                },
-                                image: {
-                                    url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                },
-                                thumbnail: {
-                                    url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                },
-                                author: {
-                                    name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                    url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                    icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                },
-                                fields: newEmbed.fields ?? oldEmbed.fields
+                    await Servers.updateOne(
+                        { _id: guild._id },
+                        {
+                            $set: {
+                                'modules.farewell.message.embed': {
+                                    active: newEmbed.active ?? oldEmbed.active,
+                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                    footer: {
+                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                    },
+                                    image: {
+                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                    },
+                                    thumbnail: {
+                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                    },
+                                    author: {
+                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                    },
+                                    fields: newEmbed.fields ?? oldEmbed.fields
+                                }
                             }
                         }
-                    })
+                    )
                 }
             }
         }
@@ -832,53 +1143,65 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.format': data.modules.levels.level_up_alerts.format } })
                 }
 
-                if (typeof data.modules.levels.level_up_alerts.channel_id === 'string' && data.modules.levels.level_up_alerts.channel_id !== guild.modules.levels.level_up_alerts.channel_id) {
+                if (
+                    typeof data.modules.levels.level_up_alerts.channel_id === 'string' &&
+                    data.modules.levels.level_up_alerts.channel_id !== guild.modules.levels.level_up_alerts.channel_id
+                ) {
                     await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.channel_id': data.modules.levels.level_up_alerts.channel_id } })
                 }
 
                 if (data.modules.levels.level_up_alerts.message) {
-                    if (typeof data.modules.levels.level_up_alerts.message.content === 'string' && data.modules.levels.level_up_alerts.message.content !== guild.modules.levels.level_up_alerts.message.content) {
-                        await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.level_up_alerts.message.content': data.modules.levels.level_up_alerts.message.content } })
+                    if (
+                        typeof data.modules.levels.level_up_alerts.message.content === 'string' &&
+                        data.modules.levels.level_up_alerts.message.content !== guild.modules.levels.level_up_alerts.message.content
+                    ) {
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            { $set: { 'modules.levels.level_up_alerts.message.content': data.modules.levels.level_up_alerts.message.content } }
+                        )
                     }
 
                     if (data.modules.levels.level_up_alerts.message.embed) {
                         const newEmbed = data.modules.levels.level_up_alerts.message.embed
                         const oldEmbed = guild.modules.levels.level_up_alerts.message.embed
-    
-                        await Servers.updateOne({ _id: guild._id }, {
-                            $set: {
-                                'modules.levels.level_up_alerts.message.embed': {
-                                    active: newEmbed.active ?? oldEmbed.active,
-                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                    footer: {
-                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                    },
-                                    image: {
-                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                    },
-                                    thumbnail: {
-                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                    },
-                                    author: {
-                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                    },
-                                    fields: newEmbed.fields ?? oldEmbed.fields
+
+                        await Servers.updateOne(
+                            { _id: guild._id },
+                            {
+                                $set: {
+                                    'modules.levels.level_up_alerts.message.embed': {
+                                        active: newEmbed.active ?? oldEmbed.active,
+                                        title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                        description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                        url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                        timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                        color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                        footer: {
+                                            text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                            icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                        },
+                                        image: {
+                                            url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                        },
+                                        thumbnail: {
+                                            url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                        },
+                                        author: {
+                                            name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                            url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                            icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                        },
+                                        fields: newEmbed.fields ?? oldEmbed.fields
+                                    }
                                 }
                             }
-                        })
+                        )
                     }
                 }
             }
 
             if (Array.isArray(data.modules.levels.awards)) {
-                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.awards': data.modules.levels.awards.slice(0, (guild.server.premium.available ? 200 : 50)) } })
+                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.levels.awards': data.modules.levels.awards.slice(0, guild.server.premium.available ? 200 : 50) } })
             }
         }
 
@@ -905,22 +1228,37 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.music.blocked.channels': data.modules.music.blocked.channels } })
             }
 
-            if (typeof data.modules.music.allow_radio_playback === 'boolean' && data.modules.music.allow_radio_playback !== guild.modules.music.allow_radio_playback && guild.server.premium.available) {
+            if (
+                typeof data.modules.music.allow_radio_playback === 'boolean' &&
+                data.modules.music.allow_radio_playback !== guild.modules.music.allow_radio_playback &&
+                guild.server.premium.available
+            ) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.music.allow_radio_playback': data.modules.music.allow_radio_playback } })
             }
 
-            if (typeof data.modules.music.queue_max_length === 'number' && data.modules.music.queue_max_length !== guild.modules.music.queue_max_length && guild.server.premium.available) {
+            if (
+                typeof data.modules.music.queue_max_length === 'number' &&
+                data.modules.music.queue_max_length !== guild.modules.music.queue_max_length &&
+                guild.server.premium.available
+            ) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.music.queue_max_length': data.modules.music.queue_max_length } })
             }
 
-            if (typeof data.modules.music.default_volume === 'number' && data.modules.music.default_volume !== guild.modules.music.default_volume && guild.server.premium.available) {
+            if (
+                typeof data.modules.music.default_volume === 'number' &&
+                data.modules.music.default_volume !== guild.modules.music.default_volume &&
+                guild.server.premium.available
+            ) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.music.default_volume': data.modules.music.default_volume } })
             }
         }
 
         if (data.modules.voice_manager) {
             if (Array.isArray(data.modules.voice_manager.voice_roles)) {
-                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.voice_manager.voice_roles': data.modules.voice_manager.voice_roles.slice(0, (guild.server.premium.available ? 20 : 2)) } })
+                await Servers.updateOne(
+                    { _id: guild._id },
+                    { $set: { 'modules.voice_manager.voice_roles': data.modules.voice_manager.voice_roles.slice(0, guild.server.premium.available ? 20 : 2) } }
+                )
             }
         }
 
@@ -936,17 +1274,17 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
         if (data.modules.autoreactions) {
             if (data.modules.autoreactions.length) {
-                for (const reaction of data.modules.autoreactions.slice(0, (guild.server.premium.available ? 20 : 2))) {
-                    reaction.reactions.filter(emoji => !emoji.name).forEach(emoji => {
-                        const index = reaction.reactions.indexOf(emoji)
-                        reaction.reactions[index] = Util.parseEmoji(emoji as any)
-                    })
+                for (const reaction of data.modules.autoreactions.slice(0, guild.server.premium.available ? 20 : 2)) {
+                    reaction.reactions
+                        .filter(emoji => !emoji.name)
+                        .forEach(emoji => {
+                            const index = reaction.reactions.indexOf(emoji)
+                            reaction.reactions[index] = Util.parseEmoji(emoji as any)
+                        })
                 }
 
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.autoreactions': data.modules.autoreactions } })
-            }
-
-            else await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.autoreactions': [] } })
+            } else await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.autoreactions': [] } })
         }
 
         if (data.modules.economy) {
@@ -958,71 +1296,88 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.reset_wallet_on_leave': data.modules.economy.reset_wallet_on_leave } })
             }
 
-            if (Array.isArray(data.modules.economy.currencies) && data.modules.economy.currencies.length && JSON.stringify(data.modules.economy.currencies) !== JSON.stringify(guild.modules.economy.currencies)) {
+            if (
+                Array.isArray(data.modules.economy.currencies) &&
+                data.modules.economy.currencies.length &&
+                JSON.stringify(data.modules.economy.currencies) !== JSON.stringify(guild.modules.economy.currencies)
+            ) {
                 await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.currencies': data.modules.economy.currencies.slice(0, 2) } })
             }
 
             if (Array.isArray(data.modules.economy.store?.items) && JSON.stringify(data.modules.economy.store.items) !== JSON.stringify(guild.modules.economy.store.items)) {
-                await Servers.updateOne({ _id: guild._id }, { $set: { 'modules.economy.store.items': data.modules.economy.store.items.slice(0, (guild.server.premium.available ? 200 : 50)) } })
+                await Servers.updateOne(
+                    { _id: guild._id },
+                    { $set: { 'modules.economy.store.items': data.modules.economy.store.items.slice(0, guild.server.premium.available ? 200 : 50) } }
+                )
             }
         }
     }
 
-    const changes = [ ...new Set(Object.keys(dotNotateObject(data)).map(k => k.split('.').slice(0, 3).join('.'))) ]
+    const changes = [...new Set(Object.keys(dotNotateObject(data)).map(k => k.split('.').slice(0, 3).join('.')))]
 
-    await Servers.updateOne({ _id: guild._id }, {
-        $push: {
-            change_log: {
-                $each: [ { user_id, changes, timestamp: Date.now() } ],
-                $sort: { timestamp: 1 },
-                $slice: -50
-            } as never
+    await Servers.updateOne(
+        { _id: guild._id },
+        {
+            $push: {
+                change_log: {
+                    $each: [{ user_id, changes, timestamp: Date.now() }],
+                    $sort: { timestamp: 1 },
+                    $slice: -50
+                } as never
+            }
         }
-    })
+    )
 
     return await Servers.findOne({ _id: guild._id })
 }
 
 export async function addReactionElement(server: ServerDocument, reaction: Partial<ReactionElement>) {
-    const element_id = generateId(), emoji = Util.parseEmoji(reaction.emoji as any)
+    const element_id = generateId(),
+        emoji = Util.parseEmoji(reaction.emoji as any)
     const elements = server.modules.reactions
 
     if (elements.length >= 50 && !server.server.premium.available) return 'reactions_limit_reached_no_premium'
 
     if (elements.length >= 200) return 'reactions_limit_reached'
-    
+
     if (elements.some(r => r.message.id == reaction.message.id && r.emoji.name == emoji.name)) return 'emoji_already_used'
 
-    if (elements.some(r => r.message.id == reaction.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref)))) return 'reference_is_single'
+    if (elements.some(r => r.message.id == reaction.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref))))
+        return 'reference_is_single'
 
     const message = await rest.get(Routes.channelMessage(reaction.message.channel_id, reaction.message.id)).catch(() => {})
 
     if (!message) return 'unknown_message'
 
-    const __reaction = await rest.put(Routes.channelMessageOwnReaction(reaction.message.channel_id, reaction.message.id, encodeURIComponent(emoji.id ? `${emoji.name}:${emoji.id}` : emoji.name))).catch(() => {})
+    const __reaction = await rest
+        .put(Routes.channelMessageOwnReaction(reaction.message.channel_id, reaction.message.id, encodeURIComponent(emoji.id ? `${emoji.name}:${emoji.id}` : emoji.name)))
+        .catch(() => {})
 
     if (!__reaction) return 'cannot_create_reaction'
 
-    await Servers.updateOne({ _id: server._id }, {
-        $push: {
-            'modules.reactions': {
-                id: element_id,
-                type: reaction.type,
-                element: {
-                    single: reaction.element.single,
-                    global_single: false,
-                    reverse: reaction.element.reverse,
-                    lifespan: 0
-                },
-                message: {
-                    id: reaction.message.id,
-                    channel_id: reaction.message.channel_id
-                },
-                emoji: emoji,
-                references: reaction.references
+    await Servers.updateOne(
+        { _id: server._id },
+        {
+            $push: {
+                'modules.reactions': {
+                    id: element_id,
+                    type: reaction.type,
+                    element: {
+                        single: reaction.element.single,
+                        global_single: false,
+                        reverse: reaction.element.reverse,
+                        lifespan: 0
+                    },
+                    message: {
+                        id: reaction.message.id,
+                        channel_id: reaction.message.channel_id
+                    },
+                    emoji: emoji,
+                    references: reaction.references
+                }
             }
         }
-    })
+    )
 
     const updated = await Servers.findOne({ _id: server._id })
     return updated.modules.reactions.find(r => r.id == element_id)
@@ -1033,15 +1388,27 @@ export async function editReactionElement(server: ServerDocument, reaction: Reac
 
     if (!element) return 'element_not_found'
 
-    if (server.modules.reactions.some(r => r.id != reaction.id && r.message.id == reaction.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => reaction.references.includes(ref)))) return 'reference_is_single'
+    if (
+        server.modules.reactions.some(
+            r =>
+                r.id != reaction.id &&
+                r.message.id == reaction.message.id &&
+                (r.element.single || r.element.global_single) &&
+                r.references.some(ref => reaction.references.includes(ref))
+        )
+    )
+        return 'reference_is_single'
 
-    await Servers.updateOne({ _id: server._id, 'modules.reactions.id': element.id }, {
-        $set: {
-            'modules.reactions.$.element.single': reaction.element.single,
-            'modules.reactions.$.element.reverse': reaction.element.reverse,
-            'modules.reactions.$.references': reaction.references
+    await Servers.updateOne(
+        { _id: server._id, 'modules.reactions.id': element.id },
+        {
+            $set: {
+                'modules.reactions.$.element.single': reaction.element.single,
+                'modules.reactions.$.element.reverse': reaction.element.reverse,
+                'modules.reactions.$.references': reaction.references
+            }
         }
-    })
+    )
 
     return reaction
 }
@@ -1051,15 +1418,26 @@ export async function removeReactionElement(server: ServerDocument, reaction_id:
 
     if (!element) return 'element_not_found'
 
-    await Servers.updateOne({ _id: server._id }, {
-        $pull: {
-            'modules.reactions': {
-                id: reaction_id
+    await Servers.updateOne(
+        { _id: server._id },
+        {
+            $pull: {
+                'modules.reactions': {
+                    id: reaction_id
+                }
             }
         }
-    })
+    )
 
-    await rest.delete(Routes.channelMessageReaction(element.message.channel_id, element.message.id, encodeURIComponent(element.emoji.id ? `${element.emoji.name}:${element.emoji.id}` : element.emoji.name))).catch(() => {})
+    await rest
+        .delete(
+            Routes.channelMessageReaction(
+                element.message.channel_id,
+                element.message.id,
+                encodeURIComponent(element.emoji.id ? `${element.emoji.name}:${element.emoji.id}` : element.emoji.name)
+            )
+        )
+        .catch(() => {})
 
     return true
 }
@@ -1096,13 +1474,14 @@ export async function createTwitchSubscription(server: ServerDocument, subscript
         } as any)
     }
 
-    const webhook = await rest.post(Routes.channelWebhooks(subscription.notification_channel_id), {
-        body: {
-            name: subscription.broadcaster.name,
-            avatar: await DataResolver.resolveImage(subscription.broadcaster.thumbnail)
-        }
-    })
-    .catch(() => {}) as any
+    const webhook = (await rest
+        .post(Routes.channelWebhooks(subscription.notification_channel_id), {
+            body: {
+                name: subscription.broadcaster.name,
+                avatar: await DataResolver.resolveImage(subscription.broadcaster.thumbnail)
+            }
+        })
+        .catch(() => {})) as any
 
     const data = {
         broadcaster_id: subscription.broadcaster.id,
@@ -1115,11 +1494,14 @@ export async function createTwitchSubscription(server: ServerDocument, subscript
         display_stream_preview: subscription.display_stream_preview
     }
 
-    await db.servers.updateOne({ _id: server._id }, {
-        $push: {
-            'modules.subscriptions.twitch': data
+    await db.servers.updateOne(
+        { _id: server._id },
+        {
+            $push: {
+                'modules.subscriptions.twitch': data
+            }
         }
-    })
+    )
 
     return data
 }
@@ -1130,20 +1512,25 @@ export async function updateTwitchSubscription(server: ServerDocument, subscript
 
     if (!sub) return 'twitch_channel_not_found'
 
-    await db.servers.updateOne({ _id: server._id, 'modules.subscriptions.twitch.broadcaster_id': subscription.broadcaster_id }, {
-        $set: {
-            'modules.subscriptions.twitch.$.notification_channel_id': subscription.notification_channel_id,
-            'modules.subscriptions.twitch.$.notification_message': subscription.notification_message,
-            'modules.subscriptions.twitch.$.display_stream_preview': subscription.display_stream_preview
+    await db.servers.updateOne(
+        { _id: server._id, 'modules.subscriptions.twitch.broadcaster_id': subscription.broadcaster_id },
+        {
+            $set: {
+                'modules.subscriptions.twitch.$.notification_channel_id': subscription.notification_channel_id,
+                'modules.subscriptions.twitch.$.notification_message': subscription.notification_message,
+                'modules.subscriptions.twitch.$.display_stream_preview': subscription.display_stream_preview
+            }
         }
-    })
+    )
 
     if (sub.notification_channel_id != subscription.notification_channel_id) {
-        await rest.patch(Routes.webhook(sub.webhook_id), {
-            body: {
-                channel_id: subscription.notification_channel_id
-            }
-        }).catch(() => {})
+        await rest
+            .patch(Routes.webhook(sub.webhook_id), {
+                body: {
+                    channel_id: subscription.notification_channel_id
+                }
+            })
+            .catch(() => {})
     }
 }
 
@@ -1153,13 +1540,16 @@ export async function deleteTwitchSubscription(server: ServerDocument, subscript
 
     if (!sub) return 'twitch_channel_not_found'
 
-    await Servers.updateOne({ _id: server._id }, {
-        $pull: {
-            'modules.subscriptions.twitch': {
-                broadcaster_id: sub.broadcaster_id
+    await Servers.updateOne(
+        { _id: server._id },
+        {
+            $pull: {
+                'modules.subscriptions.twitch': {
+                    broadcaster_id: sub.broadcaster_id
+                }
             }
         }
-    })
+    )
 
     const subscribedGuilds = await db.servers.find({ 'modules.subscriptions.twitch.broadcaster_id': sub.broadcaster_id })
 
@@ -1169,7 +1559,7 @@ export async function deleteTwitchSubscription(server: ServerDocument, subscript
         await eventSubUnsubscribe(twitchSub?._id).catch(() => {})
         await db.twitchSubs.deleteMany({ broadcaster_id: sub.broadcaster_id })
     }
-    
+
     if (sub.webhook_id) await rest.delete(Routes.webhook(sub.webhook_id, sub.webhook_token)).catch(() => {})
 }
 
@@ -1191,20 +1581,19 @@ export async function createYouTubeSubscription(server: ServerDocument, subscrip
             await db.youtubeSubs.create({
                 _id: subscription.channel.id,
                 channel_name: subscription.channel.name,
-                channel_thumbnail_url: subscription.channel.thumbnail,
+                channel_thumbnail_url: subscription.channel.thumbnail
             } as any)
-        }
-
-        else return 'youtube_subscribe_error'
+        } else return 'youtube_subscribe_error'
     }
 
-    const webhook = await rest.post(Routes.channelWebhooks(subscription.notification_channel_id), {
-        body: {
-            name: subscription.channel.name,
-            avatar: await DataResolver.resolveImage(subscription.channel.thumbnail)
-        }
-    })
-    .catch(() => {}) as any
+    const webhook = (await rest
+        .post(Routes.channelWebhooks(subscription.notification_channel_id), {
+            body: {
+                name: subscription.channel.name,
+                avatar: await DataResolver.resolveImage(subscription.channel.thumbnail)
+            }
+        })
+        .catch(() => {})) as any
 
     const data = {
         channel_id: subscription.channel.id,
@@ -1216,11 +1605,14 @@ export async function createYouTubeSubscription(server: ServerDocument, subscrip
         webhook_token: webhook?.token ?? null
     }
 
-    await db.servers.updateOne({ _id: server._id }, {
-        $push: {
-            'modules.subscriptions.youtube': data
+    await db.servers.updateOne(
+        { _id: server._id },
+        {
+            $push: {
+                'modules.subscriptions.youtube': data
+            }
         }
-    })
+    )
 
     return data
 }
@@ -1231,19 +1623,24 @@ export async function updateYouTubeSubscription(server: ServerDocument, subscrip
 
     if (!sub) return 'youtube_channel_not_found'
 
-    await db.servers.updateOne({ _id: server._id, 'modules.subscriptions.youtube.channel_id': subscription.channel_id }, {
-        $set: {
-            'modules.subscriptions.youtube.$.notification_channel_id': subscription.notification_channel_id,
-            'modules.subscriptions.youtube.$.notification_message': subscription.notification_message
+    await db.servers.updateOne(
+        { _id: server._id, 'modules.subscriptions.youtube.channel_id': subscription.channel_id },
+        {
+            $set: {
+                'modules.subscriptions.youtube.$.notification_channel_id': subscription.notification_channel_id,
+                'modules.subscriptions.youtube.$.notification_message': subscription.notification_message
+            }
         }
-    })
+    )
 
     if (sub.notification_channel_id != subscription.notification_channel_id) {
-        await rest.patch(Routes.webhook(sub.webhook_id), {
-            body: {
-                channel_id: subscription.notification_channel_id
-            }
-        }).catch(() => {})
+        await rest
+            .patch(Routes.webhook(sub.webhook_id), {
+                body: {
+                    channel_id: subscription.notification_channel_id
+                }
+            })
+            .catch(() => {})
     }
 }
 
@@ -1253,13 +1650,16 @@ export async function deleteYouTubeSubscription(server: ServerDocument, subscrip
 
     if (!sub) return 'youtube_channel_not_found'
 
-    await db.servers.updateOne({ _id: server._id }, {
-        $pull: {
-            'modules.subscriptions.youtube': {
-                channel_id: sub.channel_id
+    await db.servers.updateOne(
+        { _id: server._id },
+        {
+            $pull: {
+                'modules.subscriptions.youtube': {
+                    channel_id: sub.channel_id
+                }
             }
         }
-    })
+    )
 
     const subscribedGuilds = await db.servers.find({ 'modules.subscriptions.youtube.channel_id': sub.channel_id })
 
@@ -1267,7 +1667,7 @@ export async function deleteYouTubeSubscription(server: ServerDocument, subscrip
         await hubSubscribe(sub.channel_id, 'unsubscribe').catch(() => {})
         await db.youtubeSubs.deleteOne({ _id: sub.channel_id })
     }
-    
+
     if (sub.webhook_id) await rest.delete(Routes.webhook(sub.webhook_id, sub.webhook_token)).catch(() => {})
 
     return true
@@ -1280,11 +1680,14 @@ export async function addAutoVoice(server: ServerDocument, autovoice: IAutoVoice
     if (autovoices.length >= 20) return 'autovoices_limit_reached'
     if (autovoices.some(i => i.channel_id == autovoice.channel_id)) return 'autovoice_already_added'
 
-    await db.servers.updateOne({ _id: server._id }, {
-        $push: {
-            'modules.voice_manager.autovoices': autovoice
+    await db.servers.updateOne(
+        { _id: server._id },
+        {
+            $push: {
+                'modules.voice_manager.autovoices': autovoice
+            }
         }
-    })
+    )
 
     return autovoice
 }
@@ -1294,14 +1697,17 @@ export async function updateAutoVoice(server: ServerDocument, autovoice: Partial
 
     if (!autovoices.some(i => i.channel_id == autovoice.channel_id)) return 'autovoice_not_found'
 
-    await db.servers.updateOne({ _id: server._id, 'modules.voice_manager.autovoices.channel_id': autovoice.channel_id }, {
-        $set: {
-            'modules.voice_manager.autovoices.$.default': autovoice.default,
-            'modules.voice_manager.autovoices.$.allowed_roles': autovoice.allowed_roles ?? [],
-            'modules.voice_manager.autovoices.$.blocked_roles': autovoice.blocked_roles ?? [],
-            'modules.voice_manager.autovoices.$.moderator_roles': autovoice.moderator_roles ?? []
+    await db.servers.updateOne(
+        { _id: server._id, 'modules.voice_manager.autovoices.channel_id': autovoice.channel_id },
+        {
+            $set: {
+                'modules.voice_manager.autovoices.$.default': autovoice.default,
+                'modules.voice_manager.autovoices.$.allowed_roles': autovoice.allowed_roles ?? [],
+                'modules.voice_manager.autovoices.$.blocked_roles': autovoice.blocked_roles ?? [],
+                'modules.voice_manager.autovoices.$.moderator_roles': autovoice.moderator_roles ?? []
+            }
         }
-    })
+    )
 
     return autovoice
 }
@@ -1312,13 +1718,16 @@ export async function removeAutoVoice(server: ServerDocument, channel_id: string
 
     if (!autovoice) return 'autovoice_not_found'
 
-    await db.servers.updateOne({ _id: server._id }, {
-        $pull: {
-            'modules.voice_manager.autovoices': {
-                channel_id: channel_id
+    await db.servers.updateOne(
+        { _id: server._id },
+        {
+            $pull: {
+                'modules.voice_manager.autovoices': {
+                    channel_id: channel_id
+                }
             }
         }
-    })
+    )
 
     return true
 }

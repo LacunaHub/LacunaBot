@@ -1,12 +1,12 @@
-import { messageCreate as addLevelPoints } from '../../modules/Levels'
-import { messageCreate as addWalletCash } from '../../modules/Economy'
-import { autoReact } from '../../modules/Reactions'
-import CustomCommand from '../../modules/CustomCommand'
-import { parseCommandArguments } from '../../internals/utility/Utils'
-import Lacuna from '../../internals/Lacuna'
 import { Message } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
+import Lacuna from '../../internals/Lacuna'
+import { parseCommandArguments } from '../../internals/utility/Utils'
 import { antiCaps, linksFilter, nicknamesModeration, swearFilter, usersSlowdown } from '../../modules/Automoder'
+import CustomCommand from '../../modules/CustomCommand'
+import { messageCreate as addWalletCash } from '../../modules/Economy'
+import { messageCreate as addLevelPoints } from '../../modules/Levels'
+import { autoReact } from '../../modules/Reactions'
 
 const handler = async (self: Lacuna, message: Message) => {
     if (message.author.bot || message.channel.type == 'DM') return false
@@ -18,7 +18,7 @@ const handler = async (self: Lacuna, message: Message) => {
 
         return false
     }
-    
+
     await message.member.fetch()
 
     if (message.member && message.member.roles.cache.has(server.moderation.roles.mute) && !message.member.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_MESSAGES)) {

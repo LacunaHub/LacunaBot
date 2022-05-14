@@ -1,13 +1,13 @@
 import { GuildMember } from 'discord.js'
+import { clean, isZalgo } from 'unzalgo'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { isZalgo, clean } from 'unzalgo'
 
 const reason = 'Автомодер: Модерирование никнеймов'
 
 const adjectives = ['Foggy', 'Magnanimous', 'Taboo', 'Compulsive', 'Busy', 'Angry', 'Responsive', 'Amiable', 'Nice', 'Unexpected']
 
-export default async function(self: Lacuna, server: ServerDocument, member: GuildMember) {
+export default async function (self: Lacuna, server: ServerDocument, member: GuildMember) {
     const config = server.moderation.automoder.nicknames
 
     if (!config.active) return false
@@ -26,8 +26,12 @@ export default async function(self: Lacuna, server: ServerDocument, member: Guil
 
     if (member.manageable && name != member.displayName) {
         await member.setNickname(name, reason).catch(self.logger.error)
-    
-        self.emit('moduleExecution', { module: 'Automoder: Nickname Moderation', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+
+        self.emit('moduleExecution', {
+            module: 'Automoder: Nickname Moderation',
+            guild: { id: member.guild.id, name: member.guild.name },
+            target: { id: member.id, name: member.user.tag }
+        })
     }
 
     return true
@@ -36,7 +40,7 @@ export default async function(self: Lacuna, server: ServerDocument, member: Guil
 function adjustNickname(types: ServerDocument['moderation']['automoder']['nicknames']['types'], name: string): string {
     const regexps = {
         special_characters: /[-!@#$%\^&*()_=+\[\]\\{};:'"|,<.>\/?]/g,
-        emojis: /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}/gu,
+        emojis: /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}/gu
     }
 
     const split = name.split(/\s{1,}/)
@@ -47,7 +51,7 @@ function adjustNickname(types: ServerDocument['moderation']['automoder']['nickna
     if (regexps.emojis.test(name) && types.emojis) name = name.replace(regexps.emojis, '')
 
     if (types.contains.some(c => split.includes(c))) {
-        types.contains.forEach(c => name = name.replace(c, ''))
+        types.contains.forEach(c => (name = name.replace(c, '')))
     }
 
     return name.trim()

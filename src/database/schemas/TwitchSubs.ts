@@ -1,16 +1,19 @@
-import { Schema, model, Document } from 'mongoose'
+import { Document, model, Schema } from 'mongoose'
 
 export default model<ITwitchSub>(
     'twitch-subs',
-    new Schema<ITwitchSub>({
-        _id: { type: String, required: true },
-        broadcaster_id: { type: String, required: true },
-        broadcaster_login: { type: String, required: true },
-        broadcaster_name: { type: String, required: true },
-        broadcaster_thumbnail_url: { type: String, default: null },
-        created_timestamp: { type: Number, default: () => Date.now() },
-        last_eventsub_message_id: { type: String, default: null }
-    }, { versionKey: false })
+    new Schema<ITwitchSub>(
+        {
+            _id: { type: String, required: true },
+            broadcaster_id: { type: String, required: true },
+            broadcaster_login: { type: String, required: true },
+            broadcaster_name: { type: String, required: true },
+            broadcaster_thumbnail_url: { type: String, default: null },
+            created_timestamp: { type: Number, default: () => Date.now() },
+            last_eventsub_message_id: { type: String, default: null }
+        },
+        { versionKey: false }
+    )
 )
 
 export interface ITwitchSub extends Document {

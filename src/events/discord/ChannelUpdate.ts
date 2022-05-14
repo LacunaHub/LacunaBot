@@ -21,9 +21,26 @@ const handler = async (self: Lacuna, before: DMChannel | GuildChannel, channel: 
 
             for (const role of roles) {
                 const overwrites = channel.permissionOverwrites.cache.find(p => p.id == role)
-                
-                if (!overwrites && channel.manageable) await channel.permissionOverwrites.create(role, permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {})).catch(self.logger.error)
-                else if (!overwrites.allow.has(permissions) && channel.manageable) await overwrites.edit(permissions.toArray().reduce((obj, k) => { obj[k] = true; return obj }, {})).catch(self.logger.error)
+
+                if (!overwrites && channel.manageable)
+                    await channel.permissionOverwrites
+                        .create(
+                            role,
+                            permissions.toArray().reduce((obj, k) => {
+                                obj[k] = true
+                                return obj
+                            }, {})
+                        )
+                        .catch(self.logger.error)
+                else if (!overwrites.allow.has(permissions) && channel.manageable)
+                    await overwrites
+                        .edit(
+                            permissions.toArray().reduce((obj, k) => {
+                                obj[k] = true
+                                return obj
+                            }, {})
+                        )
+                        .catch(self.logger.error)
             }
         }
     }

@@ -49,15 +49,18 @@ export default class TemporaryMute {
     }
 
     async createEntry() {
-        await this.self.db.servers.updateOne({ _id: this.guild_id }, {
-            $push: {
-                'moderation.tempmutes': {
-                    user_id: this.user_id,
-                    role_id: this.role_id,
-                    expires_timestamp: this.expires.getTime()
+        await this.self.db.servers.updateOne(
+            { _id: this.guild_id },
+            {
+                $push: {
+                    'moderation.tempmutes': {
+                        user_id: this.user_id,
+                        role_id: this.role_id,
+                        expires_timestamp: this.expires.getTime()
+                    }
                 }
             }
-        })
+        )
     }
 
     async createSchedule() {
@@ -67,33 +70,37 @@ export default class TemporaryMute {
 
     async mute() {
         const guild: Guild = this.self.guilds.cache.get(this.guild_id)
-        
+
         if (guild && guild.available) {
             const server: ServerDocument = await this.self.db.servers.findOne({ _id: guild.id })
-            const member = await guild.members.fetch(this.user_id).catch(() => {}) as GuildMember
-    
+            const member = (await guild.members.fetch(this.user_id).catch(() => {})) as GuildMember
+
             if (member) {
                 if (server.moderation.roles.on_mute.remove_all_roles) {
                     const current_roles: string[] = member.roles.cache.filter(r => r.editable && r.id != guild.id).map(r => r.id)
-        
-                    await this.self.db.servers.updateOne({ _id: guild.id }, {
-                        $push: {
-                            'moderation.roles.on_mute.returnable_roles': {
-                                user_id: member.id,
-                                roles: current_roles
+
+                    await this.self.db.servers.updateOne(
+                        { _id: guild.id },
+                        {
+                            $push: {
+                                'moderation.roles.on_mute.returnable_roles': {
+                                    user_id: member.id,
+                                    roles: current_roles
+                                }
                             }
                         }
-                    })
-        
-                    const strict_roles: string[] = [...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)), ...member.roles.cache.filter(r => !r.editable).map(r => r.id)]
-        
+                    )
+
+                    const strict_roles: string[] = [
+                        ...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)),
+                        ...member.roles.cache.filter(r => !r.editable).map(r => r.id)
+                    ]
+
                     await member.roles.set([this.role_id, ...strict_roles], this.reason).catch(this.self.logger.error)
-                }
-                
-                else {
+                } else {
                     await member.roles.add(this.role_id, this.reason).catch(this.self.logger.error)
                 }
-    
+
                 if (member.voice?.channelId) await member.voice.setMute(true, this.reason).catch(this.self.logger.error)
             }
         }
@@ -107,42 +114,46 @@ export default class TemporaryMute {
     }
 
     async deleteEntry() {
-        await this.self.db.servers.updateOne({ _id: this.guild_id }, {
-            $pull: {
-                'moderation.tempmutes': {
-                    user_id: this.user_id
+        await this.self.db.servers.updateOne(
+            { _id: this.guild_id },
+            {
+                $pull: {
+                    'moderation.tempmutes': {
+                        user_id: this.user_id
+                    }
                 }
             }
-        })
+        )
     }
 
     async unmute(reason = 'Temporary Mute') {
         const guild: Guild = this.self.guilds.cache.get(this.guild_id)
-        
+
         if (guild && guild.available) {
             const server: ServerDocument = await this.self.db.servers.findOne({ _id: guild.id })
-            const member = await guild.members.fetch(this.user_id).catch(() => {}) as GuildMember
-    
+            const member = (await guild.members.fetch(this.user_id).catch(() => {})) as GuildMember
+
             if (member) {
                 const returnable_roles = server.moderation.roles.on_mute.returnable_roles.find(r => r.user_id == member.id)
-    
+
                 if (returnable_roles) {
-                    await this.self.db.servers.updateOne({ _id: guild.id }, {
-                        $pull: {
-                            'moderation.roles.on_mute.returnable_roles': {
-                                user_id: member.id
+                    await this.self.db.servers.updateOne(
+                        { _id: guild.id },
+                        {
+                            $pull: {
+                                'moderation.roles.on_mute.returnable_roles': {
+                                    user_id: member.id
+                                }
                             }
                         }
-                    })
-        
+                    )
+
                     await member.roles.add(returnable_roles.roles.filter(r => guild.roles.cache.has(r))).catch(this.self.logger.error)
                 }
-    
+
                 await member.roles.remove(this.role_id, reason).catch(this.self.logger.error)
                 if (member.voice?.channelId && member.voice?.serverMute) await member.voice.setMute(false, reason)
-            }
-    
-            else {
+            } else {
                 await this.deleteEntry()
             }
         }

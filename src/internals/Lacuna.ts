@@ -1,20 +1,18 @@
-import { connect } from 'mongoose'
-import { readdirSync } from 'fs'
 import { Client, ClientOptions, Collection, PermissionFlags, Permissions, Util } from 'discord.js'
 import { Manager } from 'erela.js'
+import { readdirSync } from 'fs'
+import { connect } from 'mongoose'
+import qdb from 'quick.db'
+import db from '../database'
+import Utils from '../internals/utility/Utils'
+import locale from './locale'
+import logger from './Logger'
 import Command, { CommandOptions } from './structures/Command'
 import Event, { EventOptions } from './structures/Event'
-import logger from './Logger'
-import db from '../database'
-import qdb from 'quick.db'
-import Utils from '../internals/utility/Utils'
-
 import Giveaway, { handleEntries as handleGiveawayEntries } from './structures/Giveaway'
 import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './structures/TemporaryBan'
 import TemporaryMute, { handleEntries as handleTemporaryMuteEntries } from './structures/TemporaryMute'
 import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole'
-
-import locale from './locale'
 
 export default class Lacuna extends Client {
     public logger: typeof logger
@@ -83,19 +81,21 @@ export default class Lacuna extends Client {
     get playerNodesStats() {
         const nodes = this.player?.nodes
 
-        return nodes?.map(node => {
-            return {
-                id: node.options.identifier,
-                connected: node.connected,
-                cpu_load: Number(node.stats.cpu.lavalinkLoad.toFixed(2)),
-                memory_usage: Math.round((node.stats.memory.used * 100) / node.stats.memory.reservable),
-                uptime: node.stats.uptime,
-                players: {
-                    playing: node.stats.playingPlayers,
-                    total: node.stats.players
+        return (
+            nodes?.map(node => {
+                return {
+                    id: node.options.identifier,
+                    connected: node.connected,
+                    cpu_load: Number(node.stats.cpu.lavalinkLoad.toFixed(2)),
+                    memory_usage: Math.round((node.stats.memory.used * 100) / node.stats.memory.reservable),
+                    uptime: node.stats.uptime,
+                    players: {
+                        playing: node.stats.playingPlayers,
+                        total: node.stats.players
+                    }
                 }
-            }
-        }) ?? []
+            }) ?? []
+        )
     }
 
     async start(): Promise<number> {
@@ -128,61 +128,81 @@ export default class Lacuna extends Client {
     async registerSlashCommands(guild_id: string, language: string) {
         const locale = this.translator.locale(language)
 
-        const slash = this.commands.filter(c => c.is_slash_command).map(c => {
-            return {
-                name: c.name,
-                description: this.utils.resolveObjectPath(c.description, locale),
-                type: 'CHAT_INPUT',
-                options: c?.options?.map(option => {
-                    if (option.type == 'SUB_COMMAND') return {
-                        ...option,
-                        description: this.utils.resolveObjectPath(option.description, locale),
-                        options: option.options.map(o => {
+        const slash = this.commands
+            .filter(c => c.is_slash_command)
+            .map(c => {
+                return {
+                    name: c.name,
+                    description: this.utils.resolveObjectPath(c.description, locale),
+                    type: 'CHAT_INPUT',
+                    options:
+                        c?.options?.map(option => {
+                            if (option.type == 'SUB_COMMAND')
+                                return {
+                                    ...option,
+                                    description: this.utils.resolveObjectPath(option.description, locale),
+                                    options: option.options.map(o => {
+                                        return {
+                                            ...o,
+                                            name: this.utils.resolveObjectPath(o.name, locale),
+                                            description: this.utils.resolveObjectPath(o.description, locale),
+                                            choices: option.choices?.length
+                                                ? option.choices.map(oc => {
+                                                      return { ...oc, name: this.utils.resolveObjectPath(oc.name, locale) }
+                                                  })
+                                                : null
+                                        }
+                                    })
+                                }
+
                             return {
-                                ...o,
-                                name: this.utils.resolveObjectPath(o.name, locale),
-                                description: this.utils.resolveObjectPath(o.description, locale),
-                                choices: option.choices?.length ? option.choices.map(oc => { return { ...oc, name: this.utils.resolveObjectPath(oc.name, locale) } }) : null
+                                ...option,
+                                name: this.utils.resolveObjectPath(option.name, locale),
+                                description: this.utils.resolveObjectPath(option.description, locale),
+                                choices: option.choices?.length
+                                    ? option.choices.map(oc => {
+                                          return { ...oc, name: this.utils.resolveObjectPath(oc.name, locale) }
+                                      })
+                                    : null
                             }
-                        })
-                    }
+                        }) ?? []
+                }
+            })
 
-                    return {
-                        ...option,
-                        name: this.utils.resolveObjectPath(option.name, locale),
-                        description: this.utils.resolveObjectPath(option.description, locale),
-                        choices: option.choices?.length ? option.choices.map(oc => { return { ...oc, name: this.utils.resolveObjectPath(oc.name, locale) } }) : null
-                    }
-                }) ?? []
-            }
-        })
+        const message = this.commands
+            .filter(c => c.is_message_command)
+            .map(c => {
+                return {
+                    name: this.utils.resolveObjectPath(c.pretty_name, locale),
+                    type: 'MESSAGE'
+                }
+            })
 
-        const message = this.commands.filter(c => c.is_message_command).map(c => {
-            return {
-                name: this.utils.resolveObjectPath(c.pretty_name, locale),
-                type: 'MESSAGE'
-            }
-        })
+        const user = this.commands
+            .filter(c => c.is_user_command)
+            .map(c => {
+                return {
+                    name: this.utils.resolveObjectPath(c.pretty_name, locale),
+                    type: 'USER'
+                }
+            })
 
-        const user = this.commands.filter(c => c.is_user_command).map(c => {
-            return {
-                name: this.utils.resolveObjectPath(c.pretty_name, locale),
-                type: 'USER'
-            }
-        })
-
-        const commands = [ ...slash, ...message, ...user ]
+        const commands = [...slash, ...message, ...user]
 
         return await this.application.commands.set(commands as any, guild_id)
     }
 
     loadCommands() {
-        const directories: string[] = readdirSync('./dist/commands', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
+        const directories: string[] = readdirSync('./dist/commands', { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
 
         let amount: number = 0
 
         for (const directory of directories) {
-            const dirs: string[] = readdirSync(`./dist/commands/${directory}`, { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
+            const dirs: string[] = readdirSync(`./dist/commands/${directory}`, { withFileTypes: true })
+                .filter(dirent => dirent.isDirectory())
+                .map(dirent => dirent.name)
 
             for (const dir of dirs) {
                 const command: CommandOptions = require(`../commands/${directory}/${dir}`).default
@@ -199,12 +219,17 @@ export default class Lacuna extends Client {
     }
 
     loadEvents(initial = false) {
-        const directories: string[] = readdirSync('./dist/events', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
+        const directories: string[] = readdirSync('./dist/events', { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
 
-        let amount = 0, total = 0
+        let amount = 0,
+            total = 0
 
         for (const directory of directories) {
-            const files: string[] = readdirSync(`./dist/events/${directory}`, { withFileTypes: true }).filter(dirent => dirent.isFile() && dirent.name.endsWith('.js')).map(dirent => dirent.name)
+            const files: string[] = readdirSync(`./dist/events/${directory}`, { withFileTypes: true })
+                .filter(dirent => dirent.isFile() && dirent.name.endsWith('.js'))
+                .map(dirent => dirent.name)
 
             let events: EventOptions[] = files.map(file => require(`../events/${directory}/${file}`).default)
             events = events.filter(e => Boolean(e.initial) == initial)

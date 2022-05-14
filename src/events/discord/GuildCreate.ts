@@ -10,7 +10,7 @@ const handler = async (self: Lacuna, guild: Guild) => {
 
     if (server.server.blocked) {
         self.logger.info(`Guild ${guild.name} (${guild.id}) is blocked`)
-        
+
         await guild.leave()
 
         return false

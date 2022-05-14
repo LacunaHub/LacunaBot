@@ -6,7 +6,10 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     const locale = self.translator.locale(server.locale).commands
 
     if (!server.modules.economy.active) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.store.texts.economy_disabled, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.store.texts.economy_disabled, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -28,8 +31,7 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
         }
     }
 
-    const embed = new MessageEmbed()
-        .setAuthor({ name: self.translator.format(locale.wallet.balance.texts.user_balance, mention.displayName), iconURL: mention.displayAvatarURL() })
+    const embed = new MessageEmbed().setAuthor({ name: self.translator.format(locale.wallet.balance.texts.user_balance, mention.displayName), iconURL: mention.displayAvatarURL() })
 
     if (!wallet.currencies.filter(i => server.modules.economy.currencies.some(ii => i.id == ii.id)).length) embed.setDescription(locale.wallet.balance.texts.empty_wallet)
 
@@ -48,7 +50,10 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     const locale = self.translator.locale(server.locale).commands
 
     if (!server.modules.economy.active) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.store.texts.economy_disabled, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.store.texts.economy_disabled, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -58,13 +63,19 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     const currency = interaction.options?.getString(locale.wallet.transfer.options.currency.name)
 
     if (!mention) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.wallet.transfer.texts.no_mention, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.wallet.transfer.texts.no_mention, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
 
     if (!amount) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.wallet.transfer.texts.no_amount, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.wallet.transfer.texts.no_amount, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -88,7 +99,10 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     const transaction_currency = wallet.currencies.find(c => c.id == currency_id)
 
     if (!transaction_currency || transaction_currency.amount < amount) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.wallet.transfer.texts.insufficient_funds, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.wallet.transfer.texts.insufficient_funds, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -120,43 +134,27 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
             }
         }
 
-        await self.db.users.updateOne({ _id: mention.id }, {
-            $push: { 'activities.wallets': mention_wallet as never }
-        })
+        await self.db.users.updateOne(
+            { _id: mention.id },
+            {
+                $push: { 'activities.wallets': mention_wallet as never }
+            }
+        )
     }
 
-    await self.db.users.updateOne({ _id: interaction.user.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } }, {
-        $inc: {
-            'activities.wallets.$[guild].currencies.$[currency].amount': -amount
-        },
-        $push: {
-            'activities.wallets.$[guild].transactions': {
-                $each: [
-                    {
-                        type: 'TRANSFER_TO',
-                        amount: amount,
-                        details: mention.id,
-                        timestamp: Date.now()
-                    }
-                ],
-                $position: 0,
-                $slice: 512
-            }
-        }
-    }, { arrayFilters: [ { 'guild.guild_id': interaction.guildId }, { 'currency.id': currency_id } ] })
-
-    if (mention_wallet.currencies.some(c => c.id == currency_id)) {
-        await self.db.users.updateOne({ _id: mention.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } }, {
+    await self.db.users.updateOne(
+        { _id: interaction.user.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } },
+        {
             $inc: {
-                'activities.wallets.$[guild].currencies.$[currency].amount': amount
+                'activities.wallets.$[guild].currencies.$[currency].amount': -amount
             },
             $push: {
                 'activities.wallets.$[guild].transactions': {
                     $each: [
                         {
-                            type: 'TRANSFER_FROM',
+                            type: 'TRANSFER_TO',
                             amount: amount,
-                            details: interaction.user.id,
+                            details: mention.id,
                             timestamp: Date.now()
                         }
                     ],
@@ -164,32 +162,69 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
                     $slice: 512
                 }
             }
-        }, { arrayFilters: [ { 'guild.guild_id': interaction.guildId }, { 'currency.id': currency_id } ] })
-    }
+        },
+        { arrayFilters: [{ 'guild.guild_id': interaction.guildId }, { 'currency.id': currency_id }] }
+    )
 
-    else {
-        await self.db.users.updateOne({ _id: mention.id, 'activities.wallets.guild_id': interaction.guildId }, {
-            $push: {
-                'activities.wallets.$.currencies': {
-                    id: currency_id, amount
+    if (mention_wallet.currencies.some(c => c.id == currency_id)) {
+        await self.db.users.updateOne(
+            { _id: mention.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } },
+            {
+                $inc: {
+                    'activities.wallets.$[guild].currencies.$[currency].amount': amount
                 },
-                'activities.wallets.$.transactions': {
-                    $each: [
-                        {
-                            type: 'TRANSFER_FROM',
-                            amount: amount,
-                            details: interaction.user.id,
-                            timestamp: Date.now()
-                        }
-                    ],
-                    $position: 0,
-                    $slice: 512
+                $push: {
+                    'activities.wallets.$[guild].transactions': {
+                        $each: [
+                            {
+                                type: 'TRANSFER_FROM',
+                                amount: amount,
+                                details: interaction.user.id,
+                                timestamp: Date.now()
+                            }
+                        ],
+                        $position: 0,
+                        $slice: 512
+                    }
+                }
+            },
+            { arrayFilters: [{ 'guild.guild_id': interaction.guildId }, { 'currency.id': currency_id }] }
+        )
+    } else {
+        await self.db.users.updateOne(
+            { _id: mention.id, 'activities.wallets.guild_id': interaction.guildId },
+            {
+                $push: {
+                    'activities.wallets.$.currencies': {
+                        id: currency_id,
+                        amount
+                    },
+                    'activities.wallets.$.transactions': {
+                        $each: [
+                            {
+                                type: 'TRANSFER_FROM',
+                                amount: amount,
+                                details: interaction.user.id,
+                                timestamp: Date.now()
+                            }
+                        ],
+                        $position: 0,
+                        $slice: 512
+                    }
                 }
             }
-        })
+        )
     }
 
-    await interaction.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.wallet.transfer.texts.transferred, `**${(interaction.member as any).displayName}**`, `**${amount}${server.modules.economy.currencies.find(c => c.id == currency_id).symbol}**`, `**${mention.displayName}**`)}`, ephemeral: true })
+    await interaction.reply({
+        content: `${self._emojis.OK} | ${self.translator.format(
+            locale.wallet.transfer.texts.transferred,
+            `**${(interaction.member as any).displayName}**`,
+            `**${amount}${server.modules.economy.currencies.find(c => c.id == currency_id).symbol}**`,
+            `**${mention.displayName}**`
+        )}`,
+        ephemeral: true
+    })
 
     return true
 }

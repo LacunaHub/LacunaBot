@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageActionRow, MessageButton, CommandInteraction, GuildMember } from 'discord.js'
+import { CommandInteraction, GuildMember, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -16,16 +16,21 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         .setAuthor({ name, iconURL: mention.user.displayAvatarURL() })
         .addField(locale.user.texts.account_created, `<t:${created_ts}:d> – <t:${created_ts}:R>`, true)
         .addField(locale.user.texts.member_joined, `<t:${joined_ts}:d> – <t:${joined_ts}:R>`, true)
-        .addField(`${locale.user.texts.roles} [${mention.roles.cache.filter(r => r.id != interaction.guild.id).size}]`, mention.roles.cache.filter(r => r.id != interaction.guild.id).map(role => `<@&${role.id}>`).join(' ') || '-')
+        .addField(
+            `${locale.user.texts.roles} [${mention.roles.cache.filter(r => r.id != interaction.guild.id).size}]`,
+            mention.roles.cache
+                .filter(r => r.id != interaction.guild.id)
+                .map(role => `<@&${role.id}>`)
+                .join(' ') || '-'
+        )
         .setFooter({ text: `ID: ${mention.id}` })
 
-    const row = new MessageActionRow()
-        .addComponents(
-            new MessageButton()
-                .setStyle('LINK')
-                .setLabel(locale.user.texts.avatar_link)
-                .setURL(mention.user.displayAvatarURL({ size: 512, format: 'png' }))
-        )
+    const row = new MessageActionRow().addComponents(
+        new MessageButton()
+            .setStyle('LINK')
+            .setLabel(locale.user.texts.avatar_link)
+            .setURL(mention.user.displayAvatarURL({ size: 512, format: 'png' }))
+    )
 
     await interaction.reply({ embeds: [embed], components: [row] })
 

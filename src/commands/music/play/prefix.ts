@@ -24,7 +24,9 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     const has_permissions = voice.permissionsFor(message.guild.me).has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'USE_VAD'])
 
     if (!has_permissions) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_required_permissions_in_voice, `**${message.member.displayName}**`)}` })
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_required_permissions_in_voice, `**${message.member.displayName}**`)}`
+        })
 
         return false
     }
@@ -74,25 +76,12 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
     let _message: Message
 
-    const row = new MessageActionRow()
-        .addComponents(
-            new MessageButton()
-                .setCustomId('previous')
-                .setStyle('SECONDARY')
-                .setEmoji('⏮️'),
-            new MessageButton()
-                .setCustomId('pause-resume')
-                .setStyle('SECONDARY')
-                .setEmoji('⏸️'),
-            new MessageButton()
-                .setCustomId('skip')
-                .setStyle('SECONDARY')
-                .setEmoji('⏭️'),
-            new MessageButton()
-                .setCustomId('repeat-one')
-                .setStyle('SECONDARY')
-                .setEmoji('🔂')
-        )
+    const row = new MessageActionRow().addComponents(
+        new MessageButton().setCustomId('previous').setStyle('SECONDARY').setEmoji('⏮️'),
+        new MessageButton().setCustomId('pause-resume').setStyle('SECONDARY').setEmoji('⏸️'),
+        new MessageButton().setCustomId('skip').setStyle('SECONDARY').setEmoji('⏭️'),
+        new MessageButton().setCustomId('repeat-one').setStyle('SECONDARY').setEmoji('🔂')
+    )
 
     if (search.loadType === 'PLAYLIST_LOADED') {
         if (!server.server.premium.available) {
@@ -110,20 +99,24 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
             .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
 
-            _message = await message.reply({ embeds: [embed], components: [row] })
+        _message = await message.reply({ embeds: [embed], components: [row] })
     }
 
     if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
         const track = search.tracks[0]
 
         if (player.queue.length >= server.modules.music.queue_max_length && server.modules.music.queue_max_length) {
-            await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.queue_limit_reached_no_premium, `**${message.member.displayName}**`)}` })
+            await message.reply({
+                content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.queue_limit_reached_no_premium, `**${message.member.displayName}**`)}`
+            })
 
             return false
         }
 
         if (track.isStream && !server.server.premium.available) {
-            await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.track_stream_only_for_premium, `**${message.member.displayName}**`)}` })
+            await message.reply({
+                content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.track_stream_only_for_premium, `**${message.member.displayName}**`)}`
+            })
 
             return false
         }
@@ -141,8 +134,11 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
             .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
 
-        if (player.playing) await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.play.texts.added_to_queue, `**${message.member.displayName}**`, `**${track.title}**`)}`, allowedMentions: { roles: [], users: [] } })
-
+        if (player.playing)
+            await message.reply({
+                content: `${self._emojis.OK} | ${self.translator.format(locale.play.texts.added_to_queue, `**${message.member.displayName}**`, `**${track.title}**`)}`,
+                allowedMentions: { roles: [], users: [] }
+            })
         else {
             _message = await message.reply({ embeds: [embed], components: [row] })
         }
@@ -169,15 +165,12 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
                 if (player.queue.previous && player.position < 5000) {
                     await player.play(player.queue.previous)
                     player.queue.add(player.queue.previous, 0)
-                }
-
-                else if (player.queue.current.isSeekable) player.seek(0)
+                } else if (player.queue.current.isSeekable) player.seek(0)
             }
 
             if (i.customId == row.components[1].customId) {
-                player.pause(!player.paused);
-            
-                (row.components[1] as any).setEmoji(player.paused ? '▶️' : '⏸️')
+                player.pause(!player.paused)
+                ;(row.components[1] as any).setEmoji(player.paused ? '▶️' : '⏸️')
             }
 
             if (i.customId == row.components[2].customId) {
@@ -186,13 +179,11 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
             if (i.customId == row.components[3].customId) {
                 if (player.trackRepeat) {
-                    (row.components[3] as any).setEmoji('🔂')
+                    ;(row.components[3] as any).setEmoji('🔂')
                     player.setTrackRepeat(false)
                     player.setQueueRepeat(true)
-                }
-
-                else {
-                    (row.components[3] as any).setEmoji('🔁')
+                } else {
+                    ;(row.components[3] as any).setEmoji('🔁')
                     player.setTrackRepeat(true)
                 }
             }
@@ -203,7 +194,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
             collector.resetTimer()
         })
 
-        collector.on('end', async () => await _message.edit({ components: [] }).catch(() => {}) as any)
+        collector.on('end', async () => (await _message.edit({ components: [] }).catch(() => {})) as any)
     }
 
     return true

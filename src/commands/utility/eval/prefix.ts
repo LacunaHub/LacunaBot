@@ -11,14 +11,12 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         if (typeof evaled !== 'string') evaled = util.inspect(evaled)
 
         await message.channel.send({ content: `**ВЫВОД**:\`\`\`xl\n${clean(evaled)}\n\`\`\`` })
-    } catch(err) {
+    } catch (err) {
         await message.channel.send({ content: `**ОШИБКА**:\`\`\`xl\n${clean(err)}\n\`\`\`` })
     }
 }
 
 function clean(text: string) {
-    if (typeof(text) === "string")
-      return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203))
-    else
-        return text
+    if (typeof text === 'string') return text.replace(/`/g, '`' + String.fromCharCode(8203)).replace(/@/g, '@' + String.fromCharCode(8203))
+    else return text
 }

@@ -1,5 +1,5 @@
 import { Message } from 'discord.js'
-import { ServerDocument, CustomCommand as ICustomCommand } from '../../database/schemas/Servers'
+import { CustomCommand as ICustomCommand, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import Command from '../../internals/structures/Command'
 import { parseCommandArguments } from '../../internals/utility/Utils'
@@ -10,8 +10,8 @@ import { MessageUpdate } from '../../modules/Logs'
 const handler = async (self: Lacuna, before: Message, message: Message) => {
     let partial = before.partial || message.partial
 
-    before = before.partial ? (await before.fetch()) : before
-    message = message.partial ? (await message.fetch()) : message
+    before = before.partial ? await before.fetch() : before
+    message = message.partial ? await message.fetch() : message
 
     if (message.author.bot || message.channel.type == 'DM') return false
     if ((!before.embeds.length && message.embeds.length) || (!before.pinned && message.pinned)) return false

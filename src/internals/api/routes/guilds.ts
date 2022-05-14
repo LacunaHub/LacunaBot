@@ -35,32 +35,37 @@ async function getSettings(ctx: Context) {
 
     if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
 
-    const selfMember = await dsc.get(Routes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {}) as any
+    const selfMember = (await dsc.get(Routes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {})) as any
 
     if (!selfMember) ctx.throw(406, 'Not Acceptable')
 
-    const guildChannels = await dsc.get(Routes.guildChannels(guild_id)).catch(() => {}) as any[] ?? []
-    const guildRoles = await dsc.get(Routes.guildRoles(guild_id)).catch(() => {}) as any[] ?? []
-    const guildEmojis = await dsc.get(Routes.guildEmojis(guild_id)).catch(() => {}) as any[] ?? []
+    const guildChannels = ((await dsc.get(Routes.guildChannels(guild_id)).catch(() => {})) as any[]) ?? []
+    const guildRoles = ((await dsc.get(Routes.guildRoles(guild_id)).catch(() => {})) as any[]) ?? []
+    const guildEmojis = ((await dsc.get(Routes.guildEmojis(guild_id)).catch(() => {})) as any[]) ?? []
 
-    const selfRoles = selfMember ? guildRoles
-        .sort((a, b) => a.position - b.position)
-        .filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID) : []
+    const selfRoles = selfMember ? guildRoles.sort((a, b) => a.position - b.position).filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID) : []
     const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
 
     const channels = guildChannels
         .sort((a, b) => a.parent_id - b.parent_id || a.position - b.position)
-        .map(c => { return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' } })
+        .map(c => {
+            return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' }
+        })
     const roles = guildRoles
         .filter(r => !r.tags?.bot_id)
         .sort((a, b) => b.position - a.position)
-        .map(r => { return { id: r.id, name: r.name, color: r.color, position: r.position, managed: r.managed, higher: !selfHighestRole || selfHighestRole.position <= r.position } })
-    const emojis = guildEmojis
-        .map(e => { return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` } })
+        .map(r => {
+            return { id: r.id, name: r.name, color: r.color, position: r.position, managed: r.managed, higher: !selfHighestRole || selfHighestRole.position <= r.position }
+        })
+    const emojis = guildEmojis.map(e => {
+        return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` }
+    })
 
     const locale = translator.locale(server.locale)
 
-    const commands = qdb.get('commands').map(c => { return { ...c, description: resolveObjectPath(c.description, locale), options: [] } })
+    const commands = qdb.get('commands').map(c => {
+        return { ...c, description: resolveObjectPath(c.description, locale), options: [] }
+    })
     const { diamondPrices: prices } = await db.json.get()
 
     ctx.status = 200
@@ -70,10 +75,11 @@ async function getSettings(ctx: Context) {
         prefix: server.prefix,
         premium: server.server.premium,
         server: {
-            bot_expert_roles: server.server.bot_expert_roles,
+            bot_expert_roles: server.server.bot_expert_roles
         },
         commands: {
-            ...server.commands, list: commands
+            ...server.commands,
+            list: commands
         },
         guild: {
             ...JSON.parse(partial),
@@ -135,13 +141,15 @@ async function updateSettings(ctx: Context) {
 
     if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
 
-    const selfMember = await dsc.get(Routes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {}) as any
+    const selfMember = (await dsc.get(Routes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {})) as any
 
     if (!selfMember) ctx.throw(406, 'Not Acceptable')
 
     const locale = translator.locale(server.locale)
 
-    const commands = qdb.get('commands').map(c => { return { ...c, description: resolveObjectPath(c.description, locale), options: [] } })
+    const commands = qdb.get('commands').map(c => {
+        return { ...c, description: resolveObjectPath(c.description, locale), options: [] }
+    })
     const { diamondPrices: prices } = await db.json.get()
 
     server = await Guilds.updateSettings(server, data, user_id)
@@ -153,10 +161,11 @@ async function updateSettings(ctx: Context) {
         prefix: server.prefix,
         premium: server.server.premium,
         server: {
-            bot_expert_roles: server.server.bot_expert_roles,
+            bot_expert_roles: server.server.bot_expert_roles
         },
         commands: {
-            ...server.commands, list: commands
+            ...server.commands,
+            list: commands
         },
         moderation: {
             case_log: {
@@ -217,18 +226,18 @@ async function updateInteractiveMessages(ctx: Context) {
     let response: any
 
     try {
-        switch(method) {
+        switch (method) {
             case 'create':
                 response = await apiInterfaces.im.createInteractiveMessage(server, data)
-            break
+                break
 
             case 'update':
                 response = await apiInterfaces.im.updateInteractiveMessage(server, data)
-            break
+                break
 
             case 'delete':
                 response = await apiInterfaces.im.deleteInteractiveMessage(server, data)
-            break
+                break
 
             default:
                 throw new Error('UNKNOWN_METHOD')
@@ -249,20 +258,23 @@ async function addOrEditReaction(ctx: Context) {
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
     if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
+        ctx.status = 404
+        ctx.body = 'Not Found'
 
         return
     }
 
-    const result = method == 'add' ? (await Guilds.addReactionElement(server, options)) : (await Guilds.editReactionElement(server, options as ReactionElement))
+    const result = method == 'add' ? await Guilds.addReactionElement(server, options) : await Guilds.editReactionElement(server, options as ReactionElement)
 
     if (typeof result === 'string') {
-        ctx.status = 400; ctx.body = result
+        ctx.status = 400
+        ctx.body = result
 
         return
     }
 
-    ctx.status = 200; ctx.body = result
+    ctx.status = 200
+    ctx.body = result
 }
 
 async function removeReaction(ctx: Context) {
@@ -272,7 +284,8 @@ async function removeReaction(ctx: Context) {
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
     if (!server || server.server.blocked) {
-        ctx.status = 404; ctx.body = 'Not Found'
+        ctx.status = 404
+        ctx.body = 'Not Found'
 
         return
     }
@@ -280,7 +293,8 @@ async function removeReaction(ctx: Context) {
     const result = await Guilds.removeReactionElement(server, reaction_id)
 
     if (typeof result === 'string') {
-        ctx.status = 400; ctx.body = result
+        ctx.status = 400
+        ctx.body = result
 
         return
     }
@@ -299,18 +313,18 @@ async function updateTwitchSubscriptions(ctx: Context) {
 
     let result: any
 
-    switch(method) {
+    switch (method) {
         case 'create':
             result = await Guilds.createTwitchSubscription(server, data)
-        break
+            break
 
         case 'update':
             result = await Guilds.updateTwitchSubscription(server, data)
-        break
+            break
 
         case 'delete':
             result = await Guilds.deleteTwitchSubscription(server, data)
-        break
+            break
 
         default:
             result = 'unknown_method'
@@ -333,18 +347,18 @@ async function updateYouTubeSubscriptions(ctx: Context) {
 
     let result: any
 
-    switch(method) {
+    switch (method) {
         case 'create':
             result = await Guilds.createYouTubeSubscription(server, data)
-        break
+            break
 
         case 'update':
             result = await Guilds.updateYouTubeSubscription(server, data)
-        break
+            break
 
         case 'delete':
             result = await Guilds.deleteYouTubeSubscription(server, data)
-        break
+            break
 
         default:
             result = 'unknown_method'
@@ -365,11 +379,12 @@ async function addOrUpdateAutoVoice(ctx: Context) {
 
     if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
 
-    const result = method == 'add' ? (await Guilds.addAutoVoice(server, options as IAutoVoice)) : (await Guilds.updateAutoVoice(server, options))
+    const result = method == 'add' ? await Guilds.addAutoVoice(server, options as IAutoVoice) : await Guilds.updateAutoVoice(server, options)
 
     if (typeof result === 'string') ctx.throw(400, result)
 
-    ctx.status = 200; ctx.body = result
+    ctx.status = 200
+    ctx.body = result
 }
 
 async function removeAutoVoice(ctx: Context) {
