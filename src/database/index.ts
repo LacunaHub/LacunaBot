@@ -29,7 +29,7 @@ export default {
             return await Bills.updateOne(filter, update, options)
         }
     },
-  
+
     servers: {
         async create(doc: ServerDocument) {
             return await Servers.create(doc)
