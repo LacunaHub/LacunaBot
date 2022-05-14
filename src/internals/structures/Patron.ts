@@ -18,6 +18,14 @@ export default class Patron {
         this.expiration = expiration instanceof Date ? expiration.getTime() : expiration
 
         this.schedule = null
+
+        if (Date.now() >= this.expiration || this.expiration - Date.now() <= 30000) {
+            this.expire()
+
+            return
+        }
+
+        this.initialize()
     }
 
     initialize() {
