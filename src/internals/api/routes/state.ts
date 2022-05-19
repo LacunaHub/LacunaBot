@@ -12,12 +12,7 @@ const router: Router = new Router({ prefix: '/state' })
 router.get('/', getState)
 
 async function getState(ctx: Context) {
-    if (!sharding.shards.every(shard => shard.ready)) {
-        ctx.status = 503
-        ctx.body = 'Service Unavailable'
-
-        return
-    }
+    if (!sharding.shards.every(shard => shard.ready)) ctx.throw(503)
 
     const guilds = (await sharding.fetchClientValues('guilds.cache.size')) as number[]
     const users = (await sharding.broadcastEval(self => self.guilds.cache.reduce((x, y) => x + y.memberCount, 0))) as number[]
