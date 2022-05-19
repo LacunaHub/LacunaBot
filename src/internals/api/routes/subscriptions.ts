@@ -21,15 +21,15 @@ async function searchTwitch(ctx: Context) {
     const guild_id = ctx.query.gid as string
     const query = ctx.query.q as string
 
-    if (!guild_id || !query) ctx.throw(400, 'Bad Request')
+    if (!guild_id || !query) ctx.throw(400)
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
+    if (!server || server.server.blocked) ctx.throw(404)
 
     const channels = await searchTwitchChannels(query)
 
-    if (!channels?.length) ctx.throw(404, 'Not Found')
+    if (!channels?.length) ctx.throw(404)
 
     const added = server.modules.subscriptions.twitch
 
@@ -41,15 +41,15 @@ async function searchYouTube(ctx: Context) {
     const guild_id = ctx.query.gid as string
     const query = ctx.query.q as string
 
-    if (!guild_id || !query) ctx.throw(400, 'Bad Request')
+    if (!guild_id || !query) ctx.throw(400)
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
+    if (!server || server.server.blocked) ctx.throw(404)
 
     const channels = await searchYouTubeChannels(query)
 
-    if (!channels?.length) ctx.throw(404, 'Not Found')
+    if (!channels?.length) ctx.throw(404)
 
     const added = server.modules.subscriptions.youtube
 
@@ -114,7 +114,7 @@ function eventSubAuthentication(ctx: Context, next: Next) {
         .digest('hex')
 
     if (messageSignature == `sha256=${signature}`) next()
-    else ctx.throw(403, 'Forbidden')
+    else ctx.throw(403)
 }
 
 async function hubbubWebhookChallenge(ctx: Context) {
@@ -123,7 +123,7 @@ async function hubbubWebhookChallenge(ctx: Context) {
     const hubMode = ctx.query['hub.mode'] as string
     let hubLeaseSeconds = ctx.query['hub.lease_seconds'] as string
 
-    ctx.assert(hubTopic && hubChallenge && hubMode, 404, 'Not Found')
+    ctx.assert(hubTopic && hubChallenge && hubMode, 404)
 
     const [, topicQuery] = hubTopic.split('?')
     const topicParams = new URLSearchParams(topicQuery)
@@ -133,7 +133,7 @@ async function hubbubWebhookChallenge(ctx: Context) {
         hubLeaseSeconds = isNaN(hubLeaseSeconds as any) ? null : (Number(hubLeaseSeconds) as any)
         const subscription = await db.youtubeSubs.findOne({ _id: channelId })
 
-        ctx.assert(hubLeaseSeconds && subscription, 404, 'Not Found')
+        ctx.assert(hubLeaseSeconds && subscription, 404)
 
         await db.youtubeSubs.updateOne({ _id: channelId }, { $set: { expiration_timestamp: Date.now() + (hubLeaseSeconds as any) * 1000 } })
     }
@@ -149,7 +149,7 @@ async function hubbubWebhookChallenge(ctx: Context) {
 async function hubbubWebhook(ctx: Context) {
     const hubSignature = ctx.request.headers['x-hub-signature'] as string
 
-    if (!hubSignature) ctx.throw(403, 'Forbidden')
+    if (!hubSignature) ctx.throw(403)
 
     const data = await rawBodyParser(ctx.req).then(async str => {
         const body = (await convertXml2Json(str)) as any
@@ -170,7 +170,7 @@ async function hubbubWebhook(ctx: Context) {
 
     const [entry] = body.feed?.entry
 
-    if (!entry) ctx.throw(400, 'Bad Request')
+    if (!entry) ctx.throw(400)
 
     const [algorithm, hmac] = hubSignature.split('=')
 

@@ -1,5 +1,5 @@
 import { MessageReaction } from 'discord.js'
-import { ReactionElement, ServerDocument } from '../../database/schemas/Servers'
+import { InteractiveReaction, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, reaction: MessageReaction) => {
@@ -10,7 +10,7 @@ const handler = async (self: Lacuna, reaction: MessageReaction) => {
     const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
-    const element: ReactionElement = server.modules.reactions.find(
+    const element: InteractiveReaction = server.modules.reactions.find(
         r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name)
     )
 

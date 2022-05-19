@@ -841,6 +841,10 @@ export interface ServerDocument extends Document {
         logs: {
             webhooks: LogsWebhook[]
             types: {
+                [key: string]: {
+                    active: boolean
+                    channel_id: string
+                }
                 channel_create: {
                     active: boolean
                     channel_id: string
@@ -1141,7 +1145,7 @@ export interface ServerDocument extends Document {
                 embed: MessageEmbed
             }
         }
-        reactions: ReactionElement[]
+        reactions: InteractiveReaction[]
         levels: {
             active: boolean
             voice: boolean
@@ -1420,7 +1424,7 @@ export interface TemporaryMuteEntry {
     expires_timestamp: number
 }
 
-export interface ReactionElement {
+export interface InteractiveReaction {
     id: string
     type: 'CHANNEL' | 'ROLE'
     element: {

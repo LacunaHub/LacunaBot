@@ -1,10 +1,8 @@
-import { config } from 'dotenv'
+require('dotenv').config()
 import { Server } from 'http'
 import api from './internals/api'
 import logger from './internals/Logger'
 import ShardingManager from './internals/utility/ShardingManager'
-
-config()
 
 export const sharding: ShardingManager = new ShardingManager('./dist/internals/utility/Client.js', { token: process.env.CLIENT_TOKEN, respawn: true })
 
