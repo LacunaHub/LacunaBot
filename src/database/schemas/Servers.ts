@@ -554,7 +554,7 @@ export default model<ServerDocument>(
                 },
                 tempbans: { type: Array, default: [] },
                 tempmutes: { type: Array, default: [] },
-                use_timeout_mute: { type: Boolean, default: false }
+                use_timeout_mute: { type: Boolean, default: true }
             },
             modules: {
                 welcome: {
