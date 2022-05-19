@@ -26,7 +26,7 @@ export default model<ServerDocument>(
                 case_log: {
                     cases: { type: Array, default: [] },
                     case_count: { type: Number, default: 0 },
-                    channel_id: { type: String, default: '' },
+                    channel_id: { type: String, default: null },
                     case_types: {
                         BAN_ADD: { type: Boolean, default: true },
                         BAN_REMOVE: { type: Boolean, default: true },
@@ -189,147 +189,147 @@ export default model<ServerDocument>(
                     types: {
                         channel_create: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         channel_delete: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         channel_update: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         emoji_create: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         emoji_delete: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         emoji_update: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         guild_ban_add: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         guild_ban_remove: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         guild_member_add: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         guild_member_remove: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         guild_member_update: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         guild_update: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         invite_create: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         invite_delete: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         message_delete: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         message_delete_bulk: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         message_update: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         role_create: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         role_delete: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         role_member_add: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         role_member_remove: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         role_update: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         sticker_create: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         sticker_delete: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         sticker_update: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         thread_create: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         thread_delete: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         thread_update: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         user_update: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         voice_connect: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         voice_disconnect: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         voice_move: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         voice_server_mute: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         voice_server_unmute: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         voice_server_deaf: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         },
                         voice_server_undeaf: {
                             active: { type: Boolean, default: false },
-                            channel_id: { type: String, default: '' }
+                            channel_id: { type: String, default: null }
                         }
                     }
                 },
@@ -514,7 +514,7 @@ export default model<ServerDocument>(
                             diacritics: { type: Boolean, default: false },
                             emojis: { type: Boolean, default: false },
                             regexp: {
-                                pattern: { type: String, default: '' },
+                                pattern: { type: String, default: null },
                                 flags: { type: Array, default: [] }
                             },
                             contains: { type: Array, default: [] }
@@ -544,7 +544,7 @@ export default model<ServerDocument>(
                     violators: { type: Array, default: [] }
                 },
                 roles: {
-                    mute: { type: String, default: '' },
+                    mute: { type: String, default: null },
                     temporary: { type: Array, default: [] },
                     on_mute: {
                         remove_all_roles: { type: Boolean, default: false },
@@ -560,7 +560,7 @@ export default model<ServerDocument>(
                 welcome: {
                     active: { type: Boolean, default: false },
                     format: { type: String, default: 'DM' },
-                    channel_id: { type: String, default: '' },
+                    channel_id: { type: String, default: null },
                     message: {
                         content: { type: String, default: '' },
                         embed: {
@@ -596,7 +596,7 @@ export default model<ServerDocument>(
                 farewell: {
                     active: { type: Boolean, default: false },
                     format: { type: String, default: 'DM' },
-                    channel_id: { type: String, default: '' },
+                    channel_id: { type: String, default: null },
                     message: {
                         content: { type: String, default: '' },
                         embed: {
@@ -642,7 +642,7 @@ export default model<ServerDocument>(
                     level_up_alerts: {
                         active: { type: Boolean, default: false },
                         format: { type: String, default: 'CURRENT_CHANNEL' },
-                        channel_id: { type: String, default: '' },
+                        channel_id: { type: String, default: null },
                         message: {
                             content: { type: String, default: '' },
                             embed: {
@@ -701,7 +701,7 @@ export default model<ServerDocument>(
                 statistics: { type: Array, default: [] },
                 reports: {
                     active: { type: Boolean, default: false },
-                    channel_id: { type: String, default: '' }
+                    channel_id: { type: String, default: null }
                 },
                 autoreactions: { type: Array, default: [] },
                 economy: {
