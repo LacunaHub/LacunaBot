@@ -41,7 +41,7 @@ async function getMe(ctx: Context) {
             id: user._id,
             ...user.user
         },
-        guilds: accessibleGuilds
+        guilds: guilds
     }
 }
 

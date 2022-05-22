@@ -23,14 +23,34 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         return false
     }
 
+    if (mention.id == message.member.id) {
+        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${message.member.displayName}**`)}` })
+
+        return false
+    }
+
     if (!mention.manageable) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.cant_mute_user, `**${message.member.displayName}**`)}` })
 
         return false
     }
 
-    if (mention.id == message.member.id) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${message.member.displayName}**`)}` })
+    if (server.moderation.respect_hierarchy && mention.roles.highest.position > message.member.roles.highest.position) {
+        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_higher, `**${message.member.displayName}**`)}` })
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.MODERATE_MEMBERS)) {
+        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_moderator, `**${message.member.displayName}**`)}` })
+
+        return false
+    }
+
+    if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_unmoderated_roles, `**${message.member.displayName}**`)}`
+        })
 
         return false
     }
@@ -57,7 +77,11 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         let mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
 
         if (!mute_role || message.guild.me.roles.highest.position < mute_role.position) {
-            mute_role = await message.guild.roles.create({ name: 'Muted', color: 0x607d8b, permissions: message.guild.roles.everyone.permissions.remove('SEND_MESSAGES') })
+            mute_role = await message.guild.roles.create({
+                name: 'Muted',
+                color: 0x607d8b,
+                permissions: message.guild.roles.everyone.permissions.remove('SEND_MESSAGES')
+            })
 
             await self.db.servers.updateOne(
                 { _id: message.guild.id },
@@ -72,7 +96,9 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         const tempmute = self.tempmutes.find(m => m.user_id == mention.id)
 
         if (mention.roles.cache.has(mute_role.id) || tempmute) {
-            await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_already_muted, `**${message.member.displayName}**`)}` })
+            await message.reply({
+                content: `${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_already_muted, `**${message.member.displayName}**`)}`
+            })
 
             return false
         }
@@ -125,7 +151,9 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
     await caseLog.createCaseEntry(server, message.guild, { type: 'MUTE_ADD', target: mention.user, executor: message.author, reason })
 
-    await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.mute.texts.user_muted, `**${message.member.displayName}**`, `**${mention.user.tag}**`)}` })
+    await message.reply({
+        content: `${self._emojis.OK} | ${self.translator.format(locale.mute.texts.user_muted, `**${message.member.displayName}**`, `**${mention.user.tag}**`)}`
+    })
 
     return true
 }

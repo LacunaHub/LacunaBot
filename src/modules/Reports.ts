@@ -35,10 +35,49 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
         return
     }
 
+    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_is_higher, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PERMISSIONS_FLAGS[action == 'KICK' ? 'KICK_MEMBERS' : 'MANAGE_ROLES'])) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_is_moderator, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
+    if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.commands.ban.texts.user_has_unmoderated_roles,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
     if (action == 'KICK') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.KICK_MEMBERS)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.common.texts.command_denied, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${self.translator.format(
+                    locale.commands.common.texts.command_denied,
+                    `**${(interaction.member as any).displayName}**`
+                )}`,
                 ephemeral: true
             })
 
@@ -61,7 +100,10 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     if (action == 'WARN') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.MANAGE_ROLES)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.common.texts.command_denied, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${self.translator.format(
+                    locale.commands.common.texts.command_denied,
+                    `**${(interaction.member as any).displayName}**`
+                )}`,
                 ephemeral: true
             })
 
@@ -103,10 +145,49 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
         return
     }
 
+    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_is_higher, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PERMISSIONS_FLAGS[action == 'BAN' ? 'BAN_MEMBERS' : 'MODERATE_MEMBERS'])) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_is_moderator, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
+    if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.commands.ban.texts.user_has_unmoderated_roles,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
     if (action == 'BAN') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.BAN_MEMBERS)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.common.texts.command_denied, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${self.translator.format(
+                    locale.commands.common.texts.command_denied,
+                    `**${(interaction.member as any).displayName}**`
+                )}`,
                 ephemeral: true
             })
 
@@ -140,7 +221,10 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
     if (action == 'MUTE') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.MODERATE_MEMBERS)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.common.texts.command_denied, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${self.translator.format(
+                    locale.commands.common.texts.command_denied,
+                    `**${(interaction.member as any).displayName}**`
+                )}`,
                 ephemeral: true
             })
 
@@ -164,7 +248,10 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
 
             if (!muteRole) {
                 await interaction.reply({
-                    content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.mute.texts.mute_role_not_found, `**${(interaction.member as any).displayName}**`)}`,
+                    content: `${self._emojis.ERROR} | ${self.translator.format(
+                        locale.commands.mute.texts.mute_role_not_found,
+                        `**${(interaction.member as any).displayName}**`
+                    )}`,
                     ephemeral: true
                 })
 

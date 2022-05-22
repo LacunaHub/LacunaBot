@@ -554,7 +554,10 @@ export default model<ServerDocument>(
                 },
                 tempbans: { type: Array, default: [] },
                 tempmutes: { type: Array, default: [] },
-                use_timeout_mute: { type: Boolean, default: true }
+                use_timeout_mute: { type: Boolean, default: true },
+                respect_hierarchy: { type: Boolean, default: true },
+                deny_moderate_users_with_mp: { type: Boolean, default: true },
+                unmoderated_roles: { type: Array, default: [] }
             },
             modules: {
                 welcome: {
@@ -1121,6 +1124,9 @@ export interface ServerDocument extends Document {
         tempbans: TemporaryBanEntry[]
         tempmutes: TemporaryMuteEntry[]
         use_timeout_mute: boolean
+        respect_hierarchy: boolean
+        deny_moderate_users_with_mp: boolean
+        unmoderated_roles: string[]
     }
     modules: {
         welcome: {

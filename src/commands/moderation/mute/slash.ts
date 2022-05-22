@@ -25,6 +25,15 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
+    if (mention.id == interaction.user.id) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
     if (!mention.manageable) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.cant_mute_user, `**${(interaction.member as any).displayName}**`)}`,
@@ -34,9 +43,27 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
-    if (mention.id == interaction.user.id) {
+    if (server.moderation.respect_hierarchy && mention.roles.highest.position > (interaction.member as any).roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_higher, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.MODERATE_MEMBERS)) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_moderator, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_unmoderated_roles, `**${(interaction.member as any).displayName}**`)}`,
             ephemeral: true
         })
 
@@ -65,7 +92,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         let mute_role = interaction.guild.roles.cache.get(server.moderation.roles.mute)
 
         if (!mute_role || interaction.guild.me.roles.highest.position < mute_role.position) {
-            mute_role = await interaction.guild.roles.create({ name: 'Muted', color: 0x607d8b, permissions: interaction.guild.roles.everyone.permissions.remove('SEND_MESSAGES') })
+            mute_role = await interaction.guild.roles.create({
+                name: 'Muted',
+                color: 0x607d8b,
+                permissions: interaction.guild.roles.everyone.permissions.remove('SEND_MESSAGES')
+            })
             await self.db.servers.updateOne(
                 { _id: interaction.guild.id },
                 {
@@ -136,7 +167,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     await caseLog.createCaseEntry(server, interaction.guild, { type: 'MUTE_ADD', target: mention.user, executor: interaction.user, reason })
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.translator.format(locale.mute.texts.user_muted, `**${(interaction.member as any).displayName}**`, `**${mention.user.tag}**`)}`,
+        content: `${self._emojis.OK} | ${self.translator.format(
+            locale.mute.texts.user_muted,
+            `**${(interaction.member as any).displayName}**`,
+            `**${mention.user.tag}**`
+        )}`,
         ephemeral: true
     })
 
