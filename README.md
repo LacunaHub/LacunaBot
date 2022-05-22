@@ -217,18 +217,30 @@ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
     "diamondPrices": [
         {
             "months": 1,
-            "price": 95,
-            "discount": 0
+            "prices": {
+                "RUB": 95
+            },
+            "discounts": {
+                "RUB": 0
+            }
         },
         {
             "months": 3,
-            "price": 270,
-            "discount": 0
+            "prices": {
+                "RUB": 270
+            },
+            "discounts": {
+                "RUB": 0
+            }
         },
         {
             "months": 6,
-            "price": 525,
-            "discount": 0
+            "prices": {
+                "RUB": 525
+            },
+            "discounts": {
+                "RUB": 0
+            }
         }
     ],
     "allowedApiHosts": [],
