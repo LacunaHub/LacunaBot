@@ -1,5 +1,5 @@
-import { resetLevelPrefix, resetWalletPrefix, setLevelPrefix, setWalletBalancePrefix } from './prefix'
-import { resetLevelSlash, resetWalletSlash, setLevelSlash, setWalletBalanceSlash } from './slash'
+import { addWalletBalancePrefix, resetLevelPrefix, resetWalletPrefix, setLevelPrefix, setWalletBalancePrefix } from './prefix'
+import { addWalletBalanceSlash, resetLevelSlash, resetWalletSlash, setLevelSlash, setWalletBalanceSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
@@ -34,6 +34,33 @@ export default {
                     description: `commands.${name}.set-level.options.level.description`,
                     required: true,
                     min_value: 0
+                }
+            ]
+        },
+        {
+            type: 'SUB_COMMAND',
+            name: 'add-wallet-balance',
+            description: `commands.${name}.add-wallet-balance.description`,
+            options: [
+                {
+                    type: 'USER',
+                    name: `commands.${name}.add-wallet-balance.options.user.name`,
+                    description: `commands.${name}.add-wallet-balance.options.user.description`,
+                    required: true
+                },
+                {
+                    type: 'INTEGER',
+                    name: `commands.${name}.add-wallet-balance.options.amount.name`,
+                    description: `commands.${name}.add-wallet-balance.options.amount.description`,
+                    required: true,
+                    min_value: 1,
+                    max_value: Math.pow(2, 31) - 1
+                },
+                {
+                    type: 'STRING',
+                    name: `commands.${name}.add-wallet-balance.options.currency.name`,
+                    description: `commands.${name}.add-wallet-balance.options.currency.description`,
+                    required: false
                 }
             ]
         },
@@ -114,6 +141,11 @@ export default {
             name: 'set-wallet-balance',
             prefix: setWalletBalancePrefix,
             slash: setWalletBalanceSlash
+        },
+        {
+            name: 'add-wallet-balance',
+            prefix: addWalletBalancePrefix,
+            slash: addWalletBalanceSlash
         },
         {
             name: 'reset-wallet',
