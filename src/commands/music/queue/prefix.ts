@@ -10,10 +10,16 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
     const player = self.player.get(message.guild.id)
 
-    if (!player || !player.queue.size) {
+    if (!player) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${message.member.displayName}**`)}` })
 
         return false
+    }
+
+    if (!player.queue.size) {
+        await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.queue.texts.no_track_queue, `**${message.member.displayName}**`)}` })
+
+        return true
     }
 
     const chunks: Queue[] = chunkArray(player.queue, 15)
