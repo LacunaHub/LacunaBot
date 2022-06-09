@@ -10,13 +10,22 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     const player = self.player.get(interaction.guild.id)
 
-    if (!player || !player.queue.size) {
+    if (!player) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${(interaction.member as any).displayName}**`)}`,
             ephemeral: true
         })
 
         return false
+    }
+
+    if (!player.queue.size) {
+        await interaction.reply({
+            content: `${self._emojis.OK} | ${self.translator.format(locale.queue.texts.no_track_queue, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return true
     }
 
     const chunks: Queue[] = chunkArray(player.queue, 15)
