@@ -18,9 +18,15 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
-    if ((server.modules.music.allowed.channels.length && !server.modules.music.allowed.channels.includes(voice.id)) || server.modules.music.blocked.channels.includes(voice.id)) {
+    if (
+        (server.modules.music.allowed.channels.length && !server.modules.music.allowed.channels.includes(voice.id)) ||
+        server.modules.music.blocked.channels.includes(voice.id)
+    ) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.not_allowed_in_current_channel, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.play.texts.not_allowed_in_current_channel,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
             ephemeral: true
         })
 
@@ -31,7 +37,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!has_permissions) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_required_permissions_in_voice, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.play.texts.no_required_permissions_in_voice,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
             ephemeral: true
         })
 
@@ -98,17 +107,24 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     let message: Message
 
-    const row = new MessageActionRow().addComponents(
-        new MessageButton().setCustomId('previous').setStyle('SECONDARY').setEmoji('⏮️'),
-        new MessageButton().setCustomId('pause-resume').setStyle('SECONDARY').setEmoji('⏸️'),
-        new MessageButton().setCustomId('skip').setStyle('SECONDARY').setEmoji('⏭️'),
-        new MessageButton().setCustomId('repeat-one').setStyle('SECONDARY').setEmoji('🔂')
-    )
+    const rows = [
+        new MessageActionRow().addComponents(
+            new MessageButton().setCustomId('PLAYER-STOP').setStyle('SECONDARY').setEmoji('⏹️'),
+            new MessageButton().setCustomId('PLAYER-PREVIOUS').setStyle('SECONDARY').setEmoji('⏮️'),
+            new MessageButton().setCustomId('PLAYER-PAUSE-RESUME').setStyle('SECONDARY').setEmoji('⏸️'),
+            new MessageButton().setCustomId('PLAYER-SKIP').setStyle('SECONDARY').setEmoji('⏭️'),
+            new MessageButton().setCustomId('PLAYER-REPEAT').setStyle('SECONDARY').setEmoji('🔁')
+        ),
+        new MessageActionRow().addComponents(new MessageButton().setCustomId('PLAYER-QUEUE').setStyle('SECONDARY').setEmoji('🎶'))
+    ]
 
     if (search.loadType === 'PLAYLIST_LOADED') {
         if (!server.server.premium.available) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.playlist_loaded_no_premium, `**${(interaction.member as any).displayName}**`)}`
+                content: `${self._emojis.ERROR} | ${self.translator.format(
+                    locale.play.texts.playlist_loaded_no_premium,
+                    `**${(interaction.member as any).displayName}**`
+                )}`
             })
 
             return false
@@ -123,7 +139,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
             .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
 
-        message = (await interaction.editReply({ embeds: [embed], components: [row] })) as Message
+        message = (await interaction.editReply({ embeds: [embed], components: rows })) as Message
     }
 
     if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
@@ -131,7 +147,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         if (player.queue.length >= server.modules.music.queue_max_length && server.modules.music.queue_max_length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.queue_limit_reached_no_premium, `**${(interaction.member as any).displayName}**`)}`
+                content: `${self._emojis.ERROR} | ${self.translator.format(
+                    locale.play.texts.queue_limit_reached_no_premium,
+                    `**${(interaction.member as any).displayName}**`
+                )}`
             })
 
             return false
@@ -139,7 +158,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         if (track.isStream && !server.server.premium.available) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.track_stream_only_for_premium, `**${(interaction.member as any).displayName}**`)}`
+                content: `${self._emojis.ERROR} | ${self.translator.format(
+                    locale.play.texts.track_stream_only_for_premium,
+                    `**${(interaction.member as any).displayName}**`
+                )}`
             })
 
             return false
@@ -160,66 +182,25 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
             .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
 
-        if (player.playing)
+        if (player.playing || player.paused)
             await interaction.editReply({
-                content: `${self._emojis.OK} | ${self.translator.format(locale.play.texts.added_to_queue, `**${(interaction.member as any).displayName}**`, `**${track.title}**`)}`
+                content: `${self._emojis.OK} | ${self.translator.format(
+                    locale.play.texts.added_to_queue,
+                    `**${(interaction.member as any).displayName}**`,
+                    `**${track.title}**`
+                )}`
             })
         else {
-            message = (await interaction.editReply({ embeds: [embed], components: [row] })) as Message
+            message = (await interaction.editReply({ embeds: [embed], components: rows })) as Message
         }
     }
 
     if (player.state != 'CONNECTED') player.connect()
 
-    if (!player.playing && !player.paused && !player.queue.size) {
+    if (!player.playing && !player.paused) {
         if (!player.get('message')) player.set('message', message)
 
         await player.play()
-        player.setQueueRepeat(true)
-
-        const collector = message.createMessageComponentCollector({
-            componentType: 'BUTTON',
-            filter: i => row.components.some(c => c.customId == i.customId) && voice.members.has(i.user.id),
-            time: 900000
-        })
-
-        if (!player.get('collector')) player.set('collector', collector)
-
-        collector.on('collect', async i => {
-            if (i.customId == row.components[0].customId) {
-                if (player.queue.previous && player.position < 5000) {
-                    await player.play(player.queue.previous)
-                    player.queue.add(player.queue.previous, 0)
-                } else if (player.queue.current.isSeekable) await player.seek(0)
-            }
-
-            if (i.customId == row.components[1].customId) {
-                player.pause(!player.paused)
-                ;(row.components[1] as any).setEmoji(player.paused ? '▶️' : '⏸️')
-            }
-
-            if (i.customId == row.components[2].customId) {
-                if (player.playing && player.queue.current) await player.stop()
-            }
-
-            if (i.customId == row.components[3].customId) {
-                if (player.trackRepeat) {
-                    ;(row.components[3] as any).setEmoji('🔂')
-                    player.setTrackRepeat(false)
-                    player.setQueueRepeat(true)
-                } else {
-                    ;(row.components[3] as any).setEmoji('🔁')
-                    player.setTrackRepeat(true)
-                }
-            }
-
-            await message.edit({ components: [row] }).catch(() => {})
-            await i.deferUpdate()
-
-            collector.resetTimer()
-        })
-
-        collector.on('end', async () => (await message.edit({ components: [] }).catch(() => {})) as any)
     }
 
     return true

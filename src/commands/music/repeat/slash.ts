@@ -34,7 +34,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     await interaction.reply({
         content: `${self._emojis.OK} | ${self.translator.format(
-            player.trackRepeat ? locale.repeat.texts.track_repeat : locale.repeat.texts.queue_repeat,
+            !player.trackRepeat && !player.queueRepeat
+                ? locale.repeat.texts.no_repeat
+                : player.trackRepeat
+                ? locale.repeat.texts.track_repeat
+                : locale.repeat.texts.queue_repeat,
             `**${(interaction.member as any).displayName}**`
         )}`
     })
