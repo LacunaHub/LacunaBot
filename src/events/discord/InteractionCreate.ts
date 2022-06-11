@@ -99,6 +99,8 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
                 if (interaction.customId != rows[0].components[0].customId) await message.edit({ components: rows })
                 if (interaction.customId != rows[1].components[0].customId) await interaction.deferUpdate()
             }
+
+            return true
         }
 
         const im = server.modules.interactive_messages.slice(0, server.server.premium.available ? 50 : 5).find(i => i.id == interaction.message.id)
