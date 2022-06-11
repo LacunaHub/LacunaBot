@@ -1,4 +1,4 @@
-import { ButtonInteraction, InteractionCollector, Message, MessageEmbed } from 'discord.js'
+import { Message, MessageEmbed } from 'discord.js'
 import { Player } from 'erela.js'
 import numbro from 'numbro'
 
@@ -12,11 +12,11 @@ const handler = async (self, player: Player) => {
 
         if (embed.footer?.text) embed.setFooter({ text: embed.footer.text.replace(/:[\w\W]+/i, `: ${player.queue.current.requester}`) })
 
-        await message.edit({ embeds: [embed] }).catch(() => {
-            player.set('message', null)
-            player.set('collector', null)
-        })
-        player.get<InteractionCollector<ButtonInteraction>>('collector')?.resetTimer()
+        await message.delete().catch(() => {})
+        await message.channel
+            .send({ embeds: [embed], components: message.components })
+            .then(message => player.set('message', message))
+            .catch(() => player.set('message', null))
     }
 
     return true
