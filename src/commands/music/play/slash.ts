@@ -130,7 +130,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
             return false
         }
 
-        for (const track of search.tracks.slice(0, 99)) await player.queue.add(track)
+        const tracks = search.tracks.slice(0, 99)
+
+        for (const track of tracks) await player.queue.add(track)
 
         const track = search.tracks[0]
 
@@ -139,7 +141,18 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
             .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
 
-        message = (await interaction.editReply({ embeds: [embed], components: rows })) as Message
+        if (player.playing || player.paused)
+            await message.reply({
+                content: `${self._emojis.OK} | ${self.translator.format(
+                    locale.play.texts.playlist_added_to_queue,
+                    `**${message.member.displayName}**`,
+                    `**${search.playlist.name}**`
+                )}`,
+                allowedMentions: { roles: [], users: [] }
+            })
+        else {
+            message = (await interaction.editReply({ embeds: [embed], components: rows })) as Message
+        }
     }
 
     if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
@@ -185,7 +198,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         if (player.playing || player.paused)
             await interaction.editReply({
                 content: `${self._emojis.OK} | ${self.translator.format(
-                    locale.play.texts.added_to_queue,
+                    locale.play.texts.track_added_to_queue,
                     `**${(interaction.member as any).displayName}**`,
                     `**${track.title}**`
                 )}`
