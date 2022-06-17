@@ -1,10 +1,10 @@
 # Зависимости
 
--   Node.js v16
--   MongoDB v5.0
--   PM2
--   [node-gyp](https://github.com/nodejs/node-gyp)
--   Reverse proxy (e.g. Nginx)
+* Node.js v16
+* MongoDB v5.0
+* PM2
+* [node-gyp](https://github.com/nodejs/node-gyp)
+* Reverse proxy (e.g. Nginx)
 
 ## Установка Node.js
 
@@ -59,11 +59,11 @@ echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb
 
 Эта единственная строка указывает APT все, что необходимо знать об источнике, и где его найти:
 
--   `deb`: означает, что источник ссылается на обычную архитектуру Debian. В других случаях эта часть строки может выглядеть как `deb-src`. Это означает, что источник представляет исходный код дистрибутива Debian.
--   `[ arch=amd64,arm64 ]`: указывает, в какие архитектуры загружать данные APT. В данном случае это архитектуры `amd64` и `arm64`.
--   `https://repo.mongodb.org/apt/ubuntu`: это URI, представляющий местоположение данных APT. В данном случае URI указывает на адрес HTTPS, где находится официальный репозиторий MongoDB.
--   `focal/mongodb-org/5.0`: репозитории Ubuntu могут содержать несколько разных выпусков. Это означает, что вам нужна только версия `4.4` пакета `mongodb-org`, доступная для выпуска Ubuntu `focal` («Focal Fossa» — это кодовое название Ubuntu 20.04).
--   `multiverse`: эта часть указывает APT на один из четырех основных репозиториев Ubuntu. В данном случае — на [репозиторий `multiverse`](https://help.ubuntu.com/community/Repositories#Multiverse).
+* `deb`: означает, что источник ссылается на обычную архитектуру Debian. В других случаях эта часть строки может выглядеть как `deb-src`. Это означает, что источник представляет исходный код дистрибутива Debian.
+* `[ arch=amd64,arm64 ]`: указывает, в какие архитектуры загружать данные APT. В данном случае это архитектуры `amd64` и `arm64`.
+* `https://repo.mongodb.org/apt/ubuntu`: это URI, представляющий местоположение данных APT. В данном случае URI указывает на адрес HTTPS, где находится официальный репозиторий MongoDB.
+* `focal/mongodb-org/5.0`: репозитории Ubuntu могут содержать несколько разных выпусков. Это означает, что вам нужна только версия `4.4` пакета `mongodb-org`, доступная для выпуска Ubuntu `focal` («Focal Fossa» — это кодовое название Ubuntu 20.04).
+* `multiverse`: эта часть указывает APT на один из четырех основных репозиториев Ubuntu. В данном случае — на [репозиторий `multiverse`](https://help.ubuntu.com/community/Repositories#Multiverse).
 
 Обновите локальный индекс пакетов вашего сервера, чтобы APT знал, где найти пакет `mongodb-org`
 
@@ -135,11 +135,13 @@ use admin
 Воспользуйтесь методом `db.createUser`
 
 ```javascript
-db.createUser({
-    user: 'username',
-    pwd: 'password', // passwordPrompt() - запрос на ввод пароля после выполнения метода
-    roles: [{ role: 'userAdminAnyDatabase', db: 'admin' }, 'readWriteAnyDatabase']
-})
+db.createUser(
+    {
+        user: "username",
+        pwd: "password", // passwordPrompt() - запрос на ввод пароля после выполнения метода
+        roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+    }
+)
 ```
 
 Этот метод требует указать имя и пароль пользователя, а также любые роли, которые будет иметь пользователь. Напомним, что MongoDB хранит свои данные в виде документов JSON. Поэтому при создании нового пользователя все, что вы делаете, — это создаете документ для хранения соответствующих данных пользователя в форме отдельных полей.
@@ -158,7 +160,7 @@ sudo nano /etc/mongod.conf
 
 ```yaml
 security:
-    authorization: 'enabled'
+  authorization: "enabled"
 ```
 
 Обратите внимание, что у строки `security:` нет пробелов в начале, а строка `authorization:` выделена двумя пробелами в начале.
