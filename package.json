@@ -38,7 +38,7 @@
     "koa-ratelimit": "5.0.1",
     "koa-xml-body": "2.2.0",
     "moment": "2.29.2",
-    "mongoose": "^5.13.14",
+    "mongoose": "5.11.9",
     "ms": "2.1.2",
     "node-abort-controller": "3.0.1",
     "node-fetch": "2.6.7",
