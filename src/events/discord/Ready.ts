@@ -1,4 +1,5 @@
 import { Manager } from 'erela.js'
+import Spotify from 'erela.js-spotify'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna) => {
@@ -15,6 +16,7 @@ const handler = async (self: Lacuna) => {
                 retryDelay: 60000
             }
         ],
+        plugins: [new Spotify({ clientID: process.env.SPOTIFY_CLIENT_ID, clientSecret: process.env.SPOTIFY_CLIENT_SECRET })],
         clientId: self.user.id,
         shards: Number(process.env.CLIENT_MAX_SHARDS),
         send(id, payload) {
