@@ -130,9 +130,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
             return false
         }
 
-        const tracks = search.tracks.slice(0, 99)
-
-        for (const track of tracks) await player.queue.add(track)
+        for (const track of search.tracks.slice(0, 99)) await player.queue.add(track)
 
         const track = search.tracks[0]
 
