@@ -110,7 +110,18 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
             .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
 
-        _message = await message.reply({ embeds: [embed], components: rows })
+        if (player.playing || player.paused)
+            await message.reply({
+                content: `${self._emojis.OK} | ${self.translator.format(
+                    locale.play.texts.playlist_added_to_queue,
+                    `**${message.member.displayName}**`,
+                    `**${search.playlist.name}**`
+                )}`,
+                allowedMentions: { roles: [], users: [] }
+            })
+        else {
+            _message = await message.reply({ embeds: [embed], components: rows })
+        }
     }
 
     if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
@@ -149,7 +160,11 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
         if (player.playing || player.paused)
             await message.reply({
-                content: `${self._emojis.OK} | ${self.translator.format(locale.play.texts.added_to_queue, `**${message.member.displayName}**`, `**${track.title}**`)}`,
+                content: `${self._emojis.OK} | ${self.translator.format(
+                    locale.play.texts.track_added_to_queue,
+                    `**${message.member.displayName}**`,
+                    `**${track.title}**`
+                )}`,
                 allowedMentions: { roles: [], users: [] }
             })
         else {
