@@ -46,7 +46,8 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
             }
 
             if (server.modules.restoring.restore_roles && data.roles.length) {
-                const roles = member.guild.roles.cache.filter(r => r.editable && data.roles.includes(r.id))
+                const strict_roles = server.modules.restoring.strict_roles
+                const roles = member.guild.roles.cache.filter(r => r.editable && data.roles.includes(r.id) && !strict_roles.includes(r.id))
 
                 if (roles.size) await member.roles.add(roles) // Need reason
             }
