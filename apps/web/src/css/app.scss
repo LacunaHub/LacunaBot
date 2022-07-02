@@ -1,0 +1,106 @@
+/* GLOBAL STYLES */
+
+@font-face {
+  font-family: 'Ubuntu';
+  src: url(./fonts/Ubuntu-Regular.ttf);
+}
+
+body {
+  font-family: 'Ubuntu';
+}
+
+body.body--dark {
+  background: $dark-grey-1;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: $primary;
+}
+
+/* OVERWRITE FRAMEWORK STYLES */
+
+.q-btn {
+  border-radius: $border-radius-lg;
+}
+
+.q-menu {
+  border-radius: $border-radius-lg;
+  color: white;
+  background: $dark-grey-2;
+}
+
+.q-field__control {
+  border-radius: $border-radius-lg $border-radius-lg 0 0 !important;
+}
+
+/* OTHER */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: black;
+  border-radius: 999px;
+}
+
+/* TRANSITIONS */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 15px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -15px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -15px, 0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, 15px, 0);
+  }
+}
+
+.q-notification-custom {
+  transition: 0.3s ease-out all;
+}

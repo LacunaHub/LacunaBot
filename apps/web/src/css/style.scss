@@ -1,0 +1,142 @@
+/* COLORS */
+
+/* Text */
+
+.text-dark-grey-1 {
+  color: $dark-grey-1 !important;
+}
+
+.text-dark-grey-2 {
+  color: $dark-grey-2 !important;
+}
+
+.text-dark-grey-3 {
+  color: $dark-grey-3 !important;
+}
+
+.text-dark-grey-3d5 {
+  color: $dark-grey-3d5 !important;
+}
+
+.text-dark-grey-4 {
+  color: $dark-grey-4 !important;
+}
+
+.text--primary {
+  color: #fff;
+}
+
+.text--secondary {
+  color: #cdcdcd;
+}
+
+/* Background */
+
+.bg-dark-grey-1 {
+  background: $dark-grey-1 !important;
+}
+
+.bg-dark-grey-2 {
+  background: $dark-grey-2 !important;
+}
+
+.bg-dark-grey-3 {
+  background: $dark-grey-3 !important;
+}
+
+.bg-dark-grey-3d5 {
+  background: $dark-grey-3d5 !important;
+}
+
+.bg-dark-grey-4 {
+  background: $dark-grey-4 !important;
+}
+
+/* OPACITY */
+
+.opacity-md {
+  opacity: 0.7 !important;
+}
+
+.opacity-lg {
+  opacity: 0.5 !important;
+}
+
+/* BORDER */
+
+.rounded-md {
+  border-radius: $border-radius-md !important;
+}
+
+.rounded-lg {
+  border-radius: $border-radius-lg !important;
+}
+
+.rounded-t-lg {
+  border-radius: $border-radius-lg $border-radius-lg 0 0 !important;
+}
+
+.rounded-b-lg {
+  border-radius: 0 0 $border-radius-lg $border-radius-lg !important;
+}
+
+.dashed-border {
+  border-width: 1px;
+  border-style: dashed;
+  border-color: #757575;
+}
+
+/* OTHER HELPERS */
+
+.partial-full-width {
+  width: 85% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.rotate-5 {
+  transform: rotate(5deg);
+}
+
+.rotate-5-reverse {
+  transform: rotate(-5deg);
+}
+
+.menu-item--active {
+  color: white;
+  background: $dark-grey-3;
+}
+
+.break-word {
+  word-break: break-word;
+}
+
+/* STYLISH */
+
+code {
+  text-indent: 0;
+  white-space: pre-wrap;
+  background: $dark-grey-2;
+  border: 1px solid $dark-grey-2;
+  border-radius: $border-radius-md;
+  padding: 1px;
+}
+
+pre > code {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  text-size-adjust: none;
+  border: 1px solid $dark-grey-1;
+  color: #cdcdcd;
+}
+
+pre {
+  margin: 0.2em 0;
+}
+
+blockquote {
+  margin: 0;
+  margin-left: 0.3em;
+  display: block;
+}

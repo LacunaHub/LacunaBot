@@ -1,0 +1,16 @@
+{
+  "trailingComma": "none",
+  "tabWidth": 4,
+  "singleQuote": true,
+  "semi": false,
+  "arrowParens": "avoid",
+  "printWidth": 120,
+  "overrides": [
+    {
+      "files": ["*.vue", "*.scss", "*.css", "*.html", "*.json"],
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
+}
