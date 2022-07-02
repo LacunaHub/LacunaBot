@@ -5,6 +5,7 @@ export default model<IBill>(
     new Schema<IBill>(
         {
             _id: { type: String },
+            external_id: { type: String },
             type: { type: String, required: true, uppercase: true },
             amount: { type: Number, required: true },
             currency: { type: String, required: true, uppercase: true },
@@ -20,7 +21,7 @@ export default model<IBill>(
             },
             comment: { type: String, default: null },
             creation_timestamp: { type: Number, required: true },
-            expiration_timestamp: { type: Number, required: true }
+            expiration_timestamp: { type: Number }
         },
         { versionKey: false }
     )
@@ -28,6 +29,7 @@ export default model<IBill>(
 
 export interface IBill extends Document {
     _id: string
+    external_id?: string
     type: 'QIWI'
     amount: number
     currency: string
@@ -43,5 +45,5 @@ export interface IBill extends Document {
     }
     comment: string
     creation_timestamp: number
-    expiration_timestamp: number
+    expiration_timestamp?: number
 }

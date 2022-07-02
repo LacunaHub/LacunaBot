@@ -297,6 +297,10 @@ TOPGG_API_KEY=
 # QIWI
 QIWI_PUBLIC_KEY=
 QIWI_SECRET_KEY=
+
+# PayPal
+PAYPAL_CLIENT_ID=
+PAYPAL_SECRET=
 ```
 
 Генерация ранговой карточки использует шрифт [Gotham Pro](https://fonts-online.ru/fonts/gotham-pro). Желательно его установить
