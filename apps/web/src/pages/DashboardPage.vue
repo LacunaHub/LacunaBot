@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="row justify-center items-start">
+  <q-page class="q-pa-md row justify-center items-start">
     <div v-if="pageLoading" class="absolute-center">
       <q-spinner-tail color="white" size="64px"></q-spinner-tail>
     </div>

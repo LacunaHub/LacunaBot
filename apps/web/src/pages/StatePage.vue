@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page class="q-pa-md">
     <div v-if="pageLoading" class="absolute-center">
       <q-spinner-tail color="white" size="64px"></q-spinner-tail>
     </div>
