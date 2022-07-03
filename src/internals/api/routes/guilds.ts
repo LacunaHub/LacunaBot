@@ -110,6 +110,9 @@ async function getSettings(ctx: Context) {
                 penalties: server.moderation.warnings.penalties
             },
             automoder: server.moderation.automoder,
+            respect_hierarchy: server.moderation.respect_hierarchy,
+            deny_moderate_users_with_mp: server.moderation.deny_moderate_users_with_mp,
+            unmoderated_roles: server.moderation.unmoderated_roles,
             mutes: {
                 rar: server.moderation.mutes.rar,
                 rar_strict: server.moderation.mutes.rar_strict
@@ -182,6 +185,9 @@ async function updateSettings(ctx: Context) {
                 penalties: server.moderation.warnings.penalties
             },
             automoder: server.moderation.automoder,
+            respect_hierarchy: server.moderation.respect_hierarchy,
+            deny_moderate_users_with_mp: server.moderation.deny_moderate_users_with_mp,
+            unmoderated_roles: server.moderation.unmoderated_roles,
             mutes: {
                 rar: server.moderation.mutes.rar,
                 rar_strict: server.moderation.mutes.rar_strict
