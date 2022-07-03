@@ -15,7 +15,7 @@ export default class OAuth2 {
 
         this.client_secret = client_secret
 
-        this.redirect_uri = process.env.REDIRECT_URI
+        this.redirect_uri = process.env.CLIENT_OAUTH2_REDIRECT_URI
 
         this.authorize_url = 'https://discord.com/api/oauth2/authorize'
 

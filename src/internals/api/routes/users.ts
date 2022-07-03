@@ -11,7 +11,8 @@ const router: Router = new Router({ prefix: '/users' })
 const oauth = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
 
 router.get('/@me', authorize, getMe)
-router.get('/bills', authorize, getBills)
+router.get('/@me/bills', authorize, getBills)
+router.get('/@me/activities', authorize, getActivities)
 
 async function getMe(ctx: Context) {
     const user_id = ctx.request.headers['user-id'] as string
@@ -23,16 +24,17 @@ async function getMe(ctx: Context) {
     const guilds = (await oauth.getUserGuilds(ctx.request.headers.authorization).catch(() => {})) as OAuth2Guild[]
     if (!guilds) ctx.throw(400)
 
-    const accessibleGuilds = guilds.filter(g => {
-        const permissions = new Permissions(BigInt(g.permissions))
+    for (const guild of guilds) {
+        const permissions = new Permissions(BigInt(guild.permissions))
+        const permitted = guild.owner || permissions.has('ADMINISTRATOR')
 
-        return g.owner || permissions.has('ADMINISTRATOR')
-    })
+        if (permitted) {
+            const me = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.CLIENT_ID)).catch(() => {})) as any
 
-    for (const guild of accessibleGuilds) {
-        const me = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.CLIENT_ID)).catch(() => {})) as any
+            guild['joined'] = Boolean(me)
+        }
 
-        guild['joined'] = Boolean(me)
+        guild['permitted'] = permitted
     }
 
     ctx.status = 200
@@ -41,7 +43,7 @@ async function getMe(ctx: Context) {
             id: user._id,
             ...user.user
         },
-        guilds: accessibleGuilds
+        guilds
     }
 }
 
@@ -52,7 +54,20 @@ async function getBills(ctx: Context) {
     const bills = await db.bills.find({ 'custom_fields.user_id': user_id })
 
     ctx.status = 200
-    ctx.body = bills
+    ctx.body = bills.reverse()
+}
+
+async function getActivities(ctx: Context) {
+    const user_id = ctx.request.headers['user-id'] as string
+    if (!user_id) ctx.throw(400)
+
+    const user = await db.users.findOne({ _id: user_id })
+    if (!user) ctx.throw(404)
+
+    ctx.status = 200
+    ctx.body = {
+        levels: user.activities.levels
+    }
 }
 
 export default router

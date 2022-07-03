@@ -5,14 +5,18 @@ import { generateId } from '../../../modules/Reactions'
 import DiscordUtils from '../../utility/DiscordUtils'
 
 export async function createInteractiveReaction(server: ServerDocument, data: Partial<InteractiveReaction>) {
-    const element_id = generateId(),
+    const element_id = data.id ?? generateId(),
         emoji = Util.parseEmoji(data.emoji as any),
         interactiveReactions = server.modules.reactions
 
     if (interactiveReactions.length >= 50 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
     if (interactiveReactions.length >= 200) throw new Error('LIMIT_REACHED')
     if (interactiveReactions.some(r => r.message.id == data.message.id && r.emoji.name == emoji.name)) throw new Error('EMOJI_ALREADY_USED')
-    if (interactiveReactions.some(r => r.message.id == data.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => data.references.includes(ref))))
+    if (
+        interactiveReactions.some(
+            r => r.message.id == data.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => data.references.includes(ref))
+        )
+    )
         throw new Error('REFERENCE_IS_SINGLE')
 
     const message = await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.channelMessage(data.message.channel_id, data.message.id)).catch(() => {})
@@ -65,7 +69,11 @@ export async function updateInteractiveReaction(server: ServerDocument, data: In
 
     if (
         server.modules.reactions.some(
-            r => r.id != data.id && r.message.id == data.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => data.references.includes(ref))
+            r =>
+                r.id != data.id &&
+                r.message.id == data.message.id &&
+                (r.element.single || r.element.global_single) &&
+                r.references.some(ref => data.references.includes(ref))
         )
     )
         return 'reference_is_single'
@@ -101,7 +109,11 @@ export async function deleteInteractiveReaction(server: ServerDocument, data: { 
 
     await DiscordUtils.restApi
         .delete(
-            DiscordUtils.apiRoutes.channelMessageReaction(ir.message.channel_id, ir.message.id, encodeURIComponent(ir.emoji.id ? `${ir.emoji.name}:${ir.emoji.id}` : ir.emoji.name))
+            DiscordUtils.apiRoutes.channelMessageReaction(
+                ir.message.channel_id,
+                ir.message.id,
+                encodeURIComponent(ir.emoji.id ? `${ir.emoji.name}:${ir.emoji.id}` : ir.emoji.name)
+            )
         )
         .catch(() => {})
 

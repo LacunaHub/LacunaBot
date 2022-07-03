@@ -13,7 +13,7 @@ router.get('/add', addBot)
 async function authorize(ctx: Context) {
     const data = {
         client_id: oauth.client_id,
-        redirect_uri: encodeURIComponent(process.env.REDIRECT_URI),
+        redirect_uri: encodeURIComponent(process.env.CLIENT_OAUTH2_REDIRECT_URI),
         scope: encodeURIComponent('identify guilds')
     }
 
@@ -21,6 +21,12 @@ async function authorize(ctx: Context) {
 }
 
 async function callback(ctx: Context) {
+    if (ctx.query.error) {
+        ctx.redirect(process.env.WEBSITE_URL)
+
+        return
+    }
+
     const auth = await oauth.requestToken(ctx.query.code as string)
     const user = await oauth.getUser(auth.access_token)
 
@@ -69,13 +75,13 @@ async function callback(ctx: Context) {
         }
     }
 
-    ctx.redirect(process.env.WEBSITE_URL)
+    ctx.redirect(ctx.query.guild_id ? `${process.env.WEBSITE_URL}/guilds/${ctx.query.guild_id}/settings` : `${process.env.WEBSITE_URL}/@me/guilds`)
 }
 
 async function addBot(ctx: Context) {
     const query = new URLSearchParams(ctx.query as any).toString()
 
-    ctx.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=bot%20applications.commands&permissions=844491870&${query}`)
+    ctx.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&permissions=997584094&${query}`)
 }
 
 export default router

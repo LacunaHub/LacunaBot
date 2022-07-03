@@ -27,6 +27,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
     }
 
     if (data.commands) {
+        if (Array.isArray(data.commands.configuration) && JSON.stringify(data.commands.configuration) !== JSON.stringify(guild.commands.configuration)) {
+            updateData['commands.configuration'] = data.commands.configuration
+        }
+
         if (Array.isArray(data.commands.system) && JSON.stringify(data.commands.system) !== JSON.stringify(guild.commands.system)) {
             updateData['commands.system'] = data.commands.system
         }
