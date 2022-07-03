@@ -27,10 +27,41 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
+    if (server.moderation.respect_hierarchy && mention.roles.highest.position > (interaction.member as any).roles.highest.position) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_higher, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_ROLES)) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_moderator, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_unmoderated_roles, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
     await warnings.addWarn(self, server, interaction, { target: mention, executor: interaction.member as GuildMember, reason: reason })
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.translator.format(locale.warn.add.texts.user_warned, `**${(interaction.member as any).displayName}**`, `**${mention.user.tag}**`)}`,
+        content: `${self._emojis.OK} | ${self.translator.format(
+            locale.warn.add.texts.user_warned,
+            `**${(interaction.member as any).displayName}**`,
+            `**${mention.user.tag}**`
+        )}`,
         ephemeral: true
     })
 
@@ -66,7 +97,10 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!violator || !violator.violations.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.no_violator_or_violations, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.warn.remove.texts.no_violator_or_violations,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
             ephemeral: true
         })
 

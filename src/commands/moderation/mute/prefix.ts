@@ -22,14 +22,34 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         return false
     }
 
+    if (mention.id == message.member.id) {
+        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${message.member.displayName}**`)}` })
+
+        return false
+    }
+
     if (!mention.manageable) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.cant_mute_user, `**${message.member.displayName}**`)}` })
 
         return false
     }
 
-    if (mention.id == message.member.id) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${message.member.displayName}**`)}` })
+    if (server.moderation.respect_hierarchy && mention.roles.highest.position > message.member.roles.highest.position) {
+        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_higher, `**${message.member.displayName}**`)}` })
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.MODERATE_MEMBERS)) {
+        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_moderator, `**${message.member.displayName}**`)}` })
+
+        return false
+    }
+
+    if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_unmoderated_roles, `**${message.member.displayName}**`)}`
+        })
 
         return false
     }

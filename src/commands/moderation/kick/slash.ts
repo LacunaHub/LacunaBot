@@ -19,6 +19,15 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
+    if (mention.id == (interaction.member as any).id) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
     if (!mention.kickable) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${self.translator.format(locale.kick.texts.cant_kick_user, `**${(interaction.member as any).displayName}**`)}`,
@@ -28,9 +37,27 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
-    if (mention.id == (interaction.member as any).id) {
+    if (server.moderation.respect_hierarchy && mention.roles.highest.position > (interaction.member as any).roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_higher, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.KICK_MEMBERS)) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_moderator, `**${(interaction.member as any).displayName}**`)}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_unmoderated_roles, `**${(interaction.member as any).displayName}**`)}`,
             ephemeral: true
         })
 
