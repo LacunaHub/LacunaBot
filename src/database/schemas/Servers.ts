@@ -361,32 +361,32 @@ export default model<ServerDocument>(
                             remove: { type: Array, default: [] }
                         },
                         send_message: {
-                                content: { type: String, default: '' },
-                                embed: {
-                                    active: { type: Boolean, default: false },
-                                    title: { type: String, default: null },
-                                    description: { type: String, default: null },
+                            content: { type: String, default: '' },
+                            embed: {
+                                active: { type: Boolean, default: false },
+                                title: { type: String, default: null },
+                                description: { type: String, default: null },
+                                url: { type: String, default: null },
+                                timestamp: { type: String, default: null },
+                                color: { type: String, default: null },
+                                footer: {
+                                    text: { type: String, default: null },
+                                    icon_url: { type: String, default: null }
+                                },
+                                image: {
+                                    url: { type: String, default: null }
+                                },
+                                thumbnail: {
+                                    url: { type: String, default: null }
+                                },
+                                author: {
+                                    name: { type: String, default: null },
                                     url: { type: String, default: null },
-                                    timestamp: { type: String, default: null },
-                                    color: { type: String, default: null },
-                                    footer: {
-                                        text: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    image: {
-                                        url: { type: String, default: null }
-                                    },
-                                    thumbnail: {
-                                        url: { type: String, default: null }
-                                    },
-                                    author: {
-                                        name: { type: String, default: null },
-                                        url: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    fields: { type: Array, default: [] }
-                                }
-                            },
+                                    icon_url: { type: String, default: null }
+                                },
+                                fields: { type: Array, default: [] }
+                            }
+                        },
                         ignored: {
                             channels: { type: Array, default: [] },
                             roles: { type: Array, default: [] },
@@ -405,32 +405,32 @@ export default model<ServerDocument>(
                             remove: { type: Array, default: [] }
                         },
                         send_message: {
-                                content: { type: String, default: '' },
-                                embed: {
-                                    active: { type: Boolean, default: false },
-                                    title: { type: String, default: null },
-                                    description: { type: String, default: null },
+                            content: { type: String, default: '' },
+                            embed: {
+                                active: { type: Boolean, default: false },
+                                title: { type: String, default: null },
+                                description: { type: String, default: null },
+                                url: { type: String, default: null },
+                                timestamp: { type: String, default: null },
+                                color: { type: String, default: null },
+                                footer: {
+                                    text: { type: String, default: null },
+                                    icon_url: { type: String, default: null }
+                                },
+                                image: {
+                                    url: { type: String, default: null }
+                                },
+                                thumbnail: {
+                                    url: { type: String, default: null }
+                                },
+                                author: {
+                                    name: { type: String, default: null },
                                     url: { type: String, default: null },
-                                    timestamp: { type: String, default: null },
-                                    color: { type: String, default: null },
-                                    footer: {
-                                        text: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    image: {
-                                        url: { type: String, default: null }
-                                    },
-                                    thumbnail: {
-                                        url: { type: String, default: null }
-                                    },
-                                    author: {
-                                        name: { type: String, default: null },
-                                        url: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    fields: { type: Array, default: [] }
-                                }
-                            },
+                                    icon_url: { type: String, default: null }
+                                },
+                                fields: { type: Array, default: [] }
+                            }
+                        },
                         ignored: {
                             channels: { type: Array, default: [] },
                             roles: { type: Array, default: [] },
@@ -472,32 +472,32 @@ export default model<ServerDocument>(
                             remove: { type: Array, default: [] }
                         },
                         send_message: {
-                                content: { type: String, default: '' },
-                                embed: {
-                                    active: { type: Boolean, default: false },
-                                    title: { type: String, default: null },
-                                    description: { type: String, default: null },
+                            content: { type: String, default: '' },
+                            embed: {
+                                active: { type: Boolean, default: false },
+                                title: { type: String, default: null },
+                                description: { type: String, default: null },
+                                url: { type: String, default: null },
+                                timestamp: { type: String, default: null },
+                                color: { type: String, default: null },
+                                footer: {
+                                    text: { type: String, default: null },
+                                    icon_url: { type: String, default: null }
+                                },
+                                image: {
+                                    url: { type: String, default: null }
+                                },
+                                thumbnail: {
+                                    url: { type: String, default: null }
+                                },
+                                author: {
+                                    name: { type: String, default: null },
                                     url: { type: String, default: null },
-                                    timestamp: { type: String, default: null },
-                                    color: { type: String, default: null },
-                                    footer: {
-                                        text: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    image: {
-                                        url: { type: String, default: null }
-                                    },
-                                    thumbnail: {
-                                        url: { type: String, default: null }
-                                    },
-                                    author: {
-                                        name: { type: String, default: null },
-                                        url: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    fields: { type: Array, default: [] }
-                                }
-                            },
+                                    icon_url: { type: String, default: null }
+                                },
+                                fields: { type: Array, default: [] }
+                            }
+                        },
                         ignored: {
                             channels: { type: Array, default: [] },
                             roles: { type: Array, default: [] },
@@ -515,32 +515,32 @@ export default model<ServerDocument>(
                             remove: { type: Array, default: [] }
                         },
                         send_message: {
-                                content: { type: String, default: '' },
-                                embed: {
-                                    active: { type: Boolean, default: false },
-                                    title: { type: String, default: null },
-                                    description: { type: String, default: null },
+                            content: { type: String, default: '' },
+                            embed: {
+                                active: { type: Boolean, default: false },
+                                title: { type: String, default: null },
+                                description: { type: String, default: null },
+                                url: { type: String, default: null },
+                                timestamp: { type: String, default: null },
+                                color: { type: String, default: null },
+                                footer: {
+                                    text: { type: String, default: null },
+                                    icon_url: { type: String, default: null }
+                                },
+                                image: {
+                                    url: { type: String, default: null }
+                                },
+                                thumbnail: {
+                                    url: { type: String, default: null }
+                                },
+                                author: {
+                                    name: { type: String, default: null },
                                     url: { type: String, default: null },
-                                    timestamp: { type: String, default: null },
-                                    color: { type: String, default: null },
-                                    footer: {
-                                        text: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    image: {
-                                        url: { type: String, default: null }
-                                    },
-                                    thumbnail: {
-                                        url: { type: String, default: null }
-                                    },
-                                    author: {
-                                        name: { type: String, default: null },
-                                        url: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    fields: { type: Array, default: [] }
-                                }
-                            },
+                                    icon_url: { type: String, default: null }
+                                },
+                                fields: { type: Array, default: [] }
+                            }
+                        },
                         ignored: {
                             channels: { type: Array, default: [] },
                             roles: { type: Array, default: [] },
@@ -558,7 +558,7 @@ export default model<ServerDocument>(
                 tempbans: { type: Array, default: [] },
                 respect_hierarchy: { type: Boolean, default: true },
                 deny_moderate_users_with_mp: { type: Boolean, default: true },
-                unmoderated_roles: { type: Array, default: [] }
+                unmoderated_roles: { type: Array, default: [] },
                 mutes: {
                     rar: { type: Boolean, default: false },
                     rar_strict: { type: Array, default: [] },
@@ -1166,7 +1166,7 @@ export interface ServerDocument extends Document {
                 modify_roles: {
                     add: string[]
                     remove: string[]
-                    }
+                }
                 send_message: {
                     content: string
                     embed: MessageEmbed
