@@ -52,9 +52,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
             .fromNow(true)})`
     }
 
-    if (server.moderation.case_log.case_types_messages.BAN_ADD.active) {
+    if (server.moderation.case_log.types.BAN_ADD.active) {
         const replacer = new Replacer(null, { guild: interaction.guild, member: mention, penalty: { reason } })
-        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.BAN_ADD.dm_message)
+        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.BAN_ADD.dm_message)
 
         await mention.send(dm_message).catch(self.logger.error)
     }
@@ -74,7 +74,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     await caseLog.createCaseEntry(server, interaction.guild, { type: 'BAN_ADD', target: mention.user, executor: interaction.user, reason })
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.translator.format(locale.ban.texts.user_banned, `**${(interaction.member as any).displayName}**`, `**${mention.user.tag}**`)}`,
+        content: `${self._emojis.OK} | ${self.translator.format(
+            locale.ban.texts.user_banned,
+            `**${(interaction.member as any).displayName}**`,
+            `**${mention.user.tag}**`
+        )}`,
         ephemeral: true
     })
 

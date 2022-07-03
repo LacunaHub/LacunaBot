@@ -145,27 +145,16 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 updateData['moderation.case_log.channel_id'] = data.moderation.case_log.channel_id
             }
 
-            if (typeof data.moderation.case_log.case_types === 'object' && data.moderation.case_log.case_types !== null) {
-                updateData['moderation.case_log.case_types'] = {
-                    BAN_ADD: Boolean(data.moderation.case_log.case_types.BAN_ADD ?? guild.moderation.case_log.case_types.BAN_ADD),
-                    BAN_REMOVE: Boolean(data.moderation.case_log.case_types.BAN_REMOVE ?? guild.moderation.case_log.case_types.BAN_REMOVE),
-                    KICK: Boolean(data.moderation.case_log.case_types.KICK ?? guild.moderation.case_log.case_types.KICK),
-                    MUTE_ADD: Boolean(data.moderation.case_log.case_types.MUTE_ADD ?? guild.moderation.case_log.case_types.MUTE_ADD),
-                    MUTE_REMOVE: Boolean(data.moderation.case_log.case_types.MUTE_REMOVE ?? guild.moderation.case_log.case_types.MUTE_REMOVE),
-                    PRUNE_MESSAGES: Boolean(data.moderation.case_log.case_types.PRUNE_MESSAGES ?? guild.moderation.case_log.case_types.PRUNE_MESSAGES),
-                    WARN_ADD: Boolean(data.moderation.case_log.case_types.WARN_ADD ?? guild.moderation.case_log.case_types.WARN_ADD),
-                    WARN_REMOVE: Boolean(data.moderation.case_log.case_types.WARN_REMOVE ?? guild.moderation.case_log.case_types.WARN_REMOVE)
-                }
-            }
-
-            if (typeof data.moderation.case_log.case_types_messages === 'object' && data.moderation.case_log.case_types_messages !== null) {
-                for (const type of Object.keys(data.moderation.case_log.case_types_messages)) {
-                    const current = data.moderation.case_log.case_types_messages[type],
-                        previous = guild.moderation.case_log.case_types_messages[type]
+            if (typeof data.moderation.case_log.types === 'object' && data.moderation.case_log.types !== null) {
+                for (const type of Object.keys(data.moderation.case_log.types)) {
+                    const current = data.moderation.case_log.types[type]
+                    const previous = guild.moderation.case_log.types[type]
 
                     if (JSON.stringify(current) !== JSON.stringify(previous)) {
-                        updateData[`moderation.case_log.case_types_messages.${type}`] = {
+                        updateData[`moderation.case_log.types.${type}`] = {
                             active: current.active ?? previous.active,
+                            channel_id: current.channel_id ?? previous.channel_id,
+                            custom_dm_message: current.custom_dm_message ?? previous.custom_dm_message,
                             dm_message: {
                                 content: current.dm_message?.content ?? previous.dm_message.content,
                                 embed: {
@@ -247,28 +236,6 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             }
         }
 
-        if (data.moderation.roles) {
-            if ((typeof data.moderation.roles.mute === 'string' || data.moderation.roles.mute === null) && data.moderation.roles.mute !== guild.moderation.roles.mute) {
-                updateData['moderation.roles.mute'] = data.moderation.roles.mute
-            }
-
-            if (data.moderation.roles.on_mute) {
-                if (
-                    typeof data.moderation.roles.on_mute.remove_all_roles === 'boolean' &&
-                    data.moderation.roles.on_mute.remove_all_roles !== guild.moderation.roles.on_mute.remove_all_roles
-                ) {
-                    updateData['moderation.roles.on_mute.remove_all_roles'] = data.moderation.roles.on_mute.remove_all_roles
-                }
-
-                if (
-                    Array.isArray(data.moderation.roles.on_mute.strict_roles) &&
-                    JSON.stringify(data.moderation.roles.on_mute.strict_roles) !== JSON.stringify(guild.moderation.roles.on_mute.strict_roles)
-                ) {
-                    updateData['moderation.roles.on_mute.strict_roles'] = data.moderation.roles.on_mute.strict_roles
-                }
-            }
-        }
-
         if (data.moderation.warnings) {
             if (
                 Array.isArray(data.moderation.warnings.penalties) &&
@@ -279,366 +246,6 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
         }
 
         if (data.moderation.automoder) {
-            if (data.moderation.automoder.links_filter) {
-                if (
-                    typeof data.moderation.automoder.links_filter.active === 'boolean' &&
-                    data.moderation.automoder.links_filter.active !== guild.moderation.automoder.links_filter.active
-                ) {
-                    updateData['moderation.automoder.links_filter.active'] = data.moderation.automoder.links_filter.active
-                }
-
-                if (
-                    Array.isArray(data.moderation.automoder.links_filter.registry) &&
-                    JSON.stringify(data.moderation.automoder.links_filter.registry) !== JSON.stringify(guild.moderation.automoder.links_filter.registry)
-                ) {
-                    updateData['moderation.automoder.links_filter.registry'] = data.moderation.automoder.links_filter.registry
-                }
-
-                if (
-                    Array.isArray(data.moderation.automoder.links_filter.allowed_registry) &&
-                    JSON.stringify(data.moderation.automoder.links_filter.allowed_registry) !== JSON.stringify(guild.moderation.automoder.links_filter.allowed_registry)
-                ) {
-                    updateData['moderation.automoder.links_filter.allowed_registry'] = data.moderation.automoder.links_filter.allowed_registry
-                }
-
-                if (
-                    typeof data.moderation.automoder.links_filter.delete_all_links === 'boolean' &&
-                    data.moderation.automoder.links_filter.delete_all_links !== guild.moderation.automoder.links_filter.delete_all_links
-                ) {
-                    updateData['moderation.automoder.links_filter.delete_all_links'] = data.moderation.automoder.links_filter.delete_all_links
-                }
-
-                if (
-                    typeof data.moderation.automoder.links_filter.delete_referral_invites === 'boolean' &&
-                    data.moderation.automoder.links_filter.delete_referral_invites !== guild.moderation.automoder.links_filter.delete_referral_invites
-                ) {
-                    updateData['moderation.automoder.links_filter.delete_referral_invites'] = data.moderation.automoder.links_filter.delete_referral_invites
-                }
-
-                if (data.moderation.automoder.links_filter.penalty) {
-                    if (
-                        typeof data.moderation.automoder.links_filter.penalty.action === 'number' &&
-                        data.moderation.automoder.links_filter.penalty.action !== guild.moderation.automoder.links_filter.penalty.action
-                    ) {
-                        updateData['moderation.automoder.links_filter.penalty.action']
-                    }
-
-                    if (
-                        typeof data.moderation.automoder.links_filter.penalty.timer === 'number' &&
-                        data.moderation.automoder.links_filter.penalty.timer !== guild.moderation.automoder.links_filter.penalty.timer
-                    ) {
-                        updateData['moderation.automoder.links_filter.penalty.timer'] = data.moderation.automoder.links_filter.penalty.timer
-                    }
-
-                    if (data.moderation.automoder.links_filter.penalty.message) {
-                        if (
-                            typeof data.moderation.automoder.links_filter.penalty.message.content === 'string' &&
-                            data.moderation.automoder.links_filter.penalty.message.content !== guild.moderation.automoder.links_filter.penalty.message.content
-                        ) {
-                            updateData['moderation.automoder.links_filter.penalty.message.content'] = data.moderation.automoder.links_filter.penalty.message.content
-                        }
-
-                        if (data.moderation.automoder.links_filter.penalty.message.embed) {
-                            const newEmbed = data.moderation.automoder.links_filter.penalty.message.embed
-                            const oldEmbed = guild.moderation.automoder.links_filter.penalty.message.embed
-
-                            if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
-                                updateData['moderation.automoder.links_filter.penalty.message.embed'] = {
-                                    active: newEmbed.active ?? oldEmbed.active,
-                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                    footer: {
-                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                    },
-                                    image: {
-                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                    },
-                                    thumbnail: {
-                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                    },
-                                    author: {
-                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                    },
-                                    fields: newEmbed.fields ?? oldEmbed.fields
-                                }
-                            }
-                        }
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.links_filter.penalty.add_roles) &&
-                        JSON.stringify(data.moderation.automoder.links_filter.penalty.add_roles) !==
-                            JSON.stringify(guild.moderation.automoder.links_filter.penalty.add_roles)
-                    ) {
-                        updateData['moderation.automoder.links_filter.penalty.add_roles'] = data.moderation.automoder.links_filter.penalty.add_roles
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.links_filter.penalty.remove_roles) &&
-                        JSON.stringify(data.moderation.automoder.links_filter.penalty.remove_roles) !==
-                            JSON.stringify(guild.moderation.automoder.links_filter.penalty.remove_roles)
-                    ) {
-                        updateData['moderation.automoder.links_filter.penalty.remove_roles'] = data.moderation.automoder.links_filter.penalty.remove_roles
-                    }
-                }
-
-                if (data.moderation.automoder.links_filter.ignored) {
-                    if (
-                        Array.isArray(data.moderation.automoder.links_filter.ignored.channels) &&
-                        JSON.stringify(data.moderation.automoder.links_filter.ignored.channels) !==
-                            JSON.stringify(guild.moderation.automoder.links_filter.ignored.channels)
-                    ) {
-                        updateData['moderation.automoder.links_filter.ignored.channels'] = data.moderation.automoder.links_filter.ignored.channels
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.links_filter.ignored.roles) &&
-                        JSON.stringify(data.moderation.automoder.links_filter.ignored.roles) !== JSON.stringify(guild.moderation.automoder.links_filter.ignored.roles)
-                    ) {
-                        updateData['moderation.automoder.links_filter.ignored.roles'] = data.moderation.automoder.links_filter.ignored.roles
-                    }
-
-                    if (
-                        typeof data.moderation.automoder.links_filter.ignored.permissions === 'number' &&
-                        data.moderation.automoder.links_filter.ignored.permissions !== guild.moderation.automoder.links_filter.ignored.permissions
-                    ) {
-                        updateData['moderation.automoder.links_filter.ignored.permissions'] = data.moderation.automoder.links_filter.ignored.permissions
-                    }
-                }
-            }
-
-            if (data.moderation.automoder.swear_filter) {
-                if (
-                    typeof data.moderation.automoder.swear_filter.active === 'boolean' &&
-                    data.moderation.automoder.swear_filter.active !== guild.moderation.automoder.swear_filter.active
-                ) {
-                    updateData['moderation.automoder.swear_filter.active'] = data.moderation.automoder.swear_filter.active
-                }
-
-                if (
-                    Array.isArray(data.moderation.automoder.swear_filter.registry) &&
-                    JSON.stringify(data.moderation.automoder.swear_filter.registry) !== JSON.stringify(guild.moderation.automoder.swear_filter.registry)
-                ) {
-                    updateData['moderation.automoder.swear_filter.registry'] = data.moderation.automoder.swear_filter.registry
-                }
-
-                if (data.moderation.automoder.swear_filter.penalty) {
-                    if (
-                        typeof data.moderation.automoder.swear_filter.penalty.action === 'number' &&
-                        data.moderation.automoder.swear_filter.penalty.action !== guild.moderation.automoder.swear_filter.penalty.action
-                    ) {
-                        updateData['moderation.automoder.swear_filter.penalty.action'] = data.moderation.automoder.swear_filter.penalty.action
-                    }
-
-                    if (
-                        typeof data.moderation.automoder.swear_filter.penalty.timer === 'number' &&
-                        data.moderation.automoder.swear_filter.penalty.timer !== guild.moderation.automoder.swear_filter.penalty.timer
-                    ) {
-                        updateData['moderation.automoder.swear_filter.penalty.timer'] = data.moderation.automoder.swear_filter.penalty.timer
-                    }
-
-                    if (data.moderation.automoder.swear_filter.penalty.message) {
-                        if (
-                            typeof data.moderation.automoder.swear_filter.penalty.message.content === 'string' &&
-                            data.moderation.automoder.swear_filter.penalty.message.content !== guild.moderation.automoder.swear_filter.penalty.message.content
-                        ) {
-                            updateData['moderation.automoder.swear_filter.penalty.message.content'] = data.moderation.automoder.swear_filter.penalty.message.content
-                        }
-
-                        if (data.moderation.automoder.swear_filter.penalty.message.embed) {
-                            const newEmbed = data.moderation.automoder.swear_filter.penalty.message.embed
-                            const oldEmbed = guild.moderation.automoder.swear_filter.penalty.message.embed
-
-                            if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
-                                updateData['moderation.automoder.swear_filter.penalty.message.embed'] = {
-                                    active: newEmbed.active ?? oldEmbed.active,
-                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                    footer: {
-                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                    },
-                                    image: {
-                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                    },
-                                    thumbnail: {
-                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                    },
-                                    author: {
-                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                    },
-                                    fields: newEmbed.fields ?? oldEmbed.fields
-                                }
-                            }
-                        }
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.swear_filter.penalty.add_roles) &&
-                        JSON.stringify(data.moderation.automoder.swear_filter.penalty.add_roles) !==
-                            JSON.stringify(guild.moderation.automoder.swear_filter.penalty.add_roles)
-                    ) {
-                        updateData['moderation.automoder.swear_filter.penalty.add_roles'] = data.moderation.automoder.swear_filter.penalty.add_roles
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.swear_filter.penalty.remove_roles) &&
-                        JSON.stringify(data.moderation.automoder.swear_filter.penalty.remove_roles) !==
-                            JSON.stringify(guild.moderation.automoder.swear_filter.penalty.remove_roles)
-                    ) {
-                        updateData['moderation.automoder.swear_filter.penalty.remove_roles'] = data.moderation.automoder.swear_filter.penalty.remove_roles
-                    }
-                }
-
-                if (data.moderation.automoder.swear_filter.ignored) {
-                    if (
-                        Array.isArray(data.moderation.automoder.swear_filter.ignored.channels) &&
-                        JSON.stringify(data.moderation.automoder.swear_filter.ignored.channels) !==
-                            JSON.stringify(guild.moderation.automoder.swear_filter.ignored.channels)
-                    ) {
-                        updateData['moderation.automoder.swear_filter.ignored.channels'] = data.moderation.automoder.swear_filter.ignored.channels
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.swear_filter.ignored.roles) &&
-                        JSON.stringify(data.moderation.automoder.swear_filter.ignored.roles) !== JSON.stringify(guild.moderation.automoder.swear_filter.ignored.roles)
-                    ) {
-                        updateData['moderation.automoder.swear_filter.ignored.roles']
-                    }
-
-                    if (
-                        typeof data.moderation.automoder.swear_filter.ignored.permissions === 'number' &&
-                        data.moderation.automoder.swear_filter.ignored.permissions !== guild.moderation.automoder.swear_filter.ignored.permissions
-                    ) {
-                        updateData['moderation.automoder.swear_filter.ignored.permissions'] = data.moderation.automoder.swear_filter.ignored.permissions
-                    }
-                }
-            }
-
-            if (data.moderation.automoder.users_slowdown) {
-                if (
-                    typeof data.moderation.automoder.users_slowdown.active === 'boolean' &&
-                    data.moderation.automoder.users_slowdown.active !== guild.moderation.automoder.users_slowdown.active
-                ) {
-                    updateData['moderation.automoder.users_slowdown.active'] = data.moderation.automoder.users_slowdown.active
-                }
-
-                if (
-                    typeof data.moderation.automoder.users_slowdown.messages_limit === 'number' &&
-                    data.moderation.automoder.users_slowdown.messages_limit !== guild.moderation.automoder.users_slowdown.messages_limit
-                ) {
-                    updateData['moderation.automoder.users_slowdown.messages_limit'] = data.moderation.automoder.users_slowdown.messages_limit
-                }
-
-                if (data.moderation.automoder.users_slowdown.penalty) {
-                    if (
-                        typeof data.moderation.automoder.users_slowdown.penalty.action === 'number' &&
-                        data.moderation.automoder.users_slowdown.penalty.action !== guild.moderation.automoder.users_slowdown.penalty.action
-                    ) {
-                        updateData['moderation.automoder.users_slowdown.penalty.action'] = data.moderation.automoder.users_slowdown.penalty.action
-                    }
-
-                    if (
-                        typeof data.moderation.automoder.users_slowdown.penalty.timer === 'number' &&
-                        data.moderation.automoder.users_slowdown.penalty.timer !== guild.moderation.automoder.users_slowdown.penalty.timer
-                    ) {
-                        updateData['moderation.automoder.users_slowdown.penalty.timer'] = data.moderation.automoder.users_slowdown.penalty.timer
-                    }
-
-                    if (data.moderation.automoder.users_slowdown.penalty.message) {
-                        if (
-                            typeof data.moderation.automoder.users_slowdown.penalty.message.content === 'string' &&
-                            data.moderation.automoder.users_slowdown.penalty.message.content !== guild.moderation.automoder.users_slowdown.penalty.message.content
-                        ) {
-                            updateData['moderation.automoder.users_slowdown.penalty.message.content'] = data.moderation.automoder.users_slowdown.penalty.message.content
-                        }
-
-                        if (data.moderation.automoder.users_slowdown.penalty.message.embed) {
-                            const newEmbed = data.moderation.automoder.users_slowdown.penalty.message.embed
-                            const oldEmbed = guild.moderation.automoder.users_slowdown.penalty.message.embed
-
-                            if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
-                                updateData['moderation.automoder.users_slowdown.penalty.message.embed'] = {
-                                    active: newEmbed.active ?? oldEmbed.active,
-                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                    footer: {
-                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                    },
-                                    image: {
-                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                    },
-                                    thumbnail: {
-                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                    },
-                                    author: {
-                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                    },
-                                    fields: newEmbed.fields ?? oldEmbed.fields
-                                }
-                            }
-                        }
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.users_slowdown.penalty.add_roles) &&
-                        JSON.stringify(data.moderation.automoder.users_slowdown.penalty.add_roles) !==
-                            JSON.stringify(guild.moderation.automoder.users_slowdown.penalty.add_roles)
-                    ) {
-                        updateData['moderation.automoder.users_slowdown.penalty.add_roles'] = data.moderation.automoder.users_slowdown.penalty.add_roles
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.users_slowdown.penalty.remove_roles) &&
-                        JSON.stringify(data.moderation.automoder.users_slowdown.penalty.remove_roles) !==
-                            JSON.stringify(guild.moderation.automoder.users_slowdown.penalty.remove_roles)
-                    ) {
-                        updateData['moderation.automoder.users_slowdown.penalty.remove_roles'] = data.moderation.automoder.users_slowdown.penalty.remove_roles
-                    }
-                }
-
-                if (data.moderation.automoder.users_slowdown.ignored) {
-                    if (
-                        Array.isArray(data.moderation.automoder.users_slowdown.ignored.channels) &&
-                        JSON.stringify(data.moderation.automoder.users_slowdown.ignored.channels) !==
-                            JSON.stringify(guild.moderation.automoder.users_slowdown.ignored.channels)
-                    ) {
-                        updateData['moderation.automoder.users_slowdown.ignored.channels'] = data.moderation.automoder.users_slowdown.ignored.channels
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.users_slowdown.ignored.roles) &&
-                        JSON.stringify(data.moderation.automoder.users_slowdown.ignored.roles) !== JSON.stringify(guild.moderation.automoder.users_slowdown.ignored.roles)
-                    ) {
-                        updateData['moderation.automoder.users_slowdown.ignored.roles'] = data.moderation.automoder.users_slowdown.ignored.roles
-                    }
-
-                    if (
-                        typeof data.moderation.automoder.users_slowdown.ignored.permissions === 'number' &&
-                        data.moderation.automoder.users_slowdown.ignored.permissions !== guild.moderation.automoder.users_slowdown.ignored.permissions
-                    ) {
-                        updateData['moderation.automoder.users_slowdown.ignored.permissions'] = data.moderation.automoder.users_slowdown.ignored.permissions
-                    }
-                }
-            }
-
             if (data.moderation.automoder.anti_caps) {
                 if (
                     typeof data.moderation.automoder.anti_caps.active === 'boolean' &&
@@ -663,35 +270,58 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     updateData['moderation.automoder.anti_caps.minimum_content_length'] = data.moderation.automoder.anti_caps.minimum_content_length
                 }
 
-                if (data.moderation.automoder.anti_caps.penalty) {
-                    if (
-                        typeof data.moderation.automoder.anti_caps.penalty.action === 'number' &&
-                        data.moderation.automoder.anti_caps.penalty.action !== guild.moderation.automoder.anti_caps.penalty.action
-                    ) {
-                        updateData['moderation.automoder.anti_caps.penalty.action'] = data.moderation.automoder.anti_caps.penalty.action
-                    }
+                if (
+                    Array.isArray(data.moderation.automoder.anti_caps.options) &&
+                    JSON.stringify(data.moderation.automoder.anti_caps.options) !== JSON.stringify(guild.moderation.automoder.anti_caps.options)
+                ) {
+                    updateData['moderation.automoder.anti_caps.options'] = data.moderation.automoder.anti_caps.options
+                }
+
+                if (
+                    typeof data.moderation.automoder.anti_caps.ban_timeout === 'number' &&
+                    data.moderation.automoder.anti_caps.ban_timeout !== guild.moderation.automoder.anti_caps.ban_timeout
+                ) {
+                    updateData['moderation.automoder.anti_caps.ban_timeout'] = data.moderation.automoder.anti_caps.ban_timeout
+                }
 
                     if (
-                        typeof data.moderation.automoder.anti_caps.penalty.timer === 'number' &&
-                        data.moderation.automoder.anti_caps.penalty.timer !== guild.moderation.automoder.anti_caps.penalty.timer
+                    typeof data.moderation.automoder.anti_caps.mute_timeout === 'number' &&
+                    data.moderation.automoder.anti_caps.mute_timeout !== guild.moderation.automoder.anti_caps.mute_timeout
                     ) {
-                        updateData['moderation.automoder.anti_caps.penalty.timer'] = data.moderation.automoder.anti_caps.penalty.timer
+                    updateData['moderation.automoder.anti_caps.mute_timeout'] = data.moderation.automoder.anti_caps.mute_timeout
                     }
 
-                    if (data.moderation.automoder.anti_caps.penalty.message) {
+                if (data.moderation.automoder.anti_caps.modify_roles) {
+                    if (
+                        Array.isArray(data.moderation.automoder.anti_caps.modify_roles.add) &&
+                        JSON.stringify(data.moderation.automoder.anti_caps.modify_roles.add) !== JSON.stringify(guild.moderation.automoder.anti_caps.modify_roles.add)
+                    ) {
+                        updateData['moderation.automoder.anti_caps.modify_roles.add'] = data.moderation.automoder.anti_caps.modify_roles.add
+                    }
+
                         if (
-                            typeof data.moderation.automoder.anti_caps.penalty.message.content === 'string' &&
-                            data.moderation.automoder.anti_caps.penalty.message.content !== guild.moderation.automoder.anti_caps.penalty.message.content
+                        Array.isArray(data.moderation.automoder.anti_caps.modify_roles.remove) &&
+                        JSON.stringify(data.moderation.automoder.anti_caps.modify_roles.remove) !==
+                            JSON.stringify(guild.moderation.automoder.anti_caps.modify_roles.remove)
                         ) {
-                            updateData['moderation.automoder.anti_caps.penalty.message.content'] = data.moderation.automoder.anti_caps.penalty.message.content
+                        updateData['moderation.automoder.anti_caps.modify_roles.remove'] = data.moderation.automoder.anti_caps.modify_roles.remove
+                    }
                         }
 
-                        if (data.moderation.automoder.anti_caps.penalty.message.embed) {
-                            const newEmbed = data.moderation.automoder.anti_caps.penalty.message.embed
-                            const oldEmbed = guild.moderation.automoder.anti_caps.penalty.message.embed
+                if (data.moderation.automoder.anti_caps.send_message) {
+                    if (
+                        typeof data.moderation.automoder.anti_caps.send_message.content === 'string' &&
+                        data.moderation.automoder.anti_caps.send_message.content !== guild.moderation.automoder.anti_caps.send_message.content
+                    ) {
+                        updateData['moderation.automoder.anti_caps.send_message.content'] = data.moderation.automoder.anti_caps.send_message.content
+                    }
+
+                    if (data.moderation.automoder.anti_caps.send_message.embed) {
+                        const newEmbed = data.moderation.automoder.anti_caps.send_message.embed
+                        const oldEmbed = guild.moderation.automoder.anti_caps.send_message.embed
 
                             if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
-                                updateData['moderation.automoder.anti_caps.penalty.message.embed'] = {
+                            updateData['moderation.automoder.anti_caps.send_message.embed'] = {
                                     active: newEmbed.active ?? oldEmbed.active,
                                     title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
                                     description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
@@ -719,22 +349,6 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         }
                     }
 
-                    if (
-                        Array.isArray(data.moderation.automoder.anti_caps.penalty.add_roles) &&
-                        JSON.stringify(data.moderation.automoder.anti_caps.penalty.add_roles) !== JSON.stringify(guild.moderation.automoder.anti_caps.penalty.add_roles)
-                    ) {
-                        updateData['moderation.automoder.anti_caps.penalty.add_roles'] = data.moderation.automoder.anti_caps.penalty.add_roles
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.anti_caps.penalty.remove_roles) &&
-                        JSON.stringify(data.moderation.automoder.anti_caps.penalty.remove_roles) !==
-                            JSON.stringify(guild.moderation.automoder.anti_caps.penalty.remove_roles)
-                    ) {
-                        updateData['moderation.automoder.anti_caps.penalty.remove_roles'] = data.moderation.automoder.anti_caps.penalty.remove_roles
-                    }
-                }
-
                 if (data.moderation.automoder.anti_caps.ignored) {
                     if (
                         Array.isArray(data.moderation.automoder.anti_caps.ignored.channels) &&
@@ -751,73 +365,180 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     }
 
                     if (
-                        typeof data.moderation.automoder.anti_caps.ignored.permissions === 'number' &&
-                        data.moderation.automoder.anti_caps.ignored.permissions !== guild.moderation.automoder.anti_caps.ignored.permissions
+                        Array.isArray(data.moderation.automoder.anti_caps.ignored.permissions) &&
+                        JSON.stringify(data.moderation.automoder.anti_caps.ignored.permissions) !==
+                            JSON.stringify(guild.moderation.automoder.anti_caps.ignored.permissions)
                     ) {
                         updateData['moderation.automoder.anti_caps.ignored.permissions'] = data.moderation.automoder.anti_caps.ignored.permissions
                     }
+                    }
                 }
+
+            if (data.moderation.automoder.links_filter) {
+                    if (
+                    typeof data.moderation.automoder.links_filter.active === 'boolean' &&
+                    data.moderation.automoder.links_filter.active !== guild.moderation.automoder.links_filter.active
+                    ) {
+                    updateData['moderation.automoder.links_filter.active'] = data.moderation.automoder.links_filter.active
+                    }
+
+                    if (
+                    Array.isArray(data.moderation.automoder.links_filter.allowed_registry) &&
+                    JSON.stringify(data.moderation.automoder.links_filter.allowed_registry) !== JSON.stringify(guild.moderation.automoder.links_filter.allowed_registry)
+                    ) {
+                    updateData['moderation.automoder.links_filter.allowed_registry'] = data.moderation.automoder.links_filter.allowed_registry
+                    }
+
+                    if (
+                    Array.isArray(data.moderation.automoder.links_filter.blocked_registry) &&
+                    JSON.stringify(data.moderation.automoder.links_filter.blocked_registry) !== JSON.stringify(guild.moderation.automoder.links_filter.blocked_registry)
+                    ) {
+                    updateData['moderation.automoder.links_filter.blocked_registry'] = data.moderation.automoder.links_filter.blocked_registry
+                    }
+
+                if (
+                    Array.isArray(data.moderation.automoder.links_filter.options) &&
+                    JSON.stringify(data.moderation.automoder.links_filter.options) !== JSON.stringify(guild.moderation.automoder.links_filter.options)
+                ) {
+                    updateData['moderation.automoder.links_filter.options'] = data.moderation.automoder.links_filter.options
             }
 
-            if (data.moderation.automoder.nicknames) {
                 if (
+                    typeof data.moderation.automoder.links_filter.ban_timeout === 'number' &&
+                    data.moderation.automoder.links_filter.ban_timeout !== guild.moderation.automoder.links_filter.ban_timeout
+                ) {
+                    updateData['moderation.automoder.links_filter.ban_timeout'] = data.moderation.automoder.links_filter.ban_timeout
+                }
+
+                if (
+                    typeof data.moderation.automoder.links_filter.mute_timeout === 'number' &&
+                    data.moderation.automoder.links_filter.mute_timeout !== guild.moderation.automoder.links_filter.mute_timeout
+                ) {
+                    updateData['moderation.automoder.links_filter.mute_timeout'] = data.moderation.automoder.links_filter.mute_timeout
+                }
+
+                if (data.moderation.automoder.links_filter.modify_roles) {
+                    if (
+                        Array.isArray(data.moderation.automoder.links_filter.modify_roles.add) &&
+                        JSON.stringify(data.moderation.automoder.links_filter.modify_roles.add) !==
+                            JSON.stringify(guild.moderation.automoder.links_filter.modify_roles.add)
+                    ) {
+                        updateData['moderation.automoder.links_filter.modify_roles.add'] = data.moderation.automoder.links_filter.modify_roles.add
+                    }
+
+                    if (
+                        Array.isArray(data.moderation.automoder.links_filter.modify_roles.remove) &&
+                        JSON.stringify(data.moderation.automoder.links_filter.modify_roles.remove) !==
+                            JSON.stringify(guild.moderation.automoder.links_filter.modify_roles.remove)
+                    ) {
+                        updateData['moderation.automoder.links_filter.modify_roles.remove'] = data.moderation.automoder.links_filter.modify_roles.remove
+                    }
+                    }
+
+                if (data.moderation.automoder.links_filter.send_message) {
+                        if (
+                        typeof data.moderation.automoder.links_filter.send_message.content === 'string' &&
+                        data.moderation.automoder.links_filter.send_message.content !== guild.moderation.automoder.links_filter.send_message.content
+                        ) {
+                        updateData['moderation.automoder.links_filter.send_message.content'] = data.moderation.automoder.links_filter.send_message.content
+                        }
+
+                    if (data.moderation.automoder.links_filter.send_message.embed) {
+                        const newEmbed = data.moderation.automoder.links_filter.send_message.embed
+                        const oldEmbed = guild.moderation.automoder.links_filter.send_message.embed
+
+                            if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
+                            updateData['moderation.automoder.links_filter.send_message.embed'] = {
+                                    active: newEmbed.active ?? oldEmbed.active,
+                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                    footer: {
+                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                    },
+                                    image: {
+                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                    },
+                                    thumbnail: {
+                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                    },
+                                    author: {
+                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                    },
+                                    fields: newEmbed.fields ?? oldEmbed.fields
+                                }
+                            }
+                        }
+                    }
+
+                if (data.moderation.automoder.links_filter.ignored) {
+                    if (
+                        Array.isArray(data.moderation.automoder.links_filter.ignored.channels) &&
+                        JSON.stringify(data.moderation.automoder.links_filter.ignored.channels) !==
+                            JSON.stringify(guild.moderation.automoder.links_filter.ignored.channels)
+                    ) {
+                        updateData['moderation.automoder.links_filter.ignored.channels'] = data.moderation.automoder.links_filter.ignored.channels
+                    }
+
+                    if (
+                        Array.isArray(data.moderation.automoder.links_filter.ignored.roles) &&
+                        JSON.stringify(data.moderation.automoder.links_filter.ignored.roles) !== JSON.stringify(guild.moderation.automoder.links_filter.ignored.roles)
+                    ) {
+                        updateData['moderation.automoder.links_filter.ignored.roles'] = data.moderation.automoder.links_filter.ignored.roles
+                    }
+
+                    if (
+                        Array.isArray(data.moderation.automoder.links_filter.ignored.permissions) &&
+                        JSON.stringify(data.moderation.automoder.links_filter.ignored.permissions) !==
+                            JSON.stringify(guild.moderation.automoder.links_filter.ignored.permissions)
+                    ) {
+                        updateData['moderation.automoder.links_filter.ignored.permissions'] = data.moderation.automoder.links_filter.ignored.permissions
+                    }
+                    }
+                }
+
+            if (data.moderation.automoder.nicknames) {
+                    if (
                     typeof data.moderation.automoder.nicknames.active === 'boolean' &&
                     data.moderation.automoder.nicknames.active !== guild.moderation.automoder.nicknames.active
-                ) {
+                    ) {
                     updateData['moderation.automoder.nicknames.active'] = data.moderation.automoder.nicknames.active
-                }
-
-                if (data.moderation.automoder.nicknames.types) {
-                    if (
-                        typeof data.moderation.automoder.nicknames.types.special_characters === 'boolean' &&
-                        data.moderation.automoder.nicknames.types.special_characters !== guild.moderation.automoder.nicknames.types.special_characters
-                    ) {
-                        updateData['moderation.automoder.nicknames.types.special_characters'] = data.moderation.automoder.nicknames.types.special_characters
                     }
 
                     if (
-                        typeof data.moderation.automoder.nicknames.types.zalgo === 'boolean' &&
-                        data.moderation.automoder.nicknames.types.zalgo !== guild.moderation.automoder.nicknames.types.zalgo
+                    Array.isArray(data.moderation.automoder.nicknames.options) &&
+                    JSON.stringify(data.moderation.automoder.nicknames.options) !== JSON.stringify(guild.moderation.automoder.nicknames.options)
                     ) {
-                        updateData['moderation.automoder.nicknames.types.zalgo'] = data.moderation.automoder.nicknames.types.zalgo
+                    updateData['moderation.automoder.nicknames.options'] = data.moderation.automoder.nicknames.options
                     }
 
                     if (
-                        typeof data.moderation.automoder.nicknames.types.diacritics === 'boolean' &&
-                        data.moderation.automoder.nicknames.types.diacritics !== guild.moderation.automoder.nicknames.types.diacritics
+                    Array.isArray(data.moderation.automoder.nicknames.contains) &&
+                    JSON.stringify(data.moderation.automoder.nicknames.contains) !== JSON.stringify(guild.moderation.automoder.nicknames.contains)
                     ) {
-                        updateData['moderation.automoder.nicknames.types.diacritics'] = data.moderation.automoder.nicknames.types.diacritics
-                    }
-
-                    if (
-                        typeof data.moderation.automoder.nicknames.types.emojis === 'boolean' &&
-                        data.moderation.automoder.nicknames.types.emojis !== guild.moderation.automoder.nicknames.types.emojis
-                    ) {
-                        updateData['moderation.automoder.nicknames.types.emojis'] = data.moderation.automoder.nicknames.types.emojis
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.nicknames.types.contains) &&
-                        JSON.stringify(data.moderation.automoder.nicknames.types.contains) !== JSON.stringify(guild.moderation.automoder.nicknames.types.contains)
-                    ) {
-                        updateData['moderation.automoder.nicknames.types.contains'] = data.moderation.automoder.nicknames.types.contains
-                    }
-                }
+                    updateData['moderation.automoder.nicknames.contains'] = data.moderation.automoder.nicknames.contains
+            }
 
                 if (data.moderation.automoder.nicknames.ignored) {
-                    if (
+                if (
                         Array.isArray(data.moderation.automoder.nicknames.ignored.roles) &&
                         JSON.stringify(data.moderation.automoder.nicknames.ignored.roles) !== JSON.stringify(guild.moderation.automoder.nicknames.ignored.roles)
-                    ) {
+                ) {
                         updateData['moderation.automoder.nicknames.ignored.roles'] = data.moderation.automoder.nicknames.ignored.roles
-                    }
+                }
 
-                    if (
-                        typeof data.moderation.automoder.nicknames.ignored.permissions === 'number' &&
-                        data.moderation.automoder.nicknames.ignored.permissions !== guild.moderation.automoder.nicknames.ignored.permissions
-                    ) {
+                if (
+                        Array.isArray(data.moderation.automoder.nicknames.ignored.permissions) &&
+                        JSON.stringify(data.moderation.automoder.nicknames.ignored.permissions) !==
+                            JSON.stringify(guild.moderation.automoder.nicknames.ignored.permissions)
+                ) {
                         updateData['moderation.automoder.nicknames.ignored.permissions'] = data.moderation.automoder.nicknames.ignored.permissions
-                    }
+                }
 
                     if (
                         typeof data.moderation.automoder.nicknames.ignored.bots === 'boolean' &&
@@ -826,22 +547,22 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         updateData['moderation.automoder.nicknames.ignored.bots'] = data.moderation.automoder.nicknames.ignored.bots
                     }
                 }
-            }
+                    }
 
             if (data.moderation.automoder.newbies) {
-                if (
+                    if (
                     typeof data.moderation.automoder.newbies.active === 'boolean' &&
                     data.moderation.automoder.newbies.active !== guild.moderation.automoder.newbies.active
-                ) {
+                    ) {
                     updateData['moderation.automoder.newbies.active'] = data.moderation.automoder.newbies.active
-                }
+                    }
 
-                if (
+                        if (
                     typeof data.moderation.automoder.newbies.minimum_account_age?.value === 'number' &&
                     data.moderation.automoder.newbies.minimum_account_age.value !== guild.moderation.automoder.newbies.minimum_account_age.value
-                ) {
+                        ) {
                     updateData['moderation.automoder.newbies.minimum_account_age.value'] = data.moderation.automoder.newbies.minimum_account_age.value
-                }
+                        }
 
                 if (
                     typeof data.moderation.automoder.newbies.minimum_account_age?.measure === 'string' &&
@@ -849,42 +570,287 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     ['MINUTES', 'HOURS', 'DAYS'].includes(data.moderation.automoder.newbies.minimum_account_age.measure)
                 ) {
                     updateData['moderation.automoder.newbies.minimum_account_age.measure'] = data.moderation.automoder.newbies.minimum_account_age.measure
+                    }
+
+                    if (
+                    Array.isArray(data.moderation.automoder.newbies.options) &&
+                    JSON.stringify(data.moderation.automoder.newbies.options) !== JSON.stringify(guild.moderation.automoder.newbies.options)
+                    ) {
+                    updateData['moderation.automoder.newbies.options'] = data.moderation.automoder.newbies.options
+                    }
+
+                    if (
+                    typeof data.moderation.automoder.newbies.ban_timeout === 'number' &&
+                    data.moderation.automoder.newbies.ban_timeout !== guild.moderation.automoder.newbies.ban_timeout
+                    ) {
+                    updateData['moderation.automoder.newbies.ban_timeout'] = data.moderation.automoder.newbies.ban_timeout
                 }
 
-                if (data.moderation.automoder.newbies.penalty) {
                     if (
-                        typeof data.moderation.automoder.newbies.penalty.action === 'number' &&
-                        data.moderation.automoder.newbies.penalty.action !== guild.moderation.automoder.newbies.penalty.action
+                    typeof data.moderation.automoder.newbies.mute_timeout === 'number' &&
+                    data.moderation.automoder.newbies.mute_timeout !== guild.moderation.automoder.newbies.mute_timeout
                     ) {
-                        updateData['moderation.automoder.newbies.penalty.action'] = data.moderation.automoder.newbies.penalty.action
+                    updateData['moderation.automoder.newbies.mute_timeout'] = data.moderation.automoder.newbies.mute_timeout
+                    }
+
+                if (data.moderation.automoder.newbies.modify_roles) {
+                    if (
+                        Array.isArray(data.moderation.automoder.newbies.modify_roles.add) &&
+                        JSON.stringify(data.moderation.automoder.newbies.modify_roles.add) !== JSON.stringify(guild.moderation.automoder.newbies.modify_roles.add)
+                    ) {
+                        updateData['moderation.automoder.newbies.modify_roles.add'] = data.moderation.automoder.newbies.modify_roles.add
                     }
 
                     if (
-                        typeof data.moderation.automoder.newbies.penalty.timer === 'number' &&
-                        data.moderation.automoder.newbies.penalty.timer !== guild.moderation.automoder.newbies.penalty.timer
+                        Array.isArray(data.moderation.automoder.newbies.modify_roles.remove) &&
+                        JSON.stringify(data.moderation.automoder.newbies.modify_roles.remove) !== JSON.stringify(guild.moderation.automoder.newbies.modify_roles.remove)
                     ) {
-                        updateData['moderation.automoder.newbies.penalty.timer'] = data.moderation.automoder.newbies.penalty.timer
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.newbies.penalty.add_roles) &&
-                        JSON.stringify(data.moderation.automoder.newbies.penalty.add_roles) !== JSON.stringify(guild.moderation.automoder.newbies.penalty.add_roles)
-                    ) {
-                        updateData['moderation.automoder.newbies.penalty.add_roles'] = data.moderation.automoder.newbies.penalty.add_roles
-                    }
-
-                    if (
-                        Array.isArray(data.moderation.automoder.newbies.penalty.remove_roles) &&
-                        JSON.stringify(data.moderation.automoder.newbies.penalty.remove_roles) !== JSON.stringify(guild.moderation.automoder.newbies.penalty.remove_roles)
-                    ) {
-                        updateData['moderation.automoder.newbies.penalty.remove_roles'] = data.moderation.automoder.newbies.penalty.remove_roles
+                        updateData['moderation.automoder.newbies.modify_roles.remove'] = data.moderation.automoder.newbies.modify_roles.remove
                     }
                 }
             }
-        }
 
-        if (typeof data.moderation.use_timeout_mute === 'boolean' && data.moderation.use_timeout_mute !== guild.moderation.use_timeout_mute) {
-            updateData['moderation.use_timeout_mute'] = data.moderation.use_timeout_mute
+            if (data.moderation.automoder.swear_filter) {
+                if (
+                    typeof data.moderation.automoder.swear_filter.active === 'boolean' &&
+                    data.moderation.automoder.swear_filter.active !== guild.moderation.automoder.swear_filter.active
+                ) {
+                    updateData['moderation.automoder.swear_filter.active'] = data.moderation.automoder.swear_filter.active
+                }
+
+                if (
+                    Array.isArray(data.moderation.automoder.swear_filter.registry) &&
+                    JSON.stringify(data.moderation.automoder.swear_filter.registry) !== JSON.stringify(guild.moderation.automoder.swear_filter.registry)
+                ) {
+                    updateData['moderation.automoder.swear_filter.registry'] = data.moderation.automoder.swear_filter.registry
+                    }
+
+                if (
+                    Array.isArray(data.moderation.automoder.swear_filter.options) &&
+                    JSON.stringify(data.moderation.automoder.swear_filter.options) !== JSON.stringify(guild.moderation.automoder.swear_filter.options)
+                ) {
+                    updateData['moderation.automoder.swear_filter.options'] = data.moderation.automoder.swear_filter.options
+                }
+
+                if (
+                    typeof data.moderation.automoder.swear_filter.ban_timeout === 'number' &&
+                    data.moderation.automoder.swear_filter.ban_timeout !== guild.moderation.automoder.swear_filter.ban_timeout
+                ) {
+                    updateData['moderation.automoder.swear_filter.ban_timeout'] = data.moderation.automoder.swear_filter.ban_timeout
+                }
+
+                    if (
+                    typeof data.moderation.automoder.swear_filter.mute_timeout === 'number' &&
+                    data.moderation.automoder.swear_filter.mute_timeout !== guild.moderation.automoder.swear_filter.mute_timeout
+                    ) {
+                    updateData['moderation.automoder.swear_filter.mute_timeout'] = data.moderation.automoder.swear_filter.mute_timeout
+                    }
+
+                if (data.moderation.automoder.swear_filter.modify_roles) {
+                    if (
+                        Array.isArray(data.moderation.automoder.swear_filter.modify_roles.add) &&
+                        JSON.stringify(data.moderation.automoder.swear_filter.modify_roles.add) !==
+                            JSON.stringify(guild.moderation.automoder.swear_filter.modify_roles.add)
+                    ) {
+                        updateData['moderation.automoder.swear_filter.modify_roles.add'] = data.moderation.automoder.swear_filter.modify_roles.add
+                    }
+
+                        if (
+                        Array.isArray(data.moderation.automoder.swear_filter.modify_roles.remove) &&
+                        JSON.stringify(data.moderation.automoder.swear_filter.modify_roles.remove) !==
+                            JSON.stringify(guild.moderation.automoder.swear_filter.modify_roles.remove)
+                        ) {
+                        updateData['moderation.automoder.swear_filter.modify_roles.remove'] = data.moderation.automoder.swear_filter.modify_roles.remove
+                    }
+                        }
+
+                if (data.moderation.automoder.swear_filter.send_message) {
+                    if (
+                        typeof data.moderation.automoder.swear_filter.send_message.content === 'string' &&
+                        data.moderation.automoder.swear_filter.send_message.content !== guild.moderation.automoder.swear_filter.send_message.content
+                    ) {
+                        updateData['moderation.automoder.swear_filter.send_message.content'] = data.moderation.automoder.swear_filter.send_message.content
+                    }
+
+                    if (data.moderation.automoder.swear_filter.send_message.embed) {
+                        const newEmbed = data.moderation.automoder.swear_filter.send_message.embed
+                        const oldEmbed = guild.moderation.automoder.swear_filter.send_message.embed
+
+                            if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
+                            updateData['moderation.automoder.swear_filter.send_message.embed'] = {
+                                    active: newEmbed.active ?? oldEmbed.active,
+                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                    footer: {
+                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                    },
+                                    image: {
+                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                    },
+                                    thumbnail: {
+                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                    },
+                                    author: {
+                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                    },
+                                    fields: newEmbed.fields ?? oldEmbed.fields
+                                }
+                            }
+                        }
+                    }
+
+                if (data.moderation.automoder.swear_filter.ignored) {
+                    if (
+                        Array.isArray(data.moderation.automoder.swear_filter.ignored.channels) &&
+                        JSON.stringify(data.moderation.automoder.swear_filter.ignored.channels) !==
+                            JSON.stringify(guild.moderation.automoder.swear_filter.ignored.channels)
+                    ) {
+                        updateData['moderation.automoder.swear_filter.ignored.channels'] = data.moderation.automoder.swear_filter.ignored.channels
+                    }
+
+                    if (
+                        Array.isArray(data.moderation.automoder.swear_filter.ignored.roles) &&
+                        JSON.stringify(data.moderation.automoder.swear_filter.ignored.roles) !== JSON.stringify(guild.moderation.automoder.swear_filter.ignored.roles)
+                    ) {
+                        updateData['moderation.automoder.swear_filter.ignored.roles']
+                }
+
+                    if (
+                        Array.isArray(data.moderation.automoder.swear_filter.ignored.permissions) &&
+                        JSON.stringify(data.moderation.automoder.swear_filter.ignored.permissions) !==
+                            JSON.stringify(guild.moderation.automoder.swear_filter.ignored.permissions)
+                    ) {
+                        updateData['moderation.automoder.swear_filter.ignored.permissions'] = data.moderation.automoder.swear_filter.ignored.permissions
+                    }
+                }
+                    }
+
+            if (data.moderation.automoder.users_slowdown) {
+                    if (
+                    typeof data.moderation.automoder.users_slowdown.active === 'boolean' &&
+                    data.moderation.automoder.users_slowdown.active !== guild.moderation.automoder.users_slowdown.active
+                    ) {
+                    updateData['moderation.automoder.users_slowdown.active'] = data.moderation.automoder.users_slowdown.active
+            }
+
+                if (
+                    typeof data.moderation.automoder.users_slowdown.messages_limit === 'number' &&
+                    data.moderation.automoder.users_slowdown.messages_limit !== guild.moderation.automoder.users_slowdown.messages_limit
+                ) {
+                    updateData['moderation.automoder.users_slowdown.messages_limit'] = data.moderation.automoder.users_slowdown.messages_limit
+                }
+
+                    if (
+                    Array.isArray(data.moderation.automoder.users_slowdown.options) &&
+                    JSON.stringify(data.moderation.automoder.users_slowdown.options) !== JSON.stringify(guild.moderation.automoder.users_slowdown.options)
+                    ) {
+                    updateData['moderation.automoder.users_slowdown.options'] = data.moderation.automoder.users_slowdown.options
+                    }
+
+                    if (
+                    typeof data.moderation.automoder.users_slowdown.ban_timeout === 'number' &&
+                    data.moderation.automoder.users_slowdown.ban_timeout !== guild.moderation.automoder.users_slowdown.ban_timeout
+                    ) {
+                    updateData['moderation.automoder.users_slowdown.ban_timeout'] = data.moderation.automoder.users_slowdown.ban_timeout
+                    }
+
+                    if (
+                    typeof data.moderation.automoder.users_slowdown.mute_timeout === 'number' &&
+                    data.moderation.automoder.users_slowdown.mute_timeout !== guild.moderation.automoder.users_slowdown.mute_timeout
+                    ) {
+                    updateData['moderation.automoder.users_slowdown.mute_timeout'] = data.moderation.automoder.users_slowdown.mute_timeout
+                    }
+
+                if (data.moderation.automoder.users_slowdown.modify_roles) {
+                    if (
+                        Array.isArray(data.moderation.automoder.users_slowdown.modify_roles.add) &&
+                        JSON.stringify(data.moderation.automoder.users_slowdown.modify_roles.add) !==
+                            JSON.stringify(guild.moderation.automoder.users_slowdown.modify_roles.add)
+                    ) {
+                        updateData['moderation.automoder.users_slowdown.modify_roles.add'] = data.moderation.automoder.users_slowdown.modify_roles.add
+                    }
+
+                    if (
+                        Array.isArray(data.moderation.automoder.users_slowdown.modify_roles.remove) &&
+                        JSON.stringify(data.moderation.automoder.users_slowdown.modify_roles.remove) !==
+                            JSON.stringify(guild.moderation.automoder.users_slowdown.modify_roles.remove)
+                    ) {
+                        updateData['moderation.automoder.users_slowdown.modify_roles.remove'] = data.moderation.automoder.users_slowdown.modify_roles.remove
+                    }
+                }
+
+                if (data.moderation.automoder.users_slowdown.send_message) {
+                    if (
+                        typeof data.moderation.automoder.users_slowdown.send_message.content === 'string' &&
+                        data.moderation.automoder.users_slowdown.send_message.content !== guild.moderation.automoder.users_slowdown.send_message.content
+                    ) {
+                        updateData['moderation.automoder.users_slowdown.send_message.content'] = data.moderation.automoder.users_slowdown.send_message.content
+                    }
+
+                    if (data.moderation.automoder.users_slowdown.send_message.embed) {
+                        const newEmbed = data.moderation.automoder.users_slowdown.send_message.embed
+                        const oldEmbed = guild.moderation.automoder.users_slowdown.send_message.embed
+
+                        if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
+                            updateData['moderation.automoder.users_slowdown.send_message.embed'] = {
+                                active: newEmbed.active ?? oldEmbed.active,
+                                title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                footer: {
+                                    text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                    icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                },
+                                image: {
+                                    url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                },
+                                thumbnail: {
+                                    url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                },
+                                author: {
+                                    name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                    url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                    icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                },
+                                fields: newEmbed.fields ?? oldEmbed.fields
+                }
+                }
+                }
+                    }
+
+                if (data.moderation.automoder.users_slowdown.ignored) {
+                    if (
+                        Array.isArray(data.moderation.automoder.users_slowdown.ignored.channels) &&
+                        JSON.stringify(data.moderation.automoder.users_slowdown.ignored.channels) !==
+                            JSON.stringify(guild.moderation.automoder.users_slowdown.ignored.channels)
+                    ) {
+                        updateData['moderation.automoder.users_slowdown.ignored.channels'] = data.moderation.automoder.users_slowdown.ignored.channels
+                    }
+
+                    if (
+                        Array.isArray(data.moderation.automoder.users_slowdown.ignored.roles) &&
+                        JSON.stringify(data.moderation.automoder.users_slowdown.ignored.roles) !== JSON.stringify(guild.moderation.automoder.users_slowdown.ignored.roles)
+                    ) {
+                        updateData['moderation.automoder.users_slowdown.ignored.roles'] = data.moderation.automoder.users_slowdown.ignored.roles
+                    }
+
+                    if (
+                        Array.isArray(data.moderation.automoder.users_slowdown.ignored.permissions) &&
+                        JSON.stringify(data.moderation.automoder.users_slowdown.ignored.permissions) !==
+                            JSON.stringify(guild.moderation.automoder.users_slowdown.ignored.permissions)
+                    ) {
+                        updateData['moderation.automoder.users_slowdown.ignored.permissions'] = data.moderation.automoder.users_slowdown.ignored.permissions
+                    }
+                }
+            }
         }
     }
 

@@ -11,7 +11,6 @@ import Command, { CommandOptions } from './structures/Command'
 import Event, { EventOptions } from './structures/Event'
 import Giveaway, { handleEntries as handleGiveawayEntries } from './structures/Giveaway'
 import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './structures/TemporaryBan'
-import TemporaryMute, { handleEntries as handleTemporaryMuteEntries } from './structures/TemporaryMute'
 import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole'
 
 export default class Lacuna extends Client {
@@ -23,7 +22,6 @@ export default class Lacuna extends Client {
     public player: Manager
     public giveaways: Collection<string, Giveaway>
     public tempbans: Collection<string, TemporaryBan>
-    public tempmutes: Collection<string, TemporaryMute>
     public temproles: Collection<string, TemporaryRole>
     public translator: typeof locale
     public utils: typeof Utils
@@ -47,8 +45,6 @@ export default class Lacuna extends Client {
         this.giveaways = new Collection()
 
         this.tempbans = new Collection()
-
-        this.tempmutes = new Collection()
 
         this.temproles = new Collection()
 
@@ -109,7 +105,6 @@ export default class Lacuna extends Client {
 
         handleGiveawayEntries(this)
         handleTemporaryBanEntries(this)
-        handleTemporaryMuteEntries(this)
         handleTemporaryRoleEntries(this)
 
         process.on('unhandledRejection', error => {

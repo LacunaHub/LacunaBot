@@ -91,8 +91,7 @@ async function getSettings(ctx: Context) {
         moderation: {
             case_log: {
                 channel_id: server.moderation.case_log.channel_id,
-                case_types: server.moderation.case_log.case_types,
-                case_types_messages: server.moderation.case_log.case_types_messages
+                types: server.moderation.case_log.types
             },
             logs: {
                 types: server.moderation.logs.types
@@ -100,15 +99,11 @@ async function getSettings(ctx: Context) {
             warnings: {
                 penalties: server.moderation.warnings.penalties
             },
-            roles: {
-                mute: server.moderation.roles.mute,
-                on_mute: {
-                    remove_all_roles: server.moderation.roles.on_mute.remove_all_roles,
-                    strict_roles: server.moderation.roles.on_mute.strict_roles
-                }
-            },
             automoder: server.moderation.automoder,
-            use_timeout_mute: server.moderation.use_timeout_mute
+            mutes: {
+                rar: server.moderation.mutes.rar,
+                rar_strict: server.moderation.mutes.rar_strict
+            }
         },
         modules: {
             welcome: server.modules.welcome,
@@ -168,8 +163,7 @@ async function updateSettings(ctx: Context) {
         moderation: {
             case_log: {
                 channel_id: server.moderation.case_log.channel_id,
-                case_types: server.moderation.case_log.case_types,
-                case_types_messages: server.moderation.case_log.case_types_messages
+                types: server.moderation.case_log.types
             },
             logs: {
                 types: server.moderation.logs.types
@@ -177,15 +171,11 @@ async function updateSettings(ctx: Context) {
             warnings: {
                 penalties: server.moderation.warnings.penalties
             },
-            roles: {
-                mute: server.moderation.roles.mute,
-                on_mute: {
-                    remove_all_roles: server.moderation.roles.on_mute.remove_all_roles,
-                    strict_roles: server.moderation.roles.on_mute.strict_roles
-                }
-            },
             automoder: server.moderation.automoder,
-            use_timeout_mute: server.moderation.use_timeout_mute
+            mutes: {
+                rar: server.moderation.mutes.rar,
+                rar_strict: server.moderation.mutes.rar_strict
+            }
         },
         modules: {
             welcome: server.modules.welcome,

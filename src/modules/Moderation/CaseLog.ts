@@ -8,7 +8,7 @@ import { images } from '../Logs'
 export async function createCaseEntry(server: ServerDocument, guild: Guild, options: ICreateCaseMessageOptions) {
     const caseLog = guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
 
-    if (caseLog && server.moderation.case_log.case_types[options.type]) {
+    if (caseLog && server.moderation.case_log.types[options.type].active) {
         const locale = translator.locale(server.locale)
         const caseId = server.moderation.case_log.case_count + 1
 
