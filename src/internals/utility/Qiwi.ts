@@ -3,11 +3,8 @@ import fetch from 'node-fetch'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 import { v4 as idv4 } from 'uuid'
 import db from '../../database'
-import { sharding } from '../../index'
 import logger from '../Logger'
-import DiamondGuild from '../structures/DiamondGuild'
-import Patron from '../structures/Patron'
-import discord from './DiscordUtils'
+import { addDiamond } from './BillUtils'
 
 export class Bill {
     public bill_id: string
@@ -103,7 +100,7 @@ export function syncBills(): Job {
     rule.minute = new Range(0, 59, 2)
 
     const job = scheduleJob(rule, async () => {
-        const bills = await db.bills.find({ 'status.value': 'WAITING' })
+        const bills = await db.bills.find({ type: 'QIWI', 'status.value': 'WAITING' })
 
         for (const bill of bills) {
             const update = await getBill(bill._id)
@@ -120,54 +117,8 @@ export function syncBills(): Job {
 
             if (update.status.value == 'PAID') {
                 const server = await db.servers.findOne({ _id: bill.custom_fields.reference_id })
-                const { diamondPrices } = await db.json.get()
-                const months = diamondPrices[bill.custom_fields.tier]?.months ?? 0
 
-                if (months > 0) {
-                    const period = server.server.premium.will_expire_on
-                        ? moment(server.server.premium.will_expire_on).add(months, 'M').valueOf()
-                        : moment().add(months, 'M').valueOf()
-
-                    await db.servers.updateOne(
-                        { _id: bill.custom_fields.reference_id },
-                        {
-                            $set: {
-                                'server.premium.available': true,
-                                'server.premium.will_expire_on': period
-                            }
-                        }
-                    )
-
-                    const diamondGuild = sharding.diamondGuilds.get(bill.custom_fields.reference_id)
-                    if (diamondGuild) diamondGuild.cancel()
-
-                    new DiamondGuild(sharding, bill.custom_fields.reference_id, period)
-
-                    await db.users.updateOne(
-                        { _id: bill.custom_fields.user_id },
-                        {
-                            $set: {
-                                'premium.available': true,
-                                'premium.expiration_timestamp': period,
-                                'premium.last_charge_timestamp': Date.now()
-                            }
-                        }
-                    )
-
-                    const support_server_id = '740586549145763960',
-                        patron_roles = ['968097093388468274']
-
-                    patron_roles.push(bill.amount > 500 ? '896416992079265824' : '746825813806284866')
-
-                    for (const role of patron_roles) {
-                        await discord.restApi.put(discord.apiRoutes.guildMemberRole(support_server_id, bill.custom_fields.user_id, role)).catch(() => {})
-                    }
-
-                    const patron = sharding.patrons.get(bill.custom_fields.user_id)
-                    if (patron) patron.cancel()
-
-                    new Patron(sharding, bill.custom_fields.user_id, period)
-                }
+                await addDiamond(bill, server)
             }
         }
     })
