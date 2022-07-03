@@ -141,6 +141,24 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
     }
 
     if (data.moderation) {
+        if (typeof data.moderation.respect_hierarchy === 'boolean' && data.moderation.respect_hierarchy !== guild.moderation.respect_hierarchy) {
+            updateData['moderation.respect_hierarchy'] = data.moderation.respect_hierarchy
+        }
+
+        if (
+            typeof data.moderation.deny_moderate_users_with_mp === 'boolean' &&
+            data.moderation.deny_moderate_users_with_mp !== guild.moderation.deny_moderate_users_with_mp
+        ) {
+            updateData['moderation.deny_moderate_users_with_mp'] = data.moderation.deny_moderate_users_with_mp
+        }
+
+        if (
+            Array.isArray(data.moderation.unmoderated_roles) &&
+            JSON.stringify(data.moderation.unmoderated_roles) !== JSON.stringify(guild.moderation.unmoderated_roles)
+        ) {
+            updateData['moderation.unmoderated_roles'] = data.moderation.unmoderated_roles
+        }
+
         if (data.moderation.case_log) {
             if (
                 (typeof data.moderation.case_log.channel_id === 'string' || data.moderation.case_log.channel_id === null) &&
@@ -288,12 +306,12 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     updateData['moderation.automoder.anti_caps.ban_timeout'] = data.moderation.automoder.anti_caps.ban_timeout
                 }
 
-                    if (
+                if (
                     typeof data.moderation.automoder.anti_caps.mute_timeout === 'number' &&
                     data.moderation.automoder.anti_caps.mute_timeout !== guild.moderation.automoder.anti_caps.mute_timeout
-                    ) {
+                ) {
                     updateData['moderation.automoder.anti_caps.mute_timeout'] = data.moderation.automoder.anti_caps.mute_timeout
-                    }
+                }
 
                 if (data.moderation.automoder.anti_caps.modify_roles) {
                     if (
@@ -303,14 +321,14 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         updateData['moderation.automoder.anti_caps.modify_roles.add'] = data.moderation.automoder.anti_caps.modify_roles.add
                     }
 
-                        if (
+                    if (
                         Array.isArray(data.moderation.automoder.anti_caps.modify_roles.remove) &&
                         JSON.stringify(data.moderation.automoder.anti_caps.modify_roles.remove) !==
                             JSON.stringify(guild.moderation.automoder.anti_caps.modify_roles.remove)
-                        ) {
+                    ) {
                         updateData['moderation.automoder.anti_caps.modify_roles.remove'] = data.moderation.automoder.anti_caps.modify_roles.remove
                     }
-                        }
+                }
 
                 if (data.moderation.automoder.anti_caps.send_message) {
                     if (
@@ -324,34 +342,34 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         const newEmbed = data.moderation.automoder.anti_caps.send_message.embed
                         const oldEmbed = guild.moderation.automoder.anti_caps.send_message.embed
 
-                            if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
+                        if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
                             updateData['moderation.automoder.anti_caps.send_message.embed'] = {
-                                    active: newEmbed.active ?? oldEmbed.active,
-                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                    footer: {
-                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                    },
-                                    image: {
-                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                    },
-                                    thumbnail: {
-                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                    },
-                                    author: {
-                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                    },
-                                    fields: newEmbed.fields ?? oldEmbed.fields
-                                }
+                                active: newEmbed.active ?? oldEmbed.active,
+                                title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                footer: {
+                                    text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                    icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                },
+                                image: {
+                                    url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                },
+                                thumbnail: {
+                                    url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                },
+                                author: {
+                                    name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                    url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                    icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                },
+                                fields: newEmbed.fields ?? oldEmbed.fields
                             }
                         }
                     }
+                }
 
                 if (data.moderation.automoder.anti_caps.ignored) {
                     if (
@@ -375,37 +393,37 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     ) {
                         updateData['moderation.automoder.anti_caps.ignored.permissions'] = data.moderation.automoder.anti_caps.ignored.permissions
                     }
-                    }
                 }
+            }
 
             if (data.moderation.automoder.links_filter) {
-                    if (
+                if (
                     typeof data.moderation.automoder.links_filter.active === 'boolean' &&
                     data.moderation.automoder.links_filter.active !== guild.moderation.automoder.links_filter.active
-                    ) {
+                ) {
                     updateData['moderation.automoder.links_filter.active'] = data.moderation.automoder.links_filter.active
-                    }
+                }
 
-                    if (
+                if (
                     Array.isArray(data.moderation.automoder.links_filter.allowed_registry) &&
                     JSON.stringify(data.moderation.automoder.links_filter.allowed_registry) !== JSON.stringify(guild.moderation.automoder.links_filter.allowed_registry)
-                    ) {
+                ) {
                     updateData['moderation.automoder.links_filter.allowed_registry'] = data.moderation.automoder.links_filter.allowed_registry
-                    }
+                }
 
-                    if (
+                if (
                     Array.isArray(data.moderation.automoder.links_filter.blocked_registry) &&
                     JSON.stringify(data.moderation.automoder.links_filter.blocked_registry) !== JSON.stringify(guild.moderation.automoder.links_filter.blocked_registry)
-                    ) {
+                ) {
                     updateData['moderation.automoder.links_filter.blocked_registry'] = data.moderation.automoder.links_filter.blocked_registry
-                    }
+                }
 
                 if (
                     Array.isArray(data.moderation.automoder.links_filter.options) &&
                     JSON.stringify(data.moderation.automoder.links_filter.options) !== JSON.stringify(guild.moderation.automoder.links_filter.options)
                 ) {
                     updateData['moderation.automoder.links_filter.options'] = data.moderation.automoder.links_filter.options
-            }
+                }
 
                 if (
                     typeof data.moderation.automoder.links_filter.ban_timeout === 'number' &&
@@ -437,48 +455,48 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     ) {
                         updateData['moderation.automoder.links_filter.modify_roles.remove'] = data.moderation.automoder.links_filter.modify_roles.remove
                     }
-                    }
+                }
 
                 if (data.moderation.automoder.links_filter.send_message) {
-                        if (
+                    if (
                         typeof data.moderation.automoder.links_filter.send_message.content === 'string' &&
                         data.moderation.automoder.links_filter.send_message.content !== guild.moderation.automoder.links_filter.send_message.content
-                        ) {
+                    ) {
                         updateData['moderation.automoder.links_filter.send_message.content'] = data.moderation.automoder.links_filter.send_message.content
-                        }
+                    }
 
                     if (data.moderation.automoder.links_filter.send_message.embed) {
                         const newEmbed = data.moderation.automoder.links_filter.send_message.embed
                         const oldEmbed = guild.moderation.automoder.links_filter.send_message.embed
 
-                            if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
+                        if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
                             updateData['moderation.automoder.links_filter.send_message.embed'] = {
-                                    active: newEmbed.active ?? oldEmbed.active,
-                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                    footer: {
-                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                    },
-                                    image: {
-                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                    },
-                                    thumbnail: {
-                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                    },
-                                    author: {
-                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                    },
-                                    fields: newEmbed.fields ?? oldEmbed.fields
-                                }
+                                active: newEmbed.active ?? oldEmbed.active,
+                                title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                footer: {
+                                    text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                    icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                },
+                                image: {
+                                    url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                },
+                                thumbnail: {
+                                    url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                },
+                                author: {
+                                    name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                    url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                    icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                },
+                                fields: newEmbed.fields ?? oldEmbed.fields
                             }
                         }
                     }
+                }
 
                 if (data.moderation.automoder.links_filter.ignored) {
                     if (
@@ -503,46 +521,46 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     ) {
                         updateData['moderation.automoder.links_filter.ignored.permissions'] = data.moderation.automoder.links_filter.ignored.permissions
                     }
-                    }
                 }
-
-            if (data.moderation.automoder.nicknames) {
-                    if (
-                    typeof data.moderation.automoder.nicknames.active === 'boolean' &&
-                    data.moderation.automoder.nicknames.active !== guild.moderation.automoder.nicknames.active
-                    ) {
-                    updateData['moderation.automoder.nicknames.active'] = data.moderation.automoder.nicknames.active
-                    }
-
-                    if (
-                    Array.isArray(data.moderation.automoder.nicknames.options) &&
-                    JSON.stringify(data.moderation.automoder.nicknames.options) !== JSON.stringify(guild.moderation.automoder.nicknames.options)
-                    ) {
-                    updateData['moderation.automoder.nicknames.options'] = data.moderation.automoder.nicknames.options
-                    }
-
-                    if (
-                    Array.isArray(data.moderation.automoder.nicknames.contains) &&
-                    JSON.stringify(data.moderation.automoder.nicknames.contains) !== JSON.stringify(guild.moderation.automoder.nicknames.contains)
-                    ) {
-                    updateData['moderation.automoder.nicknames.contains'] = data.moderation.automoder.nicknames.contains
             }
 
-                if (data.moderation.automoder.nicknames.ignored) {
+            if (data.moderation.automoder.nicknames) {
                 if (
-                        Array.isArray(data.moderation.automoder.nicknames.ignored.roles) &&
-                        JSON.stringify(data.moderation.automoder.nicknames.ignored.roles) !== JSON.stringify(guild.moderation.automoder.nicknames.ignored.roles)
+                    typeof data.moderation.automoder.nicknames.active === 'boolean' &&
+                    data.moderation.automoder.nicknames.active !== guild.moderation.automoder.nicknames.active
                 ) {
-                        updateData['moderation.automoder.nicknames.ignored.roles'] = data.moderation.automoder.nicknames.ignored.roles
+                    updateData['moderation.automoder.nicknames.active'] = data.moderation.automoder.nicknames.active
                 }
 
                 if (
+                    Array.isArray(data.moderation.automoder.nicknames.options) &&
+                    JSON.stringify(data.moderation.automoder.nicknames.options) !== JSON.stringify(guild.moderation.automoder.nicknames.options)
+                ) {
+                    updateData['moderation.automoder.nicknames.options'] = data.moderation.automoder.nicknames.options
+                }
+
+                if (
+                    Array.isArray(data.moderation.automoder.nicknames.contains) &&
+                    JSON.stringify(data.moderation.automoder.nicknames.contains) !== JSON.stringify(guild.moderation.automoder.nicknames.contains)
+                ) {
+                    updateData['moderation.automoder.nicknames.contains'] = data.moderation.automoder.nicknames.contains
+                }
+
+                if (data.moderation.automoder.nicknames.ignored) {
+                    if (
+                        Array.isArray(data.moderation.automoder.nicknames.ignored.roles) &&
+                        JSON.stringify(data.moderation.automoder.nicknames.ignored.roles) !== JSON.stringify(guild.moderation.automoder.nicknames.ignored.roles)
+                    ) {
+                        updateData['moderation.automoder.nicknames.ignored.roles'] = data.moderation.automoder.nicknames.ignored.roles
+                    }
+
+                    if (
                         Array.isArray(data.moderation.automoder.nicknames.ignored.permissions) &&
                         JSON.stringify(data.moderation.automoder.nicknames.ignored.permissions) !==
                             JSON.stringify(guild.moderation.automoder.nicknames.ignored.permissions)
-                ) {
+                    ) {
                         updateData['moderation.automoder.nicknames.ignored.permissions'] = data.moderation.automoder.nicknames.ignored.permissions
-                }
+                    }
 
                     if (
                         typeof data.moderation.automoder.nicknames.ignored.bots === 'boolean' &&
@@ -551,22 +569,22 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         updateData['moderation.automoder.nicknames.ignored.bots'] = data.moderation.automoder.nicknames.ignored.bots
                     }
                 }
-                    }
+            }
 
             if (data.moderation.automoder.newbies) {
-                    if (
+                if (
                     typeof data.moderation.automoder.newbies.active === 'boolean' &&
                     data.moderation.automoder.newbies.active !== guild.moderation.automoder.newbies.active
-                    ) {
+                ) {
                     updateData['moderation.automoder.newbies.active'] = data.moderation.automoder.newbies.active
-                    }
+                }
 
-                        if (
+                if (
                     typeof data.moderation.automoder.newbies.minimum_account_age?.value === 'number' &&
                     data.moderation.automoder.newbies.minimum_account_age.value !== guild.moderation.automoder.newbies.minimum_account_age.value
-                        ) {
+                ) {
                     updateData['moderation.automoder.newbies.minimum_account_age.value'] = data.moderation.automoder.newbies.minimum_account_age.value
-                        }
+                }
 
                 if (
                     typeof data.moderation.automoder.newbies.minimum_account_age?.measure === 'string' &&
@@ -574,28 +592,28 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     ['MINUTES', 'HOURS', 'DAYS'].includes(data.moderation.automoder.newbies.minimum_account_age.measure)
                 ) {
                     updateData['moderation.automoder.newbies.minimum_account_age.measure'] = data.moderation.automoder.newbies.minimum_account_age.measure
-                    }
+                }
 
-                    if (
+                if (
                     Array.isArray(data.moderation.automoder.newbies.options) &&
                     JSON.stringify(data.moderation.automoder.newbies.options) !== JSON.stringify(guild.moderation.automoder.newbies.options)
-                    ) {
+                ) {
                     updateData['moderation.automoder.newbies.options'] = data.moderation.automoder.newbies.options
-                    }
+                }
 
-                    if (
+                if (
                     typeof data.moderation.automoder.newbies.ban_timeout === 'number' &&
                     data.moderation.automoder.newbies.ban_timeout !== guild.moderation.automoder.newbies.ban_timeout
-                    ) {
+                ) {
                     updateData['moderation.automoder.newbies.ban_timeout'] = data.moderation.automoder.newbies.ban_timeout
                 }
 
-                    if (
+                if (
                     typeof data.moderation.automoder.newbies.mute_timeout === 'number' &&
                     data.moderation.automoder.newbies.mute_timeout !== guild.moderation.automoder.newbies.mute_timeout
-                    ) {
+                ) {
                     updateData['moderation.automoder.newbies.mute_timeout'] = data.moderation.automoder.newbies.mute_timeout
-                    }
+                }
 
                 if (data.moderation.automoder.newbies.modify_roles) {
                     if (
@@ -627,7 +645,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     JSON.stringify(data.moderation.automoder.swear_filter.registry) !== JSON.stringify(guild.moderation.automoder.swear_filter.registry)
                 ) {
                     updateData['moderation.automoder.swear_filter.registry'] = data.moderation.automoder.swear_filter.registry
-                    }
+                }
 
                 if (
                     Array.isArray(data.moderation.automoder.swear_filter.options) &&
@@ -643,12 +661,12 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     updateData['moderation.automoder.swear_filter.ban_timeout'] = data.moderation.automoder.swear_filter.ban_timeout
                 }
 
-                    if (
+                if (
                     typeof data.moderation.automoder.swear_filter.mute_timeout === 'number' &&
                     data.moderation.automoder.swear_filter.mute_timeout !== guild.moderation.automoder.swear_filter.mute_timeout
-                    ) {
+                ) {
                     updateData['moderation.automoder.swear_filter.mute_timeout'] = data.moderation.automoder.swear_filter.mute_timeout
-                    }
+                }
 
                 if (data.moderation.automoder.swear_filter.modify_roles) {
                     if (
@@ -659,14 +677,14 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         updateData['moderation.automoder.swear_filter.modify_roles.add'] = data.moderation.automoder.swear_filter.modify_roles.add
                     }
 
-                        if (
+                    if (
                         Array.isArray(data.moderation.automoder.swear_filter.modify_roles.remove) &&
                         JSON.stringify(data.moderation.automoder.swear_filter.modify_roles.remove) !==
                             JSON.stringify(guild.moderation.automoder.swear_filter.modify_roles.remove)
-                        ) {
+                    ) {
                         updateData['moderation.automoder.swear_filter.modify_roles.remove'] = data.moderation.automoder.swear_filter.modify_roles.remove
                     }
-                        }
+                }
 
                 if (data.moderation.automoder.swear_filter.send_message) {
                     if (
@@ -680,34 +698,34 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         const newEmbed = data.moderation.automoder.swear_filter.send_message.embed
                         const oldEmbed = guild.moderation.automoder.swear_filter.send_message.embed
 
-                            if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
+                        if (JSON.stringify(newEmbed) !== JSON.stringify(oldEmbed)) {
                             updateData['moderation.automoder.swear_filter.send_message.embed'] = {
-                                    active: newEmbed.active ?? oldEmbed.active,
-                                    title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
-                                    description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
-                                    url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
-                                    timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
-                                    color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
-                                    footer: {
-                                        text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
-                                        icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
-                                    },
-                                    image: {
-                                        url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
-                                    },
-                                    thumbnail: {
-                                        url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
-                                    },
-                                    author: {
-                                        name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
-                                        url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
-                                        icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
-                                    },
-                                    fields: newEmbed.fields ?? oldEmbed.fields
-                                }
+                                active: newEmbed.active ?? oldEmbed.active,
+                                title: typeof newEmbed.title == 'undefined' ? oldEmbed.title : newEmbed.title,
+                                description: typeof newEmbed.description == 'undefined' ? oldEmbed.description : newEmbed.description,
+                                url: typeof newEmbed.url == 'undefined' ? oldEmbed.url : newEmbed.url,
+                                timestamp: typeof newEmbed.timestamp == 'undefined' ? oldEmbed.timestamp : newEmbed.timestamp,
+                                color: typeof newEmbed.color == 'undefined' ? oldEmbed.color : newEmbed.color,
+                                footer: {
+                                    text: typeof newEmbed.footer?.text == 'undefined' ? oldEmbed.footer.text : newEmbed.footer.text,
+                                    icon_url: typeof newEmbed.footer?.icon_url == 'undefined' ? oldEmbed.footer.icon_url : newEmbed.footer.icon_url
+                                },
+                                image: {
+                                    url: typeof newEmbed.image?.url == 'undefined' ? oldEmbed.image.url : newEmbed.image.url
+                                },
+                                thumbnail: {
+                                    url: typeof newEmbed.thumbnail?.url == 'undefined' ? oldEmbed.thumbnail.url : newEmbed.thumbnail.url
+                                },
+                                author: {
+                                    name: typeof newEmbed.author?.name == 'undefined' ? oldEmbed.author.name : newEmbed.author.name,
+                                    url: typeof newEmbed.author?.url == 'undefined' ? oldEmbed.author.url : newEmbed.author.url,
+                                    icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
+                                },
+                                fields: newEmbed.fields ?? oldEmbed.fields
                             }
                         }
                     }
+                }
 
                 if (data.moderation.automoder.swear_filter.ignored) {
                     if (
@@ -723,7 +741,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         JSON.stringify(data.moderation.automoder.swear_filter.ignored.roles) !== JSON.stringify(guild.moderation.automoder.swear_filter.ignored.roles)
                     ) {
                         updateData['moderation.automoder.swear_filter.ignored.roles']
-                }
+                    }
 
                     if (
                         Array.isArray(data.moderation.automoder.swear_filter.ignored.permissions) &&
@@ -733,15 +751,15 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         updateData['moderation.automoder.swear_filter.ignored.permissions'] = data.moderation.automoder.swear_filter.ignored.permissions
                     }
                 }
-                    }
+            }
 
             if (data.moderation.automoder.users_slowdown) {
-                    if (
+                if (
                     typeof data.moderation.automoder.users_slowdown.active === 'boolean' &&
                     data.moderation.automoder.users_slowdown.active !== guild.moderation.automoder.users_slowdown.active
-                    ) {
+                ) {
                     updateData['moderation.automoder.users_slowdown.active'] = data.moderation.automoder.users_slowdown.active
-            }
+                }
 
                 if (
                     typeof data.moderation.automoder.users_slowdown.messages_limit === 'number' &&
@@ -750,26 +768,26 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     updateData['moderation.automoder.users_slowdown.messages_limit'] = data.moderation.automoder.users_slowdown.messages_limit
                 }
 
-                    if (
+                if (
                     Array.isArray(data.moderation.automoder.users_slowdown.options) &&
                     JSON.stringify(data.moderation.automoder.users_slowdown.options) !== JSON.stringify(guild.moderation.automoder.users_slowdown.options)
-                    ) {
+                ) {
                     updateData['moderation.automoder.users_slowdown.options'] = data.moderation.automoder.users_slowdown.options
-                    }
+                }
 
-                    if (
+                if (
                     typeof data.moderation.automoder.users_slowdown.ban_timeout === 'number' &&
                     data.moderation.automoder.users_slowdown.ban_timeout !== guild.moderation.automoder.users_slowdown.ban_timeout
-                    ) {
+                ) {
                     updateData['moderation.automoder.users_slowdown.ban_timeout'] = data.moderation.automoder.users_slowdown.ban_timeout
-                    }
+                }
 
-                    if (
+                if (
                     typeof data.moderation.automoder.users_slowdown.mute_timeout === 'number' &&
                     data.moderation.automoder.users_slowdown.mute_timeout !== guild.moderation.automoder.users_slowdown.mute_timeout
-                    ) {
+                ) {
                     updateData['moderation.automoder.users_slowdown.mute_timeout'] = data.moderation.automoder.users_slowdown.mute_timeout
-                    }
+                }
 
                 if (data.moderation.automoder.users_slowdown.modify_roles) {
                     if (
@@ -825,10 +843,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                                     icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                                 },
                                 fields: newEmbed.fields ?? oldEmbed.fields
-                }
-                }
-                }
+                            }
+                        }
                     }
+                }
 
                 if (data.moderation.automoder.users_slowdown.ignored) {
                     if (
