@@ -17,6 +17,7 @@ export default model<ServerDocument>(
                 bot_expert_roles: { type: Array, default: [] }
             },
             commands: {
+                configuration: { type: Array, default: [] },
                 system: { type: Array, default: [] },
                 custom: { type: Array, default: [] },
                 slash_commands: { type: Boolean, default: false },
@@ -743,7 +744,8 @@ export default model<ServerDocument>(
                     twitch: { type: Array, default: [] },
                     youtube: { type: Array, default: [] }
                 },
-                interactive_messages: { type: Array, default: [] }
+                interactive_messages: { type: Array, default: [] },
+                custom_commands: { type: Array, default: [] }
             },
             utility: {
                 giveaways: { type: Array, default: [] }
@@ -769,19 +771,9 @@ export interface ServerDocument extends Document {
         bot_expert_roles: string[]
     }
     commands: {
+        configuration: ISystemCommandConfig[]
         system: SystemCommand[]
         custom: CustomCommand[]
-        /** @deprecated */
-        permissions: {
-            allowed: {
-                channels: string[]
-                roles: string[]
-            }
-            blocked: {
-                channels: string[]
-                roles: string[]
-            }
-        }
         slash_commands: boolean
         prefix_commands: boolean
     }
@@ -1233,15 +1225,31 @@ export interface ServerDocument extends Document {
             youtube: IYouTubeSubscription[]
         }
         interactive_messages: InteractiveMessage[]
+        custom_commands: ICustomCommand[]
     }
     utility: {
         giveaways: Giveaway[]
     }
     created_at: number
-    /** @deprecated */
-    modified_at: number
     activity_ping_at: number
     change_log: ChangeLog[]
+}
+
+export interface ISystemCommandConfig {
+    name: string
+    inactive: boolean
+    options: string[]
+    permissions: {
+        allowed_channels: string[]
+        allowed_roles: string[]
+        blocked_channels: string[]
+        blocked_roles: string[]
+    }
+    throttling?: {
+        type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
+        max_uses: number
+        timeout: number
+    }
 }
 
 export interface SystemCommand {
@@ -1269,6 +1277,116 @@ export interface SystemCommand {
         roles: string[]
     }
 }
+
+export interface ICustomCommand {
+    id: string
+    options: string[]
+    components: ICustomCommandComponent[]
+    command: {
+        type: number
+        name: string
+        description: string
+        name_localizations?: {
+            [key: string]: string
+        }
+        description_localizations?: {
+            [key: string]: string
+        }
+        options: ICustomCommandOption[]
+    }
+    permissions: {
+        allowed_channels: string[]
+        allowed_roles: string[]
+        blocked_channels: string[]
+        blocked_roles: string[]
+    }
+    throttling?: {
+        type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
+        max_uses: number
+        timeout: number
+    }
+}
+
+export interface ICustomCommandComponent {
+    type: 'CONDITION' | 'ACTION'
+    condition?: {
+        type: 'COMPARE_VALUES' | 'USER_VALIDATION' | 'IF_BLOCK'
+        compare_values?: {
+            operator: 'EQUAL' | 'NOT_EQUAL' | 'GREATER_THAN' | 'LESS_THAN' | 'STARTS_WITH' | 'ENDS_WITH' | 'CONTAINS' | 'NOT_CONTAINS'
+            left: string
+            right: string
+        }
+        user_validation?: {
+            operator: 'HAS_ROLES' | 'MISSING_ROLES' | 'HAS_PERMISSIONS' | 'MISSING_PERMISSIONS'
+            roles?: string[]
+            permissions?: string[]
+        }
+        if_block?: {
+            condition: {
+                type: 'COMPARE_VALUES' | 'USER_VALIDATION'
+                compare_values?: {
+                    operator: 'EQUAL' | 'NOT_EQUAL' | 'GREATER_THAN' | 'LESS_THAN' | 'STARTS_WITH' | 'ENDS_WITH' | 'CONTAINS' | 'NOT_CONTAINS'
+                    left: string
+                    right: string
+                }
+                user_validation?: {
+                    operator: 'HAS_ROLES' | 'MISSING_ROLES' | 'HAS_PERMISSIONS' | 'MISSING_PERMISSIONS'
+                    roles?: string[]
+                    permissions?: string[]
+                }
+            }
+            components: ICustomCommandComponent[]
+        }
+    }
+    action?: {
+        type: 'SEND_MESSAGE' | 'MODIFY_ROLES' | 'FORWARD_TO_COMMAND' | 'MODIFY_WALLET'
+        send_message?: {
+            format: 'CHANNEL' | 'CURRENT_CHANNEL'
+            channel_id: string
+            message: {
+                content: string
+                embed: MessageEmbed
+            }
+            tts: boolean
+            ephemeral: boolean
+        }
+        modify_roles?: {
+            user_id: string
+            add: string[]
+            remove: string[]
+            duration: number
+        }
+        forward_to_command?: string
+        modify_wallet?: {}
+    }
+}
+
+export interface ICustomCommandOption {
+    type: 'STRING' | 'INTEGER' | 'BOOLEAN' | 'USER' | 'CHANNEL' | 'ROLE' | 'MENTIONABLE' | 'NUMBER'
+    name: string
+    description: string
+    name_localizations?: {
+        [key: string]: string
+    }
+    description_localizations?: {
+        [key: string]: string
+    }
+    required: boolean
+    choices: ICustomCommandOptionChoice[]
+    channel_types?: ICustomCommandOptionChannelTypes[]
+    min_value?: number
+    max_value?: number
+}
+
+export interface ICustomCommandOptionChoice {
+    name: string
+    name_localizations?: {
+        [key: string]: string
+    }
+    value: string | number
+}
+
+export type ICustomCommandOptionChannelTypes = 'GUILD_TEXT' | 'GUILD_VOICE' | 'GUILD_CATEGORY' | 'GUILD_NEWS'
 
 export interface CustomCommand {
     name: string

@@ -35,6 +35,8 @@ async function getSettings(ctx: Context) {
     const guildChannels = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildChannels(guild_id)).catch(() => {})) as any[]) ?? []
     const guildRoles = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildRoles(guild_id)).catch(() => {})) as any[]) ?? []
     const guildEmojis = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildEmojis(guild_id)).catch(() => {})) as any[]) ?? []
+    const guildCommands =
+        ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild_id)).catch(() => {})) as any[]) ?? []
 
     const selfRoles = selfMember
         ? guildRoles.sort((a, b) => a.position - b.position).filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID)
@@ -63,10 +65,16 @@ async function getSettings(ctx: Context) {
         return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` }
     })
 
-    const locale = translator.locale(server.locale)
-    const commands = qdb.get('commands').map(c => {
-        return { ...c, description: resolveObjectPath(c.description, locale), options: [] }
+    const commands = qdb.get('commands').map((i: any) => {
+        const guildCommand = guildCommands.find(j => i.name === j.name)
+
+        return {
+            name: i.name,
+            description: guildCommand?.description,
+            group: i.group
+        }
     })
+
     const { diamondPrices: prices } = await db.json.get()
 
     ctx.status = 200
@@ -84,9 +92,11 @@ async function getSettings(ctx: Context) {
         },
         guild: {
             ...JSON.parse(partial),
-            channels: channels,
+            channels,
             roles: roles.filter(r => r.id != guild_id),
-            emojis: emojis
+            emojis,
+            commands,
+            app_commands_registered: guildCommands.length > 0
         },
         moderation: {
             case_log: {
