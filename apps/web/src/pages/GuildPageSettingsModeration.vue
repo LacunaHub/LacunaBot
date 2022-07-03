@@ -19,7 +19,7 @@
             </q-item-section>
 
             <q-item-section side>
-              <q-checkbox v-model="toggle" dense></q-checkbox>
+              <q-checkbox v-model="guild.moderation.respect_hierarchy" dense></q-checkbox>
             </q-item-section>
           </q-item>
 
@@ -31,7 +31,7 @@
             </q-item-section>
 
             <q-item-section side>
-              <q-checkbox v-model="toggle" dense></q-checkbox>
+              <q-checkbox v-model="guild.moderation.deny_moderate_users_with_mp" dense></q-checkbox>
             </q-item-section>
           </q-item>
         </q-list>
@@ -47,7 +47,7 @@
               </div>
 
               <q-select
-                v-model="select"
+                v-model="guild.moderation.unmoderated_roles"
                 :options="guild.roles"
                 option-label="name"
                 option-value="id"
