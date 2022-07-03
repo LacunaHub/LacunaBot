@@ -1,4 +1,4 @@
-import { ButtonInteraction, Collection, CommandInteraction, ContextMenuInteraction, GuildChannel } from 'discord.js'
+import { ButtonInteraction, Collection, CommandInteraction, ContextMenuInteraction, GuildChannel, Message } from 'discord.js'
 import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponent, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { buttonPressed } from '../../internals/structures/Giveaway'
@@ -35,6 +35,70 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
 
         if (/R\-\w+\-\d+/.test(interaction.customId)) {
             await reports.buttonPressed(self, server, interaction)
+
+            return true
+        }
+
+        if (interaction.customId.startsWith('PLAYER')) {
+            const player = self.player.get(interaction.guild.id)
+            const message = player?.get<Message>('message')
+
+            if (message?.id == interaction.message?.id) {
+                if (interaction.member.voice.channel?.id != player.voiceChannel) {
+                    interaction.reply({
+                        content: `${self._emojis.ERROR} | ${self.translator.format(
+                            self.translator.locale(server.locale).commands.repeat.texts.different_voice,
+                            `**${interaction.member.displayName}**`
+                        )}`,
+                        ephemeral: true
+                    })
+
+                    return false
+                }
+
+                const rows = message.components
+
+                if (interaction.customId == rows[0].components[0].customId) {
+                    player.destroy()
+                }
+
+                if (interaction.customId == rows[0].components[1].customId) {
+                    if (player.queue.previous && player.position < 5000) {
+                        await player.play(player.queue.previous)
+                        player.queue.add(player.queue.current, 0)
+                    } else if (player.queue.current.isSeekable) player.seek(0)
+                }
+
+                if (interaction.customId == rows[0].components[2].customId) {
+                    player.pause(!player.paused)
+                    ;(rows[0].components[2] as any).setEmoji(player.paused ? '▶️' : '⏸️')
+                }
+
+                if (interaction.customId == rows[0].components[3].customId) {
+                    if (player.queueRepeat) player.queue.add(player.queue.current)
+                    player.stop()
+                }
+
+                if (interaction.customId == rows[0].components[4].customId) {
+                    if (!player.trackRepeat && !player.queueRepeat) {
+                        ;(rows[0].components[4] as any).setEmoji('🔂')
+                        player.setQueueRepeat(true)
+                    } else if (player.queueRepeat) {
+                        ;(rows[0].components[4] as any).setEmoji('➡️')
+                        player.setTrackRepeat(true)
+                    } else {
+                        ;(rows[0].components[4] as any).setEmoji('🔁')
+                        player.setTrackRepeat(false)
+                    }
+                }
+
+                if (interaction.customId == rows[1].components[0].customId) {
+                    self.commands.get('queue').executeSlash(server, interaction as any)
+                }
+
+                if (interaction.customId != rows[0].components[0].customId) await message.edit({ components: rows })
+                if (interaction.customId != rows[1].components[0].customId) await interaction.deferUpdate()
+            }
 
             return true
         }

@@ -64,9 +64,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
-    if (server.moderation.case_log.case_types_messages.KICK.active) {
+    if (server.moderation.case_log.types.KICK.active) {
         const replacer = new Replacer(null, { guild: interaction.guild, member: mention, penalty: { reason } })
-        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.KICK.dm_message)
+        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.KICK.dm_message)
 
         await mention.send(dm_message).catch(self.logger.error)
     }

@@ -64,9 +64,9 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
             .fromNow(true)})`
     }
 
-    if (server.moderation.case_log.case_types_messages.BAN_ADD.active) {
+    if (server.moderation.case_log.types.BAN_ADD.active) {
         const replacer = new Replacer(null, { guild: message.guild, member: mention, message, penalty: { reason } })
-        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.BAN_ADD.dm_message)
+        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.BAN_ADD.dm_message)
 
         await mention.send(dm_message).catch(self.logger.error)
     }

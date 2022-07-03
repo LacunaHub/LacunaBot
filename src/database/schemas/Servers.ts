@@ -17,6 +17,7 @@ export default model<ServerDocument>(
                 bot_expert_roles: { type: Array, default: [] }
             },
             commands: {
+                configuration: { type: Array, default: [] },
                 system: { type: Array, default: [] },
                 custom: { type: Array, default: [] },
                 slash_commands: { type: Boolean, default: false },
@@ -27,19 +28,11 @@ export default model<ServerDocument>(
                     cases: { type: Array, default: [] },
                     case_count: { type: Number, default: 0 },
                     channel_id: { type: String, default: null },
-                    case_types: {
-                        BAN_ADD: { type: Boolean, default: true },
-                        BAN_REMOVE: { type: Boolean, default: true },
-                        KICK: { type: Boolean, default: true },
-                        MUTE_ADD: { type: Boolean, default: true },
-                        MUTE_REMOVE: { type: Boolean, default: true },
-                        PRUNE_MESSAGES: { type: Boolean, default: true },
-                        WARN_ADD: { type: Boolean, default: true },
-                        WARN_REMOVE: { type: Boolean, default: true }
-                    },
-                    case_types_messages: {
+                    types: {
                         BAN_ADD: {
                             active: { type: Boolean, default: true },
+                            channel_id: { type: String, default: null },
+                            custom_dm_message: { type: Boolean, default: false },
                             dm_message: {
                                 content: { type: String, default: '' },
                                 embed: {
@@ -60,22 +53,28 @@ export default model<ServerDocument>(
                                         url: { type: String, default: null }
                                     },
                                     author: {
-                                        name: { type: String, default: 'Блокировка выдана' },
+                                        name: { type: String, default: 'Ban Added' },
                                         url: { type: String, default: null },
                                         icon_url: { type: String, default: 'https://i.imgur.com/qI02Ivf.png' }
                                     },
                                     fields: {
                                         type: Array,
                                         default: [
-                                            { name: 'Сервер', value: '{ guild.name }', inline: true },
-                                            { name: 'Причина', value: '{ penalty.reason }', inline: true }
+                                            { name: 'Guild', value: '{ guild.name }', inline: true },
+                                            { name: 'Reason', value: '{ penalty.reason }', inline: true }
                                         ]
                                     }
                                 }
                             }
                         },
+                        BAN_REMOVE: {
+                            active: { type: Boolean, default: true },
+                            channel_id: { type: String, default: null }
+                        },
                         KICK: {
                             active: { type: Boolean, default: true },
+                            channel_id: { type: String, default: null },
+                            custom_dm_message: { type: Boolean, default: false },
                             dm_message: {
                                 content: { type: String, default: '' },
                                 embed: {
@@ -96,15 +95,15 @@ export default model<ServerDocument>(
                                         url: { type: String, default: null }
                                     },
                                     author: {
-                                        name: { type: String, default: 'Участник выгнан' },
+                                        name: { type: String, default: 'Member Kicked' },
                                         url: { type: String, default: null },
                                         icon_url: { type: String, default: 'https://i.imgur.com/RYVLGuy.png' }
                                     },
                                     fields: {
                                         type: Array,
                                         default: [
-                                            { name: 'Сервер', value: '{ guild.name }', inline: true },
-                                            { name: 'Причина', value: '{ penalty.reason }', inline: true }
+                                            { name: 'Guild', value: '{ guild.name }', inline: true },
+                                            { name: 'Reason', value: '{ penalty.reason }', inline: true }
                                         ]
                                     }
                                 }
@@ -112,6 +111,8 @@ export default model<ServerDocument>(
                         },
                         MUTE_ADD: {
                             active: { type: Boolean, default: true },
+                            channel_id: { type: String, default: null },
+                            custom_dm_message: { type: Boolean, default: false },
                             dm_message: {
                                 content: { type: String, default: '' },
                                 embed: {
@@ -132,22 +133,32 @@ export default model<ServerDocument>(
                                         url: { type: String, default: null }
                                     },
                                     author: {
-                                        name: { type: String, default: 'Заглушение выдано' },
+                                        name: { type: String, default: 'Mute Added' },
                                         url: { type: String, default: null },
                                         icon_url: { type: String, default: 'https://i.imgur.com/t5FJ6Gw.png' }
                                     },
                                     fields: {
                                         type: Array,
                                         default: [
-                                            { name: 'Сервер', value: '{ guild.name }', inline: true },
-                                            { name: 'Причина', value: '{ penalty.reason }', inline: true }
+                                            { name: 'Guild', value: '{ guild.name }', inline: true },
+                                            { name: 'Reason', value: '{ penalty.reason }', inline: true }
                                         ]
                                     }
                                 }
                             }
                         },
+                        MUTE_REMOVE: {
+                            active: { type: Boolean, default: true },
+                            channel_id: { type: String, default: null }
+                        },
+                        PRUNE_MESSAGES: {
+                            active: { type: Boolean, default: true },
+                            channel_id: { type: String, default: null }
+                        },
                         WARN_ADD: {
                             active: { type: Boolean, default: true },
+                            channel_id: { type: String, default: null },
+                            custom_dm_message: { type: Boolean, default: false },
                             dm_message: {
                                 content: { type: String, default: '' },
                                 embed: {
@@ -168,19 +179,23 @@ export default model<ServerDocument>(
                                         url: { type: String, default: null }
                                     },
                                     author: {
-                                        name: { type: String, default: 'Предупреждение выдано' },
+                                        name: { type: String, default: 'Warn Added' },
                                         url: { type: String, default: null },
                                         icon_url: { type: String, default: 'https://i.imgur.com/R03G3G5.png' }
                                     },
                                     fields: {
                                         type: Array,
                                         default: [
-                                            { name: 'Сервер', value: '{ guild.name }', inline: true },
-                                            { name: 'Причина', value: '{ penalty.reason }', inline: true }
+                                            { name: 'Guild', value: '{ guild.name }', inline: true },
+                                            { name: 'Reason', value: '{ penalty.reason }', inline: true }
                                         ]
                                     }
                                 }
                             }
+                        },
+                        WARN_REMOVE: {
+                            active: { type: Boolean, default: true },
+                            channel_id: { type: String, default: null }
                         }
                     }
                 },
@@ -334,143 +349,18 @@ export default model<ServerDocument>(
                     }
                 },
                 automoder: {
-                    swear_filter: {
-                        active: { type: Boolean, default: false },
-                        registry: { type: Array, default: [] },
-                        penalty: {
-                            action: { type: Number, default: 0 },
-                            timer: { type: Number, default: 0 },
-                            message: {
-                                content: { type: String, default: '' },
-                                embed: {
-                                    active: { type: Boolean, default: false },
-                                    title: { type: String, default: null },
-                                    description: { type: String, default: null },
-                                    url: { type: String, default: null },
-                                    timestamp: { type: String, default: null },
-                                    color: { type: String, default: null },
-                                    footer: {
-                                        text: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    image: {
-                                        url: { type: String, default: null }
-                                    },
-                                    thumbnail: {
-                                        url: { type: String, default: null }
-                                    },
-                                    author: {
-                                        name: { type: String, default: null },
-                                        url: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    fields: { type: Array, default: [] }
-                                }
-                            },
-                            add_roles: { type: Array, default: [] },
-                            remove_roles: { type: Array, default: [] }
-                        },
-                        ignored: {
-                            channels: { type: Array, default: [] },
-                            roles: { type: Array, default: [] },
-                            permissions: { type: Number, default: 8 }
-                        }
-                    },
-                    links_filter: {
-                        active: { type: Boolean, default: false },
-                        registry: { type: Array, default: [] },
-                        allowed_registry: { type: Array, default: [] },
-                        delete_all_links: { type: Boolean, default: false },
-                        delete_referral_invites: { type: Boolean, default: false },
-                        penalty: {
-                            action: { type: Number, default: 0 },
-                            timer: { type: Number, default: 0 },
-                            message: {
-                                content: { type: String, default: '' },
-                                embed: {
-                                    active: { type: Boolean, default: false },
-                                    title: { type: String, default: null },
-                                    description: { type: String, default: null },
-                                    url: { type: String, default: null },
-                                    timestamp: { type: String, default: null },
-                                    color: { type: String, default: null },
-                                    footer: {
-                                        text: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    image: {
-                                        url: { type: String, default: null }
-                                    },
-                                    thumbnail: {
-                                        url: { type: String, default: null }
-                                    },
-                                    author: {
-                                        name: { type: String, default: null },
-                                        url: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    fields: { type: Array, default: [] }
-                                }
-                            },
-                            add_roles: { type: Array, default: [] },
-                            remove_roles: { type: Array, default: [] }
-                        },
-                        ignored: {
-                            channels: { type: Array, default: [] },
-                            roles: { type: Array, default: [] },
-                            permissions: { type: Number, default: 8 }
-                        }
-                    },
-                    users_slowdown: {
-                        active: { type: Boolean, default: false },
-                        messages_limit: { type: Array, default: 3 },
-                        penalty: {
-                            action: { type: Number, default: 0 },
-                            timer: { type: Number, default: 0 },
-                            message: {
-                                content: { type: String, default: '' },
-                                embed: {
-                                    active: { type: Boolean, default: false },
-                                    title: { type: String, default: null },
-                                    description: { type: String, default: null },
-                                    url: { type: String, default: null },
-                                    timestamp: { type: String, default: null },
-                                    color: { type: String, default: null },
-                                    footer: {
-                                        text: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    image: {
-                                        url: { type: String, default: null }
-                                    },
-                                    thumbnail: {
-                                        url: { type: String, default: null }
-                                    },
-                                    author: {
-                                        name: { type: String, default: null },
-                                        url: { type: String, default: null },
-                                        icon_url: { type: String, default: null }
-                                    },
-                                    fields: { type: Array, default: [] }
-                                }
-                            },
-                            add_roles: { type: Array, default: [] },
-                            remove_roles: { type: Array, default: [] }
-                        },
-                        ignored: {
-                            channels: { type: Array, default: [] },
-                            roles: { type: Array, default: [] },
-                            permissions: { type: Number, default: 8 }
-                        }
-                    },
                     anti_caps: {
                         active: { type: Boolean, default: false },
                         percentage_of_caps: { type: Number, default: 70 },
                         minimum_content_length: { type: Number, default: 10 },
-                        penalty: {
-                            action: { type: Number, default: 0 },
-                            timer: { type: Number, default: 0 },
-                            message: {
+                        options: { type: Array, default: ['ACTION_DELETE_MESSAGE'] },
+                        ban_timeout: { type: Number },
+                        mute_timeout: { type: Number },
+                        modify_roles: {
+                            add: { type: Array, default: [] },
+                            remove: { type: Array, default: [] }
+                        },
+                        send_message: {
                                 content: { type: String, default: '' },
                                 embed: {
                                     active: { type: Boolean, default: false },
@@ -497,31 +387,63 @@ export default model<ServerDocument>(
                                     fields: { type: Array, default: [] }
                                 }
                             },
-                            add_roles: { type: Array, default: [] },
-                            remove_roles: { type: Array, default: [] }
-                        },
                         ignored: {
                             channels: { type: Array, default: [] },
                             roles: { type: Array, default: [] },
-                            permissions: { type: Number, default: 8 }
+                            permissions: { type: Array, default: [8] }
+                        }
+                    },
+                    links_filter: {
+                        active: { type: Boolean, default: false },
+                        allowed_registry: { type: Array, default: [] },
+                        blocked_registry: { type: Array, default: [] },
+                        options: { type: Array, default: ['ACTION_DELETE_MESSAGE'] },
+                        ban_timeout: { type: Number },
+                        mute_timeout: { type: Number },
+                        modify_roles: {
+                            add: { type: Array, default: [] },
+                            remove: { type: Array, default: [] }
+                        },
+                        send_message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: false },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
+                                    url: { type: String, default: null },
+                                    timestamp: { type: String, default: null },
+                                    color: { type: String, default: null },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: null },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    fields: { type: Array, default: [] }
+                                }
+                            },
+                        ignored: {
+                            channels: { type: Array, default: [] },
+                            roles: { type: Array, default: [] },
+                            permissions: { type: Array, default: [8] }
                         }
                     },
                     nicknames: {
                         active: { type: Boolean, default: false },
-                        types: {
-                            special_characters: { type: Boolean, default: false },
-                            zalgo: { type: Boolean, default: false },
-                            diacritics: { type: Boolean, default: false },
-                            emojis: { type: Boolean, default: false },
-                            regexp: {
-                                pattern: { type: String, default: null },
-                                flags: { type: Array, default: [] }
-                            },
-                            contains: { type: Array, default: [] }
-                        },
+                        options: { type: Array, default: [] },
+                        contains: { type: Array, default: [] },
                         ignored: {
                             roles: { type: Array, default: [] },
-                            permissions: { type: Number, default: 8 },
+                            permissions: { type: Array, default: [8] },
                             bots: { type: Boolean, default: false }
                         }
                     },
@@ -531,11 +453,98 @@ export default model<ServerDocument>(
                             value: { type: Number, default: 12 },
                             measure: { type: String, default: 'HOURS' }
                         },
-                        penalty: {
-                            action: { type: Number, default: 0 },
-                            timer: { type: Number, default: 0 },
-                            add_roles: { type: Array, default: [] },
-                            remove_roles: { type: Array, default: [] }
+                        options: { type: Array, default: [] },
+                        ban_timeout: { type: Number },
+                        mute_timeout: { type: Number },
+                        modify_roles: {
+                            add: { type: Array, default: [] },
+                            remove: { type: Array, default: [] }
+                        }
+                    },
+                    swear_filter: {
+                        active: { type: Boolean, default: false },
+                        registry: { type: Array, default: [] },
+                        options: { type: Array, default: ['ACTION_DELETE_MESSAGE'] },
+                        ban_timeout: { type: Number },
+                        mute_timeout: { type: Number },
+                        modify_roles: {
+                            add: { type: Array, default: [] },
+                            remove: { type: Array, default: [] }
+                        },
+                        send_message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: false },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
+                                    url: { type: String, default: null },
+                                    timestamp: { type: String, default: null },
+                                    color: { type: String, default: null },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: null },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    fields: { type: Array, default: [] }
+                                }
+                            },
+                        ignored: {
+                            channels: { type: Array, default: [] },
+                            roles: { type: Array, default: [] },
+                            permissions: { type: Array, default: [8] }
+                        }
+                    },
+                    users_slowdown: {
+                        active: { type: Boolean, default: false },
+                        messages_limit: { type: Number, default: 3 },
+                        options: { type: Array, default: ['ACTION_DELETE_MESSAGE'] },
+                        ban_timeout: { type: Number },
+                        mute_timeout: { type: Number },
+                        modify_roles: {
+                            add: { type: Array, default: [] },
+                            remove: { type: Array, default: [] }
+                        },
+                        send_message: {
+                                content: { type: String, default: '' },
+                                embed: {
+                                    active: { type: Boolean, default: false },
+                                    title: { type: String, default: null },
+                                    description: { type: String, default: null },
+                                    url: { type: String, default: null },
+                                    timestamp: { type: String, default: null },
+                                    color: { type: String, default: null },
+                                    footer: {
+                                        text: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    image: {
+                                        url: { type: String, default: null }
+                                    },
+                                    thumbnail: {
+                                        url: { type: String, default: null }
+                                    },
+                                    author: {
+                                        name: { type: String, default: null },
+                                        url: { type: String, default: null },
+                                        icon_url: { type: String, default: null }
+                                    },
+                                    fields: { type: Array, default: [] }
+                                }
+                            },
+                        ignored: {
+                            channels: { type: Array, default: [] },
+                            roles: { type: Array, default: [] },
+                            permissions: { type: Array, default: [8] }
                         }
                     }
                 },
@@ -544,20 +553,17 @@ export default model<ServerDocument>(
                     violators: { type: Array, default: [] }
                 },
                 roles: {
-                    mute: { type: String, default: null },
-                    temporary: { type: Array, default: [] },
-                    on_mute: {
-                        remove_all_roles: { type: Boolean, default: false },
-                        strict_roles: { type: Array, default: [] },
-                        returnable_roles: { type: Array, default: [] }
-                    }
+                    temporary: { type: Array, default: [] }
                 },
                 tempbans: { type: Array, default: [] },
-                tempmutes: { type: Array, default: [] },
-                use_timeout_mute: { type: Boolean, default: true },
                 respect_hierarchy: { type: Boolean, default: true },
                 deny_moderate_users_with_mp: { type: Boolean, default: true },
                 unmoderated_roles: { type: Array, default: [] }
+                mutes: {
+                    rar: { type: Boolean, default: false },
+                    rar_strict: { type: Array, default: [] },
+                    rar_data: { type: Array, default: [] }
+                }
             },
             modules: {
                 welcome: {
@@ -746,7 +752,8 @@ export default model<ServerDocument>(
                     twitch: { type: Array, default: [] },
                     youtube: { type: Array, default: [] }
                 },
-                interactive_messages: { type: Array, default: [] }
+                interactive_messages: { type: Array, default: [] },
+                custom_commands: { type: Array, default: [] }
             },
             utility: {
                 giveaways: { type: Array, default: [] }
@@ -772,19 +779,9 @@ export interface ServerDocument extends Document {
         bot_expert_roles: string[]
     }
     commands: {
+        configuration: ISystemCommandConfig[]
         system: SystemCommand[]
         custom: CustomCommand[]
-        /** @deprecated */
-        permissions: {
-            allowed: {
-                channels: string[]
-                roles: string[]
-            }
-            blocked: {
-                channels: string[]
-                roles: string[]
-            }
-        }
         slash_commands: boolean
         prefix_commands: boolean
     }
@@ -793,6 +790,18 @@ export interface ServerDocument extends Document {
             cases: ModerationCase[]
             case_count: number
             channel_id: string
+            types: {
+                [key: string]: {
+                    active: boolean
+                    channel_id: string
+                    custom_dm_message: boolean
+                    dm_message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                }
+            }
+            /** @deprecated */
             case_types: {
                 BAN_ADD: boolean
                 BAN_REMOVE: boolean
@@ -803,6 +812,7 @@ export interface ServerDocument extends Document {
                 WARN_ADD: boolean
                 WARN_REMOVE: boolean
             }
+            /** @deprecated */
             case_types_messages: {
                 BAN_ADD: {
                     active: boolean
@@ -995,70 +1005,22 @@ export interface ServerDocument extends Document {
             }
         }
         automoder: {
-            swear_filter: {
-                active: boolean
-                registry: string[]
-                penalty: {
-                    action: number
-                    timer: number
-                    message: {
-                        content: string
-                        embed: MessageEmbed
-                    }
-                    add_roles: string[]
-                    remove_roles: string[]
-                }
-                ignored: {
-                    channels: string[]
-                    roles: string[]
-                    permissions: number
-                }
-            }
-            links_filter: {
-                active: boolean
-                registry: string[]
-                allowed_registry: string[]
-                delete_all_links: boolean
-                delete_referral_invites: boolean
-                penalty: {
-                    action: number
-                    timer: number
-                    message: {
-                        content: string
-                        embed: MessageEmbed
-                    }
-                    add_roles: string[]
-                    remove_roles: string[]
-                }
-                ignored: {
-                    channels: string[]
-                    roles: string[]
-                    permissions: number
-                }
-            }
-            users_slowdown: {
-                active: boolean
-                messages_limit: number
-                penalty: {
-                    action: number
-                    timer: number
-                    message: {
-                        content: string
-                        embed: MessageEmbed
-                    }
-                    add_roles: string[]
-                    remove_roles: string[]
-                }
-                ignored: {
-                    channels: string[]
-                    roles: string[]
-                    permissions: number
-                }
-            }
             anti_caps: {
                 active: boolean
                 percentage_of_caps: number
                 minimum_content_length: number
+                options: ('ACTION_BAN' | 'ACTION_MUTE' | 'ACTION_KICK' | 'ACTION_WARN' | 'ACTION_MODIFY_ROLES' | 'ACTION_SEND_MESSAGE' | 'ACTION_DELETE_MESSAGE')[]
+                ban_timeout?: number
+                mute_timeout?: number
+                modify_roles: {
+                    add: string[]
+                    remove: string[]
+                }
+                send_message: {
+                    content: string
+                    embed: MessageEmbed
+                }
+                /** @deprecated */
                 penalty: {
                     action: number
                     timer: number
@@ -1072,11 +1034,81 @@ export interface ServerDocument extends Document {
                 ignored: {
                     channels: string[]
                     roles: string[]
-                    permissions: number
+                    permissions: number[]
+                }
+            }
+            links_filter: {
+                active: boolean
+                allowed_registry: string[]
+                blocked_registry: string[]
+                options: (
+                    | 'DELETE_ALL_LINKS'
+                    | 'DELETE_REFERRAL_INVITES'
+                    | 'ACTION_BAN'
+                    | 'ACTION_MUTE'
+                    | 'ACTION_KICK'
+                    | 'ACTION_WARN'
+                    | 'ACTION_MODIFY_ROLES'
+                    | 'ACTION_SEND_MESSAGE'
+                    | 'ACTION_DELETE_MESSAGE'
+                )[]
+                ban_timeout?: number
+                mute_timeout?: number
+                modify_roles: {
+                    add: string[]
+                    remove: string[]
+                }
+                send_message: {
+                    content: string
+                    embed: MessageEmbed
+                }
+                /** @deprecated */
+                delete_all_links: boolean
+                /** @deprecated */
+                delete_referral_invites: boolean
+                /** @deprecated */
+                penalty: {
+                    action: number
+                    timer: number
+                    message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                    add_roles: string[]
+                    remove_roles: string[]
+                }
+                ignored: {
+                    channels: string[]
+                    roles: string[]
+                    permissions: number[]
+                }
+            }
+            newbies: {
+                active: boolean
+                minimum_account_age: {
+                    value: number
+                    measure: 'MINUTES' | 'HOURS' | 'DAYS'
+                }
+                options: ('ACTION_BAN' | 'ACTION_MUTE' | 'ACTION_KICK' | 'ACTION_MODIFY_ROLES')[]
+                ban_timeout?: number
+                mute_timeout?: number
+                modify_roles: {
+                    add: string[]
+                    remove: string[]
+                }
+                /** @deprecated */
+                penalty: {
+                    action: number
+                    timer: number
+                    add_roles: string[]
+                    remove_roles: string[]
                 }
             }
             nicknames: {
                 active: boolean
+                options: ('SPECIAL_CHARACTERS' | 'ZALGO' | 'DIACRITICS' | 'EMOJIS')[]
+                contains: string[]
+                /** @deprecated */
                 types: {
                     special_characters: boolean
                     zalgo: boolean
@@ -1090,21 +1122,70 @@ export interface ServerDocument extends Document {
                 }
                 ignored: {
                     roles: string[]
-                    permissions: number
+                    permissions: number[]
                     bots: boolean
                 }
             }
-            newbies: {
+            swear_filter: {
                 active: boolean
-                minimum_account_age: {
-                    value: number
-                    measure: 'MINUTES' | 'HOURS' | 'DAYS'
+                registry: string[]
+                options: ('ACTION_BAN' | 'ACTION_MUTE' | 'ACTION_KICK' | 'ACTION_WARN' | 'ACTION_MODIFY_ROLES' | 'ACTION_SEND_MESSAGE' | 'ACTION_DELETE_MESSAGE')[]
+                ban_timeout?: number
+                mute_timeout?: number
+                modify_roles: {
+                    add: string[]
+                    remove: string[]
                 }
+                send_message: {
+                    content: string
+                    embed: MessageEmbed
+                }
+                /** @deprecated */
                 penalty: {
                     action: number
                     timer: number
+                    message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
                     add_roles: string[]
                     remove_roles: string[]
+                }
+                ignored: {
+                    channels: string[]
+                    roles: string[]
+                    permissions: number[]
+                }
+            }
+            users_slowdown: {
+                active: boolean
+                messages_limit: number
+                options: ('ACTION_BAN' | 'ACTION_MUTE' | 'ACTION_KICK' | 'ACTION_WARN' | 'ACTION_MODIFY_ROLES' | 'ACTION_SEND_MESSAGE' | 'ACTION_DELETE_MESSAGE')[]
+                ban_timeout?: number
+                mute_timeout?: number
+                modify_roles: {
+                    add: string[]
+                    remove: string[]
+                    }
+                send_message: {
+                    content: string
+                    embed: MessageEmbed
+                }
+                /** @deprecated */
+                penalty: {
+                    action: number
+                    timer: number
+                    message: {
+                        content: string
+                        embed: MessageEmbed
+                    }
+                    add_roles: string[]
+                    remove_roles: string[]
+                }
+                ignored: {
+                    channels: string[]
+                    roles: string[]
+                    permissions: number[]
                 }
             }
         }
@@ -1113,8 +1194,10 @@ export interface ServerDocument extends Document {
             violators: WarningsViolator[]
         }
         roles: {
+            /** @deprecated */
             mute: string
             temporary: TemporaryRoleEntry[]
+            /** @deprecated */
             on_mute: {
                 remove_all_roles: boolean
                 strict_roles: string[]
@@ -1122,11 +1205,18 @@ export interface ServerDocument extends Document {
             }
         }
         tempbans: TemporaryBanEntry[]
+        /** @deprecated */
         tempmutes: TemporaryMuteEntry[]
+        /** @deprecated */
         use_timeout_mute: boolean
         respect_hierarchy: boolean
         deny_moderate_users_with_mp: boolean
         unmoderated_roles: string[]
+        mutes: {
+            rar: boolean
+            rar_strict: string[]
+            rar_data: Array<{ user_id: string; roles: string[] }>
+        }
     }
     modules: {
         welcome: {
@@ -1178,10 +1268,6 @@ export interface ServerDocument extends Document {
         }
         voice_manager: {
             voice_roles: VoiceRole[]
-            /** @deprecated */
-            temp_voice_channels: {
-                triggers: any[]
-            }
             autovoices: IAutoVoice[]
         }
         restoring: {
@@ -1215,16 +1301,6 @@ export interface ServerDocument extends Document {
             }
             minimum: number
         }
-        /** @deprecated */
-        twitch: {
-            custom_client_id: string
-            channels: TwitchChannel[]
-        }
-        /** @deprecated */
-        youtube: {
-            custom_api_key: string
-            channels: YouTubeChannel[]
-        }
         autoreactions: AutoReaction[]
         economy: {
             active: boolean
@@ -1239,15 +1315,31 @@ export interface ServerDocument extends Document {
             youtube: IYouTubeSubscription[]
         }
         interactive_messages: InteractiveMessage[]
+        custom_commands: ICustomCommand[]
     }
     utility: {
         giveaways: Giveaway[]
     }
     created_at: number
-    /** @deprecated */
-    modified_at: number
     activity_ping_at: number
     change_log: ChangeLog[]
+}
+
+export interface ISystemCommandConfig {
+    name: string
+    inactive: boolean
+    options: string[]
+    permissions: {
+        allowed_channels: string[]
+        allowed_roles: string[]
+        blocked_channels: string[]
+        blocked_roles: string[]
+    }
+    throttling?: {
+        type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
+        max_uses: number
+        timeout: number
+    }
 }
 
 export interface SystemCommand {
@@ -1275,6 +1367,116 @@ export interface SystemCommand {
         roles: string[]
     }
 }
+
+export interface ICustomCommand {
+    id: string
+    options: string[]
+    components: ICustomCommandComponent[]
+    command: {
+        type: number
+        name: string
+        description: string
+        name_localizations?: {
+            [key: string]: string
+        }
+        description_localizations?: {
+            [key: string]: string
+        }
+        options: ICustomCommandOption[]
+    }
+    permissions: {
+        allowed_channels: string[]
+        allowed_roles: string[]
+        blocked_channels: string[]
+        blocked_roles: string[]
+    }
+    throttling?: {
+        type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
+        max_uses: number
+        timeout: number
+    }
+}
+
+export interface ICustomCommandComponent {
+    type: 'CONDITION' | 'ACTION'
+    condition?: {
+        type: 'COMPARE_VALUES' | 'USER_VALIDATION' | 'IF_BLOCK'
+        compare_values?: {
+            operator: 'EQUAL' | 'NOT_EQUAL' | 'GREATER_THAN' | 'LESS_THAN' | 'STARTS_WITH' | 'ENDS_WITH' | 'CONTAINS' | 'NOT_CONTAINS'
+            left: string
+            right: string
+        }
+        user_validation?: {
+            operator: 'HAS_ROLES' | 'MISSING_ROLES' | 'HAS_PERMISSIONS' | 'MISSING_PERMISSIONS'
+            roles?: string[]
+            permissions?: string[]
+        }
+        if_block?: {
+            condition: {
+                type: 'COMPARE_VALUES' | 'USER_VALIDATION'
+                compare_values?: {
+                    operator: 'EQUAL' | 'NOT_EQUAL' | 'GREATER_THAN' | 'LESS_THAN' | 'STARTS_WITH' | 'ENDS_WITH' | 'CONTAINS' | 'NOT_CONTAINS'
+                    left: string
+                    right: string
+                }
+                user_validation?: {
+                    operator: 'HAS_ROLES' | 'MISSING_ROLES' | 'HAS_PERMISSIONS' | 'MISSING_PERMISSIONS'
+                    roles?: string[]
+                    permissions?: string[]
+                }
+            }
+            components: ICustomCommandComponent[]
+        }
+    }
+    action?: {
+        type: 'SEND_MESSAGE' | 'MODIFY_ROLES' | 'FORWARD_TO_COMMAND' | 'MODIFY_WALLET'
+        send_message?: {
+            format: 'CHANNEL' | 'CURRENT_CHANNEL'
+            channel_id: string
+            message: {
+                content: string
+                embed: MessageEmbed
+            }
+            tts: boolean
+            ephemeral: boolean
+        }
+        modify_roles?: {
+            user_id: string
+            add: string[]
+            remove: string[]
+            duration: number
+        }
+        forward_to_command?: string
+        modify_wallet?: {}
+    }
+}
+
+export interface ICustomCommandOption {
+    type: 'STRING' | 'INTEGER' | 'BOOLEAN' | 'USER' | 'CHANNEL' | 'ROLE' | 'MENTIONABLE' | 'NUMBER'
+    name: string
+    description: string
+    name_localizations?: {
+        [key: string]: string
+    }
+    description_localizations?: {
+        [key: string]: string
+    }
+    required: boolean
+    choices: ICustomCommandOptionChoice[]
+    channel_types?: ICustomCommandOptionChannelTypes[]
+    min_value?: number
+    max_value?: number
+}
+
+export interface ICustomCommandOptionChoice {
+    name: string
+    name_localizations?: {
+        [key: string]: string
+    }
+    value: string | number
+}
+
+export type ICustomCommandOptionChannelTypes = 'GUILD_TEXT' | 'GUILD_VOICE' | 'GUILD_CATEGORY' | 'GUILD_NEWS'
 
 export interface CustomCommand {
     name: string
@@ -1391,13 +1593,29 @@ export interface LogsWebhook {
 export interface WarningsPenalty {
     id: string
     penalties: number
+    options: ('ACTION_BAN' | 'ACTION_MUTE' | 'ACTION_KICK' | 'ACTION_MODIFY_ROLES' | 'ACTION_SEND_MESSAGE' | 'ACTION_RESET_VIOLATIONS')[]
+    ban_timeout?: number
+    mute_timeout?: number
+    modify_roles?: {
+        add: string[]
+        remove: string[]
+    }
+    send_message?: {
+        content: string
+        embed: MessageEmbed
+    }
+    /** @deprecated */
     action: number
+    /** @deprecated */
     duration: number
+    /** @deprecated */
     message: {
         content: string
         embed: MessageEmbed
     }
+    /** @deprecated */
     add_roles: string[]
+    /** @deprecated */
     remove_roles: string[]
 }
 
@@ -1616,35 +1834,6 @@ export interface RestoringData {
     timestamp: number
 }
 
-/** @deprecated */
-export interface TwitchChannel {
-    active: boolean
-    live: boolean
-    last_check_timestamp: number
-    channel: {
-        id: number
-        display_name: string
-        logo: string
-    }
-    alerts: {
-        channel_id: string
-        /** @deprecated */
-        message_template: string
-        message: {
-            content: string
-        }
-        display_preview: boolean
-        after_end: {
-            delete_alert: boolean
-            message_id: string
-        }
-        webhook: {
-            id: string
-            token: string
-        }
-    }
-}
-
 export interface ITwitchSubscription {
     broadcaster_id: string
     broadcaster_name: string
@@ -1664,37 +1853,6 @@ export interface IYouTubeSubscription {
     notification_message: { content: string }
     webhook_id: string
     webhook_token: string
-}
-
-/** @deprecated */
-export interface YouTubeChannel {
-    active: boolean
-    last_video_id: string
-    last_check_timestamp: number
-    channel: {
-        id: string
-        name: string
-        thumbnail: string
-    }
-    alerts: {
-        channel_id: string
-        /** @deprecated */
-        videos_message_template: string
-        /** @deprecated */
-        broadcasts_message_template: string
-        videos_message: {
-            content: string
-        }
-        broadcasts_message: {
-            content: string
-        }
-        videos: boolean
-        broadcasts: boolean
-        webhook: {
-            id: string
-            token: string
-        }
-    }
 }
 
 export interface AutoReaction {

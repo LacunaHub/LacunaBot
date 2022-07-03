@@ -9,7 +9,6 @@ const handler = async (self, player: Player) => {
     }
 
     player.set('message', null)
-    player.set('collector', null)
 
     return true
 }

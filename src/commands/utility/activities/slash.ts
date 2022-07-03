@@ -11,7 +11,10 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['set-level'].texts.no_mention, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.activities['set-level'].texts.no_mention,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
             ephemeral: true
         })
 
@@ -111,7 +114,10 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
 
     if (!amount && typeof amount !== 'number') {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['set-wallet-balance'].texts.no_amount, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.activities['set-wallet-balance'].texts.no_amount,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
             ephemeral: true
         })
 
@@ -198,6 +204,117 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     return true
 }
 
+export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+    const locale = self.translator.locale(server.locale).commands
+
+    const mention = interaction.options?.getMember(locale.activities['add-wallet-balance'].options.user.name) as GuildMember
+    let amount = interaction.options?.getInteger(locale.activities['add-wallet-balance'].options.amount.name)
+    const currency = interaction.options?.getString(locale.activities['add-wallet-balance'].options.currency.name)
+
+    if (!mention) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.activities['set-wallet-balance'].texts.no_mention,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    if (!amount && typeof amount !== 'number') {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.activities['set-wallet-balance'].texts.no_amount,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    const INT32_MAX = Math.pow(2, 31) - 1
+
+    if (amount < 0 || amount > INT32_MAX) amount = amount > INT32_MAX ? INT32_MAX : 1
+
+    let user = await self.db.users.findOne({ _id: mention.id })
+
+    if (!user) {
+        user = await self.db.users.create({
+            _id: mention.id,
+            user: {
+                username: mention.user.username,
+                discriminator: mention.user.discriminator,
+                avatar: mention.user.avatar,
+                flags: mention.user.flags?.bitfield ?? 0
+            }
+        } as any)
+    }
+
+    let wallet = user.activities.wallets.find(i => i.guild_id == interaction.guildId)
+
+    if (!wallet) {
+        wallet = {
+            guild_id: interaction.guildId,
+            currencies: [],
+            transactions: [],
+            activity: {
+                last_message_at: 0,
+                voice_connected_at: 0
+            }
+        }
+
+        await self.db.users.updateOne(
+            { _id: mention.id },
+            {
+                $push: { 'activities.wallets': wallet as never }
+            }
+        )
+    }
+
+    const currency_id = server.modules.economy.currencies.find(c => c.name == currency || c.symbol == currency)?.id ?? 'DEFAULT'
+    const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id == currency_id)
+
+    if (wallet.currencies.some(c => c.id == currency_id)) {
+        await self.db.users.updateOne(
+            { _id: mention.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } },
+            {
+                $inc: {
+                    'activities.wallets.$[guild].currencies.$[currency].amount': amount
+                }
+            },
+            { arrayFilters: [{ 'guild.guild_id': interaction.guildId }, { 'currency.id': currency_id }] }
+        )
+    } else {
+        await self.db.users.updateOne(
+            { _id: mention.id, 'activities.wallets.guild_id': interaction.guildId },
+            {
+                $push: {
+                    'activities.wallets.$.currencies': {
+                        id: currency_id,
+                        amount
+                    }
+                }
+            }
+        )
+    }
+
+    const reply = Math.random() <= 0.2 ? locale.activities['set-wallet-balance'].texts.success_2 : locale.activities['add-wallet-balance'].texts.success
+
+    await interaction.reply({
+        content: `${self._emojis.OK} | ${self.translator.format(
+            reply,
+            `**${(interaction.member as any).displayName}**`,
+            `**${mention.displayName}**`,
+            `**${amount}${currency_symbol}**`
+        )}`
+    })
+
+    return true
+}
+
 export async function resetWalletSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
     const locale = self.translator.locale(server.locale).commands
 
@@ -227,7 +344,10 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
         await interaction.deferReply({ ephemeral: true })
 
         const message = (await interaction.editReply({
-            content: `:grey_question: | ${self.translator.format(locale.activities['reset-wallet'].texts.confirmation, `**${(interaction.member as any).displayName}**`)}`,
+            content: `:grey_question: | ${self.translator.format(
+                locale.activities['reset-wallet'].texts.confirmation,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
             components: [row]
         })) as Message
 
@@ -254,7 +374,10 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
 
                     const reply = Math.random() <= 0.3 ? locale.activities['reset-wallet'].texts.confirmed_2 : locale.activities['reset-wallet'].texts.confirmed
 
-                    await i.editReply({ content: `${self._emojis.OK} | ${self.translator.format(reply, `**${(interaction.member as any).displayName}**`)}`, components: [] })
+                    await i.editReply({
+                        content: `${self._emojis.OK} | ${self.translator.format(reply, `**${(interaction.member as any).displayName}**`)}`,
+                        components: []
+                    })
                     break
 
                 case 'cancel':
@@ -279,7 +402,10 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
         )
 
         await interaction.reply({
-            content: `${self._emojis.OK} | ${self.translator.format(locale.activities['reset-wallet'].texts.reset_user, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.OK} | ${self.translator.format(
+                locale.activities['reset-wallet'].texts.reset_user,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
             ephemeral: true
         })
     }
@@ -295,7 +421,10 @@ export async function resetLevelSlash(self: Lacuna, server: ServerDocument, inte
 
     if (!member && !member_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.activities['reset-level'].texts.no_mention, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${self.translator.format(
+                locale.activities['reset-level'].texts.no_mention,
+                `**${(interaction.member as any).displayName}**`
+            )}`,
             ephemeral: true
         })
 

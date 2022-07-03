@@ -41,7 +41,7 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
         if (
             case_log &&
             member.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) &&
-            (server.moderation.case_log.case_types.MUTE_ADD || server.moderation.case_log.case_types.MUTE_REMOVE)
+            (server.moderation.case_log.types.MUTE_ADD.active || server.moderation.case_log.types.MUTE_REMOVE.active)
         ) {
             const audit = await member.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_UPDATE' })
             const entry = audit.entries.find(e => (e.target as User).id == member.id)

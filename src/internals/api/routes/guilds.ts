@@ -35,6 +35,8 @@ async function getSettings(ctx: Context) {
     const guildChannels = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildChannels(guild_id)).catch(() => {})) as any[]) ?? []
     const guildRoles = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildRoles(guild_id)).catch(() => {})) as any[]) ?? []
     const guildEmojis = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildEmojis(guild_id)).catch(() => {})) as any[]) ?? []
+    const guildCommands =
+        ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild_id)).catch(() => {})) as any[]) ?? []
 
     const selfRoles = selfMember
         ? guildRoles.sort((a, b) => a.position - b.position).filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID)
@@ -63,10 +65,16 @@ async function getSettings(ctx: Context) {
         return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` }
     })
 
-    const locale = translator.locale(server.locale)
-    const commands = qdb.get('commands').map(c => {
-        return { ...c, description: resolveObjectPath(c.description, locale), options: [] }
+    const commands = qdb.get('commands').map((i: any) => {
+        const guildCommand = guildCommands.find(j => i.name === j.name)
+
+        return {
+            name: i.name,
+            description: guildCommand?.description,
+            group: i.group
+        }
     })
+
     const { diamondPrices: prices } = await db.json.get()
 
     ctx.status = 200
@@ -84,15 +92,16 @@ async function getSettings(ctx: Context) {
         },
         guild: {
             ...JSON.parse(partial),
-            channels: channels,
+            channels,
             roles: roles.filter(r => r.id != guild_id),
-            emojis: emojis
+            emojis,
+            commands,
+            app_commands_registered: guildCommands.length > 0
         },
         moderation: {
             case_log: {
                 channel_id: server.moderation.case_log.channel_id,
-                case_types: server.moderation.case_log.case_types,
-                case_types_messages: server.moderation.case_log.case_types_messages
+                types: server.moderation.case_log.types
             },
             logs: {
                 types: server.moderation.logs.types
@@ -100,15 +109,11 @@ async function getSettings(ctx: Context) {
             warnings: {
                 penalties: server.moderation.warnings.penalties
             },
-            roles: {
-                mute: server.moderation.roles.mute,
-                on_mute: {
-                    remove_all_roles: server.moderation.roles.on_mute.remove_all_roles,
-                    strict_roles: server.moderation.roles.on_mute.strict_roles
-                }
-            },
             automoder: server.moderation.automoder,
-            use_timeout_mute: server.moderation.use_timeout_mute
+            mutes: {
+                rar: server.moderation.mutes.rar,
+                rar_strict: server.moderation.mutes.rar_strict
+            }
         },
         modules: {
             welcome: server.modules.welcome,
@@ -168,8 +173,7 @@ async function updateSettings(ctx: Context) {
         moderation: {
             case_log: {
                 channel_id: server.moderation.case_log.channel_id,
-                case_types: server.moderation.case_log.case_types,
-                case_types_messages: server.moderation.case_log.case_types_messages
+                types: server.moderation.case_log.types
             },
             logs: {
                 types: server.moderation.logs.types
@@ -177,15 +181,11 @@ async function updateSettings(ctx: Context) {
             warnings: {
                 penalties: server.moderation.warnings.penalties
             },
-            roles: {
-                mute: server.moderation.roles.mute,
-                on_mute: {
-                    remove_all_roles: server.moderation.roles.on_mute.remove_all_roles,
-                    strict_roles: server.moderation.roles.on_mute.strict_roles
-                }
-            },
             automoder: server.moderation.automoder,
-            use_timeout_mute: server.moderation.use_timeout_mute
+            mutes: {
+                rar: server.moderation.mutes.rar,
+                rar_strict: server.moderation.mutes.rar_strict
+            }
         },
         modules: {
             welcome: server.modules.welcome,

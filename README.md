@@ -217,18 +217,30 @@ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
     "diamondPrices": [
         {
             "months": 1,
-            "price": 95,
-            "discount": 0
+            "prices": {
+                "RUB": 95
+            },
+            "discounts": {
+                "RUB": 0
+            }
         },
         {
             "months": 3,
-            "price": 270,
-            "discount": 0
+            "prices": {
+                "RUB": 270
+            },
+            "discounts": {
+                "RUB": 0
+            }
         },
         {
             "months": 6,
-            "price": 525,
-            "discount": 0
+            "prices": {
+                "RUB": 525
+            },
+            "discounts": {
+                "RUB": 0
+            }
         }
     ],
     "allowedApiHosts": [],
@@ -247,14 +259,21 @@ CLIENT_SECRET=
 CLIENT_TOKEN=
 CLIENT_MAX_SHARDS=1
 
-# Discord OAuth2
-REDIRECT_URI=API_URL/authorize/callback
-
 # Database
 DB_URL=
 
+# API & Website
+API_PORT=
+WEBSITE_DOMAIN=localhost
+# Only for local development
+WEBSITE_PORT=9000
+
 # Music Nodes
 WINTER_MUSIC_NODE=NAME:IP:PORT:PASSWORD
+
+# Spotify
+SPOTIFY_CLIENT_ID=
+SPOTIFY_CLIENT_SECRET=
 
 # Twitch
 TWITCH_CLIENT_ID=
@@ -270,14 +289,6 @@ YOUTUBE_HMAC_SECRET=
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_LOG_CHAT_ID=
 
-# Website
-WEBSITE_URL=
-WEBSITE_DOMAIN=
-
-# API
-SERVER_PORT=
-API_URL=
-
 # Listings
 BDGG_API_KEY=
 TOPGG_API_KEY=
@@ -285,6 +296,10 @@ TOPGG_API_KEY=
 # QIWI
 QIWI_PUBLIC_KEY=
 QIWI_SECRET_KEY=
+
+# PayPal
+PAYPAL_CLIENT_ID=
+PAYPAL_SECRET=
 ```
 
 Генерация ранговой карточки использует шрифт [Gotham Pro](https://fonts-online.ru/fonts/gotham-pro). Желательно его установить

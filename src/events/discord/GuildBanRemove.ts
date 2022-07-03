@@ -9,7 +9,7 @@ const handler = async (self: Lacuna, ban: GuildBan) => {
 
     const case_log = ban.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
 
-    if (case_log && ban.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) && server.moderation.case_log.case_types.BAN_REMOVE) {
+    if (case_log && ban.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) && server.moderation.case_log.types.BAN_REMOVE.active) {
         const audit = await ban.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_BAN_REMOVE' })
         const entry = audit.entries.find(e => (e.target as User).id == ban.user.id)
 
