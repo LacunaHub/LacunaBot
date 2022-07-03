@@ -21,15 +21,6 @@ const handler = async (self: Lacuna, message: Message) => {
 
     await message.member.fetch()
 
-    if (message.member && message.member.roles.cache.has(server.moderation.roles.mute) && !message.member.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_MESSAGES)) {
-        const mute_role = message.guild.roles.cache.get(server.moderation.roles.mute)
-        const has_permissions = message.channel.permissionsFor(mute_role.id).has(self.PERMISSIONS_FLAGS.SEND_MESSAGES)
-
-        if (message.deletable && !has_permissions) await message.delete()
-
-        return false
-    }
-
     const splitted = message.content.split(/\s+/)
     const command_name = splitted.shift().toLowerCase()
     message['args'] = parseCommandArguments(splitted.join(' '))

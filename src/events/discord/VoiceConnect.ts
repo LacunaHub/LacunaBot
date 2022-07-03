@@ -38,13 +38,6 @@ const handler = async (self: Lacuna, state: VoiceState) => {
         if (voice_roles.size) await state.member.roles.add(voice_roles, locale.voice_manager.voice_add_roles_reason).catch(() => {})
     }
 
-    const mute_role = state.guild.roles.cache.get(server.moderation.roles.mute)
-    const tempmute = self.tempmutes.get(`${state.guild.id}:${state.member.id}`)
-
-    if ((mute_role && state.member.roles.cache.has(mute_role.id)) || tempmute) {
-        if (state.member.manageable) await state.setMute(true).catch(() => {})
-    }
-
     await levelsVoiceAssign(self, server, state)
     await economyVoiceAssign(self, server, state)
 
