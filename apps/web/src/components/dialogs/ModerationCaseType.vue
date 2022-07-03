@@ -1,7 +1,7 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
     <q-card class="rounded-lg bg-dark-grey-2" style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
+      <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
             {{ $t(`common.case_log_keys.${caseType.name}`) }}
@@ -69,7 +69,7 @@
       </q-card-section>
 
       <q-list v-if="caseType.config.custom_dm_message !== undefined" class="q-px-none" padding dense>
-        <q-item tag="label" v-ripple>
+        <q-item tag="label" :disable="!caseType.config.active" v-ripple="caseType.config.active">
           <q-item-section>
             <q-item-label>
               {{ $t('mod_case_type.custom_dm_message_title') }}
@@ -77,7 +77,11 @@
           </q-item-section>
 
           <q-item-section side>
-            <q-checkbox v-model="caseType.config.custom_dm_message" dense></q-checkbox>
+            <q-checkbox
+              v-model="caseType.config.custom_dm_message"
+              :disable="!caseType.config.active"
+              dense
+            ></q-checkbox>
           </q-item-section>
         </q-item>
       </q-list>
