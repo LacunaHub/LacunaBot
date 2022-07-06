@@ -56,7 +56,21 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
     const current_level: number = level.experience.level,
         next_level = 150 + current_level * current_level * 8
 
-    const points: number = Math.floor(Math.random() * 11) + 15 + current_level
+    const multipliers = server.modules.activities.multipliers
+        .filter(i => {
+            if (i.blocked_channels.includes(message.channelId)) return false
+            if (message.member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
+            if (i.allowed_channels.length && !i.allowed_channels.includes(message.channelId)) return false
+            if (i.allowed_roles.length && !message.member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
+
+            return i.options.includes('LEVELS_TEXT')
+        })
+        .slice(0, server.server.premium.available ? 10 : 1)
+
+    const multiplier = multipliers.reduce((x, y) => x * (y.levels_text_multiplier / 100), 100) / 100
+    let points: number = Math.floor(Math.random() * 11) + 15 + current_level
+
+    points *= multiplier || 1
 
     if (next_level - current_xp <= points) {
         await self.db.users.updateOne(
@@ -104,7 +118,8 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 export async function voiceAssign(self: Lacuna, server: ServerDocument, state: VoiceState): Promise<boolean> {
     if (!server.modules.levels.voice) return false
 
-    if (server.modules.levels.blocked.channels.includes(state.channelId) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))) return false
+    if (server.modules.levels.blocked.channels.includes(state.channelId) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id)))
+        return false
     if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channelId)) return false
     if (server.modules.levels.allowed.roles.length && !state.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id))) return false
     if (state.guild.afkChannelId === state.channelId) return false
@@ -178,10 +193,10 @@ export async function voiceUnassign(self: Lacuna, server: ServerDocument, state:
 
     const members = channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
-    if (members) await voiceCount(self, server, members.size == 1 ? [state.member, members.first()] : [state.member])
+    if (members) await voiceCount(self, server, members.size == 1 ? [state.member, members.first()] : [state.member], channel)
 }
 
-export async function voiceCount(self: Lacuna, server: ServerDocument, members: GuildMember[]) {
+export async function voiceCount(self: Lacuna, server: ServerDocument, members: GuildMember[], channel: BaseGuildVoiceChannel) {
     for (const member of members) {
         const user = await self.db.users.findOne({ _id: member.user.id })
         const level = user?.activities?.levels?.find(i => i.guild_id == server._id)
@@ -192,13 +207,32 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
         const current_level: number = level.experience.level,
             next_level: number = 150 + current_level * current_level * 8
 
+        const multipliers = server.modules.activities.multipliers
+            .filter(i => {
+                if (i.blocked_channels.includes(channel.id)) return false
+                if (member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
+                if (i.allowed_channels.length && !i.allowed_channels.includes(channel.id)) return false
+                if (i.allowed_roles.length && !member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
+
+                return i.options.includes('LEVELS_VOICE')
+            })
+            .slice(0, server.server.premium.available ? 10 : 1)
+
+        const multiplier = multipliers.reduce((x, y) => x * (y.levels_voice_multiplier / 100), 100) / 100
         const time: number = (Date.now() - level.activity.voice_connected_at) / 1000
-        const points: number = ((time / 60) * (time / 60 / 60 <= 0 ? 1 : time / 60 / 60) + (5 / 100) * time) * ((10 / 100) * current_level < 1 ? 1 : (10 / 100) * current_level)
+        let points: number =
+            ((time / 60) * (time / 60 / 60 <= 0 ? 1 : time / 60 / 60) + (5 / 100) * time) * ((10 / 100) * current_level < 1 ? 1 : (10 / 100) * current_level)
+
+        points *= multiplier || 1
 
         if (next_level - current_xp <= points) {
             let new_level: number, new_current_xp: number
 
-            for (new_level = current_level, new_current_xp = points + current_xp; new_current_xp >= neededXp(new_level); new_current_xp -= neededXp(new_level), new_level++) {}
+            for (
+                new_level = current_level, new_current_xp = points + current_xp;
+                new_current_xp >= neededXp(new_level);
+                new_current_xp -= neededXp(new_level), new_level++
+            ) {}
 
             await self.db.users.updateOne(
                 { _id: member.id, 'activities.levels.guild_id': server._id },
@@ -263,7 +297,11 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
             }
         }
 
-        self.emit('moduleExecution', { module: 'Levels: Update Awards', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+        self.emit('moduleExecution', {
+            module: 'Levels: Update Awards',
+            guild: { id: member.guild.id, name: member.guild.name },
+            target: { id: member.id, name: member.user.tag }
+        })
     }
 
     if (!award && prevAward) {
@@ -323,7 +361,8 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
     let mention: GuildMember
 
     if (signal instanceof CommandInteraction) mention = (signal.options?.getMember('пользователь') || signal.member) as GuildMember
-    if (signal instanceof Message) mention = signal.mentions.members.first() || (signal['args'][0] ? await signal.guild.members.fetch(signal['args'][0]) : null) || signal.member
+    if (signal instanceof Message)
+        mention = signal.mentions.members.first() || (signal['args'][0] ? await signal.guild.members.fetch(signal['args'][0]) : null) || signal.member
     if (signal instanceof ContextMenuInteraction) mention = await signal.guild.members.fetch(signal.targetId)
 
     const activities = (await self.db.users.find({ 'activities.levels.guild_id': signal.guildId })).map(i => ({
@@ -478,7 +517,9 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
     ctx.drawImage(microphone, 615 - m3.width / 2 - 25 - m5.width, 95, 25, 25)
 
     const current_xp_format =
-        level.experience.current >= 1000 ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 2 }).toUpperCase() : Math.floor(level.experience.current)
+        level.experience.current >= 1000
+            ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 2 }).toUpperCase()
+            : Math.floor(level.experience.current)
     const next_xp_format = formula >= 1000 ? numbro(formula).format({ average: true, mantissa: 2 }).toUpperCase() : formula
 
     ctx.textBaseline = 'top'

@@ -1235,6 +1235,15 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 updateData['modules.economy.store.items'] = data.modules.economy.store.items
             }
         }
+
+        if (data.modules.activities) {
+            if (
+                Array.isArray(data.modules.activities.multipliers) &&
+                JSON.stringify(data.modules.activities.multipliers) !== JSON.stringify(guild.modules.activities.multipliers)
+            ) {
+                updateData['modules.activities.multipliers'] = data.modules.activities.multipliers.slice(0, guild.server.premium.available ? 10 : 1)
+            }
+        }
     }
 
     if (Object.keys(updateData).length) {
