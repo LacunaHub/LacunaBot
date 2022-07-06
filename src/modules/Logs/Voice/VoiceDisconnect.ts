@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, state: VoiceState, channel: VoiceChannel): Promise<boolean> {
     if (server.moderation.logs.types.voice_disconnect.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_disconnect.channel_id) as BaseGuildTextChannel
 
@@ -31,7 +31,7 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_disconnect.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.voice_disconnect_title') })
                     })
                 } catch (err) {
                     return false
@@ -52,8 +52,8 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             }
 
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.voice_disconnect.title)
-                .setDescription(self.translator.format(locale.logs.voice_disconnect.template, `**${state.member.user.tag}**`, `<#${channel?.id ?? '1'}>`))
+                .setTitle(t('logs.voice_disconnect_title'))
+                .setDescription(t('logs.voice_disconnect_template', { user: `**${state.member.user.tag}**`, channel: `<#${channel?.id ?? '1'}>` }))
                 .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#EF5350')

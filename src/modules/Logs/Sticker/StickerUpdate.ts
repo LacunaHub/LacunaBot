@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: Sticker, sticker: Sticker): Promise<boolean> {
     if (server.moderation.logs.types.sticker_update.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = sticker.guild.channels.cache.get(server.moderation.logs.types.sticker_update.channel_id) as BaseGuildTextChannel
 
@@ -14,7 +14,9 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = sticker.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await sticker.guild.fetchAuditLogs({ limit: 1, type: 'STICKER_UPDATE' }) : null
+            const audit = sticker.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
+                ? await sticker.guild.fetchAuditLogs({ limit: 1, type: 'STICKER_UPDATE' })
+                : null
             const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
@@ -34,7 +36,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.sticker_update.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.sticker_update_title') })
                     })
                 } catch (err) {
                     return false
@@ -56,16 +58,15 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
 
             if (before.name != sticker.name) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.logs.sticker_update.title)
+                    .setTitle(t('logs.sticker_update_title'))
                     .setDescription(
-                        self.translator.format(
-                            locale.logs.sticker_update.template,
-                            `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
-                            self.translator.format(locale.logs.sticker_update.types.name, `**${sticker.name}**`)
-                        )
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.sticker_update_name_change_template', { sticker: `**${sticker.name}**` })
+                        })
                     )
-                    .addField(locale.logs.common.before_changes, before.name, true)
-                    .addField(locale.logs.common.after_changes, sticker.name, true)
+                    .addField(t('logs.before_change'), before.name, true)
+                    .addField(t('logs.after_change'), sticker.name, true)
                     .setFooter({ text: sticker.id })
                     .setTimestamp()
                     .setColor('#FFA726')

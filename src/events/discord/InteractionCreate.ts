@@ -46,10 +46,9 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
             if (message?.id == interaction.message?.id) {
                 if (interaction.member.voice.channel?.id != player.voiceChannel) {
                     interaction.reply({
-                        content: `${self._emojis.ERROR} | ${self.translator.format(
-                            self.translator.locale(server.locale).commands.repeat.texts.different_voice,
-                            `**${interaction.member.displayName}**`
-                        )}`,
+                        content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.next.text_different_voice', {
+                            user: `**${interaction.member.displayName}**`
+                        })}`,
                         ephemeral: true
                     })
 

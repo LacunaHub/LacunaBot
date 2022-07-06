@@ -4,14 +4,14 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
-    const query = interaction.options?.getString('запрос')
+    const query = interaction.options?.getString(t('commands.play.options.query.name'))
     const voice = (interaction.member as GuildMember).voice?.channel
 
     if (!voice) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_voice_channel, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_connect_to_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -23,10 +23,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         server.modules.music.blocked.channels.includes(voice.id)
     ) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(
-                locale.play.texts.not_allowed_in_current_channel,
-                `**${(interaction.member as any).displayName}**`
-            )}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_disallowed_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -37,10 +34,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!has_permissions) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(
-                locale.play.texts.no_required_permissions_in_voice,
-                `**${(interaction.member as any).displayName}**`
-            )}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_no_required_permissions_in_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -49,7 +43,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (voice.full && !voice.permissionsFor(interaction.guild.me).has('MOVE_MEMBERS') && !voice.members.has(self.user.id)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.voice_is_full, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_voice_is_full', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -58,7 +52,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!query) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_search_track, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_no_search_track', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -70,7 +64,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (is_url && !allowed_hosts.some(h => query.startsWith(h))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.not_allowed_host, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_not_allowed_host', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -83,7 +77,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (search.loadType === 'LOAD_FAILED') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.load_failed, `**${(interaction.member as any).displayName}**`)}`
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_load_failed', { user: `**${(interaction.member as any).displayName}**` })}`
         })
 
         return false
@@ -91,7 +85,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (search.loadType === 'NO_MATCHES') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.no_matches, `**${(interaction.member as any).displayName}**`)}`
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_no_matches', { user: `**${(interaction.member as any).displayName}**` })}`
         })
 
         return false
@@ -121,10 +115,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     if (search.loadType === 'PLAYLIST_LOADED') {
         if (!server.server.premium.available) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(
-                    locale.play.texts.playlist_loaded_no_premium,
-                    `**${(interaction.member as any).displayName}**`
-                )}`
+                content: `${self._emojis.ERROR} | ${t('commands.play.text_playlist_loaded_no_premium', { user: `**${(interaction.member as any).displayName}**` })}`
             })
 
             return false
@@ -135,17 +126,16 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         const track = search.tracks[0]
 
         const embed = new MessageEmbed()
-            .setTitle(locale.play.texts.player)
+            .setTitle(t('commands.play.text_player'))
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
-            .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
+            .setFooter({ text: t('commands.play.text_added_by', { requester: track.requester }) })
 
         if (player.playing || player.paused)
             await message.reply({
-                content: `${self._emojis.OK} | ${self.translator.format(
-                    locale.play.texts.playlist_added_to_queue,
-                    `**${message.member.displayName}**`,
-                    `**${search.playlist.name}**`
-                )}`,
+                content: `${self._emojis.OK} | ${t('commands.play.text_playlist_added_to_queue', {
+                    user: `**${message.member.displayName}**`,
+                    playlist: `**${search.playlist.name}**`
+                })}`,
                 allowedMentions: { roles: [], users: [] }
             })
         else {
@@ -158,10 +148,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         if (player.queue.length >= server.modules.music.queue_max_length && server.modules.music.queue_max_length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(
-                    locale.play.texts.queue_limit_reached_no_premium,
-                    `**${(interaction.member as any).displayName}**`
-                )}`
+                content: `${self._emojis.ERROR} | ${t('commands.play.text_queue_limit_reached_no_premium', { user: `**${(interaction.member as any).displayName}**` })}`
             })
 
             return false
@@ -169,10 +156,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         if (track.isStream && !server.server.premium.available) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(
-                    locale.play.texts.track_stream_only_for_premium,
-                    `**${(interaction.member as any).displayName}**`
-                )}`
+                content: `${self._emojis.ERROR} | ${t('commands.play.text_track_stream_only_for_premium', { user: `**${(interaction.member as any).displayName}**` })}`
             })
 
             return false
@@ -180,7 +164,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         if (track.isStream && !server.modules.music.allow_radio_playback) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.play.texts.track_stream_disabled, `**${(interaction.member as any).displayName}**`)}`
+                content: `${self._emojis.ERROR} | ${t('commands.play.text_track_stream_disabled', { user: `**${(interaction.member as any).displayName}**` })}`
             })
 
             return false
@@ -189,17 +173,16 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         player.queue.add(track)
 
         const embed = new MessageEmbed()
-            .setTitle(locale.play.texts.player)
+            .setTitle(t('commands.play.text_player'))
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
-            .setFooter({ text: self.translator.format(locale.play.texts.added_by, track.requester) })
+            .setFooter({ text: t('commands.play.text_added_by', { requester: track.requester }) })
 
         if (player.playing || player.paused)
             await interaction.editReply({
-                content: `${self._emojis.OK} | ${self.translator.format(
-                    locale.play.texts.track_added_to_queue,
-                    `**${(interaction.member as any).displayName}**`,
-                    `**${track.title}**`
-                )}`
+                content: `${self._emojis.OK} | ${t('commands.play.text_track_added_to_queue', {
+                    user: `**${(interaction.member as any).displayName}**`,
+                    track: `**${track.title}**`
+                })}`
             })
         else {
             message = (await interaction.editReply({ embeds: [embed], components: rows })) as Message

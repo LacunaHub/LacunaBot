@@ -4,6 +4,7 @@ import { readdirSync } from 'fs'
 import { connect } from 'mongoose'
 import qdb from 'quick.db'
 import db from '../database'
+import i18n from '../i18n'
 import Utils from '../internals/utility/Utils'
 import locale from './locale'
 import logger from './Logger'
@@ -24,6 +25,7 @@ export default class Lacuna extends Client {
     public tempbans: Collection<string, TemporaryBan>
     public temproles: Collection<string, TemporaryRole>
     public translator: typeof locale
+    public i18n: typeof i18n
     public utils: typeof Utils
     public PERMISSIONS_FLAGS: PermissionFlags
 
@@ -49,6 +51,8 @@ export default class Lacuna extends Client {
         this.temproles = new Collection()
 
         this.translator = locale
+
+        this.i18n = i18n
 
         this.utils = Utils
 
@@ -121,29 +125,29 @@ export default class Lacuna extends Client {
     }
 
     async registerSlashCommands(guild_id: string, language: string) {
-        const locale = this.translator.locale(language)
+        const t = this.i18n.t.bind(null, language)
 
         const slash = this.commands
             .filter(c => c.is_slash_command)
             .map(c => {
                 return {
                     name: c.name,
-                    description: this.utils.resolveObjectPath(c.description, locale),
+                    description: t(c.description),
                     type: 'CHAT_INPUT',
                     options:
                         c?.options?.map(option => {
                             if (option.type == 'SUB_COMMAND')
                                 return {
                                     ...option,
-                                    description: this.utils.resolveObjectPath(option.description, locale),
+                                    description: t(option.description),
                                     options: option.options.map(o => {
                                         return {
                                             ...o,
-                                            name: this.utils.resolveObjectPath(o.name, locale),
-                                            description: this.utils.resolveObjectPath(o.description, locale),
+                                            name: t(o.name),
+                                            description: t(o.description),
                                             choices: option.choices?.length
                                                 ? option.choices.map(oc => {
-                                                      return { ...oc, name: this.utils.resolveObjectPath(oc.name, locale) }
+                                                      return { ...oc, name: t(oc.name) }
                                                   })
                                                 : null
                                         }
@@ -152,11 +156,11 @@ export default class Lacuna extends Client {
 
                             return {
                                 ...option,
-                                name: this.utils.resolveObjectPath(option.name, locale),
-                                description: this.utils.resolveObjectPath(option.description, locale),
+                                name: t(option.name),
+                                description: t(option.description),
                                 choices: option.choices?.length
                                     ? option.choices.map(oc => {
-                                          return { ...oc, name: this.utils.resolveObjectPath(oc.name, locale) }
+                                          return { ...oc, name: t(oc.name) }
                                       })
                                     : null
                             }
@@ -168,7 +172,7 @@ export default class Lacuna extends Client {
             .filter(c => c.is_message_command)
             .map(c => {
                 return {
-                    name: this.utils.resolveObjectPath(c.pretty_name, locale),
+                    name: t(c.pretty_name),
                     type: 'MESSAGE'
                 }
             })
@@ -177,7 +181,7 @@ export default class Lacuna extends Client {
             .filter(c => c.is_user_command)
             .map(c => {
                 return {
-                    name: this.utils.resolveObjectPath(c.pretty_name, locale),
+                    name: t(c.pretty_name),
                     type: 'USER'
                 }
             })

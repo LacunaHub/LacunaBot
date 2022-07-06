@@ -119,14 +119,14 @@ export default class Command {
     }
 
     async executeSlash(server: ServerDocument, interaction: CommandInteraction): Promise<boolean> {
-        const locale = this.self.translator.locale(server.locale)
+        const t = this.self.i18n.t.bind(null, server.locale)
 
         const denied: boolean = this.denied(server, interaction),
             allowed: boolean = this.allowed(server, interaction)
 
         if (!denied || !allowed) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.command_denied, `**${interaction.user.tag}**`)}`,
+                content: `${this.self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.user.tag}**` })}`,
                 ephemeral: true
             })
 
@@ -135,7 +135,7 @@ export default class Command {
 
         if (this.premium_only && !server.server.premium.available) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${interaction.user.tag}**`)}`,
+                content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', { user: `**${interaction.user.tag}**` })}`,
                 ephemeral: true
             })
 
@@ -161,14 +161,14 @@ export default class Command {
     }
 
     async executeContext(server: ServerDocument, interaction: ContextMenuInteraction): Promise<boolean> {
-        const locale = this.self.translator.locale(server.locale)
+        const t = this.self.i18n.t.bind(null, server.locale)
 
         const denied: boolean = this.denied(server, interaction),
             allowed: boolean = this.allowed(server, interaction)
 
         if (!denied || !allowed) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.command_denied, `**${interaction.user.tag}**`)}`,
+                content: `${this.self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.user.tag}**` })}`,
                 ephemeral: true
             })
 
@@ -177,7 +177,7 @@ export default class Command {
 
         if (this.premium_only && !server.server.premium.available) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${interaction.user.tag}**`)}`,
+                content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', { user: `**${interaction.user.tag}**` })}`,
                 ephemeral: true
             })
 
@@ -240,7 +240,9 @@ export default class Command {
         }
 
         if (this.premium_only && !server.server.premium.available) {
-            await message.reply({ content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${message.author.tag}**`)}` })
+            await message.reply({
+                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${message.author.tag}**`)}`
+            })
 
             return false
         }

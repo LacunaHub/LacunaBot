@@ -6,11 +6,11 @@ import Lacuna from '../../../internals/Lacuna'
 import { truncateString } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.reports.active || !server.modules.reports.channel_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.reports_disabled_or_no_channel, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_reports_disabled_or_no_channel', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -21,18 +21,18 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!channel) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.channel_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_channel_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
         return false
     }
 
-    const target_id = interaction.options?.getString('id-сообщения')
+    const target_id = interaction.options?.getString(t('commands.report.options.message_id.name'))
 
     if (!target_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.no_message_id, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_message_id', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -43,7 +43,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!target) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.no_message, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_message', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -55,7 +55,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (entry?.users?.includes(interaction.user.id)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.report.texts.already_reported, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_already_reported', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -70,19 +70,19 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     if (!report) {
         const embed = new MessageEmbed()
             .setAuthor({ name: target.author.tag, iconURL: target.author.displayAvatarURL() })
-            .addField(locale.report.texts.message_channel, `<#${target.channelId}>`, true)
-            .addField(locale.report.texts.report_count, '1', true)
+            .addField(t('commands.report.text_message_channel'), `<#${target.channelId}>`, true)
+            .addField(t('commands.report.text_report_count'), '1', true)
             .setFooter({ text: `ID: ${target.id}` })
             .setTimestamp(target.createdTimestamp)
 
         if (target.attachments.filter(file => Boolean(file.width)).size > 0) embed.setImage(target.attachments.first().proxyURL)
-        if (target.content) embed.setDescription(`${truncateString(target.content, 768)}${target.embeds[0] ? `\n\`[${locale.report.texts.attachments}]\`` : ''}`)
+        if (target.content) embed.setDescription(`${truncateString(target.content, 768)}${target.embeds[0] ? `\n\`[${t('common.attachments')}]\`` : ''}`)
 
         const selectMenuOptions = ['indefinitely', '10m', '30m', '1h', '2h', '5h', '12h', '1d', '3d', '7d', '14d'].map(i => {
             return {
                 label:
                     i == 'indefinitely'
-                        ? locale.common.texts.indefinitely.toLowerCase()
+                        ? t('indefinitely').toLowerCase()
                         : moment(Date.now() + ms(i))
                               .locale(server.locale)
                               .fromNow(true),
@@ -92,16 +92,19 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         const rows = [
             new MessageActionRow().addComponents(
-                new MessageButton().setCustomId(`R-KICK-${target.author.id}`).setLabel(locale.report.texts.quick_actions.KICK).setStyle('DANGER'),
-                new MessageButton().setCustomId(`R-WARN-${target.author.id}`).setLabel(locale.report.texts.quick_actions.WARN).setStyle('PRIMARY'),
-                new MessageButton().setCustomId(`R-SKIP-${target.author.id}`).setLabel(locale.report.texts.quick_actions.IGNORE).setStyle('SECONDARY'),
-                new MessageButton().setLabel(locale.report.texts.jump_to_message).setStyle('LINK').setURL(target.url)
+                new MessageButton().setCustomId(`R-KICK-${target.author.id}`).setLabel(t('commands.report.quick_actions.KICK')).setStyle('DANGER'),
+                new MessageButton().setCustomId(`R-WARN-${target.author.id}`).setLabel(t('commands.report.quick_actions.WARN')).setStyle('PRIMARY'),
+                new MessageButton().setCustomId(`R-SKIP-${target.author.id}`).setLabel(t('commands.report.quick_actions.IGNORE')).setStyle('SECONDARY'),
+                new MessageButton().setLabel(t('commands.report.text_jump_to_message')).setStyle('LINK').setURL(target.url)
             ),
             new MessageActionRow().addComponents(
-                new MessageSelectMenu().setCustomId(`R-BAN-${target.author.id}`).setPlaceholder(locale.report.texts.quick_actions.BAN).setOptions(selectMenuOptions)
+                new MessageSelectMenu().setCustomId(`R-BAN-${target.author.id}`).setPlaceholder(t('commands.report.quick_actions.BAN')).setOptions(selectMenuOptions)
             ),
             new MessageActionRow().addComponents(
-                new MessageSelectMenu().setCustomId(`R-MUTE-${target.author.id}`).setPlaceholder(locale.report.texts.quick_actions.MUTE).setOptions(selectMenuOptions.slice(1))
+                new MessageSelectMenu()
+                    .setCustomId(`R-MUTE-${target.author.id}`)
+                    .setPlaceholder(t('commands.report.quick_actions.MUTE'))
+                    .setOptions(selectMenuOptions.slice(1))
             )
         ]
 
@@ -116,7 +119,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     }
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.translator.format(locale.report.texts.report_confirm, `**${(interaction.member as any).displayName}**`)}`,
+        content: `${self._emojis.OK} | ${t('commands.report.text_report_confirm', { user: `**${(interaction.member as any).displayName}**` })}`,
         ephemeral: true
     })
 

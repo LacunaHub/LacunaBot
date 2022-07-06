@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: VoiceState, state: VoiceState): Promise<boolean> {
     if (server.moderation.logs.types.voice_disconnect.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_move.channel_id) as BaseGuildTextChannel
 
@@ -31,7 +31,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_move.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.voice_move_title') })
                     })
                 } catch (err) {
                     return false
@@ -52,10 +52,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
             }
 
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.voice_move.title)
-                .setDescription(self.translator.format(locale.logs.voice_move.template, `**${state.member.user.tag}**`))
-                .addField(locale.logs.voice_move.old_channel, `<#${before.channelId}>`, true)
-                .addField(locale.logs.voice_move.new_channel, `<#${state.channelId}>`, true)
+                .setTitle(t('logs.voice_move_title'))
+                .setDescription(t('logs.voice_move_template', { user: `**${state.member.user.tag}**`, from: `<#${before.channelId}>`, to: `<#${state.channelId}>` }))
                 .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#FFA726')

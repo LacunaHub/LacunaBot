@@ -6,13 +6,13 @@ import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
     const player = self.player.get(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -21,7 +21,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!player.queue.size) {
         await interaction.reply({
-            content: `${self._emojis.OK} | ${self.translator.format(locale.queue.texts.no_track_queue, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.OK} | ${t('commands.queue.text_no_track_queue', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -65,7 +65,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     )
 
     const message = (await interaction.editReply({
-        embeds: [embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, page + 1, chunks.length) })],
+        embeds: [embed.setFields(fields[page]).setFooter({ text: t('commands.leaders.text_pagination', page + 1, chunks.length) })],
         components: [row]
     })) as Message
 
@@ -89,7 +89,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         await i.deferUpdate()
         await i
             .editReply({
-                embeds: [embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, page + 1, chunks.length) })],
+                embeds: [embed.setFields(fields[page]).setFooter({ text: t('commands.leaders.text_pagination', page + 1, chunks.length) })],
                 components: [row]
             })
             .catch(() => {})

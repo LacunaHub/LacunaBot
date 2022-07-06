@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, state: VoiceState): Promise<boolean> {
     if (server.moderation.logs.types.voice_server_undeaf.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_server_undeaf.channel_id) as BaseGuildTextChannel
 
@@ -31,7 +31,7 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_server_undeaf.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.voice_undeaf_title') })
                     })
                 } catch (err) {
                     return false
@@ -52,9 +52,9 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             }
 
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.voice_server_undeaf.title)
-                .addField(state.member.user.bot ? locale.logs.common.bot : locale.logs.common.user, `${state.member.user.tag}`, true)
-                .addField(locale.logs.common.channel, `<#${state.channelId}>`, true)
+                .setTitle(t('logs.voice_undeaf_title'))
+                .addField(t('common.command_option_types.USER'), `${state.member.user.tag}`, true)
+                .addField(t('common.channel'), `<#${state.channelId}>`, true)
                 .addField('\u200B', '\u200B', true)
                 .setFooter({ text: state.member.id })
                 .setTimestamp()

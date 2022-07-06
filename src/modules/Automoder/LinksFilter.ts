@@ -7,8 +7,6 @@ import TemporaryBan from '../../internals/structures/TemporaryBan'
 import { warnings } from '../Moderation'
 import Replacer from '../Replacer'
 
-const reason = 'Автомодер: Фильтрация ссылок'
-
 export default async function (self: Lacuna, server: ServerDocument, message: Message) {
     const config = server.moderation.automoder.links_filter
 
@@ -58,6 +56,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
 }
 
 async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
+    const reason = self.i18n.t(server.locale, 'audit_reasons.automoder_links_filter')
     const config = server.moderation.automoder.links_filter
 
     const ban = config.options.includes('ACTION_BAN')
@@ -80,7 +79,7 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
                 initial: true
             })
         } else {
-            await message.guild.members.ban(message.author.id, { reason: reason }).catch(self.logger.error)
+            await message.guild.members.ban(message.author.id, { reason }).catch(self.logger.error)
         }
     }
 
@@ -136,7 +135,7 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
     }
 
     if (warn) {
-        await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason: reason })
+        await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason })
     }
 
     if (send_message && (config.send_message.content || config.send_message.embed.active)) {

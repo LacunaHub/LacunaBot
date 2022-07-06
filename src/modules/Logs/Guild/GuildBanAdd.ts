@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, guild: Guild, user: User): Promise<boolean> {
     if (server.moderation.logs.types.guild_ban_add.active) {
-        const locale = self.translator.locale(server.locale)
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = guild.channels.cache.get(server.moderation.logs.types.guild_ban_add.channel_id) as BaseGuildTextChannel
 
@@ -35,7 +35,7 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.commands.common.case_log.cases.BAN_ADD)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.guild_ban_add_title') })
                     })
                 } catch (err) {
                     return false
@@ -56,15 +56,9 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
             }
 
             const embed = new MessageEmbed()
-                .setTitle(locale.commands.common.case_log.cases.BAN_ADD)
-                .setDescription(
-                    self.translator.format(
-                        locale.modules.logs.guild_ban_add.template,
-                        `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`,
-                        `**${user.tag}** (${user.id})`
-                    )
-                )
-                .addField(locale.commands.common.case_log.reason, reason ?? '-')
+                .setTitle(t('logs.guild_ban_add_title'))
+                .setDescription(t('logs.guild_ban_add_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, target: `**${user.tag}** (${user.id})` }))
+                .addField(t('case_log.reason'), reason ?? '-')
                 .setTimestamp()
                 .setColor('#EF5350')
 
