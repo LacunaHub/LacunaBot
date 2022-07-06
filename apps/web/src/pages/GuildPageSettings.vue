@@ -286,8 +286,6 @@ export default defineComponent({
 
       const data = objectDifferences(this.guildClone, this.freezedGuild)
 
-      console.log(data)
-
       return interfaces.guilds
         .updateSettings(this.gid, { data })
         .then(response => {

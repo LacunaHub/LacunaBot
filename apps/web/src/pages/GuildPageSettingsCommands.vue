@@ -5,7 +5,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.cm_custom_commands') }}
+              {{ $t('pages.guild.cm_custom_commands_title') }}
             </q-item-label>
           </q-item-section>
 
@@ -16,7 +16,7 @@
 
         <q-card-section>
           <div class="row q-col-gutter-md">
-            <div class="col-12 col-sm-6 col-md-4">
+            <div class="col-12">
               <q-btn class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
@@ -29,10 +29,24 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.cm_system_commands') }}
+              {{ $t('pages.guild.cm_system_commands_title') }}
             </q-item-label>
           </q-item-section>
         </q-item>
+
+        <q-list class="q-px-none" padding dense>
+          <q-item tag="label" v-ripple>
+            <q-item-section>
+              <q-item-label>
+                {{ $t('pages.guild.cm_enable_prefix_commands_title') }}
+              </q-item-label>
+            </q-item-section>
+
+            <q-item-section side>
+              <q-checkbox v-model="guild.commands.prefix_commands" dense></q-checkbox>
+            </q-item-section>
+          </q-item>
+        </q-list>
 
         <q-card-section>
           <q-banner class="rounded-lg bg-dark-grey-3" dense>
@@ -71,16 +85,28 @@
 
         <q-card-section>
           <div class="row q-col-gutter-md">
-            <div v-for="command in guild.guild.commands" :key="command.name" class="col-12 col-sm-6 col-md-4">
-              <q-btn
-                class="full-width"
-                :label="command.name"
-                color="dark-grey-3"
-                align="left"
-                unelevated
-                no-caps
-                @click="systemCommandDialog(command)"
-              ></q-btn>
+            <div v-for="group in ['GENERAL', 'MODERATION', 'MUSIC', 'UTILITY']" :key="group" class="col-12">
+              <div class="row q-col-gutter-md">
+                <div class="col-12">
+                  {{ $t(`pages.guild.cm_command_categories.${group}`) }}
+                </div>
+
+                <div
+                  v-for="command in guild.guild.commands.filter(i => i.group === group)"
+                  :key="command.name"
+                  class="col-12 col-sm-6 col-md-4"
+                >
+                  <q-card class="rounded-lg bg-dark-grey-3" flat>
+                    <q-item @click="systemCommandDialog(command)" class="rounded-lg" clickable v-ripple>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ command.name }}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-card>
+                </div>
+              </div>
             </div>
           </div>
         </q-card-section>
