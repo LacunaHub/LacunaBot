@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, invite: Invite): Promise<boolean> {
     if (server.moderation.logs.types.invite_delete.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = (invite.guild as Guild).channels.cache.get(server.moderation.logs.types.invite_delete.channel_id) as BaseGuildTextChannel
 
@@ -31,7 +31,7 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.invite_delete.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.invite_delete_title') })
                     })
                 } catch (err) {
                     return false
@@ -52,10 +52,10 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
             }
 
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.invite_delete.title)
-                .addField(locale.logs.common.invite_code, invite.code, true)
-                .addField(locale.logs.common.channel, `<#${invite.channel.id}>`, true)
-                .addField(locale.logs.common.invite_inviter, invite.inviter?.tag ?? '-', true)
+                .setTitle(t('logs.invite_delete_title'))
+                .addField(t('logs.invite_code'), invite.code, true)
+                .addField(t('common.channel'), `<#${invite.channel.id}>`, true)
+                .addField(t('logs.invite_inviter'), invite.inviter?.tag ?? '-', true)
                 .setTimestamp()
                 .setColor('#EF5350')
 

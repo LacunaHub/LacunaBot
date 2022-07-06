@@ -5,7 +5,7 @@ import { truncateString } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, message: Message): Promise<boolean> {
     if (server.moderation.logs.types.message_delete.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = message.guild.channels.cache.get(server.moderation.logs.types.message_delete.channel_id) as BaseGuildTextChannel
 
@@ -32,7 +32,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.message_delete.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.message_delete_title') })
                     })
                 } catch (err) {
                     return false
@@ -56,10 +56,10 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             const attachment = message.attachments.first()
 
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.message_delete.title)
-                .addField(locale.logs.common.sender, `${message.author.tag}\n(${message.author.id})`, true)
-                .addField(locale.logs.common.channel, `<#${message.channel.id}>`, true)
-                .addField(locale.logs.message_delete.content, content || `\`[${locale.logs.message_delete.attachment}]\``)
+                .setTitle(t('logs.message_delete_title'))
+                .addField(t('logs.message_author'), `${message.author.tag}\n(${message.author.id})`, true)
+                .addField(t('common.channel'), `<#${message.channel.id}>`, true)
+                .addField(t('logs.message_content'), content || `\`[${t('common.attachment')}]\``)
                 .setFooter({ text: message.id })
                 .setTimestamp()
                 .setColor('#EF5350')

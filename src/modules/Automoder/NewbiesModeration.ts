@@ -5,9 +5,8 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
 
-const reason = 'Автомодер: Модерирование новоприбывших'
-
 export default async function (self: Lacuna, server: ServerDocument, member: GuildMember) {
+    const reason = self.i18n.t(server.locale, 'audit_reasons.automoder_newbies_moderation')
     const config = server.moderation.automoder.newbies
 
     if (!config.active) return false
@@ -38,7 +37,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                     initial: true
                 })
             } else {
-                await member.guild.members.ban(member.id, { reason: reason }).catch(self.logger.error)
+                await member.guild.members.ban(member.id, { reason }).catch(self.logger.error)
             }
         }
 

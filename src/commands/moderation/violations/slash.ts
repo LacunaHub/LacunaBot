@@ -3,13 +3,13 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember('пользователь') as GuildMember
+    const mention = interaction.options?.getMember(t('commands.violations.options.user.name')) as GuildMember
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.violations.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -20,7 +20,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!violator || !violator.violations.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.violations.texts.no_violations, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.violations.text_no_violations', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -32,13 +32,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const last_10_violations = violator.violations.slice(Math.max(violator.violations.length - 10, 0)).sort((a, b) => a.timestamp - b.timestamp)
 
     const embed = new MessageEmbed()
-        .setAuthor({ name: self.translator.format(locale.violations.texts.title, mention.user.tag), iconURL: mention.user.displayAvatarURL() })
-        .addField(locale.violations.texts.last_24_hours, `${last_24_hours.length}`, true)
-        .addField(locale.violations.texts.last_7_days, `${last_7_days.length}`, true)
-        .addField(locale.violations.texts.total, `${violator.violations.length}`, true)
+        .setAuthor({ name: t('commands.violations.text_user_violations', mention.user.tag), iconURL: mention.user.displayAvatarURL() })
+        .addField(t('commands.violations.text_last_24_hours'), `${last_24_hours.length}`, true)
+        .addField(t('commands.violations.text_last_7_days'), `${last_7_days.length}`, true)
+        .addField(t('commands.violations.text_total_violations'), `${violator.violations.length}`, true)
         .addField(
-            locale.violations.texts.last_10_violations,
-            last_10_violations.map((v, i) => `${i + 1}. **${v.reason || locale.common.texts.none}** – <t:${Math.round(v.timestamp / 1000)}:R> \`${v.id}\``).join('\n')
+            t('commands.violations.text_last_10_violations'),
+            last_10_violations.map((v, i) => `${i + 1}. **${v.reason || '-'}** – <t:${Math.round(v.timestamp / 1000)}:R> \`${v.id}\``).join('\n')
         )
 
     await interaction.reply({ embeds: [embed], ephemeral: true })

@@ -4,14 +4,14 @@ import Lacuna from '../../../internals/Lacuna'
 import { caseLog } from '../../../modules/Moderation'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember('пользователь') as GuildMember
-    const reason = interaction.options?.getString('причина') ?? '-'
+    const mention = interaction.options?.getMember(t('commands.unmute.options.user.name')) as GuildMember
+    const reason = interaction.options?.getString(t('commands.unmute.options.reason.name')) ?? '-'
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.unmute.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -20,7 +20,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!mention.isCommunicationDisabled()) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_muted, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.unmute.text_user_not_muted', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -51,11 +51,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     await caseLog.createCaseEntry(server, interaction.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: interaction.user, reason })
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.translator.format(
-            locale.unmute.texts.user_unmuted,
-            `**${(interaction.member as any).displayName}**`,
-            `**${mention.user.tag}**`
-        )}`,
+        content: `${self._emojis.OK} | ${t('commands.unmute.text_user_unmuted', {
+            user: `**${(interaction.member as any).displayName}**`,
+            target: `**${mention.user.tag}**`
+        })}`,
         ephemeral: true
     })
 

@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, channel: GuildChannel): Promise<boolean> {
     if (server.moderation.logs.types.channel_create.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = channel.guild.channels.cache.get(server.moderation.logs.types.channel_create.channel_id) as BaseGuildTextChannel
 
@@ -14,7 +14,9 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = channel.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_CREATE' }) : null
+            const audit = channel.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
+                ? await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_CREATE' })
+                : null
             const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
@@ -34,7 +36,7 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_create.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.channel_create_title') })
                     })
                 } catch (err) {
                     return false
@@ -55,16 +57,10 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
             }
 
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.channel_create.title)
-                .setDescription(
-                    self.translator.format(
-                        locale.logs.channel_create.template,
-                        `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
-                        `${locale.logs.channel_create.types[channel.type] ?? locale.logs.channel_create.types.UNKNOWN} <#${channel.id}>`
-                    )
-                )
-                .addField(locale.logs.common.category, channel?.parent?.name ?? '-', true)
-                .addField(locale.logs.common.position, channel.rawPosition.toString(), true)
+                .setTitle(t('logs.channel_create_title'))
+                .setDescription(t('logs.channel_create_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, channel: `<#${channel.id}>` }))
+                .addField(t('logs.channel_category'), channel?.parent?.name ?? '-', true)
+                .addField(t('logs.channel_position'), channel.rawPosition.toString(), true)
                 .setFooter({ text: channel.id })
                 .setTimestamp()
                 .setColor('#2FDF84')

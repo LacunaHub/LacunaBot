@@ -140,11 +140,13 @@ export default class Giveaway {
             const winners: string[] = members.randomKey(this.winners_amount >= members.size ? members.size : this.winners_amount)
 
             const embed = new MessageEmbed(message.embeds[0])
-                .setDescription(this.self.translator.format(locale.giveaway.end.texts.winners, winners.map(w => `<@${w}>`).join(', ')))
+                .setDescription(this.self.i18n.t(this.locale, 'commands.giveaway.end.text_winners', { winners: winners.map(w => `<@${w}>`).join(', ') }))
                 .setColor('#EF5350')
 
             await message.edit({ embeds: [embed], components: [] })
-            await message.reply({ content: this.self.translator.format(locale.giveaway.end.texts.congrats, `${winners.map(w => `<@${w}>`)}`, `**${this.prize}**`) })
+            await message.reply({
+                content: this.self.i18n.t(this.locale, 'commands.giveaway.end.text_congrats', { winner: `${winners.map(w => `<@${w}>`)}`, prize: `**${this.prize}**` })
+            })
 
             members.clear()
         } else {
@@ -183,20 +185,18 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
             await message.edit({ embeds: [embed] })
 
             await interaction.reply({
-                content: `${self._emojis.OK} | ${self.translator.format(
-                    locale.commands.giveaway.create.texts.participated,
-                    `**${interaction.user.username}**`,
-                    `**${giveaway.prize}**`
-                )}`,
+                content: `${self._emojis.OK} | ${self.i18n.t(server.locale, 'commands.giveaway.create.text_participated', {
+                    user: `**${interaction.user.username}**`,
+                    giveaway: `**${giveaway.prize}**`
+                })}`,
                 ephemeral: true
             })
         } else {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(
-                    locale.commands.giveaway.create.texts.already_participating,
-                    `**${interaction.user.username}**`,
-                    `**${giveaway.prize}**`
-                )}`,
+                content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.giveaway.create.text_already_participating', {
+                    user: `**${interaction.user.username}**`,
+                    giveaway: `**${giveaway.prize}**`
+                })}`,
                 ephemeral: true
             })
         }

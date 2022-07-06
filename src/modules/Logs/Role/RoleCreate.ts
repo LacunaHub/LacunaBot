@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, role: Role): Promise<boolean> {
     if (server.moderation.logs.types.role_create.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = role.guild.channels.cache.get(server.moderation.logs.types.role_create.channel_id) as BaseGuildTextChannel
 
@@ -34,7 +34,7 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.role_create.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.role_create_title') })
                     })
                 } catch (err) {
                     return false
@@ -55,10 +55,10 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
             }
 
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.role_create.title)
-                .setDescription(self.translator.format(locale.logs.role_create.template, `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`, `<@&${role.id}>`))
-                .addField(locale.logs.role_create.color, `\`${role.hexColor}\``, true)
-                .addField(locale.logs.common.position, role.rawPosition.toString(), true)
+                .setTitle(t('logs.role_create_title'))
+                .setDescription(t('logs.role_create_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, role: `<@&${role.id}>` }))
+                .addField(t('logs.role_color'), `\`${role.hexColor}\``, true)
+                .addField(t('logs.role_position'), role.rawPosition.toString(), true)
                 .setFooter({ text: role.id })
                 .setTimestamp()
                 .setColor('#2FDF84')

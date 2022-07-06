@@ -1,10 +1,9 @@
-import { CommandInteraction, GuildMember, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
+import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
-import { resolveObjectPath } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale)
+    const t = self.i18n.t.bind(null, server.locale)
 
     const command_name: string = interaction.options?.getString('команда')
 
@@ -32,20 +31,20 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         }
 
         const embed = new MessageEmbed()
-            .setTitle(locale.commands.help.texts.title)
-            .setDescription(self.translator.format(locale.commands.help.texts.description, `\`/\``))
-            .setFooter({ text: self.translator.format(locale.commands.help.texts.use_help_for_detail_info, '/') })
+            .setTitle(t('commands.help.text_commands_list'))
+            .setDescription(t('commands.help.text_use_prefix', { prefix: `\`${server.prefix}\`` }))
+            .setFooter({ text: t('commands.help.text_use_help_for_more_details', { prefix: server.prefix }) })
 
         const components = new MessageActionRow().addComponents(
-            new MessageButton().setStyle('LINK').setLabel(locale.commands.help.texts.links.website).setURL(`https://www.voidlacuna.ru/guilds/${interaction.guild.id}`),
-            new MessageButton().setStyle('LINK').setLabel(locale.commands.help.texts.links.docs).setURL('https://docs.voidlacuna.ru')
+            new MessageButton().setStyle('LINK').setLabel(t('commands.help.text_dashboard_link')).setURL(`https://www.voidlacuna.ru/guilds/${interaction.guildId}`),
+            new MessageButton().setStyle('LINK').setLabel(t('commands.help.text_docs_link')).setURL('https://docs.voidlacuna.ru')
         )
 
-        if (categories.general.size) embed.addField(locale.commands.help.texts.categories.general, categories.general.map(c => `\`${c.name}\``).join(', '))
-        if (categories.moderation.size) embed.addField(locale.commands.help.texts.categories.moderation, categories.moderation.map(c => `\`${c.name}\``).join(', '))
-        if (categories.music.size) embed.addField(locale.commands.help.texts.categories.music, categories.music.map(c => `\`${c.name}\``).join(', '))
-        if (categories.utility.size) embed.addField(locale.commands.help.texts.categories.utility, categories.utility.map(c => `\`${c.name}\``).join(', '))
-        if (custom.length) embed.addField('Пользовательские', custom.map(c => `\`${c.name}\``).join(', '))
+        if (categories.general.size) embed.addField(t('common.command_categories.GENERAL'), categories.general.map(c => `\`${c.name}\``).join(', '))
+        if (categories.moderation.size) embed.addField(t('common.command_categories.MODERATION'), categories.moderation.map(c => `\`${c.name}\``).join(', '))
+        if (categories.music.size) embed.addField(t('common.command_categories.MUSIC'), categories.music.map(c => `\`${c.name}\``).join(', '))
+        if (categories.utility.size) embed.addField(t('common.command_categories.UTILITY'), categories.utility.map(c => `\`${c.name}\``).join(', '))
+        if (custom.length) embed.addField(t('common.command_categories.CUSTOM'), custom.map(c => `\`${c.name}\``).join(', '))
 
         await interaction.reply({ embeds: [embed], components: [components] })
     } else {
@@ -54,10 +53,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         if (!command && !custom) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(
-                    locale.commands.help.texts.command_not_found,
-                    `**${(interaction.member as GuildMember).displayName}**`
-                )}`,
+                content: `${self._emojis.ERROR} | ${t('commands.help.text_command_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -65,17 +61,17 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         }
 
         if (command) {
-            const embed = new MessageEmbed().setTitle('Справка по команде').setDescription(resolveObjectPath(command.description, locale))
+            const embed = new MessageEmbed().setTitle(t('commands.help.text_command_help', { command: command.name })).setDescription(t(command.description))
 
             if (command.permissions.self.length || command.permissions.user.length) {
                 const self_permissions = command.permissions.self.length
-                    ? `${locale.commands.help.texts.permissions.self}\n- ${command.permissions.self.map(p => locale.commands.common.permissions[p]).join('\n- ')}`
-                    : `~~${locale.commands.help.texts.permissions.self}~~`
+                    ? `${t('commands.help.text_required_permissions_bot')}\n- ${command.permissions.self.map(p => t(`common.permissions_keys.${p}`)).join('\n- ')}`
+                    : `~~${t('commands.help.text_required_permissions_bot')}~~`
                 const user_permissions = command.permissions.user.length
-                    ? `${locale.commands.help.texts.permissions.user}\n- ${command.permissions.user.map(p => locale.commands.common.permissions[p]).join('\n- ')}`
-                    : `~~${locale.commands.help.texts.permissions.user}~~`
+                    ? `${t('commands.help.text_required_permissions_author')}\n- ${command.permissions.user.map(p => t(`common.permissions_keys.${p}`)).join('\n- ')}`
+                    : `~~${t('commands.help.text_required_permissions_author')}~~`
 
-                embed.addField(locale.commands.help.texts.permissions.title, `${self_permissions}\n${user_permissions}`)
+                embed.addField(t('commands.help.text_required_permissions'), `${self_permissions}\n${user_permissions}`)
             }
 
             if (command.options?.filter(opt => !['SUB_COMMAND', 'SUB_COMMAND_GROUP'].includes(opt.type))?.length) {
@@ -83,25 +79,24 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                     `${server.prefix}${command.name} ` +
                     command.options
                         .map(opt => {
-                            return `${opt.required ? '<' : '['}${resolveObjectPath(opt.name, locale)}${opt.required ? '>' : ']'}`
+                            return `${opt.required ? '<' : '['}${t(opt.name)}${opt.required ? '>' : ']'}`
                         })
                         .join(' ')
 
                 const args = command.options
                     .map(opt => {
                         return (
-                            `\`${opt.required ? '<' : '['}${resolveObjectPath(opt.name, locale)}${opt.required ? '>' : ']'}\`: ${resolveObjectPath(opt.description, locale)}` +
-                            `\n- ${opt.required ? locale.commands.help.texts.required : locale.commands.help.texts.optional}` +
-                            `\n- ${self.translator.format(
-                                locale.commands.help.texts.type,
-                                resolveObjectPath(`commands.common.command_option_types.${opt.type}`, locale)?.toLowerCase()
-                            )}`
+                            `\`${opt.required ? '<' : '['}${t(opt.name)}${opt.required ? '>' : ']'}\`: ${t(opt.description)}` +
+                            `\n- ${opt.required ? t('commands.help.text_command_arg_required') : t('commands.help.text_command_arg_optional')}` +
+                            `\n- ${t('commands.help.text_command_arg_type', {
+                                type: t(`common.command_option_types.${opt.type}`)?.toLowerCase()
+                            })}`
                         )
                     })
                     .join('\n')
 
-                embed.addField(locale.commands.help.texts.usage, `\`${usage}\``)
-                embed.addField(locale.commands.help.texts.args, args)
+                embed.addField(t('commands.help.text_command_usage'), `\`${usage}\``)
+                embed.addField(t('commands.help.text_command_args'), args)
             }
 
             if (command.options?.filter(opt => ['SUB_COMMAND', 'SUB_COMMAND_GROUP'].includes(opt.type))?.length) {
@@ -109,11 +104,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                     .map(opt => {
                         const args = opt?.options
                             ?.map(o => {
-                                return `${o.required ? '<' : '['}${resolveObjectPath(o.name, locale)}${o.required ? '>' : ']'}`
+                                return `${o.required ? '<' : '['}${t(o.name)}${o.required ? '>' : ']'}`
                             })
                             .join(' ')
 
-                        return `\`${server.prefix}${command.name} ${opt.name} ${args}\`: ${resolveObjectPath(opt.description, locale)?.toLowerCase()}`
+                        return `\`${server.prefix}${command.name} ${opt.name} ${args}\`: ${t(opt.description)?.toLowerCase()}`
                     })
                     .join('\n\n')
 
@@ -121,12 +116,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                     const args = opt.options
                         ?.map(o => {
                             return (
-                                `\`${o.required ? '<' : '['}${resolveObjectPath(o.name, locale)}${o.required ? '>' : ']'}\`: ${resolveObjectPath(o.description, locale)}` +
-                                `\n- ${o.required ? locale.commands.help.texts.required : locale.commands.help.texts.optional}` +
-                                `\n- ${self.translator.format(
-                                    locale.commands.help.texts.type,
-                                    resolveObjectPath(`commands.common.command_option_types.${o.type}`, locale)?.toLowerCase()
-                                )}`
+                                `\`${o.required ? '<' : '['}${t(o.name)}${o.required ? '>' : ']'}\`: ${t(o.description)}` +
+                                `\n- ${o.required ? t('commands.help.text_command_arg_required') : t('commands.help.text_command_arg_optional')}` +
+                                `\n- ${t('commands.help.text_command_arg_type', {
+                                    type: t(`common.command_option_types.${o.type}`)?.toLowerCase()
+                                })}`
                             )
                         })
                         .join('\n')
@@ -134,7 +128,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                     return { name: opt.name, value: args }
                 })
 
-                embed.addField(locale.commands.help.texts.usage, usage)
+                embed.addField(t('commands.help.text_command_usage'), usage)
                 for (const sc of subcommands) embed.addField(`${command.name} ${sc.name}`, sc.value)
             }
 
@@ -142,7 +136,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         }
 
         if (custom && !command) {
-            const embed = new MessageEmbed().setTitle('Справка по команде').setDescription(custom.description)
+            const embed = new MessageEmbed().setTitle(t('commands.help.text_command_help', { command: custom.name })).setDescription(custom.description)
 
             await interaction.reply({ embeds: [embed] })
         }

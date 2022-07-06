@@ -7,17 +7,17 @@ import { caseLog } from '../../../modules/Moderation'
 import Replacer from '../../../modules/Replacer'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember('пользователь') as GuildMember
-    let duration = interaction.options?.getString('длительность') as any
-    let reason = interaction.options?.getString('причина') ?? '-'
+    const mention = interaction.options?.getMember(t('commands.mute.options.user.name')) as GuildMember
+    let duration = interaction.options?.getString(t('commands.mute.options.duration.name')) as any
+    let reason = interaction.options?.getString(t('commands.mute.options.reason.name')) ?? '-'
 
     duration = duration && ms(duration) ? ms(duration) : null
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.mute.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -26,7 +26,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (mention.id == interaction.user.id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.mute.text_self_action', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -35,7 +35,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!mention.manageable) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.mute.texts.cant_mute_user, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.mute.text_cant_mute_user', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -44,7 +44,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (server.moderation.respect_hierarchy && mention.roles.highest.position > (interaction.member as any).roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_higher, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -53,7 +53,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.MODERATE_MEMBERS)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_moderator, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -62,7 +62,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_unmoderated_roles, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -118,11 +118,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     await caseLog.createCaseEntry(server, interaction.guild, { type: 'MUTE_ADD', target: mention.user, executor: interaction.user, reason })
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.translator.format(
-            locale.mute.texts.user_muted,
-            `**${(interaction.member as any).displayName}**`,
-            `**${mention.user.tag}**`
-        )}`,
+        content: `${self._emojis.OK} | ${t('commands.mute.text_user_muted', {
+            user: `**${(interaction.member as any).displayName}**`,
+            target: `**${mention.user.tag}**`
+        })}`,
         ephemeral: true
     })
 

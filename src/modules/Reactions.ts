@@ -14,7 +14,7 @@ export function parseId(str: string) {
 
 export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction: MessageReaction, user: User): Promise<boolean> {
     if (server.modules.reactions.length) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const message = await reaction.message.fetch()
         const element = server.modules.reactions
@@ -47,7 +47,12 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
 
                 if (channels.size) {
                     try {
-                        for (const [, channel] of channels) await channel.permissionOverwrites.create(user.id, { VIEW_CHANNEL: element.element.reverse ? true : false })
+                        for (const [, channel] of channels)
+                            await channel.permissionOverwrites.create(
+                                user.id,
+                                { VIEW_CHANNEL: element.element.reverse ? true : false },
+                                { reason: t('audit_reasons.irs') }
+                            )
 
                         self.emit('moduleExecution', {
                             module: 'Reactions: Show Channels',
@@ -70,7 +75,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                 if (roles.size) {
                     if (element.element.reverse && roles.some(r => member.roles.cache.has(r.id))) {
                         try {
-                            await member.roles.remove(roles, locale.reactions.remove_roles_reason)
+                            await member.roles.remove(roles, t('audit_reasons.irs'))
 
                             self.emit('moduleExecution', {
                                 module: 'Reactions: Remove Roles',
@@ -99,7 +104,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         }
 
                         try {
-                            await member.roles.add(roles, locale.reactions.add_roles_reason)
+                            await member.roles.add(roles, t('audit_reasons.irs'))
                         } catch (err) {
                             self.logger.error('An error occurred', err)
 
@@ -109,7 +114,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         }
                     } else {
                         try {
-                            await member.roles.add(roles, locale.reactions.add_roles_reason)
+                            await member.roles.add(roles, t('audit_reasons.irs'))
                         } catch (err) {
                             self.logger.error('An error occurred', err)
 
@@ -134,7 +139,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
 
 export async function reactionRemove(self: Lacuna, server: ServerDocument, reaction: MessageReaction, user: User) {
     if (server.modules.reactions.length) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const message = reaction.message
         const element = server.modules.reactions
@@ -153,7 +158,7 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                             const overwrites = channel.permissionOverwrites.cache.find(p => p.id == user.id)
 
                             if (overwrites) {
-                                await overwrites.delete(element.element.reverse ? locale.reactions.hide_channels_reason : locale.reactions.show_channels_reason)
+                                await overwrites.delete(t('audit_reasons.irs'))
 
                                 self.emit('moduleExecution', {
                                     module: `Reactions: ${element.element.reverse ? 'Hide Channels' : 'Show Channels'}`,
@@ -175,8 +180,8 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
 
                 if (roles.size) {
                     try {
-                        if (element.element.reverse) await member.roles.add(roles, locale.reactions.add_roles_reason)
-                        else await member.roles.remove(roles, locale.reactions.remove_roles_reason)
+                        if (element.element.reverse) await member.roles.add(roles, t('audit_reasons.irs'))
+                        else await member.roles.remove(roles, t('audit_reasons.irs'))
 
                         await self.emit('moduleExecution', {
                             module: `Reactions: ${element.element.reverse ? 'Add' : 'Remove'} Roles`,

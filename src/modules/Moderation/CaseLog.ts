@@ -2,25 +2,25 @@ import { BaseGuildTextChannel, Guild, MessageEmbed, User } from 'discord.js'
 import reason from '../../commands/moderation/reason'
 import db from '../../database'
 import { ServerDocument } from '../../database/schemas/Servers'
-import translator from '../../internals/locale'
+import i18n from '../../i18n'
 import { images } from '../Logs'
 
 export async function createCaseEntry(server: ServerDocument, guild: Guild, options: ICreateCaseMessageOptions) {
     const caseLog = guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
 
     if (caseLog && server.moderation.case_log.types[options.type].active) {
-        const locale = translator.locale(server.locale)
+        const t = i18n.t.bind(null, server.locale)
         const caseId = server.moderation.case_log.case_count + 1
 
         await caseLog
             .send({
                 embeds: [
                     new MessageEmbed()
-                        .setAuthor({ name: locale.commands.common.case_log.cases[options.type], iconURL: images[options.type] })
-                        .addField(locale.commands.common.case_log.target, options.target ? `${options.target.tag}\n(${options.target.id})` : '-', true)
-                        .addField(locale.commands.common.case_log.executor, options.executor.tag, true)
-                        .addField(locale.commands.common.case_log.reason, options.reason ?? '-')
-                        .setFooter({ text: translator.format(locale.commands.common.case_log.case, caseId) })
+                        .setAuthor({ name: t(`case_log.cases.${options.type}`), iconURL: images[options.type] })
+                        .addField(t('common.command_option_types.USER'), options.target ? `${options.target.tag}\n(${options.target.id})` : '-', true)
+                        .addField(t('case_log.moderator'), options.executor.tag, true)
+                        .addField('case_log.reason', options.reason ?? '-')
+                        .setFooter({ text: t('case_log.case_number', { case_number: caseId }) })
                         .setTimestamp()
                         .setColor(options.type.endsWith('REMOVE') ? '#2FDF84' : '#EF5350')
                 ]

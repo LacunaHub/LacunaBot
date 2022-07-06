@@ -7,9 +7,8 @@ import TemporaryBan from '../../internals/structures/TemporaryBan'
 import { warnings } from '../Moderation'
 import Replacer from '../Replacer'
 
-const reason = 'Автомодер: Анти-капс'
-
 export default async function (self: Lacuna, server: ServerDocument, message: Message) {
+    const reason = self.i18n.t(server.locale, 'audit_reasons.automoder_anti_caps')
     const config = server.moderation.automoder.anti_caps
 
     if (!config.active) return false
@@ -42,7 +41,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                     initial: true
                 })
             } else {
-                await message.guild.members.ban(message.author.id, { reason: reason }).catch(self.logger.error)
+                await message.guild.members.ban(message.author.id, { reason }).catch(self.logger.error)
             }
         }
 
@@ -98,7 +97,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (warn) {
-            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason: reason })
+            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason })
         }
 
         if (send_message && (config.send_message.content || config.send_message.embed.active)) {

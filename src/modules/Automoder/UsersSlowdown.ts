@@ -7,11 +7,10 @@ import TemporaryBan from '../../internals/structures/TemporaryBan'
 import { warnings } from '../Moderation'
 import Replacer from '../Replacer'
 
-const reason = 'Автомодер: Замедление отправки сообщений'
-
 const slowedUsers = new Map()
 
 export default async function (self: Lacuna, server: ServerDocument, message: Message) {
+    const reason = self.i18n.t(server.locale, 'audit_reasons.automoder_users_slowdown')
     const config = server.moderation.automoder.users_slowdown
 
     if (!config.active) return false
@@ -51,7 +50,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                     initial: true
                 })
             } else {
-                await message.guild.members.ban(message.author.id, { reason: reason }).catch(self.logger.error)
+                await message.guild.members.ban(message.author.id, { reason }).catch(self.logger.error)
             }
         }
 
@@ -107,7 +106,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (warn) {
-            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason: reason })
+            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason })
         }
 
         if (send_message) {

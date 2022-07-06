@@ -4,14 +4,14 @@ import Lacuna from '../../../internals/Lacuna'
 import { caseLog, warnings } from '../../../modules/Moderation'
 
 export async function addSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember('пользователь') as GuildMember
-    const reason = interaction.options?.getString('причина') ?? '-'
+    const mention = interaction.options?.getMember(t('commands.warn.add.options.user.name')) as GuildMember
+    const reason = interaction.options?.getString(t('commands.warn.add.options.reason.name')) ?? '-'
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.add.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.add.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -20,7 +20,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (mention.id == interaction.user.id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.add.text_self_action', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -29,7 +29,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (server.moderation.respect_hierarchy && mention.roles.highest.position > (interaction.member as any).roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_higher, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -38,7 +38,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_ROLES)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_moderator, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -47,7 +47,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_unmoderated_roles, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -57,11 +57,10 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
     await warnings.addWarn(self, server, interaction, { target: mention, executor: interaction.member as GuildMember, reason: reason })
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.translator.format(
-            locale.warn.add.texts.user_warned,
-            `**${(interaction.member as any).displayName}**`,
-            `**${mention.user.tag}**`
-        )}`,
+        content: `${self._emojis.OK} | ${t('commands.warn.add.text_user_warned', {
+            user: `**${(interaction.member as any).displayName}**`,
+            target: `**${mention.user.tag}**`
+        })}`,
         ephemeral: true
     })
 
@@ -69,15 +68,15 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 }
 
 export async function removeSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember('пользователь') as GuildMember
-    const warn_id = interaction.options?.getString('номер-предупреждения') as string | number
-    const reason = interaction.options?.getString('причина') ?? '-'
+    const mention = interaction.options?.getMember(t('commands.warn.remove.options.user.name')) as GuildMember
+    const warn_id = interaction.options?.getString(t('commands.warn.remove.options.warn_id.name')) as string | number
+    const reason = interaction.options?.getString(t('commands.warn.remove.options.reason.name')) ?? '-'
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.add.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -86,7 +85,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!warn_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.no_warn_id, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_warn_id', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -97,10 +96,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!violator || !violator.violations.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(
-                locale.warn.remove.texts.no_violator_or_violations,
-                `**${(interaction.member as any).displayName}**`
-            )}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_violator_or_violations', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -120,7 +116,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         )
 
         await interaction.reply({
-            content: `${self._emojis.OK} | ${self.translator.format(locale.warn.remove.texts.warns_removed_all, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warns_removed_all', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
     } else {
@@ -128,7 +124,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
         if (!violation) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.invalid_warn_id, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_invalid_warn_id', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -147,7 +143,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         )
 
         await interaction.reply({
-            content: `${self._emojis.OK} | ${self.translator.format(locale.warn.remove.texts.warn_removed, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warn_removed', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
     }

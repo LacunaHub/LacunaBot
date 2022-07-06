@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, member: GuildMember): Promise<boolean> {
     if (server.moderation.logs.types.guild_member_add.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = member.guild.channels.cache.get(server.moderation.logs.types.guild_member_add.channel_id) as BaseGuildTextChannel
 
@@ -34,7 +34,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.guild_member_add.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.guild_member_add_title') })
                     })
                 } catch (err) {
                     return false
@@ -55,18 +55,10 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             }
 
             const embed = new MessageEmbed()
-                .setTitle(member.user.bot ? locale.logs.guild_member_add.bot_add : locale.logs.guild_member_add.title)
-                .setDescription(
-                    member.user.bot
-                        ? self.translator.format(
-                              locale.logs.guild_member_add.bot_add_template,
-                              `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
-                              `**${member.user.tag}** (${member.id})`
-                          )
-                        : `${member.user.tag} (${member.id})`
-                )
-                .addField(locale.logs.common.members, member.guild.memberCount.toString(), true)
-                .addField(locale.logs.common.account_created, `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`, true)
+                .setTitle(t('logs.guild_member_add_title'))
+                .setDescription(`${member.user.tag} (${member.id})`)
+                .addField(t('commands.user.text_registration_date'), `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`, true)
+                .addField(t('logs.guild_member_count'), member.guild.memberCount.toString(), true)
                 .setTimestamp()
                 .setColor('#2FDF84')
 

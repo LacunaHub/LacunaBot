@@ -5,8 +5,8 @@ import { truncateString } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, messages: Collection<string, Message>): Promise<boolean> {
     if (server.moderation.logs.types.message_delete_bulk.active) {
+        const t = self.i18n.t.bind(null, server.locale)
         const message = messages.first()
-        const locale = self.translator.locale(server.locale).modules
 
         const log = message.guild.channels.cache.get(server.moderation.logs.types.message_delete_bulk.channel_id) as BaseGuildTextChannel
 
@@ -33,7 +33,7 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.message_delete_bulk.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.message_delete_bulk_title') })
                     })
                 } catch (err) {
                     return false
@@ -54,16 +54,16 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
             }
 
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.message_delete_bulk.title)
-                .addField(locale.logs.message_delete_bulk.amount, messages.size.toString(), true)
-                .addField(locale.logs.common.channel, `<#${message.channel.id}>`, true)
+                .setTitle(t('logs.message_delete_bulk_title'))
+                .addField(t('logs.message_count'), messages.size.toString(), true)
+                .addField(t('common.channel'), `<#${message.channel.id}>`, true)
                 .setTimestamp()
                 .setColor('#EF5350')
 
             for (const message of messages.first(10)) {
                 embed.addField(
                     `${message.author?.tag ?? '???'} <t:${Math.round(message.createdTimestamp / 1000)}:R>`,
-                    truncateString(message.content || `\`[${locale.logs.message_delete.attachment}]\``, 100)
+                    truncateString(message.content || `\`[${t('common.attachment')}]\``, 100)
                 )
             }
 

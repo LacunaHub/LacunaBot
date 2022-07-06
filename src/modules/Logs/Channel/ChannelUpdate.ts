@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: GuildChannel, channel: GuildChannel): Promise<boolean> {
     if (server.moderation.logs.types.channel_update.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = channel.guild.channels.cache.get(server.moderation.logs.types.channel_update.channel_id) as BaseGuildTextChannel
 
@@ -15,7 +15,9 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = channel.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_UPDATE' }) : null
+            const audit = channel.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
+                ? await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_UPDATE' })
+                : null
             const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
@@ -35,7 +37,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.channel_update.title)
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.channel_update_title') })
                     })
                 } catch (err) {
                     return false
@@ -57,16 +59,15 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.name != channel.name) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.logs.channel_update.title)
+                    .setTitle(t('logs.channel_update_title'))
                     .setDescription(
-                        self.translator.format(
-                            locale.logs.channel_update.template,
-                            `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
-                            self.translator.format(locale.logs.channel_update.name_update, `<#${channel.id}>`)
-                        )
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.channel_update_name_change_template', { channel: `<#${channel.id}>` })
+                        })
                     )
-                    .addField(locale.logs.common.before_changes, before.name, true)
-                    .addField(locale.logs.common.after_changes, channel.name, true)
+                    .addField(t('logs.before_change'), before.name, true)
+                    .addField(t('logs.after_change'), channel.name, true)
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -80,16 +81,15 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.isText() && channel.isText() && before.topic != channel.topic) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.logs.channel_update.title)
+                    .setTitle(t('logs.channel_update_title'))
                     .setDescription(
-                        self.translator.format(
-                            locale.logs.channel_update.template,
-                            `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
-                            self.translator.format(locale.logs.channel_update.topic_update, `<#${channel.id}>`)
-                        )
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.channel_update_topic_change_template', { channel: `<#${channel.id}>` })
+                        })
                     )
-                    .addField(locale.logs.common.before_changes, before.topic ?? '-', true)
-                    .addField(locale.logs.common.after_changes, channel.topic ?? '-', true)
+                    .addField(t('logs.before_change'), before.topic ?? '-', true)
+                    .addField(t('logs.after_change'), channel.topic ?? '-', true)
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -103,21 +103,20 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if ((before as TextChannel).rateLimitPerUser != (channel as TextChannel).rateLimitPerUser) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.logs.channel_update.title)
+                    .setTitle(t('logs.channel_update_title'))
                     .setDescription(
-                        self.translator.format(
-                            locale.logs.channel_update.template,
-                            `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
-                            self.translator.format(locale.logs.channel_update.rate_limit_update, `<#${channel.id}>`)
-                        )
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.channel_update_rate_limit_change_template', { channel: `<#${channel.id}>` })
+                        })
                     )
                     .addField(
-                        locale.logs.common.before_changes,
+                        t('logs.before_change'),
                         (before as TextChannel).rateLimitPerUser ? numbro((before as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-',
                         true
                     )
                     .addField(
-                        locale.logs.common.after_changes,
+                        t('logs.after_change'),
                         (channel as TextChannel).rateLimitPerUser ? numbro((channel as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-',
                         true
                     )
@@ -134,16 +133,15 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.parentId != channel.parentId) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.logs.channel_update.title)
+                    .setTitle(t('logs.channel_update_title'))
                     .setDescription(
-                        self.translator.format(
-                            locale.logs.channel_update.template,
-                            `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
-                            self.translator.format(locale.logs.channel_update.parent_update, `<#${channel.id}>`)
-                        )
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.channel_update_parent_change_template', { channel: `<#${channel.id}>` })
+                        })
                     )
-                    .addField(locale.logs.common.before_changes, before?.parent?.name ?? '-', true)
-                    .addField(locale.logs.common.after_changes, channel?.parent?.name ?? '-', true)
+                    .addField(t('logs.before_change'), before?.parent?.name ?? '-', true)
+                    .addField(t('logs.after_change'), channel?.parent?.name ?? '-', true)
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -157,16 +155,15 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.isVoice() && channel.isVoice() && before.bitrate != channel.bitrate) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.logs.channel_update.title)
+                    .setTitle(t('logs.channel_update_title'))
                     .setDescription(
-                        self.translator.format(
-                            locale.logs.channel_update.template,
-                            `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
-                            self.translator.format(locale.logs.channel_update.bitrate_update, `<#${channel.id}>`)
-                        )
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.channel_update_bitrate_change_template', { channel: `<#${channel.id}>` })
+                        })
                     )
-                    .addField(locale.logs.common.before_changes, `${before.bitrate / 1000}kbps`, true)
-                    .addField(locale.logs.common.after_changes, `${channel.bitrate / 1000}kbps`, true)
+                    .addField(t('logs.before_change'), `${before.bitrate / 1000}kbps`, true)
+                    .addField(t('logs.after_change'), `${channel.bitrate / 1000}kbps`, true)
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -180,16 +177,15 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.isVoice() && channel.isVoice() && before.userLimit != channel.userLimit) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.logs.channel_update.title)
+                    .setTitle(t('logs.channel_update_title'))
                     .setDescription(
-                        self.translator.format(
-                            locale.logs.channel_update.template,
-                            `**${executor?.tag ?? locale.logs.common.unknown_initiator}**`,
-                            self.translator.format(locale.logs.channel_update.user_limit_update, `<#${channel.id}>`)
-                        )
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.channel_update_user_limit_change_template', { channel: `<#${channel.id}>` })
+                        })
                     )
-                    .addField(locale.logs.common.before_changes, before.userLimit.toString(), true)
-                    .addField(locale.logs.common.after_changes, channel.userLimit.toString(), true)
+                    .addField(t('logs.before_change'), before.userLimit.toString(), true)
+                    .addField(t('logs.after_change'), channel.userLimit.toString(), true)
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')

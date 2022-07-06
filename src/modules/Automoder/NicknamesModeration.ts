@@ -3,11 +3,10 @@ import { clean, isZalgo } from 'unzalgo'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 
-const reason = 'Автомодер: Модерирование никнеймов'
-
 const adjectives = ['Foggy', 'Magnanimous', 'Taboo', 'Compulsive', 'Busy', 'Angry', 'Responsive', 'Amiable', 'Nice', 'Unexpected']
 
 export default async function (self: Lacuna, server: ServerDocument, member: GuildMember) {
+    const reason = self.i18n.t(server.locale, 'audit_reasons.automoder_nicknames_moderation')
     const config = server.moderation.automoder.nicknames
 
     if (!config.active) return false

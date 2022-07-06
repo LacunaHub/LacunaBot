@@ -9,12 +9,12 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     const [, action, user_id] = interaction.customId.split('-')
 
     const member = await interaction.guild.members.fetch(user_id).catch(() => {})
-    const locale = self.translator.locale(server.locale)
+    const t = self.i18n.t.bind(null, server.locale)
     const reason = 'Репорты'
 
     if (!member) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -24,11 +24,6 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     }
 
     if (member.id == interaction.user.id) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
-            ephemeral: true
-        })
-
         await removeComponentsFromMessage(interaction)
 
         return
@@ -36,7 +31,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
 
     if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_is_higher, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -47,7 +42,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
 
     if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PERMISSIONS_FLAGS[action == 'KICK' ? 'KICK_MEMBERS' : 'MANAGE_ROLES'])) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_is_moderator, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -58,10 +53,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
 
     if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(
-                locale.commands.ban.texts.user_has_unmoderated_roles,
-                `**${(interaction.member as any).displayName}**`
-            )}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -73,10 +65,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     if (action == 'KICK') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.KICK_MEMBERS)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(
-                    locale.commands.common.texts.command_denied,
-                    `**${(interaction.member as any).displayName}**`
-                )}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -85,7 +74,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
 
         if (!member.kickable) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.kick.texts.cant_kick_user, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('commands.kick.text_cant_kick_user', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -99,10 +88,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     if (action == 'WARN') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.MANAGE_ROLES)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(
-                    locale.commands.common.texts.command_denied,
-                    `**${(interaction.member as any).displayName}**`
-                )}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -118,13 +104,13 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
 export async function optionSelected(self: Lacuna, server: ServerDocument, interaction: SelectMenuInteraction) {
     const [, action, user_id] = interaction.customId.split('-')
     const member = (await interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
-    const locale = self.translator.locale(server.locale)
+    const t = self.i18n.t.bind(null, server.locale)
     const duration = interaction.values[0]
     const reason = 'Репорты'
 
     if (!member) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -134,11 +120,6 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
     }
 
     if (member.id == interaction.user.id) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
-            ephemeral: true
-        })
-
         await removeComponentsFromMessage(interaction)
 
         return
@@ -146,7 +127,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
 
     if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_is_higher, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -157,7 +138,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
 
     if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PERMISSIONS_FLAGS[action == 'BAN' ? 'BAN_MEMBERS' : 'MODERATE_MEMBERS'])) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_is_moderator, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -168,10 +149,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
 
     if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(
-                locale.commands.ban.texts.user_has_unmoderated_roles,
-                `**${(interaction.member as any).displayName}**`
-            )}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -183,10 +161,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
     if (action == 'BAN') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.BAN_MEMBERS)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(
-                    locale.commands.common.texts.command_denied,
-                    `**${(interaction.member as any).displayName}**`
-                )}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -195,7 +170,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
 
         if (!member.bannable) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.cant_ban_user, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('commands.ban.text_cant_ban_user', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -220,10 +195,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
     if (action == 'MUTE') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.MODERATE_MEMBERS)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(
-                    locale.commands.common.texts.command_denied,
-                    `**${(interaction.member as any).displayName}**`
-                )}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -232,7 +204,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
 
         if (!member.manageable) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.mute.texts.cant_mute_user, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('commands.mute.text_cant_mute_user', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 

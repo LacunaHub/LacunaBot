@@ -6,26 +6,29 @@ import Lacuna from '../../../internals/Lacuna'
 import { chunkArray, isSnowflake } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
+    const locale = self.i18n.locale(server.locale)
 
-    let sorting = interaction.options?.getInteger(locale.leaders.options.sorting.name) ?? 1
-    let page: number = interaction.options?.getInteger(locale.leaders.options.page.name) ? interaction.options.getInteger(locale.leaders.options.page.name) - 1 : 0
+    let sorting = interaction.options?.getInteger(t('commands.leaders.options.sorting.name')) ?? 1
+    let page: number = interaction.options?.getInteger(t('commands.leaders.options.page.name'))
+        ? interaction.options.getInteger(t('commands.leaders.options.page.name')) - 1
+        : 0
 
     const fields = []
     let chunks: Array<IUserLevel[] | IUserWallet[]> = []
 
-    const sorting_choices = Object.values(locale.leaders.options.sorting.choices)
+    const sorting_choices = Object.values(locale.commands.leaders.options.sorting.choices)
 
     if (sorting > sorting_choices.length || sorting < 1) sorting = 1
 
-    const embed = new MessageEmbed().setTitle(self.translator.format(locale.leaders.texts.leaders_by, sorting_choices[sorting - 1]))
+    const embed = new MessageEmbed().setTitle(t('commands.leaders.text_leaders_by', { sort: sorting_choices[sorting - 1] }))
 
     await interaction.deferReply({ ephemeral: true })
 
     if (sorting == 1) {
         if (!server.modules.levels.active && !server.modules.levels.voice) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.levels_is_disabled, `**${(interaction.member as any).displayName}**`)}`
+                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_levels_disabled', { user: `**${(interaction.member as any).displayName}**` })}`
             })
 
             return false
@@ -38,7 +41,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         if (!activities?.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.leaders.texts.no_levels, `**${(interaction.member as any).displayName}**`)}`
+                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_no_levels', { user: `**${(interaction.member as any).displayName}**` })}`
             })
 
             return false
@@ -67,10 +70,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
                 current.push({
                     name: `#${index + 1} ${username}`,
-                    value: `${self.translator.format(
-                        locale.leaders.texts.level,
-                        level.experience.level
-                    )} → :sparkles: ${current_xp_format} – ${total_xp_format}\n:incoming_envelope: ${level.activity.total_messages} :microphone2: ${voice_time}`,
+                    value: `${t('commands.leaders.text_level', {
+                        level: level.experience.level
+                    })} → :sparkles: ${current_xp_format} – ${total_xp_format}\n:incoming_envelope: ${level.activity.total_messages} :microphone2: ${voice_time}`,
                     inline: true
                 })
             }
@@ -82,7 +84,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     if (sorting == 2) {
         if (!server.modules.economy.active) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.store.texts.economy_disabled, `**${(interaction.member as any).displayName}**`)}`
+                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', { user: `**${(interaction.member as any).displayName}**` })}`
             })
 
             return false
@@ -95,7 +97,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         if (!activities?.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.leaders.texts.no_wallets, `**${(interaction.member as any).displayName}**`)}`
+                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_no_wallets', { user: `**${(interaction.member as any).displayName}**` })}`
             })
 
             return false
@@ -137,19 +139,19 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         new MessageButton()
             .setCustomId('backward')
             .setStyle('SECONDARY')
-            .setLabel(locale.store.items.texts.previous_page)
+            .setLabel(t('commands.leaders.text_previous_page'))
             .setDisabled(fields.length == 1),
         new MessageButton()
             .setCustomId('forward')
             .setStyle('SECONDARY')
-            .setLabel(locale.store.items.texts.next_page)
+            .setLabel(t('commands.leaders.text_next_page'))
             .setDisabled(fields.length == 1)
     )
 
     const field = fields[page]
 
     const message = (await interaction.editReply({
-        embeds: [embed.setFields(field).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, page + 1, chunks.length) })],
+        embeds: [embed.setFields(field).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
         components: [row]
     })) as Message
 
@@ -181,7 +183,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         }
 
         await i.editReply({
-            embeds: [embed.setFields(field).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, page + 1, chunks.length) })],
+            embeds: [embed.setFields(field).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
             components: [row]
         })
 
