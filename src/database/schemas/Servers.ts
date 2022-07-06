@@ -1334,7 +1334,7 @@ export interface ServerDocument extends Document {
 export interface ISystemCommandConfig {
     name: string
     inactive: boolean
-    options: string[]
+    options: 'THROTTLING'[]
     permissions: {
         allowed_channels: string[]
         allowed_roles: string[]

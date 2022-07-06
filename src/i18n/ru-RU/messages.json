@@ -15,6 +15,7 @@
         "command_missing_send_messages": "{user}, отсутствует разрешение на отправку сообщений в канал {channel}",
         "command_denied": "{user}, у вас недостаточно прав на использование этой команды",
         "command_premium_only": "{user}, команда доступна только бонусным серверам",
+        "command_throttled": "{user}, достигнуто ограничение на использование команды, попробуйте еще раз в {time}",
         "command_categories": {
             "GENERAL": "Общие",
             "MODERATION": "Модерация",
