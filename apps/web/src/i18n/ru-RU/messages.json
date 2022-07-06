@@ -14,6 +14,7 @@
   "date": "Дата",
   "copied_to_clipboard": "Скопировано в буфер обмена",
   "none": "Отсутствует",
+  "try_again": "Попробовать еще раз",
 
   "common": {
     "channel": "Канал",
@@ -433,6 +434,9 @@
       "gs_restore_strict_roles_title": "Строгие роли",
       "gs_restore_strict_roles_description": "Эти роли не будут восстановлены при повторном присоединении на сервер",
       "gs_farewell_title": "Прощание",
+      "cm_custom_commands": "Пользовательские команды",
+      "cm_system_commands": "Системные команды",
+      "cm_no_registered_app_commands": "На сервере нет ни одной зарегистрированной команды. Пожалуйста, убедитесь, что бот имеет возможность на их создание",
       "md_hierarchy_title": "Иерархия",
       "md_respect_hierarchy_title": "Учитывать иерархию ролей в командах модерирования",
       "md_deny_moderate_users_with_mp_title": "Запретить модерировать пользователей с правами модератора",

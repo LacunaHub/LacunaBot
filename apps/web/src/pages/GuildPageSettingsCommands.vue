@@ -4,7 +4,9 @@
       <q-card class="rounded-lg bg-dark-grey-2">
         <q-item class="q-py-md">
           <q-item-section>
-            <q-item-label class="text-subtitle1">Пользовательские команды</q-item-label>
+            <q-item-label class="text-subtitle1">
+              {{ $t('pages.guild.cm_custom_commands') }}
+            </q-item-label>
           </q-item-section>
 
           <q-item-section side top>
@@ -26,15 +28,16 @@
       <q-card class="rounded-lg bg-dark-grey-2">
         <q-item class="q-py-md">
           <q-item-section>
-            <q-item-label class="text-subtitle1">Системные команды</q-item-label>
+            <q-item-label class="text-subtitle1">
+              {{ $t('pages.guild.cm_system_commands') }}
+            </q-item-label>
           </q-item-section>
         </q-item>
 
         <q-card-section v-if="!guild.guild.app_commands_registered">
           <q-banner class="rounded-lg bg-dark-grey-3" dense>
             <span>
-              На сервере нет ни одной зарегистрированной команды. Пожалуйста, убедитесь, что бот имеет возможность на их
-              создание
+              {{ $t('pages.guild.cm_no_registered_app_commands') }}
             </span>
 
             <template #avatar>
@@ -42,7 +45,7 @@
             </template>
 
             <template #action>
-              <q-btn unelevated flat>Попробовать еще раз</q-btn>
+              <q-btn unelevated flat>{{ $t('try_again') }}</q-btn>
             </template>
           </q-banner>
         </q-card-section>
