@@ -26,6 +26,13 @@ const interfaces = {
                 }
             })
         },
+        updateApplicationCommands(gid) {
+            return api.post(`/guilds/${gid}/application-commands`, null, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
         updateTwitchSubscriptions(gid, options) {
             return api.post(`/guilds/${gid}/subscriptions/twitch/${options.method}`, options.data, {
                 headers: {

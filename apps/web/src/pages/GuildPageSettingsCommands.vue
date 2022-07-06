@@ -34,18 +34,37 @@
           </q-item-section>
         </q-item>
 
-        <q-card-section v-if="!guild.guild.app_commands_registered">
+        <q-card-section>
           <q-banner class="rounded-lg bg-dark-grey-3" dense>
             <span>
-              {{ $t('pages.guild.cm_no_registered_app_commands') }}
+              {{
+                $t(
+                  guild.guild.app_commands_registered
+                    ? 'pages.guild.cm_app_commands_refresh'
+                    : 'pages.guild.cm_no_registered_app_commands'
+                )
+              }}
             </span>
 
             <template #avatar>
-              <q-icon name="error" color="warning"></q-icon>
+              <q-icon
+                :name="guild.guild.app_commands_registered ? 'info' : 'error'"
+                :color="guild.guild.app_commands_registered ? 'info' : 'warning'"
+              ></q-icon>
             </template>
 
             <template #action>
-              <q-btn unelevated flat>{{ $t('try_again') }}</q-btn>
+              <q-btn
+                unelevated
+                color="dark-grey-4"
+                :label="$t(guild.guild.app_commands_registered ? 'refresh' : 'try_again')"
+                :loading="updateCommandsLoading"
+                @click="updateAppCommands"
+              >
+                <template #loading>
+                  <q-spinner-dots color="white"></q-spinner-dots>
+                </template>
+              </q-btn>
             </template>
           </q-banner>
         </q-card-section>
@@ -74,6 +93,7 @@
 import { defineComponent } from 'vue'
 import { useGuildStore } from 'src/stores/guild'
 import SystemCommand from 'src/components/dialogs/SystemCommand.vue'
+import { interfaces } from 'src/boot/axios'
 
 export default defineComponent({
   name: 'GuildPageSettingsCommands',
@@ -84,7 +104,26 @@ export default defineComponent({
     return { guild }
   },
 
+  data() {
+    return {
+      updateCommandsLoading: false
+    }
+  },
+
   methods: {
+    updateAppCommands() {
+      this.updateCommandsLoading = true
+
+      interfaces.guilds
+        .updateApplicationCommands(this.guild._id)
+        .then(() => {
+          this.guild.guild.app_commands_registered = true
+        })
+        .catch(err => {
+          console.error(err)
+        })
+        .finally(() => (this.updateCommandsLoading = false))
+    },
     systemCommandDialog(command) {
       this.$q
         .dialog({
