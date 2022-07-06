@@ -178,7 +178,7 @@
     "bonus_increased_limits_description": "Больше наград за уровни, предметов в магазине, голосовых ролей, временных голосовых каналов, автореакций и элементов реакций",
     "bonus_personalization_description": "Возможность изменения аватара и названия веб-хука в журнале действий",
     "bonus_more_subscriptions_description": "Увеличьте количество подписок Twitch и YouTube до 10",
-    "bonus_activities_description": "Возможность зарабатывать валюты в голосовых каналах",
+    "bonus_activities_description": "Возможность зарабатывать валюты в голосовых каналах и больше множителей опыта и заработка",
     "bonus_respect_description": "Материальная помощь команде проекта и особая роль на официальном сервере поддержки",
     "select_plan": "Выберите план",
     "select_payment_method": "Способ оплаты",
@@ -231,7 +231,7 @@
     "ac_minimum_symbols_title": "Минимальное количество символов",
     "lf_allowed_registry": "Реестр разрешенных ссылок",
     "lf_blocked_registry": "Реестр запрещенных ссылок",
-    "nm_minimum_account_age_title": "Минимальное количество времени",
+    "nm_minimum_account_age_title": "Минимальный возраст аккаунта",
     "nm_minimum_account_age_description": "Аккаунт должен быть зарегистрирован указанное количество времени",
     "nm_age_measures": {
       "MINUTES": "Минуты",
@@ -305,6 +305,15 @@
     },
     "item_quantity_title": "Количество предметов",
     "item_duration_title": "Длительность предмета"
+  },
+
+  "activity_multipliers": {
+    "add_multiplier": "@:add множитель",
+    "edit_multiplier": "@:edit множитель",
+    "level_multipliers": "Множители опыта",
+    "economy_multipliers": "Множители заработка",
+    "for_text_activity": "За текстовую активность",
+    "for_voice_activity": "За голосовую активность"
   },
 
   "subscriptions": {
@@ -455,6 +464,7 @@
       "ac_economy_reset_on_leave_title": "Сбрасывать кошелёк при выходе участника",
       "ac_economy_currencies_title": "Валюты",
       "ac_economy_store_items_title": "Предметы магазина",
+      "ac_multipliers_title": "Множители опыта и заработка",
       "vc_music_title": "Музыка",
       "vc_music_allow_radio_playback_title": "Разрешить потоковое воспроизведение",
       "vc_music_queue_max_length_title": "Максимальный размер очереди",

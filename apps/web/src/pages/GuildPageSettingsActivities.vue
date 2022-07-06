@@ -599,6 +599,53 @@
         </q-card-section>
       </q-card>
     </div>
+
+    <div class="col-12">
+      <q-card class="rounded-lg bg-dark-grey-2">
+        <q-item class="q-py-md">
+          <q-item-section>
+            <q-item-label class="text-subtitle1">
+              {{ $t('pages.guild.ac_multipliers_title') }}
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side top>
+            <div>{{ guild.modules.activities.multipliers.length }}/{{ guild.premium.available ? '10' : '1' }}</div>
+          </q-item-section>
+        </q-item>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div
+              v-for="multiplier in guild.modules.activities.multipliers"
+              :key="multiplier.id"
+              class="col-12 col-sm-6 col-md-4"
+            >
+              <q-card class="rounded-lg bg-dark-grey-3" flat>
+                <q-item class="rounded-lg" clickable v-ripple @click="multiplierDialog(multiplier)">
+                  <q-item-section>
+                    <q-item-label>{{ multiplier.id }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-card>
+            </div>
+
+            <div v-if="guild.modules.activities.multipliers.length < 10" class="col-12">
+              <q-btn
+                @click="
+                  !guild.premium.available && guild.modules.activities.multipliers.length >= 1
+                    ? lacunaDiamondDialog()
+                    : multiplierDialog()
+                "
+                class="full-width dashed-border"
+                icon="add"
+                flat
+              ></q-btn>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </div>
   </div>
 </template>
 
@@ -610,6 +657,7 @@ import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import ActivitiesLevelAward from 'src/components/dialogs/ActivitiesLevelAward.vue'
 import ActivitiesEconomyCurrency from 'src/components/dialogs/ActivitiesEconomyCurrency.vue'
 import ActivitiesEconomyStoreItem from 'src/components/dialogs/ActivitiesEconomyStoreItem.vue'
+import ActivitiesMultiplier from 'src/components/dialogs/ActivitiesMultiplier.vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsActivities',
@@ -712,6 +760,33 @@ export default defineComponent({
             const index = this.guild.modules.economy.store.items.findIndex(i => i.id === item.id)
 
             this.guild.modules.economy.store.items.splice(index, 1)
+          }
+        })
+    },
+    multiplierDialog(config) {
+      this.$q
+        .dialog({
+          component: ActivitiesMultiplier,
+
+          componentProps: config ? { multiplierProp: config } : null
+        })
+        .onOk(payload => {
+          const { mode, multiplier } = payload
+
+          if (mode === 'CREATE') {
+            this.guild.modules.activities.multipliers.push(multiplier)
+          }
+
+          if (mode === 'UPDATE') {
+            const index = this.guild.modules.activities.multipliers.findIndex(i => i.id === multiplier.id)
+
+            this.guild.modules.activities.multipliers[index] = multiplier
+          }
+
+          if (mode === 'DELETE') {
+            const index = this.guild.modules.activities.multipliers.findIndex(i => i.id === multiplier.id)
+
+            this.guild.modules.activities.multipliers.splice(index, 1)
           }
         })
     }
