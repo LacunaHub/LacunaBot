@@ -4,7 +4,9 @@ import { Context } from 'koa'
 import qdb from 'quick.db'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
+import i18n from '../../../i18n'
 import translator from '../../locale'
+import { commandOptionTypes } from '../../utility/Constants'
 import DiscordUtils from '../../utility/DiscordUtils'
 import { resolveObjectPath } from '../../utility/Utils'
 import interfaces from '../interfaces'
@@ -16,6 +18,7 @@ router.use(authorize)
 
 router.get('/:guild_id/settings', checkPermissions, getSettings)
 router.post('/:guild_id/settings', checkPermissions, updateSettings)
+router.post('/:guild_id/application-commands', checkPermissions, updateApplicationCommands)
 router.post('/:guild_id/interactive-messages/:method', checkPermissions, updateInteractiveMessages)
 router.post('/:guild_id/reactions/:method', checkPermissions, updateInteractiveReaction)
 router.post('/:guild_id/subscriptions/twitch/:method', checkPermissions, updateTwitchSubscriptions)
@@ -216,6 +219,81 @@ async function updateSettings(ctx: Context) {
         prices,
         change_log: server.change_log.reverse()
     }
+}
+
+async function updateApplicationCommands(ctx: Context) {
+    const guild_id: string = ctx.params.guild_id
+
+    const server = await db.servers.findOne({ _id: guild_id })
+    if (!server || server.server.blocked) ctx.throw(404)
+
+    let commands = qdb.get('commands')
+    const t = i18n.t.bind(null, server.locale)
+
+    const slash = commands
+        .filter(i => i.is_slash_command)
+        .map(command => {
+            return {
+                name: command.name,
+                description: t(command.description),
+                type: 1,
+                options:
+                    command?.options?.map(option => {
+                        if (option.type === 'SUB_COMMAND') {
+                            return {
+                                ...option,
+                                type: commandOptionTypes[option.type],
+                                description: t(option.description),
+                                options:
+                                    option.options?.map(opt => {
+                                        return {
+                                            ...opt,
+                                            type: commandOptionTypes[opt.type],
+                                            name: t(opt.name),
+                                            description: t(opt.description),
+                                            choices:
+                                                opt.choices?.map(choice => {
+                                                    return { ...choice, name: t(choice.name) }
+                                                }) ?? null
+                                        }
+                                    }) ?? []
+                            }
+                        }
+
+                        return {
+                            ...option,
+                            type: commandOptionTypes[option.type],
+                            name: t(option.name),
+                            description: t(option.description),
+                            choices:
+                                option.choices?.map(choice => {
+                                    return { ...choice, name: t(choice.name) }
+                                }) ?? null
+                        }
+                    }) ?? []
+            }
+        })
+
+    const context = commands
+        .filter(i => i.is_user_command || i.is_message_command)
+        .map(command => {
+            return {
+                name: t(command.pretty_name),
+                type: command.is_user_command ? 2 : 3
+            }
+        })
+
+    commands = [...slash, ...context]
+
+    try {
+        await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild_id), {
+            body: commands
+        })
+    } catch (err) {
+        ctx.throw(500)
+    }
+
+    ctx.status = 204
 }
 
 async function updateInteractiveMessages(ctx: Context) {

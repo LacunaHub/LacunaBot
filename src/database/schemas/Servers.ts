@@ -18,10 +18,8 @@ export default model<ServerDocument>(
             },
             commands: {
                 configuration: { type: Array, default: [] },
-                system: { type: Array, default: [] },
                 custom: { type: Array, default: [] },
-                slash_commands: { type: Boolean, default: false },
-                prefix_commands: { type: Boolean, default: true }
+                prefix_commands: { type: Boolean, default: false }
             },
             moderation: {
                 case_log: {
@@ -783,8 +781,10 @@ export interface ServerDocument extends Document {
     }
     commands: {
         configuration: ISystemCommandConfig[]
+        /** @deprecated */
         system: SystemCommand[]
         custom: CustomCommand[]
+        /** @deprecated */
         slash_commands: boolean
         prefix_commands: boolean
     }
