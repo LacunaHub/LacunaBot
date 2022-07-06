@@ -753,7 +753,10 @@ export default model<ServerDocument>(
                     youtube: { type: Array, default: [] }
                 },
                 interactive_messages: { type: Array, default: [] },
-                custom_commands: { type: Array, default: [] }
+                custom_commands: { type: Array, default: [] },
+                activities: {
+                    multipliers: { type: Array, default: [] }
+                }
             },
             utility: {
                 giveaways: { type: Array, default: [] }
@@ -1316,6 +1319,9 @@ export interface ServerDocument extends Document {
         }
         interactive_messages: InteractiveMessage[]
         custom_commands: ICustomCommand[]
+        activities: {
+            multipliers: ActivityMultiplier[]
+        }
     }
     utility: {
         giveaways: Giveaway[]
@@ -1909,6 +1915,19 @@ export interface EconomyStoreItem {
 }
 
 export type EconomyStoreItemOptions = 'SELLABLE' | 'LIMITED_QUANTITY' | 'TEMPORARY_REFERENCES' | 'CUSTOM_PURCHASE_REPLY'
+
+export interface ActivityMultiplier {
+    id: string
+    options: ('LEVELS_TEXT' | 'LEVELS_VOICE' | 'ECONOMY_TEXT' | 'ECONOMY_VOICE')[]
+    allowed_channels: string[]
+    allowed_roles: string[]
+    blocked_channels: string[]
+    blocked_roles: string[]
+    levels_text_multiplier?: number
+    levels_voice_multiplier?: number
+    economy_text_multiplier?: number
+    economy_voice_multiplier?: number
+}
 
 export interface Giveaway {
     message_id: string

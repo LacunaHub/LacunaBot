@@ -49,8 +49,23 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 
         if (currency.income.messages.rate_limit_per_user && Date.now() - wallet.activity.last_message_at < currency.income.messages.rate_limit_per_user * 1000) continue
 
-        const amount: number =
-            Math.random() * (currency.income.messages.range_per_message[1] - currency.income.messages.range_per_message[0]) + currency.income.messages.range_per_message[0]
+        const multipliers = server.modules.activities.multipliers
+            .filter(i => {
+                if (i.blocked_channels.includes(message.channelId)) return false
+                if (message.member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
+                if (i.allowed_channels.length && !i.allowed_channels.includes(message.channelId)) return false
+                if (i.allowed_roles.length && !message.member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
+
+                return i.options.includes('ECONOMY_TEXT')
+            })
+            .slice(0, server.server.premium.available ? 10 : 1)
+
+        const multiplier = multipliers.reduce((x, y) => x * (y.economy_text_multiplier / 100), 100) / 100
+        let amount: number =
+            Math.random() * (currency.income.messages.range_per_message[1] - currency.income.messages.range_per_message[0]) +
+            currency.income.messages.range_per_message[0]
+
+        amount *= multiplier || 1
 
         if (wallet.currencies.some(c => c.id == currency.id)) {
             await self.db.users.updateOne(
@@ -166,10 +181,24 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
             if (currency.income.blocked.channels.includes(channel.id)) continue
             if (member.roles.cache.some(r => currency.income.blocked.roles.includes(r.id))) continue
 
-            const amount: number =
+            const multipliers = server.modules.activities.multipliers
+                .filter(i => {
+                    if (i.blocked_channels.includes(channel.id)) return false
+                    if (member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
+                    if (i.allowed_channels.length && !i.allowed_channels.includes(channel.id)) return false
+                    if (i.allowed_roles.length && !member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
+
+                    return i.options.includes('ECONOMY_VOICE')
+                })
+                .slice(0, server.server.premium.available ? 10 : 1)
+
+            const multiplier = multipliers.reduce((x, y) => x * (y.economy_voice_multiplier / 100), 100) / 100
+            let amount: number =
                 (Math.random() * (currency.income.voice_channels.range_per_minute[1] - currency.income.voice_channels.range_per_minute[0]) +
                     currency.income.voice_channels.range_per_minute[0]) *
                 time
+
+            amount *= multiplier || 1
 
             if (wallet.currencies.some(c => c.id == currency.id)) {
                 await self.db.users.updateOne(
@@ -245,7 +274,8 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
 
     const measures = { MINUTES: 60, HOURS: 3600, DAYS: 86400 }
 
-    if (!wallet.currencies.find(c => c.id == item.currency_id) || wallet.currencies.find(c => c.id == item.currency_id).amount < item.purchase_price) return 'INSUFFICIENT_FUNDS'
+    if (!wallet.currencies.find(c => c.id == item.currency_id) || wallet.currencies.find(c => c.id == item.currency_id).amount < item.purchase_price)
+        return 'INSUFFICIENT_FUNDS'
 
     if (wallet.transactions.some(t => t.type == 'PURCHASE' && t.details == `${item.id}:${item.references.join(',')}`)) {
         if (item.options.includes('TEMPORARY_REFERENCES')) {
