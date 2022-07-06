@@ -17,12 +17,8 @@ const handler = async (self: Lacuna, guild: Guild) => {
     }
 
     try {
-        await self.registerSlashCommands(guild.id, server.locale)
-
-        await self.db.servers.updateOne({ _id: guild.id }, { $set: { 'commands.slash_commands': true } })
-    } catch (err) {
-        if (server.commands.slash_commands) await self.db.servers.updateOne({ _id: guild.id }, { $set: { 'commands.slash_commands': false } })
-    }
+        await self.updateApplicationCommands(guild.id, server.locale)
+    } catch (err) {}
 
     return true
 }

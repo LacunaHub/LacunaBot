@@ -124,69 +124,59 @@ export default class Lacuna extends Client {
         return Date.now()
     }
 
-    async registerSlashCommands(guild_id: string, language: string) {
+    async updateApplicationCommands(guild_id: string, language: string) {
         const t = this.i18n.t.bind(null, language)
 
         const slash = this.commands
             .filter(c => c.is_slash_command)
-            .map(c => {
+            .map(command => {
                 return {
-                    name: c.name,
-                    description: t(c.description),
+                    name: command.name,
+                    description: t(command.description),
                     type: 'CHAT_INPUT',
                     options:
-                        c?.options?.map(option => {
+                        command.options?.map(option => {
                             if (option.type == 'SUB_COMMAND')
                                 return {
                                     ...option,
                                     description: t(option.description),
-                                    options: option.options.map(o => {
-                                        return {
-                                            ...o,
-                                            name: t(o.name),
-                                            description: t(o.description),
-                                            choices: option.choices?.length
-                                                ? option.choices.map(oc => {
-                                                      return { ...oc, name: t(oc.name) }
-                                                  })
-                                                : null
-                                        }
-                                    })
+                                    options:
+                                        option.options?.map(opt => {
+                                            return {
+                                                ...opt,
+                                                name: t(opt.name),
+                                                description: t(opt.description),
+                                                choices:
+                                                    option.choices?.map(choice => {
+                                                        return { ...choice, name: t(choice.name) }
+                                                    }) ?? null
+                                            }
+                                        }) ?? []
                                 }
 
                             return {
                                 ...option,
                                 name: t(option.name),
                                 description: t(option.description),
-                                choices: option.choices?.length
-                                    ? option.choices.map(oc => {
-                                          return { ...oc, name: t(oc.name) }
-                                      })
-                                    : null
+                                choices:
+                                    option.choices?.map(choice => {
+                                        return { ...choice, name: t(choice.name) }
+                                    }) ?? null
                             }
                         }) ?? []
                 }
             })
 
-        const message = this.commands
-            .filter(c => c.is_message_command)
-            .map(c => {
+        const context = this.commands
+            .filter(i => i.is_user_command || i.is_message_command)
+            .map(command => {
                 return {
-                    name: t(c.pretty_name),
-                    type: 'MESSAGE'
+                    name: t(command.pretty_name),
+                    type: command.is_user_command ? 'USER' : 'MESSAGE'
                 }
             })
 
-        const user = this.commands
-            .filter(c => c.is_user_command)
-            .map(c => {
-                return {
-                    name: t(c.pretty_name),
-                    type: 'USER'
-                }
-            })
-
-        const commands = [...slash, ...message, ...user]
+        const commands = [...slash, ...context]
 
         return await this.application.commands.set(commands as any, guild_id)
     }

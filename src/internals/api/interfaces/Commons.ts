@@ -1,11 +1,7 @@
 import { Util } from 'discord.js'
-import qdb from 'quick.db'
 import database from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
-import translator from '../../locale'
-import { commandOptionTypes } from '../../utility/Constants'
-import DiscordUtils from '../../utility/DiscordUtils'
-import { dotNotateObject, resolveObjectPath } from '../../utility/Utils'
+import { dotNotateObject } from '../../utility/Utils'
 
 export async function updateSettings(guild: ServerDocument, data: Partial<ServerDocument>, user_id: string): Promise<ServerDocument> {
     const updateData = {}
@@ -31,108 +27,11 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             updateData['commands.configuration'] = data.commands.configuration
         }
 
-        if (Array.isArray(data.commands.system) && JSON.stringify(data.commands.system) !== JSON.stringify(guild.commands.system)) {
-            updateData['commands.system'] = data.commands.system
-        }
-
         if (Array.isArray(data.commands.custom) && JSON.stringify(data.commands.custom) !== JSON.stringify(guild.commands.custom)) {
             data.commands.custom = data.commands.custom.slice(0, 100)
             data.commands.custom = [...new Map(data.commands.custom.map(c => [c.name.toLowerCase(), c])).values()]
 
             updateData['commands.custom'] = data.commands.custom
-        }
-
-        if (
-            (typeof data.commands.slash_commands === 'boolean' && data.commands.slash_commands) ||
-            (guild.commands.slash_commands && Array.isArray(data.commands.system))
-        ) {
-            const dataCommands = data.commands.system?.length ? data.commands.system : guild.commands.system
-            const locale = translator.locale(data.locale ?? guild.locale)
-
-            let commands = qdb.get('commands')
-
-            const slash = commands
-                .filter(c => c.is_slash_command && !dataCommands.find(sc => sc.name == c.name)?.inactive)
-                .map(c => {
-                    return {
-                        name: c.name,
-                        description: resolveObjectPath(c.description, locale),
-                        type: 1,
-                        options:
-                            c?.options?.map(option => {
-                                if (option.type == 'SUB_COMMAND')
-                                    return {
-                                        ...option,
-                                        type: commandOptionTypes[option.type],
-                                        description: resolveObjectPath(option.description, locale),
-                                        options:
-                                            option.options?.map(o => {
-                                                return {
-                                                    ...o,
-                                                    type: commandOptionTypes[o.type],
-                                                    name: resolveObjectPath(o.name, locale),
-                                                    description: resolveObjectPath(o.description, locale),
-                                                    choices: option.choices?.length
-                                                        ? option.choices.map(oc => {
-                                                              return { ...oc, name: resolveObjectPath(oc.name, locale) }
-                                                          })
-                                                        : null
-                                                }
-                                            }) ?? []
-                                    }
-
-                                return {
-                                    ...option,
-                                    type: commandOptionTypes[option.type],
-                                    name: resolveObjectPath(option.name, locale),
-                                    description: resolveObjectPath(option.description, locale),
-                                    choices: option.choices?.length
-                                        ? option.choices.map(oc => {
-                                              return { ...oc, name: resolveObjectPath(oc.name, locale) }
-                                          })
-                                        : null
-                                }
-                            }) ?? []
-                    }
-                })
-
-            const message = commands
-                .filter(c => c.is_message_command && !dataCommands.find(sc => sc.name == c.name)?.inactive)
-                .map(c => {
-                    return {
-                        name: resolveObjectPath(c.pretty_name, locale),
-                        type: 3
-                    }
-                })
-
-            const user = commands
-                .filter(c => c.is_user_command && !dataCommands.find(sc => sc.name == c.name)?.inactive)
-                .map(c => {
-                    return {
-                        name: resolveObjectPath(c.pretty_name, locale),
-                        type: 2
-                    }
-                })
-
-            commands = [...slash, ...message, ...user]
-
-            const res = await DiscordUtils.restApi
-                .put(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild._id), {
-                    body: commands
-                })
-                .catch(() => {})
-
-            if (typeof res !== 'undefined' && typeof data.commands.slash_commands === 'boolean') {
-                updateData['commands.slash_commands'] = data.commands.slash_commands
-            }
-        }
-
-        if (typeof data.commands.slash_commands === 'boolean' && !data.commands.slash_commands) {
-            const res = await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild._id), { body: [] }).catch(() => {})
-
-            if (typeof res !== 'undefined') {
-                updateData['commands.slash_commands'] = data.commands.slash_commands
-            }
         }
 
         if (typeof data.commands.prefix_commands === 'boolean' && data.commands.prefix_commands !== guild.commands.prefix_commands) {
