@@ -13,19 +13,19 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         const categories = {
             general: commands.filter(c => {
-                const config = server.commands.system.find(e => e.name == c.name)
+                const config = server.commands.configuration.find(e => e.name == c.name)
                 return c.group == 'GENERAL' && (!config || (config && !config.inactive))
             }),
             moderation: commands.filter(c => {
-                const config = server.commands.system.find(e => e.name == c.name)
+                const config = server.commands.configuration.find(e => e.name == c.name)
                 return c.group == 'MODERATION' && (!config || (config && !config.inactive))
             }),
             music: commands.filter(c => {
-                const config = server.commands.system.find(e => e.name == c.name)
+                const config = server.commands.configuration.find(e => e.name == c.name)
                 return c.group == 'MUSIC' && (!config || (config && !config.inactive))
             }),
             utility: commands.filter(c => {
-                const config = server.commands.system.find(e => e.name == c.name)
+                const config = server.commands.configuration.find(e => e.name == c.name)
                 return c.group == 'UTILITY' && (!config || (config && !config.inactive))
             })
         }

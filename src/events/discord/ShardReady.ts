@@ -10,10 +10,33 @@ const handler = async (self: Lacuna, id: number, unavailable_guilds: Set<string>
             self.commands
                 .filter(c => !c.private)
                 .map(c => {
-                    const { name, pretty_name, description, options, group, premium_only, is_prefix_command, is_slash_command, is_user_command, is_message_command, permissions } =
-                        c
+                    const {
+                        name,
+                        pretty_name,
+                        description,
+                        options,
+                        group,
+                        premium_only,
+                        is_prefix_command,
+                        is_slash_command,
+                        is_user_command,
+                        is_message_command,
+                        permissions
+                    } = c
 
-                    return { name, pretty_name, description, options, group, premium_only, is_prefix_command, is_slash_command, is_user_command, is_message_command, permissions }
+                    return {
+                        name,
+                        pretty_name,
+                        description,
+                        options,
+                        group,
+                        premium_only,
+                        is_prefix_command,
+                        is_slash_command,
+                        is_user_command,
+                        is_message_command,
+                        permissions
+                    }
                 })
         )
 

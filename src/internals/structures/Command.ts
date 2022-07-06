@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, CommandInteraction, ContextMenuInteraction, GuildMember, Message, Team } from 'discord.js'
-import { ServerDocument, SystemCommand } from '../../database/schemas/Servers'
+import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 
 export default class Command {
@@ -23,8 +23,6 @@ export default class Command {
     public uses: number
     public premium_only: boolean
     public private: boolean
-    public throttling: CommandThrottlingOptions
-    public throttles: Map<string, CommandThrottledUser>
     public permissions: CommandOptions['permissions']
 
     constructor(self: Lacuna, options: CommandOptions) {
@@ -68,10 +66,6 @@ export default class Command {
 
         this.private = Boolean(options.private)
 
-        this.throttling = options.throttling ?? null
-
-        this.throttles = options.throttling ? new Map() : null
-
         this.permissions = {
             self: options.permissions?.self ?? [],
             user: options.permissions?.user ?? []
@@ -81,37 +75,38 @@ export default class Command {
     }
 
     denied(server: ServerDocument, signal: CommandInteraction | ContextMenuInteraction | Message): boolean {
-        const command: SystemCommand = server.commands.system.find(c => c.name == this.name)
+        const config = server.commands.configuration.find(i => i.name === this.name)
 
         if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
 
         if (this.private) return false
 
-        if (command) {
-            if (command.inactive) return false
+        if (config) {
+            if (config.inactive) return false
 
-            if (command.blocked.channels.includes(signal.channel.id)) return false
+            if (config.permissions.blocked_channels.includes(signal.channel.id)) return false
 
-            if (command.allowed.channels.length && !command.allowed.channels.includes(signal.channel.id)) return false
+            if (config.permissions.allowed_channels.length && !config.permissions.allowed_channels.includes(signal.channel.id)) return false
 
-            if ((signal.member as GuildMember).roles.cache.some(r => command.blocked.roles.includes(r.id))) return false
+            if ((signal.member as GuildMember).roles.cache.some(r => config.permissions.blocked_roles.includes(r.id))) return false
         }
 
         return true
     }
 
     allowed(server: ServerDocument, signal: CommandInteraction | ContextMenuInteraction | Message): boolean {
-        const command: SystemCommand = server.commands.system.find(c => c.name == this.name)
+        const config = server.commands.configuration.find(i => i.name === this.name)
 
         if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
 
-        if (command) {
-            if (command.allowed.roles.length && (signal.member as GuildMember).roles.cache.some(r => command.allowed.roles.includes(r.id))) return true
+        if (config) {
+            if (config.permissions.allowed_roles.length && (signal.member as GuildMember).roles.cache.some(r => config.permissions.allowed_roles.includes(r.id)))
+                return true
 
-            if (!command.allowed.roles.length && !this.permissions.user.length) return true
+            if (!config.permissions.allowed_roles.length && !this.permissions.user.length) return true
         }
 
-        if (!command && !this.permissions.user.length) return true
+        if (!config && !this.permissions.user.length) return true
 
         if (this.permissions.user.length && (signal.member as GuildMember).permissions.has(this.permissions.user as any)) return true
 
@@ -126,7 +121,7 @@ export default class Command {
 
         if (!denied || !allowed) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.user.tag}**` })}`,
+                content: `${this.self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.user.username}**` })}`,
                 ephemeral: true
             })
 
@@ -135,7 +130,21 @@ export default class Command {
 
         if (this.premium_only && !server.server.premium.available) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', { user: `**${interaction.user.tag}**` })}`,
+                content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', { user: `**${interaction.user.username}**` })}`,
+                ephemeral: true
+            })
+
+            return false
+        }
+
+        const throttled = this.throttled(server, interaction)
+
+        if (throttled.status) {
+            await interaction.reply({
+                content: `${this.self._emojis.ERROR} | ${t('common.command_throttled', {
+                    user: `**${interaction.user.username}**`,
+                    time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
+                })}`,
                 ephemeral: true
             })
 
@@ -149,6 +158,8 @@ export default class Command {
 
         if (subcommand) await subcommand.slash(this.self, server, interaction)
         else await this.slash(this.self, server, interaction)
+
+        this.throttle(server, interaction)
 
         this.self.emit('commandExecution', {
             command: subcommand ? `${this.name} ${subcommand.name}` : this.name,
@@ -184,10 +195,26 @@ export default class Command {
             return false
         }
 
+        const throttled = this.throttled(server, interaction)
+
+        if (throttled.status) {
+            await interaction.reply({
+                content: `${this.self._emojis.ERROR} | ${t('common.command_throttled', {
+                    user: `**${interaction.user.username}**`,
+                    time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
+                })}`,
+                ephemeral: true
+            })
+
+            return false
+        }
+
         this.uses++
 
         if (interaction.targetType == 'MESSAGE') await this.message(this.self, server, interaction)
         if (interaction.targetType == 'USER') await this.user(this.self, server, interaction)
+
+        this.throttle(server, interaction)
 
         this.self.emit('commandExecution', {
             command: this.name,
@@ -266,6 +293,83 @@ export default class Command {
 
         return true
     }
+
+    throttled(server: ServerDocument, interaction: CommandInteraction | ContextMenuInteraction) {
+        const config = server.commands.configuration.find(i => i.name === this.name)
+
+        if (config?.options?.includes('THROTTLING')) {
+            let path = `${interaction.guildId}.users.${interaction.user.id}`
+
+            if (config.throttling?.type === 'PER_GUILD') {
+                path = `${interaction.guildId}.guild`
+            }
+
+            if (config.throttling?.type === 'PER_CHANNEL') {
+                path = `${interaction.guildId}.channels.${interaction.channelId}`
+            }
+
+            const throttled = this.self.qdb.get(`throttling.commands.${this.name}.${path}`)
+
+            if (throttled?.retry_after - Date.now() > 0) {
+                return {
+                    status: true,
+                    retry_after: throttled.retry_after
+                }
+            }
+
+            if (throttled?.remaining === -1) {
+                this.self.qdb.delete(`throttling.commands.${this.name}.${path}`)
+            }
+
+            return {
+                status: false
+            }
+        }
+
+        return {
+            status: false
+        }
+    }
+
+    throttle(server: ServerDocument, interaction: CommandInteraction | ContextMenuInteraction) {
+        const config = server.commands.configuration.find(i => i.name === this.name)
+
+        if ((this.self.application.owner as Team).members.some(m => m.id === interaction.user.id)) return false
+
+        if (config?.options?.includes('THROTTLING')) {
+            let path = `${interaction.guildId}.users.${interaction.user.id}`
+
+            if (config.throttling?.type === 'PER_GUILD') {
+                path = `${interaction.guildId}.guild`
+            }
+
+            if (config.throttling?.type === 'PER_CHANNEL') {
+                path = `${interaction.guildId}.channels.${interaction.channelId}`
+            }
+
+            let throttled = this.self.qdb.get(`throttling.commands.${this.name}.${path}`)
+            if (!throttled) {
+                this.self.qdb.set(`throttling.commands.${this.name}.${path}`, {
+                    retry_after: Date.now(),
+                    remaining: config.throttling.max_uses
+                })
+
+                throttled = this.self.qdb.get(`throttling.commands.${this.name}.${path}`)
+            }
+
+            this.self.qdb.subtract(`throttling.commands.${this.name}.${path}.remaining`, 1)
+            throttled.remaining--
+
+            if (throttled.remaining <= 0) {
+                this.self.qdb.set(`throttling.commands.${this.name}.${path}.retry_after`, Date.now() + config.throttling.timeout * 1000)
+                this.self.qdb.set(`throttling.commands.${this.name}.${path}.remaining`, -1)
+            }
+        } else {
+            if (this.self.qdb.has(`throttling.commands.${this.name}.${interaction.guildId}`)) {
+                this.self.qdb.delete(`throttling.commands.${this.name}.${interaction.guildId}`)
+            }
+        }
+    }
 }
 
 export interface CommandOptions {
@@ -283,7 +387,6 @@ export interface CommandOptions {
     subcommands?: CommandSubcommand[]
     premium_only: boolean
     private: boolean
-    throttling?: CommandThrottlingOptions
     permissions: {
         self: string[]
         user: string[]
@@ -308,16 +411,4 @@ export interface CommandSubcommand {
     prefix(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean>
     slash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction): Promise<boolean>
     name: string
-}
-
-export interface CommandThrottlingOptions {
-    usages: number
-    duration: number
-}
-
-export interface CommandThrottledUser {
-    usages: number
-    throttled: boolean
-    timeout: any
-    expires: number
 }

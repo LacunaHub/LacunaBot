@@ -14,19 +14,19 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
         const categories = {
             general: commands.filter(c => {
-                const config = server.commands.system.find(e => e.name == c.name)
+                const config = server.commands.configuration.find(e => e.name == c.name)
                 return c.group == 'GENERAL' && (!config || (config && !config.inactive))
             }),
             moderation: commands.filter(c => {
-                const config = server.commands.system.find(e => e.name == c.name)
+                const config = server.commands.configuration.find(e => e.name == c.name)
                 return c.group == 'MODERATION' && (!config || (config && !config.inactive))
             }),
             music: commands.filter(c => {
-                const config = server.commands.system.find(e => e.name == c.name)
+                const config = server.commands.configuration.find(e => e.name == c.name)
                 return c.group == 'MUSIC' && (!config || (config && !config.inactive))
             }),
             utility: commands.filter(c => {
-                const config = server.commands.system.find(e => e.name == c.name)
+                const config = server.commands.configuration.find(e => e.name == c.name)
                 return c.group == 'UTILITY' && (!config || (config && !config.inactive))
             })
         }
@@ -53,7 +53,9 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         const custom = server.commands.custom.find(c => !c.inactive && !c.hidden && c.name == command_name)
 
         if (!command && !custom) {
-            await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.help.texts.command_not_found, `**${message.member.displayName}**`)}` })
+            await message.reply({
+                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.help.texts.command_not_found, `**${message.member.displayName}**`)}`
+            })
 
             return false
         }
@@ -84,7 +86,10 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
                 const args = command.options
                     .map(opt => {
                         return (
-                            `\`${opt.required ? '<' : '['}${resolveObjectPath(opt.name, locale)}${opt.required ? '>' : ']'}\`: ${resolveObjectPath(opt.description, locale)}` +
+                            `\`${opt.required ? '<' : '['}${resolveObjectPath(opt.name, locale)}${opt.required ? '>' : ']'}\`: ${resolveObjectPath(
+                                opt.description,
+                                locale
+                            )}` +
                             `\n- ${opt.required ? locale.commands.help.texts.required : locale.commands.help.texts.optional}` +
                             `\n- ${self.translator.format(
                                 locale.commands.help.texts.type,
@@ -115,7 +120,10 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
                     const args = opt.options
                         ?.map(o => {
                             return (
-                                `\`${o.required ? '<' : '['}${resolveObjectPath(o.name, locale)}${o.required ? '>' : ']'}\`: ${resolveObjectPath(o.description, locale)}` +
+                                `\`${o.required ? '<' : '['}${resolveObjectPath(o.name, locale)}${o.required ? '>' : ']'}\`: ${resolveObjectPath(
+                                    o.description,
+                                    locale
+                                )}` +
                                 `\n- ${o.required ? locale.commands.help.texts.required : locale.commands.help.texts.optional}` +
                                 `\n- ${self.translator.format(
                                     locale.commands.help.texts.type,
