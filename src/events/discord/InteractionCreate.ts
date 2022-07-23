@@ -117,6 +117,10 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
             const buttons = im.components.flat().filter(i => i.type == 'BUTTON')
             const button = buttons.find(i => i.id == interaction.customId) as InteractiveMessageButtonComponent
 
+            if (button.options.includes('RESTRICT_ROLES') && Array.isArray(button.restricted_roles)) {
+                if (interaction.member.roles.cache.some(i => button.restricted_roles.includes(i.id))) return false
+            }
+
             if (button?.options?.includes('EPHEMERAL_REPLY') && button?.ephemeral_reply) {
                 const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
                 const content = await replacer.replaceTemplateMessage(button.ephemeral_reply)
@@ -177,6 +181,10 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
             const value = interaction.values[0]
 
             const option = select?._options?.find(i => i.appearance.value == value)
+
+            if (option.options.includes('RESTRICT_ROLES') && Array.isArray(option.restricted_roles)) {
+                if (interaction.member.roles.cache.some(i => option.restricted_roles.includes(i.id))) return false
+            }
 
             if (option?.options.includes('EPHEMERAL_REPLY') && option.ephemeral_reply) {
                 const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
