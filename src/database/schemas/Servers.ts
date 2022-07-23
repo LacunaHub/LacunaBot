@@ -1728,6 +1728,7 @@ export interface InteractiveMessageButtonComponent {
         }
         reversible: boolean
     }
+    restricted_roles?: string[]
 }
 
 export interface InteractiveMessageSelectMenuComponent {
@@ -1768,9 +1769,10 @@ export interface InteractiveMessageSelectMenuComponentOption {
         }
         reversible: boolean
     }
+    restricted_roles?: string[]
 }
 
-export type InteractiveMessageComponentOption = 'EPHEMERAL_REPLY' | 'MODIFY_ROLES' | 'OVERWRITE_CHANNEL_PERMISSIONS'
+export type InteractiveMessageComponentOption = 'EPHEMERAL_REPLY' | 'MODIFY_ROLES' | 'OVERWRITE_CHANNEL_PERMISSIONS' | 'RESTRICT_ROLES'
 
 export interface InteractiveMessageReaction {
     id: string
@@ -1794,9 +1796,10 @@ export interface InteractiveMessageReaction {
         }
         reversible: boolean
     }
+    restricted_roles?: string[]
 }
 
-export type InteractiveMessageReactionOption = 'MODIFY_ROLES' | 'OVERWRITE_CHANNEL_PERMISSIONS'
+export type InteractiveMessageReactionOption = 'MODIFY_ROLES' | 'OVERWRITE_CHANNEL_PERMISSIONS' | 'RESTRICT_ROLES'
 
 export interface LevelAward {
     id: string
