@@ -95,7 +95,8 @@
       "ACTION_RESET_VIOLATIONS": "Обнулить предупреждения",
       "EPHEMERAL_REPLY": "Эфемерное сообщение",
       "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
-      "OVERWRITE_CHANNEL_PERMISSIONS": "Переопределить права канала"
+      "OVERWRITE_CHANNEL_PERMISSIONS": "Переопределить права канала",
+      "RESTRICT_ROLES": "Запретить выполнение ролям"
     },
     "case_log_keys": {
       "BAN_ADD": "Блокировка выдана",

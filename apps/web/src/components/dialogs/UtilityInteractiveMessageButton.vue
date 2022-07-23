@@ -60,7 +60,7 @@
 
       <q-list class="q-px-none q-py-md" dense>
         <q-item
-          v-for="action in ['EPHEMERAL_REPLY', 'MODIFY_ROLES', 'OVERWRITE_CHANNEL_PERMISSIONS']"
+          v-for="action in ['EPHEMERAL_REPLY', 'MODIFY_ROLES', 'OVERWRITE_CHANNEL_PERMISSIONS', 'RESTRICT_ROLES']"
           :key="action"
           tag="label"
           v-ripple
@@ -308,6 +308,54 @@
         </q-card-section>
       </transition>
 
+      <transition enter-active-class="animated fadeInUp">
+        <q-card-section v-if="button.options.includes('RESTRICT_ROLES')">
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('common.blocked_roles') }}
+              </div>
+
+              <q-select
+                v-model="button.restricted_roles"
+                :options="guild.roles"
+                option-label="name"
+                option-value="id"
+                use-chips
+                class="q-pt-sm"
+                multiple
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt, index, removeAtIndex }">
+                  <q-chip
+                    class="rounded-lg"
+                    square
+                    :label="opt.name ?? opt"
+                    size="sm"
+                    :style="`background: ${opt.color}`"
+                    :ripple="false"
+                    removable
+                    @remove="removeAtIndex(index)"
+                  ></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section>
+                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+          </div>
+        </q-card-section>
+      </transition>
+
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
@@ -434,6 +482,10 @@ export default defineComponent({
         }
       }
 
+      if (options.includes('RESTRICT_ROLES') && !this.button.restricted_roles) {
+        this.button.restricted_roles = []
+      }
+
       if (!options.includes('EPHEMERAL_REPLY')) {
         delete this.button.ephemeral_reply
       }
@@ -444,6 +496,10 @@ export default defineComponent({
 
       if (!options.includes('OVERWRITE_CHANNEL_PERMISSIONS')) {
         delete this.button.overwrite_channel_permissions
+      }
+
+      if (!options.includes('RESTRICT_ROLES')) {
+        delete this.button.restricted_roles
       }
     }
   }
