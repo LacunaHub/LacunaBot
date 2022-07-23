@@ -310,6 +310,14 @@ export default defineComponent({
         .catch(err => {
           console.error(err)
           this.updateSettingsError = true
+          this.$q.notify({
+            message: this.$t('pages.guild.save_error'),
+            classes: 'rounded-lg q-notification-custom',
+            color: 'black',
+            icon: 'error',
+            iconColor: 'negative',
+            timeout: 5000
+          })
         })
         .finally(() => (this.updateSettingsLoading = false))
     },
