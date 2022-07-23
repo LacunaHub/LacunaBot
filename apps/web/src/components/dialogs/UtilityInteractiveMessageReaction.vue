@@ -68,6 +68,20 @@
                     </q-item-section>
                   </q-item>
                 </template>
+
+                <template #prepend>
+                  <q-checkbox v-model="reaction.modify_roles.reversible_add" dense>
+                    <q-tooltip
+                      class="bg-black rounded-lg"
+                      anchor="top middle"
+                      self="bottom middle"
+                      transition-show=""
+                      transition-hide=""
+                    >
+                      {{ $t('ims.mr_reversible_mode') }}
+                    </q-tooltip>
+                  </q-checkbox>
+                </template>
               </q-select>
             </div>
 
@@ -115,6 +129,20 @@
                       <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
                     </q-item-section>
                   </q-item>
+                </template>
+
+                <template #prepend>
+                  <q-checkbox v-model="reaction.modify_roles.reversible_remove" dense>
+                    <q-tooltip
+                      class="bg-black rounded-lg"
+                      anchor="top middle"
+                      self="bottom middle"
+                      transition-show=""
+                      transition-hide=""
+                    >
+                      {{ $t('ims.mr_reversible_mode') }}
+                    </q-tooltip>
+                  </q-checkbox>
                 </template>
               </q-select>
             </div>

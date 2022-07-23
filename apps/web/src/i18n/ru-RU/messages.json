@@ -437,7 +437,8 @@
     "btn_style_title": "Стиль кнопки",
     "select_menu_placeholder_title": "Заполнитель",
     "opt_name_title": "Название опции",
-    "opt_description_title": "Описание опции"
+    "opt_description_title": "Описание опции",
+    "mr_reversible_mode": "Реверсивный режим"
   },
 
   "irs": {
