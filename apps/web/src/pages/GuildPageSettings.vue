@@ -53,7 +53,13 @@
                     </q-item-section>
                   </q-item>
 
-                  <q-item clickable :to="`/guilds/${gid}/sphere`" active-class="nav-item--active" v-ripple>
+                  <q-item
+                    clickable
+                    :to="`/guilds/${gid}/sphere`"
+                    active-class="nav-item--active"
+                    v-ripple
+                    style="display: none"
+                  >
                     <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
 
                     <q-item-section avatar side>
@@ -104,7 +110,13 @@
                     </q-item-section>
                   </q-item>
 
-                  <q-item clickable :to="`/guilds/${gid}/sphere`" active-class="nav-item--active" v-ripple>
+                  <q-item
+                    clickable
+                    :to="`/guilds/${gid}/sphere`"
+                    active-class="nav-item--active"
+                    v-ripple
+                    style="display: none"
+                  >
                     <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
 
                     <q-item-section avatar side>

@@ -15,7 +15,12 @@
       </q-toolbar-title>
 
       <div class="gt-sm">
-        <router-link to="/guilds" class="header-link text-uppercase q-mr-lg" active-class="header-link--active">
+        <router-link
+          to="/guilds"
+          class="header-link text-uppercase q-mr-lg"
+          active-class="header-link--active"
+          style="display: none"
+        >
           <span>
             {{ $t('header.guilds') }}
           </span>
@@ -76,7 +81,14 @@
 
     <transition enter-active-class="animated fadeInDown">
       <q-list v-if="displayMobileNav" class="text-uppercase">
-        <q-item clickable to="/guilds" active-class="nav-item--active" v-ripple @click="toggleMobileNav">
+        <q-item
+          clickable
+          to="/guilds"
+          active-class="nav-item--active"
+          v-ripple
+          @click="toggleMobileNav"
+          style="display: none"
+        >
           <q-item-section>
             <q-item-label>
               {{ $t('header.guilds') }}
