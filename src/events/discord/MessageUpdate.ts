@@ -1,10 +1,9 @@
 import { Message } from 'discord.js'
-import { CustomCommand as ICustomCommand, ServerDocument } from '../../database/schemas/Servers'
+import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import Command from '../../internals/structures/Command'
 import { parseCommandArguments } from '../../internals/utility/Utils'
 import { antiCaps, linksFilter, swearFilter } from '../../modules/Automoder'
-import CustomCommand from '../../modules/CustomCommand'
 import { MessageUpdate } from '../../modules/Logs'
 
 const handler = async (self: Lacuna, before: Message, message: Message) => {
@@ -23,16 +22,9 @@ const handler = async (self: Lacuna, before: Message, message: Message) => {
     message['args'] = parseCommandArguments(splitted.join(' '))
 
     const command: Command = self.commands.find(c => c.name == command_name.slice(server.prefix.length) && c.is_prefix_command)
-    const custom_command: ICustomCommand = server.commands.custom.find(c => !c.inactive && c.name == command_name.slice(server.prefix.length))
 
     if (command) {
         await command.executePrefix(server, message)
-    }
-
-    if (custom_command && !command) {
-        const custom: CustomCommand = new CustomCommand(custom_command, self, server, message)
-
-        await custom.execute()
     }
 
     await antiCaps(self, server, message)

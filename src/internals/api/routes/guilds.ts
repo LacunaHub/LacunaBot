@@ -19,11 +19,12 @@ router.use(authorize)
 router.get('/:guild_id/settings', checkPermissions, getSettings)
 router.post('/:guild_id/settings', checkPermissions, updateSettings)
 router.post('/:guild_id/application-commands', checkPermissions, updateApplicationCommands)
+router.post('/:guild_id/autovoices/:method', checkPermissions, updateAutoVoices)
+router.post('/:guild_id/custom-commands/:method', checkPermissions, updateCustomCommand)
 router.post('/:guild_id/interactive-messages/:method', checkPermissions, updateInteractiveMessages)
 router.post('/:guild_id/reactions/:method', checkPermissions, updateInteractiveReaction)
 router.post('/:guild_id/subscriptions/twitch/:method', checkPermissions, updateTwitchSubscriptions)
 router.post('/:guild_id/subscriptions/youtube/:method', checkPermissions, updateYouTubeSubscriptions)
-router.post('/:guild_id/autovoices/:method', checkPermissions, updateAutoVoices)
 
 async function getSettings(ctx: Context) {
     const guild_id: string = ctx.params.guild_id
@@ -138,7 +139,8 @@ async function getSettings(ctx: Context) {
             economy: server.modules.economy,
             subscriptions: server.modules.subscriptions,
             interactive_messages: server.modules.interactive_messages,
-            activities: server.modules.activities
+            activities: server.modules.activities,
+            custom_commands: server.modules.custom_commands
         },
         prices,
         change_log: server.change_log.reverse()
@@ -214,7 +216,8 @@ async function updateSettings(ctx: Context) {
             economy: server.modules.economy,
             subscriptions: server.modules.subscriptions,
             interactive_messages: server.modules.interactive_messages,
-            activities: server.modules.activities
+            activities: server.modules.activities,
+            custom_commands: server.modules.custom_commands
         },
         prices,
         change_log: server.change_log.reverse()
@@ -283,7 +286,9 @@ async function updateApplicationCommands(ctx: Context) {
             }
         })
 
-    commands = [...slash, ...context]
+    const custom = server.modules.custom_commands.map(i => i.command)
+
+    commands = [...slash, ...context, ...custom]
 
     try {
         await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild_id), {
@@ -294,6 +299,41 @@ async function updateApplicationCommands(ctx: Context) {
     }
 
     ctx.status = 204
+}
+
+async function updateCustomCommand(ctx: Context) {
+    const guild_id: string = ctx.params.guild_id
+    const method: string = ctx.params.method
+    const data = ctx.request.body
+
+    const server = await db.servers.findOne({ _id: guild_id })
+    if (!server || server.server.blocked) ctx.throw(404)
+
+    let response: any
+
+    try {
+        switch (method) {
+            case 'create':
+                response = await interfaces.createCustomCommand(server, data)
+                break
+
+            case 'update':
+                response = await interfaces.updateCustomCommand(server, data)
+                break
+
+            case 'delete':
+                response = await interfaces.deleteCustomCommand(server, data)
+                break
+
+            default:
+                throw new Error('UNKNOWN_METHOD')
+        }
+    } catch (err) {
+        ctx.throw(400, err.message)
+    }
+
+    ctx.status = 200
+    ctx.body = response
 }
 
 async function updateInteractiveMessages(ctx: Context) {

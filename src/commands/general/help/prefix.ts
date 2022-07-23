@@ -10,7 +10,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
     if (!command_name) {
         const commands = self.commands.filter(c => !c.private && !(c.premium_only && !server.server.premium.available))
-        const custom = server.commands.custom.filter(c => c.name && !c.inactive && !c.hidden)
+        const customCommand = server.modules.custom_commands.map(i => i.command)
 
         const categories = {
             general: commands.filter(c => {
@@ -45,14 +45,14 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         if (categories.moderation.size) embed.addField(locale.commands.help.texts.categories.moderation, categories.moderation.map(c => `\`${c.name}\``).join(', '))
         if (categories.music.size) embed.addField(locale.commands.help.texts.categories.music, categories.music.map(c => `\`${c.name}\``).join(', '))
         if (categories.utility.size) embed.addField(locale.commands.help.texts.categories.utility, categories.utility.map(c => `\`${c.name}\``).join(', '))
-        if (custom.length) embed.addField('Пользовательские', custom.map(c => `\`${c.name}\``).join(', '))
+        if (customCommand.length) embed.addField('Пользовательские', customCommand.map(c => `\`${c.name}\``).join(', '))
 
         await message.reply({ embeds: [embed], components: [components] })
     } else {
         const command = self.commands.find(c => !c.private && c.name == command_name)
-        const custom = server.commands.custom.find(c => !c.inactive && !c.hidden && c.name == command_name)
+        const customCommand = server.modules.custom_commands.map(i => i.command).find(i => i.name == command_name)
 
-        if (!command && !custom) {
+        if (!command && !customCommand) {
             await message.reply({
                 content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.help.texts.command_not_found, `**${message.member.displayName}**`)}`
             })
@@ -143,8 +143,8 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
             await message.reply({ embeds: [embed] })
         }
 
-        if (custom && !command) {
-            const embed = new MessageEmbed().setTitle('Справка по команде').setDescription(custom.description)
+        if (customCommand && !command) {
+            const embed = new MessageEmbed().setTitle('Справка по команде').setDescription(customCommand.description)
 
             await message.reply({ embeds: [embed] })
         }

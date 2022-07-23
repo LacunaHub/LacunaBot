@@ -3,7 +3,6 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { parseCommandArguments } from '../../internals/utility/Utils'
 import { antiCaps, linksFilter, nicknamesModeration, swearFilter, usersSlowdown } from '../../modules/Automoder'
-import CustomCommand from '../../modules/CustomCommand'
 import { messageCreate as addWalletCash } from '../../modules/Economy'
 import { messageCreate as addLevelPoints } from '../../modules/Levels'
 import { autoReact } from '../../modules/Reactions'
@@ -26,19 +25,12 @@ const handler = async (self: Lacuna, message: Message) => {
     message['args'] = parseCommandArguments(splitted.join(' '))
 
     const command = self.commands.find(c => c.name == command_name.slice(server.prefix.length) && c.is_prefix_command)
-    const custom_command = server.commands.custom.find(c => !c.inactive && c.name == command_name.slice(server.prefix.length))
 
     if (command) {
         await command.executePrefix(server, message)
     }
 
-    if (custom_command && !command) {
-        const custom = new CustomCommand(custom_command, self, server, message)
-
-        await custom.execute()
-    }
-
-    if (!command && !custom_command && ['DEFAULT', 'REPLY'].includes(message.type)) {
+    if (!command && ['DEFAULT', 'REPLY'].includes(message.type)) {
         await addLevelPoints(self, server, message)
         await addWalletCash(self, server, message)
     }

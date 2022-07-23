@@ -4,6 +4,7 @@ import { readdirSync } from 'fs'
 import { connect } from 'mongoose'
 import qdb from 'quick.db'
 import db from '../database'
+import { ServerDocument } from '../database/schemas/Servers'
 import i18n from '../i18n'
 import Utils from '../internals/utility/Utils'
 import locale from './locale'
@@ -115,17 +116,13 @@ export default class Lacuna extends Client {
             const err = (error as any)?.stack ?? (error as any).message
 
             this.logger.error('(Unhandled Rejection)', err)
-
-            if (typeof err === 'string' && !err.includes('DiscordAPIError')) {
-                this.logger.telegram.error('`Unhandled Rejection`', `\`\`\`\n${err}\n\`\`\``)
-            }
         })
 
         return Date.now()
     }
 
-    async updateApplicationCommands(guild_id: string, language: string) {
-        const t = this.i18n.t.bind(null, language)
+    async updateApplicationCommands(server: ServerDocument) {
+        const t = this.i18n.t.bind(null, server.locale)
 
         const slash = this.commands
             .filter(c => c.is_slash_command)
@@ -176,9 +173,11 @@ export default class Lacuna extends Client {
                 }
             })
 
-        const commands = [...slash, ...context]
+        const custom = server.modules.custom_commands.map(i => i.command)
 
-        return await this.application.commands.set(commands as any, guild_id)
+        const commands = [...slash, ...context, ...custom]
+
+        return await this.application.commands.set(commands as any, server._id)
     }
 
     loadCommands() {

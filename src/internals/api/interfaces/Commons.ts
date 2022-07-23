@@ -27,13 +27,6 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             updateData['commands.configuration'] = data.commands.configuration
         }
 
-        if (Array.isArray(data.commands.custom) && JSON.stringify(data.commands.custom) !== JSON.stringify(guild.commands.custom)) {
-            data.commands.custom = data.commands.custom.slice(0, 100)
-            data.commands.custom = [...new Map(data.commands.custom.map(c => [c.name.toLowerCase(), c])).values()]
-
-            updateData['commands.custom'] = data.commands.custom
-        }
-
         if (typeof data.commands.prefix_commands === 'boolean' && data.commands.prefix_commands !== guild.commands.prefix_commands) {
             updateData['commands.prefix_commands'] = data.commands.prefix_commands
         }

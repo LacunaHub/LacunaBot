@@ -31,6 +31,7 @@
     "erela.js": "2.3.3",
     "erela.js-spotify": "1.2.0",
     "erlpack": "github:discord/erlpack",
+    "isolated-vm": "4.4.1",
     "koa": "2.13.4",
     "koa-bodyparser": "4.3.0",
     "koa-json": "2.0.2",

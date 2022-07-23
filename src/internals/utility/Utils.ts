@@ -176,6 +176,18 @@ export function convertXml2Json(str: Buffer, options = {}) {
     })
 }
 
+export function isValidHttpUrl(string: string) {
+    let url: URL
+
+    try {
+        url = new URL(string)
+    } catch (_) {
+        return false
+    }
+
+    return url.protocol === 'http:' || url.protocol === 'https:'
+}
+
 export default {
     truncateArray,
     shuffleArray,

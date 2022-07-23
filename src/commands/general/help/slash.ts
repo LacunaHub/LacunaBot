@@ -1,6 +1,7 @@
 import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
+import { commandOptionTypes } from '../../../internals/utility/Constants'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -9,7 +10,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (!command_name) {
         const commands = self.commands.filter(c => !c.private && !(c.premium_only && !server.server.premium.available))
-        const custom = server.commands.custom.filter(c => c.name && !c.inactive && !c.hidden)
+        const customCommand = server.modules.custom_commands.map(i => i.command)
 
         const categories = {
             general: commands.filter(c => {
@@ -44,14 +45,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         if (categories.moderation.size) embed.addField(t('common.command_categories.MODERATION'), categories.moderation.map(c => `\`${c.name}\``).join(', '))
         if (categories.music.size) embed.addField(t('common.command_categories.MUSIC'), categories.music.map(c => `\`${c.name}\``).join(', '))
         if (categories.utility.size) embed.addField(t('common.command_categories.UTILITY'), categories.utility.map(c => `\`${c.name}\``).join(', '))
-        if (custom.length) embed.addField(t('common.command_categories.CUSTOM'), custom.map(c => `\`${c.name}\``).join(', '))
+        if (customCommand.length) embed.addField(t('common.command_categories.CUSTOM'), customCommand.map(c => `\`${c.name}\``).join(', '))
 
         await interaction.reply({ embeds: [embed], components: [components] })
     } else {
         const command = self.commands.find(c => !c.private && c.name == command_name)
-        const custom = server.commands.custom.find(c => !c.inactive && !c.hidden && c.name == command_name)
+        const customCommand = server.modules.custom_commands.map(i => i.command).find(i => i.name == command_name)
 
-        if (!command && !custom) {
+        if (!command && !customCommand) {
             await interaction.reply({
                 content: `${self._emojis.ERROR} | ${t('commands.help.text_command_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
@@ -135,8 +136,33 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
             await interaction.reply({ embeds: [embed] })
         }
 
-        if (custom && !command) {
-            const embed = new MessageEmbed().setTitle(t('commands.help.text_command_help', { command: custom.name })).setDescription(custom.description)
+        if (customCommand && !command) {
+            const embed = new MessageEmbed().setTitle(t('commands.help.text_command_help', { command: customCommand.name })).setDescription(customCommand.description)
+
+            if (customCommand.options.length) {
+                const usage =
+                    `${server.prefix}${customCommand.name} ` +
+                    customCommand.options
+                        .map(opt => {
+                            return `${opt.required ? '<' : '['}${opt.name}${opt.required ? '>' : ']'}`
+                        })
+                        .join(' ')
+
+                const args = customCommand.options
+                    .map(opt => {
+                        return (
+                            `\`${opt.required ? '<' : '['}${opt.name}${opt.required ? '>' : ']'}\`: ${opt.description}` +
+                            `\n- ${opt.required ? t('commands.help.text_command_arg_required') : t('commands.help.text_command_arg_optional')}` +
+                            `\n- ${t('commands.help.text_command_arg_type', {
+                                type: t(`common.command_option_types.${commandOptionTypes[opt.type]}`)?.toLowerCase()
+                            })}`
+                        )
+                    })
+                    .join('\n')
+
+                embed.addField(t('commands.help.text_command_usage'), `\`${usage}\``)
+                embed.addField(t('commands.help.text_command_args'), args)
+            }
 
             await interaction.reply({ embeds: [embed] })
         }
