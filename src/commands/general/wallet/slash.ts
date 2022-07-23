@@ -31,7 +31,10 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
         }
     }
 
-    const embed = new MessageEmbed().setAuthor({ name: t('commands.wallet.balance.text_user_balance', mention.displayName), iconURL: mention.displayAvatarURL() })
+    const embed = new MessageEmbed().setAuthor({
+        name: t('commands.wallet.balance.text_user_balance', { user: mention.displayName }),
+        iconURL: mention.displayAvatarURL()
+    })
 
     if (!wallet.currencies.filter(i => server.modules.economy.currencies.some(ii => i.id == ii.id)).length)
         embed.setDescription(t('commands.wallet.balance.text_empty_wallet'))

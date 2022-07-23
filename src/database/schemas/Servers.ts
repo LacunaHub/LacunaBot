@@ -18,7 +18,6 @@ export default model<ServerDocument>(
             },
             commands: {
                 configuration: { type: Array, default: [] },
-                custom: { type: Array, default: [] },
                 prefix_commands: { type: Boolean, default: false }
             },
             moderation: {
@@ -783,6 +782,7 @@ export interface ServerDocument extends Document {
         configuration: ISystemCommandConfig[]
         /** @deprecated */
         system: SystemCommand[]
+        /** @deprecated */
         custom: CustomCommand[]
         /** @deprecated */
         slash_commands: boolean
@@ -1390,12 +1390,6 @@ export interface ICustomCommand {
         }
         options: ICustomCommandOption[]
     }
-    permissions: {
-        allowed_channels: string[]
-        allowed_roles: string[]
-        blocked_channels: string[]
-        blocked_roles: string[]
-    }
     throttling?: {
         type: 'PER_GUILD' | 'PER_CHANNEL' | 'PER_USER'
         max_uses: number
@@ -1408,17 +1402,22 @@ export interface ICustomCommandComponent {
     condition?: {
         type: 'COMPARE_VALUES' | 'USER_VALIDATION' | 'IF_BLOCK'
         compare_values?: {
+            options: ('FALSE_REPLY' | 'FALSE_REPLY_EPHEMERAL')[]
             operator: 'EQUAL' | 'NOT_EQUAL' | 'GREATER_THAN' | 'LESS_THAN' | 'STARTS_WITH' | 'ENDS_WITH' | 'CONTAINS' | 'NOT_CONTAINS'
             left: string
             right: string
+            false_reply?: {
+                content: string
+                embed: MessageEmbed
+            }
         }
         user_validation?: {
             operator: 'HAS_ROLES' | 'MISSING_ROLES' | 'HAS_PERMISSIONS' | 'MISSING_PERMISSIONS'
             roles?: string[]
-            permissions?: string[]
+            permissions?: number[]
         }
         if_block?: {
-            condition: {
+            conditions: Array<{
                 type: 'COMPARE_VALUES' | 'USER_VALIDATION'
                 compare_values?: {
                     operator: 'EQUAL' | 'NOT_EQUAL' | 'GREATER_THAN' | 'LESS_THAN' | 'STARTS_WITH' | 'ENDS_WITH' | 'CONTAINS' | 'NOT_CONTAINS'
@@ -1430,35 +1429,45 @@ export interface ICustomCommandComponent {
                     roles?: string[]
                     permissions?: string[]
                 }
-            }
+            }>
             components: ICustomCommandComponent[]
         }
     }
     action?: {
-        type: 'SEND_MESSAGE' | 'MODIFY_ROLES' | 'FORWARD_TO_COMMAND' | 'MODIFY_WALLET'
+        type: 'REPLY' | 'SEND_MESSAGE' | 'MODIFY_ROLES' | 'FORWARD_TO_COMMAND' | 'MODIFY_WALLET'
+        reply?: {
+            options: 'EPHEMERAL'[]
+            message: {
+                content: string
+                embed: MessageEmbed
+            }
+        }
         send_message?: {
+            options: 'TTS'[]
             format: 'CHANNEL' | 'CURRENT_CHANNEL'
             channel_id: string
             message: {
                 content: string
                 embed: MessageEmbed
             }
-            tts: boolean
-            ephemeral: boolean
         }
         modify_roles?: {
-            user_id: string
             add: string[]
             remove: string[]
-            duration: number
+            user_id: string
         }
         forward_to_command?: string
-        modify_wallet?: {}
+        modify_wallet?: {
+            operator: 'INCREMENT' | 'DECREMENT'
+            amount: string
+            user_id: string
+            currency_id: string
+        }
     }
 }
 
 export interface ICustomCommandOption {
-    type: 'STRING' | 'INTEGER' | 'BOOLEAN' | 'USER' | 'CHANNEL' | 'ROLE' | 'MENTIONABLE' | 'NUMBER'
+    type: 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
     name: string
     description: string
     name_localizations?: {

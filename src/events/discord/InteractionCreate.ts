@@ -3,6 +3,7 @@ import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponen
 import Lacuna from '../../internals/Lacuna'
 import { buttonPressed } from '../../internals/structures/Giveaway'
 import { resolveObjectPath } from '../../internals/utility/Utils'
+import { CustomCommand } from '../../modules/CustomCommandV2'
 import Replacer from '../../modules/Replacer'
 import reports from '../../modules/Reports'
 
@@ -14,8 +15,14 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
 
     if (interaction.isCommand()) {
         const command = self.commands.find(c => c.is_slash_command && c.name == interaction.commandName)
+        const customCommand = server.modules.custom_commands.find(i => i.id === interaction.commandId)
 
         if (command) await command.executeSlash(server, interaction)
+        if (!command && customCommand) {
+            const custom = new CustomCommand(customCommand, self, server, interaction)
+
+            await custom.execute()
+        }
     }
 
     if (interaction.isContextMenu()) {

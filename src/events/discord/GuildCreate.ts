@@ -17,7 +17,7 @@ const handler = async (self: Lacuna, guild: Guild) => {
     }
 
     try {
-        await self.updateApplicationCommands(guild.id, server.locale)
+        await self.updateApplicationCommands(server)
     } catch (err) {}
 
     return true
