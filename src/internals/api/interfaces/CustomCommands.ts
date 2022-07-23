@@ -65,7 +65,6 @@ export async function updateCustomCommand(server: ServerDocument, data: ICustomC
                 'modules.custom_commands.$.command': data.command,
                 'modules.custom_commands.$.components': data.components,
                 'modules.custom_commands.$.options': data.options,
-                'modules.custom_commands.$.permissions': data.permissions,
                 'modules.custom_commands.$.throttling': data.throttling
             }
         }
