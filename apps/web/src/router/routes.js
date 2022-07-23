@@ -62,7 +62,7 @@ const routes = [
             {
                 path: 'add',
                 beforeEnter: to => {
-                    event('link_follow', { event_category: 'Links', event_label: 'Add Bot' })
+                    event('link_follow', { event_category: 'links', event_label: 'Add Bot' })
                     const query = new URLSearchParams(to.query).toString()
                     window.location.href = `${process.env.API}/authorize/add?${query}`
                 }

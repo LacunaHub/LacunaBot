@@ -372,7 +372,7 @@
             </div>
 
             <div>
-              <div v-html="$markdown(message.content || '')"></div>
+              <div class="break-word" v-html="$markdown(message.content || '')"></div>
             </div>
 
             <div
@@ -578,9 +578,9 @@
           indicator-color="transparent"
           no-caps
         >
-          <q-tab name="roles" :label="$t('common.roles')"></q-tab>
+          <q-tab name="roles" :label="$t('common.roles')" style="width: 50%"></q-tab>
 
-          <q-tab name="channels" :label="$t('common.channels')"></q-tab>
+          <q-tab name="channels" :label="$t('common.channels')" style="width: 50%"></q-tab>
         </q-tabs>
 
         <q-separator></q-separator>

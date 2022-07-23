@@ -319,6 +319,7 @@ export default defineComponent({
       'guildClone',
       (value, before) => {
         if (
+          JSON.stringify(before.modules.custom_commands) !== JSON.stringify(value.modules.custom_commands) ||
           JSON.stringify(before.modules.subscriptions.twitch) !== JSON.stringify(value.modules.subscriptions.twitch) ||
           JSON.stringify(before.modules.subscriptions.youtube) !==
             JSON.stringify(value.modules.subscriptions.youtube) ||

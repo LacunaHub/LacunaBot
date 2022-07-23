@@ -5,10 +5,10 @@
         <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ 'Репорты' }}
+              {{ $t('pages.guild.ut_reports_title') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ 'Получение жалоб на сообщения' }}
+              {{ $t('pages.guild.ut_reports_description') }}
             </q-item-label>
           </q-item-section>
 
@@ -78,10 +78,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ 'Автореакции' }}
+              {{ $t('pages.guild.ut_auto_reactions_title') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ 'Автоматическое добавление реакций на сообщение' }}
+              {{ $t('pages.guild.ut_auto_reactions_description') }}
             </q-item-label>
           </q-item-section>
 
@@ -128,7 +128,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ 'Интерактивные сообщения' }}
+              {{ $t('pages.guild.ut_ims_title') }}
             </q-item-label>
           </q-item-section>
 
@@ -173,10 +173,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ 'Интерактивные реакции' }}
+              {{ $t('pages.guild.ut_irs_title') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ 'Выдача ролей и доступов к каналам при нажатии на реакции' }}
+              {{ $t('pages.guild.ut_irs_description') }}
             </q-item-label>
           </q-item-section>
 

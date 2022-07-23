@@ -163,6 +163,19 @@
       "SUCCESS": "Зелёный",
       "DANGER": "Красный",
       "LINK": "Ссылка"
+    },
+    "discord_command_option_types": {
+      "SUB_COMMAND": "Подкоманда",
+      "SUB_COMMAND_GROUP": "Группа подкоманд",
+      "STRING": "Строка",
+      "INTEGER": "Целое число",
+      "BOOLEAN": "Логический",
+      "USER": "Пользователь",
+      "CHANNEL": "@:common.channel",
+      "ROLE": "@:common.role",
+      "MENTIONABLE": "Упоминаемый",
+      "NUMBER": "Число",
+      "ATTACHMENT": "Вложение"
     }
   },
 
@@ -218,6 +231,57 @@
     },
     "throttling_max_uses_title": "Максимум использований",
     "throttling_timeout_title": "Повторное использование"
+  },
+
+  "custom_command": {
+    "add_custom_command": "@:add команду",
+    "edit_custom_command": "@:edit команду",
+    "import_command": "Импортировать команду",
+    "export_command": "Экспортировать команду",
+    "command_name_title": "Название команды",
+    "command_description_title": "Описание команды",
+    "command_options_title": "Аргументы команды",
+    "co_name_title": "Название аргумента",
+    "co_type_title": "Тип аргумента",
+    "co_description_title": "Описание аргумента",
+    "co_required_title": "Обязательный аргумент",
+    "co_choices_title": "Варианты выбора",
+    "co_choice_name_title": "Название выбора",
+    "co_choice_value_title": "Значение выбора",
+    "add_condition": "@:add условие",
+    "add_action": "@:add действие",
+    "component_names": {
+      "COMPARE_VALUES": "Сравнить значения",
+      "REPLY": "Ответить",
+      "SEND_MESSAGE": "Отправить сообщение",
+      "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
+      "FORWARD_TO_COMMAND": "Перенаправить на команду",
+      "MODIFY_WALLET": "Изменить кошелёк"
+    },
+    "cv_operator_title": "Оператор",
+    "cv_operators": {
+      "EQUAL": "Равно",
+      "NOT_EQUAL": "Не равно",
+      "GREATER_THAN": "Больше чем",
+      "LESS_THAN": "Меньше чем",
+      "STARTS_WITH": "Начинается с",
+      "ENDS_WITH": "Заканчивается на",
+      "CONTAINS": "Содержит",
+      "NOT_CONTAINS": "Не содержит"
+    },
+    "cv_left_part_title": "Левая часть",
+    "cv_right_part_title": "Правая часть",
+    "cv_false_reply_title": "Ложный ответ",
+    "mr_user_id_title": "Идентификатор пользователя",
+    "mr_user_id_description": "Добавить/убрать роли указанному пользователю (по умолчанию указан автор команды)",
+    "mw_operators": {
+      "INCREMENT": "Прибавить",
+      "DECREMENT": "Убавить"
+    },
+    "mw_amount_title": "Количество валюты",
+    "mw_user_id_description": "Изменить кошелёк указанного пользователя (по умолчанию указан автор команды)",
+    "mw_currency_id_title": "Идентификатор валюты",
+    "mw_currency_id_description": "Укажите, если хотите выдать другую валюту, а не стандартную"
   },
 
   "automoder": {
@@ -485,7 +549,14 @@
       "vc_voice_roles_title": "Голосовые роли",
       "vc_voice_roles_description": "Автоматическая выдача ролей при подключении к голосовым каналам",
       "vc_auto_voices_title": "Временные голосовые каналы",
-      "vc_auto_voices_description": "Автоматическое создание и удаление голосовых каналов"
+      "vc_auto_voices_description": "Автоматическое создание и удаление голосовых каналов",
+      "ut_reports_title": "Репорты",
+      "ut_reports_description": "Получение жалоб на сообщения",
+      "ut_auto_reactions_title": "Автореакции",
+      "ut_auto_reactions_description": "Автоматическое добавление реакций на сообщение",
+      "ut_ims_title": "Интерактивные сообщения",
+      "ut_irs_title": "Интерактивные реакции",
+      "ut_irs_description": "Выдача ролей и доступов к каналам при нажатии на реакции"
     },
 
     "landing": {

@@ -29,7 +29,7 @@ export const useGuildStore = defineStore('guild', {
 
                 const parent = state.guild.channels.find(j => j.id === i.parentId)
 
-                if (i.type === 'GUILD_CATEGORY') icon = 'expand_more'
+                if (i.type === 'GUILD_CATEGORY') icon = 'folder'
                 if (i.type === 'GUILD_TEXT') icon = 'tag'
                 if (i.type === 'GUILD_NEWS') icon = 'campaign'
                 if (i.type === 'GUILD_VOICE') icon = 'volume_up'

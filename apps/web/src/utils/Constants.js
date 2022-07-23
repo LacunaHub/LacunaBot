@@ -81,3 +81,14 @@ export const discordChannelPermissions = {
     USE_EXTERNAL_STICKERS: 1n << 37n,
     SEND_MESSAGES_IN_THREADS: 1n << 38n
 }
+
+export const discordAppCommandNameRegexp = /^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u
+
+export const customCommandComponentLimits = {
+    COMPARE_VALUES: 5,
+    REPLY: 1,
+    SEND_MESSAGE: 2,
+    MODIFY_ROLES: 2,
+    FORWARD_TO_COMMAND: 1,
+    MODIFY_WALLET: 2
+}
