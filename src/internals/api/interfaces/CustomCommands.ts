@@ -6,7 +6,7 @@ import DiscordUtils from '../../utility/DiscordUtils'
 export async function createCustomCommand(server: ServerDocument, data: ICustomCommand) {
     const customCommands = server.modules.custom_commands
 
-    if (customCommands.length >= 5 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
+    // if (customCommands.length >= 5 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
     if (customCommands.length >= 25) throw new Error('LIMIT_REACHED')
     if (!data.components.length) throw new Error('NO_COMPONENTS')
 
