@@ -482,6 +482,7 @@
       "gs_title": "Общие настройки",
       "gs_prefix_title": "Префикс",
       "gs_locale_title": "Локализация",
+      "gs_translate_title": "Перевести",
       "gs_expert_roles_title": "Роли экспертов",
       "gs_expert_roles_description": "Выбранные роли смогут просматривать и изменять настройки бота, будьте осторожны",
       "gs_welcome_title": "Приветствие",
