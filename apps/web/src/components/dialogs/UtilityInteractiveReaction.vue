@@ -12,7 +12,7 @@
       <q-card-section v-if="confirmError">
         <q-banner class="rounded-lg bg-dark-grey-3" dense>
           <span>
-            {{ confirmError }}
+            {{ $t(`errors.irs.${confirmError}`) }}
           </span>
 
           <template #avatar>

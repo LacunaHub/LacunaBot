@@ -9,6 +9,18 @@
         </q-item-section>
       </q-item>
 
+      <q-card-section v-if="confirmError">
+        <q-banner class="rounded-lg bg-dark-grey-3" dense>
+          <span>
+            {{ $t(`errors.custom_commands.${confirmError}`) }}
+          </span>
+
+          <template #avatar>
+            <q-icon name="error" color="negative"></q-icon>
+          </template>
+        </q-banner>
+      </q-card-section>
+
       <q-tabs
         v-model="currentTab"
         class="bg-dark-grey-3"
