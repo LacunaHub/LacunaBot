@@ -28,7 +28,7 @@
               </q-card>
             </div>
 
-            <div class="col-12">
+            <div v-if="guild.modules.custom_commands.length < 25" class="col-12">
               <q-btn @click="customCommandDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
