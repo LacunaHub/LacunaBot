@@ -1,5 +1,5 @@
 import Router from '@koa/router'
-import { Constants } from 'discord.js'
+import { Constants, Permissions } from 'discord.js'
 import { Context } from 'koa'
 import qdb from 'quick.db'
 import db from '../../../database'
@@ -46,6 +46,7 @@ async function getSettings(ctx: Context) {
         ? guildRoles.sort((a, b) => a.position - b.position).filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID)
         : []
     const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (DiscordUtils.compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
+    const selfPermissions = selfRoles.reduce((x, y) => x | BigInt(y.permissions), 0n)
 
     const channels = guildChannels
         .sort((a, b) => a.parent_id - b.parent_id || a.position - b.position)
@@ -100,7 +101,8 @@ async function getSettings(ctx: Context) {
             roles: roles.filter(r => r.id != guild_id),
             emojis,
             commands,
-            app_commands_registered: guildCommands.length > 0
+            app_commands_registered: guildCommands.length > 0,
+            app_permissions: new Permissions(selfPermissions).toArray()
         },
         moderation: {
             case_log: {
