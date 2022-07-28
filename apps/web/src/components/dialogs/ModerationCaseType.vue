@@ -13,7 +13,7 @@
         </q-item-section>
       </q-item>
 
-      <q-card-section>
+      <q-card-section v-if="false">
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
