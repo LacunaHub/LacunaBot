@@ -13,7 +13,8 @@
         "lib": ["ES2021"],
         "moduleResolution": "Node",
         "resolveJsonModule": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "skipLibCheck": true
     },
     "exclude": ["node_modules"]
 }

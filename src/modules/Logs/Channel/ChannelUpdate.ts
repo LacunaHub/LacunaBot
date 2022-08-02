@@ -79,7 +79,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 })
             }
 
-            if (before.isText() && channel.isText() && before.topic != channel.topic) {
+            if ((before as any).topic != (channel as any).topic) {
                 const embed = new MessageEmbed()
                     .setTitle(t('logs.channel_update_title'))
                     .setDescription(
@@ -88,8 +88,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             change: t('logs.channel_update_topic_change_template', { channel: `<#${channel.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), before.topic ?? '-', true)
-                    .addField(t('logs.after_change'), channel.topic ?? '-', true)
+                    .addField(t('logs.before_change'), (before as any).topic ?? '-', true)
+                    .addField(t('logs.after_change'), (channel as any).topic ?? '-', true)
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
