@@ -119,7 +119,7 @@ export async function removePrefix(self: Lacuna, server: ServerDocument, message
         await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.warn.remove.texts.warn_removed, `**${message.member.displayName}**`)}` })
     }
 
-    await caseLog.createCaseEntry(server, message.guild, { type: 'WARN_REMOVE', target: mention.user, executor: message.author, reason })
+    await caseLog.createCaseEntry(message.guild, { type: 'WARN_REMOVE', target: mention.user, executor: message.author, reason })
 
     return true
 }

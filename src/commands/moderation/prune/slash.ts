@@ -45,7 +45,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         })
     }
 
-    await caseLog.createCaseEntry(server, interaction.guild, { type: 'PRUNE_MESSAGES', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'PRUNE_MESSAGES', target: mention.user, executor: interaction.user, reason })
 
     return true
 }

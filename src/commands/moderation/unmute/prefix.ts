@@ -42,7 +42,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         }
     }
 
-    await caseLog.createCaseEntry(server, message.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: message.author, reason })
+    await caseLog.createCaseEntry(message.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: message.author, reason })
 
     await message.reply({
         content: `${self._emojis.OK} | ${self.translator.format(locale.unmute.texts.user_unmuted, `**${message.member.displayName}**`, `**${mention.user.tag}**`)}`

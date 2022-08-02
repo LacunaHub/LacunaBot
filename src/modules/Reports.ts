@@ -10,7 +10,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
 
     const member = await interaction.guild.members.fetch(user_id).catch(() => {})
     const t = self.i18n.t.bind(null, server.locale)
-    const reason = 'Репорты'
+    const reason = '-'
 
     if (!member) {
         await interaction.reply({
@@ -82,7 +82,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
         }
 
         await member.kick(reason).catch(() => {})
-        await caseLog.createCaseEntry(server, interaction.guild, { type: 'KICK', target: member.user, executor: interaction.user, reason })
+        await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: member.user, executor: interaction.user, reason })
     }
 
     if (action == 'WARN') {
@@ -106,7 +106,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
     const member = (await interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
     const t = self.i18n.t.bind(null, server.locale)
     const duration = interaction.values[0]
-    const reason = 'Репорты'
+    const reason = '-'
 
     if (!member) {
         await interaction.reply({
@@ -189,7 +189,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
             })
         }
 
-        await caseLog.createCaseEntry(server, interaction.guild, { type: 'BAN_ADD', target: member.user, executor: interaction.user, reason })
+        await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_ADD', target: member.user, executor: interaction.user, reason })
     }
 
     if (action == 'MUTE') {
@@ -236,7 +236,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
             await member.roles.set(strict_roles, reason).catch(self.logger.error)
         }
 
-        await caseLog.createCaseEntry(server, interaction.guild, { type: 'MUTE_ADD', target: member.user, executor: interaction.user, reason })
+        await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_ADD', target: member.user, executor: interaction.user, reason })
     }
 
     await removeComponentsFromMessage(interaction)

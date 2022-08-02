@@ -32,7 +32,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const last_10_violations = violator.violations.slice(Math.max(violator.violations.length - 10, 0)).sort((a, b) => a.timestamp - b.timestamp)
 
     const embed = new MessageEmbed()
-        .setAuthor({ name: t('commands.violations.text_user_violations', mention.user.tag), iconURL: mention.user.displayAvatarURL() })
+        .setAuthor({ name: t('commands.violations.text_user_violations', { target: mention.user.tag }), iconURL: mention.user.displayAvatarURL() })
         .addField(t('commands.violations.text_last_24_hours'), `${last_24_hours.length}`, true)
         .addField(t('commands.violations.text_last_7_days'), `${last_7_days.length}`, true)
         .addField(t('commands.violations.text_total_violations'), `${violator.violations.length}`, true)

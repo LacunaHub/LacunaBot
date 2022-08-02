@@ -4,11 +4,11 @@ import ms from 'ms'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
-import { warnings } from '../Moderation'
+import { caseLog, warnings } from '../Moderation'
 import Replacer from '../Replacer'
 
 export default async function (self: Lacuna, server: ServerDocument, message: Message) {
-    const reason = self.i18n.t(server.locale, 'audit_reasons.automoder_anti_caps')
+    let reason = self.i18n.t(server.locale, 'audit_reasons.automoder_anti_caps')
     const config = server.moderation.automoder.anti_caps
 
     if (!config.active) return false
@@ -29,26 +29,31 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         const send_message = config.options.includes('ACTION_SEND_MESSAGE')
         const delete_message = config.options.includes('ACTION_DELETE_MESSAGE')
 
-        if (ban && !mute && !kick) {
+        if (ban && !mute && !kick && message.member.bannable) {
             if (config.ban_timeout) {
                 const expires_timestamp = Date.now() + config.ban_timeout * 1000
+                reason += ` (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`
 
                 new TemporaryBan(self, {
                     user_id: message.author.id,
                     guild_id: message.guild.id,
                     expires_timestamp: expires_timestamp,
-                    reason: `${reason} (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
+                    reason: reason,
                     initial: true
                 })
             } else {
                 await message.guild.members.ban(message.author.id, { reason }).catch(self.logger.error)
             }
+
+            await caseLog.createCaseEntry(message.guild, { type: 'BAN_ADD', target: message.author, executor: self.user, reason })
         }
 
-        if (mute && !ban && !kick) {
-            const expires_timestamp: number = Date.now() + (config.mute_timeout ? config.mute_timeout * 1000 : ms('2h'))
+        if (mute && !ban && !kick && message.member.moderatable) {
+            const expires_timestamp = Date.now() + (config.mute_timeout ? config.mute_timeout * 1000 : ms('2h'))
+            reason += ` (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`
 
             await message.member.disableCommunicationUntil(expires_timestamp, reason).catch(() => {})
+            await caseLog.createCaseEntry(message.guild, { type: 'MUTE_ADD', target: message.author, executor: self.user, reason })
 
             if (server.moderation.mutes.rar) {
                 const current_roles = message.member.roles.cache.filter(r => r.editable && r.id != message.guild.id).map(r => r.id)
@@ -74,8 +79,9 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             }
         }
 
-        if (kick && !ban && !mute) {
-            if (message.member.kickable) await message.member.kick(reason).catch(self.logger.error)
+        if (kick && !ban && !mute && message.member.kickable) {
+            await message.member.kick(reason).catch(self.logger.error)
+            await caseLog.createCaseEntry(message.guild, { type: 'KICK', target: message.author, executor: self.user, reason })
         }
 
         if (modify_roles && !ban && !kick) {
