@@ -83,7 +83,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         await message.guild.members.ban(mention, { reason: reason }).catch(self.logger.error)
     }
 
-    await caseLog.createCaseEntry(server, message.guild, { type: 'BAN_ADD', target: mention.user, executor: message.author, reason })
+    await caseLog.createCaseEntry(message.guild, { type: 'BAN_ADD', target: mention.user, executor: message.author, reason })
 
     await message.reply({
         content: `${self._emojis.OK} | ${self.translator.format(locale.ban.texts.user_banned, `**${message.member.displayName}**`, `**${mention.user.tag}**`)}`

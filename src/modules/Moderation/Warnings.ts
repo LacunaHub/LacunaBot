@@ -1,5 +1,4 @@
 import { ButtonInteraction, CommandInteraction, GuildMember, Message } from 'discord.js'
-import moment from 'moment'
 import ms from 'ms'
 import { ServerDocument, WarningsPenalty, WarningsViolator } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
@@ -50,6 +49,8 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
         )
     }
 
+    await caseLog.createCaseEntry(signal.guild, { type: 'WARN_ADD', target: target.user, executor: executor.user, reason })
+
     if (penalty) {
         const ban = penalty.options.includes('ACTION_BAN')
         const mute = penalty.options.includes('ACTION_MUTE')
@@ -58,7 +59,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
         const modify_roles = penalty.options.includes('ACTION_MODIFY_ROLES')
         const reset_violations = penalty.options.includes('ACTION_RESET_VIOLATIONS')
 
-        if (ban && !mute && !kick) {
+        if (ban && !mute && !kick && target.bannable) {
             if (penalty.ban_timeout) {
                 const expires_timestamp = Date.now() + penalty.ban_timeout * 1000
 
@@ -66,28 +67,24 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
                     user_id: target.user.id,
                     guild_id: signal.guild.id,
                     expires_timestamp: expires_timestamp,
-                    reason: `Автомодер: Предупреждение (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
+                    reason: reason,
                     initial: true
                 })
             } else {
-                await signal.guild.members.ban(target.user.id, { reason: 'Автомодер: Предупреждение' }).catch(self.logger.error)
+                await signal.guild.members.ban(target.user.id, { reason }).catch(self.logger.error)
             }
+
+            await caseLog.createCaseEntry(signal.guild, { type: 'BAN_ADD', target: target.user, executor: self.user, reason })
         }
 
-        if (mute && !ban && !kick) {
+        if (mute && !ban && !kick && target.moderatable) {
             let duration = penalty.mute_timeout * 1000
 
             if (duration < ms('1m')) duration = ms('1m')
             else if (duration > ms('28d')) duration = ms('28d')
 
-            await target
-                .disableCommunicationUntil(
-                    Date.now() + duration,
-                    `Автомодер: Предупреждение (${moment(Date.now() + duration)
-                        .locale(server.locale)
-                        .fromNow(true)})`
-                )
-                .catch(() => {})
+            await target.disableCommunicationUntil(Date.now() + duration, reason).catch(() => {})
+            await caseLog.createCaseEntry(signal.guild, { type: 'MUTE_ADD', target: target.user, executor: self.user, reason })
 
             if (server.moderation.mutes.rar) {
                 const current_roles = target.roles.cache.filter(r => r.editable && r.id != signal.guild.id).map(r => r.id)
@@ -113,8 +110,9 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
             }
         }
 
-        if (kick && !ban && !mute) {
-            if (target.kickable) await target.kick('Автомодер: Предупреждение')
+        if (kick && !ban && !mute && target.kickable) {
+            await target.kick(reason).catch(() => {})
+            await caseLog.createCaseEntry(signal.guild, { type: 'KICK', target: target.user, executor: self.user, reason })
         }
 
         if (modify_roles && !ban && !kick) {
@@ -122,7 +120,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
                 const editable = signal.guild.roles.cache.filter(r => r.editable && penalty.modify_roles.add.includes(r.id))
 
                 if (editable.size) {
-                    await target.roles.add(editable, 'Автомодер: Предупреждение').catch(self.logger.error)
+                    await target.roles.add(editable, reason).catch(self.logger.error)
                 }
             }
 
@@ -130,7 +128,7 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
                 const editable = signal.guild.roles.cache.filter(r => r.editable && penalty.modify_roles.remove.includes(r.id))
 
                 if (editable.size) {
-                    await target.roles.remove(editable, 'Автомодер: Предупреждение').catch(self.logger.error)
+                    await target.roles.remove(editable, reason).catch(self.logger.error)
                 }
             }
         }
@@ -167,8 +165,6 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
 
         await target.send(dm_message).catch(self.logger.error)
     }
-
-    await caseLog.createCaseEntry(server, signal.guild, { type: 'WARN_ADD', target: target.user, executor: executor.user, reason })
 }
 
 export interface WarnOptions {

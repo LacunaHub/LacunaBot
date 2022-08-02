@@ -72,7 +72,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     }
 
     await mention.kick(reason).catch(self.logger.error)
-    await caseLog.createCaseEntry(server, interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })
 
     await interaction.reply({
         content: `${self._emojis.OK} | ${t('commands.kick.text_user_kicked', {

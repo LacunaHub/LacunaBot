@@ -98,7 +98,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         await interaction.guild.members.ban(mention, { reason: reason }).catch(self.logger.error)
     }
 
-    await caseLog.createCaseEntry(server, interaction.guild, { type: 'BAN_ADD', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_ADD', target: mention.user, executor: interaction.user, reason })
 
     await interaction.reply({
         content: `${self._emojis.OK} | ${t('commands.ban.text_user_banned', {

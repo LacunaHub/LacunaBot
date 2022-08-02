@@ -148,7 +148,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         })
     }
 
-    await caseLog.createCaseEntry(server, interaction.guild, { type: 'WARN_REMOVE', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'WARN_REMOVE', target: mention.user, executor: interaction.user, reason })
 
     return true
 }

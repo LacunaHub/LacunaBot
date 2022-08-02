@@ -15,8 +15,8 @@ const handler = async (self: Lacuna, ban: GuildBan) => {
         const audit = await ban.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_BAN_ADD' })
         const entry = audit.entries.find(e => (e.target as User).id == ban.user.id)
 
-        if (entry && (entry.executor.id != self.user.id || entry.reason?.includes('Автомодер:'))) {
-            await caseLog.createCaseEntry(server, ban.guild, { type: 'BAN_ADD', target: ban.user, executor: entry.executor, reason: entry.reason })
+        if (entry && entry.executor.id !== self.user.id) {
+            await caseLog.createCaseEntry(ban.guild, { type: 'BAN_ADD', target: ban.user, executor: entry.executor, reason: entry.reason })
         }
     }
 

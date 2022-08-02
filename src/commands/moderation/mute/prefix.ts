@@ -100,7 +100,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         await mention.send(dm_message).catch(self.logger.error)
     }
 
-    await caseLog.createCaseEntry(server, message.guild, { type: 'MUTE_ADD', target: mention.user, executor: message.author, reason })
+    await caseLog.createCaseEntry(message.guild, { type: 'MUTE_ADD', target: mention.user, executor: message.author, reason })
 
     await message.reply({
         content: `${self._emojis.OK} | ${self.translator.format(locale.mute.texts.user_muted, `**${message.member.displayName}**`, `**${mention.user.tag}**`)}`

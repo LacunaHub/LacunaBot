@@ -46,8 +46,8 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
             const audit = await member.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_UPDATE' })
             const entry = audit.entries.find(e => (e.target as User).id == member.id)
 
-            if (entry && (entry.executor.id != self.user.id || entry.reason?.includes('Автомодер:'))) {
-                await caseLog.createCaseEntry(server, member.guild, {
+            if (entry && entry.executor.id !== self.user.id) {
+                await caseLog.createCaseEntry(member.guild, {
                     type: member.communicationDisabledUntilTimestamp ? 'MUTE_ADD' : 'MUTE_REMOVE',
                     target: member.user,
                     executor: entry.executor,

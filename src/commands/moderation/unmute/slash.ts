@@ -48,7 +48,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         }
     }
 
-    await caseLog.createCaseEntry(server, interaction.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: interaction.user, reason })
 
     await interaction.reply({
         content: `${self._emojis.OK} | ${t('commands.unmute.text_user_unmuted', {

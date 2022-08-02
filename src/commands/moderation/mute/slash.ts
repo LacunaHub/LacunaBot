@@ -115,7 +115,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         await mention.send(dm_message).catch(self.logger.error)
     }
 
-    await caseLog.createCaseEntry(server, interaction.guild, { type: 'MUTE_ADD', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_ADD', target: mention.user, executor: interaction.user, reason })
 
     await interaction.reply({
         content: `${self._emojis.OK} | ${t('commands.mute.text_user_muted', {
