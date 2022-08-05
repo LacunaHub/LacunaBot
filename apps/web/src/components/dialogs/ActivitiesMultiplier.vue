@@ -4,164 +4,148 @@
       <q-item class="q-py-md rounded-t-lg">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'economy_currency.add_currency' : 'economy_currency.edit_currency') }}
+            {{ $t(mode === 'CREATE' ? 'activity_multipliers.add_multiplier' : 'activity_multipliers.edit_multiplier') }}
           </q-item-label>
         </q-item-section>
       </q-item>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('economy_currency.currency_name_title') }}
+      <q-list class="q-px-none q-py-md" dense>
+        <q-item class="q-mb-sm">
+          <q-item-section>
+            <q-item-label>
+              {{ $t('activity_multipliers.level_multipliers') }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item v-for="option in ['LEVELS_TEXT', 'LEVELS_VOICE']" :key="option" tag="label" v-ripple>
+          <q-item-section>
+            <q-item-label>
+              {{ $t(`activity_multipliers.${option === 'LEVELS_TEXT' ? 'for_text_activity' : 'for_voice_activity'}`) }}
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side>
+            <q-checkbox
+              v-model="multiplier.options"
+              :val="option"
+              dense
+              @update:model-value="onSelectOption"
+            ></q-checkbox>
+          </q-item-section>
+        </q-item>
+      </q-list>
+
+      <transition enter-active-class="animated fadeInUp">
+        <q-card-section v-if="multiplier.options.includes('LEVELS_TEXT')">
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('activity_multipliers.for_text_activity') }}
+              </div>
+
+              <q-slider
+                v-model.number="multiplier.levels_text_multiplier"
+                class="q-pt-sm q-px-sm"
+                :min="50"
+                :max="500"
+                label
+                :label-value="`${multiplier.levels_text_multiplier}%`"
+              ></q-slider>
             </div>
-
-            <q-input
-              v-model.trim="currency.name"
-              class="q-pt-sm"
-              :maxlength="64"
-              filled
-              dense
-              hide-bottom-space
-            ></q-input>
           </div>
+        </q-card-section>
+      </transition>
 
-          <div class="col-12">
-            <div>
-              {{ $t('economy_currency.currency_symbol_title') }}
+      <transition enter-active-class="animated fadeInUp">
+        <q-card-section v-if="multiplier.options.includes('LEVELS_VOICE')">
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('activity_multipliers.for_voice_activity') }}
+              </div>
+
+              <q-slider
+                v-model.number="multiplier.levels_voice_multiplier"
+                class="q-pt-sm q-px-sm"
+                :min="50"
+                :max="500"
+                label
+                :label-value="`${multiplier.levels_voice_multiplier}%`"
+              ></q-slider>
             </div>
-
-            <q-input
-              v-model.trim="currency.symbol"
-              class="q-pt-sm"
-              :maxlength="64"
-              filled
-              dense
-              hide-bottom-space
-            ></q-input>
           </div>
-        </div>
-      </q-card-section>
+        </q-card-section>
+      </transition>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-6">
-            <div>
-              {{ $t('economy_currency.income_per_message_title') }}
+      <q-list class="q-px-none q-py-md" dense>
+        <q-item class="q-mb-sm">
+          <q-item-section>
+            <q-item-label>
+              {{ $t('activity_multipliers.economy_multipliers') }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item v-for="option in ['ECONOMY_TEXT', 'ECONOMY_VOICE']" :key="option" tag="label" v-ripple>
+          <q-item-section>
+            <q-item-label>
+              {{ $t(`activity_multipliers.${option === 'ECONOMY_TEXT' ? 'for_text_activity' : 'for_voice_activity'}`) }}
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side>
+            <q-checkbox
+              v-model="multiplier.options"
+              :val="option"
+              dense
+              @update:model-value="onSelectOption"
+            ></q-checkbox>
+          </q-item-section>
+        </q-item>
+      </q-list>
+
+      <transition enter-active-class="animated fadeInUp">
+        <q-card-section v-if="multiplier.options.includes('ECONOMY_TEXT')">
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('activity_multipliers.for_text_activity') }}
+              </div>
+
+              <q-slider
+                v-model.number="multiplier.economy_text_multiplier"
+                class="q-pt-sm q-px-sm"
+                :min="50"
+                :max="500"
+                label
+                :label-value="`${multiplier.economy_text_multiplier}%`"
+              ></q-slider>
             </div>
-
-            <q-input
-              v-model.number="currency.income.messages.range_per_message[0]"
-              class="q-pt-sm"
-              type="number"
-              filled
-              dense
-              hide-bottom-space
-              :prefix="$t('economy_currency.income_from')"
-              @update:model-value="onChangeMessageIncome($event, 0)"
-            ></q-input>
           </div>
+        </q-card-section>
+      </transition>
 
-          <div class="col-12 col-md-6 self-end">
-            <q-input
-              v-model.number="currency.income.messages.range_per_message[1]"
-              class="q-pt-sm"
-              type="number"
-              filled
-              dense
-              hide-bottom-space
-              :prefix="$t('economy_currency.income_to')"
-              @update:model-value="onChangeMessageIncome($event, 1)"
-            ></q-input>
-          </div>
+      <transition enter-active-class="animated fadeInUp">
+        <q-card-section v-if="multiplier.options.includes('ECONOMY_VOICE')">
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('activity_multipliers.for_voice_activity') }}
+              </div>
 
-          <div class="col-12">
-            <div>
-              {{ $t('economy_currency.income_per_message_rl_title') }}
+              <q-slider
+                v-model.number="multiplier.economy_voice_multiplier"
+                class="q-pt-sm q-px-sm"
+                :min="50"
+                :max="500"
+                label
+                :label-value="`${multiplier.economy_voice_multiplier}%`"
+              ></q-slider>
             </div>
-            <div class="text--secondary">
-              {{ $t('economy_currency.income_per_message_rl_description') }}
-            </div>
-
-            <q-select
-              v-model.number="currency.income.messages.rate_limit_per_user"
-              :options="[0, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-            >
-              <template #selected-item="{ opt }">
-                <span v-if="opt === 0" class="text-lowercase">
-                  {{ $t('none') }}
-                </span>
-                <span v-else>
-                  {{
-                    $dt
-                      .now()
-                      .plus({ seconds: opt })
-                      .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                  }}
-                </span>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section>
-                    <q-item-label v-if="opt === 0" class="text-lowercase">
-                      {{ $t('none') }}
-                    </q-item-label>
-                    <q-item-label v-else>
-                      {{
-                        $dt
-                          .now()
-                          .plus({ seconds: opt })
-                          .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                      }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
           </div>
-        </div>
-      </q-card-section>
-
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-6">
-            <div>
-              {{ $t('economy_currency.income_per_minute_title') }}
-            </div>
-
-            <q-input
-              v-model.number="currency.income.voice_channels.range_per_minute[0]"
-              :disable="!guild.premium.available"
-              class="q-pt-sm"
-              type="number"
-              filled
-              dense
-              hide-bottom-space
-              :prefix="$t('economy_currency.income_from')"
-              @update:model-value="onChangeVoiceIncome($event, 0)"
-            ></q-input>
-          </div>
-
-          <div class="col-12 col-md-6 self-end">
-            <q-input
-              v-model.number="currency.income.voice_channels.range_per_minute[1]"
-              :disable="!guild.premium.available"
-              class="q-pt-sm"
-              type="number"
-              filled
-              dense
-              hide-bottom-space
-              :prefix="$t('economy_currency.income_to')"
-              @update:model-value="onChangeVoiceIncome($event, 1)"
-            ></q-input>
-          </div>
-        </div>
-      </q-card-section>
+        </q-card-section>
+      </transition>
 
       <q-list class="q-px-none" padding>
         <q-expansion-item expand-separator :label="$t('common.permissions')">
@@ -174,7 +158,7 @@
                   </div>
 
                   <q-select
-                    v-model="currency.income.allowed.channels"
+                    v-model="multiplier.allowed_channels"
                     :options="[...guild.channelsText, ...guild.channelsVoice]"
                     option-label="name"
                     option-value="id"
@@ -226,7 +210,7 @@
                   </div>
 
                   <q-select
-                    v-model="currency.income.blocked.channels"
+                    v-model="multiplier.blocked_channels"
                     :options="[...guild.channelsText, ...guild.channelsVoice]"
                     option-label="name"
                     option-value="id"
@@ -282,7 +266,7 @@
                   </div>
 
                   <q-select
-                    v-model="currency.income.allowed.roles"
+                    v-model="multiplier.allowed_roles"
                     :options="guild.roles"
                     option-label="name"
                     option-value="id"
@@ -324,7 +308,7 @@
                   </div>
 
                   <q-select
-                    v-model="currency.income.blocked.roles"
+                    v-model="multiplier.blocked_roles"
                     :options="guild.roles"
                     option-label="name"
                     option-value="id"
@@ -387,7 +371,6 @@
               class="full-width rounded-lg"
               :label="$t('done')"
               :disable="!isValid"
-              :disable-dropdown="currency.id === 'DEFAULT'"
               split
               unelevated
               no-caps
@@ -418,12 +401,12 @@ import { useGuildStore } from 'src/stores/guild'
 import { suid } from 'src/utils/Utils'
 
 export default defineComponent({
-  name: 'ActivitiesEconomyCurrency',
+  name: 'ActivitiesMultiplier',
 
   emits: [...useDialogPluginComponent.emits],
 
   props: {
-    currencyProp: {
+    multiplierProp: {
       type: Object,
       default: null
     }
@@ -433,49 +416,35 @@ export default defineComponent({
     const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
-    const mode = ref(props.currencyProp ? 'UPDATE' : 'CREATE')
-    const currency = ref(
+    const mode = ref(props.multiplierProp ? 'UPDATE' : 'CREATE')
+    const multiplier = ref(
       mode.value === 'UPDATE'
-        ? JSON.parse(JSON.stringify(props.currencyProp))
+        ? JSON.parse(JSON.stringify(props.multiplierProp))
         : {
             id: suid(6),
-            name: '',
-            symbol: '',
             options: [],
-            income: {
-              messages: {
-                range_per_message: [1, 5],
-                rate_limit_per_user: 60
-              },
-              voice_channels: {
-                range_per_minute: [0.2, 1]
-              },
-              allowed: {
-                channels: [],
-                roles: []
-              },
-              blocked: {
-                channels: [],
-                roles: []
-              }
-            }
+            allowed_channels: [],
+            allowed_roles: [],
+            blocked_channels: [],
+            blocked_roles: []
           }
     )
 
     const isValid = computed(() => {
-      return currency.value.name && currency.value.symbol
+      return multiplier.value.options
     })
 
     return {
       guild,
       dialogRef,
       mode,
-      currency,
+      multiplier,
+
       isValid,
 
       onConfirm() {
         if (isValid.value) {
-          onDialogOK({ mode: mode.value, currency: currency.value })
+          onDialogOK({ mode: mode.value, multiplier: multiplier.value })
         }
       },
 
@@ -488,43 +457,44 @@ export default defineComponent({
       },
 
       onDelete() {
-        if (currency.value.id !== 'DEFAULT') {
-          onDialogOK({ mode: 'DELETE', currency: currency.value })
-        }
+        onDialogOK({ mode: 'DELETE', multiplier: multiplier.value })
       }
     }
   },
 
   methods: {
-    onChangeMessageIncome(value, position) {
-      const MIN_INCOME_AMOUNT = 0,
-        MAX_INCOME_AMOUNT = 100000
-      const range = this.currency.income.messages.range_per_message
-
-      if (position) {
-        if (value > MAX_INCOME_AMOUNT) value = MAX_INCOME_AMOUNT
-        if (value < range[0]) value = range[0]
-      } else {
-        if (value < MIN_INCOME_AMOUNT) value = MIN_INCOME_AMOUNT
-        if (value > range[1]) value = range[1]
+    onSelectOption(options) {
+      if (options.includes('LEVELS_TEXT') && !this.multiplier.levels_text_multiplier) {
+        this.multiplier.levels_text_multiplier = 100
       }
 
-      this.currency.income.messages.range_per_message[position] = value
-    },
-    onChangeVoiceIncome(value, position) {
-      const MIN_INCOME_AMOUNT = 0,
-        MAX_INCOME_AMOUNT = 100000
-      const range = this.currency.income.voice_channels.range_per_minute
-
-      if (position) {
-        if (value > MAX_INCOME_AMOUNT) value = MAX_INCOME_AMOUNT
-        if (value < range[0]) value = range[0]
-      } else {
-        if (value < MIN_INCOME_AMOUNT) value = MIN_INCOME_AMOUNT
-        if (value > range[1]) value = range[1]
+      if (options.includes('LEVELS_VOICE') && !this.multiplier.levels_voice_multiplier) {
+        this.multiplier.levels_voice_multiplier = 100
       }
 
-      this.currency.income.voice_channels.range_per_minute[position] = value
+      if (options.includes('ECONOMY_TEXT') && !this.multiplier.economy_text_multiplier) {
+        this.multiplier.economy_text_multiplier = 100
+      }
+
+      if (options.includes('ECONOMY_VOICE') && !this.multiplier.economy_voice_multiplier) {
+        this.multiplier.economy_voice_multiplier = 100
+      }
+
+      if (!options.includes('LEVELS_TEXT')) {
+        delete this.multiplier.levels_text_multiplier
+      }
+
+      if (!options.includes('LEVELS_VOICE')) {
+        delete this.multiplier.levels_voice_multiplier
+      }
+
+      if (!options.includes('ECONOMY_TEXT')) {
+        delete this.multiplier.economy_text_multiplier
+      }
+
+      if (!options.includes('ECONOMY_VOICE')) {
+        delete this.multiplier.economy_voice_multiplier
+      }
     }
   }
 })

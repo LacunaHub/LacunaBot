@@ -44,6 +44,22 @@
                     </q-item-section>
                   </q-item>
                 </template>
+
+                <template #after-options>
+                  <q-separator></q-separator>
+
+                  <q-item clickable href="https://crowdin.com/project/lacuna" target="_blank">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ $t('pages.guild.gs_translate_title') }}
+                      </q-item-label>
+                    </q-item-section>
+
+                    <q-item-section side>
+                      <q-icon name="open_in_new"></q-icon>
+                    </q-item-section>
+                  </q-item>
+                </template>
               </q-select>
             </div>
 
@@ -499,11 +515,7 @@ export default defineComponent({
   setup() {
     const guild = useGuildStore()
 
-    function console(e) {
-      window.console.log(e)
-    }
-
-    return { guild, console }
+    return { guild }
   },
 
   components: { MessageEditor },
@@ -512,10 +524,7 @@ export default defineComponent({
     return {
       input: null,
       toggle: false,
-      locales: [
-        { label: 'Русский', value: 'ru' },
-        { label: 'English', value: 'en' }
-      ]
+      locales: [{ label: 'Русский', value: 'ru' }]
     }
   }
 })

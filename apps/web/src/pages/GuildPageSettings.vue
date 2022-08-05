@@ -53,7 +53,13 @@
                     </q-item-section>
                   </q-item>
 
-                  <q-item clickable :to="`/guilds/${gid}/sphere`" active-class="nav-item--active" v-ripple>
+                  <q-item
+                    clickable
+                    :to="`/guilds/${gid}/sphere`"
+                    active-class="nav-item--active"
+                    v-ripple
+                    style="display: none"
+                  >
                     <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
 
                     <q-item-section avatar side>
@@ -104,7 +110,13 @@
                     </q-item-section>
                   </q-item>
 
-                  <q-item clickable :to="`/guilds/${gid}/sphere`" active-class="nav-item--active" v-ripple>
+                  <q-item
+                    clickable
+                    :to="`/guilds/${gid}/sphere`"
+                    active-class="nav-item--active"
+                    v-ripple
+                    style="display: none"
+                  >
                     <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
 
                     <q-item-section avatar side>
@@ -286,8 +298,6 @@ export default defineComponent({
 
       const data = objectDifferences(this.guildClone, this.freezedGuild)
 
-      console.log(data)
-
       return interfaces.guilds
         .updateSettings(this.gid, { data })
         .then(response => {
@@ -300,6 +310,14 @@ export default defineComponent({
         .catch(err => {
           console.error(err)
           this.updateSettingsError = true
+          this.$q.notify({
+            message: this.$t('pages.guild.save_error'),
+            classes: 'rounded-lg q-notification-custom',
+            color: 'black',
+            icon: 'error',
+            iconColor: 'negative',
+            timeout: 5000
+          })
         })
         .finally(() => (this.updateSettingsLoading = false))
     },
@@ -321,6 +339,7 @@ export default defineComponent({
       'guildClone',
       (value, before) => {
         if (
+          JSON.stringify(before.modules.custom_commands) !== JSON.stringify(value.modules.custom_commands) ||
           JSON.stringify(before.modules.subscriptions.twitch) !== JSON.stringify(value.modules.subscriptions.twitch) ||
           JSON.stringify(before.modules.subscriptions.youtube) !==
             JSON.stringify(value.modules.subscriptions.youtube) ||

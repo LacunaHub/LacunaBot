@@ -21,9 +21,9 @@
         indicator-color="transparent"
         no-caps
       >
-        <q-tab name="general" :label="$t('pages.guild.nav_names.GENERAL')"></q-tab>
+        <q-tab name="general" :label="$t('pages.guild.nav_names.GENERAL')" style="width: 50%"></q-tab>
 
-        <q-tab name="actions" :label="$t('common.actions')"></q-tab>
+        <q-tab name="actions" :label="$t('common.actions')" style="width: 50%"></q-tab>
       </q-tabs>
 
       <q-tab-panels v-model="currentTab" class="bg-dark-grey-2" animated>

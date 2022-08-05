@@ -8,12 +8,14 @@
   "remove": "Убрать",
   "delete": "Удалить",
   "save": "Сохранить",
+  "refresh": "Обновить",
   "amount": "Сумма",
   "description": "Описание",
   "logout": "Выйти",
   "date": "Дата",
   "copied_to_clipboard": "Скопировано в буфер обмена",
   "none": "Отсутствует",
+  "try_again": "Попробовать еще раз",
 
   "common": {
     "channel": "Канал",
@@ -93,7 +95,8 @@
       "ACTION_RESET_VIOLATIONS": "Обнулить предупреждения",
       "EPHEMERAL_REPLY": "Эфемерное сообщение",
       "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
-      "OVERWRITE_CHANNEL_PERMISSIONS": "Переопределить права канала"
+      "OVERWRITE_CHANNEL_PERMISSIONS": "Переопределить права канала",
+      "RESTRICT_ROLES": "Запретить выполнение ролям"
     },
     "case_log_keys": {
       "BAN_ADD": "Блокировка выдана",
@@ -161,6 +164,19 @@
       "SUCCESS": "Зелёный",
       "DANGER": "Красный",
       "LINK": "Ссылка"
+    },
+    "discord_command_option_types": {
+      "SUB_COMMAND": "Подкоманда",
+      "SUB_COMMAND_GROUP": "Группа подкоманд",
+      "STRING": "Строка",
+      "INTEGER": "Целое число",
+      "BOOLEAN": "Логический",
+      "USER": "Пользователь",
+      "CHANNEL": "@:common.channel",
+      "ROLE": "@:common.role",
+      "MENTIONABLE": "Упоминаемый",
+      "NUMBER": "Число",
+      "ATTACHMENT": "Вложение"
     }
   },
 
@@ -178,7 +194,7 @@
     "bonus_increased_limits_description": "Больше наград за уровни, предметов в магазине, голосовых ролей, временных голосовых каналов, автореакций и элементов реакций",
     "bonus_personalization_description": "Возможность изменения аватара и названия веб-хука в журнале действий",
     "bonus_more_subscriptions_description": "Увеличьте количество подписок Twitch и YouTube до 10",
-    "bonus_activities_description": "Возможность зарабатывать валюты в голосовых каналах",
+    "bonus_activities_description": "Возможность зарабатывать валюты в голосовых каналах и больше множителей опыта и заработка",
     "bonus_respect_description": "Материальная помощь команде проекта и особая роль на официальном сервере поддержки",
     "select_plan": "Выберите план",
     "select_payment_method": "Способ оплаты",
@@ -218,6 +234,57 @@
     "throttling_timeout_title": "Повторное использование"
   },
 
+  "custom_command": {
+    "add_custom_command": "@:add команду",
+    "edit_custom_command": "@:edit команду",
+    "import_command": "Импортировать команду",
+    "export_command": "Экспортировать команду",
+    "command_name_title": "Название команды",
+    "command_description_title": "Описание команды",
+    "command_options_title": "Аргументы команды",
+    "co_name_title": "Название аргумента",
+    "co_type_title": "Тип аргумента",
+    "co_description_title": "Описание аргумента",
+    "co_required_title": "Обязательный аргумент",
+    "co_choices_title": "Варианты выбора",
+    "co_choice_name_title": "Название выбора",
+    "co_choice_value_title": "Значение выбора",
+    "add_condition": "@:add условие",
+    "add_action": "@:add действие",
+    "component_names": {
+      "COMPARE_VALUES": "Сравнить значения",
+      "REPLY": "Ответить",
+      "SEND_MESSAGE": "Отправить сообщение",
+      "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
+      "FORWARD_TO_COMMAND": "Перенаправить на команду",
+      "MODIFY_WALLET": "Изменить кошелёк"
+    },
+    "cv_operator_title": "Оператор",
+    "cv_operators": {
+      "EQUAL": "Равно",
+      "NOT_EQUAL": "Не равно",
+      "GREATER_THAN": "Больше чем",
+      "LESS_THAN": "Меньше чем",
+      "STARTS_WITH": "Начинается с",
+      "ENDS_WITH": "Заканчивается на",
+      "CONTAINS": "Содержит",
+      "NOT_CONTAINS": "Не содержит"
+    },
+    "cv_left_part_title": "Левая часть",
+    "cv_right_part_title": "Правая часть",
+    "cv_false_reply_title": "Ложный ответ",
+    "mr_user_id_title": "Идентификатор пользователя",
+    "mr_user_id_description": "Добавить/убрать роли указанному пользователю (по умолчанию указан автор команды)",
+    "mw_operators": {
+      "INCREMENT": "Прибавить",
+      "DECREMENT": "Убавить"
+    },
+    "mw_amount_title": "Количество валюты",
+    "mw_user_id_description": "Изменить кошелёк указанного пользователя (по умолчанию указан автор команды)",
+    "mw_currency_id_title": "Идентификатор валюты",
+    "mw_currency_id_description": "Укажите, если хотите выдать другую валюту, а не стандартную"
+  },
+
   "automoder": {
     "titles": {
       "anti_caps": "Анти-КАПС",
@@ -231,7 +298,7 @@
     "ac_minimum_symbols_title": "Минимальное количество символов",
     "lf_allowed_registry": "Реестр разрешенных ссылок",
     "lf_blocked_registry": "Реестр запрещенных ссылок",
-    "nm_minimum_account_age_title": "Минимальное количество времени",
+    "nm_minimum_account_age_title": "Минимальный возраст аккаунта",
     "nm_minimum_account_age_description": "Аккаунт должен быть зарегистрирован указанное количество времени",
     "nm_age_measures": {
       "MINUTES": "Минуты",
@@ -307,6 +374,15 @@
     "item_duration_title": "Длительность предмета"
   },
 
+  "activity_multipliers": {
+    "add_multiplier": "@:add множитель",
+    "edit_multiplier": "@:edit множитель",
+    "level_multipliers": "Множители опыта",
+    "economy_multipliers": "Множители заработка",
+    "for_text_activity": "За текстовую активность",
+    "for_voice_activity": "За голосовую активность"
+  },
+
   "subscriptions": {
     "twitch_channel_name_title": "Название канала",
     "twitch_display_stream_preview": "Показывать предпросмотр стрима",
@@ -362,7 +438,8 @@
     "btn_style_title": "Стиль кнопки",
     "select_menu_placeholder_title": "Заполнитель",
     "opt_name_title": "Название опции",
-    "opt_description_title": "Описание опции"
+    "opt_description_title": "Описание опции",
+    "mr_reversible_mode": "Реверсивный режим"
   },
 
   "irs": {
@@ -401,9 +478,11 @@
         "UTILITY": "Полезное",
         "CHANGE_LOG": "Журнал изменений"
       },
+      "save_error": "Что-то пошло не так при попытке сохранения. Пожалуйста, попробуйте немного позже.",
       "gs_title": "Общие настройки",
       "gs_prefix_title": "Префикс",
       "gs_locale_title": "Локализация",
+      "gs_translate_title": "Перевести",
       "gs_expert_roles_title": "Роли экспертов",
       "gs_expert_roles_description": "Выбранные роли смогут просматривать и изменять настройки бота, будьте осторожны",
       "gs_welcome_title": "Приветствие",
@@ -424,6 +503,17 @@
       "gs_restore_strict_roles_title": "Строгие роли",
       "gs_restore_strict_roles_description": "Эти роли не будут восстановлены при повторном присоединении на сервер",
       "gs_farewell_title": "Прощание",
+      "cm_custom_commands_title": "Пользовательские команды",
+      "cm_system_commands_title": "Системные команды",
+      "cm_enable_prefix_commands_title": "Включить префиксные команды",
+      "cm_no_registered_app_commands": "На сервере нет ни одной зарегистрированной команды. Пожалуйста, убедитесь, что бот имеет возможность на их создание.",
+      "cm_app_commands_refresh": "Вы можете обновить команды. Это полезно, если на сервере отсутствуют некоторые из них или они устарели.",
+      "cm_command_categories": {
+        "GENERAL": "Общие",
+        "MODERATION": "Модерация",
+        "MUSIC": "Музыка",
+        "UTILITY": "Полезное"
+      },
       "md_hierarchy_title": "Иерархия",
       "md_respect_hierarchy_title": "Учитывать иерархию ролей в командах модерирования",
       "md_deny_moderate_users_with_mp_title": "Запретить модерировать пользователей с правами модератора",
@@ -455,6 +545,7 @@
       "ac_economy_reset_on_leave_title": "Сбрасывать кошелёк при выходе участника",
       "ac_economy_currencies_title": "Валюты",
       "ac_economy_store_items_title": "Предметы магазина",
+      "ac_multipliers_title": "Множители опыта и заработка",
       "vc_music_title": "Музыка",
       "vc_music_allow_radio_playback_title": "Разрешить потоковое воспроизведение",
       "vc_music_queue_max_length_title": "Максимальный размер очереди",
@@ -462,7 +553,14 @@
       "vc_voice_roles_title": "Голосовые роли",
       "vc_voice_roles_description": "Автоматическая выдача ролей при подключении к голосовым каналам",
       "vc_auto_voices_title": "Временные голосовые каналы",
-      "vc_auto_voices_description": "Автоматическое создание и удаление голосовых каналов"
+      "vc_auto_voices_description": "Автоматическое создание и удаление голосовых каналов",
+      "ut_reports_title": "Репорты",
+      "ut_reports_description": "Получение жалоб на сообщения",
+      "ut_auto_reactions_title": "Автореакции",
+      "ut_auto_reactions_description": "Автоматическое добавление реакций на сообщение",
+      "ut_ims_title": "Интерактивные сообщения",
+      "ut_irs_title": "Интерактивные реакции",
+      "ut_irs_description": "Выдача ролей и доступов к каналам при нажатии на реакции"
     },
 
     "landing": {
@@ -529,6 +627,51 @@
       "symbols": "Символы",
       "flags": "Флаги",
       "custom": "Пользовательские"
+    }
+  },
+
+  "errors": {
+    "activate_lacuna_diamond": "Активируйте Lacuna Diamond, чтобы увеличить максимальное количество.",
+    "custom_commands": {
+      "LIMIT_REACHED": "Достигнуто ограничение на количество пользовательских команд.",
+      "LIMIT_REACHED_NO_PREMIUM": "@:errors.custom_commands.LIMIT_REACHED @:errors.activate_lacuna_diamond",
+      "NO_COMPONENTS": "В команде отсутствуют какие-либо компоненты. Пожалуйста, добавьте их и попробуйте снова.",
+      "NAME_CONFLICT": "Название команды конфликтует с уже существующей. Выберите другое название.",
+      "NOT_FOUND": "Пользовательская команда не найдена.",
+      "CANNOT_CREATE_COMMAND": "Ошибка при создании команды.",
+      "CANNOT_UPDATE_COMMAND": "Ошибка при обновлении команды.",
+      "CANNOT_DELETE_COMMAND": "Ошибка при удалении команды."
+    },
+    "subscriptions": {
+      "LIMIT_REACHED": "Достигнуто ограничение на количество подписок.",
+      "LIMIT_REACHED_NO_PREMIUM": "@:errors.subscriptions.LIMIT_REACHED @:errors.activate_lacuna_diamond",
+      "ALREADY_SUBSCRIBED": "Подписка уже существует.",
+      "CANNOT_SUBSCRIBE": "Произошла ошибка при создании подписки.",
+      "NOT_FOUND": "Подписка не найдена."
+    },
+    "auto_voices": {
+      "LIMIT_REACHED": "Достигнуто ограничение на количество голосовых триггеров.",
+      "LIMIT_REACHED_NO_PREMIUM": "@:errors.auto_voices.LIMIT_REACHED @:errors.activate_lacuna_diamond",
+      "ALREADY_EXISTS": "Голосовой триггер уже существует.",
+      "NOT_FOUND": "Голосовой триггер не найден."
+    },
+    "ims": {
+      "LIMIT_REACHED": "Достигнуто ограничение на количество интерактивных сообщений.",
+      "LIMIT_REACHED_NO_PREMIUM": "@:errors.ims.LIMIT_REACHED @:errors.activate_lacuna_diamond",
+      "CANNOT_CREATE_EMPTY_MESSAGE": "Невозможно создать пустое сообщение.",
+      "NON_INTERACTIVE": "Сообщение не интерактивно. Добавьте компоненты.",
+      "NOT_FOUND": "Интерактивное сообщение не найдено.",
+      "CANNOT_CREATE_MESSAGE": "Ошибка при создании сообщения.",
+      "CANNOT_UPDATE_MESSAGE": "Ошибка при обновлении сообщения."
+    },
+    "irs": {
+      "LIMIT_REACHED": "Достигнуто ограничение на количество интерактивных сообщений.",
+      "LIMIT_REACHED_NO_PREMIUM": "@:errors.ims.LIMIT_REACHED @:errors.activate_lacuna_diamond",
+      "EMOJI_ALREADY_USED": "Выбранный эмодзи уже используется на этом сообщении.",
+      "REFERENCE_IS_SINGLE": "Одно или несколько направлений являются одиночными.",
+      "UNKNOWN_MESSAGE": "Сообщения с таким идентификатором не найдено в выбранном канале.",
+      "NOT_FOUND": "Интерактивная реакция не найдена.",
+      "CANNOT_CREATE_REACTION": "Ошибка при добавлении реакции на сообщение."
     }
   }
 }

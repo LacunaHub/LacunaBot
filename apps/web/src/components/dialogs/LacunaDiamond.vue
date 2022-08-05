@@ -178,7 +178,7 @@ export default defineComponent({
             const payUrl = response.data
 
             if (payUrl) {
-              event('checkout_progress')
+              event('checkout_progress', { event_label: provider.value })
               window.open(payUrl, '_blank')
             }
 

@@ -1,38 +1,56 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-grey-2" style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(`common.case_log_keys.${caseType.name}`) }}
-          </q-item-label>
-        </q-item-section>
-
-        <q-item-section side top>
-          <q-toggle v-model="caseType.config.active" dense></q-toggle>
-        </q-item-section>
-      </q-item>
-
-      <q-card-section v-if="false">
+    <q-card class="rounded-lg bg-dark-grey-2" style="width: 1000px; max-width: 90vw">
+      <q-card-section>
         <div class="row q-col-gutter-md">
-          <div class="col-12">
+          <div class="col-12 col-md-6">
             <div>
-              {{ $t('pages.guild.md_case_log_channel_title') }}
+              {{ $t('pages.guild.gs_message_format_title') }}
             </div>
 
             <q-select
-              v-model="caseType.config.channel_id"
+              v-model="component.action.send_message.format"
+              :options="['CURRENT_CHANNEL', 'CHANNEL']"
+              class="q-pt-sm"
+              filled
+              dense
+              hide-bottom-space
+            >
+              <template #selected-item="{ opt }">
+                <span>
+                  {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                </span>
+              </template>
+
+              <template #option="{ opt, toggleOption, selected }">
+                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div>
+              {{ $t('pages.guild.gs_message_channel_title') }}
+            </div>
+
+            <q-select
+              v-model="component.action.send_message.channel_id"
               :options="guild.channelsText"
               option-label="name"
               option-value="id"
-              :disable="!caseType.config.active"
+              :disable="component.action.send_message.format !== 'CHANNEL'"
               class="q-pt-sm"
               filled
               dense
               hide-bottom-space
               emit-value
               map-options
-              clearable
             >
               <template #selected-item="{ opt }">
                 <q-chip
@@ -65,32 +83,20 @@
               </template>
             </q-select>
           </div>
+
+          <div class="col-12">
+            <div>
+              {{ $t('common.message') }}
+            </div>
+
+            <MessageEditor
+              :message="component.action.send_message.message"
+              hide-replacers
+              hide-code-snippets
+              class="q-pt-sm"
+            />
+          </div>
         </div>
-      </q-card-section>
-
-      <q-list v-if="caseType.config.custom_dm_message !== undefined" class="q-px-none" padding dense>
-        <q-item tag="label" :disable="!caseType.config.active" v-ripple="caseType.config.active">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('mod_case_type.custom_dm_message_title') }}
-            </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-checkbox
-              v-model="caseType.config.custom_dm_message"
-              :disable="!caseType.config.active"
-              dense
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
-
-      <q-card-section v-if="caseType.config.custom_dm_message !== undefined">
-        <MessageEditor
-          :message="caseType.config.dm_message"
-          :disable="!caseType.config.active || !caseType.config.custom_dm_message"
-        />
       </q-card-section>
 
       <q-card-section>
@@ -111,16 +117,16 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
-import { useGuildStore } from 'src/stores/guild'
 import MessageEditor from '../MessageEditor.vue'
+import { useGuildStore } from 'src/stores/guild'
 
 export default defineComponent({
-  name: 'ModerationCaseType',
+  name: 'CustomCommandActionSendMessage',
 
   emits: [...useDialogPluginComponent.emits],
 
   props: {
-    caseTypeProp: {
+    componentProp: {
       type: Object,
       required: true
     }
@@ -134,15 +140,15 @@ export default defineComponent({
     const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
-    const caseType = ref(JSON.parse(JSON.stringify(props.caseTypeProp)))
+    const component = ref(JSON.parse(JSON.stringify(props.componentProp)))
 
     return {
       guild,
-
       dialogRef,
+      component,
 
       onConfirm() {
-        onDialogOK(caseType.value)
+        onDialogOK({ component: component.value })
       },
 
       onCancel() {
@@ -151,9 +157,7 @@ export default defineComponent({
 
       onDismiss() {
         onDialogHide()
-      },
-
-      caseType
+      }
     }
   }
 })
