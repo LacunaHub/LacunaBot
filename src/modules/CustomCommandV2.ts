@@ -195,10 +195,12 @@ export class CustomCommand {
     async replacePatterns(string: string, ctx: Context) {
         const patterns = this.getPatterns(string)
 
-        for (const pattern of patterns) {
+        for (let pattern of patterns) {
             const regexp = new RegExp(`{{\\s*${escapeRegexp(pattern)}\\s*}}`, 'g')
 
             try {
+                // Remove all regexp to avoid ReDoS
+                pattern = pattern.replace(/\/((.|\n)+?)\//g, '').replace(/RegExp/gi, '')
                 const value = await ctx.eval(pattern, { timeout: 96 })
                 string = string.replace(regexp, () => {
                     return typeof value === 'undefined' ? '' : value
