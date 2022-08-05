@@ -451,6 +451,13 @@ import AutoModSwearFilter from 'src/components/dialogs/AutoModSwearFilter.vue'
 import AutoModUsersSlowdown from 'src/components/dialogs/AutoModUsersSlowdown.vue'
 import ModerationWarningPenalty from 'src/components/dialogs/ModerationWarningPenalty.vue'
 
+import lowerCaseImg from 'src/assets/lower-case.svg'
+import unlinkImg from 'src/assets/unlink.svg'
+import newbieImg from 'src/assets/newbie.svg'
+import tagsImg from 'src/assets/tags.svg'
+import profanityImg from 'src/assets/profanity.svg'
+import slowdownImg from 'src/assets/slowdown.svg'
+
 export default defineComponent({
   name: 'GuildPageSettingsModeration',
 
@@ -465,12 +472,12 @@ export default defineComponent({
       toggle: true,
       select: [],
       automoderTypes: [
-        { name: 'anti_caps', icon: '/src/assets/lower-case.svg' },
-        { name: 'links_filter', icon: '/src/assets/unlink.svg' },
-        { name: 'newbies', icon: '/src/assets/newbie.svg' },
-        { name: 'nicknames', icon: '/src/assets/tags.svg' },
-        { name: 'swear_filter', icon: '/src/assets/profanity.svg' },
-        { name: 'users_slowdown', icon: '/src/assets/slowdown.svg' }
+        { name: 'anti_caps', icon: lowerCaseImg },
+        { name: 'links_filter', icon: unlinkImg },
+        { name: 'newbies', icon: newbieImg },
+        { name: 'nicknames', icon: tagsImg },
+        { name: 'swear_filter', icon: profanityImg },
+        { name: 'users_slowdown', icon: slowdownImg }
       ]
     }
   },

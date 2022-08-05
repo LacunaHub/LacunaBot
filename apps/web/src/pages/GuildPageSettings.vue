@@ -195,6 +195,14 @@ import { useMeta } from 'quasar'
 import { decimalToHex, objectDifferences } from 'src/utils/Utils'
 import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 
+import controlPanelImg from 'src/assets/control-panel.svg'
+import slashCommandImg from 'src/assets/slash-command.svg'
+import shieldImg from 'src/assets/shield.svg'
+import activitiesImg from 'src/assets/activities.svg'
+import bellImg from 'src/assets/bell.svg'
+import karaokeImg from 'src/assets/karaoke.svg'
+import layersImg from 'src/assets/layers.svg'
+
 export default defineComponent({
   name: 'GuildPageSettings',
 
@@ -215,33 +223,33 @@ export default defineComponent({
       gid: this.$route.params.guild_id,
       pageLoading: true,
       navItems: [
-        { name: this.$t('pages.guild.nav_names.GENERAL'), path: 'settings', icon: '/src/assets/control-panel.svg' },
+        { name: this.$t('pages.guild.nav_names.GENERAL'), path: 'settings', icon: controlPanelImg },
         {
           name: this.$t('pages.guild.nav_names.COMMANDS'),
           path: 'settings/commands',
-          icon: '/src/assets/slash-command.svg'
+          icon: slashCommandImg
         },
         {
           name: this.$t('pages.guild.nav_names.MODERATION'),
           path: 'settings/moderation',
-          icon: '/src/assets/shield.svg'
+          icon: shieldImg
         },
         {
           name: this.$t('pages.guild.nav_names.ACTIVITIES'),
           path: 'settings/activities',
-          icon: '/src/assets/activities.svg'
+          icon: activitiesImg
         },
         {
           name: this.$t('pages.guild.nav_names.SUBSCRIPTIONS'),
           path: 'settings/subscriptions',
-          icon: '/src/assets/bell.svg'
+          icon: bellImg
         },
         {
           name: this.$t('pages.guild.nav_names.VOICE_CHANNELS'),
           path: 'settings/voice-channels',
-          icon: '/src/assets/karaoke.svg'
+          icon: karaokeImg
         },
-        { name: this.$t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: '/src/assets/layers.svg' }
+        { name: this.$t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: layersImg }
       ],
       freezedGuild: {},
       guildChanged: false,
