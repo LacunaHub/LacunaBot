@@ -1,7 +1,6 @@
 import { BaseGuildTextChannel, GuildMember } from 'discord.js'
 import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
-import { antiCaps } from './Automoder'
 import Replacer from './Replacer'
 
 export default async function greet(self: Lacuna, server: ServerDocument, member: GuildMember) {
@@ -30,7 +29,11 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
         if (roles.size) {
             await member.roles.add(roles) // Need reason
 
-            self.emit('moduleExecution', { module: 'Greeting: Initial Roles', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+            self.emit('moduleExecution', {
+                module: 'Greeting: Initial Roles',
+                guild: { id: member.guild.id, name: member.guild.name },
+                target: { id: member.id, name: member.user.tag }
+            })
         }
     }
 
@@ -43,20 +46,28 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
             }
 
             if (server.modules.restoring.restore_roles && data.roles.length) {
-                const roles = member.guild.roles.cache.filter(r => r.editable && data.roles.includes(r.id))
+                const strict_roles = server.modules.restoring.strict_roles
+                const roles = member.guild.roles.cache.filter(r => r.editable && data.roles.includes(r.id) && !strict_roles.includes(r.id))
 
                 if (roles.size) await member.roles.add(roles) // Need reason
             }
 
-            await self.db.servers.updateOne({ _id: member.guild.id }, {
-                $pull: {
-                    'modules.restoring.data': {
-                        user_id: member.id
+            await self.db.servers.updateOne(
+                { _id: member.guild.id },
+                {
+                    $pull: {
+                        'modules.restoring.data': {
+                            user_id: member.id
+                        }
                     }
                 }
-            })
+            )
 
-            self.emit('moduleExecution', { module: 'Restoring: Member Add', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+            self.emit('moduleExecution', {
+                module: 'Restoring: Member Add',
+                guild: { id: member.guild.id, name: member.guild.name },
+                target: { id: member.id, name: member.user.tag }
+            })
         }
     }
 

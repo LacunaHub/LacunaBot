@@ -1,22 +1,21 @@
 import { GuildMember } from 'discord.js'
+import { clean, isZalgo } from 'unzalgo'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { isZalgo, clean } from 'unzalgo'
-
-const reason = 'Автомодер: Модерирование никнеймов'
 
 const adjectives = ['Foggy', 'Magnanimous', 'Taboo', 'Compulsive', 'Busy', 'Angry', 'Responsive', 'Amiable', 'Nice', 'Unexpected']
 
-export default async function(self: Lacuna, server: ServerDocument, member: GuildMember) {
+export default async function (self: Lacuna, server: ServerDocument, member: GuildMember) {
+    const reason = self.i18n.t(server.locale, 'audit_reasons.automoder_nicknames_moderation')
     const config = server.moderation.automoder.nicknames
 
     if (!config.active) return false
     if (member.user.bot && config.ignored.bots) return false
-    if (member.permissions.any(BigInt(config.ignored.permissions), false)) return false
+    if (member.permissions.any(BigInt(config.ignored.permissions.reduce((x, y) => x | y, 0)), false)) return false
 
     if (member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
 
-    let name = adjustNickname(config.types, member.displayName)
+    let name = adjustNickname(config, member.displayName)
 
     if (!name.length) {
         const random = Math.floor(Math.random() * adjectives.length)
@@ -26,28 +25,32 @@ export default async function(self: Lacuna, server: ServerDocument, member: Guil
 
     if (member.manageable && name != member.displayName) {
         await member.setNickname(name, reason).catch(self.logger.error)
-    
-        self.emit('moduleExecution', { module: 'Automoder: Nickname Moderation', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+
+        self.emit('moduleExecution', {
+            module: 'Automoder: Nickname Moderation',
+            guild: { id: member.guild.id, name: member.guild.name },
+            target: { id: member.id, name: member.user.tag }
+        })
     }
 
     return true
 }
 
-function adjustNickname(types: ServerDocument['moderation']['automoder']['nicknames']['types'], name: string): string {
+function adjustNickname(config: ServerDocument['moderation']['automoder']['nicknames'], name: string): string {
     const regexps = {
         special_characters: /[-!@#$%\^&*()_=+\[\]\\{};:'"|,<.>\/?]/g,
-        emojis: /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}/gu,
+        emojis: /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}/gu
     }
 
     const split = name.split(/\s{1,}/)
 
-    if (regexps.special_characters.test(name) && types.special_characters) name = name.replace(regexps.special_characters, '')
-    if (isZalgo(name) && types.zalgo) name = clean(name)
-    if (types.diacritics) name = name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
-    if (regexps.emojis.test(name) && types.emojis) name = name.replace(regexps.emojis, '')
+    if (regexps.special_characters.test(name) && config.options.includes('SPECIAL_CHARACTERS')) name = name.replace(regexps.special_characters, '')
+    if (isZalgo(name) && config.options.includes('ZALGO')) name = clean(name)
+    if (config.options.includes('DIACRITICS')) name = name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    if (regexps.emojis.test(name) && config.options.includes('EMOJIS')) name = name.replace(regexps.emojis, '')
 
-    if (types.contains.some(c => split.includes(c))) {
-        types.contains.forEach(c => name = name.replace(c, ''))
+    if (config.contains.some(c => split.includes(c))) {
+        config.contains.forEach(c => (name = name.replace(c, '')))
     }
 
     return name.trim()

@@ -1,7 +1,7 @@
-import Lacuna from '../Lacuna'
+import { Guild } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import { ServerDocument } from '../../database/schemas/Servers'
-import { Guild } from 'discord.js'
+import Lacuna from '../Lacuna'
 
 export default class TemporaryBan {
     public self: Lacuna
@@ -42,14 +42,17 @@ export default class TemporaryBan {
     }
 
     async createEntry() {
-        await this.self.db.servers.updateOne({ _id: this.guild_id }, {
-            $push: {
-                'moderation.tempbans': {
-                    user_id: this.user_id,
-                    expires_timestamp: this.expires.getTime()
+        await this.self.db.servers.updateOne(
+            { _id: this.guild_id },
+            {
+                $push: {
+                    'moderation.tempbans': {
+                        user_id: this.user_id,
+                        expires_timestamp: this.expires.getTime()
+                    }
                 }
             }
-        })
+        )
     }
 
     async createSchedule() {
@@ -73,13 +76,16 @@ export default class TemporaryBan {
     }
 
     async deleteEntry() {
-        await this.self.db.servers.updateOne({ _id: this.guild_id }, {
-            $pull: {
-                'moderation.tempbans': {
-                    user_id: this.user_id
+        await this.self.db.servers.updateOne(
+            { _id: this.guild_id },
+            {
+                $pull: {
+                    'moderation.tempbans': {
+                        user_id: this.user_id
+                    }
                 }
             }
-        })
+        )
     }
 
     async unban() {

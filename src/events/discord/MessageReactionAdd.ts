@@ -24,6 +24,14 @@ const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
         const member = await message.guild.members.fetch(user.id)
         const imReaction = im.reactions.slice(0, 10).find(i => (i.emoji.id ? i.emoji.id == reaction.emoji.id : i.emoji.name == reaction.emoji.name))
 
+        if (imReaction.options.includes('RESTRICT_ROLES') && Array.isArray(imReaction.restricted_roles)) {
+            if (member.roles.cache.some(i => imReaction.restricted_roles.includes(i.id))) {
+                await reaction.users.remove(user)
+
+                return false
+            }
+        }
+
         if (imReaction?.options?.includes('MODIFY_ROLES') && imReaction?.modify_roles) {
             const addRoles = message.guild.roles.cache.filter(i => i.editable && imReaction.modify_roles.add.includes(i.id)).first(8)
             const removeRoles = message.guild.roles.cache.filter(i => i.editable && imReaction.modify_roles.remove.includes(i.id)).first(8)

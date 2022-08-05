@@ -21,6 +21,26 @@ export async function addPrefix(self: Lacuna, server: ServerDocument, message: M
         return false
     }
 
+    if (server.moderation.respect_hierarchy && mention.roles.highest.position > message.member.roles.highest.position) {
+        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_higher, `**${message.member.displayName}**`)}` })
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_ROLES)) {
+        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_is_moderator, `**${message.member.displayName}**`)}` })
+
+        return false
+    }
+
+    if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.ban.texts.user_has_unmoderated_roles, `**${message.member.displayName}**`)}`
+        })
+
+        return false
+    }
+
     await warnings.addWarn(self, server, message, { target: mention, executor: message.member, reason: reason })
 
     await message.reply({
@@ -71,12 +91,16 @@ export async function removePrefix(self: Lacuna, server: ServerDocument, message
             }
         )
 
-        await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.warn.remove.texts.warns_removed_all, `**${message.member.displayName}**`)}` })
+        await message.reply({
+            content: `${self._emojis.OK} | ${self.translator.format(locale.warn.remove.texts.warns_removed_all, `**${message.member.displayName}**`)}`
+        })
     } else {
         const violation = violator.violations.find((v, i) => v.id == warn_id || i + 1 == warn_id)
 
         if (!violation) {
-            await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.invalid_warn_id, `**${message.member.displayName}**`)}` })
+            await message.reply({
+                content: `${self._emojis.ERROR} | ${self.translator.format(locale.warn.remove.texts.invalid_warn_id, `**${message.member.displayName}**`)}`
+            })
 
             return false
         }
@@ -95,7 +119,7 @@ export async function removePrefix(self: Lacuna, server: ServerDocument, message
         await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.warn.remove.texts.warn_removed, `**${message.member.displayName}**`)}` })
     }
 
-    await caseLog.createCaseEntry(server, message.guild, { type: 'WARN_REMOVE', target: mention.user, executor: message.author, reason })
+    await caseLog.createCaseEntry(message.guild, { type: 'WARN_REMOVE', target: mention.user, executor: message.author, reason })
 
     return true
 }

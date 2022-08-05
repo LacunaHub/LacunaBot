@@ -13,7 +13,7 @@ export default {
 
 export interface CommandExecutionData {
     command: string
-    guild: { name: string, id: string }
-    channel: { name: string, id: string }
-    user: { name: string, id: string }
+    guild: { name: string; id: string }
+    channel: { name: string; id: string }
+    user: { name: string; id: string }
 }

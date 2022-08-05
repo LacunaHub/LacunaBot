@@ -33,9 +33,12 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
             }
         }
 
-        await self.db.users.updateOne({ _id: message.author.id }, {
-            $push: { 'activities.wallets': wallet as never }
-        })
+        await self.db.users.updateOne(
+            { _id: message.author.id },
+            {
+                $push: { 'activities.wallets': wallet as never }
+            }
+        )
     }
 
     for (const currency of server.modules.economy.currencies) {
@@ -44,30 +47,51 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
         if (currency.income.blocked.channels.includes(message.channelId)) continue
         if (message.member.roles.cache.some(r => currency.income.blocked.roles.includes(r.id))) continue
 
-        if (currency.income.messages.rate_limit_per_user && (Date.now() - wallet.activity.last_message_at) < (currency.income.messages.rate_limit_per_user * 1000)) continue
+        if (currency.income.messages.rate_limit_per_user && Date.now() - wallet.activity.last_message_at < currency.income.messages.rate_limit_per_user * 1000) continue
 
-        const amount: number = Math.random() * (currency.income.messages.range_per_message[1] - currency.income.messages.range_per_message[0]) + currency.income.messages.range_per_message[0]
-        
-        if (wallet.currencies.some(c => c.id == currency.id)) {
-            await self.db.users.updateOne({ _id: message.author.id, 'activities.wallets': { $elemMatch: { guild_id: message.guildId, 'currencies.id': currency.id } } }, {
-                $inc: {
-                    'activities.wallets.$[guild].currencies.$[currency].amount': amount
-                },
-                $set: {
-                    'activities.wallets.$[guild].activity.last_message_at': Date.now()
-                }
-            }, { arrayFilters: [ { 'guild.guild_id': message.guildId }, { 'currency.id': currency.id } ] })
-        }
+        const multipliers = server.modules.activities.multipliers
+            .filter(i => {
+                if (i.blocked_channels.includes(message.channelId)) return false
+                if (message.member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
+                if (i.allowed_channels.length && !i.allowed_channels.includes(message.channelId)) return false
+                if (i.allowed_roles.length && !message.member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
 
-        else {
-            await self.db.users.updateOne({ _id: message.author.id, 'activities.wallets.guild_id': message.guildId }, {
-                $push: {
-                    'activities.wallets.$.currencies': { id: currency.id, amount }
-                },
-                $set: {
-                    'activities.wallets.$.activity.last_message_at': Date.now()
-                }
+                return i.options.includes('ECONOMY_TEXT')
             })
+            .slice(0, server.server.premium.available ? 10 : 1)
+
+        const multiplier = multipliers.reduce((x, y) => x * (y.economy_text_multiplier / 100), 100) / 100
+        let amount: number =
+            Math.random() * (currency.income.messages.range_per_message[1] - currency.income.messages.range_per_message[0]) +
+            currency.income.messages.range_per_message[0]
+
+        amount *= multiplier || 1
+
+        if (wallet.currencies.some(c => c.id == currency.id)) {
+            await self.db.users.updateOne(
+                { _id: message.author.id, 'activities.wallets': { $elemMatch: { guild_id: message.guildId, 'currencies.id': currency.id } } },
+                {
+                    $inc: {
+                        'activities.wallets.$[guild].currencies.$[currency].amount': amount
+                    },
+                    $set: {
+                        'activities.wallets.$[guild].activity.last_message_at': Date.now()
+                    }
+                },
+                { arrayFilters: [{ 'guild.guild_id': message.guildId }, { 'currency.id': currency.id }] }
+            )
+        } else {
+            await self.db.users.updateOne(
+                { _id: message.author.id, 'activities.wallets.guild_id': message.guildId },
+                {
+                    $push: {
+                        'activities.wallets.$.currencies': { id: currency.id, amount }
+                    },
+                    $set: {
+                        'activities.wallets.$.activity.last_message_at': Date.now()
+                    }
+                }
+            )
         }
     }
 }
@@ -92,9 +116,9 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
                     }
                 } as any)
             }
-        
+
             let wallet = user.activities.wallets.find(i => i.guild_id == member.guild.id)
-        
+
             if (!wallet) {
                 wallet = {
                     guild_id: member.guild.id,
@@ -105,22 +129,32 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
                         voice_connected_at: 0
                     }
                 }
-        
-                await self.db.users.updateOne({ _id: member.id }, {
-                    $push: { 'activities.wallets': wallet as never }
-                })
+
+                await self.db.users.updateOne(
+                    { _id: member.id },
+                    {
+                        $push: { 'activities.wallets': wallet as never }
+                    }
+                )
             }
 
-            if (!wallet.activity.voice_connected_at || (Date.now() - wallet.activity.voice_connected_at) > 36_000_000) {
-                await self.db.users.updateOne({ _id: member.id, 'activities.wallets.guild_id': member.guild.id }, {
-                    $set: {
-                        'activities.wallets.$.activity.voice_connected_at': Date.now()
+            if (!wallet.activity.voice_connected_at || Date.now() - wallet.activity.voice_connected_at > 36_000_000) {
+                await self.db.users.updateOne(
+                    { _id: member.id, 'activities.wallets.guild_id': member.guild.id },
+                    {
+                        $set: {
+                            'activities.wallets.$.activity.voice_connected_at': Date.now()
+                        }
                     }
-                })
+                )
             }
         }
 
-        self.emit('moduleExecution', { module: 'Economy: Voice Assign', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.id, name: state.member.user.tag } })
+        self.emit('moduleExecution', {
+            module: 'Economy: Voice Assign',
+            guild: { id: state.guild.id, name: state.guild.name },
+            target: { id: state.id, name: state.member.user.tag }
+        })
     }
 }
 
@@ -129,7 +163,7 @@ export async function voiceUnassign(self: Lacuna, server: ServerDocument, state:
 
     const members = channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
-    if (members) await voiceCount(self, server, (members.size == 1 ? [ state.member, members.first() ] : [ state.member ]), channel)
+    if (members) await voiceCount(self, server, members.size == 1 ? [state.member, members.first()] : [state.member], channel)
 }
 
 export async function voiceCount(self: Lacuna, server: ServerDocument, members: GuildMember[], channel: BaseGuildVoiceChannel) {
@@ -147,32 +181,58 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
             if (currency.income.blocked.channels.includes(channel.id)) continue
             if (member.roles.cache.some(r => currency.income.blocked.roles.includes(r.id))) continue
 
-            const amount: number = (Math.random() * (currency.income.voice_channels.range_per_minute[1] - currency.income.voice_channels.range_per_minute[0]) + currency.income.voice_channels.range_per_minute[0]) * time
+            const multipliers = server.modules.activities.multipliers
+                .filter(i => {
+                    if (i.blocked_channels.includes(channel.id)) return false
+                    if (member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
+                    if (i.allowed_channels.length && !i.allowed_channels.includes(channel.id)) return false
+                    if (i.allowed_roles.length && !member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
+
+                    return i.options.includes('ECONOMY_VOICE')
+                })
+                .slice(0, server.server.premium.available ? 10 : 1)
+
+            const multiplier = multipliers.reduce((x, y) => x * (y.economy_voice_multiplier / 100), 100) / 100
+            let amount: number =
+                (Math.random() * (currency.income.voice_channels.range_per_minute[1] - currency.income.voice_channels.range_per_minute[0]) +
+                    currency.income.voice_channels.range_per_minute[0]) *
+                time
+
+            amount *= multiplier || 1
 
             if (wallet.currencies.some(c => c.id == currency.id)) {
-                await self.db.users.updateOne({ _id: member.user.id, 'activities.wallets': { $elemMatch: { guild_id: server._id, 'currencies.id': currency.id } } }, {
-                    $inc: {
-                        'activities.wallets.$[guild].currencies.$[currency].amount': amount
+                await self.db.users.updateOne(
+                    { _id: member.user.id, 'activities.wallets': { $elemMatch: { guild_id: server._id, 'currencies.id': currency.id } } },
+                    {
+                        $inc: {
+                            'activities.wallets.$[guild].currencies.$[currency].amount': amount
+                        },
+                        $set: {
+                            'activities.wallets.$[guild].activity.voice_connected_at': 0
+                        }
                     },
-                    $set: {
-                        'activities.wallets.$[guild].activity.voice_connected_at': 0
+                    { arrayFilters: [{ 'guild.guild_id': server._id }, { 'currency.id': currency.id }] }
+                )
+            } else {
+                await self.db.users.updateOne(
+                    { _id: member.user.id, 'activities.wallets.guild_id': server._id },
+                    {
+                        $push: {
+                            'activities.wallets.$.currencies': { id: currency.id, amount }
+                        },
+                        $set: {
+                            'activities.wallets.$.activity.voice_connected_at': 0
+                        }
                     }
-                }, { arrayFilters: [ { 'guild.guild_id': server._id }, { 'currency.id': currency.id } ] })
-            }
-    
-            else {
-                await self.db.users.updateOne({ _id: member.user.id, 'activities.wallets.guild_id': server._id }, {
-                    $push: {
-                        'activities.wallets.$.currencies': { id: currency.id, amount }
-                    },
-                    $set: {
-                        'activities.wallets.$.activity.voice_connected_at': 0
-                    }
-                })
+                )
             }
         }
 
-        self.emit('moduleExecution', { module: 'Economy: Voice Unassign', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+        self.emit('moduleExecution', {
+            module: 'Economy: Voice Unassign',
+            guild: { id: member.guild.id, name: member.guild.name },
+            target: { id: member.id, name: member.user.tag }
+        })
     }
 }
 
@@ -204,14 +264,18 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
             }
         }
 
-        await self.db.users.updateOne({ _id: member.id }, {
-            $push: { 'activities.wallets': wallet as never }
-        })
+        await self.db.users.updateOne(
+            { _id: member.id },
+            {
+                $push: { 'activities.wallets': wallet as never }
+            }
+        )
     }
 
     const measures = { MINUTES: 60, HOURS: 3600, DAYS: 86400 }
 
-    if (!wallet.currencies.find(c => c.id == item.currency_id) || wallet.currencies.find(c => c.id == item.currency_id).amount < item.purchase_price) return 'INSUFFICIENT_FUNDS'
+    if (!wallet.currencies.find(c => c.id == item.currency_id) || wallet.currencies.find(c => c.id == item.currency_id).amount < item.purchase_price)
+        return 'INSUFFICIENT_FUNDS'
 
     if (wallet.transactions.some(t => t.type == 'PURCHASE' && t.details == `${item.id}:${item.references.join(',')}`)) {
         if (item.options.includes('TEMPORARY_REFERENCES')) {
@@ -220,9 +284,7 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
             const not_yet = (Date.now() - transaction.timestamp) / 1000 < item.references_duration.value * measures[item.references_duration.measure]
 
             if (not_yet) return 'PURCHASED'
-        }
-
-        else return 'PURCHASED'
+        } else return 'PURCHASED'
     }
 
     if (item.type == 'CHANNEL') {
@@ -243,41 +305,47 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
                         user_id: member.id,
                         guild_id: guild.id,
                         role_id: reference,
-                        expires_timestamp: Date.now() + ((item.references_duration.value * measures[item.references_duration.measure]) * 1000),
+                        expires_timestamp: Date.now() + item.references_duration.value * measures[item.references_duration.measure] * 1000,
                         initial: true
                     })
                 }
-            }
-
-            else await member.roles.add(roles).catch(() => {})
+            } else await member.roles.add(roles).catch(() => {})
         }
     }
 
-    await self.db.users.updateOne({ _id: member.id, 'activities.wallets': { $elemMatch: { guild_id: guild.id, 'currencies.id': item.currency_id } } }, {
-        $inc: {
-            'activities.wallets.$[guild].currencies.$[currency].amount': -item.purchase_price
-        },
-        $push: {
-            'activities.wallets.$[guild].transactions': {
-                $each: [
-                    {
-                        type: 'PURCHASE',
-                        amount: item.purchase_price,
-                        details: `${item.id}:${item.references.join(',')}`,
-                        timestamp: Date.now()
-                    }
-                ],
-                $position: 0,
-                $slice: 512
+    await self.db.users.updateOne(
+        { _id: member.id, 'activities.wallets': { $elemMatch: { guild_id: guild.id, 'currencies.id': item.currency_id } } },
+        {
+            $inc: {
+                'activities.wallets.$[guild].currencies.$[currency].amount': -item.purchase_price
+            },
+            $push: {
+                'activities.wallets.$[guild].transactions': {
+                    $each: [
+                        {
+                            type: 'PURCHASE',
+                            amount: item.purchase_price,
+                            details: `${item.id}:${item.references.join(',')}`,
+                            timestamp: Date.now()
+                        }
+                    ],
+                    $position: 0,
+                    $slice: 512
+                }
             }
-        }
-    }, { arrayFilters: [ { 'guild.guild_id': guild.id }, { 'currency.id': item.currency_id } ] })
+        },
+        { arrayFilters: [{ 'guild.guild_id': guild.id }, { 'currency.id': item.currency_id }] }
+    )
 
-    if (item.options.includes('LIMITED_QUANTITY')) await self.db.servers.updateOne({ _id: guild.id, 'modules.economy.store.items.id': item.id }, {
-        $inc: {
-            'modules.economy.store.items.$.quantity': -1
-        }
-    })
+    if (item.options.includes('LIMITED_QUANTITY'))
+        await self.db.servers.updateOne(
+            { _id: guild.id, 'modules.economy.store.items.id': item.id },
+            {
+                $inc: {
+                    'modules.economy.store.items.$.quantity': -1
+                }
+            }
+        )
 
     return 'SUCCESS'
 }

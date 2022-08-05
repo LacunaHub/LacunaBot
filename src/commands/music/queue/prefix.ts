@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageActionRow, MessageButton, Message } from 'discord.js'
+import { Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
 import { Queue } from 'erela.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../../../database/schemas/Servers'
@@ -10,10 +10,16 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
     const player = self.player.get(message.guild.id)
 
-    if (!player || !player.queue.size) {
+    if (!player) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.stop.texts.no_track_playback, `**${message.member.displayName}**`)}` })
 
         return false
+    }
+
+    if (!player.queue.size) {
+        await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.queue.texts.no_track_queue, `**${message.member.displayName}**`)}` })
+
+        return true
     }
 
     const chunks: Queue[] = chunkArray(player.queue, 15)
@@ -37,22 +43,21 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
     const embed = new MessageEmbed()
 
-    const row = new MessageActionRow()
-        .addComponents(
-            new MessageButton()
-                .setCustomId('backward')
-                .setStyle('SECONDARY')
-                .setLabel('Previous')
-                .setDisabled(fields.length == 1),
-            new MessageButton()
-                .setCustomId('forward')
-                .setStyle('SECONDARY')
-                .setLabel('Next')
-                .setDisabled(fields.length == 1)
-        )
+    const row = new MessageActionRow().addComponents(
+        new MessageButton()
+            .setCustomId('backward')
+            .setStyle('SECONDARY')
+            .setLabel('Previous')
+            .setDisabled(fields.length == 1),
+        new MessageButton()
+            .setCustomId('forward')
+            .setStyle('SECONDARY')
+            .setLabel('Next')
+            .setDisabled(fields.length == 1)
+    )
 
     const _message = await message.reply({
-        embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
+        embeds: [embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, page + 1, chunks.length) })],
         components: [row]
     })
 
@@ -65,18 +70,20 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     collector.on('collect', async i => {
         switch (i.customId) {
             case row.components[0].customId:
-                page = page <= 0 ? (fields.length - 1) : (page - 1)
-            break
+                page = page <= 0 ? fields.length - 1 : page - 1
+                break
 
             case row.components[1].customId:
-                page = (page + 1) >= fields.length ? 0 : (page + 1)
-            break
+                page = page + 1 >= fields.length ? 0 : page + 1
+                break
         }
 
-        await _message.edit({
-            embeds: [ embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, (page + 1), chunks.length) }) ],
-            components: [row]
-        }).catch(() => {})
+        await _message
+            .edit({
+                embeds: [embed.setFields(fields[page]).setFooter({ text: self.translator.format(locale.leaders.texts.pagination, page + 1, chunks.length) })],
+                components: [row]
+            })
+            .catch(() => {})
 
         await i.deferUpdate()
 

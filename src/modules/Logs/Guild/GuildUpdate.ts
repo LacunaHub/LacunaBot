@@ -3,9 +3,9 @@ import numbro from 'numbro'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async function(self: Lacuna, server: ServerDocument, before: Guild, guild: Guild): Promise<boolean> {
+export default async function (self: Lacuna, server: ServerDocument, before: Guild, guild: Guild): Promise<boolean> {
     if (server.moderation.logs.types.guild_update.active) {
-        const locale = self.translator.locale(server.locale)
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = guild.channels.cache.get(server.moderation.logs.types.guild_update.channel_id) as BaseGuildTextChannel
 
@@ -13,43 +13,56 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
-            let webhook = logs_webhook ? (await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook : null
+            let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
             const audit = guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await guild.fetchAuditLogs({ limit: 1, type: 'GUILD_UPDATE' }) : null
             const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
                 if (logs_webhook) {
-                    await self.db.servers.updateOne({ _id: guild.id }, {
-                        $pull: {
-                            'moderation.logs.webhooks': {
-                                channel_id: log.id
+                    await self.db.servers.updateOne(
+                        { _id: guild.id },
+                        {
+                            $pull: {
+                                'moderation.logs.webhooks': {
+                                    channel_id: log.id
+                                }
                             }
                         }
-                    })
+                    )
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.modules.logs.common.webhook_create_reason, locale.modules.logs.guild_update.title) })
-                } catch (err) { return false }
+                    webhook = await log.createWebhook(`${self.user.username}`, {
+                        avatar: self.user.displayAvatarURL(),
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.guild_update_title') })
+                    })
+                } catch (err) {
+                    return false
+                }
 
-                await self.db.servers.updateOne({ _id: guild.id }, {
-                    $push: {
-                        'moderation.logs.webhooks': {
-                            id: webhook.id,
-                            token: webhook.token,
-                            channel_id: webhook.channelId
+                await self.db.servers.updateOne(
+                    { _id: guild.id },
+                    {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelId
+                            }
                         }
                     }
-                })
+                )
             }
 
             if (before.name != guild.name) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.name))
-                    .addField(locale.modules.logs.common.before_changes, before.name, true)
-                    .addField(locale.modules.logs.common.after_changes, guild.name, true)
+                    .setTitle(t('logs.guild_update_title'))
+                    .setDescription(
+                        t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_name_change') })
+                    )
+                    .addField(t('logs.before_change'), before.name, true)
+                    .addField(t('logs.after_change'), guild.name, true)
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -62,10 +75,12 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
 
             if (before.afkChannelId != guild.afkChannelId) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.afk_channel))
-                    .addField(locale.modules.logs.common.before_changes, before.afkChannel?.name ?? '-', true)
-                    .addField(locale.modules.logs.common.after_changes, guild.afkChannel?.name ?? '-', true)
+                    .setTitle(t('logs.guild_update_title'))
+                    .setDescription(
+                        t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_afk_channel_change') })
+                    )
+                    .addField(t('logs.before_change'), before.afkChannel?.name ?? '-', true)
+                    .addField(t('logs.after_change'), guild.afkChannel?.name ?? '-', true)
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -78,26 +93,12 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
 
             if (before.afkTimeout != guild.afkTimeout) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.afk_timeout))
-                    .addField(locale.modules.logs.common.before_changes, before.afkTimeout ? numbro(before.afkTimeout).format({ output: 'time' }) : '-', true)
-                    .addField(locale.modules.logs.common.after_changes, guild.afkTimeout ? numbro(guild.afkTimeout).format({ output: 'time' }) : '-', true)
-                    .setTimestamp()
-                    .setColor('#FFA726')
-
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
-                })
-            }
-
-            if (before.verificationLevel != guild.verificationLevel) {
-                const embed = new MessageEmbed()
-                    .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.verification_level))
-                    .addField(locale.modules.logs.common.before_changes, locale.commands.server.texts.verification_levels[before.verificationLevel], true)
-                    .addField(locale.modules.logs.common.after_changes, locale.commands.server.texts.verification_levels[guild.verificationLevel], true)
+                    .setTitle(t('logs.guild_update_title'))
+                    .setDescription(
+                        t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_afk_timeout_change') })
+                    )
+                    .addField(t('logs.before_change'), before.afkTimeout ? numbro(before.afkTimeout).format({ output: 'time' }) : '-', true)
+                    .addField(t('logs.after_change'), guild.afkTimeout ? numbro(guild.afkTimeout).format({ output: 'time' }) : '-', true)
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -110,58 +111,12 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
 
             if (before.description != guild.description) {
                 const embed = new MessageEmbed()
-                    .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.description))
-                    .addField(locale.modules.logs.common.before_changes, before.description ?? '-', true)
-                    .addField(locale.modules.logs.common.after_changes, guild.description ?? '-', true)
-                    .setTimestamp()
-                    .setColor('#FFA726')
-
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
-                })
-            }
-
-            if (before.systemChannelId != guild.systemChannelId) {
-                const embed = new MessageEmbed()
-                    .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.system_channel))
-                    .addField(locale.modules.logs.common.before_changes, before.systemChannel ? `#${before.systemChannel.name}` : '-', true)
-                    .addField(locale.modules.logs.common.after_changes, guild.systemChannel ? `#${guild.systemChannel.name}` : '-', true)
-                    .setTimestamp()
-                    .setColor('#FFA726')
-
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
-                })
-            }
-
-            if (before.rulesChannelId != guild.rulesChannelId) {
-                const embed = new MessageEmbed()
-                    .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.rules_channel))
-                    .addField(locale.modules.logs.common.before_changes, before.rulesChannel ? `#${before.rulesChannel.name}` : '-', true)
-                    .addField(locale.modules.logs.common.after_changes, guild.rulesChannel ? `#${guild.rulesChannel.name}` : '-', true)
-                    .setTimestamp()
-                    .setColor('#FFA726')
-
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
-                })
-            }
-
-            if (before.publicUpdatesChannelId != guild.publicUpdatesChannelId) {
-                const embed = new MessageEmbed()
-                    .setTitle(locale.modules.logs.guild_update.title)
-                    .setDescription(self.translator.format(locale.modules.logs.guild_update.template, `**${executor?.tag ?? locale.modules.logs.common.unknown_initiator}**`, locale.modules.logs.guild_update.types.public_updates_channel))
-                    .addField(locale.modules.logs.common.before_changes, before.publicUpdatesChannel ? `#${before.publicUpdatesChannel.name}` : '-', true)
-                    .addField(locale.modules.logs.common.after_changes, guild.publicUpdatesChannel ? `#${guild.publicUpdatesChannel.name}` : '-', true)
+                    .setTitle(t('logs.guild_update_title'))
+                    .setDescription(
+                        t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_description_change') })
+                    )
+                    .addField(t('logs.before_change'), before.description ?? '-', true)
+                    .addField(t('logs.after_change'), guild.description ?? '-', true)
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -173,7 +128,7 @@ export default async function(self: Lacuna, server: ServerDocument, before: Guil
             }
 
             self.emit('moduleExecution', { module: 'Logs: Guild Update', guild: { id: guild.id, name: guild.name }, target: { id: guild.id, name: guild.name } })
-        
+
             return true
         }
     }

@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 import { Context } from 'koa'
-import OAuth2 from '../discord/OAuth2'
 import db from '../../../database'
+import OAuth2 from '../discord/OAuth2'
 
 const router: Router = new Router({ prefix: '/authorize', methods: ['GET'] })
 const oauth = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
@@ -13,7 +13,7 @@ router.get('/add', addBot)
 async function authorize(ctx: Context) {
     const data = {
         client_id: oauth.client_id,
-        redirect_uri: encodeURIComponent(process.env.REDIRECT_URI),
+        redirect_uri: encodeURIComponent(process.env.CLIENT_OAUTH2_REDIRECT_URI),
         scope: encodeURIComponent('identify guilds')
     }
 
@@ -21,6 +21,12 @@ async function authorize(ctx: Context) {
 }
 
 async function callback(ctx: Context) {
+    if (ctx.query.error) {
+        ctx.redirect(process.env.WEBSITE_URL)
+
+        return
+    }
+
     const auth = await oauth.requestToken(ctx.query.code as string)
     const user = await oauth.getUser(auth.access_token)
 
@@ -36,7 +42,7 @@ async function callback(ctx: Context) {
         .set('user_id', user.id, cookieOptions)
         .set('user_username', encodeURIComponent(user.username), cookieOptions)
         .set('user_discriminator', user.discriminator, cookieOptions)
-        
+
     if (user.avatar) ctx.cookies.set('user_avatar', user.avatar, cookieOptions)
 
     const entry = await db.users.findOne({ _id: user.id })
@@ -51,9 +57,7 @@ async function callback(ctx: Context) {
                 flags: user.public_flags
             }
         } as any)
-    }
-
-    else {
+    } else {
         if (entry.user.avatar !== user.avatar) {
             await db.users.updateOne({ _id: user.id }, { $set: { 'user.avatar': user.avatar } })
         }
@@ -71,13 +75,13 @@ async function callback(ctx: Context) {
         }
     }
 
-    ctx.redirect(process.env.WEBSITE_URL)
+    ctx.redirect(ctx.query.guild_id ? `${process.env.WEBSITE_URL}/guilds/${ctx.query.guild_id}/settings` : `${process.env.WEBSITE_URL}/@me/guilds`)
 }
 
 async function addBot(ctx: Context) {
     const query = new URLSearchParams(ctx.query as any).toString()
 
-    ctx.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&scope=bot%20applications.commands&permissions=844491870&${query}`)
+    ctx.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&permissions=997584094&${query}`)
 }
 
 export default router

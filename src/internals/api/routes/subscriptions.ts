@@ -1,13 +1,13 @@
 import Router from '@koa/router'
+import crypto from 'crypto'
 import { Context, Next } from 'koa'
 import rawBodyParser from 'raw-body'
-import crypto from 'crypto'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import { eventSubUnsubscribe, handleIncomingWebhook, searchChannels as searchTwitchChannels } from '../../../modules/Twitch'
 import { handleHubBubWebhook, searchChannels as searchYouTubeChannels } from '../../../modules/YouTube'
-import { authorize } from '../utility/Authorize'
 import { convertXml2Json } from '../../utility/Utils'
+import { authorize } from '../utility/Authorize'
 
 const router: Router = new Router({ prefix: '/subscriptions' })
 
@@ -21,15 +21,15 @@ async function searchTwitch(ctx: Context) {
     const guild_id = ctx.query.gid as string
     const query = ctx.query.q as string
 
-    if (!guild_id || !query) ctx.throw(400, 'Bad Request')
+    if (!guild_id || !query) ctx.throw(400)
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
+    if (!server || server.server.blocked) ctx.throw(404)
 
     const channels = await searchTwitchChannels(query)
 
-    if (!channels?.length) ctx.throw(404, 'Not Found')
+    if (!channels?.length) ctx.throw(404)
 
     const added = server.modules.subscriptions.twitch
 
@@ -41,15 +41,15 @@ async function searchYouTube(ctx: Context) {
     const guild_id = ctx.query.gid as string
     const query = ctx.query.q as string
 
-    if (!guild_id || !query) ctx.throw(400, 'Bad Request')
+    if (!guild_id || !query) ctx.throw(400)
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) ctx.throw(404, 'Not Found')
+    if (!server || server.server.blocked) ctx.throw(404)
 
     const channels = await searchYouTubeChannels(query)
 
-    if (!channels?.length) ctx.throw(404, 'Not Found')
+    if (!channels?.length) ctx.throw(404)
 
     const added = server.modules.subscriptions.youtube
 
@@ -74,13 +74,16 @@ async function eventSubWebhook(ctx: Context) {
 
         await eventSubUnsubscribe(subscription.id).catch(() => {})
         await db.twitchSubs.deleteOne({ _id: subscription.id })
-        await db.servers.updateMany({ 'modules.subscriptions.twitch.broadcaster_id': subscription.condition.broadcaster_user_id }, {
-            $pull: {
-                'modules.subscriptions.twitch': {
-                    broadcaster_id: subscription.condition.broadcaster_user_id
+        await db.servers.updateMany(
+            { 'modules.subscriptions.twitch.broadcaster_id': subscription.condition.broadcaster_user_id },
+            {
+                $pull: {
+                    'modules.subscriptions.twitch': {
+                        broadcaster_id: subscription.condition.broadcaster_user_id
+                    }
                 }
             }
-        })
+        )
 
         ctx.status = 204
 
@@ -105,10 +108,13 @@ function eventSubAuthentication(ctx: Context, next: Next) {
         return
     }
 
-    const signature = crypto.createHmac('sha256', process.env.TWITCH_SIGNING_SECRET).update(messageId + messageTimestamp + ctx.request.rawBody).digest('hex')
+    const signature = crypto
+        .createHmac('sha256', process.env.TWITCH_SIGNING_SECRET)
+        .update(messageId + messageTimestamp + ctx.request.rawBody)
+        .digest('hex')
 
     if (messageSignature == `sha256=${signature}`) next()
-    else ctx.throw(403, 'Forbidden')
+    else ctx.throw(403)
 }
 
 async function hubbubWebhookChallenge(ctx: Context) {
@@ -117,19 +123,19 @@ async function hubbubWebhookChallenge(ctx: Context) {
     const hubMode = ctx.query['hub.mode'] as string
     let hubLeaseSeconds = ctx.query['hub.lease_seconds'] as string
 
-    ctx.assert(hubTopic && hubChallenge && hubMode, 404, 'Not Found')
+    ctx.assert(hubTopic && hubChallenge && hubMode, 404)
 
-    const [, topicQuery ] = hubTopic.split('?')
+    const [, topicQuery] = hubTopic.split('?')
     const topicParams = new URLSearchParams(topicQuery)
     const channelId = topicParams.get('channel_id')
 
     if (hubMode == 'subscribe') {
-        hubLeaseSeconds = isNaN(hubLeaseSeconds as any) ? null : Number(hubLeaseSeconds) as any
+        hubLeaseSeconds = isNaN(hubLeaseSeconds as any) ? null : (Number(hubLeaseSeconds) as any)
         const subscription = await db.youtubeSubs.findOne({ _id: channelId })
 
-        ctx.assert(hubLeaseSeconds && subscription, 404, 'Not Found')
+        ctx.assert(hubLeaseSeconds && subscription, 404)
 
-        await db.youtubeSubs.updateOne({ _id: channelId }, { $set: { expiration_timestamp: Date.now() + (hubLeaseSeconds as any * 1000) } })
+        await db.youtubeSubs.updateOne({ _id: channelId }, { $set: { expiration_timestamp: Date.now() + (hubLeaseSeconds as any) * 1000 } })
     }
 
     if (hubMode == 'unsubscribe') {
@@ -143,17 +149,16 @@ async function hubbubWebhookChallenge(ctx: Context) {
 async function hubbubWebhook(ctx: Context) {
     const hubSignature = ctx.request.headers['x-hub-signature'] as string
 
-    if (!hubSignature) ctx.throw(403, 'Forbidden')
+    if (!hubSignature) ctx.throw(403)
 
-    const data = await rawBodyParser(ctx.req)
-        .then(async str => {
-            const body = await convertXml2Json(str) as any
+    const data = await rawBodyParser(ctx.req).then(async str => {
+        const body = (await convertXml2Json(str)) as any
 
-            return {
-                body,
-                rawBody: str
-            }
-        })
+        return {
+            body,
+            rawBody: str
+        }
+    })
 
     const { body, rawBody } = data
 
@@ -163,11 +168,11 @@ async function hubbubWebhook(ctx: Context) {
         return
     }
 
-    const [ entry ] = body.feed?.entry
+    const [entry] = body.feed?.entry
 
-    if (!entry) ctx.throw(400, 'Bad Request')
+    if (!entry) ctx.throw(400)
 
-    const [ algorithm, hmac ] = hubSignature.split('=')
+    const [algorithm, hmac] = hubSignature.split('=')
 
     const signature = crypto.createHmac(algorithm, process.env.YOUTUBE_HMAC_SECRET).update(rawBody).digest('hex')
 

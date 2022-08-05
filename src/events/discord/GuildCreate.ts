@@ -10,19 +10,15 @@ const handler = async (self: Lacuna, guild: Guild) => {
 
     if (server.server.blocked) {
         self.logger.info(`Guild ${guild.name} (${guild.id}) is blocked`)
-        
+
         await guild.leave()
 
         return false
     }
 
     try {
-        await self.registerSlashCommands(guild.id, server.locale)
-
-        await self.db.servers.updateOne({ _id: guild.id }, { $set: { 'commands.slash_commands': true } })
-    } catch (err) {
-        if (server.commands.slash_commands) await self.db.servers.updateOne({ _id: guild.id }, { $set: { 'commands.slash_commands': false } })
-    }
+        await self.updateApplicationCommands(server)
+    } catch (err) {}
 
     return true
 }

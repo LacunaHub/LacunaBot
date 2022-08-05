@@ -48,7 +48,7 @@ export default class TemporaryRole {
     }
 
     async getMember(): Promise<GuildMember> {
-        return await this.guild.members.fetch(this.user_id).catch(() => {}) as GuildMember
+        return (await this.guild.members.fetch(this.user_id).catch(() => {})) as GuildMember
     }
 
     async create() {
@@ -58,17 +58,20 @@ export default class TemporaryRole {
     }
 
     async createEntry() {
-        await this.self.db.servers.updateOne({ _id: this.guild_id }, {
-            $push: {
-                'moderation.roles.temporary': {
-                    user_id: this.user_id,
-                    guild_id: this.guild_id,
-                    role_id: this.role_id,
-                    unique_id: this.unique_id,
-                    expires_timestamp: this.expires.getTime()
+        await this.self.db.servers.updateOne(
+            { _id: this.guild_id },
+            {
+                $push: {
+                    'moderation.roles.temporary': {
+                        user_id: this.user_id,
+                        guild_id: this.guild_id,
+                        role_id: this.role_id,
+                        unique_id: this.unique_id,
+                        expires_timestamp: this.expires.getTime()
+                    }
                 }
             }
-        })
+        )
     }
 
     async createSchedule() {
@@ -92,13 +95,16 @@ export default class TemporaryRole {
     }
 
     async deleteEntry() {
-        await this.self.db.servers.updateOne({ _id: this.guild_id }, {
-            $pull: {
-                'moderation.roles.temporary': {
-                    unique_id: this.unique_id
+        await this.self.db.servers.updateOne(
+            { _id: this.guild_id },
+            {
+                $pull: {
+                    'moderation.roles.temporary': {
+                        unique_id: this.unique_id
+                    }
                 }
             }
-        })
+        )
     }
 
     async removeRole() {
@@ -106,9 +112,7 @@ export default class TemporaryRole {
 
         if (member && member.roles.cache.has(this.role_id)) {
             await member.roles.remove(this.role_id, 'Temporary Role').catch(() => {})
-        }
-
-        else {
+        } else {
             await this.deleteEntry()
         }
     }
@@ -125,7 +129,13 @@ export async function handleEntries(self: Lacuna): Promise<number> {
             const temproles = server.moderation.roles.temporary
 
             for (const role of temproles) {
-                new TemporaryRole(self, { user_id: role.user_id, guild_id: server._id, role_id: role.role_id, unique_id: role.unique_id, expires_timestamp: role.expires_timestamp })
+                new TemporaryRole(self, {
+                    user_id: role.user_id,
+                    guild_id: server._id,
+                    role_id: role.role_id,
+                    unique_id: role.unique_id,
+                    expires_timestamp: role.expires_timestamp
+                })
             }
 
             entries += temproles.length

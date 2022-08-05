@@ -6,11 +6,11 @@ export function locale(locale: string) {
     switch (locale) {
         case 'ru':
             file = russian
-        break
-    
+            break
+
         case 'en':
             file = russian
-        break
+            break
     }
 
     return file
@@ -22,7 +22,9 @@ export function format(str: string, ...args: any[]): string {
     for (const pattern of patterns) {
         const i = patterns.indexOf(pattern)
 
-        str = str.replace(pattern, () => { return args[i] })
+        str = str.replace(pattern, () => {
+            return args[i]
+        })
     }
 
     return str

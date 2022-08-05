@@ -16,12 +16,12 @@ const handler = async (self: Lacuna, member: GuildMember) => {
 
     const case_log = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
 
-    if (case_log && member.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) && server.moderation.case_log.case_types.KICK) {
+    if (case_log && member.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) && server.moderation.case_log.types.KICK.active) {
         const audit = await member.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_KICK' })
         const entry = audit.entries.find(e => (e.target as User).id == member.id)
 
-        if (entry && (entry.executor.id != self.user.id || entry.reason?.includes('Автомодер:'))) {
-            await caseLog.createCaseEntry(server, member.guild, { type: 'KICK', target: member.user, executor: entry.executor, reason: entry.reason })
+        if (entry && entry.executor.id !== self.user.id) {
+            await caseLog.createCaseEntry(member.guild, { type: 'KICK', target: member.user, executor: entry.executor, reason: entry.reason })
         }
     }
 

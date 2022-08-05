@@ -17,7 +17,9 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     }
 
     if (Math.sign(amount) != 1 || amount < 2 || amount > 100) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.prune.texts.invalid_amount_argument, `**${message.member.displayName}**`)}` })
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.prune.texts.invalid_amount_argument, `**${message.member.displayName}**`)}`
+        })
 
         return false
     }
@@ -43,7 +45,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
     setTimeout(async () => await _message.delete(), 2000)
 
-    await caseLog.createCaseEntry(server, message.guild, { type: 'PRUNE_MESSAGES', target: mention.user, executor: message.author, reason })
+    await caseLog.createCaseEntry(message.guild, { type: 'PRUNE_MESSAGES', target: mention.user, executor: message.author, reason })
 
     return true
 }

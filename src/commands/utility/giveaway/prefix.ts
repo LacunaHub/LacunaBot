@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageActionRow, MessageButton, Message } from 'discord.js'
+import { Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
 import ms from 'ms'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
@@ -8,7 +8,7 @@ import { truncateString } from '../../../internals/utility/Utils'
 export async function createPrefix(self: Lacuna, server: ServerDocument, message: Message) {
     const locale = self.translator.locale(server.locale).commands
 
-    let [ prize, duration, winners = 1, sponsor = message.author.tag ] = message['args']
+    let [prize, duration, winners = 1, sponsor = message.author.tag] = message['args']
 
     duration = duration && ms(duration) ? ms(duration) : null
     winners = isNaN(winners) ? 1 : Number(winners)
@@ -29,13 +29,17 @@ export async function createPrefix(self: Lacuna, server: ServerDocument, message
     else if (duration > ms('21d')) duration = ms('21d')
 
     if (winners && (winners < 1 || winners > 50)) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.create.texts.invalid_winners_range, `**${message.member.displayName}**`)}` })
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.create.texts.invalid_winners_range, `**${message.member.displayName}**`)}`
+        })
 
         return false
     }
 
     if (server.utility.giveaways.length > 30) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.create.texts.max_allowed_giveaways_reached, `**${message.member.displayName}**`)}` })
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.create.texts.max_allowed_giveaways_reached, `**${message.member.displayName}**`)}`
+        })
 
         return false
     }
@@ -54,13 +58,7 @@ export async function createPrefix(self: Lacuna, server: ServerDocument, message
 
     const _message = await message.channel.send({ embeds: [embed] })
 
-    const row = new MessageActionRow()
-        .addComponents(
-            new MessageButton()
-                .setCustomId(`GIVEAWAY-${_message.id}`)
-                .setStyle('SUCCESS')
-                .setLabel('Участвовать')
-        )
+    const row = new MessageActionRow().addComponents(new MessageButton().setCustomId(`GIVEAWAY-${_message.id}`).setStyle('SUCCESS').setLabel('Участвовать'))
 
     await _message.edit({ components: [row] })
 
@@ -81,7 +79,7 @@ export async function createPrefix(self: Lacuna, server: ServerDocument, message
 export async function removePrefix(self: Lacuna, server: ServerDocument, message: Message) {
     const locale = self.translator.locale(server.locale).commands
 
-    const [ message_id ] = message['args']
+    const [message_id] = message['args']
 
     if (!message_id) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.remove.texts.no_message_id, `**${message.member.displayName}**`)}` })
@@ -100,7 +98,9 @@ export async function removePrefix(self: Lacuna, server: ServerDocument, message
     const ga_message = await giveaway.getMessage()
 
     if (!ga_message) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.remove.texts.ga_message_not_found, `**${message.member.displayName}**`)}` })
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.remove.texts.ga_message_not_found, `**${message.member.displayName}**`)}`
+        })
 
         return false
     }
@@ -112,7 +112,7 @@ export async function removePrefix(self: Lacuna, server: ServerDocument, message
 export async function endPrefix(self: Lacuna, server: ServerDocument, message: Message) {
     const locale = self.translator.locale(server.locale).commands
 
-    const [ message_id ] = message['args']
+    const [message_id] = message['args']
 
     if (!message_id) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.remove.texts.no_message_id, `**${message.member.displayName}**`)}` })
@@ -131,7 +131,9 @@ export async function endPrefix(self: Lacuna, server: ServerDocument, message: M
     const ga_message = await giveaway.getMessage()
 
     if (!ga_message) {
-        await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.remove.texts.ga_message_not_found, `**${message.member.displayName}**`)}` })
+        await message.reply({
+            content: `${self._emojis.ERROR} | ${self.translator.format(locale.giveaway.remove.texts.ga_message_not_found, `**${message.member.displayName}**`)}`
+        })
 
         return false
     }

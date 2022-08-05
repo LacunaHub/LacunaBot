@@ -1,7 +1,7 @@
 import { Node } from 'erela.js'
 import Lacuna from '../../internals/Lacuna'
 
-const handler = async (self: Lacuna, node: Node, reason: { code: number, reason: string }) => {
+const handler = async (self: Lacuna, node: Node, reason: { code: number; reason: string }) => {
     self.logger.info(`(Player Manager): Node ${node.options.identifier} disconnected with code ${reason.code}: ${reason.reason}`)
 
     return true

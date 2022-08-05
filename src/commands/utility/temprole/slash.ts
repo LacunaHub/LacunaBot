@@ -6,34 +6,46 @@ import TemporaryRole from '../../../internals/structures/TemporaryRole'
 import { generateSimpleId } from '../../../internals/utility/UID'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember('пользователь') as GuildMember
-    const role = interaction.options?.getRole('роль') as Role
-    let duration = interaction.options?.getString('длительность') as any
+    const mention = interaction.options?.getMember(t('commands.temprole.options.user.name')) as GuildMember
+    const role = interaction.options?.getRole(t('commands.temprole.options.role.name')) as Role
+    let duration = interaction.options?.getString(t('commands.temprole.options.duration.name')) as any
 
     duration = duration && ms(duration) ? ms(duration) : null
 
     if (!mention) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.temprole.texts.no_mention, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_no_mention', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
 
         return false
     }
 
     if (!role) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.temprole.texts.no_role, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_no_role', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
 
         return false
     }
 
     if (!duration) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.temprole.texts.invalid_duration, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_invalid_duration', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
 
         return false
     }
 
     if (!role.editable) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.temprole.texts.role_not_editable, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_role_not_editable', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -41,7 +53,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const has_role = self.temproles.some(r => r.user_id == mention.id && r.role_id == role.id)
 
     if (has_role) {
-        await interaction.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.temprole.texts.has_role, `**${(interaction.member as any).displayName}**`)}`, ephemeral: true })
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_has_role', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
 
         return false
     }
@@ -62,7 +77,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         initial: true
     })
 
-    await interaction.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.temprole.texts.success, `**${(interaction.member as any).displayName}**`, `**${role.name}**`, `**${mention.user.tag}**`, `<t:${Math.round(ts / 1000)}:D>`)}` })
+    await interaction.reply({
+        content: `${self._emojis.OK} | ${t('commands.temprole.text_success', {
+            user: `**${(interaction.member as any).displayName}**`,
+            role: `**${role.name}**`,
+            target: `**${mention.user.tag}**`,
+            date: `<t:${Math.round(ts / 1000)}:D>`
+        })}`
+    })
 
     return true
 }

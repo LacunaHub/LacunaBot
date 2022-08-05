@@ -22,72 +22,65 @@ export default class Replacer {
 
     codeSnippets(string: string = this.string) {
         const snippets: string[] = string.match(/{\-\s*[A-Z]+\([^{}]*\)\s*\-}/g) || []
-        return snippets.map((snippet: string) => {
-            snippet = snippet.replace(/{-|-}/g, '').trim()
+        return snippets
+            .map((snippet: string) => {
+                snippet = snippet.replace(/{-|-}/g, '').trim()
 
-            const name: string = snippet.match(/^[A-Z]+/).toString()
-            const args: string = snippet.match(/\([^{}]*\)$/).toString().replace(/^\(/, '').replace(/\)$/, '')
+                const name: string = snippet.match(/^[A-Z]+/).toString()
+                const args: string = snippet
+                    .match(/\([^{}]*\)$/)
+                    .toString()
+                    .replace(/^\(/, '')
+                    .replace(/\)$/, '')
 
-            const available: string[] = [
-                'CHOOSE',
-                'DATE',
-                'DATENOW',
-                'FIXNUM',
-                'LOWER',
-                'MATH',
-                'NUMDECL',
-                'RANDOM',
-                'REPLACE',
-                'TRUNCATE',
-                'TRIM',
-                'UPPER'
-            ]
+                const available: string[] = ['CHOOSE', 'DATE', 'DATENOW', 'FIXNUM', 'LOWER', 'MATH', 'NUMDECL', 'RANDOM', 'REPLACE', 'TRUNCATE', 'TRIM', 'UPPER']
 
-            if (available.includes(name)) {
-                let fn = null
+                if (available.includes(name)) {
+                    let fn = null
 
-                switch (name) {
-                    case 'CHOOSE':
-                        fn = CHOOSE
-                    break
-                    case 'DATE':
-                        fn = DATE
-                    break
-                    case 'DATENOW':
-                        fn = DATENOW
-                    break
-                    case 'FIXNUM':
-                        fn = FIXNUM
-                    break
-                    case 'LOWER':
-                        fn = LOWER
-                    break
-                    case 'MATH':
-                        fn = MATH
-                    break
-                    case 'NUMDECL':
-                        fn = NUMDECL
-                    break
-                    case 'RANDOM':
-                        fn = RANDOM
-                    break
-                    case 'REPLACE':
-                        fn = REPLACE
-                    break
-                    case 'TRUNCATE':
-                        fn = TRUNCATE
-                    break
-                    case 'TRIM':
-                        fn = TRIM
-                    break
-                    case 'UPPER':
-                        fn = UPPER
-                    break
+                    switch (name) {
+                        case 'CHOOSE':
+                            fn = CHOOSE
+                            break
+                        case 'DATE':
+                            fn = DATE
+                            break
+                        case 'DATENOW':
+                            fn = DATENOW
+                            break
+                        case 'FIXNUM':
+                            fn = FIXNUM
+                            break
+                        case 'LOWER':
+                            fn = LOWER
+                            break
+                        case 'MATH':
+                            fn = MATH
+                            break
+                        case 'NUMDECL':
+                            fn = NUMDECL
+                            break
+                        case 'RANDOM':
+                            fn = RANDOM
+                            break
+                        case 'REPLACE':
+                            fn = REPLACE
+                            break
+                        case 'TRUNCATE':
+                            fn = TRUNCATE
+                            break
+                        case 'TRIM':
+                            fn = TRIM
+                            break
+                        case 'UPPER':
+                            fn = UPPER
+                            break
+                    }
+
+                    return { name: name, args: args, fn }
                 }
-
-                return { name: name, args: args, fn }
-            }
-        }).filter(f => f)
+            })
+            .filter(f => f)
     }
 
     async replacements() {
@@ -95,13 +88,11 @@ export default class Replacer {
         const guild = this.shapers.guild
         const member = this.shapers.member
 
-        const activities = (await db.users.find({ $or: [{ 'activities.levels.guild_id': guild.id }, { 'activities.wallets.guild_id': guild.id }] }))
-            .map(i => ({
-                user: { id: i._id, ...i.user },
-                level: i.activities.levels.find(i => i.guild_id == guild.id),
-                wallet: i.activities.wallets.find(i => i.guild_id == guild.id)
-            })
-        )
+        const activities = (await db.users.find({ $or: [{ 'activities.levels.guild_id': guild.id }, { 'activities.wallets.guild_id': guild.id }] })).map(i => ({
+            user: { id: i._id, ...i.user },
+            level: i.activities.levels.find(i => i.guild_id == guild.id),
+            wallet: i.activities.wallets.find(i => i.guild_id == guild.id)
+        }))
         const memberActivity = activities.find(i => i.user.id == member.id)
         const server_owner: GuildMember = await guild.members.fetch(guild.ownerId)
 
@@ -295,7 +286,7 @@ export default class Replacer {
     }
 
     async replace(string: string = this.string, customReplacements?: {}) {
-        const replacements = customReplacements ?? await this.replacements()
+        const replacements = customReplacements ?? (await this.replacements())
 
         for (const replacer of this.replacers(string)) {
             const regex = new RegExp(`{\\s*${escapeRegexp(replacer)}\\s*}`, 'g')
@@ -311,7 +302,9 @@ export default class Replacer {
                 else raws[i] = value
             }
 
-            string = string.replace(regex, () => { return raws.find(r => r) })
+            string = string.replace(regex, () => {
+                return raws.find(r => r)
+            })
         }
 
         for (const snippet of this.codeSnippets(string)) {
@@ -325,14 +318,16 @@ export default class Replacer {
                 res = `\`${snippet.name}#${err.name}\``
             }
 
-            string = string.replace(regex, () => { return res })
+            string = string.replace(regex, () => {
+                return res
+            })
             logger.info(`(Replacer: ${snippet.name}): on ${this.shapers.guild.name}`)
         }
 
         return string
     }
 
-    async replaceTemplateMessage(template: { content: string, embed?: IMessageEmbed }) {
+    async replaceTemplateMessage(template: { content: string; embed?: IMessageEmbed }) {
         const content = await this.replace(template.content)
         let embed = {}
 
@@ -359,22 +354,24 @@ export default class Replacer {
                     url: template.embed.author.url ? await this.replace(template.embed.author.url) : null,
                     icon_url: avatar_icon_url
                 },
-                fields: template.embed.fields.length ? await Promise.all(
-                    template.embed.fields.map(async field => {
-                        return {
-                            name: field.name ? await this.replace(field.name) : null,
-                            value: field.value ? await this.replace(field.value) : null,
-                            inline: Boolean(field.inline)
-                        }
-                    })
-                ) : []
+                fields: template.embed.fields.length
+                    ? await Promise.all(
+                          template.embed.fields.map(async field => {
+                              return {
+                                  name: field.name ? await this.replace(field.name) : null,
+                                  value: field.value ? await this.replace(field.value) : null,
+                                  inline: Boolean(field.inline)
+                              }
+                          })
+                      )
+                    : []
             }
         }
 
-        const returning = {} as { content: string, embeds: MessageEmbed[] }
+        const returning = {} as { content: string; embeds: MessageEmbed[] }
 
         if (content) returning['content'] = content
-        if (template.embed && template.embed.active) returning['embeds'] = [ new MessageEmbed(embed) ]
+        if (template.embed && template.embed.active) returning['embeds'] = [new MessageEmbed(embed)]
 
         return returning
     }
@@ -389,11 +386,14 @@ function CHOOSE(...args: string[]) {
 }
 
 function DATE(...args: string[]) {
-    let timestamp = Number(args[0]), format = args[1], utc = args[2], locale = args[3]
+    let timestamp = Number(args[0]),
+        format = args[1],
+        utc = args[2],
+        locale = args[3]
 
     if (typeof timestamp !== 'number' || isNaN(timestamp)) timestamp = Date.now()
     if (typeof format !== 'string') format = 'DD MMM YYYY HH:mm'
-    if (!(/\+\d{2}:\d{2}/.test(utc))) utc = '+00:00'
+    if (!/\+\d{2}:\d{2}/.test(utc)) utc = '+00:00'
     if (typeof locale !== 'string' || !['en', 'ru'].includes(locale)) locale = 'ru'
 
     return moment(timestamp).locale(locale).utcOffset(utc).format(format)
@@ -404,10 +404,11 @@ function DATENOW() {
 }
 
 function FIXNUM(...args: string[]) {
-    let number = Number(args[0]), digits = Number(args[1])
+    let number = Number(args[0]),
+        digits = Number(args[1])
 
     if (isNaN(number)) return 0
-    if (isNaN(digits) || (digits < 0 || digits > 20)) digits = 0
+    if (isNaN(digits) || digits < 0 || digits > 20) digits = 0
 
     return number.toFixed(digits)
 }
@@ -421,10 +422,11 @@ function LOWER(...args: string[]) {
 }
 
 function MATH(...args: any[]) {
-    let expression = args[0], digits = Number(args[1])
+    let expression = args[0],
+        digits = Number(args[1])
 
     if (typeof expression !== 'string') throw new TypeError()
-    if (typeof digits !== 'number' || (digits < 0 || digits > 20) || isNaN(digits)) digits = 0
+    if (typeof digits !== 'number' || digits < 0 || digits > 20 || isNaN(digits)) digits = 0
 
     expression = expression.match(/(?:[0-9\-\+\*\/\^\(\)])+/g) || []
 
@@ -436,7 +438,9 @@ function MATH(...args: any[]) {
 }
 
 function NUMDECL(...args: string[]) {
-    let number = Number(args[0]), titles = args[1]?.split('|'), locale = args[2]
+    let number = Number(args[0]),
+        titles = args[1]?.split('|'),
+        locale = args[2]
 
     if (typeof number !== 'number' || isNaN(number)) throw new TypeError()
     if (!Array.isArray(titles) || titles.length <= 1) throw new TypeError()
@@ -445,7 +449,7 @@ function NUMDECL(...args: string[]) {
     if (locale == 'ru') {
         const cases = [2, 0, 1, 1, 1, 2]
 
-        return titles[ (number % 100 > 4 && number % 100 < 20) ? 2 : cases[ (number % 10 < 5) ? number % 10 : 5] ]
+        return titles[number % 100 > 4 && number % 100 < 20 ? 2 : cases[number % 10 < 5 ? number % 10 : 5]]
     }
 
     if (locale == 'en') {
@@ -454,7 +458,8 @@ function NUMDECL(...args: string[]) {
 }
 
 function RANDOM(...args: string[]) {
-    let start = Number(args[0]), end = Number(args[1])
+    let start = Number(args[0]),
+        end = Number(args[1])
 
     if (typeof start !== 'number' || isNaN(start) || start < -Math.pow(2, 53)) start = 0
     if (typeof end !== 'number' || isNaN(end) || end > Math.pow(2, 53)) end = 100
@@ -463,7 +468,10 @@ function RANDOM(...args: string[]) {
 }
 
 function REPLACE(...args) {
-    let str = args[0], search = args[1], replacement = args[2], flags = args[3]
+    let str = args[0],
+        search = args[1],
+        replacement = args[2],
+        flags = args[3]
 
     if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string') throw new TypeError()
     if (!flags || !flags.split('').some(flag => ['g', 'i'].includes(flag))) flags = 'g'
@@ -474,16 +482,16 @@ function REPLACE(...args) {
 }
 
 function TRUNCATE(...args: string[]) {
-    let str = args[0], limit = Number(args[1]), end = args[2]
+    let str = args[0],
+        limit = Number(args[1]),
+        end = args[2]
 
     if (typeof str !== 'string') throw new TypeError()
     if (typeof limit !== 'number') limit = 100
     if (typeof end !== 'string') end = '...'
 
-    if (str.length > limit)
-        return str.substring(0, limit) + end
-    else
-        return str
+    if (str.length > limit) return str.substring(0, limit) + end
+    else return str
 }
 
 function TRIM(...args: string[]) {

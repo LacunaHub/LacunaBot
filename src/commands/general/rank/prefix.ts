@@ -19,8 +19,6 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     } catch (err) {
         await message.reply({ content: `${self._emojis.ERROR} | ${self.translator.format(locale.rank.texts.error_on_render, `**${message.member.displayName}**`)}` })
 
-        console.log(err)
-
         return false
     }
 

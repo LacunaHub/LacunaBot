@@ -4,15 +4,15 @@ import Lacuna from '../../../internals/Lacuna'
 import { caseLog } from '../../../modules/Moderation'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
-    const amount = interaction.options?.getInteger('количество')
-    const mention = interaction.options?.getMember('пользователь') as GuildMember
-    const reason = interaction.options?.getString('причина') ?? '-'
+    const amount = interaction.options?.getInteger(t('commands.prune.options.amount.name'))
+    const mention = interaction.options?.getMember(t('commands.prune.options.user.name')) as GuildMember
+    const reason = interaction.options?.getString(t('commands.prune.options.reason.name')) ?? '-'
 
     if (!amount) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.prune.texts.no_amount_argument, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.prune.text_no_amount_argument', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -21,7 +21,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (Math.sign(amount) != 1 || amount < 2 || amount > 100) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.prune.texts.invalid_amount_argument, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.prune.text_invalid_amount_argument', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -34,18 +34,18 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         const deleted = await (interaction.channel as BaseGuildTextChannel).bulkDelete(messages, true)
         await interaction.reply({
-            content: `${self._emojis.OK} | ${self.translator.format(locale.prune.texts.messages_pruned, `**${(interaction.member as any).displayName}**`, deleted.size)}`,
+            content: `${self._emojis.OK} | ${t('commands.prune.text_messages_pruned', { user: `**${(interaction.member as any).displayName}**`, amount: deleted.size })}`,
             ephemeral: true
         })
     } else {
         const deleted = await (interaction.channel as BaseGuildTextChannel).bulkDelete(amount, true)
         await interaction.reply({
-            content: `${self._emojis.OK} | ${self.translator.format(locale.prune.texts.messages_pruned, `**${(interaction.member as any).displayName}**`, deleted.size)}`,
+            content: `${self._emojis.OK} | ${t('commands.prune.text_messages_pruned', { user: `**${(interaction.member as any).displayName}**`, amount: deleted.size })}`,
             ephemeral: true
         })
     }
 
-    await caseLog.createCaseEntry(server, interaction.guild, { type: 'PRUNE_MESSAGES', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'PRUNE_MESSAGES', target: mention.user, executor: interaction.user, reason })
 
     return true
 }

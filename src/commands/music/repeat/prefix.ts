@@ -19,16 +19,24 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         return false
     }
 
-    if (player.trackRepeat) {
-        player.setTrackRepeat(false)
+    if (!player.trackRepeat && !player.queueRepeat) {
         player.setQueueRepeat(true)
-    }
-
-    else {
+    } else if (player.queueRepeat) {
         player.setTrackRepeat(true)
+    } else {
+        player.setTrackRepeat(false)
     }
 
-    await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(player.trackRepeat ? locale.repeat.texts.track_repeat : locale.repeat.texts.queue_repeat, `**${message.member.displayName}**`)}` })
+    await message.reply({
+        content: `${self._emojis.OK} | ${self.translator.format(
+            !player.trackRepeat && !player.queueRepeat
+                ? locale.repeat.texts.no_repeat
+                : player.trackRepeat
+                ? locale.repeat.texts.track_repeat
+                : locale.repeat.texts.queue_repeat,
+            `**${message.member.displayName}**`
+        )}`
+    })
 
     return true
 }

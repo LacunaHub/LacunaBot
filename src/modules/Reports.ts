@@ -3,19 +3,18 @@ import ms from 'ms'
 import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import TemporaryBan from '../internals/structures/TemporaryBan'
-import TemporaryMute from '../internals/structures/TemporaryMute'
 import { caseLog, warnings } from './Moderation'
 
 export async function buttonPressed(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
     const [, action, user_id] = interaction.customId.split('-')
 
     const member = await interaction.guild.members.fetch(user_id).catch(() => {})
-    const locale = self.translator.locale(server.locale)
-    const reason = 'Репорты'
+    const t = self.i18n.t.bind(null, server.locale)
+    const reason = '-'
 
     if (!member) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -25,20 +24,48 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     }
 
     if (member.id == interaction.user.id) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
-            ephemeral: true
-        })
-
         await removeComponentsFromMessage(interaction)
 
         return
     }
 
+    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PERMISSIONS_FLAGS[action == 'KICK' ? 'KICK_MEMBERS' : 'MANAGE_ROLES'])) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
+    if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
     if (action == 'KICK') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.KICK_MEMBERS)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.common.texts.command_denied, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -47,7 +74,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
 
         if (!member.kickable) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.kick.texts.cant_kick_user, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('commands.kick.text_cant_kick_user', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -55,13 +82,13 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
         }
 
         await member.kick(reason).catch(() => {})
-        await caseLog.createCaseEntry(server, interaction.guild, { type: 'KICK', target: member.user, executor: interaction.user, reason })
+        await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: member.user, executor: interaction.user, reason })
     }
 
     if (action == 'WARN') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.MANAGE_ROLES)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.common.texts.command_denied, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -77,13 +104,13 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
 export async function optionSelected(self: Lacuna, server: ServerDocument, interaction: SelectMenuInteraction) {
     const [, action, user_id] = interaction.customId.split('-')
     const member = (await interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
-    const locale = self.translator.locale(server.locale)
+    const t = self.i18n.t.bind(null, server.locale)
     const duration = interaction.values[0]
-    const reason = 'Репорты'
+    const reason = '-'
 
     if (!member) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -93,20 +120,48 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
     }
 
     if (member.id == interaction.user.id) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.self_action, `**${(interaction.member as any).displayName}**`)}`,
-            ephemeral: true
-        })
-
         await removeComponentsFromMessage(interaction)
 
         return
     }
 
+    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
+    if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PERMISSIONS_FLAGS[action == 'BAN' ? 'BAN_MEMBERS' : 'MODERATE_MEMBERS'])) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
+    if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
+
+        await removeComponentsFromMessage(interaction)
+
+        return false
+    }
+
     if (action == 'BAN') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.BAN_MEMBERS)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.common.texts.command_denied, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -115,7 +170,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
 
         if (!member.bannable) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.ban.texts.cant_ban_user, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('commands.ban.text_cant_ban_user', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -134,13 +189,13 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
             })
         }
 
-        await caseLog.createCaseEntry(server, interaction.guild, { type: 'BAN_ADD', target: member.user, executor: interaction.user, reason })
+        await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_ADD', target: member.user, executor: interaction.user, reason })
     }
 
     if (action == 'MUTE') {
         if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.MODERATE_MEMBERS)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.common.texts.command_denied, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -149,39 +204,39 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
 
         if (!member.manageable) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.mute.texts.cant_mute_user, `**${(interaction.member as any).displayName}**`)}`,
+                content: `${self._emojis.ERROR} | ${t('commands.mute.text_cant_mute_user', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
             return
         }
 
-        if (server.moderation.use_timeout_mute) {
-            await member.disableCommunicationUntil(Date.now() + ms(duration), reason)
-        } else {
-            const muteRole = interaction.guild.roles.cache.get(server.moderation.roles.mute)
-            const expires_timestamp = Date.now() + ms(duration)
+        await member.disableCommunicationUntil(Date.now() + ms(duration), reason)
 
-            if (!muteRole) {
-                await interaction.reply({
-                    content: `${self._emojis.ERROR} | ${self.translator.format(locale.commands.mute.texts.mute_role_not_found, `**${(interaction.member as any).displayName}**`)}`,
-                    ephemeral: true
-                })
+        if (server.moderation.mutes.rar) {
+            const current_roles = member.roles.cache.filter(r => r.editable && r.id != interaction.guildId).map(r => r.id)
 
-                return
-            }
+            await self.db.servers.updateOne(
+                { _id: interaction.guildId },
+                {
+                    $push: {
+                        'moderation.mutes.rar_data': {
+                            user_id: member.id,
+                            roles: current_roles
+                        }
+                    }
+                }
+            )
 
-            new TemporaryMute(self, {
-                user_id: member.id,
-                guild_id: interaction.guild.id,
-                role_id: muteRole.id,
-                expires_timestamp: expires_timestamp,
-                reason,
-                initial: true
-            })
+            const strict_roles = [
+                ...server.moderation.mutes.rar_strict.filter(r => current_roles.includes(r)),
+                ...member.roles.cache.filter(r => !r.editable).map(r => r.id)
+            ]
+
+            await member.roles.set(strict_roles, reason).catch(self.logger.error)
         }
 
-        await caseLog.createCaseEntry(server, interaction.guild, { type: 'MUTE_ADD', target: member.user, executor: interaction.user, reason })
+        await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_ADD', target: member.user, executor: interaction.user, reason })
     }
 
     await removeComponentsFromMessage(interaction)

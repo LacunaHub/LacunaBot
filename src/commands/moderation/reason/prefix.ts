@@ -37,11 +37,14 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         return false
     }
 
-    await self.db.servers.updateOne({ _id: message.guild.id, 'moderation.case_log.cases.case_id': case_id }, {
-        $set: {
-            'moderation.case_log.cases.$.reason': reason
+    await self.db.servers.updateOne(
+        { _id: message.guild.id, 'moderation.case_log.cases.case_id': case_id },
+        {
+            $set: {
+                'moderation.case_log.cases.$.reason': reason
+            }
         }
-    })
+    )
 
     const embed = new MessageEmbed(case_message.embeds[0])
 

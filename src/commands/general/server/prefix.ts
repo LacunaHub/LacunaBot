@@ -14,7 +14,12 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         .addField(locale.server.texts.owner, server_owner.user.tag, true)
         .addField(locale.server.texts.id, message.guild.id, true)
         .addField(locale.server.texts.members.title, `${message.guild.memberCount} ${locale.server.texts.members.total}`, true)
-        .addField(locale.server.texts.channels.title, `${message.guild.channels.cache.filter(c => c.type == 'GUILD_TEXT').size} ${locale.server.texts.channels.text}\n${message.guild.channels.cache.filter(c => c.type == 'GUILD_VOICE').size} ${locale.server.texts.channels.voice}`, true)
+        .addField(
+            locale.server.texts.channels.title,
+            `${message.guild.channels.cache.filter(c => c.type == 'GUILD_TEXT').size} ${locale.server.texts.channels.text}\n` +
+                `${message.guild.channels.cache.filter(c => c.type == 'GUILD_VOICE').size} ${locale.server.texts.channels.voice}`,
+            true
+        )
         .addField(locale.server.texts.verification_level, locale.server.texts.verification_levels[message.guild.verificationLevel], true)
         .addField(locale.server.texts.afk_channel, message.guild?.afkChannel?.name ?? '-', true)
         .addField(locale.server.texts.roles, `${message.guild.roles.cache.size}`, true)
@@ -24,7 +29,7 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
 
     if (server.server.premium.available) embed.setDescription(`${self._emojis.DIAMOND} ${locale.server.texts.diamomded}`)
     if (message.guild.description) embed.setDescription(embed.description ? `${embed.description}\n${message.guild.description}` : message.guild.description)
-    
+
     await message.reply({ embeds: [embed] })
 
     return true

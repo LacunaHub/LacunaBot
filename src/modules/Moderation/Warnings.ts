@@ -1,10 +1,8 @@
 import { ButtonInteraction, CommandInteraction, GuildMember, Message } from 'discord.js'
-import moment from 'moment'
 import ms from 'ms'
 import { ServerDocument, WarningsPenalty, WarningsViolator } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
-import TemporaryMute from '../../internals/structures/TemporaryMute'
 import { generateSimpleId } from '../../internals/utility/UID'
 import { caseLog } from './'
 import Replacer from './../Replacer'
@@ -51,116 +49,93 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
         )
     }
 
-    if (penalty) {
-        const ban = (penalty.action & (1 << 0)) === 1 << 0
-        const mute = (penalty.action & (1 << 1)) === 1 << 1
-        const kick = (penalty.action & (1 << 2)) === 1 << 2
-        const send_message = (penalty.action & (1 << 3)) === 1 << 3
-        const edit_roles = (penalty.action & (1 << 4)) === 1 << 4
-        const reset_violations = (penalty.action & (1 << 7)) === 1 << 7
+    await caseLog.createCaseEntry(signal.guild, { type: 'WARN_ADD', target: target.user, executor: executor.user, reason })
 
-        if (ban && !mute && !kick) {
-            if (penalty.duration) {
-                const expires_timestamp = Date.now() + penalty.duration * 1000
+    if (penalty) {
+        const ban = penalty.options.includes('ACTION_BAN')
+        const mute = penalty.options.includes('ACTION_MUTE')
+        const kick = penalty.options.includes('ACTION_KICK')
+        const send_message = penalty.options.includes('ACTION_SEND_MESSAGE')
+        const modify_roles = penalty.options.includes('ACTION_MODIFY_ROLES')
+        const reset_violations = penalty.options.includes('ACTION_RESET_VIOLATIONS')
+
+        if (ban && !mute && !kick && target.bannable) {
+            if (penalty.ban_timeout) {
+                const expires_timestamp = Date.now() + penalty.ban_timeout * 1000
 
                 new TemporaryBan(self, {
                     user_id: target.user.id,
                     guild_id: signal.guild.id,
                     expires_timestamp: expires_timestamp,
-                    reason: `Автомодер: Предупреждение (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
+                    reason: reason,
                     initial: true
                 })
             } else {
-                await signal.guild.members.ban(target.user.id, { reason: 'Автомодер: Предупреждение' }).catch(self.logger.error)
+                await signal.guild.members.ban(target.user.id, { reason }).catch(self.logger.error)
             }
+
+            await caseLog.createCaseEntry(signal.guild, { type: 'BAN_ADD', target: target.user, executor: self.user, reason })
         }
 
-        if (mute && !ban && !kick) {
-            if (server.moderation.use_timeout_mute) {
-                let duration = penalty.duration * 1000
+        if (mute && !ban && !kick && target.moderatable) {
+            let duration = penalty.mute_timeout * 1000
 
-                if (duration < ms('1m')) duration = ms('1m')
-                else if (duration > ms('28d')) duration = ms('28d')
+            if (duration < ms('1m')) duration = ms('1m')
+            else if (duration > ms('28d')) duration = ms('28d')
 
-                await target
-                    .disableCommunicationUntil(
-                        Date.now() + duration,
-                        `Автомодер: Предупреждение (${moment(Date.now() + duration)
-                            .locale(server.locale)
-                            .fromNow(true)})`
-                    )
-                    .catch(() => {})
-            } else {
-                const mute_role = signal.guild.roles.cache.get(server.moderation.roles.mute)
-                const tempmute = self.tempmutes.find(tm => tm.user_id == target.user.id)
+            await target.disableCommunicationUntil(Date.now() + duration, reason).catch(() => {})
+            await caseLog.createCaseEntry(signal.guild, { type: 'MUTE_ADD', target: target.user, executor: self.user, reason })
 
-                if (mute_role && !tempmute && !mute_role.members.has(target.user.id)) {
-                    if (penalty.duration) {
-                        const expires_timestamp = Date.now() + penalty.duration * 1000
+            if (server.moderation.mutes.rar) {
+                const current_roles = target.roles.cache.filter(r => r.editable && r.id != signal.guild.id).map(r => r.id)
 
-                        new TemporaryMute(self, {
-                            user_id: target.user.id,
-                            guild_id: signal.guild.id,
-                            role_id: mute_role.id,
-                            expires_timestamp: expires_timestamp,
-                            reason: `Автомодер: Предупреждение (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`,
-                            initial: true
-                        })
-                    } else {
-                        if (server.moderation.roles.on_mute.remove_all_roles) {
-                            const current_roles: string[] = target.roles.cache.filter(r => r.editable && r.id != signal.guild.id).map(r => r.id)
-
-                            await self.db.servers.updateOne(
-                                { _id: signal.guild.id },
-                                {
-                                    $push: {
-                                        'moderation.roles.on_mute.returnable_roles': {
-                                            user_id: target.id,
-                                            roles: current_roles
-                                        }
-                                    }
-                                }
-                            )
-
-                            const strict_roles: string[] = [
-                                ...server.moderation.roles.on_mute.strict_roles.filter(r => current_roles.includes(r)),
-                                ...target.roles.cache.filter(r => !r.editable).map(r => r.id)
-                            ]
-
-                            await target.roles.set([mute_role.id, ...strict_roles], reason).catch(self.logger.error)
-                        } else {
-                            await target.roles.add(mute_role.id, 'Автомодер: Предупреждение').catch(self.logger.error)
+                await self.db.servers.updateOne(
+                    { _id: signal.guild.id },
+                    {
+                        $push: {
+                            'moderation.mutes.rar_data': {
+                                user_id: target.id,
+                                roles: current_roles
+                            }
                         }
                     }
-                }
+                )
+
+                const strict_roles = [
+                    ...server.moderation.mutes.rar_strict.filter(r => current_roles.includes(r)),
+                    ...target.roles.cache.filter(r => !r.editable).map(r => r.id)
+                ]
+
+                await target.roles.set(strict_roles, reason).catch(self.logger.error)
             }
         }
 
-        if (kick && !ban && !mute) {
-            if (target.kickable) await target.kick('Автомодер: Предупреждение')
+        if (kick && !ban && !mute && target.kickable) {
+            await target.kick(reason).catch(() => {})
+            await caseLog.createCaseEntry(signal.guild, { type: 'KICK', target: target.user, executor: self.user, reason })
         }
 
-        if (edit_roles && !ban && !kick) {
-            if (penalty?.add_roles?.length) {
-                const editable = signal.guild.roles.cache.filter(r => r.editable && penalty.add_roles.includes(r.id))
+        if (modify_roles && !ban && !kick) {
+            if (penalty?.modify_roles?.add?.length) {
+                const editable = signal.guild.roles.cache.filter(r => r.editable && penalty.modify_roles.add.includes(r.id))
 
                 if (editable.size) {
-                    await target.roles.add(editable, 'Автомодер: Предупреждение').catch(self.logger.error)
+                    await target.roles.add(editable, reason).catch(self.logger.error)
                 }
             }
 
-            if (penalty?.remove_roles?.length) {
-                const editable = signal.guild.roles.cache.filter(r => r.editable && penalty.remove_roles.includes(r.id))
+            if (penalty?.modify_roles?.remove?.length) {
+                const editable = signal.guild.roles.cache.filter(r => r.editable && penalty.modify_roles.remove.includes(r.id))
 
                 if (editable.size) {
-                    await target.roles.remove(editable, 'Автомодер: Предупреждение').catch(self.logger.error)
+                    await target.roles.remove(editable, reason).catch(self.logger.error)
                 }
             }
         }
 
         if (send_message) {
             const replacer = new Replacer(null, { message: signal instanceof Message ? signal : undefined, guild: signal.guild, member: target })
-            const content = await replacer.replaceTemplateMessage(penalty.message)
+            const content = await replacer.replaceTemplateMessage(penalty.send_message)
 
             await signal.channel.send(content).catch(self.logger.error)
         }
@@ -179,14 +154,17 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
         }
     }
 
-    if (server.moderation.case_log.case_types_messages.WARN_ADD.active) {
-        const replacer = new Replacer(null, { guild: signal.guild, member: target, message: signal instanceof Message ? signal : undefined, penalty: { reason: reason ?? '-' } })
-        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.case_types_messages.WARN_ADD.dm_message)
+    if (server.moderation.case_log.types.WARN_ADD.active) {
+        const replacer = new Replacer(null, {
+            guild: signal.guild,
+            member: target,
+            message: signal instanceof Message ? signal : undefined,
+            penalty: { reason: reason ?? '-' }
+        })
+        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.WARN_ADD.dm_message)
 
         await target.send(dm_message).catch(self.logger.error)
     }
-
-    await caseLog.createCaseEntry(server, signal.guild, { type: 'WARN_ADD', target: target.user, executor: executor.user, reason })
 }
 
 export interface WarnOptions {

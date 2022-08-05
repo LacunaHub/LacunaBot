@@ -1,5 +1,5 @@
-import { createPrefix, removePrefix, endPrefix } from './prefix'
-import { createSlash, removeSlash, endSlash } from './slash'
+import { createPrefix, endPrefix, removePrefix } from './prefix'
+import { createSlash, endSlash, removeSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 

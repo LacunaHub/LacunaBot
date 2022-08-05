@@ -1,17 +1,19 @@
-import fetch from 'node-fetch'
-import db from '../database'
 import { REST } from '@discordjs/rest'
 import { Routes } from 'discord-api-types/v9'
-import Replacer from './Replacer'
-import logger from '../internals/Logger'
+import fetch from 'node-fetch'
 import { scheduleJob } from 'node-schedule'
+import db from '../database'
+import logger from '../internals/Logger'
+import Replacer from './Replacer'
 
 const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
 export async function searchChannels(term: string) {
     term = term.startsWith('UC') ? `channelId=${term}` : `q=${encodeURI(term)}`
 
-    const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&${term}&maxResults=15&type=channel&key=${process.env.GOOGLE_API_KEY}`, { method: 'GET' })
+    const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&${term}&maxResults=15&type=channel&key=${process.env.GOOGLE_API_KEY}`, {
+        method: 'GET'
+    })
 
     if (response.ok) {
         const data: YouTubeSearchResponse = await response.json()
@@ -43,7 +45,7 @@ export function hubSubscribe(channelId: string, mode: string = 'subscribe') {
 
 export function hubRefreshSubscriptions() {
     const job = scheduleJob('hub-refresh-subs', { hour: 0, minute: 0 }, async () => {
-        const subs = (await db.youtubeSubs.find({})).filter(sub => (sub.expiration_timestamp - Date.now()) < 129_600_000)
+        const subs = (await db.youtubeSubs.find({})).filter(sub => sub.expiration_timestamp - Date.now() < 129_600_000)
 
         subs.forEach((sub, i) => {
             setTimeout(() => hubSubscribe(sub._id), i * 1500)
@@ -59,7 +61,7 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
     if (!subscription) return null
 
     if (subscription.last_video_id == data.videoId) return null
-    else await db.youtubeSubs.updateOne({ _id: data.channelId }, { $set: { 'last_video_id': data.videoId } })
+    else await db.youtubeSubs.updateOne({ _id: data.channelId }, { $set: { last_video_id: data.videoId } })
 
     logger.info(`(YouTube HubBub): Handling incoming webhook from subscription "${data.channelId}"`)
 
@@ -75,33 +77,33 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
     const videoUrl = `https://www.youtube.com/watch?v=${data.videoId}`
 
     for (const guild of subscribedGuilds) {
-        const guildSubscription = guild.modules.subscriptions.youtube
-            .slice(0, (guild.server.premium.available ? 10 : 1))
-            .find(i => i.channel_id == data.channelId)
+        const guildSubscription = guild.modules.subscriptions.youtube.slice(0, guild.server.premium.available ? 10 : 1).find(i => i.channel_id == data.channelId)
 
         if (!guildSubscription) continue
 
-        let webhook = await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
-            .catch(() => {}) as any
+        let webhook = (await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
 
         if (!webhook) {
-            webhook = await rest.post(Routes.channelWebhooks(guildSubscription.notification_channel_id), {
-                body: {
-                    name: data.channelName
-                }
-            })
-            .catch(() => {})
+            webhook = await rest
+                .post(Routes.channelWebhooks(guildSubscription.notification_channel_id), {
+                    body: {
+                        name: data.channelName
+                    }
+                })
+                .catch(() => {})
 
-            if (webhook) await db.servers.updateOne({ _id: guild._id, 'modules.subscriptions.youtube.channel_id': data.channelId }, {
-                $set: {
-                    'modules.subscriptions.youtube.$.webhook_id': webhook.id,
-                    'modules.subscriptions.youtube.$.webhook_token': webhook.token
-                }
-            })
-
+            if (webhook)
+                await db.servers.updateOne(
+                    { _id: guild._id, 'modules.subscriptions.youtube.channel_id': data.channelId },
+                    {
+                        $set: {
+                            'modules.subscriptions.youtube.$.webhook_id': webhook.id,
+                            'modules.subscriptions.youtube.$.webhook_token': webhook.token
+                        }
+                    }
+                )
             else continue
         }
-
 
         let notificationText = guildSubscription.notification_message.content || null
         const hasVideoUrl = /{\s*(subs.link)\s*}/g.test(notificationText ?? '')
@@ -113,12 +115,13 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
             })
         }
 
-        await rest.post(Routes.webhook(webhook.id, webhook.token), {
-            body: {
-                content: hasVideoUrl ? notificationText : (notificationText ? `${notificationText}\n${videoUrl}` : videoUrl)
-            }
-        })
-        .catch(() => {})
+        await rest
+            .post(Routes.webhook(webhook.id, webhook.token), {
+                body: {
+                    content: hasVideoUrl ? notificationText : notificationText ? `${notificationText}\n${videoUrl}` : videoUrl
+                }
+            })
+            .catch(() => {})
     }
 }
 
@@ -143,7 +146,7 @@ export interface YouTubeSearchResponseItem {
         videoId: string
         channelId: string
         playlistId: string
-    },
+    }
     snippet: {
         publishedAt: string
         channelId: string
@@ -155,7 +158,7 @@ export interface YouTubeSearchResponseItem {
             high: YouTubeChannelThumbnail
             standard: YouTubeChannelThumbnail
             maxres: YouTubeChannelThumbnail
-        },
+        }
         channelTitle: string
         liveBroadcastContent: string
     }

@@ -4,82 +4,57 @@ import Lacuna from '../../../internals/Lacuna'
 import { caseLog } from '../../../modules/Moderation'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
-    const locale = self.translator.locale(server.locale).commands
+    const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember('пользователь') as GuildMember
-    const reason = interaction.options?.getString('причина') ?? '-'
+    const mention = interaction.options?.getMember(t('commands.unmute.options.user.name')) as GuildMember
+    const reason = interaction.options?.getString(t('commands.unmute.options.reason.name')) ?? '-'
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_found, `**${(interaction.member as any).displayName}**`)}`,
+            content: `${self._emojis.ERROR} | ${t('commands.unmute.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
         return false
     }
 
-    if (server.moderation.use_timeout_mute) {
-        if (!mention.communicationDisabledUntilTimestamp) {
-            await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_muted, `**${(interaction.member as any).displayName}**`)}`,
-                ephemeral: true
-            })
+    if (!mention.isCommunicationDisabled()) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('commands.unmute.text_user_not_muted', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
 
-            return false
-        }
+        return false
+    }
 
-        await mention.disableCommunicationUntil(null, reason).catch(() => {})
-    } else {
-        const mute_role = interaction.guild.roles.cache.get(server.moderation.roles.mute)
-        const tempmute = self.tempmutes.find(m => m.user_id == mention.id)
+    await mention.disableCommunicationUntil(null, reason).catch(() => {})
 
-        if (!mute_role?.members?.has(mention.id)) {
-            await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.user_not_muted, `**${(interaction.member as any).displayName}**`)}`,
-                ephemeral: true
-            })
+    if (server.moderation.mutes.rar) {
+        const returnable_roles = server.moderation.mutes.rar_data.find(r => r.user_id == mention.id)
 
-            return false
-        }
-
-        if (!mute_role.editable) {
-            await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.translator.format(locale.unmute.texts.cant_remove_role, `**${(interaction.member as any).displayName}**`)}`,
-                ephemeral: true
-            })
-
-            return false
-        }
-
-        if (tempmute) await tempmute.delete(false)
-        else {
-            const returnable_roles = server.moderation.roles.on_mute.returnable_roles.find(r => r.user_id == mention.id)
-
-            if (returnable_roles) {
-                await self.db.servers.updateOne(
-                    { _id: interaction.guild.id },
-                    {
-                        $pull: {
-                            'moderation.roles.on_mute.returnable_roles': {
-                                user_id: mention.id
-                            }
+        if (returnable_roles) {
+            await self.db.servers.updateOne(
+                { _id: interaction.guildId },
+                {
+                    $pull: {
+                        'moderation.mutes.rar_data': {
+                            user_id: mention.id
                         }
                     }
-                )
+                }
+            )
 
-                await mention.roles.add(returnable_roles.roles.filter(r => mention.guild.roles.cache.has(r)))
-            }
-
-            await mention.roles.remove(mute_role.id, reason).catch(self.logger.error)
-
-            if (mention.voice?.serverMute) await mention.voice.setMute(false, reason).catch(self.logger.error)
+            await mention.roles.add(returnable_roles.roles.filter(r => interaction.guild.roles.cache.has(r)))
         }
     }
 
-    await caseLog.createCaseEntry(server, interaction.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: interaction.user, reason })
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.translator.format(locale.unmute.texts.user_unmuted, `**${(interaction.member as any).displayName}**`, `**${mention.user.tag}**`)}`,
+        content: `${self._emojis.OK} | ${t('commands.unmute.text_user_unmuted', {
+            user: `**${(interaction.member as any).displayName}**`,
+            target: `**${mention.user.tag}**`
+        })}`,
         ephemeral: true
     })
 

@@ -2,9 +2,9 @@ import { BaseGuildTextChannel, MessageEmbed, VoiceChannel, VoiceState, Webhook }
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async function(self: Lacuna, server: ServerDocument, state: VoiceState, channel: VoiceChannel): Promise<boolean> {
+export default async function (self: Lacuna, server: ServerDocument, state: VoiceState, channel: VoiceChannel): Promise<boolean> {
     if (server.moderation.logs.types.voice_disconnect.active) {
-        const locale = self.translator.locale(server.locale).modules
+        const t = self.i18n.t.bind(null, server.locale)
 
         const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_disconnect.channel_id) as BaseGuildTextChannel
 
@@ -12,37 +12,48 @@ export default async function(self: Lacuna, server: ServerDocument, state: Voice
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
-            let webhook = logs_webhook ? (await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook : null
+            let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
             if (!webhook) {
                 if (logs_webhook) {
-                    await self.db.servers.updateOne({ _id: state.guild.id }, {
-                        $pull: {
-                            'moderation.logs.webhooks': {
-                                channel_id: log.id
+                    await self.db.servers.updateOne(
+                        { _id: state.guild.id },
+                        {
+                            $pull: {
+                                'moderation.logs.webhooks': {
+                                    channel_id: log.id
+                                }
                             }
                         }
-                    })
+                    )
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, { avatar: self.user.displayAvatarURL(), reason: self.translator.format(locale.logs.common.webhook_create_reason, locale.logs.voice_disconnect.title) })
-                } catch (err) { return false }
+                    webhook = await log.createWebhook(`${self.user.username}`, {
+                        avatar: self.user.displayAvatarURL(),
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.voice_disconnect_title') })
+                    })
+                } catch (err) {
+                    return false
+                }
 
-                await self.db.servers.updateOne({ _id: state.guild.id }, {
-                    $push: {
-                        'moderation.logs.webhooks': {
-                            id: webhook.id,
-                            token: webhook.token,
-                            channel_id: webhook.channelId
+                await self.db.servers.updateOne(
+                    { _id: state.guild.id },
+                    {
+                        $push: {
+                            'moderation.logs.webhooks': {
+                                id: webhook.id,
+                                token: webhook.token,
+                                channel_id: webhook.channelId
+                            }
                         }
                     }
-                })
+                )
             }
-        
+
             const embed = new MessageEmbed()
-                .setTitle(locale.logs.voice_disconnect.title)
-                .setDescription(self.translator.format(locale.logs.voice_disconnect.template, `**${state.member.user.tag}**`, `<#${channel?.id ?? '1'}>`))
+                .setTitle(t('logs.voice_disconnect_title'))
+                .setDescription(t('logs.voice_disconnect_template', { user: `**${state.member.user.tag}**`, channel: `<#${channel?.id ?? '1'}>` }))
                 .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#EF5350')
@@ -53,8 +64,12 @@ export default async function(self: Lacuna, server: ServerDocument, state: Voice
                 username: server.server.premium.available ? webhook.name : self.user.username
             })
 
-            self.emit('moduleExecution', { module: 'Logs: Voice Disconnect', guild: { id: state.guild.id, name: state.guild.name }, target: { id: state.member.id, name: state.member.user.tag } })
-        
+            self.emit('moduleExecution', {
+                module: 'Logs: Voice Disconnect',
+                guild: { id: state.guild.id, name: state.guild.name },
+                target: { id: state.member.id, name: state.member.user.tag }
+            })
+
             return true
         }
     }

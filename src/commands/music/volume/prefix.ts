@@ -30,13 +30,18 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
     const volume_before = player.volume
 
     player.setVolume(volume)
-    await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.volume.texts.volume_changed, `**${message.member.displayName}**`, volume_before, volume)}` })
-
-    await self.db.servers.updateOne({ _id: message.guild.id }, {
-        $set: {
-            'modules.music.default_volume': volume
-        }
+    await message.reply({
+        content: `${self._emojis.OK} | ${self.translator.format(locale.volume.texts.volume_changed, `**${message.member.displayName}**`, volume_before, volume)}`
     })
+
+    await self.db.servers.updateOne(
+        { _id: message.guild.id },
+        {
+            $set: {
+                'modules.music.default_volume': volume
+            }
+        }
+    )
 
     return true
 }

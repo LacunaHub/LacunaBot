@@ -1,8 +1,8 @@
 import { VoiceState } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { voiceUnassign as levelsVoiceUnassign, voiceAssign as levelsVoiceAssign } from '../../modules/Levels'
-import { voiceUnassign as economyVoiceUnassign, voiceAssign as economyVoiceAssign } from '../../modules/Economy'
+import { voiceAssign as economyVoiceAssign, voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
+import { voiceAssign as levelsVoiceAssign, voiceUnassign as levelsVoiceUnassign } from '../../modules/Levels'
 import { VoiceMove } from '../../modules/Logs'
 import { createTemporaryVoiceOnMove } from '../../modules/VoiceManager'
 
@@ -23,27 +23,24 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
 
             if (listens) {
                 const timeout = player.get<NodeJS.Timeout>('timeout')
-    
+
                 if (timeout) {
                     clearTimeout(timeout)
                     player.set('timeout', null)
                 }
-            }
-
-            else {
-                player.set('timeout', setTimeout(
-                    () => player.destroy(), 600000
-                ))
+            } else {
+                player.set(
+                    'timeout',
+                    setTimeout(() => player.destroy(), 600000)
+                )
             }
         }
     }
 
     const old_voice_roles_bound = server.modules.voice_manager.voice_roles
-        .slice(0, (server.server.premium.available ? 20 : 2))
+        .slice(0, server.server.premium.available ? 20 : 2)
         .filter(r => r.bound_channels_id.includes(before.channelId))
-    const voice_roles_bound = server.modules.voice_manager.voice_roles
-        .slice(0, (server.server.premium.available ? 20 : 2))
-        .filter(r => r.bound_channels_id.includes(state.channelId))
+    const voice_roles_bound = server.modules.voice_manager.voice_roles.slice(0, server.server.premium.available ? 20 : 2).filter(r => r.bound_channels_id.includes(state.channelId))
 
     if (old_voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && old_voice_roles_bound.some(b => b.role_id == r.id))

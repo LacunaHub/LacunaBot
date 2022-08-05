@@ -16,23 +16,29 @@ const handler = async (self: Lacuna, channel: DMChannel | GuildChannel) => {
         const tempVoice = autovoiceChildren ? autovoiceChildren.children.find(c => c.channel_id == channel.id) : null
 
         if (autovoice) {
-            await self.db.servers.updateOne({ _id: channel.guild.id }, {
-                $pull: {
-                    'modules.voice_manager.autovoices': {
-                        channel_id: channel.id
+            await self.db.servers.updateOne(
+                { _id: channel.guild.id },
+                {
+                    $pull: {
+                        'modules.voice_manager.autovoices': {
+                            channel_id: channel.id
+                        }
                     }
                 }
-            })
+            )
         }
 
         if (tempVoice) {
-            await self.db.servers.updateOne({ _id: channel.guild.id, 'modules.voice_manager.autovoices.children.channel_id': channel.id }, {
-                $pull: {
-                    'modules.voice_manager.autovoices.$.children': {
-                        channel_id: channel.id
+            await self.db.servers.updateOne(
+                { _id: channel.guild.id, 'modules.voice_manager.autovoices.children.channel_id': channel.id },
+                {
+                    $pull: {
+                        'modules.voice_manager.autovoices.$.children': {
+                            channel_id: channel.id
+                        }
                     }
                 }
-            })
+            )
         }
     }
 

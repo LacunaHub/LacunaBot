@@ -1,9 +1,9 @@
-import fetch from 'node-fetch'
-import Replacer from './Replacer'
-import db from '../database'
 import { REST } from '@discordjs/rest'
 import { Routes } from 'discord-api-types/v9'
+import fetch from 'node-fetch'
+import db from '../database'
 import logger from '../internals/Logger'
+import Replacer from './Replacer'
 
 const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
@@ -17,7 +17,7 @@ export async function searchChannels(query: string) {
     })
 
     if (response.ok) {
-        const { data } = await response.json() as TwitchSearchResponse
+        const { data } = (await response.json()) as TwitchSearchResponse
 
         return data?.length ? data.map(i => ({ id: i.id, name: i.display_name, login: i.broadcaster_login, thumbnail: i.thumbnail_url })) : []
     }
@@ -51,7 +51,7 @@ export function eventSubUnsubscribe(subscription_id: string) {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
-            'Client-Id': process.env.TWITCH_CLIENT_ID,
+            'Client-Id': process.env.TWITCH_CLIENT_ID
         }
     })
 }
@@ -66,7 +66,7 @@ export async function getStream(user_id: string) {
     })
 
     if (res.status === 200) {
-        const { data } = await res.json() as TwitchStreamResponse
+        const { data } = (await res.json()) as TwitchStreamResponse
         const stream = data[0]
 
         if (stream) {
@@ -76,7 +76,9 @@ export async function getStream(user_id: string) {
                 title: stream.title,
                 game: stream.game_name,
                 game_image: `https://static-cdn.jtvnw.net/ttv-boxart/${encodeURI(stream.game_name)}-144x192.jpg`,
-                preview: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${stream.user_login}-${Math.floor(Math.random() * 81) + 1200}x${Math.floor(Math.random() * 21) + 700}.jpg`
+                preview: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${stream.user_login}-${Math.floor(Math.random() * 81) + 1200}x${
+                    Math.floor(Math.random() * 21) + 700
+                }.jpg`
             }
         }
     }
@@ -89,7 +91,7 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
         if (!subscription) return null
 
         if (subscription.last_eventsub_message_id == messageId) return null
-        else await db.twitchSubs.updateOne({ _id: data.subscription.id }, { $set: { 'last_eventsub_message_id': messageId } })
+        else await db.twitchSubs.updateOne({ _id: data.subscription.id }, { $set: { last_eventsub_message_id: messageId } })
 
         logger.info(`(Twitch Eventsub): Handling incoming webhook from subscription "${data.subscription.id}"`)
 
@@ -108,29 +110,32 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
 
         for (const guild of subscribedGuilds) {
             const guildSubscription = guild.modules.subscriptions.twitch
-                .slice(0, (guild.server.premium.available ? 10 : 1))
+                .slice(0, guild.server.premium.available ? 10 : 1)
                 .find(i => i.broadcaster_id == data.event.broadcaster_user_id)
 
             if (!guildSubscription) continue
 
-            let webhook = await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
-                .catch(() => {}) as any
+            let webhook = (await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
 
             if (!webhook) {
-                webhook = await rest.post(Routes.channelWebhooks(guildSubscription.notification_channel_id), {
-                    body: {
-                        name: data.event.broadcaster_user_name
-                    }
-                })
-                .catch(() => {})
+                webhook = await rest
+                    .post(Routes.channelWebhooks(guildSubscription.notification_channel_id), {
+                        body: {
+                            name: data.event.broadcaster_user_name
+                        }
+                    })
+                    .catch(() => {})
 
-                if (webhook) await db.servers.updateOne({ _id: guild._id, 'modules.subscriptions.twitch.broadcaster_id': data.event.broadcaster_user_id }, {
-                    $set: {
-                        'modules.subscriptions.twitch.$.webhook_id': webhook.id,
-                        'modules.subscriptions.twitch.$.webhook_token': webhook.token
-                    }
-                })
-
+                if (webhook)
+                    await db.servers.updateOne(
+                        { _id: guild._id, 'modules.subscriptions.twitch.broadcaster_id': data.event.broadcaster_user_id },
+                        {
+                            $set: {
+                                'modules.subscriptions.twitch.$.webhook_id': webhook.id,
+                                'modules.subscriptions.twitch.$.webhook_token': webhook.token
+                            }
+                        }
+                    )
                 else continue
             }
 
@@ -143,21 +148,22 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
                 })
             }
 
-            await rest.post(Routes.webhook(webhook.id, webhook.token), {
-                body: {
-                    content: notificationText,
-                    embeds: [
-                        {
-                            title: stream.title,
-                            description: stream.game,
-                            url: stream.url,
-                            thumbnail: { url: stream.game_image },
-                            image: { url: guildSubscription.display_stream_preview ? stream.preview : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg' }
-                        }
-                    ]
-                }
-            })
-            .catch(() => {})
+            await rest
+                .post(Routes.webhook(webhook.id, webhook.token), {
+                    body: {
+                        content: notificationText,
+                        embeds: [
+                            {
+                                title: stream.title,
+                                description: stream.game,
+                                url: stream.url,
+                                thumbnail: { url: stream.game_image },
+                                image: { url: guildSubscription.display_stream_preview ? stream.preview : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg' }
+                            }
+                        ]
+                    }
+                })
+                .catch(() => {})
         }
     }
 }

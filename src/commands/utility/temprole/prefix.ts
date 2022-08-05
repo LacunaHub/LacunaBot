@@ -8,7 +8,7 @@ import { generateSimpleId } from '../../../internals/utility/UID'
 export default async (self: Lacuna, server: ServerDocument, message: Message) => {
     const locale = self.translator.locale(server.locale).commands
 
-    const mention = message.mentions.members.first() || (message['args'][0] ? (await message.guild.members.fetch(message['args'][0])) : null)
+    const mention = message.mentions.members.first() || (message['args'][0] ? await message.guild.members.fetch(message['args'][0]) : null)
     const role = message.mentions.roles.first() || message.guild.roles.cache.find(r => r.id == message['args'][1] || r.name == message['args'][1])
     let duration = message['args'][2]
 
@@ -62,7 +62,15 @@ export default async (self: Lacuna, server: ServerDocument, message: Message) =>
         initial: true
     })
 
-    await message.reply({ content: `${self._emojis.OK} | ${self.translator.format(locale.temprole.texts.success, `**${message.member.displayName}**`, `**${role.name}**`, `**${mention.user.tag}**`, `<t:${Math.round(ts / 1000)}:D>`)}` })
+    await message.reply({
+        content: `${self._emojis.OK} | ${self.translator.format(
+            locale.temprole.texts.success,
+            `**${message.member.displayName}**`,
+            `**${role.name}**`,
+            `**${mention.user.tag}**`,
+            `<t:${Math.round(ts / 1000)}:D>`
+        )}`
+    })
 
     return true
 }

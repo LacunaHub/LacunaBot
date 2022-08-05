@@ -1,5 +1,5 @@
-import Lacuna from '../Lacuna'
 import { Collection, LimitedCollection } from 'discord.js'
+import Lacuna from '../Lacuna'
 
 const { version } = require('../../../package.json')
 
@@ -29,26 +29,28 @@ export default new Lacuna({
 
         if (manager.name == 'GuildInviteManager') return new LimitedCollection({ maxSize: 20 })
 
-        if (manager.name == 'GuildMemberManager') return new LimitedCollection({
-            maxSize: 1000,
-            keepOverLimit: v => v.id == process.env.CLIENT_ID || v.voice.channelId
-        })
+        if (manager.name == 'GuildMemberManager')
+            return new LimitedCollection({
+                maxSize: 1000,
+                keepOverLimit: v => v.id == process.env.CLIENT_ID || v.voice.channelId
+            })
 
         if (manager.name == 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
 
         if (manager.name == 'MessageManager') return new LimitedCollection({ maxSize: 25 })
 
-        if (manager.name == 'UserManager') return new LimitedCollection({
-            maxSize: 5000,
-            keepOverLimit: v => v.id == process.env.CLIENT_ID
-        })
+        if (manager.name == 'UserManager')
+            return new LimitedCollection({
+                maxSize: 5000,
+                keepOverLimit: v => v.id == process.env.CLIENT_ID
+            })
 
         return new Collection()
     },
     sweepers: {
         messages: {
             interval: 60,
-            filter: () => v => (Date.now() - v.createdTimestamp) > 1800000
+            filter: () => v => Date.now() - v.createdTimestamp > 1800000
         }
     }
 })
