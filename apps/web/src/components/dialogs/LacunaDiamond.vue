@@ -142,6 +142,15 @@ import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { event } from 'vue-gtag'
 
+import musicNotesImg from 'src/assets/music-notes.svg'
+import plusMoreImg from 'src/assets/plus-more.svg'
+import cleanerImg from 'src/assets/cleaner.svg'
+import bellSingleImg from 'src/assets/bell-single.svg'
+import rankingImg from 'src/assets/ranking.svg'
+import respectImg from 'src/assets/respect.svg'
+import qiwiLogo from 'src/assets/qiwi-logo.svg'
+import paypalLogo from 'src/assets/paypal-logo.svg'
+
 export default defineComponent({
   name: 'LacunaDiamond',
 
@@ -209,22 +218,22 @@ export default defineComponent({
   data() {
     return {
       bonuses: [
-        { description: this.$t('lacuna_diamond.bonus_music_description'), icon: '/src/assets/music-notes.svg' },
+        { description: this.$t('lacuna_diamond.bonus_music_description'), icon: musicNotesImg },
         {
           description: this.$t('lacuna_diamond.bonus_increased_limits_description'),
-          icon: '/src/assets/plus-more.svg'
+          icon: plusMoreImg
         },
-        { description: this.$t('lacuna_diamond.bonus_personalization_description'), icon: '/src/assets/cleaner.svg' },
+        { description: this.$t('lacuna_diamond.bonus_personalization_description'), icon: cleanerImg },
         {
           description: this.$t('lacuna_diamond.bonus_more_subscriptions_description'),
-          icon: '/src/assets/bell-single.svg'
+          icon: bellSingleImg
         },
-        { description: this.$t('lacuna_diamond.bonus_activities_description'), icon: '/src/assets/ranking.svg' },
-        { description: this.$t('lacuna_diamond.bonus_respect_description'), icon: '/src/assets/respect.svg' }
+        { description: this.$t('lacuna_diamond.bonus_activities_description'), icon: rankingImg },
+        { description: this.$t('lacuna_diamond.bonus_respect_description'), icon: respectImg }
       ],
       paymentProviders: [
-        { name: 'QIWI', value: 'QIWI', icon: '/src/assets/qiwi-logo.svg' },
-        { name: 'PayPal', value: 'PAYPAL', icon: '/src/assets/paypal-logo.svg' }
+        { name: 'QIWI', value: 'QIWI', icon: qiwiLogo },
+        { name: 'PayPal', value: 'PAYPAL', icon: paypalLogo }
       ]
     }
   },
