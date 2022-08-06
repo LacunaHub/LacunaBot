@@ -6,13 +6,6 @@ import Lacuna from '../internals/Lacuna'
 import logger from '../internals/Logger'
 import { escapeRegexp, isValidHttpUrl } from '../internals/utility/Utils'
 
-const isolate = new IVM.Isolate({
-    memoryLimit: 128,
-    onCatastrophicError(message) {
-        logger.telegram.error('IVM Catastrophic Error:', message)
-        process.exit()
-    }
-})
 const storage = new qdb.table('publicStorage')
 
 export class CustomCommand {
@@ -22,6 +15,7 @@ export class CustomCommand {
     public interaction: CommandInteraction
     private usedPatterns: string[]
     private usedFunctions: string[]
+    private isolate: IVM.Isolate
 
     constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
         this.command = command
@@ -35,6 +29,14 @@ export class CustomCommand {
         this.usedPatterns = []
 
         this.usedFunctions = []
+
+        this.isolate = new IVM.Isolate({
+            memoryLimit: 16,
+            onCatastrophicError(message) {
+                logger.error('(Catastrophic Error):', message)
+                logger.telegram.error('Catastrophic Error:', message)
+            }
+        })
     }
 
     get globalValues() {
@@ -201,11 +203,16 @@ export class CustomCommand {
             try {
                 // Remove all regexp to avoid ReDoS
                 pattern = pattern.replace(/\/((.|\n)+?)\//g, '').replace(/RegExp/gi, '')
-                const value = await ctx.eval(pattern, { timeout: 96 })
+
+                const script = this.isolate.compileScriptSync(pattern)
+                const value = await script.run(ctx, { timeout: 2500 })
+
                 string = string.replace(regexp, () => {
                     return typeof value === 'undefined' ? '' : value
                 })
-            } catch (err) {}
+            } catch (err) {
+                logger.error(`(Custom Commands): "${err.message}" (${this.interaction.guildId}) (${this.interaction.user.id})`)
+            }
         }
 
         this.usedPatterns.push(...patterns)
@@ -289,7 +296,7 @@ export class CustomCommand {
             return false
         }
 
-        const ctx = isolate.createContextSync()
+        const ctx = this.isolate.createContextSync()
         ctx.global.set('global', ctx.global.derefInto())
 
         ctx.global.set('setValue', (key: string, value: any) => {
@@ -565,6 +572,8 @@ export class CustomCommand {
             channel: { name: (this.interaction.channel as BaseGuildTextChannel)?.name, id: this.interaction.channelId },
             user: { name: this.interaction.user.username, id: this.interaction.user.id }
         })
+
+        if (!this.isolate.isDisposed) this.isolate.dispose()
 
         return true
     }
