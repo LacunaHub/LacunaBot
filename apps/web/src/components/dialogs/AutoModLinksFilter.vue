@@ -199,6 +199,26 @@
           </q-card-section>
 
           <q-list class="q-px-none q-py-md" dense>
+            <q-item
+              v-for="option in ['DELETE_ALL_LINKS', 'DELETE_REFERRAL_INVITES']"
+              :key="option"
+              tag="label"
+              :disable="!config.active"
+              v-ripple
+            >
+              <q-item-section>
+                <q-item-label>
+                  {{ $t(`automoder.lf_options.${option}`) }}
+                </q-item-label>
+              </q-item-section>
+
+              <q-item-section side>
+                <q-checkbox v-model="config.options" :val="option" :disable="!config.active" dense></q-checkbox>
+              </q-item-section>
+            </q-item>
+          </q-list>
+
+          <q-list class="q-px-none q-py-md" dense>
             <q-item class="q-mb-sm">
               <q-item-section>
                 <q-item-label>

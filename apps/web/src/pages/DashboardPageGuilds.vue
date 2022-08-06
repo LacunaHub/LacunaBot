@@ -8,6 +8,18 @@
         @click="gotoGuild(guild.id, guild.joined)"
       ></GuildCardMini>
     </div>
+
+    <div v-if="!user.guilds.filter(i => i.permitted).length" class="col-12">
+      <q-banner class="rounded-lg bg-dark-grey-2" dense>
+        <span>
+          {{ $t('pages.dashboard.no_guilds') }}
+        </span>
+
+        <template #avatar>
+          <q-icon name="error" color="warning"></q-icon>
+        </template>
+      </q-banner>
+    </div>
   </div>
 </template>
 

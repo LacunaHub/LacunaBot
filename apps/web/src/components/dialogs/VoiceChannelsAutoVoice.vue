@@ -476,7 +476,8 @@ export default defineComponent({
             },
             allowed_roles: [],
             blocked_roles: [],
-            moderator_roles: []
+            moderator_roles: [],
+            children: []
           }
     )
 
