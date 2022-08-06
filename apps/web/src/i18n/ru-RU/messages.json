@@ -298,6 +298,10 @@
     "ac_minimum_symbols_title": "Минимальное количество символов",
     "lf_allowed_registry": "Реестр разрешенных ссылок",
     "lf_blocked_registry": "Реестр запрещенных ссылок",
+    "lf_options": {
+      "DELETE_ALL_LINKS": "Удалять все ссылки",
+      "DELETE_REFERRAL_INVITES": "Удалять все сторонние приглашения"
+    },
     "nm_minimum_account_age_title": "Минимальный возраст аккаунта",
     "nm_minimum_account_age_description": "Аккаунт должен быть зарегистрирован указанное количество времени",
     "nm_age_measures": {
