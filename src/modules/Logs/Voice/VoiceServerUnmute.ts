@@ -31,7 +31,7 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
                 try {
                     webhook = await log.createWebhook(`${self.user.username}`, {
                         avatar: self.user.displayAvatarURL(),
-                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.voice_unmute_title') })
+                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.voice_server_unmute') })
                     })
                 } catch (err) {
                     return false
@@ -52,7 +52,7 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             }
 
             const embed = new MessageEmbed()
-                .setTitle(t('logs.voice_unmute_title'))
+                .setTitle(t('logs.voice_server_unmute'))
                 .addField(t('common.command_option_types.USER'), `${state.member.user.tag}`, true)
                 .addField(t('common.channel'), `<#${state.channelId}>`, true)
                 .addField('\u200B', '\u200B', true)

@@ -58,13 +58,13 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                 const embed = new MessageEmbed()
                     .setTitle(t('logs.role_update_title'))
                     .setDescription(
-                        t('logs.role_update_template', {
+                        t('logs.update_template', {
                             user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
                             change: t('logs.role_update_name_change_template', { role: `<@&${role.id}>` })
                         })
                     )
-                    .addField(t('logs.common.before_change'), before.name, true)
-                    .addField(t('logs.common.after_change'), role.name, true)
+                    .addField(t('logs.before_change'), before.name, true)
+                    .addField(t('logs.after_change'), role.name, true)
                     .setFooter({ text: role.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -80,13 +80,13 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                 const embed = new MessageEmbed()
                     .setTitle(t('logs.role_update_title'))
                     .setDescription(
-                        t('logs.role_update_template', {
+                        t('logs.update_template', {
                             user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
                             change: t('logs.role_update_color_change_template', { role: `<@&${role.id}>` })
                         })
                     )
-                    .addField(t('logs.common.before_change'), `\`${before.hexColor}\``, true)
-                    .addField(t('logs.common.after_change'), `\`${role.hexColor}\``, true)
+                    .addField(t('logs.before_change'), `\`${before.hexColor}\``, true)
+                    .addField(t('logs.after_change'), `\`${role.hexColor}\``, true)
                     .setFooter({ text: role.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -102,7 +102,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                 const embed = new MessageEmbed()
                     .setTitle(t('logs.role_update_title'))
                     .setDescription(
-                        t('logs.role_update_template', {
+                        t('logs.update_template', {
                             user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
                             change: t('logs.role_update_permissions_change_template', { role: `<@&${role.id}>` })
                         })
