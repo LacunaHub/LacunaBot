@@ -296,7 +296,7 @@ export default defineComponent({
           if (status === 403) {
             this.$router.push('/forbidden')
           }
-          if (status === 404) {
+          if (status === 400 || status === 404 || status === 406) {
             this.$router.push('/not-found')
           }
         })
