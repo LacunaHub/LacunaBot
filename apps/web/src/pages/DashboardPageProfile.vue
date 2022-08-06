@@ -1,8 +1,12 @@
 <template>
   <q-card class="bg-dark-grey-2 rounded-lg">
-    <q-list>
-      <q-item>
-        <q-item-section v-if="!dataLoading">{{ $t('pages.landing.ft_activities_title') }}</q-item-section>
+    <q-list class="q-px-none q-py-md" dense>
+      <q-item class="q-mb-sm">
+        <q-item-section v-if="!dataLoading">
+          <q-item-label>
+            {{ $t('pages.landing.ft_activities_title') }}
+          </q-item-label>
+        </q-item-section>
       </q-item>
 
       <q-item v-for="level in levels" :key="level.guild_id">
