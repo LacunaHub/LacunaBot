@@ -139,7 +139,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
                     if (
                         (typeof current.active === 'boolean' && current.active !== previous.active) ||
-                        ((typeof current.channel_id === 'boolean' || typeof current.channel_id === null) && current.channel_id !== previous.channel_id)
+                        ((typeof current.channel_id === 'string' || typeof current.channel_id === null) && current.channel_id !== previous.channel_id)
                     ) {
                         updateData[`moderation.logs.types.${log}`] = {
                             active: Boolean(current.active ?? previous.active),
