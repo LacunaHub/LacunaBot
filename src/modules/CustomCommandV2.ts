@@ -498,7 +498,7 @@ export class CustomCommand {
                         let amount = modify_wallet.amount ? await this.replacePatterns(modify_wallet.amount, ctx) : 0
                         amount = isNaN(Number(amount)) ? 0 : Number(amount)
 
-                        if (amount < 0 || amount > INT32_MAX) amount = amount > INT32_MAX ? INT32_MAX : 1
+                        if (amount > INT32_MAX || amount < -INT32_MAX) amount = amount > INT32_MAX ? INT32_MAX : amount < -INT32_MAX ? -INT32_MAX : 0
 
                         let user = await this.self.db.users.findOne({ _id: member.id })
 
@@ -540,7 +540,7 @@ export class CustomCommand {
                                 { _id: member.id, 'activities.wallets': { $elemMatch: { guild_id: this.interaction.guildId, 'currencies.id': currency_id } } },
                                 {
                                     $inc: {
-                                        'activities.wallets.$[guild].currencies.$[currency].amount': modify_wallet.operator === 'INCREMENT' ? amount : -amount
+                                        'activities.wallets.$[guild].currencies.$[currency].amount': amount
                                     }
                                 },
                                 { arrayFilters: [{ 'guild.guild_id': this.interaction.guildId }, { 'currency.id': currency_id }] }
@@ -552,7 +552,7 @@ export class CustomCommand {
                                     $push: {
                                         'activities.wallets.$.currencies': {
                                             id: currency_id,
-                                            amount: modify_wallet.operator === 'INCREMENT' ? amount : 0
+                                            amount: amount
                                         }
                                     }
                                 }

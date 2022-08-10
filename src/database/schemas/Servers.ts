@@ -1458,7 +1458,8 @@ export interface ICustomCommandComponent {
         }
         forward_to_command?: string
         modify_wallet?: {
-            operator: 'INCREMENT' | 'DECREMENT'
+            /** @deprecated */
+            operator?: 'INCREMENT' | 'DECREMENT'
             amount: string
             user_id: string
             currency_id: string
