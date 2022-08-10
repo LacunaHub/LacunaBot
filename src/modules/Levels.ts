@@ -406,8 +406,8 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
         rect_y = canvas.height,
         border_radius = 40
 
-    ctx.fillStyle = '#13191C'
-    ctx.strokeStyle = '#13191C'
+    ctx.fillStyle = '#16151A'
+    ctx.strokeStyle = '#16151A'
     ctx.fillRect(rect_x, rect_y, rect_x, rect_y)
     ctx.lineJoin = 'round'
     ctx.lineWidth = border_radius
@@ -439,7 +439,7 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
     ctx.drawImage(avatar, 25, 25, 120, 120)
     ctx.restore()
 
-    const color = mention.user?.hexAccentColor ?? '#DA70D6'
+    const color = mention.user?.hexAccentColor ?? '#b86eab'
 
     ctx.globalAlpha = 0.5
     ctx.strokeStyle = color
