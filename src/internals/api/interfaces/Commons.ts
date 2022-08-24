@@ -766,6 +766,19 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
             }
         }
+
+        if (data.moderation.mutes) {
+            if (typeof data.moderation.mutes.rar === 'boolean' && data.moderation.mutes.rar !== guild.moderation.mutes.rar) {
+                updateData['moderation.mutes.rar'] = data.moderation.mutes.rar
+            }
+
+            if (
+                Array.isArray(data.moderation.mutes.rar_strict) &&
+                JSON.stringify(data.moderation.mutes.rar_strict) !== JSON.stringify(guild.moderation.mutes.rar_strict)
+            ) {
+                updateData['moderation.mutes.rar_strict'] = data.moderation.mutes.rar_strict
+            }
+        }
     }
 
     if (data.modules) {
