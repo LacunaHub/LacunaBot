@@ -58,10 +58,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
 
             const embed = new MessageEmbed()
                 .setTitle(t('logs.message_update_title'))
-                .addField(t('logs.message_author'), `${message.author.tag}\n(${message.author.id})`, true)
-                .addField(t('common.channel'), `<#${message.channel.id}>`, true)
-                .addField(t('logs.before_change'), before_content || `\`[${t('common.attachment')}]\``)
-                .addField(t('logs.after_change'), content || `\`[${t('common.attachment')}]\``)
+                .addFields([
+                    { name: t('logs.message_author'), value: `${message.author.tag}\n(${message.author.id})`, inline: true },
+                    { name: t('common.channel'), value: `<#${message.channel.id}>`, inline: true },
+                    { name: t('logs.before_change'), value: before_content || `\`[${t('common.attachment')}]\`` },
+                    { name: t('logs.after_change'), value: content || `\`[${t('common.attachment')}]\`` }
+                ])
                 .setFooter({ text: message.id })
                 .setTimestamp()
                 .setColor('#FFA726')

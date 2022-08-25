@@ -65,8 +65,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             change: t('logs.guild_member_update_nick_change_template', { user: `**${member.user.tag}** (${member.id})` })
                         })
                     )
-                    .addField(t('logs.before_change'), before.displayName, true)
-                    .addField(t('logs.after_change'), member.displayName, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.displayName, inline: true },
+                        { name: t('logs.after_change'), value: member.displayName, inline: true }
+                    ])
                     .setTimestamp()
                     .setColor('#FFA726')
 

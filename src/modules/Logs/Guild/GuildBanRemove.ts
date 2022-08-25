@@ -60,7 +60,7 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 .setDescription(
                     t('logs.guild_ban_remove_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, target: `**${user.tag}** (${user.id})` })
                 )
-                .addField(t('case_log.reason'), reason ?? '-')
+                .addFields([{ name: t('case_log.reason'), value: reason ?? '-' }])
                 .setTimestamp()
                 .setColor('#2FDF84')
 

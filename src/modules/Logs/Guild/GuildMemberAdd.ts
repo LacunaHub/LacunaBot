@@ -57,8 +57,10 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             const embed = new MessageEmbed()
                 .setTitle(t('logs.guild_member_add_title'))
                 .setDescription(`${member.user.tag} (${member.id})`)
-                .addField(t('commands.user.text_registration_date'), `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`, true)
-                .addField(t('logs.guild_member_count'), member.guild.memberCount.toString(), true)
+                .addFields([
+                    { name: t('commands.user.text_registration_date'), value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`, inline: true },
+                    { name: t('logs.guild_member_count'), value: member.guild.memberCount.toString(), inline: true }
+                ])
                 .setTimestamp()
                 .setColor('#2FDF84')
 

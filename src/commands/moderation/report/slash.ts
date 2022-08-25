@@ -69,8 +69,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     if (!report) {
         const embed = new MessageEmbed()
             .setAuthor({ name: target.author.tag, iconURL: target.author.displayAvatarURL() })
-            .addField(t('commands.report.text_message_channel'), `<#${target.channelId}>`, true)
-            .addField(t('commands.report.text_report_count'), '1', true)
+            .addFields([
+                { name: t('commands.report.text_message_channel'), value: `<#${target.channelId}>`, inline: true },
+                { name: t('commands.report.text_report_count'), value: '1', inline: true }
+            ])
             .setFooter({ text: `ID: ${target.id}` })
             .setTimestamp(target.createdTimestamp)
 

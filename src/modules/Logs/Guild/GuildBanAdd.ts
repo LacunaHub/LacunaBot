@@ -58,7 +58,7 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
             const embed = new MessageEmbed()
                 .setTitle(t('logs.guild_ban_add_title'))
                 .setDescription(t('logs.guild_ban_add_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, target: `**${user.tag}** (${user.id})` }))
-                .addField(t('case_log.reason'), reason ?? '-')
+                .addFields([{ name: t('case_log.reason'), value: reason ?? '-' }])
                 .setTimestamp()
                 .setColor('#EF5350')
 

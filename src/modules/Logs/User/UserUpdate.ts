@@ -55,8 +55,10 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 const embed = new MessageEmbed()
                     .setTitle(t('logs.user_update_title'))
                     .setDescription(t('logs.user_update_name_change_template', { user: `**${user.tag}**` }))
-                    .addField(t('logs.before_change'), before.username, true)
-                    .addField(t('logs.after_change'), user.username, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.username, inline: true },
+                        { name: t('logs.after_change'), value: user.username, inline: true }
+                    ])
                     .setFooter({ text: user.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -72,8 +74,10 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 const embed = new MessageEmbed()
                     .setTitle(t('logs.user_update_title'))
                     .setDescription(t('logs.user_update_discriminator_change_template', { user: `**${user.tag}**` }))
-                    .addField(t('logs.before_change'), before.discriminator, true)
-                    .addField(t('logs.after_change'), user.discriminator, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.discriminator, inline: true },
+                        { name: t('logs.after_change'), value: user.discriminator, inline: true }
+                    ])
                     .setFooter({ text: user.id })
                     .setTimestamp()
                     .setColor('#FFA726')

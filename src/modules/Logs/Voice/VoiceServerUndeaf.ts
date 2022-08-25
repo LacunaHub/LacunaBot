@@ -53,9 +53,11 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
 
             const embed = new MessageEmbed()
                 .setTitle(t('logs.voice_server_undeaf'))
-                .addField(t('common.command_option_types.USER'), `${state.member.user.tag}`, true)
-                .addField(t('common.channel'), `<#${state.channelId}>`, true)
-                .addField('\u200B', '\u200B', true)
+                .addFields([
+                    { name: t('common.command_option_types.USER'), value: `${state.member.user.tag}`, inline: true },
+                    { name: t('common.channel'), value: `<#${state.channelId}>`, inline: true },
+                    { name: '\u200B', value: '\u200B', inline: true }
+                ])
                 .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#FFA726')

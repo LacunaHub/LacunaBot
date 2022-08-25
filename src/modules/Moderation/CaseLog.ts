@@ -17,9 +17,11 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
                 embeds: [
                     new MessageEmbed()
                         .setAuthor({ name: t(`case_log.cases.${options.type}`), iconURL: images[options.type] })
-                        .addField(t('common.command_option_types.USER'), options.target ? `${options.target.tag}\n(${options.target.id})` : '-', true)
-                        .addField(t('case_log.moderator'), options.executor.tag, true)
-                        .addField(t('case_log.reason'), options.reason ?? '-')
+                        .addFields([
+                            { name: t('common.command_option_types.USER'), value: options.target ? `${options.target.tag}\n(${options.target.id})` : '-', inline: true },
+                            { name: t('case_log.moderator'), value: options.executor.tag, inline: true },
+                            { name: t('case_log.reason'), value: options.reason ?? '-' }
+                        ])
                         .setFooter({ text: t('case_log.case_number', { case_number: caseId }) })
                         .setTimestamp()
                         .setColor(options.type.endsWith('REMOVE') ? '#2FDF84' : '#EF5350')

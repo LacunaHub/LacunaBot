@@ -64,9 +64,11 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
     const embed = new MessageEmbed()
         .setTitle(t('commands.giveaway.create.text_giveaway_by', { sponsor: truncateString(sponsor, 64) }))
         .setDescription(t('commands.giveaway.create.text_end_date', { date: `<t:${Math.round(ts / 1000)}:R>` }))
-        .addField(t('commands.giveaway.create.text_prize'), prize, true)
-        .addField(t('commands.giveaway.create.text_winners_amount'), `${winners}`, true)
-        .addField(t('commands.giveaway.create.text_members_amount'), '0', true)
+        .addFields([
+            { name: t('commands.giveaway.create.text_prize'), value: prize, inline: true },
+            { name: t('commands.giveaway.create.text_winners_amount'), value: `${winners}`, inline: true },
+            { name: t('commands.giveaway.create.text_members_amount'), value: '0', inline: true }
+        ])
         .setColor(0x43b581)
 
     const message = await interaction.channel.send({ embeds: [embed] })

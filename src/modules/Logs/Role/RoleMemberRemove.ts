@@ -59,7 +59,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             const embed = new MessageEmbed()
                 .setTitle(t('logs.role_member_remove_title'))
                 .setDescription(t('logs.role_member_remove_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, target: `**${member.user.tag}**` }))
-                .addField(t('common.roles'), roles.map(role => `<@&${role.id}>`).join(', '), true)
+                .addFields([{ name: t('common.roles'), value: roles.map(role => `<@&${role.id}>`).join(', '), inline: true }])
                 .setFooter({ text: member.id })
                 .setTimestamp()
                 .setColor('#EF5350')
