@@ -1,8 +1,6 @@
 import { Message } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import Command from '../../internals/structures/Command'
-import { parseCommandArguments } from '../../internals/utility/Utils'
 import { antiCaps, linksFilter, swearFilter } from '../../modules/Automoder'
 import { MessageUpdate } from '../../modules/Logs'
 
@@ -16,16 +14,6 @@ const handler = async (self: Lacuna, before: Message, message: Message) => {
     if ((!before.embeds.length && message.embeds.length) || (!before.pinned && message.pinned)) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
-
-    const splitted = message.content.split(/\s+/)
-    const command_name = splitted.shift().toLowerCase()
-    message['args'] = parseCommandArguments(splitted.join(' '))
-
-    const command: Command = self.commands.find(c => c.name == command_name.slice(server.prefix.length) && c.is_prefix_command)
-
-    if (command) {
-        await command.executePrefix(server, message)
-    }
 
     await antiCaps(self, server, message)
     await linksFilter(self, server, message)

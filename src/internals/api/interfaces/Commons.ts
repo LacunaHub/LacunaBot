@@ -6,12 +6,6 @@ import { dotNotateObject } from '../../utility/Utils'
 export async function updateSettings(guild: ServerDocument, data: Partial<ServerDocument>, user_id: string): Promise<ServerDocument> {
     const updateData = {}
 
-    if (typeof data.prefix === 'string' && data.prefix !== guild.prefix) {
-        if (data.prefix.length && data.prefix !== '/') {
-            updateData['prefix'] = data.prefix.slice(0, 3)
-        }
-    }
-
     if (typeof data.locale === 'string' && data.locale !== guild.locale) {
         if (['ru', 'en'].includes(data.locale)) {
             updateData['locale'] = data.locale

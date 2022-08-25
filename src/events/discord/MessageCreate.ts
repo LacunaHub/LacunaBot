@@ -1,7 +1,6 @@
 import { Message } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { parseCommandArguments } from '../../internals/utility/Utils'
 import { antiCaps, linksFilter, nicknamesModeration, swearFilter, usersSlowdown } from '../../modules/Automoder'
 import { messageCreate as addWalletCash } from '../../modules/Economy'
 import { messageCreate as addLevelPoints } from '../../modules/Levels'
@@ -20,17 +19,7 @@ const handler = async (self: Lacuna, message: Message) => {
 
     await message.member.fetch()
 
-    const splitted = message.content.split(/\s+/)
-    const command_name = splitted.shift().toLowerCase()
-    message['args'] = parseCommandArguments(splitted.join(' '))
-
-    const command = self.commands.find(c => c.name == command_name.slice(server.prefix.length) && c.is_prefix_command)
-
-    if (command) {
-        await command.executePrefix(server, message)
-    }
-
-    if (!command && ['DEFAULT', 'REPLY'].includes(message.type)) {
+    if (['DEFAULT', 'REPLY'].includes(message.type)) {
         await addLevelPoints(self, server, message)
         await addWalletCash(self, server, message)
     }

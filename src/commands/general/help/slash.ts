@@ -33,11 +33,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         const embed = new MessageEmbed()
             .setTitle(t('commands.help.text_commands_list'))
-            .setDescription(t('commands.help.text_use_prefix', { prefix: `\`${server.prefix}\`` }))
-            .setFooter({ text: t('commands.help.text_use_help_for_more_details', { prefix: server.prefix }) })
+            .setDescription(t('commands.help.text_use_prefix', { prefix: `\`/\`` }))
+            .setFooter({ text: t('commands.help.text_use_help_for_more_details', { prefix: '/' }) })
 
         const components = new MessageActionRow().addComponents(
-            new MessageButton().setStyle('LINK').setLabel(t('commands.help.text_dashboard_link')).setURL(`https://www.voidlacuna.ru/guilds/${interaction.guildId}`),
+            new MessageButton()
+                .setStyle('LINK')
+                .setLabel(t('commands.help.text_dashboard_link'))
+                .setURL(`https://www.voidlacuna.ru/guilds/${interaction.guildId}/settings`),
             new MessageButton().setStyle('LINK').setLabel(t('commands.help.text_docs_link')).setURL('https://docs.voidlacuna.ru')
         )
 
@@ -77,7 +80,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
             if (command.options?.filter(opt => !['SUB_COMMAND', 'SUB_COMMAND_GROUP'].includes(opt.type))?.length) {
                 const usage =
-                    `${server.prefix}${command.name} ` +
+                    `/${command.name} ` +
                     command.options
                         .map(opt => {
                             return `${opt.required ? '<' : '['}${t(opt.name)}${opt.required ? '>' : ']'}`
@@ -109,7 +112,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                             })
                             .join(' ')
 
-                        return `\`${server.prefix}${command.name} ${opt.name} ${args}\`: ${t(opt.description)?.toLowerCase()}`
+                        return `\`/${command.name} ${opt.name} ${args}\`: ${t(opt.description)?.toLowerCase()}`
                     })
                     .join('\n\n')
 
@@ -141,7 +144,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
             if (customCommand.options.length) {
                 const usage =
-                    `${server.prefix}${customCommand.name} ` +
+                    `/${customCommand.name} ` +
                     customCommand.options
                         .map(opt => {
                             return `${opt.required ? '<' : '['}${opt.name}${opt.required ? '>' : ']'}`

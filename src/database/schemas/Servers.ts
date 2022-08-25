@@ -7,7 +7,6 @@ export default model<ServerDocument>(
         {
             _id: { type: String },
             locale: { type: String, default: 'ru' },
-            prefix: { type: String, default: '!' },
             server: {
                 premium: {
                     available: { type: Boolean, default: false },
@@ -769,6 +768,7 @@ export default model<ServerDocument>(
 export interface ServerDocument extends Document {
     _id: string
     locale: 'en' | 'ru'
+    /** @deprecated */
     prefix: string
     server: {
         premium: {
