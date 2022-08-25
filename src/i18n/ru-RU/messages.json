@@ -751,7 +751,7 @@
             "KICK": "Участник выгнан",
             "MUTE_ADD": "Заглушение выдано",
             "MUTE_REMOVE": "Заглушение убрано",
-            "PRUNE": "Очистка сообщений",
+            "PRUNE_MESSAGES": "Очистка сообщений",
             "WARN_ADD": "Предупреждение выдано",
             "WARN_REMOVE": "Предупреждение убрано"
         },
@@ -778,7 +778,7 @@
         "channel_update_rate_limit_change_template": "медленный режим канала {channel}",
         "channel_update_parent_change_template": "категорию канала {channel}",
         "channel_update_bitrate_change_template": "битрейт канала {channel}",
-        "channel_update_user_limit_change": "ограничение пользователей канала {channel}",
+        "channel_update_user_limit_change_template": "ограничение пользователей канала {channel}",
         "emoji_create_title": "Эмодзи добавлен",
         "emoji_create_template": "{user} добавляет эмодзи {emoji}",
         "emoji_delete_title": "Эмодзи удалён",

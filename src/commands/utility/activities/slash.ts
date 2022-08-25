@@ -289,7 +289,7 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
     }
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.activities.add-wallet-balance.text_success', {
+        content: `${self._emojis.OK} | ${t('commands.activities.add-wallet-balance.text_add_success', {
             user: `**${(interaction.member as any).displayName}**`,
             target: `**${mention.displayName}**`,
             amount: `**${amount}${currency_symbol}**`
