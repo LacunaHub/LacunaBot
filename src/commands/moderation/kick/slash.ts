@@ -64,6 +64,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
+
     if (server.moderation.case_log.types.KICK.active) {
         const replacer = new Replacer(null, { guild: interaction.guild, member: mention, penalty: { reason } })
         const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.KICK.dm_message)
@@ -74,12 +76,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     await mention.kick(reason).catch(self.logger.error)
     await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })
 
-    await interaction.reply({
+    await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.kick.text_user_kicked', {
             user: `**${(interaction.member as any).displayName}**`,
             target: `**${mention.user.tag}**`
-        })}`,
-        ephemeral: true
+        })}`
     })
 
     return true

@@ -39,12 +39,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
     const target = await interaction.channel.messages.fetch(target_id).catch(() => {})
 
     if (!target) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_message', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_message', { user: `**${(interaction.member as any).displayName}**` })}`
         })
 
         return false
@@ -54,9 +54,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     if (!entry) self.qdb.set(`reports.${target_id}`, { timestamp: target.createdTimestamp, users: [] })
 
     if (entry?.users?.includes(interaction.user.id)) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_already_reported', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_already_reported', { user: `**${(interaction.member as any).displayName}**` })}`
         })
 
         return false
@@ -118,9 +117,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         await report.edit({ embeds: [embed] }).catch(self.logger.error)
     }
 
-    await interaction.reply({
-        content: `${self._emojis.OK} | ${t('commands.report.text_report_confirm', { user: `**${(interaction.member as any).displayName}**` })}`,
-        ephemeral: true
+    await interaction.editReply({
+        content: `${self._emojis.OK} | ${t('commands.report.text_report_confirm', { user: `**${(interaction.member as any).displayName}**` })}`
     })
 
     return true

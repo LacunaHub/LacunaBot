@@ -37,13 +37,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
     const messages = await case_log.messages.fetch({ limit: 50 }, { cache: false })
     const case_message = messages.find(m => m.author.id == self.user.id && m.embeds[0]?.footer?.text?.includes(`#${case_id}`))
 
     if (!case_message) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_message', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_message', { user: `**${(interaction.member as any).displayName}**` })}`
         })
 
         return false
@@ -65,9 +65,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     await case_message.edit({ embeds: [embed] })
 
-    await interaction.reply({
-        content: `${self._emojis.OK} | ${t('commands.reason.text_case_edited', { user: `**${(interaction.member as any).displayName}**` })}`,
-        ephemeral: true
+    await interaction.editReply({
+        content: `${self._emojis.OK} | ${t('commands.reason.text_case_edited', { user: `**${(interaction.member as any).displayName}**` })}`
     })
 
     return true

@@ -48,19 +48,18 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
     const result = await purchaseItem(item, self, interaction.guild, interaction.member as GuildMember)
 
     if (result == 'INSUFFICIENT_FUNDS') {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', { user: `**${(interaction.member as any).displayName}**` })}`
         })
     }
 
     if (result == 'PURCHASED') {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_purchased', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.store.text_purchased', { user: `**${(interaction.member as any).displayName}**` })}`
         })
     }
 
@@ -70,23 +69,21 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
             const content = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
             try {
-                await interaction.reply({ ...content, ephemeral: true })
+                await interaction.editReply({ ...content })
             } catch (err) {
-                await interaction.reply({
+                await interaction.editReply({
                     content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
                         user: `**${(interaction.member as any).displayName}**`,
                         item: `**${item.name}**`
-                    })}`,
-                    ephemeral: true
+                    })}`
                 })
             }
         } else {
-            await interaction.reply({
+            await interaction.editReply({
                 content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
                     user: `**${(interaction.member as any).displayName}**`,
                     item: `**${item.name}**`
-                })}`,
-                ephemeral: true
+                })}`
             })
         }
     }
@@ -115,6 +112,8 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
+
     let page: number = interaction.options?.getInteger(t('commands.store.items.options.page.name'))
         ? interaction.options.getInteger(t('commands.store.items.options.page.name')) - 1
         : 0
@@ -127,8 +126,6 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
     const fields = [],
         select_options = []
-
-    if (!interaction.deferred) await interaction.deferReply({ ephemeral: true })
 
     for (const chunk of chunks) {
         const current_fields = [],

@@ -28,6 +28,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return true
     }
 
+    await interaction.deferReply({ ephemeral: true })
+
     const chunks: Queue[] = chunkArray(player.queue, 15)
     let page: number = 0
 
@@ -49,18 +51,16 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     const embed = new MessageEmbed()
 
-    if (!interaction.deferred) await interaction.deferReply({ ephemeral: true })
-
     const row = new MessageActionRow().addComponents(
         new MessageButton()
             .setCustomId('backward')
             .setStyle('SECONDARY')
-            .setLabel('Previous')
+            .setLabel(t('commands.leaders.text_previous_page'))
             .setDisabled(fields.length == 1),
         new MessageButton()
             .setCustomId('forward')
             .setStyle('SECONDARY')
-            .setLabel('Next')
+            .setLabel(t('commands.leaders.text_next_page'))
             .setDisabled(fields.length == 1)
     )
 
