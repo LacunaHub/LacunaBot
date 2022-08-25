@@ -16,8 +16,7 @@ export default model<ServerDocument>(
                 bot_expert_roles: { type: Array, default: [] }
             },
             commands: {
-                configuration: { type: Array, default: [] },
-                prefix_commands: { type: Boolean, default: false }
+                configuration: { type: Array, default: [] }
             },
             moderation: {
                 case_log: {
@@ -786,6 +785,7 @@ export interface ServerDocument extends Document {
         custom: CustomCommand[]
         /** @deprecated */
         slash_commands: boolean
+        /** @deprecated */
         prefix_commands: boolean
     }
     moderation: {
