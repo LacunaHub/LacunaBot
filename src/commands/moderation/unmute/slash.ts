@@ -27,6 +27,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
     await mention.disableCommunicationUntil(null, reason).catch(() => {})
 
     if (server.moderation.mutes.rar) {
@@ -50,12 +51,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: interaction.user, reason })
 
-    await interaction.reply({
+    await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.unmute.text_user_unmuted', {
             user: `**${(interaction.member as any).displayName}**`,
             target: `**${mention.user.tag}**`
-        })}`,
-        ephemeral: true
+        })}`
     })
 
     return true

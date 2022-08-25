@@ -38,23 +38,16 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     const volume_before = player.volume
 
+    await interaction.deferReply()
     player.setVolume(volume)
-    await interaction.reply({
+
+    await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.volume.text_volume_changed', {
             user: `**${(interaction.member as any).displayName}**`,
             from: volume_before,
             to: volume
         })}`
     })
-
-    await self.db.servers.updateOne(
-        { _id: interaction.guild.id },
-        {
-            $set: {
-                'modules.music.default_volume': volume
-            }
-        }
-    )
 
     return true
 }

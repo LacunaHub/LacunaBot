@@ -70,6 +70,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
+
     if (duration) {
         if (duration < ms('1m')) duration = ms('1m')
         else if (duration > ms('2y')) duration = ms('2y')
@@ -100,12 +102,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_ADD', target: mention.user, executor: interaction.user, reason })
 
-    await interaction.reply({
+    await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.ban.text_user_banned', {
             user: `**${(interaction.member as any).displayName}**`,
             target: `**${mention.user.tag}**`
-        })}`,
-        ephemeral: true
+        })}`
     })
 
     return true

@@ -66,6 +66,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     const ts = Date.now() + duration
 
+    await interaction.deferReply({ ephemeral: true })
     await mention.roles.add(role.id)
 
     new TemporaryRole(self, {
@@ -77,7 +78,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         initial: true
     })
 
-    await interaction.reply({
+    await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.temprole.text_success', {
             user: `**${(interaction.member as any).displayName}**`,
             role: `**${role.name}**`,

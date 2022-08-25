@@ -15,29 +15,28 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
     let attachment: MessageAttachment
 
     try {
         attachment = await generateRankCard(self, interaction)
     } catch (err) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.rank.text_render_error', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.rank.text_render_error', { user: `**${(interaction.member as any).displayName}**` })}`
         })
 
         return false
     }
 
     if (!attachment) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.rank.text_no_rank_card', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.rank.text_no_rank_card', { user: `**${(interaction.member as any).displayName}**` })}`
         })
 
         return false
     }
 
-    await interaction.reply({ files: [attachment] })
+    await interaction.editReply({ files: [attachment] })
 
     return true
 }

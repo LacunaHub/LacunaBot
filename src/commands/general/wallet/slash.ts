@@ -15,7 +15,6 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     }
 
     const mention = (interaction.options?.getMember(t('commands.wallet.balance.options.user.name')) ?? interaction.member) as GuildMember
-
     const user = await self.db.users.findOne({ _id: mention.id })
     let wallet = user?.activities?.wallets?.find(i => i.guild_id == interaction.guildId)
 

@@ -28,12 +28,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
     const target = await interaction.channel.messages.fetch(interaction.targetId).catch(() => {})
 
     if (!target) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_message', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_message', { user: `**${(interaction.member as any).displayName}**` })}`
         })
 
         return false
@@ -43,9 +43,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
     if (!entry) self.qdb.set(`reports.${interaction.targetId}`, { timestamp: target.createdTimestamp, users: [] })
 
     if (entry?.users?.includes(interaction.user.id)) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_already_reported', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_already_reported', { user: `**${(interaction.member as any).displayName}**` })}`
         })
 
         return false
@@ -107,9 +106,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
         await report.edit({ embeds: [embed] }).catch(self.logger.error)
     }
 
-    await interaction.reply({
-        content: `${self._emojis.OK} | ${t('commands.report.text_report_confirm', { user: `**${(interaction.member as any).displayName}**` })}`,
-        ephemeral: true
+    await interaction.editReply({
+        content: `${self._emojis.OK} | ${t('commands.report.text_report_confirm', { user: `**${(interaction.member as any).displayName}**` })}`
     })
 
     return true
