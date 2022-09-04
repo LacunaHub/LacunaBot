@@ -55,17 +55,18 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
 
             const embed = new MessageEmbed()
                 .setTitle(t('logs.message_delete_bulk_title'))
-                .addField(t('logs.message_count'), messages.size.toString(), true)
-                .addField(t('common.channel'), `<#${message.channel.id}>`, true)
+                .addFields([
+                    { name: t('logs.message_count'), value: messages.size.toString(), inline: true },
+                    { name: t('common.channel'), value: `<#${message.channel.id}>`, inline: true },
+                    ...messages
+                        .first(10)
+                        .map(i => ({
+                            name: `${i.author?.tag ?? '???'} <t:${Math.round(i.createdTimestamp / 1000)}:R>`,
+                            value: truncateString(i.content || `\`[${t('common.attachment')}]\``, 100)
+                        }))
+                ])
                 .setTimestamp()
                 .setColor('#EF5350')
-
-            for (const message of messages.first(10)) {
-                embed.addField(
-                    `${message.author?.tag ?? '???'} <t:${Math.round(message.createdTimestamp / 1000)}:R>`,
-                    truncateString(message.content || `\`[${t('common.attachment')}]\``, 100)
-                )
-            }
 
             await webhook.send({
                 embeds: [embed],

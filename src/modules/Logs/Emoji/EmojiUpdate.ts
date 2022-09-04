@@ -65,8 +65,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             change: t('logs.emoji_update_name_change_template', { emoji: `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), before.name, true)
-                    .addField(t('logs.after_change'), emoji.name, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.name },
+                        { name: t('logs.after_change'), value: emoji.name }
+                    ])
                     .setFooter({ text: emoji.id })
                     .setTimestamp()
                     .setColor('#FFA726')

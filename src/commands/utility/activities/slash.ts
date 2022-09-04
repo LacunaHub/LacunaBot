@@ -27,6 +27,8 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
+
     let total_xp = 0
 
     for (let i = 0; i < set_level; i++) {
@@ -82,9 +84,8 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
 
     await Levels.updateAwards(self, server, { member: mention, level: set_level })
 
-    await interaction.reply({
-        content: `${self._emojis.OK} | ${t('commands.activities.set-level.text_set_success', { user: `**${(interaction.member as any).displayName}**` })}`,
-        ephemeral: true
+    await interaction.editReply({
+        content: `${self._emojis.OK} | ${t('commands.activities.set-level.text_set_success', { user: `**${(interaction.member as any).displayName}**` })}`
     })
 
     return true
@@ -114,6 +115,8 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
 
         return false
     }
+
+    await interaction.deferReply({ ephemeral: true })
 
     const INT32_MAX = Math.pow(2, 31) - 1
 
@@ -181,7 +184,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
         )
     }
 
-    await interaction.reply({
+    await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.activities.set-wallet-balance.text_set_success', {
             user: `**${(interaction.member as any).displayName}**`,
             target: `**${mention.displayName}**`,
@@ -216,6 +219,8 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
 
         return false
     }
+
+    await interaction.deferReply({ ephemeral: true })
 
     const INT32_MAX = Math.pow(2, 31) - 1
 
@@ -283,8 +288,8 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
         )
     }
 
-    await interaction.reply({
-        content: `${self._emojis.OK} | ${t('commands.activities.add-wallet-balance.text_success', {
+    await interaction.editReply({
+        content: `${self._emojis.OK} | ${t('commands.activities.add-wallet-balance.text_add_success', {
             user: `**${(interaction.member as any).displayName}**`,
             target: `**${mention.displayName}**`,
             amount: `**${amount}${currency_symbol}**`

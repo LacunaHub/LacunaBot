@@ -86,7 +86,6 @@ async function getSettings(ctx: Context) {
     ctx.body = {
         _id: server._id,
         locale: server.locale,
-        prefix: server.prefix,
         premium: server.server.premium,
         server: {
             bot_expert_roles: server.server.bot_expert_roles
@@ -172,7 +171,6 @@ async function updateSettings(ctx: Context) {
     ctx.body = {
         _id: server._id,
         locale: server.locale,
-        prefix: server.prefix,
         premium: server.server.premium,
         server: {
             bot_expert_roles: server.server.bot_expert_roles

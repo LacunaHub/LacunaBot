@@ -65,8 +65,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
                             change: t('logs.sticker_update_name_change_template', { sticker: `**${sticker.name}**` })
                         })
                     )
-                    .addField(t('logs.before_change'), before.name, true)
-                    .addField(t('logs.after_change'), sticker.name, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.name, inline: true },
+                        { name: t('logs.after_change'), value: sticker.name, inline: true }
+                    ])
                     .setFooter({ text: sticker.id })
                     .setTimestamp()
                     .setColor('#FFA726')

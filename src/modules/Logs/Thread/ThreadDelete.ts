@@ -59,7 +59,7 @@ export default async function (self: Lacuna, server: ServerDocument, thread: Thr
             const embed = new MessageEmbed()
                 .setTitle(t('logs.thread_delete_title'))
                 .setDescription(t('logs.thread_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, thread: `<#${thread.id}>` }))
-                .addField(t('common.channel'), thread.parent?.id ? `<#${thread.parentId}>` : '-', true)
+                .addFields([{ name: t('common.channel'), value: thread.parent?.id ? `<#${thread.parentId}>` : '-', inline: true }])
                 .setFooter({ text: thread.id })
                 .setTimestamp()
                 .setColor('#EF5350')

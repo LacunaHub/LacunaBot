@@ -63,8 +63,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                             change: t('logs.role_update_name_change_template', { role: `<@&${role.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), before.name, true)
-                    .addField(t('logs.after_change'), role.name, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.name, inline: true },
+                        { name: t('logs.after_change'), value: role.name, inline: true }
+                    ])
                     .setFooter({ text: role.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -85,8 +87,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                             change: t('logs.role_update_color_change_template', { role: `<@&${role.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), `\`${before.hexColor}\``, true)
-                    .addField(t('logs.after_change'), `\`${role.hexColor}\``, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: `\`${before.hexColor}\``, inline: true },
+                        { name: t('logs.after_change'), value: `\`${role.hexColor}\``, inline: true }
+                    ])
                     .setFooter({ text: role.id })
                     .setTimestamp()
                     .setColor('#FFA726')

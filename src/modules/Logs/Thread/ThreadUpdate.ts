@@ -66,8 +66,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                             change: t('logs.thread_update_name_change_template', { user: `<#${thread.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), before.name, true)
-                    .addField(t('logs.after_change'), thread.name, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.name, inline: true },
+                        { name: t('logs.after_change'), value: thread.name, inline: true }
+                    ])
                     .setFooter({ text: thread.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -88,8 +90,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                             change: t('logs.thread_update_auto_archive_change_template', { user: `<#${thread.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), numbro((before.autoArchiveDuration as number) * 60).format({ output: 'time' }), true)
-                    .addField(t('logs.after_change'), numbro((thread.autoArchiveDuration as number) * 60).format({ output: 'time' }), true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: numbro((before.autoArchiveDuration as number) * 60).format({ output: 'time' }), inline: true },
+                        { name: t('logs.after_change'), value: numbro((thread.autoArchiveDuration as number) * 60).format({ output: 'time' }), inline: true }
+                    ])
                     .setFooter({ text: thread.id })
                     .setTimestamp()
                     .setColor('#FFA726')

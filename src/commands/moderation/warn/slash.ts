@@ -54,14 +54,14 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
     await warnings.addWarn(self, server, interaction, { target: mention, executor: interaction.member as GuildMember, reason: reason })
 
-    await interaction.reply({
+    await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.warn.add.text_user_warned', {
             user: `**${(interaction.member as any).displayName}**`,
             target: `**${mention.user.tag}**`
-        })}`,
-        ephemeral: true
+        })}`
     })
 
     return true
@@ -103,6 +103,8 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         return false
     }
 
+    await interaction.deferReply({ ephemeral: true })
+
     if (warn_id === 'all') {
         await self.db.servers.updateOne(
             { _id: interaction.guild.id },
@@ -115,17 +117,15 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
             }
         )
 
-        await interaction.reply({
-            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warns_removed_all', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warns_removed_all', { user: `**${(interaction.member as any).displayName}**` })}`
         })
     } else {
         const violation = violator.violations.find((v, i) => v.id == warn_id || i + 1 == warn_id)
 
         if (!violation) {
-            await interaction.reply({
-                content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_invalid_warn_id', { user: `**${(interaction.member as any).displayName}**` })}`,
-                ephemeral: true
+            await interaction.editReply({
+                content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_invalid_warn_id', { user: `**${(interaction.member as any).displayName}**` })}`
             })
 
             return false
@@ -142,9 +142,8 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
             }
         )
 
-        await interaction.reply({
-            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warn_removed', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warn_removed', { user: `**${(interaction.member as any).displayName}**` })}`
         })
     }
 

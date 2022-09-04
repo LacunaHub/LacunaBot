@@ -1,347 +1,653 @@
-import { BaseGuildTextChannel, Message, PermissionResolvable, Util } from 'discord.js'
-import { CustomCommand as ICustomCommand, ServerDocument } from '../database/schemas/Servers'
+import { BaseGuildTextChannel, CommandInteraction, GuildMember, GuildMemberRoleManager, MessageEmbed, Team, User } from 'discord.js'
+import IVM, { Context } from 'isolated-vm'
+import qdb from 'quick.db'
+import { ICustomCommand, MessageEmbed as IMessageEmbed, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
-import { parseCommandArguments } from '../internals/utility/Utils'
-import Replacer from './Replacer'
+import logger from '../internals/Logger'
+import { escapeRegexp, isValidHttpUrl } from '../internals/utility/Utils'
+
+const storage = new qdb.table('publicStorage')
 
 export default class CustomCommand {
     public command: ICustomCommand
     public self: Lacuna
     public server: ServerDocument
-    public message: Message
+    public interaction: CommandInteraction
+    private usedPatterns: string[]
+    private usedFunctions: string[]
+    private isolate: IVM.Isolate
 
-    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, message: Message) {
+    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
         this.command = command
 
         this.self = self
 
         this.server = server
 
-        this.message = message
+        this.interaction = interaction
+
+        this.usedPatterns = []
+
+        this.usedFunctions = []
+
+        this.isolate = new IVM.Isolate({
+            memoryLimit: 16,
+            onCatastrophicError(message) {
+                logger.error('(Catastrophic Error):', message)
+                logger.telegram.error('Catastrophic Error:', message)
+            }
+        })
+    }
+
+    get globalValues() {
+        let { channel, commandId, commandName, guild, member, options } = this.interaction
+
+        channel.fetch()
+        guild.fetch()
+
+        return {
+            channel: {
+                id: channel.id,
+                name: channel['name'],
+                type: channel.type,
+                parentId: channel['parentId'],
+                nsfw: channel['nsfw'],
+                position: channel['rawPosition'],
+                topic: channel['topic'],
+                lastMessageId: channel.lastMessageId,
+                rateLimitPerUser: channel['rateLimitPerUser'],
+                createdTimestamp: channel.createdTimestamp
+            },
+            command: {
+                id: commandId,
+                name: commandName,
+                options: options.data.map(i => {
+                    let user, channel, role
+
+                    if (i.type === 'USER') user = options.getUser(i.name)
+                    if (i.type === 'CHANNEL') channel = options.getChannel(i.name)
+                    if (i.type === 'ROLE') role = options.getRole(i.name)
+
+                    return {
+                        name: i.name,
+                        value: i.value,
+                        user: user
+                            ? {
+                                  id: user.id,
+                                  username: user.username,
+                                  discriminator: user.discriminator,
+                                  avatar: user.displayAvatarURL(),
+                                  createdTimestamp: user.createdTimestamp
+                              }
+                            : undefined,
+                        channel: channel
+                            ? {
+                                  id: channel.id,
+                                  name: channel.name,
+                                  type: channel.type,
+                                  parentId: channel.parentId,
+                                  nsfw: channel.nsfw,
+                                  position: channel.rawPosition,
+                                  topic: channel.topic,
+                                  lastMessageId: channel.lastMessageId,
+                                  rateLimitPerUser: channel.rateLimitPerUser,
+                                  createdTimestamp: channel.createdTimestamp
+                              }
+                            : undefined,
+                        role: role
+                            ? {
+                                  id: role.id,
+                                  name: role.name,
+                                  color: role.hexColor,
+                                  icon: role.iconURL(),
+                                  hoist: role.hoist,
+                                  managed: role.managed,
+                                  mentionable: role.mentionable,
+                                  position: role.rawPosition
+                              }
+                            : undefined
+                    }
+                })
+            },
+            guild: {
+                id: guild.id,
+                name: guild.name,
+                nameAcronym: guild.nameAcronym,
+                icon: guild.iconURL(),
+                channels: guild.channels.cache.map(i => {
+                    return {
+                        id: i.id,
+                        name: i.name,
+                        type: i.type,
+                        parentId: i.parentId,
+                        nsfw: i['nsfw'],
+                        position: i['rawPosition'],
+                        topic: i['topic'],
+                        lastMessageId: i['lastMessageId'],
+                        rateLimitPerUser: i['rateLimitPerUser'],
+                        createdTimestamp: i.createdTimestamp
+                    }
+                }),
+                roles: guild.roles.cache.map(i => {
+                    return {
+                        id: i.id,
+                        name: i.name,
+                        color: i.hexColor,
+                        icon: i.iconURL(),
+                        hoist: i.hoist,
+                        managed: i.managed,
+                        mentionable: i.mentionable,
+                        position: i.rawPosition
+                    }
+                }),
+                splash: guild.splashURL(),
+                banner: guild.bannerURL(),
+                description: guild.description,
+                discoverySplash: guild.discoverySplashURL(),
+                vanityURLCode: guild.vanityURLCode,
+                verificationLevel: guild.verificationLevel,
+                nsfwLevel: guild.nsfwLevel,
+                mfaLevel: guild.mfaLevel,
+                afkTimeout: guild.afkTimeout,
+                afkChannelId: guild.afkChannelId,
+                rulesChannelId: guild.rulesChannelId,
+                systemChannelId: guild.systemChannelId,
+                publicUpdatesChannelId: guild.publicUpdatesChannelId,
+                premiumTier: guild.premiumTier,
+                premiumSubscriptionCount: guild.premiumSubscriptionCount,
+                explicitContentFilter: guild.explicitContentFilter,
+                defaultMessageNotifications: guild.defaultMessageNotifications,
+                ownerId: guild.ownerId,
+                createdTimestamp: guild.createdTimestamp,
+                economyCurrencies: this.server.modules.economy.currencies.map(i => ({ id: i.id, name: i.name, symbol: i.symbol }))
+            },
+            member: {
+                user: {
+                    id: member.user.id,
+                    username: member.user.username,
+                    discriminator: member.user.discriminator,
+                    avatar: (member.user as User).displayAvatarURL(),
+                    createdTimestamp: member.user['createdTimestamp']
+                },
+                avatar: (member as GuildMember).displayAvatarURL(),
+                nickname: member['nickname'],
+                pending: member.pending,
+                roles: (member.roles as GuildMemberRoleManager).cache.map(i => {
+                    return {
+                        id: i.id,
+                        name: i.name,
+                        color: i.hexColor,
+                        icon: i.iconURL(),
+                        hoist: i.hoist,
+                        managed: i.managed,
+                        mentionable: i.mentionable,
+                        position: i.rawPosition
+                    }
+                }),
+                permissions: (member as GuildMember).permissions.toArray(),
+                joinedTimestamp: member['joinedTimestamp']
+            }
+        }
+    }
+
+    getPatterns(string: string) {
+        return string.match(/{{\s*((.|\n)+?)\s*}}/g)?.map(i => i.slice(2, i.length - 2).trim()) ?? []
+    }
+
+    async replacePatterns(string: string, ctx: Context) {
+        const patterns = this.getPatterns(string)
+
+        for (let pattern of patterns) {
+            const regexp = new RegExp(`{{\\s*${escapeRegexp(pattern)}\\s*}}`, 'g')
+
+            try {
+                // Remove all regexp to avoid ReDoS
+                pattern = pattern.replace(/\/((.|\n)+?)\//g, '').replace(/RegExp/gi, '')
+
+                const script = this.isolate.compileScriptSync(pattern)
+                const value = await script.run(ctx, { timeout: 2500 })
+
+                string = string.replace(regexp, () => {
+                    return typeof value === 'undefined' ? '' : value
+                })
+            } catch (err) {
+                logger.error(`(Custom Commands): "${err.message}" (${this.interaction.guildId}) (${this.interaction.user.id})`)
+            }
+        }
+
+        this.usedPatterns.push(...patterns)
+
+        return string
+    }
+
+    async handleTemplateMessage(message: { content: string; embed: IMessageEmbed }, ctx: Context) {
+        const content = await this.replacePatterns(message.content, ctx)
+        let embed = {}
+
+        if (message.embed && message.embed.active) {
+            let url = message.embed.url ? await this.replacePatterns(message.embed.url, ctx) : null,
+                footer_icon_url = message.embed.footer.icon_url ? await this.replacePatterns(message.embed.footer.icon_url, ctx) : null,
+                image_url = message.embed.image.url ? await this.replacePatterns(message.embed.image.url, ctx) : null,
+                thumbnail_url = message.embed.thumbnail.url ? await this.replacePatterns(message.embed.thumbnail.url, ctx) : null,
+                author_url = message.embed.author.url ? await this.replacePatterns(message.embed.author.url, ctx) : null,
+                author_icon_url = message.embed.author.icon_url ? await this.replacePatterns(message.embed.author.icon_url, ctx) : null
+
+            url = isValidHttpUrl(url) ? url : null
+            footer_icon_url = isValidHttpUrl(footer_icon_url) ? footer_icon_url : null
+            image_url = isValidHttpUrl(image_url) ? image_url : null
+            thumbnail_url = isValidHttpUrl(thumbnail_url) ? thumbnail_url : null
+            author_url = isValidHttpUrl(author_url) ? author_url : null
+            author_icon_url = isValidHttpUrl(author_icon_url) ? author_icon_url : null
+
+            embed = {
+                title: message.embed.title ? await this.replacePatterns(message.embed.title, ctx) : null,
+                description: message.embed.description ? await this.replacePatterns(message.embed.description, ctx) : null,
+                url: url,
+                timestamp: message.embed.timestamp ? Number(await this.replacePatterns(message.embed.timestamp, ctx)) : null,
+                color: message.embed.color ?? null,
+                footer: {
+                    text: message.embed.footer.text ? await this.replacePatterns(message.embed.footer.text, ctx) : null,
+                    icon_url: footer_icon_url
+                },
+                image: image_url ? { url: image_url } : null,
+                thumbnail: thumbnail_url ? { url: thumbnail_url } : null,
+                author: {
+                    name: message.embed.author.name ? await this.replacePatterns(message.embed.author.name, ctx) : null,
+                    url: author_url,
+                    icon_url: author_icon_url
+                },
+                fields: message.embed.fields.length
+                    ? await Promise.all(
+                          message.embed.fields
+                              .filter(i => typeof i.name === 'string' && i.name.length && typeof i.value === 'string' && i.value.length)
+                              .map(async field => {
+                                  return {
+                                      name: await this.replacePatterns(field.name, ctx),
+                                      value: await this.replacePatterns(field.value, ctx),
+                                      inline: Boolean(field.inline)
+                                  }
+                              })
+                      )
+                    : []
+            }
+        }
+
+        const returning = {} as { content: string; embeds: MessageEmbed[] }
+
+        if (content) returning.content = content
+        if (message.embed && message.embed.active) returning.embeds = [new MessageEmbed(embed)]
+
+        return returning
     }
 
     async execute() {
-        if (!this.message.content.startsWith(this.server.prefix)) return false
+        const t = this.self.i18n.t.bind(null, this.server.locale)
+        const throttled = this.throttled()
 
-        if (this.command.blocked.channels.includes(this.message.channel.id) || this.message.member.roles.cache.some(r => this.command.blocked.roles.includes(r.id))) return false
-        if (this.command.allowed.channels.length && !this.command.allowed.channels.includes(this.message.channel.id)) return false
-        if (this.command.allowed.roles.length && !this.message.member.roles.cache.some(r => this.command.allowed.roles.includes(r.id))) return false
+        if (throttled.status) {
+            await this.interaction.reply({
+                content: `${this.self._emojis.ERROR} | ${t('common.command_throttled', {
+                    user: `**${this.interaction.user.username}**`,
+                    time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
+                })}`,
+                ephemeral: true
+            })
+
+            return false
+        }
+
+        const ctx = this.isolate.createContextSync()
+        ctx.global.set('global', ctx.global.derefInto())
+
+        ctx.global.set('setValue', (key: string, value: any) => {
+            this.usedFunctions.push('setValue')
+            const used = this.usedFunctions.filter(i => i === 'setValue')
+
+            if (used.length > 5) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+
+            if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
+            if (!value || typeof value === 'function' || value === null) throw new TypeError('INVALID_PARAMETERS')
+
+            storage.set(`${this.interaction.guildId}.${key}`, value)
+        })
+
+        ctx.global.set('getValue', (key: string) => {
+            if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
+
+            return storage.get(`${this.interaction.guildId}.${key}`)
+        })
+
+        ctx.global.set('deleteValue', (key: string) => {
+            if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
+
+            storage.delete(`${this.interaction.guildId}.${key}`)
+        })
+
+        for (const smartValue of Object.keys(this.globalValues)) {
+            ctx.global.set(smartValue, this.globalValues[smartValue], { copy: true })
+        }
 
         for (const component of this.command.components) {
-            if (component.type == 'CONDITION') {
-                if (component.condition.type == 'COMPARE') {
-                    const replacer_left = new Replacer(component.condition.compare.left, { message: this.message, guild: this.message.guild, member: this.message.member })
-                    const replacer_right = new Replacer(component.condition.compare.right, { message: this.message, guild: this.message.guild, member: this.message.member })
+            if (component.type === 'CONDITION') {
+                const { condition } = component
 
-                    component.condition.compare.left = await replacer_left.replace()
-                    component.condition.compare.right = await replacer_right.replace()
+                if (condition.type === 'COMPARE_VALUES') {
+                    const { compare_values } = condition
 
-                    switch (component.condition.compare.operator) {
-                        case '==': {
-                            if (!Boolean(component.condition.compare.left == component.condition.compare.right)) return false
-                            break
-                        }
-                        case '!=': {
-                            if (!Boolean(component.condition.compare.left != component.condition.compare.right)) return false
-                            break
-                        }
-                        case '>': {
-                            if (!Boolean(component.condition.compare.left > component.condition.compare.right)) return false
-                            break
-                        }
-                        case '<': {
-                            if (!Boolean(component.condition.compare.left < component.condition.compare.right)) return false
-                            break
-                        }
-                        case '^': {
-                            if (!component.condition.compare.left.startsWith(component.condition.compare.right)) return false
-                            break
-                        }
-                        case '$': {
-                            if (!component.condition.compare.left.endsWith(component.condition.compare.right)) return false
-                            break
-                        }
-                        case '~': {
-                            if (component.condition.compare.left.includes(component.condition.compare.right)) return false
-                            break
-                        }
-                        case '!~': {
-                            if (!component.condition.compare.left.includes(component.condition.compare.right)) return false
+                    const leftVal = await this.replacePatterns(compare_values.left, ctx)
+                    const rightVal = await this.replacePatterns(compare_values.right, ctx)
+
+                    const message =
+                        compare_values.options.includes('FALSE_REPLY') && compare_values.false_reply
+                            ? await this.handleTemplateMessage(compare_values.false_reply, ctx)
+                            : null
+
+                    if (compare_values.operator === 'EQUAL') {
+                        if (leftVal !== rightVal) {
+                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+
                             break
                         }
                     }
-                }
 
-                if (component.condition.type == 'USER') {
-                    if (component.condition.user.condition == 'HAS_ROLES') {
-                        if (component.condition.user.roles.some(v => this.message.member.roles.cache.has(v))) return false
-                    }
+                    if (compare_values.operator === 'NOT_EQUAL') {
+                        if (leftVal === rightVal) {
+                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
 
-                    if (component.condition.user.condition == 'MISSING_ROLES') {
-                        if (component.condition.user.roles.some(v => !this.message.member.roles.cache.has(v))) return false
-                    }
-
-                    if (component.condition.user.condition == 'HAS_PERMISSIONS') {
-                        if (this.message.member.permissions.has(component.condition.user.permissions as PermissionResolvable[], false)) return false
-                    }
-
-                    if (component.condition.user.condition == 'MISSING_PERMISSIONS') {
-                        if (!this.message.member.permissions.has(component.condition.user.permissions as PermissionResolvable[], false)) return false
-                    }
-                }
-
-                if (component.condition.type == 'IF_ELSE') {
-                    if (component.condition.if_else.condition.type) {
-                        let value = false
-
-                        const replacer_left = new Replacer(component.condition.if_else.condition.compare.left, {
-                            message: this.message,
-                            guild: this.message.guild,
-                            member: this.message.member
-                        })
-                        const replacer_right = new Replacer(component.condition.if_else.condition.compare.right, {
-                            message: this.message,
-                            guild: this.message.guild,
-                            member: this.message.member
-                        })
-
-                        component.condition.if_else.condition.compare.left = await replacer_left.replace()
-                        component.condition.if_else.condition.compare.right = await replacer_right.replace()
-
-                        if (component.condition.if_else.condition.type == 'COMPARE') {
-                            switch (component.condition.if_else.condition.compare.operator) {
-                                case '==': {
-                                    value = component.condition.if_else.condition.compare.left == component.condition.if_else.condition.compare.right
-                                    break
-                                }
-                                case '!=': {
-                                    value = component.condition.if_else.condition.compare.left != component.condition.if_else.condition.compare.right
-                                    break
-                                }
-                                case '>': {
-                                    value = component.condition.if_else.condition.compare.left > component.condition.if_else.condition.compare.right
-                                    break
-                                }
-                                case '<': {
-                                    value = component.condition.if_else.condition.compare.left < component.condition.if_else.condition.compare.right
-                                    break
-                                }
-                                case '^': {
-                                    value = component.condition.if_else.condition.compare.left.startsWith(component.condition.if_else.condition.compare.right)
-                                    break
-                                }
-                                case '$': {
-                                    value = component.condition.if_else.condition.compare.left.endsWith(component.condition.if_else.condition.compare.right)
-                                    break
-                                }
-                                case '~': {
-                                    value = component.condition.if_else.condition.compare.left.includes(component.condition.if_else.condition.compare.right)
-                                    break
-                                }
-                                case '!~': {
-                                    value = component.condition.if_else.condition.compare.left.includes(component.condition.if_else.condition.compare.right)
-                                    break
-                                }
-                            }
+                            break
                         }
+                    }
 
-                        if (component.condition.if_else.condition.type == 'USER') {
-                            if (component.condition.if_else.condition.user.condition == 'HAS_ROLES') {
-                                value = component.condition.if_else.condition.user.roles.some(v => this.message.member.roles.cache.has(v))
-                            }
+                    if (compare_values.operator === 'STARTS_WITH') {
+                        if (!leftVal.startsWith(rightVal)) {
+                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
 
-                            if (component.condition.if_else.condition.user.condition == 'MISSING_ROLES') {
-                                value = component.condition.if_else.condition.user.roles.some(v => !this.message.member.roles.cache.has(v))
-                            }
-
-                            if (component.condition.if_else.condition.user.condition == 'HAS_PERMISSIONS') {
-                                value = this.message.member.permissions.has(component.condition.if_else.condition.user.permissions as PermissionResolvable[], false)
-                            }
-
-                            if (component.condition.if_else.condition.user.condition == 'MISSING_PERMISSIONS') {
-                                value = !this.message.member.permissions.has(component.condition.if_else.condition.user.permissions as PermissionResolvable[], false)
-                            }
+                            break
                         }
+                    }
 
-                        if (value && component.condition.if_else.actions.length) {
-                            for (const if_component of component.condition.if_else.actions) {
-                                if (if_component.action.type == 'REPLY') {
-                                    const i = component.condition.if_else.actions.filter(c => c.action.type == 'REPLY').indexOf(if_component)
+                    if (compare_values.operator === 'ENDS_WITH') {
+                        if (!leftVal.endsWith(rightVal)) {
+                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
 
-                                    if (i < 2 && (if_component.action.reply.message.content || if_component.action.reply.message.embed.active)) {
-                                        const replacer = new Replacer(null, { guild: this.message.guild, message: this.message, member: this.message.member })
-                                        const content = await replacer.replaceTemplateMessage({
-                                            content: if_component.action.reply.message.content,
-                                            embed: if_component.action.reply.message.embed
-                                        })
+                            break
+                        }
+                    }
 
-                                        if (if_component.action.reply.format == 'CURRENT_CHANNEL') {
-                                            await this.message.channel.send({ ...content, tts: if_component.action.reply.message.tts }).catch(this.self.logger.error)
-                                        }
+                    if (compare_values.operator === 'GREATER_THAN') {
+                        if (leftVal < rightVal) {
+                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
 
-                                        if (if_component.action.reply.format == 'CHANNEL' && if_component.action.reply.channel_id) {
-                                            const channel = this.message.guild.channels.cache.get(if_component.action.reply.channel_id) as BaseGuildTextChannel
+                            break
+                        }
+                    }
 
-                                            if (channel) await channel.send({ ...content, tts: if_component.action.reply.message.tts }).catch(this.self.logger.error)
-                                        }
-                                    }
-                                }
+                    if (compare_values.operator === 'LESS_THAN') {
+                        if (leftVal > rightVal) {
+                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
 
-                                if (if_component.action.type == 'MODIFY_ROLES') {
-                                    const i = component.condition.if_else.actions.filter(c => c.action.type == 'MODIFY_ROLES').indexOf(if_component)
+                            break
+                        }
+                    }
 
-                                    if (i < 2 && (if_component.action.modify_roles.add.length || if_component.action.modify_roles.remove.length)) {
-                                        if (if_component.action.modify_roles.add.length) {
-                                            const editable = this.message.guild.roles.cache.filter(r => r.editable && if_component.action.modify_roles.add.includes(r.id))
+                    if (compare_values.operator === 'CONTAINS') {
+                        if (!leftVal.includes(rightVal)) {
+                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
 
-                                            if (editable.size) await this.message.member.roles.add(editable).catch(this.self.logger.error)
-                                        }
+                            break
+                        }
+                    }
 
-                                        if (if_component.action.modify_roles.remove.length) {
-                                            const editable = this.message.guild.roles.cache.filter(r => r.editable && if_component.action.modify_roles.remove.includes(r.id))
+                    if (compare_values.operator === 'NOT_CONTAINS') {
+                        if (leftVal.includes(rightVal)) {
+                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
 
-                                            if (editable.size) await this.message.member.roles.remove(editable).catch(this.self.logger.error)
-                                        }
-                                    }
-                                }
-
-                                if (if_component.action.type == 'ADD_REACTIONS') {
-                                    const i = component.condition.if_else.actions.filter(c => c.action.type == 'ADD_REACTIONS').indexOf(if_component)
-
-                                    if (i < 2 && if_component.action.add_reactions.length) {
-                                        for (let raw_reaction of if_component.action.add_reactions.slice(0, 5)) {
-                                            const reaction = Util.parseEmoji(raw_reaction)
-                                            await this.message.react(reaction.id || reaction.name).catch(this.self.logger.error)
-                                        }
-                                    }
-                                }
-
-                                if (if_component.action.type == 'FORWARD_TO_COMMAND') {
-                                    const i = component.condition.if_else.actions.filter(c => c.action.type == 'FORWARD_TO_COMMAND').indexOf(if_component)
-
-                                    if (i == 0 && if_component.action.forward_to_command) {
-                                        const replacer = new Replacer(if_component.action.forward_to_command, {
-                                            message: this.message,
-                                            guild: this.message.guild,
-                                            member: this.message.member
-                                        })
-                                        const replaced = await replacer.replace()
-
-                                        const splitted = replaced.split(/\s+/)
-                                        const name = splitted.shift().toLowerCase()
-                                        const args = this.message['args']
-                                        this.message['args'] = parseCommandArguments(splitted.join(' '))
-
-                                        const command = this.self.commands.find(c => c.name == name && c.is_prefix_command)
-
-                                        if (command) await command.executePrefix(this.server, this.message)
-
-                                        this.message['args'] = args
-                                    }
-                                }
-
-                                if (if_component.action.type == 'DELETE_REQUEST') {
-                                    const i = component.condition.if_else.actions.filter(c => c.action.type == 'DELETE_REQUEST').indexOf(if_component)
-
-                                    if (i == 0 && if_component.action.delete_request >= 0) {
-                                        if (this.message.deletable) {
-                                            const timeout = if_component.action.delete_request
-
-                                            if (!isNaN(timeout)) setTimeout(() => this.message.delete().catch(this.self.logger.error), timeout ? timeout * 1000 : 0)
-                                        }
-                                    }
-                                }
-                            }
-
-                            return true
+                            break
                         }
                     }
                 }
             }
 
-            if (component.type == 'ACTION') {
-                if (component.action.type == 'REPLY') {
-                    const i = this.command.components.filter(c => c.action?.type == 'REPLY').indexOf(component)
+            if (component.type === 'ACTION') {
+                const { action } = component
 
-                    if (i < 2 && (component.action.reply.message.content || component.action.reply.message.embed.active)) {
-                        const replacer = new Replacer(null, { guild: this.message.guild, message: this.message, member: this.message.member })
-                        const content = await replacer.replaceTemplateMessage({ content: component.action.reply.message.content, embed: component.action.reply.message.embed })
+                if (action.type === 'REPLY') {
+                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const { reply } = action
 
-                        if (component.action.reply.format == 'CURRENT_CHANNEL') {
-                            await this.message.channel.send({ ...content, tts: component.action.reply.message.tts }).catch(this.self.logger.error)
+                    if (index > 0) continue
+
+                    const message = await this.handleTemplateMessage(reply.message, ctx)
+
+                    await this.interaction.reply({ ...message, ephemeral: reply.options.includes('EPHEMERAL') }).catch(() => {})
+                }
+
+                if (action.type === 'SEND_MESSAGE') {
+                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const { send_message } = action
+
+                    if (index > 1) continue
+
+                    const message = await this.handleTemplateMessage(send_message.message, ctx)
+
+                    if (send_message.format === 'CHANNEL') {
+                        const channel = this.interaction.guild.channels.cache.get(send_message.channel_id) as BaseGuildTextChannel
+
+                        if (channel) await channel.send({ ...message, tts: send_message.options.includes('TTS') }).catch(() => {})
+                    }
+
+                    if (send_message.format === 'CURRENT_CHANNEL') {
+                        await this.interaction.channel.send({ ...message, tts: send_message.options.includes('TTS') }).catch(() => {})
+                    }
+                }
+
+                if (action.type === 'MODIFY_ROLES') {
+                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const { modify_roles } = action
+
+                    if (index > 1) continue
+
+                    const user_id = modify_roles.user_id ? await this.replacePatterns(modify_roles.user_id, ctx) : this.interaction.user.id
+                    const member = (await this.interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
+
+                    if (member) {
+                        if (modify_roles.add.length) {
+                            const roles = this.interaction.guild.roles.cache.filter(i => i.editable && modify_roles.add.includes(i.id))
+
+                            if (roles.size) await member.roles.add(roles).catch(() => {})
                         }
 
-                        if (component.action.reply.format == 'CHANNEL' && component.action.reply.channel_id) {
-                            const channel = this.message.guild.channels.cache.get(component.action.reply.channel_id) as BaseGuildTextChannel
+                        if (modify_roles.remove.length) {
+                            const roles = this.interaction.guild.roles.cache.filter(i => i.editable && modify_roles.remove.includes(i.id))
 
-                            if (channel) await channel.send({ ...content, tts: component.action.reply.message.tts }).catch(this.self.logger.error)
+                            if (roles.size) await member.roles.remove(roles).catch(() => {})
                         }
                     }
                 }
 
-                if (component.action.type == 'MODIFY_ROLES') {
-                    const i = this.command.components.filter(c => c.action?.type == 'MODIFY_ROLES').indexOf(component)
+                if (action.type === 'FORWARD_TO_COMMAND') {
+                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const { forward_to_command } = action
 
-                    if (i < 2 && (component.action.modify_roles.add.length || component.action.modify_roles.remove.length)) {
-                        if (component.action.modify_roles.add.length) {
-                            const editable = this.message.guild.roles.cache.filter(r => r.editable && component.action.modify_roles.add.includes(r.id))
+                    if (index > 0) continue
 
-                            if (editable.size) await this.message.member.roles.add(editable).catch(this.self.logger.error)
-                        }
+                    const command = this.self.commands.find(i => i.is_slash_command && i.name === forward_to_command)
 
-                        if (component.action.modify_roles.remove.length) {
-                            const editable = this.message.guild.roles.cache.filter(r => r.editable && component.action.modify_roles.remove.includes(r.id))
-
-                            if (editable.size) await this.message.member.roles.remove(editable).catch(this.self.logger.error)
-                        }
-                    }
+                    if (command) await command.executeSlash(this.server, this.interaction)
                 }
 
-                if (component.action.type == 'ADD_REACTIONS') {
-                    const i = this.command.components.filter(c => c.action?.type == 'ADD_REACTIONS').indexOf(component)
+                if (action.type === 'MODIFY_WALLET') {
+                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const { modify_wallet } = action
 
-                    if (i < 2 && component.action.add_reactions.length) {
-                        for (let raw_reaction of component.action.add_reactions.slice(0, 5)) {
-                            const reaction = Util.parseEmoji(raw_reaction)
-                            await this.message.react(reaction.id || reaction.name).catch(this.self.logger.error)
+                    if (index > 1) continue
+                    if (!this.server.modules.economy.active) continue
+
+                    const user_id = modify_wallet.user_id ? await this.replacePatterns(modify_wallet.user_id, ctx) : this.interaction.user.id
+                    const member = (await this.interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
+
+                    if (member) {
+                        const currency_id = modify_wallet.currency_id ? await this.replacePatterns(modify_wallet.currency_id, ctx) : 'DEFAULT'
+                        let currency = this.server.modules.economy.currencies.find(i => i.id === currency_id)
+
+                        if (!currency) {
+                            currency = this.server.modules.economy.currencies.find(i => i.id === 'DEFAULT')
                         }
-                    }
-                }
 
-                if (component.action.type == 'FORWARD_TO_COMMAND') {
-                    const i = this.command.components.filter(c => c.action?.type == 'FORWARD_TO_COMMAND').indexOf(component)
+                        const INT32_MAX = Math.pow(2, 31) - 1
+                        let amount = modify_wallet.amount ? await this.replacePatterns(modify_wallet.amount, ctx) : 0
+                        amount = isNaN(Number(amount)) ? 0 : Number(amount)
 
-                    if (i == 0 && component.action.forward_to_command) {
-                        const replacer = new Replacer(component.action.forward_to_command, { message: this.message, guild: this.message.guild, member: this.message.member })
-                        const replaced = await replacer.replace()
+                        if (amount > INT32_MAX || amount < -INT32_MAX) amount = amount > INT32_MAX ? INT32_MAX : amount < -INT32_MAX ? -INT32_MAX : 0
 
-                        const splitted = replaced.split(/\s+/)
-                        const name = splitted.shift().toLowerCase()
-                        const args = this.message['args']
-                        this.message['args'] = parseCommandArguments(splitted.join(' '))
+                        let user = await this.self.db.users.findOne({ _id: member.id })
 
-                        const command = this.self.commands.find(c => c.name == name && c.is_prefix_command)
+                        if (!user) {
+                            user = await this.self.db.users.create({
+                                _id: member.id,
+                                user: {
+                                    username: member.user.username,
+                                    discriminator: member.user.discriminator,
+                                    avatar: member.user.avatar,
+                                    flags: member.user.flags?.bitfield ?? 0
+                                }
+                            } as any)
+                        }
 
-                        if (command) await command.executePrefix(this.server, this.message)
+                        let wallet = user.activities.wallets.find(i => i.guild_id == this.interaction.guildId)
 
-                        this.message['args'] = args
-                    }
-                }
+                        if (!wallet) {
+                            wallet = {
+                                guild_id: this.interaction.guildId,
+                                currencies: [],
+                                transactions: [],
+                                activity: {
+                                    last_message_at: 0,
+                                    voice_connected_at: 0
+                                }
+                            }
 
-                if (component.action.type == 'DELETE_REQUEST') {
-                    const i = this.command.components.filter(c => c.action?.type == 'DELETE_REQUEST').indexOf(component)
+                            await this.self.db.users.updateOne(
+                                { _id: member.id },
+                                {
+                                    $push: { 'activities.wallets': wallet as never }
+                                }
+                            )
+                        }
 
-                    if (i == 0 && component.action.delete_request >= 0) {
-                        if (this.message.deletable) {
-                            const timeout = component.action.delete_request
-
-                            if (!isNaN(timeout)) setTimeout(() => this.message.delete().catch(this.self.logger.error), timeout ? timeout * 1000 : 0)
+                        if (wallet.currencies.some(c => c.id === currency_id)) {
+                            await this.self.db.users.updateOne(
+                                { _id: member.id, 'activities.wallets': { $elemMatch: { guild_id: this.interaction.guildId, 'currencies.id': currency_id } } },
+                                {
+                                    $inc: {
+                                        'activities.wallets.$[guild].currencies.$[currency].amount': amount
+                                    }
+                                },
+                                { arrayFilters: [{ 'guild.guild_id': this.interaction.guildId }, { 'currency.id': currency_id }] }
+                            )
+                        } else {
+                            await this.self.db.users.updateOne(
+                                { _id: member.id, 'activities.wallets.guild_id': this.interaction.guildId },
+                                {
+                                    $push: {
+                                        'activities.wallets.$.currencies': {
+                                            id: currency_id,
+                                            amount: amount
+                                        }
+                                    }
+                                }
+                            )
                         }
                     }
                 }
             }
         }
 
+        this.throttle()
+
+        this.self.logger.telegram.info(`Code Snippets (${this.interaction.guildId}:${this.interaction.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``)
+        this.self.emit('commandExecution', {
+            command: this.interaction.commandName,
+            guild: { name: this.interaction.guild.name, id: this.interaction.guildId },
+            channel: { name: (this.interaction.channel as BaseGuildTextChannel)?.name, id: this.interaction.channelId },
+            user: { name: this.interaction.user.username, id: this.interaction.user.id }
+        })
+
+        if (!this.isolate.isDisposed) this.isolate.dispose()
+
         return true
+    }
+
+    throttled() {
+        if (this.command.options.includes('THROTTLING')) {
+            let path = `${this.interaction.guildId}.users.${this.interaction.user.id}`
+
+            if (this.command.throttling?.type === 'PER_GUILD') {
+                path = `${this.interaction.guildId}.guild`
+            }
+
+            if (this.command.throttling?.type === 'PER_CHANNEL') {
+                path = `${this.interaction.guildId}.channels.${this.interaction.channelId}`
+            }
+
+            const throttled = this.self.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)
+
+            if (throttled?.retry_after - Date.now() > 0) {
+                return {
+                    status: true,
+                    retry_after: throttled.retry_after
+                }
+            }
+
+            if (throttled?.remaining === -1) {
+                this.self.qdb.delete(`throttling.customCommands.${this.command.id}.${path}`)
+            }
+
+            return {
+                status: false
+            }
+        }
+
+        return {
+            status: false
+        }
+    }
+
+    throttle() {
+        if ((this.self.application.owner as Team).members.some(m => m.id === this.interaction.user.id)) return false
+
+        if (this.command.options.includes('THROTTLING')) {
+            let path = `${this.interaction.guildId}.users.${this.interaction.user.id}`
+
+            if (this.command.throttling?.type === 'PER_GUILD') {
+                path = `${this.interaction.guildId}.guild`
+            }
+
+            if (this.command.throttling?.type === 'PER_CHANNEL') {
+                path = `${this.interaction.guildId}.channels.${this.interaction.channelId}`
+            }
+
+            let throttled = this.self.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)
+            if (!throttled) {
+                this.self.qdb.set(`throttling.customCommands.${this.command.id}.${path}`, {
+                    retry_after: Date.now(),
+                    remaining: this.command.throttling.max_uses
+                })
+
+                throttled = this.self.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)
+            }
+
+            this.self.qdb.subtract(`throttling.customCommands.${this.command.id}.${path}.remaining`, 1)
+            throttled.remaining--
+
+            if (throttled.remaining <= 0) {
+                this.self.qdb.set(`throttling.customCommands.${this.command.id}.${path}.retry_after`, Date.now() + this.command.throttling.timeout * 1000)
+                this.self.qdb.set(`throttling.customCommands.${this.command.id}.${path}.remaining`, -1)
+            }
+        } else {
+            if (this.self.qdb.has(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)) {
+                this.self.qdb.delete(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)
+            }
+        }
     }
 }

@@ -7,7 +7,6 @@ export default model<ServerDocument>(
         {
             _id: { type: String },
             locale: { type: String, default: 'ru' },
-            prefix: { type: String, default: '!' },
             server: {
                 premium: {
                     available: { type: Boolean, default: false },
@@ -17,8 +16,7 @@ export default model<ServerDocument>(
                 bot_expert_roles: { type: Array, default: [] }
             },
             commands: {
-                configuration: { type: Array, default: [] },
-                prefix_commands: { type: Boolean, default: false }
+                configuration: { type: Array, default: [] }
             },
             moderation: {
                 case_log: {
@@ -769,6 +767,7 @@ export default model<ServerDocument>(
 export interface ServerDocument extends Document {
     _id: string
     locale: 'en' | 'ru'
+    /** @deprecated */
     prefix: string
     server: {
         premium: {
@@ -786,6 +785,7 @@ export interface ServerDocument extends Document {
         custom: CustomCommand[]
         /** @deprecated */
         slash_commands: boolean
+        /** @deprecated */
         prefix_commands: boolean
     }
     moderation: {
@@ -1458,7 +1458,8 @@ export interface ICustomCommandComponent {
         }
         forward_to_command?: string
         modify_wallet?: {
-            operator: 'INCREMENT' | 'DECREMENT'
+            /** @deprecated */
+            operator?: 'INCREMENT' | 'DECREMENT'
             amount: string
             user_id: string
             currency_id: string

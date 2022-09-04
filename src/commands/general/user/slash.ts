@@ -14,15 +14,18 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     const embed = new MessageEmbed()
         .setAuthor({ name, iconURL: mention.user.displayAvatarURL() })
-        .addField(t('commands.user.text_registration_date'), `<t:${created_ts}:d> – <t:${created_ts}:R>`, true)
-        .addField(t('commands.user.text_join_date'), `<t:${joined_ts}:d> – <t:${joined_ts}:R>`, true)
-        .addField(
-            `${t('common.roles')} [${mention.roles.cache.filter(r => r.id != interaction.guild.id).size}]`,
-            mention.roles.cache
-                .filter(r => r.id != interaction.guild.id)
-                .map(role => `<@&${role.id}>`)
-                .join(' ') || '-'
-        )
+        .addFields([
+            { name: t('commands.user.text_registration_date'), value: `<t:${created_ts}:d> – <t:${created_ts}:R>`, inline: true },
+            { name: t('commands.user.text_join_date'), value: `<t:${joined_ts}:d> – <t:${joined_ts}:R>`, inline: true },
+            {
+                name: `${t('common.roles')} [${mention.roles.cache.filter(r => r.id != interaction.guild.id).size}]`,
+                value:
+                    mention.roles.cache
+                        .filter(r => r.id != interaction.guild.id)
+                        .map(role => `<@&${role.id}>`)
+                        .join(' ') || '-'
+            }
+        ])
         .setFooter({ text: `ID: ${mention.id}` })
 
     const row = new MessageActionRow().addComponents(

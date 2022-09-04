@@ -6,12 +6,6 @@ import { dotNotateObject } from '../../utility/Utils'
 export async function updateSettings(guild: ServerDocument, data: Partial<ServerDocument>, user_id: string): Promise<ServerDocument> {
     const updateData = {}
 
-    if (typeof data.prefix === 'string' && data.prefix !== guild.prefix) {
-        if (data.prefix.length && data.prefix !== '/') {
-            updateData['prefix'] = data.prefix.slice(0, 3)
-        }
-    }
-
     if (typeof data.locale === 'string' && data.locale !== guild.locale) {
         if (['ru', 'en'].includes(data.locale)) {
             updateData['locale'] = data.locale
@@ -25,10 +19,6 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
     if (data.commands) {
         if (Array.isArray(data.commands.configuration) && JSON.stringify(data.commands.configuration) !== JSON.stringify(guild.commands.configuration)) {
             updateData['commands.configuration'] = data.commands.configuration
-        }
-
-        if (typeof data.commands.prefix_commands === 'boolean' && data.commands.prefix_commands !== guild.commands.prefix_commands) {
-            updateData['commands.prefix_commands'] = data.commands.prefix_commands
         }
     }
 
@@ -764,6 +754,19 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         updateData['moderation.automoder.users_slowdown.ignored.permissions'] = data.moderation.automoder.users_slowdown.ignored.permissions
                     }
                 }
+            }
+        }
+
+        if (data.moderation.mutes) {
+            if (typeof data.moderation.mutes.rar === 'boolean' && data.moderation.mutes.rar !== guild.moderation.mutes.rar) {
+                updateData['moderation.mutes.rar'] = data.moderation.mutes.rar
+            }
+
+            if (
+                Array.isArray(data.moderation.mutes.rar_strict) &&
+                JSON.stringify(data.moderation.mutes.rar_strict) !== JSON.stringify(guild.moderation.mutes.rar_strict)
+            ) {
+                updateData['moderation.mutes.rar_strict'] = data.moderation.mutes.rar_strict
             }
         }
     }

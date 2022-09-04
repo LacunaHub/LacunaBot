@@ -66,8 +66,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             change: t('logs.channel_update_name_change_template', { channel: `<#${channel.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), before.name, true)
-                    .addField(t('logs.after_change'), channel.name, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.name, inline: true },
+                        { name: t('logs.after_change'), value: channel.name, inline: true }
+                    ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -88,8 +90,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             change: t('logs.channel_update_topic_change_template', { channel: `<#${channel.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), (before as any).topic ?? '-', true)
-                    .addField(t('logs.after_change'), (channel as any).topic ?? '-', true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: (before as any).topic ?? '-', inline: true },
+                        { name: t('logs.after_change'), value: (channel as any).topic ?? '-', inline: true }
+                    ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -110,16 +114,18 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             change: t('logs.channel_update_rate_limit_change_template', { channel: `<#${channel.id}>` })
                         })
                     )
-                    .addField(
-                        t('logs.before_change'),
-                        (before as TextChannel).rateLimitPerUser ? numbro((before as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-',
-                        true
-                    )
-                    .addField(
-                        t('logs.after_change'),
-                        (channel as TextChannel).rateLimitPerUser ? numbro((channel as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-',
-                        true
-                    )
+                    .addFields([
+                        {
+                            name: t('logs.before_change'),
+                            value: (before as TextChannel).rateLimitPerUser ? numbro((before as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-',
+                            inline: true
+                        },
+                        {
+                            name: t('logs.after_change'),
+                            value: (channel as TextChannel).rateLimitPerUser ? numbro((channel as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-',
+                            inline: true
+                        }
+                    ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -140,8 +146,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             change: t('logs.channel_update_parent_change_template', { channel: `<#${channel.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), before?.parent?.name ?? '-', true)
-                    .addField(t('logs.after_change'), channel?.parent?.name ?? '-', true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before?.parent?.name ?? '-', inline: true },
+                        { name: t('logs.after_change'), value: channel?.parent?.name ?? '-', inline: true }
+                    ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -162,8 +170,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             change: t('logs.channel_update_bitrate_change_template', { channel: `<#${channel.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), `${before.bitrate / 1000}kbps`, true)
-                    .addField(t('logs.after_change'), `${channel.bitrate / 1000}kbps`, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: `${before.bitrate / 1000}kbps`, inline: true },
+                        { name: t('logs.after_change'), value: `${channel.bitrate / 1000}kbps`, inline: true }
+                    ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -184,8 +194,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             change: t('logs.channel_update_user_limit_change_template', { channel: `<#${channel.id}>` })
                         })
                     )
-                    .addField(t('logs.before_change'), before.userLimit.toString(), true)
-                    .addField(t('logs.after_change'), channel.userLimit.toString(), true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.userLimit.toString(), inline: true },
+                        { name: t('logs.after_change'), value: channel.userLimit.toString(), inline: true }
+                    ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
                     .setColor('#FFA726')

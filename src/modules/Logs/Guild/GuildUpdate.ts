@@ -61,8 +61,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setDescription(
                         t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_name_change') })
                     )
-                    .addField(t('logs.before_change'), before.name, true)
-                    .addField(t('logs.after_change'), guild.name, true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.name, inline: true },
+                        { name: t('logs.after_change'), value: guild.name, inline: true }
+                    ])
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -79,8 +81,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setDescription(
                         t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_afk_channel_change') })
                     )
-                    .addField(t('logs.before_change'), before.afkChannel?.name ?? '-', true)
-                    .addField(t('logs.after_change'), guild.afkChannel?.name ?? '-', true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.afkChannel?.name ?? '-', inline: true },
+                        { name: t('logs.after_change'), value: guild.afkChannel?.name ?? '-', inline: true }
+                    ])
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -97,8 +101,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setDescription(
                         t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_afk_timeout_change') })
                     )
-                    .addField(t('logs.before_change'), before.afkTimeout ? numbro(before.afkTimeout).format({ output: 'time' }) : '-', true)
-                    .addField(t('logs.after_change'), guild.afkTimeout ? numbro(guild.afkTimeout).format({ output: 'time' }) : '-', true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.afkTimeout ? numbro(before.afkTimeout).format({ output: 'time' }) : '-', inline: true },
+                        { name: t('logs.after_change'), value: guild.afkTimeout ? numbro(guild.afkTimeout).format({ output: 'time' }) : '-', inline: true }
+                    ])
                     .setTimestamp()
                     .setColor('#FFA726')
 
@@ -115,8 +121,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setDescription(
                         t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_description_change') })
                     )
-                    .addField(t('logs.before_change'), before.description ?? '-', true)
-                    .addField(t('logs.after_change'), guild.description ?? '-', true)
+                    .addFields([
+                        { name: t('logs.before_change'), value: before.description ?? '-', inline: true },
+                        { name: t('logs.after_change'), value: guild.description ?? '-', inline: true }
+                    ])
                     .setTimestamp()
                     .setColor('#FFA726')
 

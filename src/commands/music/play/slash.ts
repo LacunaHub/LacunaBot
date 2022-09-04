@@ -71,8 +71,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
-    if (!interaction.deferred) await interaction.deferReply()
-
+    await interaction.deferReply()
     const search = await self.player.search(query, interaction.user.tag)
 
     if (search.loadType === 'LOAD_FAILED') {

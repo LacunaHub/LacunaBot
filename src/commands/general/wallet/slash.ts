@@ -15,7 +15,6 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     }
 
     const mention = (interaction.options?.getMember(t('commands.wallet.balance.options.user.name')) ?? interaction.member) as GuildMember
-
     const user = await self.db.users.findOne({ _id: mention.id })
     let wallet = user?.activities?.wallets?.find(i => i.guild_id == interaction.guildId)
 
@@ -42,7 +41,7 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     for (const c of wallet.currencies) {
         const currency = server.modules.economy.currencies.find(i => i.id == c.id)
 
-        if (currency) embed.addField(currency.name, `${c.amount.toFixed(2)}${currency.symbol}`, true)
+        if (currency) embed.addFields([{ name: currency.name, value: `${c.amount.toFixed(2)}${currency.symbol}`, inline: true }])
     }
 
     await interaction.reply({ embeds: [embed] })

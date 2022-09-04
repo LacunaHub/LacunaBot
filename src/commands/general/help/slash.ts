@@ -33,19 +33,26 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         const embed = new MessageEmbed()
             .setTitle(t('commands.help.text_commands_list'))
-            .setDescription(t('commands.help.text_use_prefix', { prefix: `\`${server.prefix}\`` }))
-            .setFooter({ text: t('commands.help.text_use_help_for_more_details', { prefix: server.prefix }) })
+            .setDescription(t('commands.help.text_use_prefix', { prefix: `\`/\`` }))
+            .setFooter({ text: t('commands.help.text_use_help_for_more_details', { prefix: '/' }) })
+        const embedFields = []
 
         const components = new MessageActionRow().addComponents(
-            new MessageButton().setStyle('LINK').setLabel(t('commands.help.text_dashboard_link')).setURL(`https://www.voidlacuna.ru/guilds/${interaction.guildId}`),
+            new MessageButton()
+                .setStyle('LINK')
+                .setLabel(t('commands.help.text_dashboard_link'))
+                .setURL(`https://www.voidlacuna.ru/guilds/${interaction.guildId}/settings`),
             new MessageButton().setStyle('LINK').setLabel(t('commands.help.text_docs_link')).setURL('https://docs.voidlacuna.ru')
         )
 
-        if (categories.general.size) embed.addField(t('common.command_categories.GENERAL'), categories.general.map(c => `\`${c.name}\``).join(', '))
-        if (categories.moderation.size) embed.addField(t('common.command_categories.MODERATION'), categories.moderation.map(c => `\`${c.name}\``).join(', '))
-        if (categories.music.size) embed.addField(t('common.command_categories.MUSIC'), categories.music.map(c => `\`${c.name}\``).join(', '))
-        if (categories.utility.size) embed.addField(t('common.command_categories.UTILITY'), categories.utility.map(c => `\`${c.name}\``).join(', '))
-        if (customCommand.length) embed.addField(t('common.command_categories.CUSTOM'), customCommand.map(c => `\`${c.name}\``).join(', '))
+        if (categories.general.size) embedFields.push({ name: t('common.command_categories.GENERAL'), value: categories.general.map(c => `\`${c.name}\``).join(', ') })
+        if (categories.moderation.size)
+            embedFields.push({ name: t('common.command_categories.MODERATION'), value: categories.moderation.map(c => `\`${c.name}\``).join(', ') })
+        if (categories.music.size) embedFields.push({ name: t('common.command_categories.MUSIC'), value: categories.music.map(c => `\`${c.name}\``).join(', ') })
+        if (categories.utility.size) embedFields.push({ name: t('common.command_categories.UTILITY'), value: categories.utility.map(c => `\`${c.name}\``).join(', ') })
+        if (customCommand.length) embedFields.push({ name: t('common.command_categories.CUSTOM'), value: customCommand.map(c => `\`${c.name}\``).join(', ') })
+
+        embed.addFields(embedFields)
 
         await interaction.reply({ embeds: [embed], components: [components] })
     } else {
@@ -72,12 +79,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                     ? `${t('commands.help.text_required_permissions_author')}\n- ${command.permissions.user.map(p => t(`common.permissions_keys.${p}`)).join('\n- ')}`
                     : `~~${t('commands.help.text_required_permissions_author')}~~`
 
-                embed.addField(t('commands.help.text_required_permissions'), `${self_permissions}\n${user_permissions}`)
+                embed.addFields([{ name: t('commands.help.text_required_permissions'), value: `${self_permissions}\n${user_permissions}` }])
             }
 
             if (command.options?.filter(opt => !['SUB_COMMAND', 'SUB_COMMAND_GROUP'].includes(opt.type))?.length) {
                 const usage =
-                    `${server.prefix}${command.name} ` +
+                    `/${command.name} ` +
                     command.options
                         .map(opt => {
                             return `${opt.required ? '<' : '['}${t(opt.name)}${opt.required ? '>' : ']'}`
@@ -96,8 +103,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                     })
                     .join('\n')
 
-                embed.addField(t('commands.help.text_command_usage'), `\`${usage}\``)
-                embed.addField(t('commands.help.text_command_args'), args)
+                embed.addFields([
+                    { name: t('commands.help.text_command_usage'), value: `\`${usage}\`` },
+                    { name: t('commands.help.text_command_args'), value: args }
+                ])
             }
 
             if (command.options?.filter(opt => ['SUB_COMMAND', 'SUB_COMMAND_GROUP'].includes(opt.type))?.length) {
@@ -109,7 +118,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                             })
                             .join(' ')
 
-                        return `\`${server.prefix}${command.name} ${opt.name} ${args}\`: ${t(opt.description)?.toLowerCase()}`
+                        return `\`/${command.name} ${opt.name} ${args}\`: ${t(opt.description)?.toLowerCase()}`
                     })
                     .join('\n\n')
 
@@ -129,8 +138,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                     return { name: opt.name, value: args }
                 })
 
-                embed.addField(t('commands.help.text_command_usage'), usage)
-                for (const sc of subcommands) embed.addField(`${command.name} ${sc.name}`, sc.value)
+                embed.addFields([{ name: t('commands.help.text_command_usage'), value: usage }])
+                for (const sc of subcommands) embed.addFields([{ name: `${command.name} ${sc.name}`, value: sc.value }])
             }
 
             await interaction.reply({ embeds: [embed] })
@@ -141,7 +150,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
             if (customCommand.options.length) {
                 const usage =
-                    `${server.prefix}${customCommand.name} ` +
+                    `/${customCommand.name} ` +
                     customCommand.options
                         .map(opt => {
                             return `${opt.required ? '<' : '['}${opt.name}${opt.required ? '>' : ']'}`
@@ -160,8 +169,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
                     })
                     .join('\n')
 
-                embed.addField(t('commands.help.text_command_usage'), `\`${usage}\``)
-                embed.addField(t('commands.help.text_command_args'), args)
+                embed.addFields([
+                    { name: t('commands.help.text_command_usage'), value: `\`${usage}\`` },
+                    { name: t('commands.help.text_command_args'), value: args }
+                ])
             }
 
             await interaction.reply({ embeds: [embed] })

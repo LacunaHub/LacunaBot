@@ -53,9 +53,11 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
 
             const embed = new MessageEmbed()
                 .setTitle(t('logs.invite_create_title'))
-                .addField(t('logs.invite_code'), `[${invite.code}](${invite.url})`, true)
-                .addField(t('common.channel'), `<#${invite.channel.id}>`, true)
-                .addField(t('logs.invite_inviter'), invite.inviter?.tag ?? '-', true)
+                .addFields([
+                    { name: t('logs.invite_code'), value: `[${invite.code}](${invite.url})`, inline: true },
+                    { name: t('common.channel'), value: `<#${invite.channel.id}>`, inline: true },
+                    { name: t('logs.invite_inviter'), value: invite.inviter?.tag ?? '-', inline: true }
+                ])
                 .setTimestamp()
                 .setColor('#2FDF84')
 

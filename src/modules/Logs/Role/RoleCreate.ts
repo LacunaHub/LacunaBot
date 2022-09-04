@@ -57,8 +57,10 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
             const embed = new MessageEmbed()
                 .setTitle(t('logs.role_create_title'))
                 .setDescription(t('logs.role_create_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, role: `<@&${role.id}>` }))
-                .addField(t('logs.role_color'), `\`${role.hexColor}\``, true)
-                .addField(t('logs.role_position'), role.rawPosition.toString(), true)
+                .addFields([
+                    { name: t('logs.role_color'), value: `\`${role.hexColor}\``, inline: true },
+                    { name: t('logs.role_position'), value: role.rawPosition.toString(), inline: true }
+                ])
                 .setFooter({ text: role.id })
                 .setTimestamp()
                 .setColor('#2FDF84')

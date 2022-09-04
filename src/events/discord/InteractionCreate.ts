@@ -3,7 +3,7 @@ import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponen
 import Lacuna from '../../internals/Lacuna'
 import { buttonPressed } from '../../internals/structures/Giveaway'
 import { resolveObjectPath } from '../../internals/utility/Utils'
-import { CustomCommand } from '../../modules/CustomCommandV2'
+import CustomCommand from '../../modules/CustomCommand'
 import Replacer from '../../modules/Replacer'
 import reports from '../../modules/Reports'
 

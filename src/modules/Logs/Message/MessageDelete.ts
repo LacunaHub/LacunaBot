@@ -57,9 +57,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
 
             const embed = new MessageEmbed()
                 .setTitle(t('logs.message_delete_title'))
-                .addField(t('logs.message_author'), `${message.author.tag}\n(${message.author.id})`, true)
-                .addField(t('common.channel'), `<#${message.channel.id}>`, true)
-                .addField(t('logs.message_content'), content || `\`[${t('common.attachment')}]\``)
+                .addFields([
+                    { name: t('logs.message_author'), value: `${message.author.tag}\n(${message.author.id})`, inline: true },
+                    { name: t('common.channel'), value: `<#${message.channel.id}>`, inline: true },
+                    { name: t('logs.message_content'), value: content || `\`[${t('common.attachment')}]\``, inline: true }
+                ])
                 .setFooter({ text: message.id })
                 .setTimestamp()
                 .setColor('#EF5350')
