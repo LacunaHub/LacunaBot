@@ -7,8 +7,8 @@
     <transition enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown" appear>
       <div v-if="!pageLoading" class="row full-width" style="max-width: 720px">
         <div class="col-12 q-mb-md">
-          <div class="shadow-2 rounded-lg">
-            <q-toolbar class="bg-dark-grey-2 q-py-sm rounded-t-lg">
+          <div class="shadow-0 rounded-lg">
+            <q-toolbar class="bg-dark-1 q-py-sm rounded-t-lg">
               <q-item-section avatar>
                 <q-avatar>
                   <img :src="user.avatarURL" alt="User Avatar" />
@@ -20,7 +20,7 @@
               </q-item-section>
             </q-toolbar>
 
-            <q-tabs class="bg-dark-grey-2 rounded-b-lg" no-caps align="left">
+            <q-tabs class="bg-dark-1 rounded-b-lg" no-caps align="left">
               <q-route-tab to="/@me" :label="$t('pages.dashboard.profile')"></q-route-tab>
               <q-route-tab to="/@me/guilds" :label="$t('pages.dashboard.my_guilds')"></q-route-tab>
               <q-route-tab to="/@me/bills" :label="$t('pages.dashboard.bills')"></q-route-tab>

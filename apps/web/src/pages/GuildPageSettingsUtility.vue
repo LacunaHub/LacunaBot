@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -40,7 +40,7 @@
                 <template #selected-item="{ opt }">
                   <q-chip
                     class="rounded-lg"
-                    color="dark-grey-1"
+                    color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"
@@ -74,7 +74,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -93,7 +93,7 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(autoReaction, i) in guild.modules.autoreactions" :key="i" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item class="rounded-lg" clickable v-ripple @click="autoReactionDialog(autoReaction)">
                   <q-item-section>
                     <q-item-label>
@@ -124,7 +124,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -140,7 +140,7 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(im, i) in guild.modules.interactive_messages" :key="i" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item class="rounded-lg" clickable v-ripple @click="imDialog(im)">
                   <q-item-section>
                     <q-item-label>
@@ -169,7 +169,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -188,7 +188,7 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(ir, i) in guild.modules.reactions" :key="i" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item class="rounded-lg" clickable v-ripple @click="irDialog(ir)">
                   <q-item-section>
                     <q-item-label>

@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-grey-2" style="width: 1000px; max-width: 90vw">
+    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
@@ -55,7 +55,7 @@
               <template #selected-item="{ opt }">
                 <q-chip
                   class="rounded-lg"
-                  color="dark-grey-1"
+                  color="dark-1"
                   square
                   :label="opt.name ?? opt"
                   :icon="opt.icon"
@@ -102,7 +102,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-grey-3" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">

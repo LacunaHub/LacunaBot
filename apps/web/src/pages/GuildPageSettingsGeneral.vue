@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -12,15 +12,7 @@
 
         <q-card-section>
           <div class="row q-col-gutter-md">
-            <div class="col-12 col-md-6">
-              <div>
-                {{ $t('pages.guild.gs_prefix_title') }}
-              </div>
-
-              <q-input v-model="guild.prefix" class="q-pt-sm" filled dense hide-bottom-space></q-input>
-            </div>
-
-            <div class="col-12 col-md-6">
+            <div class="col-12">
               <div>
                 {{ $t('pages.guild.gs_locale_title') }}
               </div>
@@ -113,7 +105,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -181,7 +173,7 @@
                 <template #selected-item="{ opt }">
                   <q-chip
                     class="rounded-lg"
-                    color="dark-grey-1"
+                    color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"
@@ -227,7 +219,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -292,7 +284,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -389,7 +381,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -457,7 +449,7 @@
                 <template #selected-item="{ opt }">
                   <q-chip
                     class="rounded-lg"
-                    color="dark-grey-1"
+                    color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"

@@ -1,6 +1,6 @@
 <template>
-  <q-card class="g-card rounded-lg bg-dark-grey-2 cursor-pointer" :style="joined ? '' : 'opacity: 0.5'">
-    <q-item>
+  <q-card class="g-card rounded-lg bg-dark-1 cursor-pointer" :style="joined ? '' : 'opacity: 0.4'" flat>
+    <q-item class="rounded-lg" clickable v-ripple>
       <q-item-section avatar>
         <q-avatar>
           <img :src="icon" :alt="name" />
@@ -38,13 +38,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss" scoped>
-.g-card {
-  transition: 0.3 ease-in;
-}
-
-.g-card:hover {
-  box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 6px 10px rgb(0 0 0 / 14%), 0 1px 18px rgb(0 0 0 / 12%);
-}
-</style>

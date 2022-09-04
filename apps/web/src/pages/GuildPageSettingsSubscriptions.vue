@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">Twitch</q-item-label>
@@ -19,7 +19,7 @@
               :key="twitch.broadcaster_id"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item class="rounded-lg" clickable v-ripple @click="twitchDialog(twitch)">
                   <q-item-section avatar style="min-width: 24px">
                     <q-avatar size="24px">
@@ -54,7 +54,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">YouTube</q-item-label>
@@ -72,7 +72,7 @@
               :key="youtube.channel_id"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item class="rounded-lg" clickable v-ripple @click="youtubeDialog(youtube)">
                   <q-item-section avatar style="min-width: 24px">
                     <q-avatar size="24px">

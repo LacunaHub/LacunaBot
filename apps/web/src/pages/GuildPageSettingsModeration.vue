@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -88,7 +88,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -127,7 +127,7 @@
                 <template #selected-item="{ opt }">
                   <q-chip
                     class="rounded-lg"
-                    color="dark-grey-1"
+                    color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"
@@ -164,7 +164,7 @@
             :label="$t('pages.guild.md_case_log_types_title')"
             :caption="$t('pages.guild.md_case_log_types_description')"
           >
-            <q-card class="rounded-lg bg-dark-grey-2">
+            <q-card class="rounded-lg bg-dark-1" flat>
               <q-card-section>
                 <div class="row q-col-gutter-md">
                   <div
@@ -175,7 +175,7 @@
                     <q-btn
                       class="full-width"
                       :label="$t(`common.case_log_keys.${caseType}`)"
-                      color="dark-grey-3"
+                      color="dark-2"
                       align="left"
                       unelevated
                       no-caps
@@ -192,7 +192,7 @@
             :label="$t('pages.guild.md_action_log_title')"
             :caption="$t('pages.guild.md_action_log_description')"
           >
-            <q-card class="rounded-lg bg-dark-grey-2">
+            <q-card class="rounded-lg bg-dark-1" flat>
               <q-card-section>
                 <div class="row q-col-gutter-md">
                   <div
@@ -200,7 +200,7 @@
                     :key="log"
                     class="col-12 col-sm-6 col-md-4"
                   >
-                    <q-card class="rounded-lg bg-dark-grey-3" flat>
+                    <q-card class="rounded-lg bg-dark-2" flat>
                       <q-item class="rounded-t-lg" tag="label" v-ripple>
                         <q-item-section>
                           <q-item-label>
@@ -229,7 +229,7 @@
                           <template #selected-item="{ opt }">
                             <q-chip
                               class="rounded-lg"
-                              color="dark-grey-1"
+                              color="dark-1"
                               square
                               :label="opt.name ?? opt"
                               :icon="opt.icon"
@@ -273,7 +273,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -352,7 +352,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -367,7 +367,7 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="autoMod of automoderTypes" :key="autoMod" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item class="rounded-lg" clickable v-ripple @click="autoModDialog(autoMod.name)">
                   <q-item-section>
                     <q-item-label :class="guild.moderation.automoder[autoMod.name].active ? '' : 'text--secondary'">
@@ -389,7 +389,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -412,7 +412,7 @@
               :key="penalty.id"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item @click="penaltyDialog(penalty)" class="rounded-lg" clickable v-ripple>
                   <q-item-section>
                     <q-item-label class="ellipsis">

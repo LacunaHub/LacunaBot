@@ -9,7 +9,7 @@
         <div class="col-12 col-md-3">
           <div class="row q-col-gutter-md">
             <div class="col-12">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-item class="q-pt-md">
                   <q-item-section avatar>
                     <q-avatar>
@@ -41,7 +41,7 @@
             </div>
 
             <div class="col-12 lt-md">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-list padding>
                   <q-item clickable v-ripple @click="lacunaDiamondDialog">
                     <q-item-section class="text-subtitle1">Lacuna Diamond</q-item-section>
@@ -74,7 +74,7 @@
 
             <div class="col-12 lt-md">
               <q-tabs
-                class="bg-dark-grey-2 rounded-lg"
+                class="bg-dark-1 rounded-lg"
                 no-caps
                 active-class="nav-item--active"
                 indicator-color="transparent"
@@ -98,7 +98,7 @@
             </div>
 
             <div class="col-12 gt-sm">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-list padding>
                   <q-item clickable v-ripple @click="lacunaDiamondDialog">
                     <q-item-section class="text-subtitle1">Lacuna Diamond</q-item-section>
@@ -376,6 +376,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .nav-item--active {
   color: white;
-  background: $dark-grey-3;
+  background: $secondary;
 }
 </style>

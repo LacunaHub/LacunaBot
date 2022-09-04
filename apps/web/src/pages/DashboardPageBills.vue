@@ -1,6 +1,7 @@
 <template>
   <q-table
-    class="bg-dark-grey-2 rounded-lg"
+    class="bg-dark-1 rounded-lg"
+    flat
     :rows="bills"
     row-key="id"
     :columns="columns"

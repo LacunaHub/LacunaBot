@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -60,7 +60,7 @@
 
         <q-list class="q-px-none">
           <q-expansion-item expand-separator :label="$t('common.permissions')">
-            <q-card class="rounded-lg bg-dark-grey-2">
+            <q-card class="rounded-lg bg-dark-1" flat>
               <q-card-section>
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
@@ -70,7 +70,7 @@
 
                     <q-select
                       v-model="guild.modules.levels.allowed.channels"
-                      :options="guild.channelsText"
+                      :options="[...guild.channelsText, ...guild.channelsVoice]"
                       option-label="name"
                       option-value="id"
                       :disable="!guild.modules.levels.active && !guild.modules.levels.voice"
@@ -85,7 +85,7 @@
                       <template #selected-item="{ opt, index, removeAtIndex }">
                         <q-chip
                           class="rounded-lg"
-                          color="dark-grey-1"
+                          color="dark-1"
                           square
                           :label="opt.name ?? opt"
                           :icon="opt.icon"
@@ -128,7 +128,7 @@
 
                     <q-select
                       v-model="guild.modules.levels.blocked.channels"
-                      :options="guild.channelsText"
+                      :options="[...guild.channelsText, ...guild.channelsVoice]"
                       option-label="name"
                       option-value="id"
                       :disable="!guild.modules.levels.active && !guild.modules.levels.voice"
@@ -143,7 +143,7 @@
                       <template #selected-item="{ opt, index, removeAtIndex }">
                         <q-chip
                           class="rounded-lg"
-                          color="dark-grey-1"
+                          color="dark-1"
                           square
                           :label="opt.name ?? opt"
                           :icon="opt.icon"
@@ -367,7 +367,7 @@
                 <template #selected-item="{ opt }">
                   <q-chip
                     class="rounded-lg"
-                    color="dark-grey-1"
+                    color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"
@@ -435,7 +435,7 @@
               :key="award.id"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item
                   @click="awardDialog(award)"
                   :disable="!guild.modules.levels.active && !guild.modules.levels.voice"
@@ -475,7 +475,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -525,7 +525,7 @@
               :key="currency.id"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item
                   @click="currencyDialog(currency)"
                   :disable="!guild.modules.economy.active"
@@ -567,7 +567,7 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="item in guild.modules.economy.store.items" :key="item.id" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item
                   @click="storeItemDialog(item)"
                   :disable="!guild.modules.economy.active"
@@ -601,7 +601,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -621,7 +621,7 @@
               :key="multiplier.id"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item class="rounded-lg" clickable v-ripple @click="multiplierDialog(multiplier)">
                   <q-item-section>
                     <q-item-label>{{ multiplier.id }}</q-item-label>

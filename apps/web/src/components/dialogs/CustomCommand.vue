@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-grey-2" style="width: 1000px; max-width: 90vw">
+    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
       <q-item class="q-py-md rounded-t-lg">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
@@ -10,7 +10,7 @@
       </q-item>
 
       <q-card-section v-if="confirmError">
-        <q-banner class="rounded-lg bg-dark-grey-3" dense>
+        <q-banner class="rounded-lg bg-dark-2" dense>
           <span>
             {{ $t(`errors.custom_commands.${confirmError}`) }}
           </span>
@@ -23,9 +23,9 @@
 
       <q-tabs
         v-model="currentTab"
-        class="bg-dark-grey-3"
+        class="bg-dark-2"
         align="justify"
-        active-bg-color="dark-grey-4"
+        active-bg-color="secondary"
         indicator-color="transparent"
         no-caps
       >
@@ -34,7 +34,7 @@
         <q-tab name="components" :label="$t('common.actions')" style="width: 50%"></q-tab>
       </q-tabs>
 
-      <q-tab-panels v-model="currentTab" class="bg-dark-grey-2" animated>
+      <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
         <q-tab-panel name="general" class="q-pa-none" style="overflow-y: hidden">
           <q-card-section v-if="mode === 'CREATE'">
             <div class="row q-col-gutter-md">
@@ -241,7 +241,7 @@
                 <q-btn-dropdown
                   class="full-width"
                   :label="$t('custom_command.add_condition')"
-                  color="secondary"
+                  color="dark-2"
                   no-caps
                   unelevated
                 >
@@ -268,7 +268,7 @@
                 <q-btn-dropdown
                   class="full-width"
                   :label="$t('custom_command.add_action')"
-                  color="accent"
+                  color="dark-2"
                   no-caps
                   unelevated
                 >
@@ -333,7 +333,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-grey-3" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
@@ -631,7 +631,6 @@ export default defineComponent({
           action: {
             type,
             modify_wallet: {
-              operator: 'INCREMENT',
               amount: '0',
               user_id: null,
               currency_id: null

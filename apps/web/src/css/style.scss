@@ -2,54 +2,30 @@
 
 /* Text */
 
-.text-dark-grey-1 {
-  color: $dark-grey-1 !important;
+.text-dark-1 {
+  color: $dark-1 !important;
 }
 
-.text-dark-grey-2 {
-  color: $dark-grey-2 !important;
-}
-
-.text-dark-grey-3 {
-  color: $dark-grey-3 !important;
-}
-
-.text-dark-grey-3d5 {
-  color: $dark-grey-3d5 !important;
-}
-
-.text-dark-grey-4 {
-  color: $dark-grey-4 !important;
+.text-dark-2 {
+  color: $dark-2 !important;
 }
 
 .text--primary {
-  color: #fff;
+  color: $almost-white-1;
 }
 
 .text--secondary {
-  color: #cdcdcd;
+  color: $almost-white-3;
 }
 
 /* Background */
 
-.bg-dark-grey-1 {
-  background: $dark-grey-1 !important;
+.bg-dark-1 {
+  background: $dark-1 !important;
 }
 
-.bg-dark-grey-2 {
-  background: $dark-grey-2 !important;
-}
-
-.bg-dark-grey-3 {
-  background: $dark-grey-3 !important;
-}
-
-.bg-dark-grey-3d5 {
-  background: $dark-grey-3d5 !important;
-}
-
-.bg-dark-grey-4 {
-  background: $dark-grey-4 !important;
+.bg-dark-2 {
+  background: $dark-2 !important;
 }
 
 /* OPACITY */
@@ -81,9 +57,9 @@
 }
 
 .dashed-border {
-  border-width: 1px;
+  border-width: 2px;
   border-style: dashed;
-  border-color: #757575;
+  border-color: $secondary;
 }
 
 /* OTHER HELPERS */
@@ -103,8 +79,8 @@
 }
 
 .menu-item--active {
-  color: white;
-  background: $dark-grey-3;
+  color: $almost-white-1;
+  background: $secondary;
 }
 
 .break-word {
@@ -116,10 +92,11 @@
 code {
   text-indent: 0;
   white-space: pre-wrap;
-  background: $dark-grey-2;
-  border: 1px solid $dark-grey-2;
+  background: $dark-1;
+  border: 1px solid black;
   border-radius: $border-radius-md;
   padding: 1px;
+  color: $almost-white-3;
 }
 
 pre > code {
@@ -127,8 +104,8 @@ pre > code {
   overflow-x: auto;
   padding: 0.5em;
   text-size-adjust: none;
-  border: 1px solid $dark-grey-1;
-  color: #cdcdcd;
+  border: 1px solid $dark-1;
+  color: $almost-white-3;
 }
 
 pre {

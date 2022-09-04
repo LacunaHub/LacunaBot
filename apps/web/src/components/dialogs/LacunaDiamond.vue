@@ -1,8 +1,8 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-grey-2" style="width: 800px; max-width: 90vw">
-      <q-card-section v-if="guild.premium.available">
-        <q-banner class="rounded-lg bg-dark-grey-3" dense>
+    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+      <q-card-section v-if="!guild.premium.available">
+        <q-banner class="rounded-lg bg-dark-2" dense>
           <span v-if="guild.premium.will_expire_on">
             {{
               $t('lacuna_diamond.has_subscription', {
@@ -50,7 +50,7 @@
 
         <q-tabs
           v-model.number="tier"
-          class="rounded-lg bg-dark-grey-3 q-mt-sm"
+          class="rounded-lg bg-dark-2 q-mt-sm"
           align="justify"
           active-bg-color="primary"
           indicator-color="transparent"
@@ -93,7 +93,7 @@
           </template>
 
           <template #option="{ opt, toggleOption, selected }">
-            <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="bg-dark-grey-3 text-white">
+            <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
               <q-item-section avatar>
                 <q-avatar size="32px">
                   <img :src="opt.icon" alt="" />
@@ -111,7 +111,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-grey-3" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">

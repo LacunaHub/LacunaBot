@@ -12,22 +12,22 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary: #da70d6;
-$secondary: #26a69a;
+$primary: #b86eab;
+$secondary: #291c2b;
 $accent: #00bcd4;
 
 $positive: #2fdf84;
-$negative: #ef5350;
+$negative: #d67642;
 $info: #31ccec;
 $warning: #ffa726;
 
-$dark: #1d1d1d;
+$dark-1: #0f0f12;
+$dark-2: #16151a;
+$dark-3: darken($dark-2, 5.7%);
 
-$dark-grey-1: #252525;
-$dark-grey-2: #404040;
-$dark-grey-3: #555555;
-$dark-grey-3d5: #616161;
-$dark-grey-4: #757575;
+$almost-white-1: #f4f4f4;
+$almost-white-2: darken($almost-white-1, 10%);
+$almost-white-3: darken($almost-white-1, 25%);
 
 $border-radius-sm: 2px;
 $border-radius-md: $border-radius-sm * 2;
@@ -35,3 +35,18 @@ $border-radius-lg: $border-radius-md * 2;
 $border-radius-xl: $border-radius-lg * 3;
 $border-radius-max: 9999px;
 $border-radius-circle: 50%;
+
+$dimmed-background: rgba(0, 0, 0, 0.5) !important;
+
+$input-text-color: $almost-white-1 !important;
+$input-label-color: $almost-white-1 !important;
+
+$generic-border-radius: $border-radius-lg !important;
+
+$separator-dark-color: $secondary !important;
+
+$button-border-radius: $border-radius-lg;
+
+$menu-background: $dark-2 !important;
+
+$item-base-color: $secondary !important;

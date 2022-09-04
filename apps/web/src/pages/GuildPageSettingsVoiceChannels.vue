@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -85,7 +85,7 @@
                 <template #selected-item="{ opt, index, removeAtIndex }">
                   <q-chip
                     class="rounded-lg"
-                    color="dark-grey-1"
+                    color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"
@@ -137,7 +137,7 @@
                 <template #selected-item="{ opt, index, removeAtIndex }">
                   <q-chip
                     class="rounded-lg"
-                    color="dark-grey-1"
+                    color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"
@@ -173,7 +173,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -196,7 +196,7 @@
               :key="i"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item @click="voiceRoleDialog(voiceRole)" class="rounded-lg" clickable v-ripple>
                   <q-item-section>
                     <q-item-label>
@@ -225,7 +225,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -248,7 +248,7 @@
               :key="i"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item @click="autoVoiceDialog(autoVoice)" class="rounded-lg" clickable v-ripple>
                   <q-item-section>
                     <q-item-label>

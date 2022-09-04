@@ -2,14 +2,14 @@
   <!-- eslint-disable vue/no-deprecated-slot-attribute -->
   <!-- eslint-disable vue/no-mutating-props -->
   <div>
-    <q-toolbar class="bg-dark-grey-3 rounded-t-lg">
+    <q-toolbar class="bg-dark-2 rounded-t-lg">
       <q-btn
         v-model="currentView"
         @click="switchView('CONTENT')"
         :disable="disable"
         class="q-mr-xs"
         icon="notes"
-        :color="currentView === 'CONTENT' ? 'dark-grey-4' : ''"
+        :color="currentView === 'CONTENT' ? 'secondary' : ''"
         unelevated
         dense
       ></q-btn>
@@ -20,7 +20,7 @@
         :disable="disable"
         class="q-mr-xs"
         icon="table_chart"
-        :color="currentView === 'EMBED' ? 'dark-grey-4' : ''"
+        :color="currentView === 'EMBED' ? 'secondary' : ''"
         unelevated
         dense
       ></q-btn>
@@ -31,7 +31,7 @@
         :disable="disable"
         class="q-mr-xs"
         icon="visibility"
-        :color="currentView === 'PREVIEW' ? 'dark-grey-4' : ''"
+        :color="currentView === 'PREVIEW' ? 'secondary' : ''"
         unelevated
         dense
       ></q-btn>
@@ -58,7 +58,7 @@
       ></q-btn>
     </q-toolbar>
 
-    <q-separator></q-separator>
+    <q-separator class="bg-dark-1"></q-separator>
 
     <transition-group enter-active-class="animated fadeInUp">
       <q-input
@@ -66,14 +66,14 @@
         key="CONTENT"
         v-model.trim="message.content"
         :disable="disable"
+        class="rounded-b-lg"
         type="textarea"
         :maxlength="2000"
         filled
-        square
         hide-bottom-space
       ></q-input>
 
-      <q-card v-if="currentView === 'EMBED'" key="EMBED" class="bg-dark-grey-3 rounded-b-lg" flat>
+      <q-card v-if="currentView === 'EMBED'" key="EMBED" class="bg-dark-2 rounded-b-lg" flat>
         <div
           class="absolute-left cursor-pointer"
           :style="`background: ${messageEmbed.color || 'black'}; width: 8px; border-radius: 0 0 0 16px`"
@@ -228,7 +228,7 @@
 
                     <q-separator></q-separator>
 
-                    <q-toolbar class="bg-dark-grey-3d5 rounded-b-lg">
+                    <q-toolbar class="bg-dark-2 rounded-b-lg">
                       <q-checkbox
                         v-model="field.inline"
                         dense
@@ -255,13 +255,12 @@
 
             <div class="col-12">
               <q-btn
-                class="full-width"
+                class="full-width dashed-border"
                 :label="$t('message_editor.add_embed_field')"
                 @click="addEmbedField"
                 :disable="messageEmbed.fields.length >= 25 || !messageEmbed.active || disable"
                 unelevated
                 no-caps
-                color="dark-grey-4"
               />
             </div>
           </div>
@@ -355,11 +354,11 @@
         </q-card-section>
       </q-card>
 
-      <q-card v-if="currentView === 'PREVIEW'" key="PREVIEW" class="bg-dark-grey-3 rounded-b-lg" flat>
+      <q-card v-if="currentView === 'PREVIEW'" key="PREVIEW" class="bg-dark-2 rounded-b-lg" flat>
         <q-item>
           <q-item-section avatar top>
             <q-avatar>
-              <img src="https://cdn.discordapp.com/avatars/740585412560420914/bf35f109c9f13f009fcd2fa493a7c17a.png" />
+              <img src="~assets/lacuna-avatar.png" />
             </q-avatar>
           </q-item-section>
 
@@ -380,7 +379,7 @@
               class="q-pt-xs"
               :style="`max-width: ${$q.screen.lt.md ? '100' : '45'}%;`"
             >
-              <q-card class="bg-dark-grey-2 rounded-md" flat>
+              <q-card class="bg-dark-1 rounded-md" flat>
                 <div
                   class="absolute-left float-right"
                   :style="`background: ${message.embed.color || 'black'}; width: 4px; border-radius: 8px 0 0 8px`"
@@ -494,12 +493,12 @@
     </transition-group>
 
     <q-dialog v-model="replacersModal" transition-show="jump-down" transition-hide="jump-up">
-      <q-card class="rounded-lg bg-dark-grey-2" style="width: 380px; max-width: 80vw">
+      <q-card class="bg-dark-1" flat style="width: 380px; max-width: 80vw">
         <q-tabs
           v-model="replacersModalTab"
-          class="bg-dark-grey-3"
+          class="bg-dark-2"
           align="justify"
-          active-bg-color="dark-grey-4"
+          active-bg-color="secondary"
           indicator-color="transparent"
           no-caps
         >
@@ -515,12 +514,7 @@
 
         <q-separator></q-separator>
 
-        <q-tab-panels
-          v-model="replacersModalTab"
-          class="bg-dark-grey-2"
-          animated
-          style="max-height: 50vh; overflow-y: auto"
-        >
+        <q-tab-panels v-model="replacersModalTab" class="bg-dark-1" animated style="max-height: 50vh; overflow-y: auto">
           <q-tab-panel name="replacers" class="q-px-none" style="overflow-y: hidden">
             <q-list>
               <q-item
@@ -569,12 +563,12 @@
     </q-dialog>
 
     <q-dialog v-model="mentionsModal" transition-show="jump-down" transition-hide="jump-up">
-      <q-card class="rounded-lg bg-dark-grey-2" style="width: 380px; max-width: 80vw">
+      <q-card class="bg-dark-1" flat style="width: 380px; max-width: 80vw">
         <q-tabs
           v-model="mentionsModalTab"
-          class="bg-dark-grey-3"
+          class="bg-dark-2"
           align="justify"
-          active-bg-color="dark-grey-4"
+          active-bg-color="secondary"
           indicator-color="transparent"
           no-caps
         >
@@ -585,12 +579,7 @@
 
         <q-separator></q-separator>
 
-        <q-tab-panels
-          v-model="mentionsModalTab"
-          class="bg-dark-grey-2"
-          animated
-          style="max-height: 50vh; overflow-y: auto"
-        >
+        <q-tab-panels v-model="mentionsModalTab" class="bg-dark-1" animated style="max-height: 50vh; overflow-y: auto">
           <q-tab-panel name="roles" class="q-px-none" style="overflow-y: hidden">
             <q-list>
               <q-item v-for="role in guild.roles" :key="role.id" clickable v-ripple @click="onSelectMention(role)">
@@ -633,7 +622,7 @@
     </q-dialog>
 
     <q-dialog v-model="emojiPickerModal" transition-show="jump-down" transition-hide="jump-up">
-      <q-card class="rounded-lg" style="max-width: 380px">
+      <q-card style="max-width: 380px">
         <emoji-picker
           :data="guild.emojiIndex"
           @select="onSelectEmoji"
@@ -645,12 +634,7 @@
     </q-dialog>
 
     <q-dialog v-model="embedColorModal" transition-show="jump-down" transition-hide="jump-up">
-      <q-color
-        v-model="messageEmbed.color"
-        class="rounded-lg bg-dark-grey-2"
-        no-header-tabs
-        format-model="hex"
-      ></q-color>
+      <q-color v-model="messageEmbed.color" class="bg-dark-1" no-header-tabs format-model="hex"></q-color>
     </q-dialog>
   </div>
 </template>
