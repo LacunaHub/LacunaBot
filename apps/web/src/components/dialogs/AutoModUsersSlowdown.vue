@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-grey-2" style="width: 1000px; max-width: 90vw">
+    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
       <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
@@ -15,9 +15,9 @@
 
       <q-tabs
         v-model="currentTab"
-        class="bg-dark-grey-3"
+        class="bg-dark-2"
         align="justify"
-        active-bg-color="dark-grey-4"
+        active-bg-color="secondary"
         indicator-color="transparent"
         no-caps
       >
@@ -26,7 +26,7 @@
         <q-tab name="actions" :label="$t('common.actions')" style="width: 50%"></q-tab>
       </q-tabs>
 
-      <q-tab-panels v-model="currentTab" class="bg-dark-grey-2" animated>
+      <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
         <q-tab-panel name="general" class="q-pa-none" style="overflow-y: hidden">
           <q-card-section>
             <div class="row q-col-gutter-md">
@@ -74,7 +74,7 @@
                   <template #selected-item="{ opt, index, removeAtIndex }">
                     <q-chip
                       class="rounded-lg"
-                      color="dark-grey-1"
+                      color="dark-1"
                       square
                       :label="opt.name ?? opt"
                       :icon="opt.icon"
@@ -449,7 +449,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-grey-3" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">

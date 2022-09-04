@@ -26,26 +26,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss" scoped>
-.toolbar-title-logo {
-  opacity: 1;
-  transition: 0.3s;
-  text-decoration: none;
-  color: white;
-}
-.toolbar-title-logo:hover {
-  opacity: 0.8;
-}
-
-.header-link {
-  color: white;
-  text-decoration: none;
-  opacity: 0.6;
-  transition: 0.3s;
-  font-size: 15px;
-}
-.header-link:hover {
-  opacity: 1;
-}
-</style>

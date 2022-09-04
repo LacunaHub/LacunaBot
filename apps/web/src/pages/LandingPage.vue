@@ -12,7 +12,7 @@
           <div :class="`${$q.screen.lt.sm ? 'text-h5' : 'text-h4'}`">
             {{ $t('pages.landing.title') }}
           </div>
-          <div class="opacity-md">
+          <div class="text--secondary">
             {{ $t('pages.landing.description') }}
           </div>
 
@@ -25,6 +25,7 @@
             @click="addToMe"
             color="primary"
             size="large"
+            unelevated
             no-caps
           ></q-btn>
 
@@ -33,8 +34,9 @@
           <q-btn
             :class="`${$q.screen.lt.sm ? 'partial-full-width' : ''}`"
             :label="$t('pages.landing.learn_more')"
-            color="black"
+            color="dark-1"
             size="large"
+            unelevated
             no-caps
             @click="scrollToFeatures"
           ></q-btn>
@@ -51,7 +53,7 @@
           <div class="text-h5">
             {{ $t('pages.landing.bf_stability_title') }}
           </div>
-          <p class="opacity-md">
+          <p class="text--secondary">
             {{ $t('pages.landing.bf_stability_description') }}
           </p>
         </div>
@@ -60,7 +62,7 @@
           <div class="text-h5">
             {{ $t('pages.landing.bf_ease_title') }}
           </div>
-          <p class="opacity-md">
+          <p class="text--secondary">
             {{ $t('pages.landing.bf_ease_description') }}
           </p>
         </div>
@@ -69,7 +71,7 @@
           <div class="text-h5">
             {{ $t('pages.landing.bf_functionality_title') }}
           </div>
-          <p class="opacity-md">
+          <p class="text--secondary">
             {{ $t('pages.landing.bf_functionality_description') }}
           </p>
         </div>
@@ -85,7 +87,7 @@
                 <div class="text-h5">
                   {{ $t('pages.landing.ft_activities_title') }}
                 </div>
-                <div class="opacity-md">
+                <div class="text--secondary">
                   {{ $t('pages.landing.ft_activities_description') }}
                 </div>
               </div>
@@ -106,7 +108,7 @@
                 <div class="text-h5">
                   {{ $t('pages.landing.ft_moderation_title') }}
                 </div>
-                <div class="opacity-md">
+                <div class="text--secondary">
                   {{ $t('pages.landing.ft_moderation_description') }}
                 </div>
               </div>
@@ -127,7 +129,7 @@
                 <div class="text-h5">
                   {{ $t('pages.landing.ft_subscriptions_title') }}
                 </div>
-                <div class="opacity-md">
+                <div class="text--secondary">
                   {{ $t('pages.landing.ft_subscriptions_description') }}
                 </div>
               </div>
@@ -148,7 +150,7 @@
                 <div class="text-h5">
                   {{ $t('pages.landing.ft_music_title') }}
                 </div>
-                <div class="opacity-md">
+                <div class="text--secondary">
                   {{ $t('pages.landing.ft_music_description') }}
                 </div>
               </div>
@@ -169,7 +171,7 @@
                 <div class="text-h5">
                   {{ $t('pages.landing.ft_utility_title') }}
                 </div>
-                <div class="opacity-md">
+                <div class="text--secondary">
                   {{ $t('pages.landing.ft_utility_description') }}
                 </div>
               </div>
@@ -192,7 +194,7 @@
             <div class="text-h5">
               {{ $t('pages.landing.ready_title') }}
             </div>
-            <div class="opacity-md">
+            <div class="text--secondary">
               {{ $t('pages.landing.ready_description') }}
             </div>
           </div>
@@ -205,6 +207,7 @@
               @click="addToMe"
               color="primary"
               size="large"
+              unelevated
               no-caps
             ></q-btn>
           </div>
@@ -277,7 +280,7 @@ export default defineComponent({
 }
 
 .details-sector {
-  background: $dark-grey-2;
+  background: $dark-1;
 }
 
 .features-sector {

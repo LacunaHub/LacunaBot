@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -17,7 +17,7 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="command in guild.modules.custom_commands" :key="command.id" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-grey-3" flat>
+              <q-card class="rounded-lg bg-dark-2" flat>
                 <q-item @click="customCommandDialog(command)" class="rounded-lg" clickable v-ripple>
                   <q-item-section>
                     <q-item-label>
@@ -37,7 +37,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-grey-2">
+      <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -46,22 +46,8 @@
           </q-item-section>
         </q-item>
 
-        <q-list class="q-px-none" padding dense>
-          <q-item tag="label" v-ripple>
-            <q-item-section>
-              <q-item-label>
-                {{ $t('pages.guild.cm_enable_prefix_commands_title') }}
-              </q-item-label>
-            </q-item-section>
-
-            <q-item-section side>
-              <q-checkbox v-model="guild.commands.prefix_commands" dense></q-checkbox>
-            </q-item-section>
-          </q-item>
-        </q-list>
-
         <q-card-section>
-          <q-banner class="rounded-lg bg-dark-grey-3" dense>
+          <q-banner class="rounded-lg bg-dark-2" dense>
             <span>
               {{
                 $t(
@@ -82,7 +68,7 @@
             <template #action>
               <q-btn
                 unelevated
-                color="dark-grey-4"
+                color="primary"
                 :label="$t(guild.guild.app_commands_registered ? 'refresh' : 'try_again')"
                 :loading="updateCommandsLoading"
                 @click="updateAppCommands"
@@ -108,7 +94,7 @@
                   :key="command.name"
                   class="col-12 col-sm-6 col-md-4"
                 >
-                  <q-card class="rounded-lg bg-dark-grey-3" flat>
+                  <q-card class="rounded-lg bg-dark-2" flat>
                     <q-item @click="systemCommandDialog(command)" class="rounded-lg" clickable v-ripple>
                       <q-item-section>
                         <q-item-label>

@@ -1,14 +1,14 @@
 <template>
-  <q-card class="bg-dark-grey-2 rounded-lg">
-    <q-list class="q-px-none q-py-md" dense>
-      <q-item class="q-mb-sm">
-        <q-item-section v-if="!dataLoading">
-          <q-item-label>
-            {{ $t('pages.landing.ft_activities_title') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
+  <q-card class="bg-dark-1 rounded-lg" flat>
+    <q-item class="q-py-md rounded-t-lg">
+      <q-item-section v-if="!dataLoading">
+        <q-item-label>
+          {{ $t('pages.landing.ft_activities_title') }}
+        </q-item-label>
+      </q-item-section>
+    </q-item>
 
+    <q-list class="q-px-none q-pb-md">
       <q-item v-for="level in levels" :key="level.guild_id">
         <q-item-section avatar>
           <q-avatar>
@@ -20,7 +20,7 @@
           <q-item-label class="ellipsis">
             {{ level.guild.name }}
           </q-item-label>
-          <q-item-label class="opacity-md">
+          <q-item-label class="text--secondary">
             <span>
               <q-icon name="forum"></q-icon>
               {{ level.activity.total_messages }}
@@ -41,7 +41,7 @@
             show-value
             :value="level.progress.value"
             color="primary"
-            track-color="dark-grey-3"
+            track-color="dark-2"
             size="42px"
           >
             {{ level.experience.level }}

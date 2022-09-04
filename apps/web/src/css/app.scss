@@ -10,7 +10,8 @@ body {
 }
 
 body.body--dark {
-  background: $dark-grey-1;
+  background: $dark-2;
+  color: $almost-white-1;
 }
 
 p {
@@ -23,18 +24,31 @@ a {
 
 /* OVERWRITE FRAMEWORK STYLES */
 
-.q-btn {
-  border-radius: $border-radius-lg;
+.q-field--filled .q-field__control {
+  color: transparent;
+  background: rgba(130, 120, 150, 5.7%) !important;
+
+  &:before {
+    border-bottom: none !important;
+  }
 }
 
-.q-menu {
-  border-radius: $border-radius-lg;
-  color: white;
-  background: $dark-grey-2;
+:not(.q-textarea) > .q-field__inner > .q-field__control,
+.q-textarea--autogrow > .q-field__inner > .q-field__control {
+  border-radius: $border-radius-lg !important;
 }
 
-.q-field__control {
-  border-radius: $border-radius-lg $border-radius-lg 0 0 !important;
+.q-textarea:is(.rounded-b-lg) > .q-field__inner > .q-field__control {
+  border-radius: 0 0 $border-radius-lg $border-radius-lg !important;
+}
+
+.q-linear-progress__track,
+.q-circular-progress__track {
+  opacity: 1 !important;
+}
+
+.q-hoverable:hover > .q-focus-helper {
+  background: rgba(130, 120, 150, 5.7%) !important;
 }
 
 /* OTHER */

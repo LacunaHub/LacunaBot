@@ -10,7 +10,7 @@
     </div>
 
     <div v-if="!user.guilds.filter(i => i.permitted).length" class="col-12">
-      <q-banner class="rounded-lg bg-dark-grey-2" dense>
+      <q-banner class="rounded-lg bg-dark-1" dense>
         <span>
           {{ $t('pages.dashboard.no_guilds') }}
         </span>

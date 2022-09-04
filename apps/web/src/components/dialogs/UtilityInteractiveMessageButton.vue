@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-grey-2" style="width: 800px; max-width: 90vw">
+    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
@@ -37,6 +37,7 @@
               filled
               dense
               hide-bottom-space
+              @update:model-value="onChangeStyle"
             >
               <template #selected-item="{ opt }">
                 <span>
@@ -55,10 +56,26 @@
               </template>
             </q-select>
           </div>
+
+          <div v-if="button.appearance.style === 'LINK'" class="col-12">
+            <div>
+              {{ $t('ims.btn_url_title') }}
+            </div>
+
+            <q-input
+              v-model="button.appearance.url"
+              class="q-pt-sm"
+              :maxlength="256"
+              type="url"
+              filled
+              dense
+              hide-bottom-space
+            ></q-input>
+          </div>
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md" dense>
+      <q-list v-if="button.appearance.style !== 'LINK'" class="q-px-none q-py-md" dense>
         <q-item
           v-for="action in ['EPHEMERAL_REPLY', 'MODIFY_ROLES', 'OVERWRITE_CHANNEL_PERMISSIONS', 'RESTRICT_ROLES']"
           :key="action"
@@ -246,7 +263,7 @@
                 <template #selected-item="{ opt, index, removeAtIndex }">
                   <q-chip
                     class="rounded-lg"
-                    color="dark-grey-1"
+                    color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"
@@ -278,13 +295,7 @@
             </div>
 
             <div class="col-12">
-              <q-btn-dropdown
-                class="full-width"
-                :label="$t('common.permissions')"
-                unelevated
-                no-caps
-                color="dark-grey-3"
-              >
+              <q-btn-dropdown class="full-width" :label="$t('common.permissions')" unelevated no-caps color="dark-2">
                 <q-list>
                   <q-item v-for="(permission, i) in Object.keys(channelPermissions)" :key="i" tag="label" v-ripple>
                     <q-item-section>
@@ -359,7 +370,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-grey-3" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
@@ -443,6 +454,12 @@ export default defineComponent({
       emoji = parseEmoji(emoji.custom ? emoji.emoticons[0] : emoji.native)
       this.button.appearance.emoji = emoji
       this.emojiPickerModal = false
+    },
+    onChangeStyle(style) {
+      if (style === 'LINK') {
+        this.button.options = []
+        this.onSelectOption([])
+      }
     },
     onSelectOption(options) {
       if (options.includes('EPHEMERAL_REPLY') && !this.button.ephemeral_reply) {

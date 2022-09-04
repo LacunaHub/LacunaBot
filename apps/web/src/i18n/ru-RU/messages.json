@@ -440,6 +440,7 @@
     "action_row_select_menu_title": "Выпадающий список",
     "btn_name_title": "Название кнопки",
     "btn_style_title": "Стиль кнопки",
+    "btn_url_title": "Ссылка кнопки",
     "select_menu_placeholder_title": "Заполнитель",
     "opt_name_title": "Название опции",
     "opt_description_title": "Описание опции",
@@ -670,8 +671,8 @@
       "CANNOT_UPDATE_MESSAGE": "Ошибка при обновлении сообщения."
     },
     "irs": {
-      "LIMIT_REACHED": "Достигнуто ограничение на количество интерактивных сообщений.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.ims.LIMIT_REACHED @:errors.activate_lacuna_diamond",
+      "LIMIT_REACHED": "Достигнуто ограничение на количество интерактивных реакций.",
+      "LIMIT_REACHED_NO_PREMIUM": "@:errors.irs.LIMIT_REACHED @:errors.activate_lacuna_diamond",
       "EMOJI_ALREADY_USED": "Выбранный эмодзи уже используется на этом сообщении.",
       "REFERENCE_IS_SINGLE": "Одно или несколько направлений являются одиночными.",
       "UNKNOWN_MESSAGE": "Сообщения с таким идентификатором не найдено в выбранном канале.",

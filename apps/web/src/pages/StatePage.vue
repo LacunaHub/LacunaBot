@@ -9,10 +9,10 @@
         <div class="col-12 col-md-4">
           <div class="row q-col-gutter-md">
             <div class="col-12">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-list>
                   <q-item>
-                    <q-item-section class="opacity-md">
+                    <q-item-section class="text--secondary">
                       {{ $t('pages.state.total_guilds') }}
                     </q-item-section>
 
@@ -20,7 +20,7 @@
                   </q-item>
 
                   <q-item>
-                    <q-item-section class="opacity-md">
+                    <q-item-section class="text--secondary">
                       {{ $t('pages.state.total_users') }}
                     </q-item-section>
 
@@ -33,7 +33,7 @@
                   </q-item>
 
                   <q-item>
-                    <q-item-section class="opacity-md">
+                    <q-item-section class="text--secondary">
                       {{ $t('pages.state.total_channels') }}
                     </q-item-section>
 
@@ -45,7 +45,7 @@
 
                 <q-list>
                   <q-item>
-                    <q-item-section class="opacity-md">
+                    <q-item-section class="text--secondary">
                       {{ $t('pages.state.avg_latency') }}
                     </q-item-section>
 
@@ -55,7 +55,7 @@
                   </q-item>
 
                   <q-item>
-                    <q-item-section class="opacity-md">
+                    <q-item-section class="text--secondary">
                       {{ $t('pages.state.current_version') }}
                     </q-item-section>
 
@@ -66,13 +66,13 @@
             </div>
 
             <div class="col-12">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-item>
                   <q-item-section>
                     <q-item-label class="text-subtitle1">
                       {{ $t('pages.state.clusters_title') }}
                     </q-item-label>
-                    <q-item-label class="opacity-md">
+                    <q-item-label class="text--secondary">
                       {{ $t('pages.state.clusters_description') }}
                     </q-item-label>
                   </q-item-section>
@@ -87,7 +87,12 @@
                     <q-item-section>
                       <div class="row q-col-gutter-md">
                         <div class="col-6">
-                          <q-linear-progress class="rounded-lg" :value="cluster.cpu_usage / 100" size="xl">
+                          <q-linear-progress
+                            class="rounded-lg"
+                            track-color="dark-2"
+                            :value="cluster.cpu_usage / 100"
+                            size="xl"
+                          >
                             <div class="absolute-center text-white">{{ cluster.cpu_usage }}%</div>
                             <q-tooltip
                               class="bg-black rounded-lg"
@@ -102,7 +107,12 @@
                         </div>
 
                         <div class="col-6">
-                          <q-linear-progress class="rounded-lg" :value="cluster.memory_usage / 100" size="xl">
+                          <q-linear-progress
+                            class="rounded-lg"
+                            track-color="dark-2"
+                            :value="cluster.memory_usage / 100"
+                            size="xl"
+                          >
                             <div class="absolute-center text-white">{{ cluster.memory_usage }}%</div>
                             <q-tooltip
                               class="bg-black rounded-lg"
@@ -127,13 +137,13 @@
             </div>
 
             <div class="col-12">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-item>
                   <q-item-section>
                     <q-item-label class="text-subtitle1">
                       {{ $t('pages.state.shards_title') }}
                     </q-item-label>
-                    <q-item-label class="opacity-md">
+                    <q-item-label class="text--secondary">
                       {{ $t('pages.state.shards_description') }}
                     </q-item-label>
                   </q-item-section>
@@ -207,13 +217,13 @@
             </div>
 
             <div class="col-12">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-item>
                   <q-item-section>
                     <q-item-label class="text-subtitle1">
                       {{ $t('pages.state.players_title') }}
                     </q-item-label>
-                    <q-item-label class="opacity-md">
+                    <q-item-label class="text--secondary">
                       {{ $t('pages.state.players_description') }}
                     </q-item-label>
                   </q-item-section>
@@ -232,7 +242,12 @@
                     </q-item-section>
 
                     <q-item-section>
-                      <q-linear-progress class="rounded-lg" :value="player.cpu_load / 100" size="xl">
+                      <q-linear-progress
+                        class="rounded-lg"
+                        track-color="dark-2"
+                        :value="player.cpu_load / 100"
+                        size="xl"
+                      >
                         <div class="absolute-center text-white">{{ player.cpu_load }}%</div>
                         <q-tooltip
                           class="bg-black rounded-lg"
@@ -259,7 +274,7 @@
         <div class="col-12 col-md-8">
           <div class="row q-col-gutter-md">
             <div class="col-12">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-card-section>
                   <LineChart
                     :chart-data="guildsChartData"
@@ -281,7 +296,7 @@
             </div>
 
             <div class="col-12">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-card-section>
                   <LineChart
                     :chart-data="pingsChartData"
@@ -302,7 +317,7 @@
             </div>
 
             <div class="col-12">
-              <q-card class="rounded-lg bg-dark-grey-2">
+              <q-card class="rounded-lg bg-dark-1" flat>
                 <q-card-section>
                   <LineChart
                     :chart-data="commandUsesChartData"
