@@ -1,7 +1,7 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
     <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section v-if="!guild.premium.available">
+      <q-card-section v-if="guild.premium.available">
         <q-banner class="rounded-lg bg-dark-2" dense>
           <span v-if="guild.premium.will_expire_on">
             {{
