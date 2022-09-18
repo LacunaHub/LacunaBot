@@ -9,8 +9,6 @@ import { createTemporaryVoiceOnMove } from '../../modules/VoiceManager'
 const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: state.guild.id })
 
-    const locale = self.translator.locale(server.locale).modules
-
     const player = self.player.get(state.guild.id)
 
     if (player) {
@@ -40,18 +38,20 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
     const old_voice_roles_bound = server.modules.voice_manager.voice_roles
         .slice(0, server.server.premium.available ? 20 : 2)
         .filter(r => r.bound_channels_id.includes(before.channelId))
-    const voice_roles_bound = server.modules.voice_manager.voice_roles.slice(0, server.server.premium.available ? 20 : 2).filter(r => r.bound_channels_id.includes(state.channelId))
+    const voice_roles_bound = server.modules.voice_manager.voice_roles
+        .slice(0, server.server.premium.available ? 20 : 2)
+        .filter(r => r.bound_channels_id.includes(state.channelId))
 
     if (old_voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && old_voice_roles_bound.some(b => b.role_id == r.id))
 
-        if (voice_roles.size) await state.member.roles.remove(voice_roles, locale.voice_manager.voice_remove_roles_reason).catch(self.logger.error)
+        if (voice_roles.size) await state.member.roles.remove(voice_roles).catch(self.logger.error)
     }
 
     if (voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && voice_roles_bound.some(b => b.role_id == r.id))
 
-        if (voice_roles.size) await state.member.roles.add(voice_roles, locale.voice_manager.voice_remove_roles_reason).catch(self.logger.error)
+        if (voice_roles.size) await state.member.roles.add(voice_roles).catch(self.logger.error)
     }
 
     await levelsVoiceUnassign(self, server, before, before.channel)

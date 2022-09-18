@@ -132,8 +132,6 @@ export default class Giveaway {
             return
         }
 
-        const locale = this.self.translator.locale(this.locale).commands
-
         if (this.members.length) {
             const members: Collection<string, string> = new Collection(this.members.map(m => [m, this.message_id]))
 
@@ -150,7 +148,7 @@ export default class Giveaway {
 
             members.clear()
         } else {
-            const embed = new MessageEmbed(message.embeds[0]).setDescription(locale.giveaway.end.texts.no_members).setColor('#EF5350')
+            const embed = new MessageEmbed(message.embeds[0]).setDescription(this.self.i18n.t(this.locale, 'commands.giveaway.end.text_no_members')).setColor('#EF5350')
 
             await message.edit({ embeds: [embed], components: [] })
         }
@@ -161,7 +159,6 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     const [, message_id] = interaction.customId.split('-')
     const giveaway = self.giveaways.find(g => g.message_id == message_id)
     const entry: GiveawayOptions = server.utility.giveaways.find(g => g.message_id == message_id)
-    const locale = self.translator.locale(server.locale)
 
     if (giveaway && entry) {
         if (!entry.members.includes(interaction.user.id))

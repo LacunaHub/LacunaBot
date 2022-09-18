@@ -9,8 +9,6 @@ import { deleteTemporaryVoice } from '../../modules/VoiceManager'
 const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: state.guild.id })
 
-    const locale = self.translator.locale(server.locale).modules
-
     const player = self.player.get(state.guild.id)
 
     if (player && channel?.id == player.voiceChannel) {
@@ -32,7 +30,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
     if (voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && voice_roles_bound.some(b => b.role_id == r.id))
 
-        if (voice_roles.size) await state.member.roles.remove(voice_roles, locale.voice_manager.voice_remove_roles_reason).catch(self.logger.error)
+        if (voice_roles.size) await state.member.roles.remove(voice_roles).catch(self.logger.error)
     }
 
     await levelsVoiceUnassign(self, server, state, channel)
