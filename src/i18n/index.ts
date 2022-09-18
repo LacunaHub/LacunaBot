@@ -1,10 +1,10 @@
 import logger from '../internals/Logger'
 import { resolveObjectPath } from '../internals/utility/Utils'
-import ruRU from './ru-RU/messages.json'
+import en from './en/messages.json'
+import ru from './ru/messages.json'
+import uk from './uk/messages.json'
 
-const messages = {
-    ru: ruRU
-}
+const messages = { en, ru, uk }
 
 export function locale(locale: string): typeof messages.ru {
     return messages[locale] ?? messages.ru

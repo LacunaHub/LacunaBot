@@ -1,0 +1,825 @@
+{
+    "yes": "Yes",
+    "no": "No",
+    "none": "None",
+    "indefinitely": "Indefinitely",
+    "common": {
+        "channel": "Channel",
+        "channels": "Channels",
+        "role": "Role",
+        "roles": "Roles",
+        "attachment": "Attachment",
+        "attachments": "Attachments",
+        "command_missing_permissions": "{user}, this command requires following permissions for execution: {permissions}",
+        "command_missing_send_messages": "{user}, missing permission to send messages in channel {channel}",
+        "command_denied": "{user}, you don't have permission to use this command",
+        "command_premium_only": "{user}, command is only available for bonus servers",
+        "command_throttled": "{user}, the command restriction has been reached, try again at {time}",
+        "command_categories": {
+            "GENERAL": "General",
+            "MODERATION": "Moderation",
+            "MUSIC": "Music",
+            "UTILITY": "Utility",
+            "CUSTOM": "Custom"
+        },
+        "permissions_keys": {
+            "CREATE_INSTANT_INVITE": "Create instant invite",
+            "KICK_MEMBERS": "Kick members",
+            "BAN_MEMBERS": "Ban members",
+            "ADMINISTRATOR": "Administrator",
+            "MANAGE_CHANNELS": "Manage channels",
+            "MANAGE_GUILD": "Manage server",
+            "ADD_REACTIONS": "Add reactions",
+            "VIEW_AUDIT_LOG": "View audit log",
+            "PRIORITY_SPEAKER": "Priority speaker",
+            "STREAM": "Stream",
+            "VIEW_CHANNEL": "View channel",
+            "SEND_MESSAGES": "Send messages",
+            "SEND_TTS_MESSAGES": "Send TTS messages",
+            "MANAGE_MESSAGES": "Manage messages",
+            "EMBED_LINKS": "Embed links",
+            "ATTACH_FILES": "Attach files",
+            "READ_MESSAGE_HISTORY": "Read message history",
+            "MENTION_EVERYONE": "Mention everyone",
+            "USE_EXTERNAL_EMOJIS": "Use external emojis",
+            "VIEW_GUILD_INSIGHTS": "View guild insights",
+            "CONNECT": "Connect",
+            "SPEAK": "Speak",
+            "MUTE_MEMBERS": "Mute members",
+            "DEAFEN_MEMBERS": "Deafen members",
+            "MOVE_MEMBERS": "Move members",
+            "USE_VAD": "Use VAD",
+            "CHANGE_NICKNAME": "Change nickname",
+            "MANAGE_NICKNAMES": "Manage nicknames",
+            "MANAGE_ROLES": "Manage roles",
+            "MANAGE_WEBHOOKS": "Manage webhooks",
+            "MANAGE_EMOJIS_AND_STICKERS": "Manage emojis and stickers",
+            "USE_APPLICATION_COMMANDS": "Use application commands",
+            "REQUEST_TO_SPEAK": "Request to speak",
+            "MANAGE_THREADS": "Manage threads",
+            "USE_PUBLIC_THREADS": "Use public threads",
+            "CREATE_PUBLIC_THREADS": "Create public threads",
+            "USE_PRIVATE_THREADS": "Use private threads",
+            "CREATE_PRIVATE_THREADS": "Create private threads",
+            "USE_EXTERNAL_STICKERS": "Use external stickers",
+            "SEND_MESSAGES_IN_THREADS": "Send messages in threads",
+            "START_EMBEDDED_ACTIVITIES": "Start embedded activities",
+            "MODERATE_MEMBERS": "Moderate members"
+        },
+        "command_option_types": {
+            "SUB_COMMAND": "Sub command",
+            "SUB_COMMAND_GROUP": "Sub command group",
+            "STRING": "String",
+            "INTEGER": "Integer",
+            "BOOLEAN": "Boolean",
+            "USER": "User",
+            "CHANNEL": "Channel",
+            "ROLE": "Role",
+            "MENTIONABLE": "User or role",
+            "NUMBER": "Number"
+        },
+        "guild_verification_levels": {
+            "NONE": "None",
+            "LOW": "Low",
+            "MEDIUM": "Medium",
+            "HIGH": "High",
+            "VERY_HIGH": "Very high"
+        }
+    },
+    "commands": {
+        "about": {
+            "description": "Outputs information about the bot",
+            "text_developer": "Developer",
+            "text_version": "Current version",
+            "text_latency": "Latency",
+            "text_total_guilds": "Total guilds",
+            "text_total_users": "Total users",
+            "text_shard_count": "Number of shards",
+            "text_os_uptime": "System uptime",
+            "text_shard_uptime": "Shard uptime",
+            "text_state": "State"
+        },
+        "help": {
+            "description": "Outputs the list of available commands",
+            "options": {
+                "command": {
+                    "name": "command",
+                    "description": "Command name"
+                }
+            },
+            "text_commands_list": "Command list",
+            "text_command_help": "Help for the {command} command",
+            "text_use_prefix": "Use {prefix} to call commands",
+            "text_use_help_for_more_details": "You can enter {prefix} help for the command and get more information",
+            "text_dashboard_link": "Dashboard",
+            "text_docs_link": "Documentation",
+            "text_command_not_found": "{user}, command not found",
+            "text_command_usage": "Usage",
+            "text_command_args": "Arguments",
+            "text_subcommands": "Sub commands",
+            "text_command_arg_required": "Required",
+            "text_command_arg_optional": "Optional",
+            "text_command_arg_type": "Type: {type}",
+            "text_required_permissions": "Required permissions",
+            "text_required_permissions_bot": "For bot",
+            "text_required_permissions_author": "For the command author"
+        },
+        "leaders": {
+            "description": "Outputs the leaderboard",
+            "options": {
+                "sorting": {
+                    "name": "sort",
+                    "description": "Sorting the leaderboard by selected activity type",
+                    "choices": {
+                        "level": "by level",
+                        "balance": "by balance"
+                    }
+                },
+                "page": {
+                    "name": "page",
+                    "description": "Leaderboard page number"
+                }
+            },
+            "text_levels_disabled": "{user}, levels are disabled on this server",
+            "text_economy_disabled": "{user}, the economy is disabled on this server",
+            "text_no_levels": "{user}, no one on this server has yet received a level",
+            "text_no_wallets": "{user}, there are no wallets on this server yet",
+            "text_leaders_by": "Server leaders {sort}",
+            "text_pagination": "Page {current} of {total}",
+            "text_level": "Lvl. {level}",
+            "text_previous_page": "Previous page",
+            "text_next_page": "Next page"
+        },
+        "rank": {
+            "name": "Show rank",
+            "description": "Outputs a rank card",
+            "options": {
+                "user": {
+                    "name": "user",
+                    "description": "Outputs a rank card for the specified user"
+                }
+            },
+            "text_render_error": "{user}, an error occurred while creating a rank card",
+            "text_no_rank_card": "{user}, rank card not found"
+        },
+        "server": {
+            "description": "Outputs server information",
+            "text_owner": "Owner",
+            "text_guild_id": "Guild ID",
+            "text_total_members": "Number of members",
+            "text_total_channels": "Number of channels",
+            "text_verification_level": "Verification level",
+            "text_afk_channel": "AFK channel",
+            "text_roles": "Number of roles",
+            "text_emojis": "Number of emojis",
+            "text_guild_created_at": "Server created at {date}"
+        },
+        "store": {
+            "description": "Server item store",
+            "buy": {
+                "description": "Purchase of a store item",
+                "options": {
+                    "sku": {
+                        "name": "sku",
+                        "description": "Item SKU in store"
+                    }
+                },
+                "text_no_sku": "{user}, please specify item SKU",
+                "text_item_not_found": "{user}, item with this SKU not found"
+            },
+            "items": {
+                "description": "Outputs store items",
+                "options": {
+                    "page": {
+                        "name": "page",
+                        "description": "Item store page number"
+                    }
+                },
+                "text_purchase_price": "Price",
+                "text_price_free": "free",
+                "text_contains": "Contains",
+                "text_quantity": "Remaining quantity",
+                "text_server_store": "Server store",
+                "text_server_store_description": "Select an item from the dropdown list below or enter {command} to purchase it",
+                "text_select_item": "Select an item to purchase"
+            },
+            "text_no_store_items": "{user}, there are no items available for purchase in the store",
+            "text_insufficient_funds": "{user}, not enough funds to purchase the item",
+            "text_purchased": "{user}, you previously purchased this item",
+            "text_purchase_success": "{user}, you have purchased an item {item}"
+        },
+        "user": {
+            "description": "Outputs information about user",
+            "options": {
+                "user": {
+                    "name": "user",
+                    "description": "Outputs information about specified user"
+                }
+            },
+            "text_registration_date": "Registration date",
+            "text_join_date": "Join date",
+            "text_avatar_link": "Avatar URL"
+        },
+        "wallet": {
+            "description": "Wallet operations",
+            "balance": {
+                "description": "Outputs wallet balance",
+                "options": {
+                    "user": {
+                        "name": "user",
+                        "description": "Outputs wallet balance of specified user"
+                    }
+                },
+                "text_empty_wallet": "Wallet is empty",
+                "text_user_balance": "Balance of user {user}"
+            },
+            "transfer": {
+                "description": "Transferring funds to another wallet",
+                "options": {
+                    "user": {
+                        "name": "user",
+                        "description": "User to whom funds will be transferred"
+                    },
+                    "amount": {
+                        "name": "amount",
+                        "description": "Number of funds of transfer"
+                    },
+                    "currency": {
+                        "name": "currency",
+                        "description": "Name or currency symbol for transaction"
+                    }
+                },
+                "text_no_mention": "{user}, please specify user to whom you wish to make transfer",
+                "text_no_amount": "{user}, please specify transfer amount",
+                "text_insufficient_funds": "{user}, you do not have that transfer amount",
+                "text_transferred": "{user}, {amount} has been successfully transferred to {target}"
+            }
+        },
+        "ban": {
+            "description": "Bans a user",
+            "options": {
+                "user": {
+                    "name": "user",
+                    "description": "User to be banned"
+                },
+                "duration": {
+                    "name": "duration",
+                    "description": "Ban duration (example: 10m)"
+                },
+                "reason": {
+                    "name": "reason",
+                    "description": "Ban reason"
+                }
+            },
+            "text_invalid_user": "{user}, user not specified or not found",
+            "text_user_not_found": "{user}, please specify the user you want to ban",
+            "text_self_action": "{user}, I don't think I can let you ban yourself",
+            "text_cant_ban_user": "{user}, it is impossible to ban this user",
+            "text_user_is_higher": "{user}, the user is above you in the role hierarchy",
+            "text_user_is_moderator": "{user}, the user has moderator permissions, I can't allow to do this",
+            "text_user_has_unmoderated_roles": "{user}, the user has one or more roles for which moderation actions are prohibited",
+            "text_user_banned": "{user}, user {target} is banned on the server"
+        },
+        "kick": {
+            "description": "Kicks a user from server",
+            "options": {
+                "user": {
+                    "name": "user",
+                    "description": "User to be kicked from the server"
+                },
+                "reason": {
+                    "name": "reason",
+                    "description": "Kick reason"
+                }
+            },
+            "text_user_not_found": "{user}, please specify the user you want to kick out",
+            "text_self_action": "{user}, I don't think I can let you kick yourself out",
+            "text_cant_kick_user": "{user}, this user cannot be kicked",
+            "text_user_kicked": "{user}, user {target} was kicked from the server"
+        },
+        "mute": {
+            "description": "Mutes a user",
+            "options": {
+                "user": {
+                    "name": "user",
+                    "description": "User to be muted"
+                },
+                "duration": {
+                    "name": "duration",
+                    "description": "Mute duration (example: 10m)"
+                },
+                "reason": {
+                    "name": "reason",
+                    "description": "Mute reason"
+                }
+            },
+            "text_user_not_found": "{user}, please specify the user you want to mute",
+            "text_self_action": "{user}, I don't think I can let you mute yourself",
+            "text_cant_mute_user": "{user}, it is impossible to mute this user",
+            "text_user_already_muted": "{user}, the user is already muted",
+            "text_user_muted": "{user}, user {target} has been muted"
+        },
+        "prune": {
+            "description": "Clears messages in the channel",
+            "options": {
+                "amount": {
+                    "name": "amount",
+                    "description": "Number of messages to be deleted"
+                },
+                "user": {
+                    "name": "user",
+                    "description": "Deletes only the specified user's messages"
+                },
+                "reason": {
+                    "name": "reason",
+                    "description": "Reason for clearing messages"
+                }
+            },
+            "text_no_amount_argument": "{user}, specify the number of messages to be cleared",
+            "text_invalid_amount_argument": "{user}, the quantity must be an integer in the range from 2 to 100",
+            "text_messages_pruned": "{user}, cleared messages: {amount}"
+        },
+        "reason": {
+            "description": "Changes the cause of the case in the moderation log",
+            "options": {
+                "case_id": {
+                    "name": "case-number",
+                    "description": "Unique serial number of the case in the journal"
+                },
+                "reason": {
+                    "name": "reason",
+                    "description": "New reason for case"
+                }
+            },
+            "text_no_case_log": "{user}, the server has not set a channel for the moderation log",
+            "text_no_case_id": "{user}, please specify the case number of the moderation log",
+            "text_no_reason": "{user}, please specify the reason for the moderation log case",
+            "text_no_case_message": "{user}, a message with this case number was not found. Remember that you can only change the last 50 cases of moderation",
+            "text_case_edited": "{user}, the reason for the case has been changed"
+        },
+        "report": {
+            "name": "Send report",
+            "description": "Sends a report about the message",
+            "options": {
+                "message_id": {
+                    "name": "message-id",
+                    "description": "Identifier of the message to which the report will be sent"
+                }
+            },
+            "text_reports_disabled_or_no_channel": "{user}, reports are disabled on this server or no channel is set for them",
+            "text_channel_not_found": "{user}, the channel for reports was not found, it may have been deleted",
+            "text_already_reported": "{user}, you have already sent a report about this message",
+            "text_no_message_id": "{user}, please specify the identifier of the message to which you want to send your report",
+            "text_no_message": "{user}, there is no message with the specified identifier in the current channel",
+            "text_report_confirm": "{user}, the report about the message has been successfully sent",
+            "text_message_channel": "Channel of message",
+            "text_report_count": "Number of reports",
+            "text_jump_to_message": "Jump to message",
+            "quick_actions": {
+                "KICK": "Kick",
+                "WARN": "Warn",
+                "IGNORE": "Ignore",
+                "BAN": "Ban",
+                "MUTE": "Mute"
+            }
+        },
+        "unmute": {
+            "description": "Removes mute from the user",
+            "options": {
+                "user": {
+                    "name": "user",
+                    "description": "User who needs to unmute"
+                },
+                "reason": {
+                    "name": "reason",
+                    "description": "Unmute reason"
+                }
+            },
+            "text_user_not_found": "{user}, please specify the user who needs to unmute",
+            "text_user_not_muted": "{user}, the user has not been muted",
+            "text_user_unmuted": "{user}, user {target} has been successfully unmuted"
+        },
+        "violations": {
+            "description": "Outputs a list of user warnings",
+            "options": {
+                "user": {
+                    "name": "user",
+                    "description": "Shows the warnings of a specified user"
+                }
+            },
+            "text_user_not_found": "{user}, you specified an invalid or non-existent user",
+            "text_no_violations": "{user}, this user has no violations",
+            "text_user_violations": "Violations {target}",
+            "text_last_24_hours": "Per day",
+            "text_last_7_days": "In 7 days",
+            "text_total_violations": "Total violations",
+            "text_last_10_violations": "Last 10 violations"
+        },
+        "warn": {
+            "description": "Issuance and removal of warnings",
+            "add": {
+                "description": "Warns a user",
+                "options": {
+                    "user": {
+                        "name": "user",
+                        "description": "User to be warned"
+                    },
+                    "reason": {
+                        "name": "reason",
+                        "description": "Warn reason"
+                    }
+                },
+                "text_user_not_found": "{user}, please specify the user to be warned",
+                "text_self_action": "{user}, I don't think I can let you warn yourself",
+                "text_user_warned_dm": "{user}, you have been issued a warning on the server {guild} for the reason: {reason}",
+                "text_user_warned_closed_dm": "{user}, you were issued a warning for: {reason}",
+                "text_user_warned": "{user}, user {target} has been warned"
+            },
+            "remove": {
+                "description": "Removes warnings from the user",
+                "options": {
+                    "user": {
+                        "name": "user",
+                        "description": "User who needs to remove the warning"
+                    },
+                    "warn_id": {
+                        "name": "warning-number",
+                        "description": "Identifier, warning sequence number or \"all\" to remove all warnings"
+                    },
+                    "reason": {
+                        "name": "reason",
+                        "description": "Reason for removing the warning"
+                    }
+                },
+                "text_user_not_found": "{user}, please specify the user who needs to remove the warning",
+                "text_no_warn_id": "{user}, please specify the warning identifier",
+                "text_invalid_warn_id": "{user}, you specified an incorrect warning Identifier",
+                "text_no_violator_or_violations": "{user}, this user does not seem to have received any warnings before",
+                "text_warn_removed": "{user}, warning successfully removed",
+                "text_warns_removed_all": "{user}, all warnings have been successfully removed"
+            }
+        },
+        "next": {
+            "description": "Plays the next track in the queue",
+            "text_no_track_playback": "{user}, track playback is not running on this server",
+            "text_different_voice": "{user}, you are not connected to a voice channel or are in another",
+            "text_no_playback": "{user}, music is not playing now",
+            "text_track_skip": "{user}, playback is fast-forwarded"
+        },
+        "play": {
+            "description": "Plays music in the voice channel",
+            "options": {
+                "query": {
+                    "name": "query",
+                    "description": "Link or track title"
+                }
+            },
+            "text_connect_to_voice": "{user}, you must first connect to some voice channel",
+            "text_disallowed_voice": "{user}, playback is not allowed in the selected channel",
+            "text_no_required_permissions_in_voice": "{user}, I don't have enough permissions in the selected voice channel",
+            "text_voice_is_full": "{user}, the selected voice channel is full",
+            "text_no_search_track": "{user}, you need to specify a link to the playlist, link to the track or title",
+            "text_search_in_progress": "{user}, searching: {track}",
+            "text_load_failed": "{user}, an unexpected error occurred while loading the track",
+            "text_no_matches": "{user}, nothing was found for this query",
+            "text_playlist_loaded_no_premium": "{user}, playing playlists is only available to bonus servers",
+            "text_playlist_loaded": "{user}, the playlist has been successfully loaded and added to the playback queue",
+            "text_queue_limit_reached_no_premium": "{user}, the maximum number of tracks in the queue has been reached",
+            "text_track_stream_only_for_premium": "{user}, streaming is only available to bonus servers",
+            "text_track_stream_disabled": "{user}, streaming is disabled",
+            "text_track_added_to_queue": "{user}, track {track} added to the playback queue",
+            "text_playlist_added_to_queue": "{user}, playlist {playlist} has been added to the playback queue",
+            "text_now_playing": "{user}, now playing {track}",
+            "text_unknown_error": "{user}, an unexpected error occurred while playing the track",
+            "text_not_allowed_host": "{user}, the specified link is not in the list of allowed. Please contact the support server",
+            "text_player": "Player",
+            "text_added_by": "Added by: {requester}"
+        },
+        "previous": {
+            "description": "Plays the previous track in the queue",
+            "text_no_previous_track": "{user}, previous track not found",
+            "text_track_previous": "{user}, the previous track is now playing"
+        },
+        "queue": {
+            "description": "Shows the current playback queue",
+            "text_no_track_queue": "{user}, the play queue is empty"
+        },
+        "repeat": {
+            "description": "Turns the repeat mode for playback",
+            "text_track_repeat": "{user}, repeating the current track is enabled",
+            "text_queue_repeat": "{user}, queue repeat is enabled",
+            "text_no_repeat": "{user}, track repetition is turned off"
+        },
+        "stop": {
+            "description": "Stops music playback",
+            "text_playback_stop": "{user}, playback stopped"
+        },
+        "volume": {
+            "description": "Changes the playback volume",
+            "options": {
+                "volume": {
+                    "name": "volume",
+                    "description": "Playback volume"
+                }
+            },
+            "text_invalid_volume": "{user}, volume value is incorrect",
+            "text_volume_diapason": "{user}, the volume should be in the range from 1 to 100",
+            "text_volume_changed": "{user}, volume changed from {from} to {to}"
+        },
+        "activities": {
+            "description": "Activity management",
+            "set-level": {
+                "description": "Sets the level to members",
+                "options": {
+                    "user": {
+                        "name": "user",
+                        "description": "The user to whom the level will be set"
+                    },
+                    "level": {
+                        "name": "level",
+                        "description": "Level to be set"
+                    }
+                },
+                "text_no_mention": "{user}, please specify the member",
+                "text_no_level": "{user}, the level must be in the range from 1 to 2500",
+                "text_set_success": "{user}, the level has been successfully set"
+            },
+            "add-wallet-balance": {
+                "description": "Adds currency to members",
+                "options": {
+                    "user": {
+                        "name": "user",
+                        "description": "The user to whom the wallet balance will be changed"
+                    },
+                    "amount": {
+                        "name": "quantity",
+                        "description": "The amount of funds by which you need to replenish the balance (up to 2^31)"
+                    },
+                    "currency": {
+                        "name": "currency",
+                        "description": "Currency name or symbol"
+                    }
+                },
+                "text_add_success": "{user}, wallet balance {target} increased by {amount}"
+            },
+            "set-wallet-balance": {
+                "description": "Sets the wallet balance",
+                "options": {
+                    "user": {
+                        "name": "user",
+                        "description": "The user to whom the wallet balance will be set"
+                    },
+                    "amount": {
+                        "name": "balance",
+                        "description": "Set wallet balance (from -2^31 to 2^31)"
+                    },
+                    "currency": {
+                        "name": "currency",
+                        "description": "Currency name or symbol"
+                    }
+                },
+                "text_no_mention": "{user}, please specify the user to whom you want to set the wallet balance",
+                "text_no_amount": "{user}, please specify the wallet balance to be set",
+                "text_set_success": "{user}, wallet balance {target} is set to {amount}"
+            },
+            "reset-wallet": {
+                "description": "Drops wallets to members",
+                "options": {
+                    "user": {
+                        "name": "user",
+                        "description": "The user to whom the wallet will be reset"
+                    },
+                    "user_id": {
+                        "name": "user-id",
+                        "description": "Reset the wallet by user Id or specify \"all\" to reset wallets to everyone"
+                    }
+                },
+                "text_nothing_to_reset": "{user}, no existing wallets",
+                "text_confirmation": "{user}, are you sure you want to reset all wallets on the server? This action will be irreversible",
+                "text_confirm": "Yes, reset all wallets",
+                "text_cancel": "No, cancel",
+                "text_confirmed": "{user}, all wallets have been successfully reset",
+                "text_canceled": "{user}, reset of all wallets canceled",
+                "text_reset_user": "{user}, wallet successfully reset"
+            },
+            "reset-level": {
+                "description": "Resets the level of participants",
+                "options": {
+                    "user": {
+                        "name": "user",
+                        "description": "The specified user will be reset to level"
+                    },
+                    "user_id": {
+                        "name": "user-id",
+                        "description": "Reset the level by user Id or specify \"all\" to reset the level to all"
+                    }
+                },
+                "text_no_mention": "{user}, specify the member, his Id or \"all\" to reset the level to everyone",
+                "text_reset_success": "{user}, level successfully reset"
+            }
+        },
+        "giveaway": {
+            "description": "Creates and deletes giveaways",
+            "create": {
+                "description": "Creates a new giveaway",
+                "options": {
+                    "prize": {
+                        "name": "prize",
+                        "description": "Prize for winning the giveaway"
+                    },
+                    "duration": {
+                        "name": "duration",
+                        "description": "Duration of the giveaway"
+                    },
+                    "winners_amount": {
+                        "name": "number-of-winners",
+                        "description": "Number of winners to be selected randomly"
+                    },
+                    "sponsor": {
+                        "name": "sponsor",
+                        "description": "Who sponsored this giveaway?"
+                    }
+                },
+                "text_no_prize": "{user}, you did not specify a prize for winning the giveaway",
+                "text_invalid_duration": "{user}, the duration argument is incorrect",
+                "text_invalid_winners_range": "{user}, the number of winners must be between 1 and 50",
+                "text_max_allowed_giveaways_reached": "{user}, the maximum number of active giveaways has been reached",
+                "text_giveaway_by": "Giveaway by {sponsor}",
+                "text_end_date": "Ends on {date}",
+                "text_prize": "Prize for victory",
+                "text_winners_amount": "Number of winners",
+                "text_members_amount": "Number of members",
+                "text_participate": "Participate",
+                "text_giveaway_created": "{user}, the giveaway was successfully created",
+                "text_participated": "{user}, you participated in the {giveaway}",
+                "text_already_participating": "{user}, you are already participating in the\ngiveaway {giveaway}"
+            },
+            "remove": {
+                "description": "Deletes the giveaway",
+                "options": {
+                    "message_id": {
+                        "name": "message-id",
+                        "description": "Id of the message with the giveaway"
+                    }
+                },
+                "text_no_message_id": "{user}, please enter the message Id",
+                "text_giveaway_not_found": "{user}, giveaway not found",
+                "text_ga_message_not_found": "{user}, giveaway message not found"
+            },
+            "end": {
+                "description": "Ends a giveaway",
+                "options": {
+                    "message_id": {
+                        "name": "message-id",
+                        "description": "Id of the message with the giveaway"
+                    }
+                },
+                "text_no_members": "No members were found",
+                "text_winners": "Winners: {winners}",
+                "text_congrats": "Congratulations {winner}! You won {prize}!",
+                "text_giveaway_stopped": "{user}, the giveaway is stopped"
+            }
+        },
+        "temprole": {
+            "description": "Gives a role to the user for the specified time",
+            "options": {
+                "user": {
+                    "name": "user",
+                    "description": "The user to whom the role will be assigned"
+                },
+                "role": {
+                    "name": "role",
+                    "description": "The role to be given"
+                },
+                "duration": {
+                    "name": "duration",
+                    "description": "The time for which the role will be given"
+                }
+            },
+            "text_no_mention": "{user}, please specify the member",
+            "text_no_role": "{user}, you did not specify the role",
+            "text_invalid_duration": "{user}, the duration argument is incorrect",
+            "text_role_not_editable": "{user}, I don't have permission to issue this role to anyone",
+            "text_has_role": "{user}, the user already has this role",
+            "text_success": "{user}, role {role} is assigned to user {target} till {date}"
+        }
+    },
+    "case_log": {
+        "cases": {
+            "BAN_ADD": "Ban added",
+            "BAN_REMOVE": "Ban removed",
+            "KICK": "Member kicked",
+            "MUTE_ADD": "Mute added",
+            "MUTE_REMOVE": "Mute removed",
+            "PRUNE_MESSAGES": "Messages pruning",
+            "WARN_ADD": "Warning added",
+            "WARN_REMOVE": "Warning removed"
+        },
+        "reason": "Reason",
+        "case_number": "Case #{case_number}",
+        "moderator": "Moderator"
+    },
+    "logs": {
+        "update_template": "{user} changes {change}",
+        "unknown_initiator": "Unknown user",
+        "before_change": "Before change",
+        "after_change": "After change",
+        "channel_category": "Channel category",
+        "channel_position": "Channel position",
+        "channel_create_title": "Channel created",
+        "channel_create_template": "{user} creates a channel {channel}",
+        "channel_delete_title": "Channel deleted",
+        "channel_delete_template": "{user} deletes channel {channel}",
+        "channel_update_title": "Channel updated",
+        "channel_update_name_change_template": "channel name {channel}",
+        "channel_update_topic_change_template": "description of the channel {channel}",
+        "channel_update_rate_limit_change_template": "slow mode of the channel {channel}",
+        "channel_update_parent_change_template": "channel category {channel}",
+        "channel_update_bitrate_change_template": "channel bitrate {channel}",
+        "channel_update_user_limit_change_template": "user limit of the channel {channel}",
+        "emoji_create_title": "Emoji added",
+        "emoji_create_template": "{user} adds {emoji} emoji",
+        "emoji_delete_title": "Emoji deleted",
+        "emoji_delete_template": "{user} deletes {emoji} emoji",
+        "emoji_update_title": "Emoji updated",
+        "emoji_update_name_change_template": "emoji name {emoji}",
+        "guild_ban_add_title": "Ban added",
+        "guild_ban_add_template": "{user} issues a ban the user {target}",
+        "guild_ban_remove_title": "Ban removed",
+        "guild_ban_remove_template": "{user} removes the ban user {target}",
+        "guild_member_count": "Number of members",
+        "guild_member_add_title": "User joined the server",
+        "guild_member_remove_title": "User left the server",
+        "guild_member_update_title": "Member updated",
+        "guild_member_update_nick_change_template": "display name of the member {user}",
+        "guild_update_title": "Guild updated",
+        "guild_update_name_change": "server name",
+        "guild_update_afk_channel_change": "afk channel",
+        "guild_update_afk_timeout_change": "timeout of inactivity in voice channels",
+        "guild_update_description_change": "description of the server",
+        "invite_code": "Invitation code",
+        "invite_inviter": "Inviter",
+        "invite_create_title": "Invite created",
+        "invite_delete_title": "Invite deleted",
+        "message_author": "Message author",
+        "message_content": "Message content",
+        "message_count": "Number of messages",
+        "message_delete_title": "Message deleted",
+        "message_delete_bulk_title": "Bulk message deletion",
+        "message_update_title": "Message updated",
+        "role_name": "Role name",
+        "role_color": "Role color",
+        "role_position": "Role position",
+        "role_create_title": "Role created",
+        "role_create_template": "{user} creates a role {role}",
+        "role_delete_title": "Role deleted",
+        "role_delete_template": "{user} removes role {role}",
+        "role_member_add_title": "Role added",
+        "role_member_add_template": "{user} adds roles to user {target}",
+        "role_member_remove_title": "Role removed",
+        "role_member_remove_template": "{user} removes user roles {target}",
+        "role_update_title": "Role updated",
+        "role_update_name_change_template": "role name {role}",
+        "role_update_color_change_template": "role color {role}",
+        "role_update_permissions_change_template": "role permissions {role}",
+        "sticker_create_title": "Sticker added",
+        "sticker_create_template": "{user} adds a sticker {sticker}",
+        "sticker_delete_title": "Sticker deleted",
+        "sticker_delete_template": "{user} removes the sticker {sticker}",
+        "sticker_update_title": "Sticker updated",
+        "sticker_update_name_change_template": "sticker name {sticker}",
+        "thread_auto_archive_duration": "Auto-archive time",
+        "thread_create_title": "Thread created",
+        "thread_create_template": "{user} creates a thread {thread}",
+        "thread_delete_title": "Thread deleted",
+        "thread_delete_template": "{user} deletes the thread {thread}",
+        "thread_update_title": "Thread updated",
+        "thread_update_name_change_template": "thread name {thread}",
+        "thread_update_auto_archive_change_template": "thread auto-archiving time {thread}",
+        "user_update_title": "User updated",
+        "user_update_name_change_template": "{user} changes his username",
+        "user_update_discriminator_change_template": "{user} changes his discriminator",
+        "voice_connect_title": "Voice connection",
+        "voice_connect_template": "{user} connects to the voice channel {channel}",
+        "voice_disconnect_title": "Voice disconnection",
+        "voice_disconnect_template": "{user} disconnects from the voice channel {channel}",
+        "voice_move_title": "Voice movement",
+        "voice_move_template": "{user} moves from the voice channel {from} to {to}",
+        "voice_server_deaf": "Voice server deaf",
+        "voice_server_mute": "Voice server mute",
+        "voice_server_undeaf": "Voice server undeaf",
+        "voice_server_unmute": "Voice server unmute"
+    },
+    "audit_reasons": {
+        "automoder_anti_caps": "AutoMod: Anti-CAPS",
+        "automoder_links_filter": "AutoMod: Links filter",
+        "automoder_newbies_moderation": "AutoMod: Newbies moderation",
+        "automoder_nicknames_moderation": "AutoMod: Nicknames moderation",
+        "automoder_swear_filter": "AutoMod: Words filter",
+        "automoder_users_slowdown": "AutoMod: Slowdown messaging",
+        "logs_webhook_create": "Logs: Webhook for the event \"{event}\"",
+        "irs": "Interactive reactions",
+        "ims": "Interactive messages",
+        "voice_roles": "Voice roles"
+    }
+}

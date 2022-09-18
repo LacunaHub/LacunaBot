@@ -5,10 +5,8 @@ import qdb from 'quick.db'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import i18n from '../../../i18n'
-import translator from '../../locale'
 import { commandOptionTypes } from '../../utility/Constants'
 import DiscordUtils from '../../utility/DiscordUtils'
-import { resolveObjectPath } from '../../utility/Utils'
 import interfaces from '../interfaces'
 import { authorize, checkPermissions } from '../utility/Authorize'
 
@@ -159,9 +157,8 @@ async function updateSettings(ctx: Context) {
     const selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {})) as any
     if (!selfMember) ctx.throw(406)
 
-    const locale = translator.locale(server.locale)
-    const commands = qdb.get('commands').map(c => {
-        return { ...c, description: resolveObjectPath(c.description, locale), options: [] }
+    const commands = qdb.get('commands').map(i => {
+        return { name: i.name, description: i18n.t(server.locale, i.description), group: i.group }
     })
     const { diamondPrices: prices } = await db.json.get()
 

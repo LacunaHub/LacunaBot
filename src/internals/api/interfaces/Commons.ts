@@ -7,7 +7,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
     const updateData = {}
 
     if (typeof data.locale === 'string' && data.locale !== guild.locale) {
-        if (['ru', 'en'].includes(data.locale)) {
+        if (['en', 'ru', 'uk'].includes(data.locale)) {
             updateData['locale'] = data.locale
         }
     }
