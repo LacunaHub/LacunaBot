@@ -3,7 +3,8 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, guild: Guild) => {
-    const server: ServerDocument = await self.db.servers.fetch({ _id: guild.id })
+    const preferredLocale = guild.preferredLocale?.split('-')?.[0]
+    const server: ServerDocument = await self.db.servers.fetch({ _id: guild.id }, { locale: self.i18n.isSupported(preferredLocale) as string })
 
     self.logger.info(`${self.user.username}#${guild.shardId} added to guild ${guild.name} (${guild.id}) with ${guild.memberCount} members`)
     await self.logger.telegram.info(`${self.user.username}#${guild.shardId} added to guild ${guild.name} (${guild.id}) with ${guild.memberCount} members`)

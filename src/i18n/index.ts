@@ -42,4 +42,10 @@ export function t(locale: string, key: string, params?: any[] | { [key: string]:
     return format(string, params)
 }
 
-export default { messages, locale, format, t }
+export function isSupported(locale: string, bool = false) {
+    if (bool) return !!messages[locale]
+
+    return !!messages[locale] ? locale : 'en'
+}
+
+export default { messages, locale, format, t, isSupported }
