@@ -72,7 +72,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     }
 
     await interaction.deferReply()
-    const search = await self.player.search(query, interaction.user.tag)
+    const search = await self.player.search({ query, source: 'soundcloud' }, interaction.user.tag)
 
     if (search.loadType === 'LOAD_FAILED') {
         await interaction.editReply({
