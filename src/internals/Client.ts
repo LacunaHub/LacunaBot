@@ -7,7 +7,7 @@ const clusterClientInfo = ClusterClient.getInfo()
 
 const client = new Lacuna({
     presence: {
-        status: 'invisible',
+        status: 'online',
         activities: [
             {
                 name: `voidlacuna.ru (v${version.split('.').slice(0, 2).join('.')})`
@@ -40,11 +40,11 @@ const client = new Lacuna({
 
         if (manager.name == 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
 
-        if (manager.name == 'MessageManager') return new LimitedCollection({ maxSize: 25 })
+        if (manager.name == 'MessageManager') return new LimitedCollection({ maxSize: 50 })
 
         if (manager.name == 'UserManager')
             return new LimitedCollection({
-                maxSize: 5000,
+                maxSize: 10000,
                 keepOverLimit: v => v.id == process.env.CLIENT_ID
             })
 
