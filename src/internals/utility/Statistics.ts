@@ -1,19 +1,19 @@
 import fetch from 'node-fetch'
 import { Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 import qdb from 'quick.db'
+import { clusterManager } from '../Cluster'
 import Lacuna from '../Lacuna'
 import logger from '../Logger'
-import ShardingManager from './ShardingManager'
 
-export function scheduleStatsCollect(sharding: ShardingManager) {
+export function scheduleStatsCollect() {
     const rule = new RecurrenceRule()
     rule.minute = new Range(0, 59, 5)
 
     const job = scheduleJob(rule, async () => {
-        if (!sharding.shards.every(shard => shard.ready)) return null
+        if (![...clusterManager.clusters.values()].every(cluster => cluster.ready)) return null
 
-        const guildsSize: number[] = (await sharding.fetchClientValues('guilds.cache.size')) as number[]
-        const commandUses = await sharding.broadcastEval((self: Lacuna) =>
+        const guildsSize: number[] = (await clusterManager.fetchClientValues('guilds.cache.size')) as number[]
+        const commandUses = await clusterManager.broadcastEval((self: Lacuna) =>
             self.commands
                 .filter(c => c.is_slash_command)
                 .map(c => {
@@ -22,7 +22,7 @@ export function scheduleStatsCollect(sharding: ShardingManager) {
         )
 
         const guilds: number = guildsSize.reduce((a, b) => a + b, 0)
-        const pings: number[] = (await sharding.fetchClientValues('ws.ping')) as number[]
+        const pings: number[] = (await clusterManager.fetchClientValues('ws.ping')) as number[]
         const commands = commandUses.flat().reduce((x, y) => {
             x[y.name] = x[y.name] ? x[y.name] + y.uses : y.uses
             return x

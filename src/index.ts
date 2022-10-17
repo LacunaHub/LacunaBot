@@ -10,26 +10,59 @@ process.env.WEBSITE_URL =
         : `https://www.${process.env.WEBSITE_DOMAIN}`
 process.env.CLIENT_OAUTH2_REDIRECT_URI = `${process.env.API_URL}/authorize/callback`
 
+const isMasterBridge = process.env.CLIENT_BRIDGE_HOST === 'localhost'
+
+import { Bridge } from 'discord-cross-hosting'
 import { Server } from 'http'
 import api from './internals/api'
+import { bridgeClient, clusterManager } from './internals/Cluster'
 import logger from './internals/Logger'
-import ShardingManager from './internals/utility/ShardingManager'
+import { handleDiamondGuilds } from './internals/structures/DiamondGuild'
+import { handlePatrons } from './internals/structures/Patron'
+import { syncBills as syncQiwiBills } from './internals/utility/Qiwi'
+import { scheduleStatsCollect } from './internals/utility/Statistics'
+import { hubRefreshSubscriptions } from './modules/YouTube'
 
-export const sharding: ShardingManager = new ShardingManager('./dist/internals/utility/Client.js', {
-    token: process.env.DISCORD_CLIENT_TOKEN,
-    respawn: true
-})
+let bridge: Bridge, server: Server
 
-sharding.spawn({ amount: Number(process.env.DISCORD_CLIENT_MAX_SHARDS), delay: 20000, timeout: 60000 })
+if (isMasterBridge) {
+    server = api.listen(process.env.API_PORT, () => {
+        logger.info(`(API) Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
+        logger.telegram.info(`(API) Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
+    })
 
-sharding.on('shardCreate', shard => {
-    logger.log(`[Sharding] Shard #${shard.id} created`)
-    sharding.readiness.push(Date.now())
-})
+    bridge = new Bridge({
+        token: process.env.CLIENT_TOKEN,
+        authToken: process.env.CLIENT_BRIDGE_AUTH_TOKEN,
+        totalShards: Number(process.env.CLIENT_TOTAL_SHARDS),
+        totalMachines: Number(process.env.CLIENT_TOTAL_MACHINES),
+        port: Number(process.env.CLIENT_BRIDGE_PORT)
+    })
 
-export const server: Server = api.listen(process.env.API_PORT, () => {
-    logger.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
-    logger.telegram.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
-})
+    bridge.on('ready', url => {
+        logger.info(`(Bridge) Bridge is ready on url ${url}`)
 
-export default { sharding, server }
+        startServices()
+    })
+
+    bridge.on('connect', client => logger.info(`(Bridge) Client "${(client as any).id}" connected`))
+    bridge.on('disconnect', client => logger.warn(`(Bridge) Client "${(client as any).id}" disconnected`))
+
+    bridge.start()
+} else {
+    startServices()
+}
+
+async function startServices() {
+    await bridgeClient.connect()
+    await clusterManager.spawn({ timeout: -1 })
+    bridgeClient.listen(clusterManager)
+
+    scheduleStatsCollect()
+    syncQiwiBills()
+    handleDiamondGuilds()
+    handlePatrons()
+    hubRefreshSubscriptions()
+}
+
+export default { server, bridge }

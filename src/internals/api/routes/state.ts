@@ -3,25 +3,29 @@ import { Context } from 'koa'
 import nou from 'node-os-utils'
 import numbro from 'numbro'
 import qdb from 'quick.db'
-import { sharding } from '../../../index'
+import { clusterManager } from '../../Cluster'
+import Lacuna from '../../Lacuna'
 
 const { version } = require('../../../../package.json')
-
 const router: Router = new Router({ prefix: '/state' })
 
 router.get('/', getState)
 
 async function getState(ctx: Context) {
-    if (!sharding.shards.every(shard => shard.ready)) ctx.throw(503)
+    if (![...clusterManager.clusters.values()].every(cluster => cluster.ready)) ctx.throw(503)
 
-    const guilds = (await sharding.fetchClientValues('guilds.cache.size')) as number[]
-    const users = (await sharding.broadcastEval(self => self.guilds.cache.reduce((x, y) => x + y.memberCount, 0))) as number[]
-    const cached_users = (await sharding.fetchClientValues('users.cache.size')) as number[]
-    const channels = (await sharding.fetchClientValues('channels.cache.size')) as number[]
-    const pings = (await sharding.fetchClientValues('ws.ping')) as number[]
-    const uptimes = (await sharding.fetchClientValues('uptime')) as number[]
-    const players = await sharding.shards.first().eval('this.playerNodesStats')
+    const stats = await clusterManager.broadcastEval((self: Lacuna) => {
+        return {
+            guilds: self.guilds.cache.size,
+            users: self.guilds.cache.reduce((x, y) => x + y.memberCount, 0),
+            cachedUsers: self.users.cache.size,
+            channels: self.channels.cache.size,
+            latency: self.ws.ping,
+            uptime: self.uptime
+        }
+    })
 
+    const players = await [...clusterManager.clusters.values()][0].eval('this.playerNodesStats')
     const cluster = {
         id: nou.os.hostname(),
         uptime: nou.os.uptime(),
@@ -29,26 +33,27 @@ async function getState(ctx: Context) {
         memory: await nou.mem.used()
     }
 
-    const shards = sharding.shards.map(shard => {
+    const shards = [...clusterManager.clusters.values()].map(cluster => {
+        const clusterStats = stats[cluster.id]
+
         return {
-            id: shard.id,
-            cluster: cluster.id,
-            latency: Math.round(pings[shard.id]),
-            uptime: numbro(uptimes[shard.id] / 1000).format({ output: 'time' }),
-            guilds: guilds[shard.id],
-            users: users[shard.id],
-            cached_users: cached_users[shard.id],
-            channels: channels[shard.id]
+            id: cluster.id,
+            guilds: clusterStats.guilds,
+            users: clusterStats.users,
+            cached_users: clusterStats.cachedUsers,
+            channels: clusterStats.channels,
+            latency: Math.round(clusterStats.latency),
+            uptime: numbro(clusterStats.uptime / 1000).format({ output: 'time' })
         }
     })
 
     ctx.status = 200
     ctx.body = {
         version: version.split('.').slice(0, 2).join('.'),
-        guilds: guilds.reduce((a, b) => a + b, 0),
-        users: users.reduce((a, b) => a + b, 0),
-        cached_users: cached_users.reduce((a, b) => a + b, 0),
-        channels: channels.reduce((a, b) => a + b, 0),
+        guilds: stats.reduce((a, b) => a + b.guilds, 0),
+        users: stats.reduce((a, b) => a + b.users, 0),
+        cached_users: stats.reduce((a, b) => a + b.cachedUsers, 0),
+        channels: stats.reduce((a, b) => a + b.channels, 0),
         shards: shards,
         players: players,
         clusters: [
