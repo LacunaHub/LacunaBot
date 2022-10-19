@@ -1,5 +1,5 @@
 import { Client as BridgeClient } from 'discord-cross-hosting'
-import { HeartbeatManager, Manager as ClusterManager } from 'discord-hybrid-sharding'
+import { Manager as ClusterManager } from 'discord-hybrid-sharding'
 import logger from './Logger'
 
 const bridgeClient = new BridgeClient({
@@ -14,15 +14,9 @@ const bridgeClient = new BridgeClient({
 bridgeClient.on('ready', () => logger.info('(Bridge Client) Client is ready'))
 
 const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
-    token: process.env.CLIENT_TOKEN
+    token: process.env.CLIENT_TOKEN,
+    shardsPerClusters: Number(process.env.CLIENT_SHARDS_PER_CLUSTER)
 })
-
-clusterManager.extend(
-    new HeartbeatManager({
-        maxMissedHeartbeats: 5,
-        interval: 5000
-    })
-)
 
 clusterManager.on('clusterCreate', cluster => logger.info(`(Cluster Manager) Cluster #${cluster.id} has been created`))
 

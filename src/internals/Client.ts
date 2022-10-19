@@ -44,7 +44,7 @@ const client = new Lacuna({
 
         if (manager.name == 'UserManager')
             return new LimitedCollection({
-                maxSize: 10000,
+                maxSize: 5000,
                 keepOverLimit: v => v.id == process.env.CLIENT_ID
             })
 
