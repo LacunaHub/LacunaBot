@@ -1,6 +1,7 @@
 import { BaseGuildTextChannel, CommandInteraction, GuildMember, GuildMemberRoleManager, MessageEmbed, Team, User } from 'discord.js'
 import IVM, { Context } from 'isolated-vm'
 import qdb from 'quick.db'
+import safeRegex from 'safe-regex'
 import { ICustomCommand, MessageEmbed as IMessageEmbed, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import logger from '../internals/Logger'
@@ -201,8 +202,12 @@ export default class CustomCommand {
             const regexp = new RegExp(`{{\\s*${escapeRegexp(pattern)}\\s*}}`, 'g')
 
             try {
-                // Remove all regexp to avoid ReDoS
-                pattern = pattern.replace(/\/((.|\n)+?)\//g, '').replace(/RegExp/gi, '')
+                // Remove unsafe regex
+                pattern = pattern
+                    .replace(/\/((.|\n)+?)\//g, value => {
+                        return safeRegex(value) === true ? value : '/unsafe/'
+                    })
+                    .replace(/RegExp/gi, '')
 
                 const script = this.isolate.compileScriptSync(pattern)
                 const value = await script.run(ctx, { timeout: 2500 })
