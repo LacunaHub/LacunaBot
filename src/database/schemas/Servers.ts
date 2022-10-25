@@ -6,7 +6,7 @@ export default model<ServerDocument>(
     new Schema<ServerDocument>(
         {
             _id: { type: String },
-            locale: { type: String, default: 'ru' },
+            locale: { type: String, default: 'en' },
             server: {
                 premium: {
                     available: { type: Boolean, default: false },
@@ -766,7 +766,7 @@ export default model<ServerDocument>(
 
 export interface ServerDocument extends Document {
     _id: string
-    locale: 'en' | 'ru'
+    locale: 'en' | 'ru' | 'uk' | string
     /** @deprecated */
     prefix: string
     server: {

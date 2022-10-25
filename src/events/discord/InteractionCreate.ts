@@ -2,7 +2,6 @@ import { ButtonInteraction, Collection, CommandInteraction, ContextMenuInteracti
 import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponent, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { buttonPressed } from '../../internals/structures/Giveaway'
-import { resolveObjectPath } from '../../internals/utility/Utils'
 import CustomCommand from '../../modules/CustomCommand'
 import Replacer from '../../modules/Replacer'
 import reports from '../../modules/Reports'
@@ -26,9 +25,7 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
     }
 
     if (interaction.isContextMenu()) {
-        const locale = self.translator.locale(server.locale)
-
-        const command = self.commands.find(c => (c.is_message_command || c.is_user_command) && resolveObjectPath(c.pretty_name, locale) == interaction.commandName)
+        const command = self.commands.find(c => (c.is_message_command || c.is_user_command) && self.i18n.t(server.locale, c.pretty_name) == interaction.commandName)
 
         if (command) await command.executeContext(server, interaction)
     }

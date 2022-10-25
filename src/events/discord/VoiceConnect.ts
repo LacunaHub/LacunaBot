@@ -9,8 +9,6 @@ import { createTemporaryVoice } from '../../modules/VoiceManager'
 const handler = async (self: Lacuna, state: VoiceState) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: state.guild.id })
 
-    const locale = self.translator.locale(server.locale).modules
-
     const player = self.player.get(state.guild.id)
 
     if (player && state.channelId == player.voiceChannel) {
@@ -35,7 +33,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
     if (voice_roles_bound.length) {
         const voice_roles = state.guild.roles.cache.filter(r => r.editable && voice_roles_bound.some(b => b.role_id == r.id))
 
-        if (voice_roles.size) await state.member.roles.add(voice_roles, locale.voice_manager.voice_add_roles_reason).catch(() => {})
+        if (voice_roles.size) await state.member.roles.add(voice_roles).catch(() => {})
     }
 
     await levelsVoiceAssign(self, server, state)
