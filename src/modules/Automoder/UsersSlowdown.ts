@@ -116,10 +116,8 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (send_message) {
-            const default_content = self.translator.locale(server.locale).modules.automoder.default_slowdown_message
-
             const replacer = new Replacer(null, { message: message, guild: message.guild, member: message.member })
-            const content = await replacer.replaceTemplateMessage(config.send_message || { content: default_content })
+            const content = await replacer.replaceTemplateMessage(config.send_message)
 
             await message.channel.send(content).catch(self.logger.error)
         }

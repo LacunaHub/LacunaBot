@@ -1,0 +1,825 @@
+{
+    "yes": "Так",
+    "no": "Ні",
+    "none": "Відсутній",
+    "indefinitely": "Безстроково",
+    "common": {
+        "channel": "Канал",
+        "channels": "Канали",
+        "role": "Роль",
+        "roles": "Ролі",
+        "attachment": "Вкладення",
+        "attachments": "Вкладення",
+        "command_missing_permissions": "{user}, для виконання цієї команди потрібні наступні дозволи: {permissions}",
+        "command_missing_send_messages": "{user}, відсутній дозвіл на відправлення повідомлень у цей канал {channel}",
+        "command_denied": "{user}, у вас не достатньо прав для використання цієї команди",
+        "command_premium_only": "{user}, команда доступна тільки бонусним серверам",
+        "command_throttled": "{user}, досягнуто обмеження у використанні команди, спробуйте ще раз в {time}",
+        "command_categories": {
+            "GENERAL": "Загальні",
+            "MODERATION": "Модерація",
+            "MUSIC": "Музика",
+            "UTILITY": "Корисне",
+            "CUSTOM": "Користувацьке"
+        },
+        "permissions_keys": {
+            "CREATE_INSTANT_INVITE": "Створювати запрошення",
+            "KICK_MEMBERS": "Вигнати учасників",
+            "BAN_MEMBERS": "Банити учасників",
+            "ADMINISTRATOR": "Адміністратор",
+            "MANAGE_CHANNELS": "Управління каналами",
+            "MANAGE_GUILD": "Управління сервером",
+            "ADD_REACTIONS": "Додавання реакцій",
+            "VIEW_AUDIT_LOG": "Перегляд журналу аудиту",
+            "PRIORITY_SPEAKER": "Пріоритет розмови",
+            "STREAM": "Стрімити",
+            "VIEW_CHANNEL": "Перегляд каналу",
+            "SEND_MESSAGES": "Надсилати повідомлення",
+            "SEND_TTS_MESSAGES": "Надсилати TTS-повідомлення",
+            "MANAGE_MESSAGES": "Керувати повідомленнями",
+            "EMBED_LINKS": "Додати посилання",
+            "ATTACH_FILES": "Прикріпляти файли",
+            "READ_MESSAGE_HISTORY": "Читати історію повідомлень",
+            "MENTION_EVERYONE": "Згадувати @everyone",
+            "USE_EXTERNAL_EMOJIS": "Використання зовнішніх емодзі",
+            "VIEW_GUILD_INSIGHTS": "Переглянути аналітику сервера",
+            "CONNECT": "Під’єднатися",
+            "SPEAK": "Розмовляти",
+            "MUTE_MEMBERS": "Вимкнути мікрофони учасників",
+            "DEAFEN_MEMBERS": "Вимкнути звук для учасників",
+            "MOVE_MEMBERS": "Перемістити учасників",
+            "USE_VAD": "Використовувати режим активації за голосом",
+            "CHANGE_NICKNAME": "Змінити ім'я",
+            "MANAGE_NICKNAMES": "Керування нікнеймами",
+            "MANAGE_ROLES": "Керування ролями",
+            "MANAGE_WEBHOOKS": "Керування вебгачками",
+            "MANAGE_EMOJIS_AND_STICKERS": "Керування емодзі та наклейками",
+            "USE_APPLICATION_COMMANDS": "Використовувати слеш-команди",
+            "REQUEST_TO_SPEAK": "Заклик на розмову",
+            "MANAGE_THREADS": "Керування гілками",
+            "USE_PUBLIC_THREADS": "Використовувати публічні гілки",
+            "CREATE_PUBLIC_THREADS": "Використовувати публічні гілки",
+            "USE_PRIVATE_THREADS": "Використовувати приватні гілки",
+            "CREATE_PRIVATE_THREADS": "Використовувати публічні гілки",
+            "USE_EXTERNAL_STICKERS": "Використовувати сторонні стікери",
+            "SEND_MESSAGES_IN_THREADS": "Відправляти повідомлення в гілках",
+            "START_EMBEDDED_ACTIVITIES": "Почати вмонтовану активність",
+            "MODERATE_MEMBERS": "Модерувати учасників"
+        },
+        "command_option_types": {
+            "SUB_COMMAND": "Підкоманда",
+            "SUB_COMMAND_GROUP": "Група пыдкоманд",
+            "STRING": "Рядоковий",
+            "INTEGER": "Ціле число",
+            "BOOLEAN": "Логічний",
+            "USER": "Користувач",
+            "CHANNEL": "Канал",
+            "ROLE": "Роль",
+            "MENTIONABLE": "Користувач або роль",
+            "NUMBER": "Цифровий"
+        },
+        "guild_verification_levels": {
+            "NONE": "Відсутнє",
+            "LOW": "Низький",
+            "MEDIUM": "Середній",
+            "HIGH": "Високий",
+            "VERY_HIGH": "Дуже високий"
+        }
+    },
+    "commands": {
+        "about": {
+            "description": "Виводить інформацію про бота",
+            "text_developer": "Розробник",
+            "text_version": "Поточна версія",
+            "text_latency": "Затримка",
+            "text_total_guilds": "Всього спільнот",
+            "text_total_users": "Всього користувачів",
+            "text_shard_count": "Кількість фрагментів",
+            "text_os_uptime": "Час роботи системи",
+            "text_shard_uptime": "Час роботи фрагмента",
+            "text_state": "Стан"
+        },
+        "help": {
+            "description": "Виводе список доступних команд",
+            "options": {
+                "command": {
+                    "name": "команда",
+                    "description": "Назва команди"
+                }
+            },
+            "text_commands_list": "Список команд",
+            "text_command_help": "Довідка за командою",
+            "text_use_prefix": "Використовуйте {prefix} для виклику команд",
+            "text_use_help_for_more_details": "Ви можете ввести {prefix}help для команди та отримати більше інформації",
+            "text_dashboard_link": "Панель керування",
+            "text_docs_link": "Документація",
+            "text_command_not_found": "{user}, команда не знайдена",
+            "text_command_usage": "Використовування",
+            "text_command_args": "Аргументи",
+            "text_subcommands": "Підкоманди",
+            "text_command_arg_required": "Обов'язковий",
+            "text_command_arg_optional": "Необов'язковий",
+            "text_command_arg_type": "Тип: {type}",
+            "text_required_permissions": "Необов'язкові дозволи",
+            "text_required_permissions_bot": "Для бота",
+            "text_required_permissions_author": "Для автора команди"
+        },
+        "leaders": {
+            "description": "Виводе таблицю лідерів",
+            "options": {
+                "sorting": {
+                    "name": "сортування",
+                    "description": "Сортування таблиці лідерів по обраному типу активності",
+                    "choices": {
+                        "level": "по рівню",
+                        "balance": "по балансу"
+                    }
+                },
+                "page": {
+                    "name": "сторінка",
+                    "description": "Номер сторінки таблиці лідерів"
+                }
+            },
+            "text_levels_disabled": "{user}, рівні відключені на цьому сервері",
+            "text_economy_disabled": "{user}, економіка відключена на цьому сервері",
+            "text_no_levels": "{user}, на цьому сервері ще ніхто не отримував рівень",
+            "text_no_wallets": "{user}, на цьому сервері ще нема гаманців",
+            "text_leaders_by": "Лідери сервера {sort}",
+            "text_pagination": "Сторінка {current} з {total}",
+            "text_level": "Рів. {level}",
+            "text_previous_page": "Попередня сторінка",
+            "text_next_page": "Наступна сторінка"
+        },
+        "rank": {
+            "name": "Показати ранг",
+            "description": "Виводе рангову карту",
+            "options": {
+                "user": {
+                    "name": "користувач",
+                    "description": "Видасть рангову карту вказаного користувача"
+                }
+            },
+            "text_render_error": "{user}, сталася помилка під час створення рангової картки",
+            "text_no_rank_card": "{user}, рангова карта не найдена"
+        },
+        "server": {
+            "description": "Виводе інформацію про сервер",
+            "text_owner": "Власник",
+            "text_guild_id": "ІД спільноти",
+            "text_total_members": "Кількість учасників",
+            "text_total_channels": "Кількість каналів",
+            "text_verification_level": "Рівень провірки",
+            "text_afk_channel": "Канал простою",
+            "text_roles": "Кількість ролей",
+            "text_emojis": "Кількість емодзі",
+            "text_guild_created_at": "Сервер створений {date}"
+        },
+        "store": {
+            "description": "Магазин предметів сервера",
+            "buy": {
+                "description": "Придбання предмета магазину",
+                "options": {
+                    "sku": {
+                        "name": "артикул",
+                        "description": "Артикул (SKU) предмету в магазині"
+                    }
+                },
+                "text_no_sku": "{user}, будь ласка, вкажіть артикул предмету",
+                "text_item_not_found": "{user}, предмет з таким артикулом не знайдений"
+            },
+            "items": {
+                "description": "Виводить предмети магазину",
+                "options": {
+                    "page": {
+                        "name": "сторінка",
+                        "description": "Номер сторінки магазину предметів"
+                    }
+                },
+                "text_purchase_price": "Ціна",
+                "text_price_free": "безплатно",
+                "text_contains": "Містить в собі",
+                "text_quantity": "Залишена кількість",
+                "text_server_store": "Магазин серверу",
+                "text_server_store_description": "Виберіть предмет у випадаючому списку нижче введіть команду {command}, щоб купити його",
+                "text_select_item": "Виберіть предмет для покупки"
+            },
+            "text_no_store_items": "{user}, в магазині немає предметів для купівлі",
+            "text_insufficient_funds": "{user}, недостатньо коштів для купівлі предмета",
+            "text_purchased": "{user}, ви вже раніше купили цей предмет",
+            "text_purchase_success": "{user}, ви купили предмет {item}"
+        },
+        "user": {
+            "description": "Виводить інформацію про користувача",
+            "options": {
+                "user": {
+                    "name": "користувач",
+                    "description": "Видає інформацію про вказаного користувача"
+                }
+            },
+            "text_registration_date": "Дата реєстрації",
+            "text_join_date": "Дата вступу",
+            "text_avatar_link": "Посилання на аватар"
+        },
+        "wallet": {
+            "description": "Операція з гаманцем",
+            "balance": {
+                "description": "Виводе баланс гаманця",
+                "options": {
+                    "user": {
+                        "name": "користувач",
+                        "description": "Видає баланс гаманця вказаного користувача"
+                    }
+                },
+                "text_empty_wallet": "Гаманець пустий",
+                "text_user_balance": "Баланс користувача {user}"
+            },
+            "transfer": {
+                "description": "Переведення коштів на другий гаманець",
+                "options": {
+                    "user": {
+                        "name": "користувач",
+                        "description": "Користувач, якому будуть переказані кошти"
+                    },
+                    "amount": {
+                        "name": "сума",
+                        "description": "Кількість коштів переводу"
+                    },
+                    "currency": {
+                        "name": "валюта",
+                        "description": "Назва або символ валюти переводу"
+                    }
+                },
+                "text_no_mention": "{user}, будь ласка, вкажіть користувача, якому хочете зробити переказ",
+                "text_no_amount": "{user}, будь ласка, вкажіть суму переказу",
+                "text_insufficient_funds": "{user}, у вас немає такої суми переказу",
+                "text_transferred": "{user}, {amount} успішно переведено на рахунок {target}"
+            }
+        },
+        "ban": {
+            "description": "Видає блокування користувачу",
+            "options": {
+                "user": {
+                    "name": "користувач",
+                    "description": "Користувач, якому буде видане блокування"
+                },
+                "duration": {
+                    "name": "тривалість",
+                    "description": "Тривалість блокування (наприклад: 10m)"
+                },
+                "reason": {
+                    "name": "причина",
+                    "description": "Причина блокування"
+                }
+            },
+            "text_invalid_user": "{user}, користувач не вказаний або не знайдений",
+            "text_user_not_found": "{user}, будь ласка, вкажіть користувача, якого хочете заблокувати",
+            "text_self_action": "{user}, не думаю, що я зможу дозволити вам заблокувати самого себе",
+            "text_cant_ban_user": "{user}, неможливо заблокувати цього користувача",
+            "text_user_is_higher": "{user}, користувач знаходиться вище вас в ієрархії ролей",
+            "text_user_is_moderator": "{user}, користувач має права модератора, я не можу дозволити зробити це",
+            "text_user_has_unmoderated_roles": "{user}, користувач має одну або декілька ролей для яких заборонені дії модерування",
+            "text_user_banned": "{user}, користувачу {target} видане блокування на сервері"
+        },
+        "kick": {
+            "description": "Вигнати користувача з сервера",
+            "options": {
+                "user": {
+                    "name": "користувач",
+                    "description": "Користувач, який буде вигнаний з сервера"
+                },
+                "reason": {
+                    "name": "причина",
+                    "description": "Причина вигнання"
+                }
+            },
+            "text_user_not_found": "{user}, будь ласка, вкажіть користувача, якого хочете заблокувати",
+            "text_self_action": "{user}, не думаю, що я зможу дозволити вам заблокувати самого себе",
+            "text_cant_kick_user": "{user}, неможливо вигнати цього користувача",
+            "text_user_kicked": "{user}, користувач {target} був вигнаний з сервера"
+        },
+        "mute": {
+            "description": "Видає заглушення користувачеві",
+            "options": {
+                "user": {
+                    "name": "користувач",
+                    "description": "Користувач, який буде заглушений"
+                },
+                "duration": {
+                    "name": "тривалість",
+                    "description": "Тривалість заглушення (наприклад: 10m)"
+                },
+                "reason": {
+                    "name": "причина",
+                    "description": "Причина заглушення"
+                }
+            },
+            "text_user_not_found": "{user}, будь ласка, вкажіть користувача, якому хочете видати заглушення",
+            "text_self_action": "{user}, не думаю, що я можу дозволити вам заглушити самого себе",
+            "text_cant_mute_user": "{user}, неможливо заглужити цього користувача",
+            "text_user_already_muted": "{user}, користувач був заглушений",
+            "text_user_muted": "{user}, користувачу {target} видано заглушення"
+        },
+        "prune": {
+            "description": "Очищує повідомлення в каналі",
+            "options": {
+                "amount": {
+                    "name": "кількість",
+                    "description": "Кількість повідомлень, які потрібно видалити"
+                },
+                "user": {
+                    "name": "користувач",
+                    "description": "Видалить повідомлення тільки вказаного користувача"
+                },
+                "reason": {
+                    "name": "причина",
+                    "description": "Причина очищення повідомлення"
+                }
+            },
+            "text_no_amount_argument": "{user}, вкажіть кількість повідомлень, яких потрібно очистити",
+            "text_invalid_amount_argument": "{user}, кількість має бути цілим числом в діапазоні від 2 до 100",
+            "text_messages_pruned": "{user}, очищено повідомлень: {amount}"
+        },
+        "reason": {
+            "description": "Змінює причину випадку в журналі модерації",
+            "options": {
+                "case_id": {
+                    "name": "номер-випадку",
+                    "description": "Унікальний порядковий номер випадку в журналі"
+                },
+                "reason": {
+                    "name": "причина",
+                    "description": "Нова причина для випадку"
+                }
+            },
+            "text_no_case_log": "{user}, на сервері не встановлений канал для журналу модерації",
+            "text_no_case_id": "{user}, будь ласка, вкажіть номер випадку журналу модерації",
+            "text_no_reason": "{user}, будь ласка, вкажіть причину для випадку журналу модерації",
+            "text_no_case_message": "{user}, повідомлення з таким номером випадку не знайдено. Пам'ятайте, що ви можете змінити тільки останні 50 випадків",
+            "text_case_edited": "{user}, причина випадку змінена"
+        },
+        "report": {
+            "name": "Жалітися",
+            "description": "Відправляє жалобу на повідомлення",
+            "options": {
+                "message_id": {
+                    "name": "id-повідомлення",
+                    "description": "Ідентифікатор повідомлення, на яке буде відправлена жалоба"
+                }
+            },
+            "text_reports_disabled_or_no_channel": "{user}, репорти відключені на цьому сервері або не встановлений канал для них",
+            "text_channel_not_found": "{user}, канал для репортів не знайдений, можливо він видалений",
+            "text_already_reported": "{user}, ви вже відправили жалобу на це повідомлення",
+            "text_no_message_id": "{user}, будь ласка, вкажіть ідентифікатор повідомлення на яке потрібно відправити жалобу",
+            "text_no_message": "{user}, в поточному каналі повідомлення з вказаним ідентифікатором не існує",
+            "text_report_confirm": "{user}, жалоба на повідомлення успішно відправлена",
+            "text_message_channel": "Канал повідомлення",
+            "text_report_count": "Кількість репортів",
+            "text_jump_to_message": "Перейти до повідомлення",
+            "quick_actions": {
+                "KICK": "Вигнати",
+                "WARN": "Видати попередження",
+                "IGNORE": "Проігнорувати",
+                "BAN": "Видавати блокування",
+                "MUTE": "Видавати приглушення"
+            }
+        },
+        "unmute": {
+            "description": "Знімає заглушення в користувача",
+            "options": {
+                "user": {
+                    "name": "користувач",
+                    "description": "Користувач, якому потрібно зняти заглушення"
+                },
+                "reason": {
+                    "name": "причина",
+                    "description": "Причина зняття заглушення"
+                }
+            },
+            "text_user_not_found": "{user}, будь ласка, вкажіть користувача, якому потрібно зняти заглушення",
+            "text_user_not_muted": "{user}, користувач не був заглушений",
+            "text_user_unmuted": "{user}, користувачу {target} успішно знято заглушення"
+        },
+        "violations": {
+            "description": "Виводить список попереджень",
+            "options": {
+                "user": {
+                    "name": "користувач",
+                    "description": "Покаже попередження вказаного користувача"
+                }
+            },
+            "text_user_not_found": "{user}, ви вказали неправильного або не наявного користувача",
+            "text_no_violations": "{user}, у цього користувача нема порушень",
+            "text_user_violations": "Порушення {target}",
+            "text_last_24_hours": "За добу",
+            "text_last_7_days": "За 7 днів",
+            "text_total_violations": "Всього порушень",
+            "text_last_10_violations": "Останні 10 порушень"
+        },
+        "warn": {
+            "description": "Видача і зняття попереджень",
+            "add": {
+                "description": "Видає попередження користувачу",
+                "options": {
+                    "user": {
+                        "name": "користувач",
+                        "description": "Користувач, якому потрібно видати попередження"
+                    },
+                    "reason": {
+                        "name": "причина",
+                        "description": "Причина попередження"
+                    }
+                },
+                "text_user_not_found": "{user}, будь ласка, вкажіть користувача, якому потрібно видати попередження",
+                "text_self_action": "{user}, не думаю, що я зможу дозволити вам попередити себе",
+                "text_user_warned_dm": "{user}, вам було видано попередження на сервері {quild} по причині: {reason}",
+                "text_user_warned_closed_dm": "{user}, вам було видано попередження по причині\" {reason}",
+                "text_user_warned": "{user}, користувачу {target} видано попередження"
+            },
+            "remove": {
+                "description": "Знімає попередження з користувача",
+                "options": {
+                    "user": {
+                        "name": "користувач",
+                        "description": "Користувач, якому потрібно зняти попередження"
+                    },
+                    "warn_id": {
+                        "name": "номер-попередження",
+                        "description": "Ідентифікатор, порядковий номер попередження або \"all\" для зняття всіх попереджень"
+                    },
+                    "reason": {
+                        "name": "причина",
+                        "description": "Причина зняття попередження"
+                    }
+                },
+                "text_user_not_found": "{user}, будь ласка, вкажіть користувача, якому потрібно зняти попередження",
+                "text_no_warn_id": "{user}, будь ласка, вкажіть ідентифікатор попередження",
+                "text_invalid_warn_id": "{user}, ви вказали неправильний ідентифікатор попередження",
+                "text_no_violator_or_violations": "{user}, схоже, що цей користувач не отримував раніше попереджень",
+                "text_warn_removed": "{user}, попередження успішно знято",
+                "text_warns_removed_all": "{user}, всі попередження успішно зняті"
+            }
+        },
+        "next": {
+            "description": "Відтворить наступний трек в черзі",
+            "text_no_track_playback": "{user}, відтворення треків не запущено на цьому сервері",
+            "text_different_voice": "{user}, ви не підключені до голосового каналу або знаходитесь в іншому",
+            "text_no_playback": "{user}, музика зараз не відтворюється",
+            "text_track_skip": "{user}, відтворення перемотано вперед"
+        },
+        "play": {
+            "description": "Відтворює в голосовому чаті",
+            "options": {
+                "query": {
+                    "name": "запит",
+                    "description": "Посилання або назву треку"
+                }
+            },
+            "text_connect_to_voice": "{user}, спочатку потрібно під'єднатись до якогось голосового чату",
+            "text_disallowed_voice": "{user}, відтворення не дозволено в вибраному каналі",
+            "text_no_required_permissions_in_voice": "{user}, у мене недостатньо прав у обраному голосовому каналі",
+            "text_voice_is_full": "{user}, обраний голосовий канал заповнений",
+            "text_no_search_track": "{user}, потрібно вказати посилання на плейлист, посилання на трек або назву",
+            "text_search_in_progress": "{user}, іду пошук: {track}",
+            "text_load_failed": "{user}, відбулася невідома помилка при завантаженні треку",
+            "text_no_matches": "{user}, по вказаному запиті нічого не знайдено",
+            "text_playlist_loaded_no_premium": "{user}, програвання плейлистів доступно тільки бонусним серверам",
+            "text_playlist_loaded": "{user}, плейлист успішно завантажений і добавлений в чергу відтворення",
+            "text_queue_limit_reached_no_premium": "{user}, достигнута максимальна кількість треків в черзі",
+            "text_track_stream_only_for_premium": "{user}, потокові відтворення доступні тільки бонусним серверам",
+            "text_track_stream_disabled": "{user}, потокові відтворення відключенні",
+            "text_track_added_to_queue": "{user}, трек {track} доданий в чергу відтворення",
+            "text_playlist_added_to_queue": "{user}, плейлист {playlist} доданий в чергу відтворення",
+            "text_now_playing": "{user}, зараз грає {track}",
+            "text_unknown_error": "{user}, відбулась невідома помилка при відтворенні треку",
+            "text_not_allowed_host": "{user}, вказане посилання не знаходиться в списку дозволенних. Будь ласка, зверніться в сервер підтримки",
+            "text_player": "Плеєр",
+            "text_added_by": "Додав: {requester}"
+        },
+        "previous": {
+            "description": "Відтворить попередній трек в черзі",
+            "text_no_previous_track": "{user}, попередній трек на знайдений",
+            "text_track_previous": "{user}, попередній трек поставлений на відтворення"
+        },
+        "queue": {
+            "description": "Показує теперішню чергу відтворення",
+            "text_no_track_queue": "{user}, черга відтворення пуста"
+        },
+        "repeat": {
+            "description": "Перемикає режим повтору для відтворення",
+            "text_track_repeat": "{user}, включений повтор теперішнього треку",
+            "text_queue_repeat": "{user}, включений повтор черги",
+            "text_no_repeat": "{user}, повтор треків відключений"
+        },
+        "stop": {
+            "description": "Зупиняє відтворення музики",
+            "text_playback_stop": "{user}, відтворення зупинено"
+        },
+        "volume": {
+            "description": "Змінює гучність відтворення",
+            "options": {
+                "volume": {
+                    "name": "гучність",
+                    "description": "Гучність відтворення"
+                }
+            },
+            "text_invalid_volume": "{user}, неправильно вказане значення гучності",
+            "text_volume_diapason": "{user}, гучність має бути в діапазоні від 1 до 100",
+            "text_volume_changed": "{user}, гучність змінена з {from} до {to}"
+        },
+        "activities": {
+            "description": "Керування активностями",
+            "set-level": {
+                "description": "Встановлює рівень учасникам",
+                "options": {
+                    "user": {
+                        "name": "користувач",
+                        "description": "Користувач, якому буде встановлений рівень"
+                    },
+                    "level": {
+                        "name": "рівень",
+                        "description": "Встановлюваний рівень"
+                    }
+                },
+                "text_no_mention": "{user}, будь ласка, вкажіть користувача",
+                "text_no_level": "{user}, рівень має бути в діапазоні від 1 до 2500",
+                "text_set_success": "{user}, рівень успішно встановлений"
+            },
+            "add-wallet-balance": {
+                "description": "Додає валюту учасникам",
+                "options": {
+                    "user": {
+                        "name": "користувач",
+                        "description": "Користувач, якому буде змінений баланс гаманця"
+                    },
+                    "amount": {
+                        "name": "кількість",
+                        "description": "Кількість коштів, на яке потрібно поповнити баланс (до 2^31)"
+                    },
+                    "currency": {
+                        "name": "валюта",
+                        "description": "Назва або символ валюти"
+                    }
+                },
+                "text_add_success": "{user}, баланс гаманця {target} збільшений на {amount}"
+            },
+            "set-wallet-balance": {
+                "description": "Встановлює баланс гаманцю",
+                "options": {
+                    "user": {
+                        "name": "користувач",
+                        "description": "Користувач, якому буде встановлений баланс гаманцю"
+                    },
+                    "amount": {
+                        "name": "баланс",
+                        "description": "Встановлюваний баланс гаманця (від -2^31 до 2^31)"
+                    },
+                    "currency": {
+                        "name": "валюта",
+                        "description": "Назва або символ валюти"
+                    }
+                },
+                "text_no_mention": "{user}, будь ласка, вкажіть користувача, якому хочете встановити баланс гаманця",
+                "text_no_amount": "{user}, будь ласка, вкажіть встановлюваний баланс гаманця",
+                "text_set_success": "{user}, баланс гаманця {target} встановлений на {amount}"
+            },
+            "reset-wallet": {
+                "description": "Скидує гаманці учасникам",
+                "options": {
+                    "user": {
+                        "name": "користувач",
+                        "description": "Користувач, якому буде скинутий гаманець"
+                    },
+                    "user_id": {
+                        "name": "id-користувача",
+                        "description": "Скидування гаманця по ідентифікатору користувача або вкажіть \"all\" для скидування гаманців всім"
+                    }
+                },
+                "text_nothing_to_reset": "{user}, нема наявних гаманців",
+                "text_confirmation": "{user}, ви впевнені, що хочете скинути всі гаманці на сервері? Ця дія буде незворотня",
+                "text_confirm": "Так, скинути всі гаманці",
+                "text_cancel": "Ні, скасувати",
+                "text_confirmed": "{user}, всі гаманці успішно скинуті",
+                "text_canceled": "{user}, скидування всіх гаманців скасований",
+                "text_reset_user": "{user}, гаманець успішно скинутий"
+            },
+            "reset-level": {
+                "description": "Скидує рівень учасникам",
+                "options": {
+                    "user": {
+                        "name": "користувач",
+                        "description": "Вказаному користувачу буде скинутий рівень"
+                    },
+                    "user_id": {
+                        "name": "id-користувача",
+                        "description": "Скидування рівня по ідентифікатору користувача або вкажіть \"all\" для скидування рівня всім"
+                    }
+                },
+                "text_no_mention": "{user}, вкажіть учасника, його ідентифікатор або \"all\" для скидування рівня всім",
+                "text_reset_success": "{user}, рівень успішно скинутий"
+            }
+        },
+        "giveaway": {
+            "description": "Створює і видаляє розіграші",
+            "create": {
+                "description": "Створює новий розіграш",
+                "options": {
+                    "prize": {
+                        "name": "приз",
+                        "description": "Приз за виграш в розіграші"
+                    },
+                    "duration": {
+                        "name": "тривалість",
+                        "description": "Тривалість розіграшу"
+                    },
+                    "winners_amount": {
+                        "name": "кількість-переможців",
+                        "description": "Кількість переможців, яке буде вибрано випадковим чином"
+                    },
+                    "sponsor": {
+                        "name": "спонсор",
+                        "description": "Хто спонсорував цей розіграш?"
+                    }
+                },
+                "text_no_prize": "{user}, ви не вказали приз за виграш в розіграші",
+                "text_invalid_duration": "{user}, аргумент тривалості вказаний неправильно",
+                "text_invalid_winners_range": "{user}, кількість переможців має бути в діапазоні від 1 до 50",
+                "text_max_allowed_giveaways_reached": "{user}, достигнута максимальна кількість активних розіграшів",
+                "text_giveaway_by": "Розіграш від {sponsor}",
+                "text_end_date": "Закінчиться {date}",
+                "text_prize": "Приз за виграш",
+                "text_winners_amount": "Кількість переможців",
+                "text_members_amount": "Кількість учасників",
+                "text_participate": "Взяти участь",
+                "text_giveaway_created": "{user}, розіграш успішно створений",
+                "text_participated": "{user}, ви взяли участь в розіграші {giveaway}",
+                "text_already_participating": "{user}, ви вже берете участь в розіграші {giveaway}"
+            },
+            "remove": {
+                "description": "Видаляє розіграш",
+                "options": {
+                    "message_id": {
+                        "name": "id-повідомлення",
+                        "description": "Ідентифікатор повідомлення з розіграшами"
+                    }
+                },
+                "text_no_message_id": "{user}, будь ласка, вкажіть ідентифікатор повідомлення",
+                "text_giveaway_not_found": "{user}, розіграш не знайдений",
+                "text_ga_message_not_found": "{user}, повідомлення розіграшу не знайдено"
+            },
+            "end": {
+                "description": "Завершує розіграш",
+                "options": {
+                    "message_id": {
+                        "name": "id-повідомлення",
+                        "description": "Ідентифікатор повідомлення з розіграшами"
+                    }
+                },
+                "text_no_members": "Учасники розіграшу не знайдені",
+                "text_winners": "Переможці: {winners}",
+                "text_congrats": "Мої поздоровлення {winner}! Ви виграли {prize}!",
+                "text_giveaway_stopped": "{user}, розіграш зупинений"
+            }
+        },
+        "temprole": {
+            "description": "Видає роль користувачу на вказаний час",
+            "options": {
+                "user": {
+                    "name": "користувач",
+                    "description": "Користувач, якому буде видана роль"
+                },
+                "role": {
+                    "name": "роль",
+                    "description": "Роль, яка буде видана"
+                },
+                "duration": {
+                    "name": "тривалість",
+                    "description": "Час на яке буде видана роль"
+                }
+            },
+            "text_no_mention": "{user}, будь ласка, вкажіть учасника",
+            "text_no_role": "{user}, ви не вказали роль",
+            "text_invalid_duration": "{user}, аргумент тривалості вказаний неправильно",
+            "text_role_not_editable": "{user}, в мене нема дозволу на видачу цієї ролі комусь",
+            "text_has_role": "{user}, користувач вже має цю роль",
+            "text_success": "{user}, роль {role} видана користувачу {target} до {date}"
+        }
+    },
+    "case_log": {
+        "cases": {
+            "BAN_ADD": "Блокування видано",
+            "BAN_REMOVE": "Блокування прибрано",
+            "KICK": "Учасник вигнаний",
+            "MUTE_ADD": "Заглушення видано",
+            "MUTE_REMOVE": "Заглушення прибрано",
+            "PRUNE_MESSAGES": "Очищення повідомлень",
+            "WARN_ADD": "Попередження видано",
+            "WARN_REMOVE": "Попередження прибрано"
+        },
+        "reason": "Причина",
+        "case_number": "Випадок #{case_number}",
+        "moderator": "Модератор"
+    },
+    "logs": {
+        "update_template": "{user} Змінює {change}",
+        "unknown_initiator": "Невідомий користувач",
+        "before_change": "До змінення",
+        "after_change": "Після змінення",
+        "channel_category": "Категорія каналу",
+        "channel_position": "Позиція каналу",
+        "channel_create_title": "Канал створено",
+        "channel_create_template": "{user} створює канал {channel}",
+        "channel_delete_title": "Канал видалено",
+        "channel_delete_template": "{user} видаляє канал {channel}",
+        "channel_update_title": "Канал змінений",
+        "channel_update_name_change_template": "назва каналу {channel}",
+        "channel_update_topic_change_template": "опис каналу {channel}",
+        "channel_update_rate_limit_change_template": "повільний режим каналу {channel}",
+        "channel_update_parent_change_template": "категорію каналу {channel}",
+        "channel_update_bitrate_change_template": "бітрейт каналу {channel}",
+        "channel_update_user_limit_change_template": "обмеження користувачів каналу {channel}",
+        "emoji_create_title": "Емодзі добавлений",
+        "emoji_create_template": "{user} додає емодзі {emoji}",
+        "emoji_delete_title": "Емодзі видалений",
+        "emoji_delete_template": "{user} видаляє емодзі {emoji}",
+        "emoji_update_title": "Емодзі змінений",
+        "emoji_update_name_change_template": "назва емодзі {emoji}",
+        "guild_ban_add_title": "Блокування видано",
+        "guild_ban_add_template": "{user}, видає блокування користувачу {target}",
+        "guild_ban_remove_title": "Блокування прибрано",
+        "guild_ban_remove_template": "{user} знімає блокуванню користувачу {target}",
+        "guild_member_count": "Кількість учасників",
+        "guild_member_add_title": "Користувач приєднався до сервера",
+        "guild_member_remove_title": "Користувач залишив сервер",
+        "guild_member_update_title": "Учасник змінений",
+        "guild_member_update_nick_change_template": "відображає ім'я користувача {user}",
+        "guild_update_title": "Сервер змінений",
+        "guild_update_name_change": "назва серверу",
+        "guild_update_afk_channel_change": "канал простою",
+        "guild_update_afk_timeout_change": "тайм-аут бездіяльності в голосових каналах",
+        "guild_update_description_change": "опис сервера",
+        "invite_code": "Код запрошення",
+        "invite_inviter": "Запрошуючий",
+        "invite_create_title": "Запрошення створено",
+        "invite_delete_title": "Запрошення видалено",
+        "message_author": "Автор повідомлення",
+        "message_content": "Вміст повідомлення",
+        "message_count": "Кількість повідомлень",
+        "message_delete_title": "Повідомлення видалено",
+        "message_delete_bulk_title": "Масове видалення повідомлень",
+        "message_update_title": "Повідомлення змінено",
+        "role_name": "Назва ролі",
+        "role_color": "Колір ролі",
+        "role_position": "Позиція ролі",
+        "role_create_title": "Роль стровена",
+        "role_create_template": "{user} створює роль {role}",
+        "role_delete_title": "Роль видалена",
+        "role_delete_template": "{user} видаляє роль {role}",
+        "role_member_add_title": "Роль додана",
+        "role_member_add_template": "{user} додає ролі користувачу {target}",
+        "role_member_remove_title": "Роль прибрана",
+        "role_member_remove_template": "{user} забирає ролі в користувача {target}",
+        "role_update_title": "Роль змінена",
+        "role_update_name_change_template": "назва роли {role}",
+        "role_update_color_change_template": "колір ролі {role}",
+        "role_update_permissions_change_template": "дозволи ролі {role}",
+        "sticker_create_title": "Стікер додано",
+        "sticker_create_template": "{user} додає стікер {sticker}",
+        "sticker_delete_title": "Стікер видалений",
+        "sticker_delete_template": "{user} видаляє стікер {sticker}",
+        "sticker_update_title": "Стікер змінений",
+        "sticker_update_name_change_template": "назва стікера {sticker}",
+        "thread_auto_archive_duration": "Час автоархівації",
+        "thread_create_title": "Гілка створена",
+        "thread_create_template": "{user} створює гілку {thread}",
+        "thread_delete_title": "Гілка видалена",
+        "thread_delete_template": "{user} видаляє гілку {thread}",
+        "thread_update_title": "Гілка змінена",
+        "thread_update_name_change_template": "назва гілки {thread}",
+        "thread_update_auto_archive_change_template": "час автоархівації гілки {thread}",
+        "user_update_title": "Користувач змінений",
+        "user_update_name_change_template": "{user} змінює своє ім'я користувача",
+        "user_update_discriminator_change_template": "{user} змінює свій дискримінатор",
+        "voice_connect_title": "Голосове підключення",
+        "voice_connect_template": "{user} підключається до голосового каналу {channel}",
+        "voice_disconnect_title": "Голосове відключення",
+        "voice_disconnect_template": "{user} відлючається від голосового каналу {channel}",
+        "voice_move_title": "Голосове переміщення",
+        "voice_move_template": "{user} перемістився з голосового каналу {from} в {to}",
+        "voice_server_deaf": "Відключення звуку",
+        "voice_server_mute": "Відключення мікрофону",
+        "voice_server_undeaf": "Включення звуку",
+        "voice_server_unmute": "Включення мікрофону"
+    },
+    "audit_reasons": {
+        "automoder_anti_caps": "АвтоМод: Анти-КАПС",
+        "automoder_links_filter": "АвтоМод: Фільтрація посилань",
+        "automoder_newbies_moderation": "АвтоМод: Модерування новоприбулих",
+        "automoder_nicknames_moderation": "АвтоМод: модерування нікнеймів",
+        "automoder_swear_filter": "АвтоМод: Фільтрація слів",
+        "automoder_users_slowdown": "АвтоМод: Уповільнення відправки повідомлення",
+        "logs_webhook_create": "Логи: Веб-крючок для події \"{event}\"",
+        "irs": "Інтерактивні реакції",
+        "ims": "Інтерактивні повідомлення",
+        "voice_roles": "Голосові ролі"
+    }
+}

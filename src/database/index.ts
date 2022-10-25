@@ -40,12 +40,12 @@ export default {
         async deleteOne(filter: FilterQuery<ServerDocument>, options?: QueryOptions) {
             return await Servers.deleteOne(filter, options)
         },
-        async fetch(filter: FilterQuery<ServerDocument>) {
+        async fetch(filter: FilterQuery<ServerDocument>, defaultValues: Partial<ServerDocument> = {}) {
             let document = await Servers.findOne(filter)
 
             if (!document) {
                 try {
-                    document = await Servers.create(filter as any)
+                    document = await Servers.create({ ...filter, ...defaultValues })
                 } catch (err) {
                     document = null
                 }
