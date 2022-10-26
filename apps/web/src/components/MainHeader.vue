@@ -54,7 +54,7 @@
         </q-avatar>
         <q-icon class="gt-sm" name="arrow_drop_down" size="16px"></q-icon>
 
-        <q-menu class="bg-dark-2" auto-close>
+        <q-menu class="bg-dark-2">
           <q-list dense>
             <q-item clickable active-class="" to="/@me">
               <q-item-section>
@@ -66,7 +66,29 @@
                 {{ $t('pages.dashboard.my_guilds') }}
               </q-item-section>
             </q-item>
+
             <q-separator></q-separator>
+
+            <q-item clickable>
+              <q-item-section>
+                {{ $t('pages.guild.gs_locale_title') }}
+              </q-item-section>
+
+              <q-menu class="bg-dark-2" anchor="top left" self="top right">
+                <q-list v-for="locale in availableLocales" :key="locale.value" dense>
+                  <q-item
+                    clickable
+                    @click="setLocale(locale.value)"
+                    :active="currentLocale === locale.value"
+                    active-class="menu-item--active"
+                  >
+                    <q-item-section>
+                      {{ locale.label }}
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-item>
             <q-item clickable @click="user.logout">
               <q-item-section class="text-red">
                 {{ $t('logout') }}
@@ -127,6 +149,8 @@
 <script>
 import { useUserStore } from 'src/stores/user'
 import { defineComponent } from 'vue'
+import { availableLocales } from 'src/utils/Constants'
+import { getLocale } from 'src/utils/Utils'
 
 export default defineComponent({
   name: 'MainHeader',
@@ -135,7 +159,9 @@ export default defineComponent({
     const user = useUserStore()
 
     return {
-      user
+      user,
+      availableLocales,
+      currentLocale: getLocale()
     }
   },
 
@@ -148,6 +174,11 @@ export default defineComponent({
   methods: {
     toggleMobileNav() {
       this.displayMobileNav = !this.displayMobileNav
+    },
+    setLocale(locale) {
+      this.$i18n.locale = locale
+      this.currentLocale = locale
+      localStorage.setItem('locale', locale)
     }
   }
 })

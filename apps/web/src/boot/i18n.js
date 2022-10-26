@@ -1,11 +1,12 @@
 import { boot } from 'quasar/wrappers'
 import { createI18n } from 'vue-i18n'
 import messages from 'src/i18n'
+import { getLocale } from 'src/utils/Utils'
 
 export default boot(({ app }) => {
     const i18n = createI18n({
         legacy: false,
-        locale: 'ru',
+        locale: getLocale(),
         fallbackLocale: 'ru',
         globalInjection: true,
         messages,
