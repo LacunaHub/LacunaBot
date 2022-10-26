@@ -1,5 +1,5 @@
-import ruRU from './ru-RU'
+import en from './en'
+import ru from './ru'
+import uk from './uk'
 
-export default {
-    ru: ruRU
-}
+export default { en, ru, uk }

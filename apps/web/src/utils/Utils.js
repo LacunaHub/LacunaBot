@@ -361,3 +361,7 @@ export function resolveCustomCommandJSON(data) {
 
     return json
 }
+
+export function getLocale() {
+    return (localStorage.getItem('locale') ?? navigator.languages?.[0] ?? navigator.language ?? 'en').split('-')[0]
+}

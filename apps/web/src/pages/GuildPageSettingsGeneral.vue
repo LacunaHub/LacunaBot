@@ -500,6 +500,7 @@
 import { useGuildStore } from 'src/stores/guild'
 import { defineComponent } from 'vue'
 import MessageEditor from 'src/components/MessageEditor.vue'
+import { availableLocales } from 'src/utils/Constants'
 
 export default defineComponent({
   name: 'GuildPageSettingsGeneral',
@@ -516,7 +517,7 @@ export default defineComponent({
     return {
       input: null,
       toggle: false,
-      locales: [{ label: 'Русский', value: 'ru' }]
+      locales: availableLocales
     }
   }
 })

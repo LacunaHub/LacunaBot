@@ -92,3 +92,9 @@ export const customCommandComponentLimits = {
     FORWARD_TO_COMMAND: 1,
     MODIFY_WALLET: 2
 }
+
+export const availableLocales = [
+    { label: 'English', value: 'en' },
+    { label: 'Русский', value: 'ru' },
+    { label: 'Українська', value: 'uk' }
+]
