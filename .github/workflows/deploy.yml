@@ -4,10 +4,6 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: ./Lacuna
-
 jobs:
   deploy:
     runs-on: self-hosted
