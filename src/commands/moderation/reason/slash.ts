@@ -1,8 +1,8 @@
-import { BaseGuildTextChannel, CommandInteraction, MessageEmbed } from 'discord.js'
+import { BaseGuildTextChannel, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const case_id = interaction.options?.getInteger(t('commands.reason.options.case_id.name'))
@@ -38,7 +38,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     }
 
     await interaction.deferReply({ ephemeral: true })
-    const messages = await case_log.messages.fetch({ limit: 50 }, { cache: false })
+    const messages = await case_log.messages.fetch({ limit: 50, cache: false })
     const case_message = messages.find(m => m.author.id == self.user.id && m.embeds[0]?.footer?.text?.includes(`#${case_id}`))
 
     if (!case_message) {
@@ -58,10 +58,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         }
     )
 
-    const embed = new MessageEmbed(case_message.embeds[0])
+    const embed = new EmbedBuilder(case_message.embeds[0])
 
-    embed.fields[1].value = interaction.user.tag
-    embed.fields[2].value = reason
+    embed.data.fields[1].value = interaction.user.tag
+    embed.data.fields[2].value = reason
 
     await case_message.edit({ embeds: [embed] })
 

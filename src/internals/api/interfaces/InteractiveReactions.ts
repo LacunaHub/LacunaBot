@@ -1,4 +1,4 @@
-import { Util } from 'discord.js'
+import { parseEmoji } from 'discord.js'
 import database from '../../../database'
 import { InteractiveReaction, ServerDocument } from '../../../database/schemas/Servers'
 import { generateId } from '../../../modules/Reactions'
@@ -6,7 +6,7 @@ import DiscordUtils from '../../utility/DiscordUtils'
 
 export async function createInteractiveReaction(server: ServerDocument, data: Partial<InteractiveReaction>) {
     const element_id = data.id ?? generateId(),
-        emoji = Util.parseEmoji(data.emoji as any),
+        emoji = parseEmoji(data.emoji as any),
         interactiveReactions = server.modules.reactions
 
     if (interactiveReactions.length >= 50 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')

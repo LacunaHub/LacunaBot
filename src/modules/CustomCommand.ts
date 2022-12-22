@@ -1,4 +1,13 @@
-import { BaseGuildTextChannel, CommandInteraction, GuildMember, GuildMemberRoleManager, MessageEmbed, Team, User } from 'discord.js'
+import {
+    ApplicationCommandOptionType,
+    BaseGuildTextChannel,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    GuildMember,
+    GuildMemberRoleManager,
+    Team,
+    User
+} from 'discord.js'
 import IVM, { Context } from 'isolated-vm'
 import qdb from 'quick.db'
 import safeRegex from 'safe-regex'
@@ -13,12 +22,12 @@ export default class CustomCommand {
     public command: ICustomCommand
     public self: Lacuna
     public server: ServerDocument
-    public interaction: CommandInteraction
+    public interaction: ChatInputCommandInteraction
     private usedPatterns: string[]
     private usedFunctions: string[]
     private isolate: IVM.Isolate
 
-    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
         this.command = command
 
         this.self = self
@@ -65,9 +74,9 @@ export default class CustomCommand {
                 options: options.data.map(i => {
                     let user, channel, role
 
-                    if (i.type === 'USER') user = options.getUser(i.name)
-                    if (i.type === 'CHANNEL') channel = options.getChannel(i.name)
-                    if (i.type === 'ROLE') role = options.getRole(i.name)
+                    if (i.type === ApplicationCommandOptionType.User) user = options.getUser(i.name)
+                    if (i.type === ApplicationCommandOptionType.Channel) channel = options.getChannel(i.name)
+                    if (i.type === ApplicationCommandOptionType.Role) role = options.getRole(i.name)
 
                     return {
                         name: i.name,
@@ -277,10 +286,10 @@ export default class CustomCommand {
             }
         }
 
-        const returning = {} as { content: string; embeds: MessageEmbed[] }
+        const returning = {} as { content: string; embeds: EmbedBuilder[] }
 
         if (content) returning.content = content
-        if (message.embed && message.embed.active) returning.embeds = [new MessageEmbed(embed)]
+        if (message.embed && message.embed.active) returning.embeds = [new EmbedBuilder(embed)]
 
         return returning
     }

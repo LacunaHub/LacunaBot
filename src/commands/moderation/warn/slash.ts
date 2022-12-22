@@ -1,9 +1,9 @@
-import { CommandInteraction, GuildMember } from 'discord.js'
+import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { caseLog, warnings } from '../../../modules/Moderation'
 
-export async function addSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function addSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember(t('commands.warn.add.options.user.name')) as GuildMember
@@ -36,7 +36,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
-    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_ROLES)) {
+    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.ManageRoles)) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
@@ -67,7 +67,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
     return true
 }
 
-export async function removeSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function removeSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember(t('commands.warn.remove.options.user.name')) as GuildMember

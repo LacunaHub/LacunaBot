@@ -1,5 +1,5 @@
 import Router from '@koa/router'
-import { Constants, Permissions } from 'discord.js'
+import { ChannelType, PermissionsBitField } from 'discord.js'
 import { Context } from 'koa'
 import qdb from 'quick.db'
 import db from '../../../database'
@@ -49,7 +49,7 @@ async function getSettings(ctx: Context) {
     const channels = guildChannels
         .sort((a, b) => a.parent_id - b.parent_id || a.position - b.position)
         .map(c => {
-            return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' }
+            return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: ChannelType[c.type] ?? 'UNKNOWN' }
         })
     const roles = guildRoles
         .filter(r => !r.tags?.bot_id)
@@ -99,7 +99,7 @@ async function getSettings(ctx: Context) {
             emojis,
             commands,
             app_commands_registered: guildCommands.length > 0,
-            app_permissions: new Permissions(selfPermissions).toArray()
+            app_permissions: new PermissionsBitField(selfPermissions).toArray()
         },
         moderation: {
             case_log: {
@@ -363,6 +363,7 @@ async function updateInteractiveMessages(ctx: Context) {
                 throw new Error('UNKNOWN_METHOD')
         }
     } catch (err) {
+        console.log(err)
         ctx.throw(400, err.message)
     }
 

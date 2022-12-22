@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Guild, MessageEmbed, User, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Guild, User, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,13 +8,15 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
 
         const log = guild.channels.cache.get(server.moderation.logs.types.guild_ban_add.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_BAN_ADD' }) : null
+            const audit = guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MemberBanAdd })
+                : null
             const executor = audit?.entries?.first()?.executor
             const reason = audit?.entries?.first()?.reason
 
@@ -33,7 +35,8 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.guild_ban_add_title') })
                     })
@@ -55,7 +58,7 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 )
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.guild_ban_add_title'))
                 .setDescription(t('logs.guild_ban_add_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, target: `**${user.tag}** (${user.id})` }))
                 .addFields([{ name: t('case_log.reason'), value: reason ?? '-' }])

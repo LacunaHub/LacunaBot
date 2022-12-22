@@ -1,11 +1,9 @@
-import prefix from './prefix'
 import slash from './slash'
 import user from './user'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
 export default {
-    prefix,
     slash,
     user,
     name,

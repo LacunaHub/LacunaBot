@@ -1,4 +1,4 @@
-import { ButtonInteraction, CommandInteraction, GuildMember, Message } from 'discord.js'
+import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, Message } from 'discord.js'
 import ms from 'ms'
 import { ServerDocument, WarningsPenalty, WarningsViolator } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
@@ -7,7 +7,7 @@ import { generateSimpleId } from '../../internals/utility/UID'
 import { caseLog } from './'
 import Replacer from './../Replacer'
 
-export async function addWarn(self: Lacuna, server: ServerDocument, signal: Message | CommandInteraction | ButtonInteraction, options: WarnOptions) {
+export async function addWarn(self: Lacuna, server: ServerDocument, signal: Message | ChatInputCommandInteraction | ButtonInteraction, options: WarnOptions) {
     const target = options.target,
         executor = options.executor,
         reason = options.reason

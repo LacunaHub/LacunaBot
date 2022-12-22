@@ -1,12 +1,9 @@
-import { REST } from '@discordjs/rest'
-import { Routes } from 'discord-api-types/v9'
 import fetch from 'node-fetch'
 import { scheduleJob } from 'node-schedule'
 import db from '../database'
 import logger from '../internals/Logger'
+import { apiRoutes, restApi } from '../internals/utility/DiscordUtils'
 import Replacer from './Replacer'
-
-const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
 export async function searchChannels(term: string) {
     term = term.startsWith('UC') ? `channelId=${term}` : `q=${encodeURI(term)}`
@@ -18,7 +15,9 @@ export async function searchChannels(term: string) {
     if (response.ok) {
         const data: YouTubeSearchResponse = await response.json()
 
-        return data.items?.length ? data.items.map(item => ({ id: item.id.channelId, name: item.snippet.channelTitle, thumbnail: item.snippet.thumbnails.medium.url })) : []
+        return data.items?.length
+            ? data.items.map(item => ({ id: item.id.channelId, name: item.snippet.channelTitle, thumbnail: item.snippet.thumbnails.medium.url }))
+            : []
     }
 
     return []
@@ -81,11 +80,11 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
 
         if (!guildSubscription) continue
 
-        let webhook = (await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
+        let webhook = (await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
 
         if (!webhook) {
-            webhook = await rest
-                .post(Routes.channelWebhooks(guildSubscription.notification_channel_id), {
+            webhook = await restApi
+                .post(apiRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
                     body: {
                         name: data.channelName
                     }
@@ -115,8 +114,8 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
             })
         }
 
-        await rest
-            .post(Routes.webhook(webhook.id, webhook.token), {
+        await restApi
+            .post(apiRoutes.webhook(webhook.id, webhook.token), {
                 body: {
                     content: hasVideoUrl ? notificationText : notificationText ? `${notificationText}\n${videoUrl}` : videoUrl
                 }

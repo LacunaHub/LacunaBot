@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, MessageEmbed, VoiceState, Webhook } from 'discord.js'
+import { BaseGuildTextChannel, EmbedBuilder, VoiceState, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,7 +8,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
 
         const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_move.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(state.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(state.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
@@ -29,7 +29,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.voice_move_title') })
                     })
@@ -51,7 +52,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
                 )
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.voice_move_title'))
                 .setDescription(t('logs.voice_move_template', { user: `**${state.member.user.tag}**`, from: `<#${before.channelId}>`, to: `<#${state.channelId}>` }))
                 .setFooter({ text: state.member.id })

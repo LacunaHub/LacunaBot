@@ -1,11 +1,11 @@
-import { BaseGuildTextChannel, ContextMenuInteraction, MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu } from 'discord.js'
+import { ActionRowBuilder, BaseGuildTextChannel, ButtonBuilder, ButtonStyle, ContextMenuCommandInteraction, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { truncateString } from '../../../internals/utility/Utils'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ContextMenuInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ContextMenuCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.reports.active || !server.modules.reports.channel_id) {
@@ -29,7 +29,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
     }
 
     await interaction.deferReply({ ephemeral: true })
-    const target = await interaction.channel.messages.fetch(interaction.targetId).catch(() => {})
+    const target = await interaction.channel.messages.fetch({ message: interaction.targetId }).catch(() => {})
 
     if (!target) {
         await interaction.editReply({
@@ -52,11 +52,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
 
     self.qdb.push(`reports.${interaction.targetId}.users`, interaction.user.id)
 
-    const messages = await channel.messages.fetch({ limit: 50 }, { cache: false })
+    const messages = await channel.messages.fetch({ limit: 50, cache: false })
     const report = messages.find(m => m.author.id == self.user.id && m.embeds[0]?.footer?.text?.startsWith(`ID: ${target.id}`))
 
     if (!report) {
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setAuthor({ name: target.author.tag, iconURL: target.author.displayAvatarURL() })
             .addFields([
                 { name: t('commands.report.text_message_channel'), value: `<#${target.channelId}>`, inline: true },
@@ -81,17 +81,20 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
         })
 
         const rows = [
-            new MessageActionRow().addComponents(
-                new MessageButton().setCustomId(`R-KICK-${target.author.id}`).setLabel(t('commands.report.quick_actions.KICK')).setStyle('DANGER'),
-                new MessageButton().setCustomId(`R-WARN-${target.author.id}`).setLabel(t('commands.report.quick_actions.WARN')).setStyle('PRIMARY'),
-                new MessageButton().setCustomId(`R-SKIP-${target.author.id}`).setLabel(t('commands.report.quick_actions.IGNORE')).setStyle('SECONDARY'),
-                new MessageButton().setLabel(t('commands.report.text_jump_to_message')).setStyle('LINK').setURL(target.url)
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder().setCustomId(`R-KICK-${target.author.id}`).setLabel(t('commands.report.quick_actions.KICK')).setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId(`R-WARN-${target.author.id}`).setLabel(t('commands.report.quick_actions.WARN')).setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId(`R-SKIP-${target.author.id}`).setLabel(t('commands.report.quick_actions.IGNORE')).setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder().setLabel(t('commands.report.text_jump_to_message')).setStyle(ButtonStyle.Link).setURL(target.url)
             ),
-            new MessageActionRow().addComponents(
-                new MessageSelectMenu().setCustomId(`R-BAN-${target.author.id}`).setPlaceholder(t('commands.report.quick_actions.BAN')).setOptions(selectMenuOptions)
+            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId(`R-BAN-${target.author.id}`)
+                    .setPlaceholder(t('commands.report.quick_actions.BAN'))
+                    .setOptions(selectMenuOptions)
             ),
-            new MessageActionRow().addComponents(
-                new MessageSelectMenu()
+            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+                new StringSelectMenuBuilder()
                     .setCustomId(`R-MUTE-${target.author.id}`)
                     .setPlaceholder(t('commands.report.quick_actions.MUTE'))
                     .setOptions(selectMenuOptions.slice(1))
@@ -100,10 +103,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
 
         await channel.send({ embeds: [embed], components: rows }).catch(self.logger.error)
     } else {
-        const embed = new MessageEmbed(report.embeds[0])
-        const count = embed.fields[1].value
+        const embed = new EmbedBuilder(report.embeds[0])
+        const count = embed.data.fields[1].value
 
-        embed.fields[1].value = (Number(count) + 1).toString()
+        embed.data.fields[1].value = (Number(count) + 1).toString()
 
         await report.edit({ embeds: [embed] }).catch(self.logger.error)
     }

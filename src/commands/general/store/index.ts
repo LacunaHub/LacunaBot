@@ -1,18 +1,8 @@
-import { buyPrefix, itemsPrefix } from './prefix'
 import { buySlash, itemsSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
 export default {
-    prefix: async (self, server, message) => {
-        const help = self.commands.get('help')
-
-        message.args = [name]
-
-        await help.executePrefix(server, message)
-
-        return true
-    },
     slash: () => {},
     name,
     description: `commands.${name}.description`,
@@ -48,12 +38,10 @@ export default {
     group: 'GENERAL',
     subcommands: [
         {
-            prefix: buyPrefix,
             slash: buySlash,
             name: 'buy'
         },
         {
-            prefix: itemsPrefix,
             slash: itemsSlash,
             name: 'items'
         }

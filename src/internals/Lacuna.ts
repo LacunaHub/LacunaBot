@@ -1,4 +1,4 @@
-import { Client, ClientOptions, Collection, PermissionFlags, Permissions, Util } from 'discord.js'
+import { ApplicationCommandType, Client, ClientOptions, Collection, parseEmoji, PermissionsBitField } from 'discord.js'
 import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
 import { connect } from 'mongoose'
@@ -28,7 +28,7 @@ export default class Lacuna extends Client {
     public translator: typeof locale
     public i18n: typeof i18n
     public utils: typeof Utils
-    public PERMISSIONS_FLAGS: PermissionFlags
+    public PermissionFlags: typeof PermissionsBitField.Flags
 
     constructor(options?: ClientOptions) {
         super(options)
@@ -57,7 +57,7 @@ export default class Lacuna extends Client {
 
         this.utils = Utils
 
-        this.PERMISSIONS_FLAGS = Permissions.FLAGS
+        this.PermissionFlags = PermissionsBitField.Flags
 
         this.start()
     }
@@ -72,9 +72,9 @@ export default class Lacuna extends Client {
             ERROR,
             DIAMOND,
             details: {
-                OK: Util.parseEmoji(OK),
-                ERROR: Util.parseEmoji(ERROR),
-                DIAMOND: Util.parseEmoji(DIAMOND)
+                OK: parseEmoji(OK),
+                ERROR: parseEmoji(ERROR),
+                DIAMOND: parseEmoji(DIAMOND)
             }
         }
     }
@@ -130,10 +130,10 @@ export default class Lacuna extends Client {
                 return {
                     name: command.name,
                     description: t(command.description),
-                    type: 'CHAT_INPUT',
+                    type: ApplicationCommandType.ChatInput,
                     options:
                         command.options?.map(option => {
-                            if (option.type == 'SUB_COMMAND')
+                            if (option.type === 'SUB_COMMAND')
                                 return {
                                     ...option,
                                     description: t(option.description),

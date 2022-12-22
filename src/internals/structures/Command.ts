@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, CommandInteraction, ContextMenuInteraction, GuildMember, Message, Team } from 'discord.js'
+import { BaseGuildTextChannel, ChatInputCommandInteraction, ContextMenuCommandInteraction, GuildMember, Message, Team } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 
@@ -74,7 +74,7 @@ export default class Command {
         this.self.commands.set(this.name, this)
     }
 
-    denied(server: ServerDocument, signal: CommandInteraction | ContextMenuInteraction | Message): boolean {
+    denied(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
         if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
@@ -94,7 +94,7 @@ export default class Command {
         return true
     }
 
-    allowed(server: ServerDocument, signal: CommandInteraction | ContextMenuInteraction | Message): boolean {
+    allowed(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
         if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
@@ -113,7 +113,7 @@ export default class Command {
         return false
     }
 
-    async executeSlash(server: ServerDocument, interaction: CommandInteraction): Promise<boolean> {
+    async executeSlash(server: ServerDocument, interaction: ChatInputCommandInteraction): Promise<boolean> {
         const t = this.self.i18n.t.bind(null, server.locale)
 
         const denied: boolean = this.denied(server, interaction),
@@ -171,7 +171,7 @@ export default class Command {
         return true
     }
 
-    async executeContext(server: ServerDocument, interaction: ContextMenuInteraction): Promise<boolean> {
+    async executeContext(server: ServerDocument, interaction: ContextMenuCommandInteraction): Promise<boolean> {
         const t = this.self.i18n.t.bind(null, server.locale)
 
         const denied: boolean = this.denied(server, interaction),
@@ -211,8 +211,8 @@ export default class Command {
 
         this.uses++
 
-        if (interaction.targetType == 'MESSAGE') await this.message(this.self, server, interaction)
-        if (interaction.targetType == 'USER') await this.user(this.self, server, interaction)
+        if (interaction.isMessageContextMenuCommand()) await this.message(this.self, server, interaction)
+        if (interaction.isUserContextMenuCommand()) await this.user(this.self, server, interaction)
 
         this.throttle(server, interaction)
 
@@ -226,75 +226,7 @@ export default class Command {
         return true
     }
 
-    async executePrefix(server: ServerDocument, message: Message): Promise<boolean> {
-        if (!message.content.startsWith(server.prefix) || !server.commands.prefix_commands) return false
-
-        const locale = this.self.translator.locale(server.locale)
-
-        const denied: boolean = this.denied(server, message),
-            allowed: boolean = this.allowed(server, message)
-
-        if (!denied || !allowed) return false
-
-        if (this.permissions.self.length && !message.guild.me.permissions.has(this.permissions.self as any)) {
-            const missing = (message.channel as BaseGuildTextChannel).permissionsFor(message.guild.me).missing(this.permissions.self as any)
-
-            if (missing.includes('SEND_MESSAGES')) {
-                await message.author
-                    .send({
-                        content: `${this.self._emojis.ERROR} | ${this.self.translator.format(
-                            locale.commands.common.texts.missing_send_messages,
-                            `**${message.member.displayName}**`,
-                            `<#${message.channelId}>`
-                        )}`
-                    })
-                    .catch(() => {})
-
-                return false
-            }
-
-            if (missing) {
-                await message.reply({
-                    content: `${this.self._emojis.ERROR} | ${this.self.translator.format(
-                        locale.commands.common.texts.missing_permissions,
-                        `**${message.member.displayName}**`,
-                        missing.map(p => `\`${locale.commands.common.permissions[p]?.toLowerCase()}\``).join(', ')
-                    )}`
-                })
-
-                return false
-            }
-        }
-
-        if (this.premium_only && !server.server.premium.available) {
-            await message.reply({
-                content: `${this.self._emojis.ERROR} | ${this.self.translator.format(locale.commands.common.texts.premium_only, `**${message.author.tag}**`)}`
-            })
-
-            return false
-        }
-
-        this.uses++
-
-        const subcommand: CommandSubcommand = this.subcommands?.find(sc => sc.name == message['args'][0])
-
-        if (subcommand) {
-            message['args'] = (message as any).args.slice(1)
-
-            await subcommand.prefix(this.self, server, message)
-        } else await this.prefix(this.self, server, message)
-
-        this.self.emit('commandExecution', {
-            command: subcommand ? `${this.name} ${subcommand.name}` : this.name,
-            guild: { name: message.guild.name, id: message.guild.id },
-            channel: { name: (message.channel as BaseGuildTextChannel).name, id: message.channelId },
-            user: { name: message.author.username, id: message.author.id }
-        })
-
-        return true
-    }
-
-    throttled(server: ServerDocument, interaction: CommandInteraction | ContextMenuInteraction) {
+    throttled(server: ServerDocument, interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction) {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
         if (config?.options?.includes('THROTTLING')) {
@@ -331,7 +263,7 @@ export default class Command {
         }
     }
 
-    throttle(server: ServerDocument, interaction: CommandInteraction | ContextMenuInteraction) {
+    throttle(server: ServerDocument, interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction) {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
         if ((this.self.application.owner as Team).members.some(m => m.id === interaction.user.id)) return false
@@ -374,13 +306,13 @@ export default class Command {
 
 export interface CommandOptions {
     prefix(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean>
-    slash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction): Promise<boolean>
-    user(self: Lacuna, server: ServerDocument, interaction: ContextMenuInteraction): Promise<boolean>
-    message(self: Lacuna, server: ServerDocument, interaction: ContextMenuInteraction): Promise<boolean>
+    slash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction): Promise<boolean>
+    user(self: Lacuna, server: ServerDocument, interaction: ContextMenuCommandInteraction): Promise<boolean>
+    message(self: Lacuna, server: ServerDocument, interaction: ContextMenuCommandInteraction): Promise<boolean>
     name: string
     pretty_name?: string
     description: string
-    type: 'CHAT_INPUT' | 'USER' | 'MESSAGE'
+    type: string
     options: CommandOption[]
     default_permission: boolean
     group?: 'GENERAL' | 'MODERATION' | 'MUSIC' | 'UTILITY'
@@ -409,6 +341,6 @@ export interface CommandOptionChoice {
 
 export interface CommandSubcommand {
     prefix(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean>
-    slash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction): Promise<boolean>
+    slash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction): Promise<boolean>
     name: string
 }

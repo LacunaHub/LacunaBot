@@ -1,9 +1,9 @@
-import { BaseGuildTextChannel, CommandInteraction, GuildMember } from 'discord.js'
+import { BaseGuildTextChannel, ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { caseLog } from '../../../modules/Moderation'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const amount = interaction.options?.getInteger(t('commands.prune.options.amount.name'))
@@ -31,7 +31,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     await interaction.deferReply({ ephemeral: true })
 
     if (mention) {
-        let messages = await interaction.channel.messages.fetch({ limit: amount }, { cache: false })
+        let messages = await interaction.channel.messages.fetch({ limit: amount, cache: false })
         messages = messages.filter(m => m.author.id == mention.id)
 
         const deleted = await (interaction.channel as BaseGuildTextChannel).bulkDelete(messages, true)
