@@ -1,5 +1,5 @@
 import Router from '@koa/router'
-import { Permissions } from 'discord.js'
+import { PermissionsBitField } from 'discord.js'
 import { Context } from 'koa'
 import db from '../../../database'
 import { UserDocument } from '../../../database/schemas/Users'
@@ -25,8 +25,8 @@ async function getMe(ctx: Context) {
     if (!guilds) ctx.throw(400)
 
     for (const guild of guilds) {
-        const permissions = new Permissions(BigInt(guild.permissions))
-        const permitted = guild.owner || permissions.has('ADMINISTRATOR')
+        const permissions = new PermissionsBitField(BigInt(guild.permissions))
+        const permitted = guild.owner || permissions.has(PermissionsBitField.Flags.Administrator)
 
         if (permitted) {
             const me = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.CLIENT_ID)).catch(() => {})) as any

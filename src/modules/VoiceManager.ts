@@ -1,4 +1,4 @@
-import { BaseGuildVoiceChannel, CategoryChannelResolvable, Permissions, VoiceChannel, VoiceState } from 'discord.js'
+import { BaseGuildVoiceChannel, CategoryChannelResolvable, ChannelType, PermissionsBitField, VoiceChannel, VoiceState } from 'discord.js'
 import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import { truncateString } from '../internals/utility/Utils'
@@ -14,7 +14,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
         return false
     }
 
-    if (autovoice && state.guild.me.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_CHANNELS)) {
+    if (autovoice && state.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)) {
         const child = autovoice.children?.find(c => c.owner_id == state.member.id)
 
         if (child) {
@@ -41,14 +41,15 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
         }
 
         const parent = autovoice.default.category_id
-            ? state.guild.channels.cache.filter(c => c.type == 'GUILD_CATEGORY').get(autovoice.default.category_id)
+            ? state.guild.channels.cache.filter(c => c.type == ChannelType.GuildCategory).get(autovoice.default.category_id)
             : state.channel.parent
         const replacer = new Replacer(autovoice.default.name, { guild: state.guild, member: state.member, index: (autovoice.children?.length ?? 0) + 1 })
         const name = await replacer.replace()
-        const permissions = new Permissions(BigInt(autovoice.default.permissions))
+        const permissions = new PermissionsBitField(BigInt(autovoice.default.permissions))
 
-        const temp_voice = await state.guild.channels.create(truncateString(name, 100, '') || 'Voice', {
-            type: 'GUILD_VOICE',
+        const temp_voice = await state.guild.channels.create({
+            name: truncateString(name, 100, '') || 'Voice',
+            type: ChannelType.GuildVoice,
             permissionOverwrites: state.channel.permissionOverwrites.cache,
             parent: parent && parent.manageable ? (parent as CategoryChannelResolvable) : null,
             userLimit: autovoice.default.limit,
@@ -104,7 +105,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             }
         )
 
-        const moveable: boolean = state.channel.permissionsFor(self.user.id).has(self.PERMISSIONS_FLAGS.MOVE_MEMBERS)
+        const moveable: boolean = state.channel.permissionsFor(self.user.id).has(self.PermissionFlags.MoveMembers)
 
         if (moveable) await state.setChannel(temp_voice.id)
 
@@ -124,7 +125,7 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
     const autovoice = server.modules.voice_manager.autovoices.find(i => i.channel_id == state.channelId)
     const beforeAutovoice = server.modules.voice_manager.autovoices.find(i => i.children?.some(c => c.channel_id == before.channelId))
 
-    if (autovoice && state.guild.me.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_CHANNELS)) {
+    if (autovoice && state.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)) {
         const child = autovoice.children?.find(c => c.owner_id == state.member.id)
 
         if (child) {
@@ -144,7 +145,7 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
         await createTemporaryVoice(self, server, state)
     }
 
-    if (beforeAutovoice && state.guild.me.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_CHANNELS)) {
+    if (beforeAutovoice && state.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)) {
         const child = beforeAutovoice.children?.find(c => c.channel_id == before.channelId)
         const channel = state.guild.channels.cache.get(child.channel_id) as BaseGuildVoiceChannel
 
@@ -199,7 +200,7 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
 export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument, channel: VoiceChannel) {
     const autovoice = server.modules.voice_manager.autovoices.find(i => i.children?.some(c => c.channel_id == channel?.id))
 
-    if (autovoice && channel.guild.me.permissions.has(self.PERMISSIONS_FLAGS.MANAGE_CHANNELS)) {
+    if (autovoice && channel.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)) {
         const child = autovoice.children?.find(c => c.channel_id == channel.id)
 
         if (child && !channel.members.size) {
@@ -236,7 +237,7 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
             const overwrites = channel.permissionOverwrites.cache.find(p => p.id === child.owner_id)
             if (overwrites) await overwrites.delete()
 
-            const permissions = new Permissions(BigInt(autovoice.default.permissions))
+            const permissions = new PermissionsBitField(BigInt(autovoice.default.permissions))
             await channel.permissionOverwrites.create(
                 channel.members.first().id,
                 permissions.toArray().reduce((obj, k) => {

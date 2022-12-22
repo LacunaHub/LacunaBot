@@ -1,11 +1,11 @@
-import { CommandInteraction, GuildMember, Message, MessageActionRow, MessageEmbed, MessageSelectMenu } from 'discord.js'
+import { ActionRowBuilder, ChatInputCommandInteraction, ComponentType, EmbedBuilder, GuildMember, Message, StringSelectMenuBuilder } from 'discord.js'
 import { EconomyStoreItem, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
 import { purchaseItem } from '../../../modules/Economy'
 import Replacer from '../../../modules/Replacer'
 
-export async function buySlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function buySlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {
@@ -91,7 +91,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
     return true
 }
 
-export async function itemsSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function itemsSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {
@@ -158,17 +158,17 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
         select_options.push(current_select_options)
     }
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
         .setTitle(t('commands.store.items.text_server_store'))
         .setDescription(t('commands.store.items.text_server_store_description', { command: '`/store buy <артикул>`' }))
 
-    const row = new MessageActionRow()
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>()
 
     const message = (await interaction.editReply({
         embeds: [embed.setFields(fields[page]).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
         components: [
             row.setComponents(
-                new MessageSelectMenu({
+                new StringSelectMenuBuilder({
                     customId: interaction.id,
                     placeholder: t('commands.store.items.text_select_item'),
                     options:
@@ -185,7 +185,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
     })) as Message
 
     const collector = message.createMessageComponentCollector({
-        componentType: 'SELECT_MENU',
+        componentType: ComponentType.StringSelect,
         time: 180000
     })
 
@@ -202,7 +202,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
                 embeds: [embed.setFields(fields[page]).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
                 components: [
                     row.setComponents(
-                        new MessageSelectMenu({
+                        new StringSelectMenuBuilder({
                             customId: i.id,
                             placeholder: t('commands.store.items.text_select_item'),
                             options:

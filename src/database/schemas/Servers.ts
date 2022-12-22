@@ -1,4 +1,3 @@
-import { MessageButtonStyle } from 'discord.js'
 import { Document, model, Schema } from 'mongoose'
 
 export default model<ServerDocument>(
@@ -1702,7 +1701,7 @@ export interface InteractiveMessageButtonComponent {
     options: InteractiveMessageComponentOption[]
     appearance: {
         label: string
-        style: MessageButtonStyle
+        style: 'PRIMARY' | 'SECONDARY' | 'SUCCESS' | 'DANGER' | 'LINK'
         emoji: {
             id: string
             name: string

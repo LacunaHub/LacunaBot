@@ -1,18 +1,8 @@
-import { addPrefix, removePrefix } from './prefix'
 import { addSlash, removeSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
 export default {
-    prefix: async (self, server, message) => {
-        const help = self.commands.get('help')
-
-        message.args = [name]
-
-        await help.executePrefix(server, message)
-
-        return true
-    },
     slash: () => {},
     name,
     description: `commands.${name}.description`,
@@ -65,12 +55,10 @@ export default {
     group: 'MODERATION',
     subcommands: [
         {
-            prefix: addPrefix,
             slash: addSlash,
             name: 'add'
         },
         {
-            prefix: removePrefix,
             slash: removeSlash,
             name: 'remove'
         }

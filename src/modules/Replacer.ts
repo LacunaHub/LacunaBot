@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageEmbed } from 'discord.js'
+import { BaseGuildTextChannel, ChannelType, EmbedBuilder, Guild, GuildMember, Message } from 'discord.js'
 import moment from 'moment'
 import db from '../database'
 import { MessageEmbed as IMessageEmbed } from '../database/schemas/Servers'
@@ -196,10 +196,10 @@ export default class Replacer {
                 banner: guild.bannerURL(),
                 channels: {
                     total: guild.channels.cache.size,
-                    text: guild.channels.cache.filter(channel => channel.type == 'GUILD_TEXT').size,
-                    voice: guild.channels.cache.filter(channel => channel.type == 'GUILD_VOICE').size,
-                    news: guild.channels.cache.filter(channel => channel.type == 'GUILD_NEWS').size,
-                    category: guild.channels.cache.filter(channel => channel.type == 'GUILD_CATEGORY').size
+                    text: guild.channels.cache.filter(channel => channel.type == ChannelType.GuildText).size,
+                    voice: guild.channels.cache.filter(channel => channel.type == ChannelType.GuildVoice).size,
+                    news: guild.channels.cache.filter(channel => channel.type == ChannelType.GuildAnnouncement).size,
+                    category: guild.channels.cache.filter(channel => channel.type == ChannelType.GuildCategory).size
                 },
                 created_at: guild.createdTimestamp,
                 description: guild.description,
@@ -368,10 +368,10 @@ export default class Replacer {
             }
         }
 
-        const returning = {} as { content: string; embeds: MessageEmbed[] }
+        const returning = {} as { content: string; embeds: EmbedBuilder[] }
 
         if (content) returning['content'] = content
-        if (template.embed && template.embed.active) returning['embeds'] = [new MessageEmbed(embed)]
+        if (template.embed && template.embed.active) returning['embeds'] = [new EmbedBuilder(embed)]
 
         return returning
     }

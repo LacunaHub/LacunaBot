@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Collection, GuildMember, MessageEmbed, Role, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, Collection, EmbedBuilder, GuildMember, Role, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,14 +8,14 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
 
         const log = member.guild.channels.cache.get(server.moderation.logs.types.role_member_add.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(member.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(member.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = member.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
-                ? await member.guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_ROLE_UPDATE' })
+            const audit = member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await member.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MemberRoleUpdate })
                 : null
             const executor = audit?.entries?.first()?.executor
 
@@ -34,7 +34,8 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.role_member_add_title') })
                     })
@@ -56,7 +57,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 )
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.role_member_add_title'))
                 .setDescription(t('logs.role_member_add_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, target: `**${member.user.tag}**` }))
                 .addFields([{ name: t('common.roles'), value: roles.map(role => `<@&${role.id}>`).join(', '), inline: true }])

@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember } from 'discord.js'
+import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
 import { ServerDocument } from '../../../database/schemas/Servers'
@@ -7,7 +7,7 @@ import TemporaryBan from '../../../internals/structures/TemporaryBan'
 import { caseLog } from '../../../modules/Moderation'
 import Replacer from '../../../modules/Replacer'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember(t('commands.ban.options.user.name')) as GuildMember
@@ -52,7 +52,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
-    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PERMISSIONS_FLAGS.BAN_MEMBERS)) {
+    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.BanMembers)) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true

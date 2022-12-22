@@ -1,11 +1,8 @@
-import { REST } from '@discordjs/rest'
-import { Routes } from 'discord-api-types/v9'
 import fetch from 'node-fetch'
 import db from '../database'
 import logger from '../internals/Logger'
+import { apiRoutes, restApi } from '../internals/utility/DiscordUtils'
 import Replacer from './Replacer'
-
-const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
 
 export async function searchChannels(query: string) {
     const response = await fetch(`https://api.twitch.tv/helix/search/channels?query=${encodeURI(query)}`, {
@@ -115,11 +112,11 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
 
             if (!guildSubscription) continue
 
-            let webhook = (await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
+            let webhook = (await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
 
             if (!webhook) {
-                webhook = await rest
-                    .post(Routes.channelWebhooks(guildSubscription.notification_channel_id), {
+                webhook = await restApi
+                    .post(apiRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
                         body: {
                             name: data.event.broadcaster_user_name
                         }
@@ -148,8 +145,8 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
                 })
             }
 
-            await rest
-                .post(Routes.webhook(webhook.id, webhook.token), {
+            await restApi
+                .post(apiRoutes.webhook(webhook.id, webhook.token), {
                     body: {
                         content: notificationText,
                         embeds: [
@@ -158,7 +155,9 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
                                 description: stream.game,
                                 url: stream.url,
                                 thumbnail: { url: stream.game_image },
-                                image: { url: guildSubscription.display_stream_preview ? stream.preview : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg' }
+                                image: {
+                                    url: guildSubscription.display_stream_preview ? stream.preview : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg'
+                                }
                             }
                         ]
                     }

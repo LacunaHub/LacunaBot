@@ -1,12 +1,12 @@
-import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { commandOptionTypes } from '../../../internals/utility/Constants'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const command_name: string = interaction.options?.getString('команда')
+    const command_name: string = interaction.options?.getString(t('commands.help.options.command.name'))
 
     if (!command_name) {
         const commands = self.commands.filter(c => !c.private && !(c.premium_only && !server.server.premium.available))
@@ -31,18 +31,18 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
             })
         }
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle(t('commands.help.text_commands_list'))
             .setDescription(t('commands.help.text_use_prefix', { prefix: `\`/\`` }))
             .setFooter({ text: t('commands.help.text_use_help_for_more_details', { prefix: '/' }) })
         const embedFields = []
 
-        const components = new MessageActionRow().addComponents(
-            new MessageButton()
-                .setStyle('LINK')
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+                .setStyle(ButtonStyle.Link)
                 .setLabel(t('commands.help.text_dashboard_link'))
                 .setURL(`https://www.voidlacuna.ru/guilds/${interaction.guildId}/settings`),
-            new MessageButton().setStyle('LINK').setLabel(t('commands.help.text_docs_link')).setURL('https://docs.voidlacuna.ru')
+            new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('commands.help.text_docs_link')).setURL('https://docs.voidlacuna.ru')
         )
 
         if (categories.general.size) embedFields.push({ name: t('common.command_categories.GENERAL'), value: categories.general.map(c => `\`${c.name}\``).join(', ') })
@@ -54,7 +54,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         embed.addFields(embedFields)
 
-        await interaction.reply({ embeds: [embed], components: [components] })
+        await interaction.reply({ embeds: [embed], components: [row] })
     } else {
         const command = self.commands.find(c => !c.private && c.name == command_name)
         const customCommand = server.modules.custom_commands.map(i => i.command).find(i => i.name == command_name)
@@ -69,7 +69,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         }
 
         if (command) {
-            const embed = new MessageEmbed().setTitle(t('commands.help.text_command_help', { command: command.name })).setDescription(t(command.description))
+            const embed = new EmbedBuilder().setTitle(t('commands.help.text_command_help', { command: command.name })).setDescription(t(command.description))
 
             if (command.permissions.self.length || command.permissions.user.length) {
                 const self_permissions = command.permissions.self.length
@@ -146,7 +146,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         }
 
         if (customCommand && !command) {
-            const embed = new MessageEmbed().setTitle(t('commands.help.text_command_help', { command: customCommand.name })).setDescription(customCommand.description)
+            const embed = new EmbedBuilder().setTitle(t('commands.help.text_command_help', { command: customCommand.name })).setDescription(customCommand.description)
 
             if (customCommand.options.length) {
                 const usage =

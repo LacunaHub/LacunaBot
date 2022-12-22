@@ -291,7 +291,7 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
         const channels = guild.channels.cache.filter(c => c.manageable && item.references.includes(c.id)) as Collection<string, BaseGuildTextChannel>
 
         if (channels.size) {
-            for (const [, channel] of channels) await channel.permissionOverwrites.create(member.id, { VIEW_CHANNEL: true }).catch(() => {})
+            for (const [, channel] of channels) await channel.permissionOverwrites.create(member.id, { ViewChannel: true }).catch(() => {})
         }
     }
 

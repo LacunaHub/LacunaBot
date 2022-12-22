@@ -188,6 +188,18 @@ export function isValidHttpUrl(string: string) {
     return url.protocol === 'http:' || url.protocol === 'https:'
 }
 
+export function snakeToPascalCase(string: string) {
+    return string
+        .split('/')
+        .map(snake =>
+            snake
+                .split('_')
+                .map(substr => substr.charAt(0).toUpperCase() + substr.slice(1).toLowerCase())
+                .join('')
+        )
+        .join('/')
+}
+
 export default {
     truncateArray,
     shuffleArray,
@@ -202,5 +214,8 @@ export default {
     resolveObjectPath,
     dotNotateObject,
     createEnum,
-    shadeColor
+    shadeColor,
+    convertXml2Json,
+    isValidHttpUrl,
+    snakeToPascalCase
 }

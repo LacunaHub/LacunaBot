@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, Team } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, Team } from 'discord.js'
 import numbro from 'numbro'
 import os from 'os'
 import { ServerDocument } from '../../../database/schemas/Servers'
@@ -6,7 +6,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 const { version } = require('../../../../package.json')
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const total_guilds = (await self.shard.fetchClientValues('guilds.cache.size')) as number[]
@@ -15,7 +15,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     const developer = await self.users.fetch((self.application.owner as Team).ownerId)
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
         .addFields([
             { name: t('commands.about.text_developer'), value: developer.tag, inline: true },
             { name: t('commands.about.text_version'), value: `\`${version.split('.').slice(0, 2).join('.')}\``, inline: true },
@@ -29,11 +29,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         ])
         .setFooter({ text: `© ${(self.application.owner as Team).name}`, iconURL: (self.application.owner as Team).iconURL() })
 
-    const components = new MessageActionRow().addComponents(
-        new MessageButton().setStyle('LINK').setLabel(t('commands.about.text_state')).setURL('https://www.voidlacuna.ru/state')
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('commands.about.text_state')).setURL('https://www.voidlacuna.ru/state')
     )
 
-    await interaction.reply({ embeds: [embed], components: [components] })
+    await interaction.reply({ embeds: [embed], components: [row] })
 
     return true
 }

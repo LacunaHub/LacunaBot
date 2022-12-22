@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, MessageEmbed, VoiceChannel, VoiceState, Webhook } from 'discord.js'
+import { BaseGuildTextChannel, EmbedBuilder, VoiceChannel, VoiceState, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,7 +8,7 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
 
         const log = state.guild.channels.cache.get(server.moderation.logs.types.voice_disconnect.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(state.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(state.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
@@ -29,7 +29,8 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.voice_disconnect_title') })
                     })
@@ -51,7 +52,7 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
                 )
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.voice_disconnect_title'))
                 .setDescription(t('logs.voice_disconnect_template', { user: `**${state.member.user.tag}**`, channel: `<#${channel?.id ?? '1'}>` }))
                 .setFooter({ text: state.member.id })

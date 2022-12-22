@@ -1,11 +1,11 @@
-import { CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message } from 'discord.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import { IUserLevel, IUserWallet } from '../../../database/schemas/Users'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray, isSnowflake } from '../../../internals/utility/Utils'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
     const locale = self.i18n.locale(server.locale)
 
@@ -21,7 +21,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (sorting > sorting_choices.length || sorting < 1) sorting = 1
 
-    const embed = new MessageEmbed().setTitle(t('commands.leaders.text_leaders_by', { sort: sorting_choices[sorting - 1] }))
+    const embed = new EmbedBuilder().setTitle(t('commands.leaders.text_leaders_by', { sort: sorting_choices[sorting - 1] }))
 
     await interaction.deferReply({ ephemeral: true })
 
@@ -135,15 +135,15 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
     if (page + 1 > chunks.length) page = chunks.length - 1
 
-    const row = new MessageActionRow().addComponents(
-        new MessageButton()
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
             .setCustomId('backward')
-            .setStyle('SECONDARY')
+            .setStyle(ButtonStyle.Secondary)
             .setLabel(t('commands.leaders.text_previous_page'))
             .setDisabled(fields.length == 1),
-        new MessageButton()
+        new ButtonBuilder()
             .setCustomId('forward')
-            .setStyle('SECONDARY')
+            .setStyle(ButtonStyle.Secondary)
             .setLabel(t('commands.leaders.text_next_page'))
             .setDisabled(fields.length == 1)
     )
@@ -156,18 +156,17 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     })) as Message
 
     const collector = message.createMessageComponentCollector({
-        componentType: 'BUTTON',
-        filter: i => row.components.some(c => c.customId == i.customId),
+        componentType: ComponentType.Button,
         time: 60000
     })
 
     collector.on('collect', async i => {
         switch (i.customId) {
-            case row.components[0].customId:
+            case 'backward':
                 page = page <= 0 ? fields.length - 1 : page - 1
                 break
 
-            case row.components[1].customId:
+            case 'forward':
                 page = page + 1 >= fields.length ? 0 : page + 1
                 break
         }

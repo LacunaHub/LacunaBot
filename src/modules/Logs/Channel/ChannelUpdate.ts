@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, GuildChannel, MessageEmbed, TextChannel, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildChannel, TextChannel, Webhook } from 'discord.js'
 import numbro from 'numbro'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
@@ -9,14 +9,14 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
         const log = channel.guild.channels.cache.get(server.moderation.logs.types.channel_update.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(channel.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(channel.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = channel.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
-                ? await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_UPDATE' })
+            const audit = channel.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await channel.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.ChannelUpdate })
                 : null
             const executor = audit?.entries?.first()?.executor
 
@@ -35,7 +35,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.channel_update_title') })
                     })
@@ -58,7 +59,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             }
 
             if (before.name != channel.name) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.channel_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -82,7 +83,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             }
 
             if ((before as any).topic != (channel as any).topic) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.channel_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -106,7 +107,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             }
 
             if ((before as TextChannel).rateLimitPerUser != (channel as TextChannel).rateLimitPerUser) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.channel_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -138,7 +139,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             }
 
             if (before.parentId != channel.parentId) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.channel_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -161,8 +162,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 })
             }
 
-            if (before.isVoice() && channel.isVoice() && before.bitrate != channel.bitrate) {
-                const embed = new MessageEmbed()
+            if (before.isVoiceBased() && channel.isVoiceBased() && before.bitrate != channel.bitrate) {
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.channel_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -185,8 +186,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 })
             }
 
-            if (before.isVoice() && channel.isVoice() && before.userLimit != channel.userLimit) {
-                const embed = new MessageEmbed()
+            if (before.isVoiceBased() && channel.isVoiceBased() && before.userLimit != channel.userLimit) {
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.channel_update_title'))
                     .setDescription(
                         t('logs.update_template', {

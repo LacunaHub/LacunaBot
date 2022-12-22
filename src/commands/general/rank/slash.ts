@@ -1,9 +1,9 @@
-import { CommandInteraction, MessageAttachment } from 'discord.js'
+import { AttachmentBuilder, ChatInputCommandInteraction } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { generateRankCard } from '../../../modules/Levels'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.levels.active && !server.modules.levels.voice) {
@@ -16,7 +16,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     }
 
     await interaction.deferReply({ ephemeral: true })
-    let attachment: MessageAttachment
+    let attachment: AttachmentBuilder
 
     try {
         attachment = await generateRankCard(self, interaction)

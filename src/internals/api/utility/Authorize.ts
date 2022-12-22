@@ -1,4 +1,4 @@
-import { Permissions } from 'discord.js'
+import { PermissionsBitField } from 'discord.js'
 import { Context, Next } from 'koa'
 import db from '../../../database'
 import OAuth2, { OAuth2Guild, OAuth2User } from '../discord/OAuth2'
@@ -44,10 +44,10 @@ export async function checkPermissions(ctx: Context, next: Next) {
 
     if (!guild) ctx.throw(404)
 
-    const permissions = new Permissions(BigInt(guild.permissions))
+    const permissions = new PermissionsBitField(BigInt(guild.permissions))
     const is_bot_expert = await isBotExpert(guild_id, user_id)
 
-    if (!guild.owner && !permissions.has('ADMINISTRATOR') && !is_bot_expert) ctx.throw(403)
+    if (!guild.owner && !permissions.has(PermissionsBitField.Flags.Administrator) && !is_bot_expert) ctx.throw(403)
 
     ctx.request.headers['partial-guild'] = JSON.stringify(guild)
 

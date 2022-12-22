@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Message, MessageEmbed, Webhook } from 'discord.js'
+import { BaseGuildTextChannel, EmbedBuilder, Message, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { truncateString } from '../../../internals/utility/Utils'
@@ -9,7 +9,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
 
         const log = message.guild.channels.cache.get(server.moderation.logs.types.message_update.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(message.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(message.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok && before.content != message.content) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
@@ -30,7 +30,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.message_update_title') })
                     })
@@ -56,7 +57,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
             const content = truncateString(message.content ?? '', 800)
             const attachment = message.attachments.first()
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.message_update_title'))
                 .addFields([
                     { name: t('logs.message_author'), value: `${message.author.tag}\n(${message.author.id})`, inline: true },

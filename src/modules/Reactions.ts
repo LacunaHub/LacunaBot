@@ -1,6 +1,7 @@
-import { BaseGuildTextChannel, Collection, Message, MessageReaction, User } from 'discord.js'
+import { BaseGuildTextChannel, Collection, Message, MessageReaction, MessageType, User } from 'discord.js'
 import { AutoReaction, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
+import { snakeToPascalCase } from '../internals/utility/Utils'
 
 export function generateId() {
     return `L${Math.random().toString(36).substring(2, 9).toUpperCase()}`
@@ -50,7 +51,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         for (const [, channel] of channels)
                             await channel.permissionOverwrites.create(
                                 user.id,
-                                { VIEW_CHANNEL: element.element.reverse ? true : false },
+                                { ViewChannel: element.element.reverse ? true : false },
                                 { reason: t('audit_reasons.irs') }
                             )
 
@@ -203,7 +204,12 @@ export async function autoReact(server: ServerDocument, message: Message) {
     const auto_reaction: AutoReaction = server.modules.autoreactions.slice(0, server.server.premium.available ? 20 : 2).find(ar => ar.channel_id == message.channel.id)
 
     if (auto_reaction) {
-        if (auto_reaction.message_types && auto_reaction.message_types.length && !auto_reaction.message_types.includes(message.type)) return false
+        if (
+            auto_reaction.message_types &&
+            auto_reaction.message_types.length &&
+            !auto_reaction.message_types.map(i => MessageType[snakeToPascalCase(i)]).includes(message.type)
+        )
+            return false
 
         const content: string = message.content.toLowerCase()
         const split: string[] = content.split(/\s{1,}/)

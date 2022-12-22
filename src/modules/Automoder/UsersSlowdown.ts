@@ -112,7 +112,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (warn) {
-            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason })
+            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.members.me, reason })
         }
 
         if (send_message) {

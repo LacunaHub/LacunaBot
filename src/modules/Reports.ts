@@ -40,7 +40,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
-    if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PERMISSIONS_FLAGS[action == 'KICK' ? 'KICK_MEMBERS' : 'MANAGE_ROLES'])) {
+    if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PermissionFlags[action == 'KICK' ? 'KickMembers' : 'ManageRoles'])) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
@@ -63,7 +63,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     }
 
     if (action == 'KICK') {
-        if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.KICK_MEMBERS)) {
+        if (!interaction.memberPermissions.has(self.PermissionFlags.KickMembers)) {
             await interaction.reply({
                 content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
@@ -86,7 +86,7 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     }
 
     if (action == 'WARN') {
-        if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.MANAGE_ROLES)) {
+        if (!interaction.memberPermissions.has(self.PermissionFlags.ManageRoles)) {
             await interaction.reply({
                 content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
@@ -136,7 +136,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
         return false
     }
 
-    if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PERMISSIONS_FLAGS[action == 'BAN' ? 'BAN_MEMBERS' : 'MODERATE_MEMBERS'])) {
+    if (server.moderation.deny_moderate_users_with_mp && member.permissions.has(self.PermissionFlags[action == 'BAN' ? 'BanMembers' : 'ModerateMembers'])) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
@@ -159,7 +159,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
     }
 
     if (action == 'BAN') {
-        if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.BAN_MEMBERS)) {
+        if (!interaction.memberPermissions.has(self.PermissionFlags.BanMembers)) {
             await interaction.reply({
                 content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
@@ -193,7 +193,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
     }
 
     if (action == 'MUTE') {
-        if (!interaction.memberPermissions.has(self.PERMISSIONS_FLAGS.MODERATE_MEMBERS)) {
+        if (!interaction.memberPermissions.has(self.PermissionFlags.ModerateMembers)) {
             await interaction.reply({
                 content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
@@ -243,7 +243,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
 }
 
 async function removeComponentsFromMessage(interaction: ButtonInteraction | SelectMenuInteraction) {
-    const message = await interaction.channel.messages.fetch(interaction.message.id)
+    const message = await interaction.channel.messages.fetch({ message: interaction.message.id })
     await message?.edit({ components: [] })
 }
 

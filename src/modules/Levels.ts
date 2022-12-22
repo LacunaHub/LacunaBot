@@ -1,5 +1,14 @@
 import Canvas, { Image, NodeCanvasRenderingContext2D } from 'canvas'
-import { BaseGuildTextChannel, BaseGuildVoiceChannel, CommandInteraction, ContextMenuInteraction, GuildMember, Message, MessageAttachment, VoiceState } from 'discord.js'
+import {
+    AttachmentBuilder,
+    BaseGuildTextChannel,
+    BaseGuildVoiceChannel,
+    ChatInputCommandInteraction,
+    ContextMenuCommandInteraction,
+    GuildMember,
+    Message,
+    VoiceState
+} from 'discord.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
@@ -357,13 +366,13 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, ref
     }
 }
 
-export async function generateRankCard(self: Lacuna, signal: CommandInteraction | ContextMenuInteraction | Message): Promise<MessageAttachment> {
+export async function generateRankCard(self: Lacuna, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): Promise<AttachmentBuilder> {
     let mention: GuildMember
 
-    if (signal instanceof CommandInteraction) mention = (signal.options?.getMember('пользователь') || signal.member) as GuildMember
+    if (signal instanceof ChatInputCommandInteraction) mention = (signal.options?.getMember('пользователь') || signal.member) as GuildMember
     if (signal instanceof Message)
         mention = signal.mentions.members.first() || (signal['args'][0] ? await signal.guild.members.fetch(signal['args'][0]) : null) || signal.member
-    if (signal instanceof ContextMenuInteraction) mention = await signal.guild.members.fetch(signal.targetId)
+    if (signal instanceof ContextMenuCommandInteraction) mention = await signal.guild.members.fetch(signal.targetId)
 
     const activities = (await self.db.users.find({ 'activities.levels.guild_id': signal.guildId })).map(i => ({
         user_id: i._id,
@@ -397,7 +406,7 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
     let banner: Image
 
     try {
-        if (mention.user?.banner) banner = await Canvas.loadImage(mention.user?.bannerURL({ format: 'png', size: 600 }))
+        if (mention.user?.banner) banner = await Canvas.loadImage(mention.user?.bannerURL({ extension: 'png', size: 512 }))
     } catch (err) {
         banner = null
     }
@@ -429,7 +438,7 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
         ctx.restore()
     }
 
-    const avatar = await Canvas.loadImage(mention.user.displayAvatarURL({ format: 'png' }))
+    const avatar = await Canvas.loadImage(mention.user.displayAvatarURL({ extension: 'png' }))
 
     ctx.beginPath()
     ctx.arc(85, 85, 60, 0, Math.PI * 2, true)
@@ -531,7 +540,7 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
     ctx.textAlign = 'end'
     ctx.fillText(`${next_xp_format}`, 695, 205)
 
-    return new MessageAttachment(canvas.toBuffer(), `lacuna-rank-${Date.now()}.png`)
+    return new AttachmentBuilder(canvas.toBuffer(), { name: `lacuna-rank-${Date.now()}.png` })
 }
 
 function neededXp(level: number): number {
