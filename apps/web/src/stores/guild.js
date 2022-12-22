@@ -29,22 +29,26 @@ export const useGuildStore = defineStore('guild', {
 
                 const parent = state.guild.channels.find(j => j.id === i.parentId)
 
-                if (i.type === 'GUILD_CATEGORY') icon = 'folder'
-                if (i.type === 'GUILD_TEXT') icon = 'tag'
-                if (i.type === 'GUILD_NEWS') icon = 'campaign'
-                if (i.type === 'GUILD_VOICE') icon = 'volume_up'
+                if (i.type === 'GuildCategory') icon = 'folder'
+                if (i.type === 'GuildText') icon = 'tag'
+                if (i.type === 'GuildNews') icon = 'campaign'
+                if (i.type === 'GuildVoice') icon = 'volume_up'
+                if (i.type === 'GuildForum') icon = 'forum'
 
                 return { ...i, icon, parentName: parent?.name ?? null }
             })
         },
         channelsCategory() {
-            return this.channels.filter(i => ['GUILD_CATEGORY'].includes(i.type))
+            return this.channels.filter(i => ['GuildCategory'].includes(i.type))
         },
         channelsText() {
-            return this.channels.filter(i => ['GUILD_TEXT', 'GUILD_NEWS'].includes(i.type))
+            return this.channels.filter(i => ['GuildText', 'GuildNews'].includes(i.type))
         },
         channelsVoice() {
-            return this.channels.filter(i => ['GUILD_VOICE'].includes(i.type))
+            return this.channels.filter(i => ['GuildVoice'].includes(i.type))
+        },
+        channelsForum() {
+            return this.channels.filter(i => ['GuildForum'].includes(i.type))
         },
         roles(state) {
             return state.guild.roles
