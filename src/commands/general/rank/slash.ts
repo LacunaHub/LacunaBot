@@ -15,7 +15,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    await interaction.deferReply({ ephemeral: true })
+    await interaction.deferReply()
     let attachment: AttachmentBuilder
 
     try {
