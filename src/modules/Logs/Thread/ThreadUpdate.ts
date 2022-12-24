@@ -92,8 +92,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                         })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: numbro((before.autoArchiveDuration as number) * 60).format({ output: 'time' }), inline: true },
-                        { name: t('logs.after_change'), value: numbro((thread.autoArchiveDuration as number) * 60).format({ output: 'time' }), inline: true }
+                        {
+                            name: t('logs.before_change'),
+                            value: numbro((before.autoArchiveDuration as number) * 60).format({ output: 'time' }),
+                            inline: true
+                        },
+                        {
+                            name: t('logs.after_change'),
+                            value: numbro((thread.autoArchiveDuration as number) * 60).format({ output: 'time' }),
+                            inline: true
+                        }
                     ])
                     .setFooter({ text: thread.id })
                     .setTimestamp()
@@ -107,7 +115,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
             }
 
             self.emit('moduleExecution', {
-                module: 'Logs: Thread Update',
+                module: 'Logs',
+                category: 'ThreadUpdate',
                 guild: { id: thread.guild.id, name: thread.guild.name },
                 target: { id: thread.id, name: thread.name }
             })

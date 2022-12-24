@@ -62,7 +62,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 const embed = new EmbedBuilder()
                     .setTitle(t('logs.guild_update_title'))
                     .setDescription(
-                        t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_name_change') })
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.guild_update_name_change')
+                        })
                     )
                     .addFields([
                         { name: t('logs.before_change'), value: before.name, inline: true },
@@ -82,7 +85,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 const embed = new EmbedBuilder()
                     .setTitle(t('logs.guild_update_title'))
                     .setDescription(
-                        t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_afk_channel_change') })
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.guild_update_afk_channel_change')
+                        })
                     )
                     .addFields([
                         { name: t('logs.before_change'), value: before.afkChannel?.name ?? '-', inline: true },
@@ -102,11 +108,22 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 const embed = new EmbedBuilder()
                     .setTitle(t('logs.guild_update_title'))
                     .setDescription(
-                        t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_afk_timeout_change') })
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.guild_update_afk_timeout_change')
+                        })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: before.afkTimeout ? numbro(before.afkTimeout).format({ output: 'time' }) : '-', inline: true },
-                        { name: t('logs.after_change'), value: guild.afkTimeout ? numbro(guild.afkTimeout).format({ output: 'time' }) : '-', inline: true }
+                        {
+                            name: t('logs.before_change'),
+                            value: before.afkTimeout ? numbro(before.afkTimeout).format({ output: 'time' }) : '-',
+                            inline: true
+                        },
+                        {
+                            name: t('logs.after_change'),
+                            value: guild.afkTimeout ? numbro(guild.afkTimeout).format({ output: 'time' }) : '-',
+                            inline: true
+                        }
                     ])
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -122,7 +139,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 const embed = new EmbedBuilder()
                     .setTitle(t('logs.guild_update_title'))
                     .setDescription(
-                        t('logs.update_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, change: t('logs.guild_update_description_change') })
+                        t('logs.update_template', {
+                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                            change: t('logs.guild_update_description_change')
+                        })
                     )
                     .addFields([
                         { name: t('logs.before_change'), value: before.description ?? '-', inline: true },
@@ -138,7 +158,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 })
             }
 
-            self.emit('moduleExecution', { module: 'Logs: Guild Update', guild: { id: guild.id, name: guild.name }, target: { id: guild.id, name: guild.name } })
+            self.emit('moduleExecution', {
+                module: 'Logs',
+                category: 'GuildUpdate',
+                guild: { id: guild.id, name: guild.name },
+                target: { id: guild.id, name: guild.name }
+            })
 
             return true
         }

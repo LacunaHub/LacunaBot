@@ -3,7 +3,7 @@ import ms from 'ms'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import TemporaryRole from '../../../internals/structures/TemporaryRole'
-import { generateSimpleId } from '../../../internals/utility/UID'
+import { generateSimpleId } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -34,7 +34,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!duration) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_invalid_duration', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_invalid_duration', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -43,7 +45,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!role.editable) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_role_not_editable', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_role_not_editable', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 

@@ -54,5 +54,5 @@ export async function handlePatrons(sharding: ShardingManager) {
         new Patron(sharding, user._id, user.premium.expiration_timestamp)
     }
 
-    logger.info(`(Utility): Found ${users.length} users with premium`)
+    logger.log(`[Patron] Found ${users.length} users with premium`)
 }

@@ -23,7 +23,8 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             if (channel && channel.manageable) await state.member.voice.setChannel(child.channel_id)
 
             self.emit('moduleExecution', {
-                module: 'Autovoice: Move',
+                module: 'AutoVoice',
+                category: 'MoveToTemporaryChannel',
                 guild: { id: state.guild.id, name: state.guild.name },
                 target: { id: state.member.id, name: state.member.user.tag }
             })
@@ -43,7 +44,11 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
         const parent = autovoice.default.category_id
             ? state.guild.channels.cache.filter(c => c.type == ChannelType.GuildCategory).get(autovoice.default.category_id)
             : state.channel.parent
-        const replacer = new Replacer(autovoice.default.name, { guild: state.guild, member: state.member, index: (autovoice.children?.length ?? 0) + 1 })
+        const replacer = new Replacer(autovoice.default.name, {
+            guild: state.guild,
+            member: state.member,
+            index: (autovoice.children?.length ?? 0) + 1
+        })
         const name = await replacer.replace()
         const permissions = new PermissionsBitField(BigInt(autovoice.default.permissions))
 
@@ -110,7 +115,8 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
         if (moveable) await state.setChannel(temp_voice.id)
 
         self.emit('moduleExecution', {
-            module: 'Autovoice: Create',
+            module: 'AutoVoice',
+            category: 'CreateTemporaryChannel',
             guild: { id: state.guild.id, name: state.guild.name },
             target: { id: state.member.id, name: state.member.user.tag }
         })
@@ -134,7 +140,8 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
             if (channel && channel.manageable) await state.setChannel(child.channel_id)
 
             self.emit('moduleExecution', {
-                module: 'Autovoice: Move',
+                module: 'AutoVoice',
+                category: 'MoveToTemporaryChannel',
                 guild: { id: state.guild.id, name: state.guild.name },
                 target: { id: state.member.id, name: state.member.user.tag }
             })
@@ -153,7 +160,8 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
             if (channel.manageable) await state.setChannel(child.channel_id, '')
 
             self.emit('moduleExecution', {
-                module: 'Autovoice: Move',
+                module: 'AutoVoice',
+                category: 'MoveToTemporaryChannel',
                 guild: { id: state.guild.id, name: state.guild.name },
                 target: { id: state.member.id, name: state.member.user.tag }
             })
@@ -176,7 +184,8 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
             if (channel.deletable) await channel.delete()
 
             self.emit('moduleExecution', {
-                module: 'Autovoice: Delete',
+                module: 'AutoVoice',
+                category: 'DeleteTemporaryChannel',
                 guild: { id: channel.guild.id, name: channel.guild.name },
                 target: { id: channel.id, name: channel.name }
             })
@@ -218,7 +227,8 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
             if (channel.deletable) await channel.delete()
 
             self.emit('moduleExecution', {
-                module: 'Autovoice: Delete',
+                module: 'AutoVoice',
+                category: 'DeleteTemporaryChannel',
                 guild: { id: channel.guild.id, name: channel.guild.name },
                 target: { id: channel.id, name: channel.name }
             })
@@ -245,6 +255,13 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
                     return obj
                 }, {})
             )
+
+            self.emit('moduleExecution', {
+                module: 'AutoVoice',
+                category: 'SetNewChannelOwner',
+                guild: { id: channel.guild.id, name: channel.guild.name },
+                target: { id: channel.id, name: channel.name }
+            })
         }
 
         return true

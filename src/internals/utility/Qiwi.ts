@@ -123,7 +123,7 @@ export function syncBills(): Job {
         }
     })
 
-    logger.info('Sync for Qiwi bills initialized')
+    logger.info('[Qiwi] Bills sync was scheduled')
 
     return job
 }

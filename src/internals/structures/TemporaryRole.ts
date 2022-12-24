@@ -2,7 +2,7 @@ import { GuildMember } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
-import { generateSimpleId } from '../utility/UID'
+import { generateSimpleId } from '../utility/Utils'
 
 export default class TemporaryRole {
     public self: Lacuna
@@ -142,7 +142,7 @@ export async function handleEntries(self: Lacuna): Promise<number> {
         }
     }
 
-    self.logger.log(`(Structures): Loaded ${entries} temporary roles from ${servers.length} servers`)
+    self.logger.log(`[TemporaryRole] Loaded ${entries} temporary roles from ${servers.length} servers`)
 
     return entries
 }

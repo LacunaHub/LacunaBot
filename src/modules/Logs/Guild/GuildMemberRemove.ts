@@ -69,7 +69,8 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Guild Member Remove',
+                module: 'Logs',
+                category: 'GuildMemberRemove',
                 guild: { id: member.guild.id, name: member.guild.name },
                 target: { id: member.id, name: member.user.tag }
             })

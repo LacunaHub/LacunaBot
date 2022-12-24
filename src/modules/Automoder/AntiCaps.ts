@@ -118,7 +118,8 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         self.emit('moduleExecution', {
-            module: 'Automoder: Anti Caps',
+            module: 'AutoModer',
+            category: 'AntiCaps',
             guild: { id: message.guild.id, name: message.guild.name },
             target: { id: message.author.id, name: message.author.tag }
         })

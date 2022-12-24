@@ -47,7 +47,11 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
         if (currency.income.blocked.channels.includes(message.channelId)) continue
         if (message.member.roles.cache.some(r => currency.income.blocked.roles.includes(r.id))) continue
 
-        if (currency.income.messages.rate_limit_per_user && Date.now() - wallet.activity.last_message_at < currency.income.messages.rate_limit_per_user * 1000) continue
+        if (
+            currency.income.messages.rate_limit_per_user &&
+            Date.now() - wallet.activity.last_message_at < currency.income.messages.rate_limit_per_user * 1000
+        )
+            continue
 
         const multipliers = server.modules.activities.multipliers
             .filter(i => {
@@ -94,6 +98,15 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
             )
         }
     }
+
+    self.emit('moduleExecution', {
+        module: 'Economy',
+        category: 'MessageCreate',
+        guild: { id: message.guild.id, name: message.guild.name },
+        target: { id: message.author.id, name: message.author.tag }
+    })
+
+    return true
 }
 
 export async function voiceAssign(self: Lacuna, server: ServerDocument, state: VoiceState) {
@@ -151,11 +164,16 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
         }
 
         self.emit('moduleExecution', {
-            module: 'Economy: Voice Assign',
+            module: 'Economy',
+            category: 'VoiceAssign',
             guild: { id: state.guild.id, name: state.guild.name },
             target: { id: state.id, name: state.member.user.tag }
         })
+
+        return true
     }
+
+    return false
 }
 
 export async function voiceUnassign(self: Lacuna, server: ServerDocument, state: VoiceState, channel: BaseGuildVoiceChannel) {
@@ -229,7 +247,8 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
         }
 
         self.emit('moduleExecution', {
-            module: 'Economy: Voice Unassign',
+            module: 'Economy',
+            category: 'VoiceUnassign',
             guild: { id: member.guild.id, name: member.guild.name },
             target: { id: member.id, name: member.user.tag }
         })
@@ -346,6 +365,13 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
                 }
             }
         )
+
+    self.emit('moduleExecution', {
+        module: 'Economy',
+        category: 'ItemPurchase',
+        guild: { id: guild.id, name: guild.name },
+        target: { id: item.id, name: item.name }
+    })
 
     return 'SUCCESS'
 }

@@ -18,7 +18,8 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
         DAYS: 86400
     }
 
-    const is_newbie = (Date.now() - member.user.createdTimestamp) / 1000 < config.minimum_account_age.value * values[config.minimum_account_age.measure]
+    const is_newbie =
+        (Date.now() - member.user.createdTimestamp) / 1000 < config.minimum_account_age.value * values[config.minimum_account_age.measure]
 
     if (is_newbie) {
         const ban = config.options.includes('ACTION_BAN')
@@ -100,7 +101,8 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
         }
 
         self.emit('moduleExecution', {
-            module: 'Automoder: Newbies Moderation',
+            module: 'AutoModer',
+            category: 'NewbiesModeration',
             guild: { id: member.guild.id, name: member.guild.name },
             target: { id: member.id, name: member.user.tag }
         })

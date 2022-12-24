@@ -43,7 +43,7 @@ export default class DiamondGuild {
             }
         )
 
-        logger.telegram.info(`(Utility): Lacuna Diamond on guild ${this.guild_id} was expired`)
+        logger.info(`[DiamondGuild] Lacuna Diamond on guild ${this.guild_id} was expired`)
     }
 
     cancel() {
@@ -59,5 +59,5 @@ export async function handleDiamondGuilds(sharding: ShardingManager) {
         new DiamondGuild(sharding, server._id, server.server.premium.will_expire_on)
     }
 
-    logger.info(`(Utility): Found ${servers.length} guilds with Lacuna Diamond`)
+    logger.log(`[DiamondGuild] Found ${servers.length} guilds with Lacuna Diamond`)
 }

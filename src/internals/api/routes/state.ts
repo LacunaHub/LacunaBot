@@ -21,7 +21,6 @@ async function getState(ctx: Context) {
     const pings = (await sharding.fetchClientValues('ws.ping')) as number[]
     const uptimes = (await sharding.fetchClientValues('uptime')) as number[]
     const players = await sharding.shards.first().eval('this.playerNodesStats')
-    const charts = qdb.get('charts')
 
     const cluster = {
         id: nou.os.hostname(),
@@ -60,7 +59,8 @@ async function getState(ctx: Context) {
                 memory_usage: Number(((cluster.memory.usedMemMb * 100) / cluster.memory.totalMemMb).toFixed(2))
             }
         ],
-        charts
+        charts: qdb.get('charts'),
+        stats: qdb.get('stats')
     }
 }
 

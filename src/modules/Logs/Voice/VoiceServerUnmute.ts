@@ -70,7 +70,8 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Voice Server Unmute',
+                module: 'Logs',
+                category: 'VoiceServerUnmute',
                 guild: { id: state.guild.id, name: state.guild.name },
                 target: { id: state.member.id, name: state.member.user.tag }
             })

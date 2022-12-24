@@ -100,7 +100,10 @@ export default class Command {
         if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
 
         if (config) {
-            if (config.permissions.allowed_roles.length && (signal.member as GuildMember).roles.cache.some(r => config.permissions.allowed_roles.includes(r.id)))
+            if (
+                config.permissions.allowed_roles.length &&
+                (signal.member as GuildMember).roles.cache.some(r => config.permissions.allowed_roles.includes(r.id))
+            )
                 return true
 
             if (!config.permissions.allowed_roles.length && !this.permissions.user.length) return true
@@ -162,7 +165,18 @@ export default class Command {
         this.throttle(server, interaction)
 
         this.self.emit('commandExecution', {
-            command: subcommand ? `${this.name} ${subcommand.name}` : this.name,
+            command: this.name,
+            subcommand: subcommand?.name ?? null,
+            options: interaction.options.data.map(i => {
+                if (subcommand)
+                    return {
+                        name: i.name,
+                        type: i.type,
+                        value: i.value ?? null,
+                        options: i.options.map(ii => ({ name: ii.name, type: ii.type, value: ii.value ?? null }))
+                    }
+                else return { name: i.name, type: i.type, value: i.value ?? null }
+            }),
             guild: { name: interaction.guild.name, id: interaction.guild.id },
             channel: { name: (interaction.channel as BaseGuildTextChannel)?.name, id: interaction.channelId },
             user: { name: interaction.user.username, id: interaction.user.id }
@@ -218,6 +232,7 @@ export default class Command {
 
         this.self.emit('commandExecution', {
             command: this.name,
+            options: interaction.options.data.map(i => ({ name: i.name, type: i.type, value: i.value ?? null })),
             guild: { name: interaction.guild.name, id: interaction.guild.id },
             channel: { name: (interaction.channel as BaseGuildTextChannel)?.name, id: interaction.channelId },
             user: { name: interaction.user.username, id: interaction.user.id }

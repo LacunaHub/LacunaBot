@@ -60,7 +60,12 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
 
             const embed = new EmbedBuilder()
                 .setTitle(t('logs.guild_ban_add_title'))
-                .setDescription(t('logs.guild_ban_add_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, target: `**${user.tag}** (${user.id})` }))
+                .setDescription(
+                    t('logs.guild_ban_add_template', {
+                        user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                        target: `**${user.tag}** (${user.id})`
+                    })
+                )
                 .addFields([{ name: t('case_log.reason'), value: reason ?? '-' }])
                 .setTimestamp()
                 .setColor('#EF5350')
@@ -71,7 +76,12 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 username: server.server.premium.available ? webhook.name : self.user.username
             })
 
-            self.emit('moduleExecution', { module: 'Logs: Guild Ban Add', guild: { id: guild.id, name: guild.name }, target: { id: user.id, name: user.tag } })
+            self.emit('moduleExecution', {
+                module: 'Logs',
+                category: 'GuildBanAdd',
+                guild: { id: guild.id, name: guild.name },
+                target: { id: user.id, name: user.tag }
+            })
 
             return true
         }

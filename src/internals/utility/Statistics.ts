@@ -47,15 +47,15 @@ export function scheduleStatsCollect(sharding: ShardingManager) {
             charts.command_uses.filter(c => Date.now() - c.ts < 36000000)
         )
 
-        if (process.env.CLIENT_ID == '740585412560420914') await sendGuildCount(guilds)
+        if (process.env.NODE_ENV !== 'development') await sendBotStatsToListings(guilds)
     })
 
-    logger.info(`(Utility): Guilds chart update schedule has been initialized`)
+    logger.log(`[Statistics] Bot stats collection was scheduled`)
 
     return job
 }
 
-export async function sendGuildCount(guilds: number) {
+export async function sendBotStatsToListings(guilds: number) {
     await fetch(`https://discord.bots.gg/api/v1/bots/${process.env.CLIENT_ID}/stats`, {
         method: 'POST',
         headers: {
@@ -74,7 +74,7 @@ export async function sendGuildCount(guilds: number) {
         body: JSON.stringify({ server_count: guilds })
     })
 
-    logger.log(`(Statistics): Guild count has been sent`)
+    logger.log(`[Statistics] Bot stats successfully sent to listings`)
 }
 
 export interface GuildsChart {
@@ -86,4 +86,4 @@ export interface PingsChart {
     ts: number
 }
 
-export default { scheduleStatsCollect, sendGuildCount }
+export default { scheduleStatsCollect, sendBotStatsToListings }

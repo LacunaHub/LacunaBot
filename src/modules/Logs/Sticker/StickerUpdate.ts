@@ -82,7 +82,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
             }
 
             self.emit('moduleExecution', {
-                module: 'Logs: Sticker Update',
+                module: 'Logs',
+                category: 'StickerUpdate',
                 guild: { id: sticker.guild.id, name: sticker.guild.name },
                 target: { id: sticker.id, name: sticker.name }
             })

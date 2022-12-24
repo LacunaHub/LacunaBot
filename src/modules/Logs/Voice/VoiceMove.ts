@@ -54,7 +54,13 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
 
             const embed = new EmbedBuilder()
                 .setTitle(t('logs.voice_move_title'))
-                .setDescription(t('logs.voice_move_template', { user: `**${state.member.user.tag}**`, from: `<#${before.channelId}>`, to: `<#${state.channelId}>` }))
+                .setDescription(
+                    t('logs.voice_move_template', {
+                        user: `**${state.member.user.tag}**`,
+                        from: `<#${before.channelId}>`,
+                        to: `<#${state.channelId}>`
+                    })
+                )
                 .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#FFA726')
@@ -66,7 +72,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Voice Move',
+                module: 'Logs',
+                category: 'VoiceMove',
                 guild: { id: state.guild.id, name: state.guild.name },
                 target: { id: state.member.id, name: state.member.user.tag }
             })

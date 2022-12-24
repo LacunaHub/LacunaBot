@@ -82,7 +82,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             }
 
             self.emit('moduleExecution', {
-                module: 'Logs: Emoji Delete',
+                module: 'Logs',
+                category: 'EmojiUpdate',
                 guild: { id: emoji.guild.id, name: emoji.guild.name },
                 target: { id: emoji.id, name: emoji.name }
             })

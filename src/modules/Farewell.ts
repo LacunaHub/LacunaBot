@@ -20,7 +20,11 @@ export default async function farewell(self: Lacuna, server: ServerDocument, mem
             if (channel) await channel.send(content).catch(self.logger.error)
         }
 
-        self.emit('moduleExecution', { module: 'Farewell', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+        self.emit('moduleExecution', {
+            module: 'Farewell',
+            guild: { id: member.guild.id, name: member.guild.name },
+            target: { id: member.id, name: member.user.tag }
+        })
     }
 
     if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
@@ -54,7 +58,8 @@ export default async function farewell(self: Lacuna, server: ServerDocument, mem
         }
 
         self.emit('moduleExecution', {
-            module: 'Restoring: Member Remove',
+            module: 'Restoring',
+            category: 'SaveData',
             guild: { id: member.guild.id, name: member.guild.name },
             target: { id: member.id, name: member.user.tag }
         })

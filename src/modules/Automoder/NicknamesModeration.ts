@@ -27,7 +27,8 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
         await member.setNickname(name, reason).catch(self.logger.error)
 
         self.emit('moduleExecution', {
-            module: 'Automoder: Nickname Moderation',
+            module: 'AutoModer',
+            category: 'NicknamesModeration',
             guild: { id: member.guild.id, name: member.guild.name },
             target: { id: member.id, name: member.user.tag }
         })

@@ -59,7 +59,12 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
 
             const embed = new EmbedBuilder()
                 .setTitle(t('logs.role_member_add_title'))
-                .setDescription(t('logs.role_member_add_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, target: `**${member.user.tag}**` }))
+                .setDescription(
+                    t('logs.role_member_add_template', {
+                        user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                        target: `**${member.user.tag}**`
+                    })
+                )
                 .addFields([{ name: t('common.roles'), value: roles.map(role => `<@&${role.id}>`).join(', '), inline: true }])
                 .setFooter({ text: member.id })
                 .setTimestamp()
@@ -72,7 +77,8 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Role Member Add',
+                module: 'Logs',
+                category: 'RoleMemberAdd',
                 guild: { id: member.guild.id, name: member.guild.name },
                 target: { id: member.id, name: member.user.tag }
             })

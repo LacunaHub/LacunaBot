@@ -74,7 +74,8 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Message Delete Bulk',
+                module: 'Logs',
+                category: 'MessageDeleteBulk',
                 guild: { id: message.guild.id, name: message.guild.name },
                 target: { id: message.author ? message.author.id : message.id, name: message.author ? message.author.tag : message.type }
             })

@@ -59,7 +59,9 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
 
             const embed = new EmbedBuilder()
                 .setTitle(t('logs.channel_delete_title'))
-                .setDescription(t('logs.channel_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, channel: `**${channel.name}**` }))
+                .setDescription(
+                    t('logs.channel_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, channel: `**${channel.name}**` })
+                )
                 .addFields([
                     { name: t('logs.channel_category'), value: channel?.parent?.name ?? '-', inline: true },
                     { name: t('logs.channel_position'), value: channel.rawPosition.toString(), inline: true }
@@ -75,7 +77,8 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Channel Delete',
+                module: 'Logs',
+                category: 'ChannelDelete',
                 guild: { id: channel.guild.id, name: channel.guild.name },
                 target: { id: channel.id, name: channel.name }
             })
