@@ -25,6 +25,28 @@ jobs:
       - name: Make a env file
         uses: SpicyPizza/create-envfile@v1.3
         with:
-          envkey_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
-          envkey_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
+          envkey_API_PORT: ${{ secrets.API_PORT }}
+          envkey_DB_URL: ${{ secrets.DB_URL }}
+          envkey_DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+          envkey_DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
+          envkey_DISCORD_CLIENT_TOKEN: ${{ secrets.DISCORD_CLIENT_TOKEN }}
+          envkey_DISCORD_CLIENT_MAX_SHARDS: ${{ secrets.DISCORD_CLIENT_MAX_SHARDS }}
+          envkey_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          envkey_LISTING_BOTS_GG_API_KEY: ${{ secrets.LISTING_BOTS_GG_API_KEY }}
+          envkey_LISTING_TOP_GG_API_KEY: ${{ secrets.LISTING_TOP_GG_API_KEY }}
+          envkey_PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
+          envkey_PAYPAL_SECRET: ${{ secrets.PAYPAL_SECRET }}
+          envkey_QIWI_PUBLIC_KEY: ${{ secrets.QIWI_PUBLIC_KEY }}
+          envkey_QIWI_SECRET_KEY: ${{ secrets.QIWI_SECRET_KEY }}
+          envkey_SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          envkey_SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          envkey_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          envkey_TELEGRAM_LOG_CHAT_ID: ${{ secrets.TELEGRAM_LOG_CHAT_ID }}
+          envkey_TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          envkey_TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          envkey_TWITCH_APP_ACCESS_TOKEN: ${{ secrets.TWITCH_APP_ACCESS_TOKEN }}
+          envkey_TWITCH_SIGNING_SECRET: ${{ secrets.TWITCH_SIGNING_SECRET }}
+          envkey_WEBSITE_DOMAIN: ${{ secrets.WEBSITE_DOMAIN }}
+          envkey_WINTER_MUSIC_NODE: ${{ secrets.WINTER_MUSIC_NODE }}
+          envkey_YOUTUBE_HMAC_SECRET: ${{ secrets.YOUTUBE_HMAC_SECRET }}
           file_name: .env
