@@ -15,9 +15,12 @@ import api from './internals/api'
 import logger from './internals/Logger'
 import ShardingManager from './internals/utility/ShardingManager'
 
-export const sharding: ShardingManager = new ShardingManager('./dist/internals/utility/Client.js', { token: process.env.CLIENT_TOKEN, respawn: true })
+export const sharding: ShardingManager = new ShardingManager('./dist/internals/utility/Client.js', {
+    token: process.env.DISCORD_CLIENT_TOKEN,
+    respawn: true
+})
 
-sharding.spawn({ amount: Number(process.env.CLIENT_MAX_SHARDS), delay: 20000, timeout: 60000 })
+sharding.spawn({ amount: Number(process.env.DISCORD_CLIENT_MAX_SHARDS), delay: 20000, timeout: 60000 })
 
 sharding.on('shardCreate', shard => {
     logger.log(`[Sharding] Shard #${shard.id} created`)

@@ -102,7 +102,7 @@ export default class Lacuna extends Client {
     async start() {
         await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
         this.logger.log('[Lacuna] Connected to database')
-        await this.login(process.env.CLIENT_TOKEN)
+        await this.login(process.env.DISCORD_CLIENT_TOKEN)
         this.logger.log('[Lacuna] Connected to Discord client')
 
         this.loadEvents(true)

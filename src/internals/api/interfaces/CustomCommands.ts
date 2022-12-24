@@ -17,7 +17,7 @@ export async function createCustomCommand(server: ServerDocument, data: ICustomC
     let apiCommand: any
 
     try {
-        apiCommand = await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, server._id), {
+        apiCommand = await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, server._id), {
             body: data.command
         })
     } catch (err) {
@@ -50,7 +50,7 @@ export async function updateCustomCommand(server: ServerDocument, data: ICustomC
 
     if (JSON.stringify(data.command) !== JSON.stringify(cc.command)) {
         try {
-            await DiscordUtils.restApi.patch(DiscordUtils.apiRoutes.applicationGuildCommand(process.env.CLIENT_ID, server._id, cc.id), {
+            await DiscordUtils.restApi.patch(DiscordUtils.apiRoutes.applicationGuildCommand(process.env.DISCORD_CLIENT_ID, server._id, cc.id), {
                 body: data.command
             })
         } catch (err) {
@@ -80,7 +80,7 @@ export async function deleteCustomCommand(server: ServerDocument, data: { id: st
     if (!cc) throw new Error('NOT_FOUND')
 
     try {
-        await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.applicationGuildCommand(process.env.CLIENT_ID, server._id, cc.id))
+        await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.applicationGuildCommand(process.env.DISCORD_CLIENT_ID, server._id, cc.id))
     } catch (err) {
         throw new Error('CANNOT_DELETE_COMMAND')
     }

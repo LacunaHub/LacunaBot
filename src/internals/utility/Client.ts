@@ -32,7 +32,7 @@ export default new Lacuna({
         if (manager.name == 'GuildMemberManager')
             return new LimitedCollection({
                 maxSize: 1000,
-                keepOverLimit: v => v.id == process.env.CLIENT_ID || v.voice.channelId
+                keepOverLimit: v => v.id == process.env.DISCORD_CLIENT_ID || v.voice.channelId
             })
 
         if (manager.name == 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
@@ -42,7 +42,7 @@ export default new Lacuna({
         if (manager.name == 'UserManager')
             return new LimitedCollection({
                 maxSize: 5000,
-                keepOverLimit: v => v.id == process.env.CLIENT_ID
+                keepOverLimit: v => v.id == process.env.DISCORD_CLIENT_ID
             })
 
         return new Collection()

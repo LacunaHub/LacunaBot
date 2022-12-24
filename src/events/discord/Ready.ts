@@ -18,7 +18,7 @@ const handler = async (self: Lacuna) => {
         ],
         plugins: [new ErelaSpotify({ clientID: process.env.SPOTIFY_CLIENT_ID, clientSecret: process.env.SPOTIFY_CLIENT_SECRET })],
         clientId: self.user.id,
-        shards: Number(process.env.CLIENT_MAX_SHARDS),
+        shards: Number(process.env.DISCORD_CLIENT_MAX_SHARDS),
         send(id, payload) {
             const guild = self.guilds.cache.get(id)
 

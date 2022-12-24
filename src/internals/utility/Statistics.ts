@@ -56,19 +56,19 @@ export function scheduleStatsCollect(sharding: ShardingManager) {
 }
 
 export async function sendBotStatsToListings(guilds: number) {
-    await fetch(`https://discord.bots.gg/api/v1/bots/${process.env.CLIENT_ID}/stats`, {
+    await fetch(`https://discord.bots.gg/api/v1/bots/${process.env.DISCORD_CLIENT_ID}/stats`, {
         method: 'POST',
         headers: {
-            Authorization: process.env.BDGG_API_KEY,
+            Authorization: process.env.LISTING_BOTS_GG_API_KEY,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ guildCount: guilds })
     })
 
-    await fetch(`https://top.gg/api/bots/${process.env.CLIENT_ID}/stats`, {
+    await fetch(`https://top.gg/api/bots/${process.env.DISCORD_CLIENT_ID}/stats`, {
         method: 'POST',
         headers: {
-            Authorization: process.env.TOPGG_API_KEY,
+            Authorization: process.env.LISTING_TOP_GG_API_KEY,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ server_count: guilds })

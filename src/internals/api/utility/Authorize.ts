@@ -4,7 +4,7 @@ import db from '../../../database'
 import OAuth2, { OAuth2Guild, OAuth2User } from '../discord/OAuth2'
 import { isBotExpert } from './Utils'
 
-const oauth2 = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
+const oauth2 = new OAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
 
 export async function authorize(ctx: Context, next: Next) {
     const access_token = ctx.request.headers.authorization

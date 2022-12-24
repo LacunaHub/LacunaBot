@@ -31,17 +31,23 @@ async function getSettings(ctx: Context) {
     const server = await db.servers.findOne({ _id: guild_id })
     if (!server || server.server.blocked) ctx.throw(404)
 
-    const selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {})) as any
+    const selfMember = (await DiscordUtils.restApi
+        .get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.DISCORD_CLIENT_ID))
+        .catch(() => {})) as any
     if (!selfMember) ctx.throw(406)
 
     const guildChannels = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildChannels(guild_id)).catch(() => {})) as any[]) ?? []
     const guildRoles = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildRoles(guild_id)).catch(() => {})) as any[]) ?? []
     const guildEmojis = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildEmojis(guild_id)).catch(() => {})) as any[]) ?? []
     const guildCommands =
-        ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild_id)).catch(() => {})) as any[]) ?? []
+        ((await DiscordUtils.restApi
+            .get(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, guild_id))
+            .catch(() => {})) as any[]) ?? []
 
     const selfRoles = selfMember
-        ? guildRoles.sort((a, b) => a.position - b.position).filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID)
+        ? guildRoles
+              .sort((a, b) => a.position - b.position)
+              .filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.DISCORD_CLIENT_ID)
         : []
     const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (DiscordUtils.compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
     const selfPermissions = selfRoles.reduce((x, y) => x | BigInt(y.permissions), 0n)
@@ -154,7 +160,9 @@ async function updateSettings(ctx: Context) {
     let server = await db.servers.findOne({ _id: guild_id })
     if (!server || server.server.blocked) ctx.throw(404)
 
-    const selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {})) as any
+    const selfMember = (await DiscordUtils.restApi
+        .get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.DISCORD_CLIENT_ID))
+        .catch(() => {})) as any
     if (!selfMember) ctx.throw(406)
 
     const commands = qdb.get('commands').map(i => {
@@ -288,7 +296,7 @@ async function updateApplicationCommands(ctx: Context) {
     commands = [...slash, ...context, ...custom]
 
     try {
-        await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild_id), {
+        await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, guild_id), {
             body: commands
         })
     } catch (err) {

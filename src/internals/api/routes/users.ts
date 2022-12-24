@@ -8,7 +8,7 @@ import OAuth2, { OAuth2Guild } from '../discord/OAuth2'
 import { authorize } from '../utility/Authorize'
 
 const router: Router = new Router({ prefix: '/users' })
-const oauth = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
+const oauth = new OAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
 
 router.get('/@me', authorize, getMe)
 router.get('/@me/bills', authorize, getBills)
@@ -29,7 +29,9 @@ async function getMe(ctx: Context) {
         const permitted = guild.owner || permissions.has(PermissionsBitField.Flags.Administrator)
 
         if (permitted) {
-            const me = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.CLIENT_ID)).catch(() => {})) as any
+            const me = (await DiscordUtils.restApi
+                .get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.DISCORD_CLIENT_ID))
+                .catch(() => {})) as any
 
             guild['joined'] = Boolean(me)
         }
