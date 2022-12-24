@@ -25,7 +25,7 @@
     "bufferutil": "4.0.1",
     "canvas": "2.8.0",
     "discord-cross-hosting": "2.3.2",
-    "discord-hybrid-sharding": "1.7.4",
+    "discord-hybrid-sharding": "1.7.5",
     "discord.js": "14.7.1",
     "dotenv": "8.2.0",
     "erela.js": "2.3.3",
