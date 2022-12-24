@@ -3,34 +3,34 @@ import { capitalizeFirstLetter } from '../../internals/utility/Utils'
 
 const handler = async (self: Lacuna, data: CommandExecutionData) => {
     const { command, subcommand, options, guild, channel, user } = data
-    const commandStats = self.qdb.get(`stats.commands.${command}`)
+    // const commandStats = self.qdb.get(`stats.commands.${command}`)
 
-    if (commandStats) {
-        self.qdb.push(`stats.commands.${command}.data`, {
-            timestamp: Date.now(),
-            subcommand: subcommand ?? null,
-            options: options ?? [],
-            guild_id: guild.id,
-            channel_id: channel.id,
-            user_id: user.id
-        })
-        self.qdb.add(`stats.commands.${command}.total_uses`, 1)
-    } else {
-        self.qdb.set(`stats.commands.${command}`, {
-            command,
-            data: [
-                {
-                    timestamp: Date.now(),
-                    subcommand: subcommand ?? null,
-                    options: options ?? [],
-                    guild_id: guild.id,
-                    channel_id: channel.id,
-                    user_id: user.id
-                }
-            ],
-            total_uses: 1
-        })
-    }
+    // if (commandStats) {
+    //     self.qdb.push(`stats.commands.${command}.data`, {
+    //         timestamp: Date.now(),
+    //         subcommand: subcommand ?? null,
+    //         options: options ?? [],
+    //         guild_id: guild.id,
+    //         channel_id: channel.id,
+    //         user_id: user.id
+    //     })
+    //     self.qdb.add(`stats.commands.${command}.total_uses`, 1)
+    // } else {
+    //     self.qdb.set(`stats.commands.${command}`, {
+    //         command,
+    //         data: [
+    //             {
+    //                 timestamp: Date.now(),
+    //                 subcommand: subcommand ?? null,
+    //                 options: options ?? [],
+    //                 guild_id: guild.id,
+    //                 channel_id: channel.id,
+    //                 user_id: user.id
+    //             }
+    //         ],
+    //         total_uses: 1
+    //     })
+    // }
 
     // prettier-ignore
     self.logger.log(

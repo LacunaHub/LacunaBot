@@ -1,6 +1,7 @@
 import { BaseGuildTextChannel, ChatInputCommandInteraction, ContextMenuCommandInteraction, GuildMember, Message, Team } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
+import { snakeToPascalCase } from '../utility/Utils'
 
 export default class Command {
     public self: Lacuna
@@ -77,7 +78,7 @@ export default class Command {
     denied(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
-        if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
+        //if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
 
         if (this.private) return false
 
@@ -97,7 +98,7 @@ export default class Command {
     allowed(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
-        if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
+        //if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
 
         if (config) {
             if (
@@ -111,7 +112,11 @@ export default class Command {
 
         if (!config && !this.permissions.user.length) return true
 
-        if (this.permissions.user.length && (signal.member as GuildMember).permissions.has(this.permissions.user as any)) return true
+        if (
+            this.permissions.user.length &&
+            (signal.member as GuildMember).permissions.has(this.permissions.user.map(i => snakeToPascalCase(i)) as any)
+        )
+            return true
 
         return false
     }
