@@ -30,7 +30,7 @@ const handler = async (self: Lacuna, message: Message) => {
     await swearFilter(self, server, message)
     await usersSlowdown(self, server, message)
 
-    await autoReact(server, message)
+    await autoReact(self, server, message)
 
     return true
 }

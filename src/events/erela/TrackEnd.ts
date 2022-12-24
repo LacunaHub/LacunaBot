@@ -1,8 +1,9 @@
 import { EmbedBuilder, Message } from 'discord.js'
 import { Player } from 'erela.js'
 import numbro from 'numbro'
+import Lacuna from '../../internals/Lacuna'
 
-const handler = async (self, player: Player) => {
+const handler = async (self: Lacuna, player: Player) => {
     const message = player.get<Message>('message')
 
     if (message) {
@@ -18,6 +19,8 @@ const handler = async (self, player: Player) => {
             .then(message => player.set('message', message))
             .catch(() => player.set('message', null))
     }
+
+    self.logger.log(`[ErelaTrackEnd] Track playing for player ${player.guild} ended`)
 
     return true
 }

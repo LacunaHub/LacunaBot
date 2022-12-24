@@ -1,9 +1,13 @@
 // Set Environments
 require('dotenv').config()
 process.env.API_URL =
-    process.env.NODE_ENV === 'development' ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.API_PORT}` : `https://api.${process.env.WEBSITE_DOMAIN}`
+    process.env.NODE_ENV === 'development'
+        ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.API_PORT}`
+        : `https://api.${process.env.WEBSITE_DOMAIN}`
 process.env.WEBSITE_URL =
-    process.env.NODE_ENV === 'development' ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.WEBSITE_PORT}` : `https://www.${process.env.WEBSITE_DOMAIN}`
+    process.env.NODE_ENV === 'development'
+        ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.WEBSITE_PORT}`
+        : `https://www.${process.env.WEBSITE_DOMAIN}`
 process.env.CLIENT_OAUTH2_REDIRECT_URI = `${process.env.API_URL}/authorize/callback`
 
 import { Server } from 'http'
@@ -16,13 +20,13 @@ export const sharding: ShardingManager = new ShardingManager('./dist/internals/u
 sharding.spawn({ amount: Number(process.env.CLIENT_MAX_SHARDS), delay: 20000, timeout: 60000 })
 
 sharding.on('shardCreate', shard => {
-    logger.info(`(Sharding Manager): Launching shard #${shard.id}`)
+    logger.log(`[Sharding] Shard #${shard.id} created`)
     sharding.readiness.push(Date.now())
 })
 
 export const server: Server = api.listen(process.env.API_PORT, () => {
-    logger.info(`(API): Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
-    logger.telegram.info(`(API): Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
+    logger.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
+    logger.telegram.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
 })
 
 export default { sharding, server }

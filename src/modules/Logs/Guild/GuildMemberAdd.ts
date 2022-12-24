@@ -61,7 +61,11 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 .setTitle(t('logs.guild_member_add_title'))
                 .setDescription(`${member.user.tag} (${member.id})`)
                 .addFields([
-                    { name: t('commands.user.text_registration_date'), value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`, inline: true },
+                    {
+                        name: t('commands.user.text_registration_date'),
+                        value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`,
+                        inline: true
+                    },
                     { name: t('logs.guild_member_count'), value: member.guild.memberCount.toString(), inline: true }
                 ])
                 .setTimestamp()
@@ -74,7 +78,8 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Guild Member Add',
+                module: 'Logs',
+                category: 'GuildMemberAdd',
                 guild: { id: member.guild.id, name: member.guild.name },
                 target: { id: member.id, name: member.user.tag }
             })

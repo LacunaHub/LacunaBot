@@ -69,7 +69,8 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Invite Create',
+                module: 'Logs',
+                category: 'InviteCreate',
                 guild: { id: invite.guild.id, name: invite.guild.name },
                 target: { id: invite.channel.name, name: invite.code }
             })

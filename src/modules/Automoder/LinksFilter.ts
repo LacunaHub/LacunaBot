@@ -23,7 +23,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
     if (links && links.length) {
         const delete_referral_invites = config.options.includes('DELETE_REFERRAL_INVITES') && links.some(link => link.includes('discord.gg'))
 
-        if (config.options.includes('DELETE_ALL_LINKS') && !delete_referral_invites && !config.allowed_registry.some(reg => links.some(link => link.includes(reg)))) {
+        if (
+            config.options.includes('DELETE_ALL_LINKS') &&
+            !delete_referral_invites &&
+            !config.allowed_registry.some(reg => links.some(link => link.includes(reg)))
+        ) {
             if (message.deletable) await message.delete()
 
             await penalty(self, server, message)
@@ -158,7 +162,8 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
     }
 
     self.emit('moduleExecution', {
-        module: 'Automoder: Links Filter',
+        module: 'AutoModer',
+        category: 'LinksFilter',
         guild: { id: message.guild.id, name: message.guild.name },
         target: { id: message.author.id, name: message.author.tag }
     })

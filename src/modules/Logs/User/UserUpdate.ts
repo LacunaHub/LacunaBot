@@ -90,7 +90,12 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 })
             }
 
-            self.emit('moduleExecution', { module: 'Logs: User Update', guild: { id: guild.id, name: guild.name }, target: { id: user.username, name: user.id } })
+            self.emit('moduleExecution', {
+                module: 'Logs',
+                category: 'UserUpdate',
+                guild: { id: guild.id, name: guild.name },
+                target: { id: user.username, name: user.id }
+            })
 
             return true
         }

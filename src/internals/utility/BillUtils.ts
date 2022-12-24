@@ -3,6 +3,7 @@ import { sharding } from '../..'
 import database from '../../database'
 import { IBill } from '../../database/schemas/Bills'
 import { ServerDocument } from '../../database/schemas/Servers'
+import logger from '../Logger'
 import DiamondGuild from '../structures/DiamondGuild'
 import Patron from '../structures/Patron'
 import DiscordUtils from './DiscordUtils'
@@ -32,6 +33,8 @@ export async function addDiamond(bill: IBill, server: ServerDocument) {
         new DiamondGuild(sharding, bill.custom_fields.reference_id, period)
 
         await addPremium(bill, period)
+
+        logger.log(`[BillUtils] Bill "${bill._id}" for guild ${bill.custom_fields.reference_id} successfully charged`)
     }
 }
 
@@ -60,4 +63,6 @@ export async function addPremium(bill: IBill, period: number) {
     if (patron) patron.cancel()
 
     new Patron(sharding, bill.custom_fields.user_id, period)
+
+    logger.log(`[BillUtils] User ${bill.custom_fields.user_id} became a Patron`)
 }

@@ -139,17 +139,24 @@ export default class Giveaway {
             const members: Collection<string, string> = new Collection(this.members.map(m => [m, this.message_id]))
             const winners: string[] = members.randomKey(this.winners_amount >= members.size ? members.size : this.winners_amount)
             const embed = new EmbedBuilder(message.embeds[0])
-                .setDescription(this.self.i18n.t(this.locale, 'commands.giveaway.end.text_winners', { winners: winners.map(w => `<@${w}>`).join(', ') }))
+                .setDescription(
+                    this.self.i18n.t(this.locale, 'commands.giveaway.end.text_winners', { winners: winners.map(w => `<@${w}>`).join(', ') })
+                )
                 .setColor('#EF5350')
 
             await message.edit({ embeds: [embed], components: [] })
             await message.reply({
-                content: this.self.i18n.t(this.locale, 'commands.giveaway.end.text_congrats', { winner: `${winners.map(w => `<@${w}>`)}`, prize: `**${this.prize}**` })
+                content: this.self.i18n.t(this.locale, 'commands.giveaway.end.text_congrats', {
+                    winner: `${winners.map(w => `<@${w}>`)}`,
+                    prize: `**${this.prize}**`
+                })
             })
 
             members.clear()
         } else {
-            const embed = new EmbedBuilder(message.embeds[0]).setDescription(this.self.i18n.t(this.locale, 'commands.giveaway.end.text_no_members')).setColor('#EF5350')
+            const embed = new EmbedBuilder(message.embeds[0])
+                .setDescription(this.self.i18n.t(this.locale, 'commands.giveaway.end.text_no_members'))
+                .setColor('#EF5350')
 
             await message.edit({ embeds: [embed], components: [] })
         }
@@ -234,7 +241,7 @@ export async function handleEntries(self: Lacuna): Promise<number> {
         entries += giveaways.length
     }
 
-    self.logger.log(`(Structures): Loaded ${entries} giveaways from ${servers.length} servers`)
+    self.logger.log(`[Giveaway] Loaded ${entries} giveaways from ${servers.length} servers`)
 
     return entries
 }

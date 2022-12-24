@@ -99,14 +99,16 @@ export default class Lacuna extends Client {
         )
     }
 
-    async start(): Promise<number> {
+    async start() {
         await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-
+        this.logger.log('[Lacuna] Connected to database')
         await this.login(process.env.CLIENT_TOKEN)
+        this.logger.log('[Lacuna] Connected to Discord client')
 
-        await this.loadEvents(true)
+        this.loadEvents(true)
 
         this.application = await this.application.fetch()
+        this.logger.log('[Lacuna] Discord client application fetched')
 
         handleGiveawayEntries(this)
         handleTemporaryBanEntries(this)
@@ -115,10 +117,8 @@ export default class Lacuna extends Client {
         process.on('unhandledRejection', error => {
             const err = (error as any)?.stack ?? (error as any).message
 
-            this.logger.error('(Unhandled Rejection)', err)
+            this.logger.error('[UnhandledRejection]', err)
         })
-
-        return Date.now()
     }
 
     async updateApplicationCommands(server: ServerDocument) {
@@ -181,6 +181,8 @@ export default class Lacuna extends Client {
     }
 
     loadCommands() {
+        this.logger.log('[Lacuna] Loading commands...')
+
         const directories: string[] = readdirSync('./dist/commands', { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())
             .map(dirent => dirent.name)
@@ -203,10 +205,12 @@ export default class Lacuna extends Client {
             amount += dirs.length
         }
 
-        this.logger.info(`(Commands): Loaded ${amount} commands from ${directories.length} categories`)
+        this.logger.log(`[Lacuna] Loaded ${amount} commands from ${directories.length} categories`)
     }
 
     loadEvents(initial = false) {
+        this.logger.log('[Lacuna]', initial ? 'Loading initial events...' : 'Loading events...')
+
         const directories: string[] = readdirSync('./dist/events', { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())
             .map(dirent => dirent.name)
@@ -230,6 +234,6 @@ export default class Lacuna extends Client {
             total += files.length
         }
 
-        this.logger.info(`(Events): Loaded ${amount} events of ${total}`)
+        this.logger.log(`[Lacuna] Loaded ${amount} events of ${total}`)
     }
 }

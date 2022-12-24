@@ -20,7 +20,11 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
             if (channel) await channel.send(content).catch(self.logger.error)
         }
 
-        self.emit('moduleExecution', { module: 'Greeting', guild: { id: member.guild.id, name: member.guild.name }, target: { id: member.id, name: member.user.tag } })
+        self.emit('moduleExecution', {
+            module: 'Greeting',
+            guild: { id: member.guild.id, name: member.guild.name },
+            target: { id: member.id, name: member.user.tag }
+        })
     }
 
     if (server.modules.welcome.initial_roles.active) {
@@ -30,7 +34,8 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
             await member.roles.add(roles) // Need reason
 
             self.emit('moduleExecution', {
-                module: 'Greeting: Initial Roles',
+                module: 'Greeting',
+                category: 'InitialRoles',
                 guild: { id: member.guild.id, name: member.guild.name },
                 target: { id: member.id, name: member.user.tag }
             })
@@ -64,7 +69,8 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
             )
 
             self.emit('moduleExecution', {
-                module: 'Restoring: Member Add',
+                module: 'Restoring',
+                category: 'RestoreData',
                 guild: { id: member.guild.id, name: member.guild.name },
                 target: { id: member.id, name: member.user.tag }
             })

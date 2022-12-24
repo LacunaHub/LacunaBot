@@ -118,12 +118,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .addFields([
                         {
                             name: t('logs.before_change'),
-                            value: (before as TextChannel).rateLimitPerUser ? numbro((before as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-',
+                            value: (before as TextChannel).rateLimitPerUser
+                                ? numbro((before as TextChannel).rateLimitPerUser).format({ output: 'time' })
+                                : '-',
                             inline: true
                         },
                         {
                             name: t('logs.after_change'),
-                            value: (channel as TextChannel).rateLimitPerUser ? numbro((channel as TextChannel).rateLimitPerUser).format({ output: 'time' }) : '-',
+                            value: (channel as TextChannel).rateLimitPerUser
+                                ? numbro((channel as TextChannel).rateLimitPerUser).format({ output: 'time' })
+                                : '-',
                             inline: true
                         }
                     ])
@@ -211,7 +215,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             }
 
             self.emit('moduleExecution', {
-                module: 'Logs: Channel Update',
+                module: 'Logs',
+                category: 'ChannelUpdate',
                 guild: { id: channel.guild.id, name: channel.guild.name },
                 target: { id: channel.id, name: channel.name }
             })

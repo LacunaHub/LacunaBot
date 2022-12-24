@@ -125,7 +125,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                 })
             }
 
-            self.emit('moduleExecution', { module: 'Logs: Role Update', guild: { id: role.guild.id, name: role.guild.name }, target: { id: role.name, name: role.id } })
+            self.emit('moduleExecution', {
+                module: 'Logs',
+                category: 'RoleUpdate',
+                guild: { id: role.guild.id, name: role.guild.name },
+                target: { id: role.name, name: role.id }
+            })
 
             return true
         }

@@ -5,31 +5,31 @@ const telegram_base_url: string = `https://api.telegram.org/bot${process.env.TEL
 
 export default {
     log(...args: any[]) {
-        console.log(`[LOG: ${moment().format()}]:`, ...args)
+        console.log(`[LOG: ${moment().format()}] -`, ...args)
     },
 
     dir(...args: any[]) {
-        console.dir(`[DIR: ${moment().format()}]:`, ...args)
+        console.dir(`[DIR: ${moment().format()}] -`, ...args)
     },
 
     info(...args: any[]) {
-        console.info(`[INFO: ${moment().format()}]:`, ...args)
+        console.info(`[INFO: ${moment().format()}] -`, ...args)
     },
 
     trace(...args: any[]) {
-        console.trace(`[TRACE: ${moment().format()}]:`, ...args)
+        console.trace(`[TRACE: ${moment().format()}] -`, ...args)
     },
 
     warn(...args: any[]) {
-        console.warn(`[WARNING: ${moment().format()}]:`, ...args)
+        console.warn(`[WARNING: ${moment().format()}] -`, ...args)
     },
 
     debug(...args: any[]) {
-        console.debug(`[DEBUG: ${moment().format()}]:`, ...args)
+        console.debug(`[DEBUG: ${moment().format()}] -`, ...args)
     },
 
     error(...args: any[]) {
-        console.error(`[ERROR: ${moment().format()}]:`, ...args)
+        console.error(`[ERROR: ${moment().format()}] -`, ...args)
     },
 
     telegram: {

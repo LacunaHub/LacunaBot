@@ -59,7 +59,9 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
 
             const embed = new EmbedBuilder()
                 .setTitle(t('logs.sticker_delete_title'))
-                .setDescription(t('logs.sticker_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, sticker: `**${sticker.name}**` }))
+                .setDescription(
+                    t('logs.sticker_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, sticker: `**${sticker.name}**` })
+                )
                 .setFooter({ text: sticker.id })
                 .setTimestamp()
                 .setColor('#EF5350')
@@ -71,7 +73,8 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Sticker Delete',
+                module: 'Logs',
+                category: 'StickerDelete',
                 guild: { id: sticker.guild.id, name: sticker.guild.name },
                 target: { id: sticker.id, name: sticker.name }
             })

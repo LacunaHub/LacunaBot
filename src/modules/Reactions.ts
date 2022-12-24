@@ -44,7 +44,10 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
             }
 
             if (element.type == 'CHANNEL') {
-                const channels = message.guild.channels.cache.filter(c => c.manageable && element.references.includes(c.id)) as Collection<string, BaseGuildTextChannel>
+                const channels = message.guild.channels.cache.filter(c => c.manageable && element.references.includes(c.id)) as Collection<
+                    string,
+                    BaseGuildTextChannel
+                >
 
                 if (channels.size) {
                     try {
@@ -56,7 +59,9 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                             )
 
                         self.emit('moduleExecution', {
-                            module: 'Reactions: Show Channels',
+                            module: 'InteractiveReactions',
+                            category: 'ReactionAdd',
+                            label: 'ViewChannel',
                             guild: { id: message.guild.id, name: message.guild.name },
                             target: { id: member.id, name: member.user.tag }
                         })
@@ -79,7 +84,9 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                             await member.roles.remove(roles, t('audit_reasons.irs'))
 
                             self.emit('moduleExecution', {
-                                module: 'Reactions: Remove Roles',
+                                module: 'InteractiveReactions',
+                                category: 'ReactionAdd',
+                                label: 'RemoveRoles',
                                 guild: { id: message.guild.id, name: message.guild.name },
                                 target: { id: member.id, name: member.user.tag }
                             })
@@ -95,7 +102,9 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                     }
 
                     if (element.element.single || element.element.global_single) {
-                        const single_elements = server.modules.reactions.filter(r => r.element.global_single || (r.element.single && r.message.id == message.id))
+                        const single_elements = server.modules.reactions.filter(
+                            r => r.element.global_single || (r.element.single && r.message.id == message.id)
+                        )
                         const has_single_element: boolean = single_elements.some(sr => sr.references.some(r => member.roles.cache.has(r)))
 
                         if (has_single_element) {
@@ -126,7 +135,9 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                     }
 
                     self.emit('moduleExecution', {
-                        module: 'Reactions: Add Roles',
+                        module: 'InteractiveReactions',
+                        category: 'ReactionAdd',
+                        label: 'AddRoles',
                         guild: { id: message.guild.id, name: message.guild.name },
                         target: { id: member.id, name: member.user.tag }
                     })
@@ -151,7 +162,10 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
             const member = await message.guild.members.fetch(user.id)
 
             if (element.type == 'CHANNEL') {
-                const channels = message.guild.channels.cache.filter(c => c.manageable && element.references.includes(c.id)) as Collection<string, BaseGuildTextChannel>
+                const channels = message.guild.channels.cache.filter(c => c.manageable && element.references.includes(c.id)) as Collection<
+                    string,
+                    BaseGuildTextChannel
+                >
 
                 if (channels.size) {
                     try {
@@ -162,7 +176,9 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                                 await overwrites.delete(t('audit_reasons.irs'))
 
                                 self.emit('moduleExecution', {
-                                    module: `Reactions: ${element.element.reverse ? 'Hide Channels' : 'Show Channels'}`,
+                                    module: 'InteractiveReactions',
+                                    category: 'ReactionRemove',
+                                    label: 'DeleteChannelOverwrites',
                                     guild: { id: message.guild.id, name: message.guild.name },
                                     target: { id: member.id, name: member.user.tag }
                                 })
@@ -184,8 +200,10 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                         if (element.element.reverse) await member.roles.add(roles, t('audit_reasons.irs'))
                         else await member.roles.remove(roles, t('audit_reasons.irs'))
 
-                        await self.emit('moduleExecution', {
+                        self.emit('moduleExecution', {
                             module: `Reactions: ${element.element.reverse ? 'Add' : 'Remove'} Roles`,
+                            category: 'ReactionRemove',
+                            label: `${element.element.reverse ? 'Add' : 'Remove'}Roles`,
                             guild: { id: message.guild.id, name: message.guild.name },
                             target: { id: member.id, name: member.user.tag }
                         })
@@ -200,8 +218,10 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
     }
 }
 
-export async function autoReact(server: ServerDocument, message: Message) {
-    const auto_reaction: AutoReaction = server.modules.autoreactions.slice(0, server.server.premium.available ? 20 : 2).find(ar => ar.channel_id == message.channel.id)
+export async function autoReact(self: Lacuna, server: ServerDocument, message: Message) {
+    const auto_reaction: AutoReaction = server.modules.autoreactions
+        .slice(0, server.server.premium.available ? 20 : 2)
+        .find(ar => ar.channel_id == message.channel.id)
 
     if (auto_reaction) {
         if (
@@ -223,6 +243,13 @@ export async function autoReact(server: ServerDocument, message: Message) {
         for (const emoji of auto_reaction.reactions) {
             await message.react(emoji.id || emoji.name)
         }
+
+        self.emit('moduleExecution', {
+            module: 'AutoReactions',
+            category: 'AddReactions',
+            guild: { id: message.guild.id, name: message.guild.name },
+            target: { id: message.author.id, name: message.author.tag }
+        })
 
         return true
     }

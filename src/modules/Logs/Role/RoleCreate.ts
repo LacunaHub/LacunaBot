@@ -59,7 +59,9 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
 
             const embed = new EmbedBuilder()
                 .setTitle(t('logs.role_create_title'))
-                .setDescription(t('logs.role_create_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, role: `<@&${role.id}>` }))
+                .setDescription(
+                    t('logs.role_create_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, role: `<@&${role.id}>` })
+                )
                 .addFields([
                     { name: t('logs.role_color'), value: `\`${role.hexColor}\``, inline: true },
                     { name: t('logs.role_position'), value: role.rawPosition.toString(), inline: true }
@@ -74,7 +76,12 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
                 username: server.server.premium.available ? webhook.name : self.user.username
             })
 
-            self.emit('moduleExecution', { module: 'Logs: Role Create', guild: { id: role.guild.id, name: role.guild.name }, target: { id: role.name, name: role.id } })
+            self.emit('moduleExecution', {
+                module: 'Logs',
+                category: 'RoleCreate',
+                guild: { id: role.guild.id, name: role.guild.name },
+                target: { id: role.name, name: role.id }
+            })
 
             return true
         }

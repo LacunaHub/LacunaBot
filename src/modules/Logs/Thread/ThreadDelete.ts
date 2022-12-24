@@ -59,7 +59,9 @@ export default async function (self: Lacuna, server: ServerDocument, thread: Thr
 
             const embed = new EmbedBuilder()
                 .setTitle(t('logs.thread_delete_title'))
-                .setDescription(t('logs.thread_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, thread: `<#${thread.id}>` }))
+                .setDescription(
+                    t('logs.thread_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, thread: `<#${thread.id}>` })
+                )
                 .addFields([{ name: t('common.channel'), value: thread.parent?.id ? `<#${thread.parentId}>` : '-', inline: true }])
                 .setFooter({ text: thread.id })
                 .setTimestamp()
@@ -72,7 +74,8 @@ export default async function (self: Lacuna, server: ServerDocument, thread: Thr
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Thread Delete',
+                module: 'Logs',
+                category: 'ThreadDelete',
                 guild: { id: thread.guild.id, name: thread.guild.name },
                 target: { id: thread.id, name: thread.name }
             })

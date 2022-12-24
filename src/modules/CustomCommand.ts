@@ -358,7 +358,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'EQUAL') {
                         if (leftVal !== rightVal) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -366,7 +369,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'NOT_EQUAL') {
                         if (leftVal === rightVal) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -374,7 +380,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'STARTS_WITH') {
                         if (!leftVal.startsWith(rightVal)) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -382,7 +391,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'ENDS_WITH') {
                         if (!leftVal.endsWith(rightVal)) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -390,7 +402,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'GREATER_THAN') {
                         if (leftVal < rightVal) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -398,7 +413,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'LESS_THAN') {
                         if (leftVal > rightVal) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -406,7 +424,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'CONTAINS') {
                         if (!leftVal.includes(rightVal)) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -414,7 +435,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'NOT_CONTAINS') {
                         if (leftVal.includes(rightVal)) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -551,7 +575,10 @@ export default class CustomCommand {
 
                         if (wallet.currencies.some(c => c.id === currency_id)) {
                             await this.self.db.users.updateOne(
-                                { _id: member.id, 'activities.wallets': { $elemMatch: { guild_id: this.interaction.guildId, 'currencies.id': currency_id } } },
+                                {
+                                    _id: member.id,
+                                    'activities.wallets': { $elemMatch: { guild_id: this.interaction.guildId, 'currencies.id': currency_id } }
+                                },
                                 {
                                     $inc: {
                                         'activities.wallets.$[guild].currencies.$[currency].amount': amount
@@ -579,9 +606,12 @@ export default class CustomCommand {
 
         this.throttle()
 
-        this.self.logger.telegram.info(`Code Snippets (${this.interaction.guildId}:${this.interaction.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``)
+        this.self.logger.telegram.info(
+            `Code Snippets (${this.interaction.guildId}:${this.interaction.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``
+        )
         this.self.emit('commandExecution', {
             command: this.interaction.commandName,
+            options: this.interaction.options.data.map(i => ({ name: i.name, type: i.type, value: i.value ?? null })),
             guild: { name: this.interaction.guild.name, id: this.interaction.guildId },
             channel: { name: (this.interaction.channel as BaseGuildTextChannel)?.name, id: this.interaction.channelId },
             user: { name: this.interaction.user.username, id: this.interaction.user.id }
@@ -655,7 +685,10 @@ export default class CustomCommand {
             throttled.remaining--
 
             if (throttled.remaining <= 0) {
-                this.self.qdb.set(`throttling.customCommands.${this.command.id}.${path}.retry_after`, Date.now() + this.command.throttling.timeout * 1000)
+                this.self.qdb.set(
+                    `throttling.customCommands.${this.command.id}.${path}.retry_after`,
+                    Date.now() + this.command.throttling.timeout * 1000
+                )
                 this.self.qdb.set(`throttling.customCommands.${this.command.id}.${path}.remaining`, -1)
             }
         } else {

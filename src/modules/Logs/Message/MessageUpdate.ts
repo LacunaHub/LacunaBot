@@ -78,7 +78,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Message Update',
+                module: 'Logs',
+                category: 'MessageUpdate',
                 guild: { id: message.guild.id, name: message.guild.name },
                 target: { id: message.author.id, name: message.author.tag }
             })
