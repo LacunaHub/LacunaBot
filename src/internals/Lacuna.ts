@@ -119,6 +119,12 @@ export default class Lacuna extends Client {
 
             this.logger.error('[UnhandledRejection]', err)
         })
+
+        process.on('uncaughtException', error => {
+            const err = (error as any)?.stack ?? (error as any).message
+
+            this.logger.error('[UncaughtException]', err)
+        })
     }
 
     async updateApplicationCommands(server: ServerDocument) {
