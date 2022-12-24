@@ -10,7 +10,7 @@ process.env.WEBSITE_URL =
         : `https://www.${process.env.WEBSITE_DOMAIN}`
 process.env.CLIENT_OAUTH2_REDIRECT_URI = `${process.env.API_URL}/authorize/callback`
 
-const isMasterBridge = process.env.CLIENT_BRIDGE_HOST === 'localhost'
+const isMasterBridge = process.env.DISCORD_CLIENT_BRIDGE_HOST === 'localhost'
 
 import { Bridge } from 'discord-cross-hosting'
 import { Server } from 'http'
@@ -27,26 +27,26 @@ let bridge: Bridge, server: Server
 
 if (isMasterBridge) {
     server = api.listen(process.env.API_PORT, () => {
-        logger.info(`(API) Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
-        logger.telegram.info(`(API) Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
+        logger.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
+        logger.telegram.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
     })
 
     bridge = new Bridge({
-        token: process.env.CLIENT_TOKEN,
-        authToken: process.env.CLIENT_BRIDGE_AUTH_TOKEN,
-        totalShards: Number(process.env.CLIENT_TOTAL_SHARDS),
-        totalMachines: Number(process.env.CLIENT_TOTAL_MACHINES),
-        port: Number(process.env.CLIENT_BRIDGE_PORT)
+        token: process.env.DISCORD_CLIENT_TOKEN,
+        authToken: process.env.DISCORD_CLIENT_BRIDGE_AUTH_TOKEN,
+        totalShards: Number(process.env.DISCORD_CLIENT_TOTAL_SHARDS),
+        totalMachines: Number(process.env.DISCORD_CLIENT_TOTAL_MACHINES),
+        port: Number(process.env.DISCORD_CLIENT_BRIDGE_PORT)
     })
 
     bridge.on('ready', url => {
-        logger.info(`(Bridge) Bridge is ready on url ${url}`)
+        logger.info(`[Bridge] Bridge is ready on url ${url}`)
 
         startServices()
     })
 
-    bridge.on('connect', client => logger.info(`(Bridge) Client "${(client as any).id}" connected`))
-    bridge.on('disconnect', client => logger.warn(`(Bridge) Client "${(client as any).id}" disconnected`))
+    bridge.on('connect', client => logger.info(`[Bridge] Client "${(client as any).id}" connected`))
+    bridge.on('disconnect', client => logger.warn(`[Bridge] Client "${(client as any).id}" disconnected`))
 
     bridge.start()
 } else {
