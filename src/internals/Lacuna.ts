@@ -1,3 +1,5 @@
+import { Shard as BridgeShard } from 'discord-cross-hosting'
+import { Client as ClusterClient } from 'discord-hybrid-sharding'
 import { ApplicationCommandOptionType, ApplicationCommandType, Client, ClientOptions, Collection, parseEmoji, PermissionsBitField } from 'discord.js'
 import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
@@ -29,9 +31,15 @@ export default class Lacuna extends Client {
     public i18n: typeof i18n
     public utils: typeof Utils
     public PermissionFlags: typeof PermissionsBitField.Flags
+    public cluster: ClusterClient
+    public machine: BridgeShard
 
     constructor(options?: ClientOptions) {
         super(options)
+
+        this.cluster = null
+
+        this.machine = null
 
         this.logger = logger
 
@@ -102,6 +110,10 @@ export default class Lacuna extends Client {
     async start() {
         await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
         this.logger.log('[Lacuna] Connected to database')
+
+        this.cluster = new ClusterClient(this)
+        this.machine = new BridgeShard(this.cluster)
+
         await this.login(process.env.DISCORD_CLIENT_TOKEN)
         this.logger.log('[Lacuna] Connected to Discord client')
 

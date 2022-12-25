@@ -2,17 +2,15 @@ import { Job, scheduleJob } from 'node-schedule'
 import database from '../../database'
 import logger from '../Logger'
 import discord from '../utility/DiscordUtils'
-import ShardingManager from '../utility/ShardingManager'
+
+export const patrons = new Map<string, Patron>()
 
 export default class Patron {
-    public sharding: ShardingManager
     public user_id: string
     public expiration: number
     public schedule: Job
 
-    constructor(sharding: ShardingManager, user_id: string, expiration: number | Date) {
-        this.sharding = sharding
-
+    constructor(user_id: string, expiration: number | Date) {
         this.user_id = user_id
 
         this.expiration = expiration instanceof Date ? expiration.getTime() : expiration
@@ -30,7 +28,7 @@ export default class Patron {
 
     initialize() {
         this.schedule = scheduleJob(`PATRON:${this.user_id}`, this.expiration, () => this.expire())
-        this.sharding.patrons.set(this.user_id, this)
+        patrons.set(this.user_id, this)
     }
 
     async expire() {
@@ -43,15 +41,15 @@ export default class Patron {
 
     cancel() {
         this.schedule.cancel()
-        this.sharding.patrons.delete(this.user_id)
+        patrons.delete(this.user_id)
     }
 }
 
-export async function handlePatrons(sharding: ShardingManager) {
+export async function handlePatrons() {
     const users = await database.users.find({ 'premium.available': true })
 
     for (const user of users) {
-        new Patron(sharding, user._id, user.premium.expiration_timestamp)
+        new Patron(user._id, user.premium.expiration_timestamp)
     }
 
     logger.log(`[Patron] Found ${users.length} users with premium`)
