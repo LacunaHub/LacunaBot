@@ -201,7 +201,7 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                         else await member.roles.remove(roles, t('audit_reasons.irs'))
 
                         self.emit('moduleExecution', {
-                            module: `Reactions: ${element.element.reverse ? 'Add' : 'Remove'} Roles`,
+                            module: `InteractiveReactions`,
                             category: 'ReactionRemove',
                             label: `${element.element.reverse ? 'Add' : 'Remove'}Roles`,
                             guild: { id: message.guild.id, name: message.guild.name },
