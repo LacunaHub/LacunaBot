@@ -35,7 +35,6 @@ const handler = async (self: Lacuna) => {
 
     self.player.init(self.user.id)
 
-    self.loadCommands()
     self.loadEvents()
 
     self.logger.info(`[DiscordReady] ${self.user.username} is ready`)

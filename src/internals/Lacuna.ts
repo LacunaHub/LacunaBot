@@ -1,4 +1,4 @@
-import { ApplicationCommandType, Client, ClientOptions, Collection, parseEmoji, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType, ApplicationCommandType, Client, ClientOptions, Collection, parseEmoji, PermissionsBitField } from 'discord.js'
 import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
 import { connect } from 'mongoose'
@@ -6,7 +6,7 @@ import qdb from 'quick.db'
 import db from '../database'
 import { ServerDocument } from '../database/schemas/Servers'
 import i18n from '../i18n'
-import Utils from '../internals/utility/Utils'
+import Utils, { snakeToPascalCase } from '../internals/utility/Utils'
 import locale from './locale'
 import logger from './Logger'
 import Command, { CommandOptions } from './structures/Command'
@@ -106,6 +106,7 @@ export default class Lacuna extends Client {
         this.logger.log('[Lacuna] Connected to Discord client')
 
         this.loadEvents(true)
+        this.loadCommands()
 
         this.application = await this.application.fetch()
         this.logger.log('[Lacuna] Discord client application fetched')
@@ -142,11 +143,13 @@ export default class Lacuna extends Client {
                             if (option.type === 'SUB_COMMAND')
                                 return {
                                     ...option,
+                                    type: ApplicationCommandOptionType.Subcommand,
                                     description: t(option.description),
                                     options:
                                         option.options?.map(opt => {
                                             return {
                                                 ...opt,
+                                                type: ApplicationCommandOptionType[snakeToPascalCase(opt.type)],
                                                 name: t(opt.name),
                                                 description: t(opt.description),
                                                 choices:
@@ -159,6 +162,7 @@ export default class Lacuna extends Client {
 
                             return {
                                 ...option,
+                                type: ApplicationCommandOptionType[snakeToPascalCase(option.type)],
                                 name: t(option.name),
                                 description: t(option.description),
                                 choices:
@@ -175,7 +179,7 @@ export default class Lacuna extends Client {
             .map(command => {
                 return {
                     name: t(command.pretty_name),
-                    type: command.is_user_command ? 'USER' : 'MESSAGE'
+                    type: command.is_user_command ? ApplicationCommandType.User : ApplicationCommandType.Message
                 }
             })
 
@@ -183,7 +187,7 @@ export default class Lacuna extends Client {
 
         const commands = [...slash, ...context, ...custom]
 
-        return await this.application.commands.set(commands as any, server._id)
+        return this.application.commands.set(commands as any, server._id)
     }
 
     loadCommands() {

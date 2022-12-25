@@ -1,12 +1,12 @@
 import Router from '@koa/router'
-import { ChannelType, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, PermissionsBitField } from 'discord.js'
 import { Context } from 'koa'
 import qdb from 'quick.db'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import i18n from '../../../i18n'
-import { commandOptionTypes } from '../../utility/Constants'
 import DiscordUtils from '../../utility/DiscordUtils'
+import { snakeToPascalCase } from '../../utility/Utils'
 import interfaces from '../interfaces'
 import { authorize, checkPermissions } from '../utility/Authorize'
 
@@ -244,19 +244,19 @@ async function updateApplicationCommands(ctx: Context) {
             return {
                 name: command.name,
                 description: t(command.description),
-                type: 1,
+                type: ApplicationCommandType.ChatInput,
                 options:
                     command?.options?.map(option => {
                         if (option.type === 'SUB_COMMAND') {
                             return {
                                 ...option,
-                                type: commandOptionTypes[option.type],
+                                type: ApplicationCommandOptionType.Subcommand,
                                 description: t(option.description),
                                 options:
                                     option.options?.map(opt => {
                                         return {
                                             ...opt,
-                                            type: commandOptionTypes[opt.type],
+                                            type: ApplicationCommandOptionType[snakeToPascalCase(opt.type)],
                                             name: t(opt.name),
                                             description: t(opt.description),
                                             choices:
@@ -270,7 +270,7 @@ async function updateApplicationCommands(ctx: Context) {
 
                         return {
                             ...option,
-                            type: commandOptionTypes[option.type],
+                            type: ApplicationCommandOptionType[snakeToPascalCase(option.type)],
                             name: t(option.name),
                             description: t(option.description),
                             choices:
@@ -287,7 +287,7 @@ async function updateApplicationCommands(ctx: Context) {
         .map(command => {
             return {
                 name: t(command.pretty_name),
-                type: command.is_user_command ? 2 : 3
+                type: command.is_user_command ? ApplicationCommandType.User : ApplicationCommandType.Message
             }
         })
 
