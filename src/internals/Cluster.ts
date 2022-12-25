@@ -14,8 +14,6 @@ const bridgeClient = new BridgeClient({
 bridgeClient.on('ready', () => logger.info('[BridgeClient] Client is ready'))
 
 const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
-    token: process.env.DISCORD_CLIENT_TOKEN,
-    shardsPerClusters: Number(process.env.DISCORD_CLIENT_SHARDS_PER_CLUSTER),
     restarts: {
         max: 5,
         interval: 3_600_000

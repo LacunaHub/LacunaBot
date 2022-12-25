@@ -36,17 +36,18 @@ if (isMasterBridge) {
         authToken: process.env.DISCORD_CLIENT_BRIDGE_AUTH_TOKEN,
         totalShards: Number(process.env.DISCORD_CLIENT_TOTAL_SHARDS),
         totalMachines: Number(process.env.DISCORD_CLIENT_TOTAL_MACHINES),
+        shardsPerCluster: Number(process.env.DISCORD_CLIENT_SHARDS_PER_CLUSTER),
         port: Number(process.env.DISCORD_CLIENT_BRIDGE_PORT)
     })
 
     bridge.on('ready', url => {
         logger.info(`[Bridge] Bridge is ready on url ${url}`)
 
-        startServices()
+        setTimeout(startServices, 5000)
     })
 
-    bridge.on('connect', client => logger.info(`[Bridge] Client "${(client as any).id}" connected`))
-    bridge.on('disconnect', client => logger.warn(`[Bridge] Client "${(client as any).id}" disconnected`))
+    bridge.on('connect', client => logger.info(`[Bridge] Client "${client.id}" connected`))
+    bridge.on('disconnect', client => logger.warn(`[Bridge] Client "${client.id}" disconnected`))
 
     bridge.start()
 } else {
@@ -55,8 +56,23 @@ if (isMasterBridge) {
 
 async function startServices() {
     await bridgeClient.connect()
-    await clusterManager.spawn({ timeout: -1 })
     bridgeClient.listen(clusterManager)
+
+    try {
+        const shardData = await bridgeClient.requestShardData()
+        logger.log(`[BridgeClient] Shard data response`, JSON.stringify(shardData))
+
+        if (!shardData || !shardData.shardList) throw new Error('Invalid "shardData"')
+
+        clusterManager.totalShards = shardData.totalShards
+        clusterManager.totalClusters = shardData.shardList.length
+        clusterManager.shardList = shardData.shardList
+        clusterManager.clusterList = shardData.clusterList
+
+        await clusterManager.spawn({ timeout: -1, delay: 15000 })
+    } catch (err) {
+        logger.error('[BridgeClient]', err)
+    }
 
     scheduleStatsCollect()
     syncQiwiBills()
