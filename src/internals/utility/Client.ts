@@ -21,7 +21,8 @@ export default new Lacuna({
         GatewayIntentBits.GuildInvites,
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildMessageReactions
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.MessageContent
     ],
     partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
     makeCache: manager => {
