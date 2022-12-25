@@ -1,4 +1,4 @@
-import { Role } from 'discord.js'
+import { Events, Role } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { RoleUpdate } from '../../modules/Logs'
@@ -16,6 +16,6 @@ const handler = async (self: Lacuna, before: Role, role: Role) => {
 }
 
 export default {
-    name: 'roleUpdate',
+    name: Events.GuildRoleUpdate,
     handler
 }

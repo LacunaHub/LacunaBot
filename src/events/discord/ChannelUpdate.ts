@@ -1,4 +1,4 @@
-import { ChannelType, DMChannel, GuildChannel, PermissionsBitField } from 'discord.js'
+import { ChannelType, DMChannel, Events, GuildChannel, PermissionsBitField } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { ChannelUpdate } from '../../modules/Logs'
@@ -51,6 +51,6 @@ const handler = async (self: Lacuna, before: DMChannel | GuildChannel, channel: 
 }
 
 export default {
-    name: 'channelUpdate',
+    name: Events.ChannelUpdate,
     handler
 }

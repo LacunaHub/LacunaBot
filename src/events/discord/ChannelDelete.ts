@@ -1,4 +1,4 @@
-import { ChannelType, DMChannel, GuildChannel } from 'discord.js'
+import { ChannelType, DMChannel, Events, GuildChannel } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { ChannelDelete } from '../../modules/Logs'
@@ -50,6 +50,6 @@ const handler = async (self: Lacuna, channel: DMChannel | GuildChannel) => {
 }
 
 export default {
-    name: 'channelDelete',
+    name: Events.ChannelDelete,
     handler
 }

@@ -1,4 +1,4 @@
-import { ChannelType, Message, MessageType } from 'discord.js'
+import { ChannelType, Events, Message, MessageType } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { antiCaps, linksFilter, nicknamesModeration, swearFilter, usersSlowdown } from '../../modules/Automoder'
@@ -36,6 +36,6 @@ const handler = async (self: Lacuna, message: Message) => {
 }
 
 export default {
-    name: 'messageCreate',
+    name: Events.MessageCreate,
     handler
 }

@@ -1,4 +1,4 @@
-import { Guild } from 'discord.js'
+import { Events, Guild } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { GuildUpdate } from '../../modules/Logs'
@@ -12,6 +12,6 @@ const handler = async (self: Lacuna, before: Guild, guild: Guild) => {
 }
 
 export default {
-    name: 'guildUpdate',
+    name: Events.GuildUpdate,
     handler
 }

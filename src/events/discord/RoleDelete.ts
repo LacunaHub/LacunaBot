@@ -1,4 +1,4 @@
-import { Role } from 'discord.js'
+import { Events, Role } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { RoleDelete } from '../../modules/Logs'
@@ -14,6 +14,6 @@ const handler = async (self: Lacuna, role: Role) => {
 }
 
 export default {
-    name: 'roleDelete',
+    name: Events.GuildRoleDelete,
     handler
 }

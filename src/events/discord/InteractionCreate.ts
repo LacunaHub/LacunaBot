@@ -1,4 +1,13 @@
-import { AnySelectMenuInteraction, ButtonInteraction, ChatInputCommandInteraction, Collection, ContextMenuCommandInteraction, GuildChannel, Message } from 'discord.js'
+import {
+    AnySelectMenuInteraction,
+    ButtonInteraction,
+    ChatInputCommandInteraction,
+    Collection,
+    ContextMenuCommandInteraction,
+    Events,
+    GuildChannel,
+    Message
+} from 'discord.js'
 import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponent, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { buttonPressed } from '../../internals/structures/Giveaway'
@@ -7,7 +16,10 @@ import CustomCommand from '../../modules/CustomCommand'
 import Replacer from '../../modules/Replacer'
 import reports from '../../modules/Reports'
 
-const handler = async (self: Lacuna, interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction | AnySelectMenuInteraction) => {
+const handler = async (
+    self: Lacuna,
+    interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction | AnySelectMenuInteraction
+) => {
     if (!interaction.inGuild() || interaction.inRawGuild()) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: interaction.guildId })
@@ -26,7 +38,9 @@ const handler = async (self: Lacuna, interaction: ChatInputCommandInteraction | 
     }
 
     if (interaction.isContextMenuCommand()) {
-        const command = self.commands.find(c => (c.is_message_command || c.is_user_command) && self.i18n.t(server.locale, c.pretty_name) == interaction.commandName)
+        const command = self.commands.find(
+            c => (c.is_message_command || c.is_user_command) && self.i18n.t(server.locale, c.pretty_name) == interaction.commandName
+        )
 
         if (command) await command.executeContext(server, interaction)
     }
@@ -138,7 +152,8 @@ const handler = async (self: Lacuna, interaction: ChatInputCommandInteraction | 
                 }
 
                 if (removeRoles.length) {
-                    const missingRoles = button.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
+                    const missingRoles =
+                        button.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
 
                     if (missingRoles) await interaction.member.roles.add(removeRoles).catch(() => {})
                     else await interaction.member.roles.remove(removeRoles).catch(() => {})
@@ -208,7 +223,8 @@ const handler = async (self: Lacuna, interaction: ChatInputCommandInteraction | 
                 }
 
                 if (removeRoles.length) {
-                    const missingRoles = option.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
+                    const missingRoles =
+                        option.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
 
                     if (missingRoles) await interaction.member.roles.add(removeRoles).catch(() => {})
                     else await interaction.member.roles.remove(removeRoles).catch(() => {})
@@ -241,6 +257,6 @@ const handler = async (self: Lacuna, interaction: ChatInputCommandInteraction | 
 }
 
 export default {
-    name: 'interactionCreate',
+    name: Events.InteractionCreate,
     handler
 }

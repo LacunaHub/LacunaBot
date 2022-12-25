@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js'
+import { Events, GuildMember } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { newbiesModeration, nicknamesModeration } from '../../modules/Automoder'
@@ -34,6 +34,6 @@ const handler = async (self: Lacuna, member: GuildMember) => {
 }
 
 export default {
-    name: 'guildMemberAdd',
+    name: Events.GuildMemberAdd,
     handler
 }

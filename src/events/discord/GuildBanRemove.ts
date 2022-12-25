@@ -1,4 +1,4 @@
-import { AuditLogEvent, BaseGuildTextChannel, GuildBan, User } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, Events, GuildBan, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { GuildBanRemove } from '../../modules/Logs'
@@ -28,6 +28,6 @@ const handler = async (self: Lacuna, ban: GuildBan) => {
 }
 
 export default {
-    name: 'guildBanRemove',
+    name: Events.GuildBanRemove,
     handler
 }

@@ -1,4 +1,4 @@
-import { ChannelType, Message } from 'discord.js'
+import { ChannelType, Events, Message } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { MessageDelete } from '../../modules/Logs'
@@ -14,6 +14,6 @@ const handler = async (self: Lacuna, message: Message) => {
 }
 
 export default {
-    name: 'messageDelete',
+    name: Events.MessageDelete,
     handler
 }

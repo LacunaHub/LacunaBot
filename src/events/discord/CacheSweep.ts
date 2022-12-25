@@ -1,3 +1,4 @@
+import { Events } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, message: string) => {
@@ -7,6 +8,6 @@ const handler = async (self: Lacuna, message: string) => {
 }
 
 export default {
-    name: 'cacheSweep',
+    name: Events.CacheSweep,
     handler
 }

@@ -1,4 +1,4 @@
-import { VoiceState } from 'discord.js'
+import { Events, VoiceState } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
@@ -32,6 +32,6 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
 }
 
 export default {
-    name: 'voiceStateUpdate',
+    name: Events.VoiceStateUpdate,
     handler
 }

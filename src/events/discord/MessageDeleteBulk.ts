@@ -1,4 +1,4 @@
-import { Collection, Message } from 'discord.js'
+import { Collection, Events, Message } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { MessageDeleteBulk } from '../../modules/Logs'
@@ -14,6 +14,6 @@ const handler = async (self: Lacuna, messages: Collection<string, Message>) => {
 }
 
 export default {
-    name: 'messageDeleteBulk',
+    name: Events.MessageBulkDelete,
     handler
 }

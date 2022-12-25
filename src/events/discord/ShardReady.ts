@@ -1,3 +1,4 @@
+import { Events } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>) => {
@@ -51,7 +52,7 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
 }
 
 export default {
-    name: 'shardReady',
+    name: Events.ShardReady,
     handler,
     once: true,
     initial: true

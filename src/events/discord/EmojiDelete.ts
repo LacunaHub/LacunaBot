@@ -1,4 +1,4 @@
-import { GuildEmoji } from 'discord.js'
+import { Events, GuildEmoji } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { EmojiDelete } from '../../modules/Logs'
@@ -14,6 +14,6 @@ const handler = async (self: Lacuna, emoji: GuildEmoji) => {
 }
 
 export default {
-    name: 'emojiDelete',
+    name: Events.GuildEmojiDelete,
     handler
 }

@@ -1,4 +1,4 @@
-import { AuditLogEvent, BaseGuildTextChannel, GuildMember, User } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { nicknamesModeration } from '../../modules/Automoder'
@@ -65,6 +65,6 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
 }
 
 export default {
-    name: 'guildMemberUpdate',
+    name: Events.GuildMemberUpdate,
     handler
 }

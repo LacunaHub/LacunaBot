@@ -1,3 +1,4 @@
+import { Events } from 'discord.js'
 import { Manager } from 'erela.js'
 import ErelaSpotify from 'erela.js-spotify'
 import Lacuna from '../../internals/Lacuna'
@@ -44,7 +45,7 @@ const handler = async (self: Lacuna) => {
 }
 
 export default {
-    name: 'ready',
+    name: Events.ClientReady,
     handler,
     once: true,
     initial: true

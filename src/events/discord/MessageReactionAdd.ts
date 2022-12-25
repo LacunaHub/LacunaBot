@@ -1,4 +1,4 @@
-import { ChannelType, Collection, GuildChannel, MessageReaction, User } from 'discord.js'
+import { ChannelType, Collection, Events, GuildChannel, MessageReaction, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { snakeToPascalCase } from '../../internals/utility/Utils'
@@ -74,6 +74,6 @@ const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
 }
 
 export default {
-    name: 'messageReactionAdd',
+    name: Events.MessageReactionAdd,
     handler
 }

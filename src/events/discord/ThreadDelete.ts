@@ -1,4 +1,4 @@
-import { ThreadChannel } from 'discord.js'
+import { Events, ThreadChannel } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { ThreadDelete } from '../../modules/Logs'
@@ -14,6 +14,6 @@ const handler = async (self: Lacuna, thread: ThreadChannel) => {
 }
 
 export default {
-    name: 'threadDelete',
+    name: Events.ThreadDelete,
     handler
 }

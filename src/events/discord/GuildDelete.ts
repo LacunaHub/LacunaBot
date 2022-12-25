@@ -1,4 +1,4 @@
-import { Guild } from 'discord.js'
+import { Events, Guild } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, guild: Guild) => {
@@ -15,6 +15,6 @@ const handler = async (self: Lacuna, guild: Guild) => {
 }
 
 export default {
-    name: 'guildDelete',
+    name: Events.GuildDelete,
     handler
 }

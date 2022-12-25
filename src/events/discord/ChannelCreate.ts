@@ -1,4 +1,4 @@
-import { GuildChannel } from 'discord.js'
+import { Events, GuildChannel } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { ChannelCreate } from '../../modules/Logs'
@@ -14,6 +14,6 @@ const handler = async (self: Lacuna, channel: GuildChannel) => {
 }
 
 export default {
-    name: 'channelCreate',
+    name: Events.ChannelCreate,
     handler
 }
