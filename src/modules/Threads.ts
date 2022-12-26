@@ -26,7 +26,7 @@ export async function autoThread(self: Lacuna, server: ServerDocument, message: 
                 message: message
             }
         )
-        const name = await replacer.replace() || 'New Thread'
+        const name = await replacer.replace()
 
         await (message.channel as TextChannel).threads.create({
             name: name,
