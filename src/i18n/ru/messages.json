@@ -846,7 +846,7 @@
         "thread_update_auto_archive_change_template": "время автоархивации ветки {thread}",
         "user_update_title": "Пользователь изменён",
         "user_update_name_change_template": "{user} изменяет своё имя пользователя",
-        "user_update_discriminator_change_template": "{user} изменяет своё дискриминатор",
+        "user_update_discriminator_change_template": "{user} изменяет свой дискриминатор",
         "voice_connect_title": "Голосовое подключение",
         "voice_connect_template": "{user} подключается к голосовому каналу {channel}",
         "voice_disconnect_title": "Голосовое отключение",
