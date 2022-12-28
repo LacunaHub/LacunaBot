@@ -33,10 +33,10 @@ export function format(string: string, params?: any[] | { [key: string]: any }) 
 }
 
 export function t(locale: string, key: string, params?: any[] | { [key: string]: any }) {
-    const string = resolveObjectPath(key, messages[locale] ?? messages.ru) ?? key
+    const string = resolveObjectPath(key, messages[locale] ?? messages.ru) ?? resolveObjectPath(key, messages.ru) ?? key
 
     if (string === key) {
-        logger.warn(`[i18n]: Missing localization string ${string}`)
+        logger.warn(`[i18n] Missing localization string ${string}`)
     }
 
     return format(string, params)

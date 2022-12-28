@@ -11,6 +11,7 @@ const handler = async (self: Lacuna, player: Player) => {
 
     player.set('message', null)
     player.set('collector', null)
+    self.qdb.delete(`guildPlayers.${player.guild}`)
 
     self.logger.log(`[ErelaPlayerDestroy] Player ${player.guild} destroyed`)
 

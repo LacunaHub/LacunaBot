@@ -11,7 +11,8 @@ export default {
             type: 'STRING',
             name: `commands.${name}.options.query.name`,
             description: `commands.${name}.options.query.description`,
-            required: true
+            required: true,
+            autocomplete: true
         }
     ],
     group: 'MUSIC'

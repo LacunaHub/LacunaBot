@@ -1,6 +1,5 @@
 import { Events } from 'discord.js'
 import { Manager } from 'erela.js'
-import ErelaSpotify from 'erela.js-spotify'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna) => {
@@ -17,7 +16,6 @@ const handler = async (self: Lacuna) => {
                 retryDelay: 60000
             }
         ],
-        plugins: [new ErelaSpotify({ clientID: process.env.SPOTIFY_CLIENT_ID, clientSecret: process.env.SPOTIFY_CLIENT_SECRET })],
         clientId: self.user.id,
         shards: self.options.shardCount,
         send(id, payload) {
@@ -33,10 +31,11 @@ const handler = async (self: Lacuna) => {
         .on('playerDestroy', player => self.emit('playerDestroy', player))
         .on('queueEnd', player => self.emit('queueEnd', player))
         .on('trackEnd', player => self.emit('trackEnd', player))
-
-    self.player.init(self.user.id)
+        .on('trackStart', player => self.emit('trackStart', player))
 
     self.loadEvents()
+
+    self.player.init(self.user.id)
 
     self.logger.info(`[DiscordReady] ${self.user.username} is ready`)
     await self.logger.telegram.info(`\`[DiscordReady]\` ${self.user.username} is ready`)
