@@ -10,6 +10,64 @@
           </q-item-section>
         </q-item>
 
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('pages.guild.vc_music_default_source_title') }}
+
+                <q-badge class="q-ml-xs" color="primary">
+                  <span>NEW</span>
+                </q-badge>
+              </div>
+
+              <q-btn-toggle
+                v-model="guild.modules.music.default_source"
+                :options="[
+                  { value: 'Spotify', slot: 'sp' },
+                  { value: 'YandexMusic', slot: 'ym' },
+                  { value: 'SoundCloud', slot: 'sc' }
+                ]"
+                class="rounded-lg bg-dark-2 q-mt-sm"
+                toggle-color="secondary"
+                unelevated
+                no-caps
+                spread
+              >
+                <template #sp>
+                  <div class="row justify-center q-col-gutter-xs">
+                    <q-avatar class="col-shrink" square size="24px">
+                      <img src="~assets/spotify-logo.svg" />
+                    </q-avatar>
+
+                    <div class="col-shrink">Spotify</div>
+                  </div>
+                </template>
+
+                <template #ym>
+                  <div class="row justify-center q-col-gutter-xs">
+                    <q-avatar class="col-shrink" square size="24px">
+                      <img src="~assets/yandex-music-logo.svg" />
+                    </q-avatar>
+
+                    <div class="col-shrink">Yandex Music</div>
+                  </div>
+                </template>
+
+                <template #sc>
+                  <div class="row justify-center q-col-gutter-xs">
+                    <q-avatar class="col-shrink" square size="24px">
+                      <img src="~assets/soundcloud-logo.svg" />
+                    </q-avatar>
+
+                    <div class="col-shrink">SoundCloud</div>
+                  </div>
+                </template>
+              </q-btn-toggle>
+            </div>
+          </div>
+        </q-card-section>
+
         <q-list class="q-px-none" padding dense>
           <q-item tag="label" :disable="!guild.premium.available" v-ripple="guild.premium.available">
             <q-item-section>
