@@ -11,14 +11,20 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
 
     const player = self.player.get(state.guild.id)
 
-    if (player && channel?.id == player.voiceChannel) {
+    if (player && !player.voiceChannel && state.member.id === self.user.id) {
+        player.destroy()
+
+        return
+    }
+
+    if (player?.voiceChannel === channel?.id) {
         const listeners: number = channel.members.filter(m => !m.user.bot).size
 
         if (!listeners) {
             player.pause(true)
             player.set(
                 'timeout',
-                setTimeout(() => player.destroy(), 600000)
+                setTimeout(() => player.destroy(), 300000)
             )
         }
     }

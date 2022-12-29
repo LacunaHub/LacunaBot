@@ -66,7 +66,6 @@ export async function createInteractiveMessage(server: ServerDocument, data: Int
     try {
         apiMessage = await restApi.post(apiRoutes.channelMessages(data.channel_id), { body: message })
     } catch (err) {
-        console.log(err)
         throw new Error('CANNOT_CREATE_MESSAGE')
     }
 

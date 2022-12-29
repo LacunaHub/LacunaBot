@@ -74,15 +74,24 @@ export default class Lacuna extends Client {
         const OK = '<:OK:905724948453134349>'
         const ERROR = '<:ERROR:905724969827315732>'
         const DIAMOND = '<:DIAMOND:905707582042288178>'
+        const SPOTIFY = '<:SPOTIFY:1056946964543066112>'
+        const YANDEXMUSIC = '<:YANDEXMUSIC:1056946926110638090>'
+        const SOUNDCLOUD = '<:SOUNDCLOUD:1056946989834719352>'
 
         return {
             OK,
             ERROR,
             DIAMOND,
+            SPOTIFY,
+            YANDEXMUSIC,
+            SOUNDCLOUD,
             details: {
                 OK: parseEmoji(OK),
                 ERROR: parseEmoji(ERROR),
-                DIAMOND: parseEmoji(DIAMOND)
+                DIAMOND: parseEmoji(DIAMOND),
+                SPOTIFY: parseEmoji(SPOTIFY),
+                YANDEXMUSIC: parseEmoji(YANDEXMUSIC),
+                SOUNDCLOUD: parseEmoji(SOUNDCLOUD)
             }
         }
     }

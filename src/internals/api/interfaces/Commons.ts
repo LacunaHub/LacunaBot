@@ -1,6 +1,7 @@
 import { parseEmoji } from 'discord.js'
 import database from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
+import { lavalinkSources } from '../../utility/Constants'
 import { dotNotateObject } from '../../utility/Utils'
 
 export async function updateSettings(guild: ServerDocument, data: Partial<ServerDocument>, user_id: string): Promise<ServerDocument> {
@@ -12,12 +13,18 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
         }
     }
 
-    if (Array.isArray(data.server?.bot_expert_roles) && JSON.stringify(data.server.bot_expert_roles) !== JSON.stringify(guild.server.bot_expert_roles)) {
+    if (
+        Array.isArray(data.server?.bot_expert_roles) &&
+        JSON.stringify(data.server.bot_expert_roles) !== JSON.stringify(guild.server.bot_expert_roles)
+    ) {
         updateData['server.bot_expert_roles'] = data.server.bot_expert_roles
     }
 
     if (data.commands) {
-        if (Array.isArray(data.commands.configuration) && JSON.stringify(data.commands.configuration) !== JSON.stringify(guild.commands.configuration)) {
+        if (
+            Array.isArray(data.commands.configuration) &&
+            JSON.stringify(data.commands.configuration) !== JSON.stringify(guild.commands.configuration)
+        ) {
             updateData['commands.configuration'] = data.commands.configuration
         }
     }
@@ -63,17 +70,26 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                                 content: current.dm_message?.content ?? previous.dm_message.content,
                                 embed: {
                                     active: current.dm_message?.embed?.active ?? previous.dm_message.embed.active,
-                                    title: typeof current.dm_message?.embed?.title === 'undefined' ? previous.dm_message.embed.title : current.dm_message.embed.title,
+                                    title:
+                                        typeof current.dm_message?.embed?.title === 'undefined'
+                                            ? previous.dm_message.embed.title
+                                            : current.dm_message.embed.title,
                                     description:
                                         typeof current.dm_message?.embed?.description === 'undefined'
                                             ? previous.dm_message.embed.description
                                             : current.dm_message.embed.description,
-                                    url: typeof current.dm_message?.embed?.url === 'undefined' ? previous.dm_message.embed.url : current.dm_message.embed.url,
+                                    url:
+                                        typeof current.dm_message?.embed?.url === 'undefined'
+                                            ? previous.dm_message.embed.url
+                                            : current.dm_message.embed.url,
                                     timestamp:
                                         typeof current.dm_message?.embed?.timestamp === 'undefined'
                                             ? previous.dm_message.embed.timestamp
                                             : current.dm_message.embed.timestamp,
-                                    color: typeof current.dm_message?.embed?.color === 'undefined' ? previous.dm_message.embed.color : current.dm_message.embed.color,
+                                    color:
+                                        typeof current.dm_message?.embed?.color === 'undefined'
+                                            ? previous.dm_message.embed.color
+                                            : current.dm_message.embed.color,
                                     footer: {
                                         text:
                                             typeof current.dm_message?.embed?.footer?.text === 'undefined'
@@ -162,7 +178,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     typeof data.moderation.automoder.anti_caps.percentage_of_caps === 'number' &&
                     data.moderation.automoder.anti_caps.percentage_of_caps !== guild.moderation.automoder.anti_caps.percentage_of_caps
                 ) {
-                    if (data.moderation.automoder.anti_caps.percentage_of_caps >= 1 && data.moderation.automoder.anti_caps.percentage_of_caps <= 100) {
+                    if (
+                        data.moderation.automoder.anti_caps.percentage_of_caps >= 1 &&
+                        data.moderation.automoder.anti_caps.percentage_of_caps <= 100
+                    ) {
                         updateData['moderation.automoder.anti_caps.percentage_of_caps'] = data.moderation.automoder.anti_caps.percentage_of_caps
                     }
                 }
@@ -198,7 +217,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 if (data.moderation.automoder.anti_caps.modify_roles) {
                     if (
                         Array.isArray(data.moderation.automoder.anti_caps.modify_roles.add) &&
-                        JSON.stringify(data.moderation.automoder.anti_caps.modify_roles.add) !== JSON.stringify(guild.moderation.automoder.anti_caps.modify_roles.add)
+                        JSON.stringify(data.moderation.automoder.anti_caps.modify_roles.add) !==
+                            JSON.stringify(guild.moderation.automoder.anti_caps.modify_roles.add)
                     ) {
                         updateData['moderation.automoder.anti_caps.modify_roles.add'] = data.moderation.automoder.anti_caps.modify_roles.add
                     }
@@ -256,14 +276,16 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 if (data.moderation.automoder.anti_caps.ignored) {
                     if (
                         Array.isArray(data.moderation.automoder.anti_caps.ignored.channels) &&
-                        JSON.stringify(data.moderation.automoder.anti_caps.ignored.channels) !== JSON.stringify(guild.moderation.automoder.anti_caps.ignored.channels)
+                        JSON.stringify(data.moderation.automoder.anti_caps.ignored.channels) !==
+                            JSON.stringify(guild.moderation.automoder.anti_caps.ignored.channels)
                     ) {
                         updateData['moderation.automoder.anti_caps.ignored.channels'] = data.moderation.automoder.anti_caps.ignored.channels
                     }
 
                     if (
                         Array.isArray(data.moderation.automoder.anti_caps.ignored.roles) &&
-                        JSON.stringify(data.moderation.automoder.anti_caps.ignored.roles) !== JSON.stringify(guild.moderation.automoder.anti_caps.ignored.roles)
+                        JSON.stringify(data.moderation.automoder.anti_caps.ignored.roles) !==
+                            JSON.stringify(guild.moderation.automoder.anti_caps.ignored.roles)
                     ) {
                         updateData['moderation.automoder.anti_caps.ignored.roles'] = data.moderation.automoder.anti_caps.ignored.roles
                     }
@@ -288,14 +310,16 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
                 if (
                     Array.isArray(data.moderation.automoder.links_filter.allowed_registry) &&
-                    JSON.stringify(data.moderation.automoder.links_filter.allowed_registry) !== JSON.stringify(guild.moderation.automoder.links_filter.allowed_registry)
+                    JSON.stringify(data.moderation.automoder.links_filter.allowed_registry) !==
+                        JSON.stringify(guild.moderation.automoder.links_filter.allowed_registry)
                 ) {
                     updateData['moderation.automoder.links_filter.allowed_registry'] = data.moderation.automoder.links_filter.allowed_registry
                 }
 
                 if (
                     Array.isArray(data.moderation.automoder.links_filter.blocked_registry) &&
-                    JSON.stringify(data.moderation.automoder.links_filter.blocked_registry) !== JSON.stringify(guild.moderation.automoder.links_filter.blocked_registry)
+                    JSON.stringify(data.moderation.automoder.links_filter.blocked_registry) !==
+                        JSON.stringify(guild.moderation.automoder.links_filter.blocked_registry)
                 ) {
                     updateData['moderation.automoder.links_filter.blocked_registry'] = data.moderation.automoder.links_filter.blocked_registry
                 }
@@ -335,7 +359,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         JSON.stringify(data.moderation.automoder.links_filter.modify_roles.remove) !==
                             JSON.stringify(guild.moderation.automoder.links_filter.modify_roles.remove)
                     ) {
-                        updateData['moderation.automoder.links_filter.modify_roles.remove'] = data.moderation.automoder.links_filter.modify_roles.remove
+                        updateData['moderation.automoder.links_filter.modify_roles.remove'] =
+                            data.moderation.automoder.links_filter.modify_roles.remove
                     }
                 }
 
@@ -344,7 +369,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         typeof data.moderation.automoder.links_filter.send_message.content === 'string' &&
                         data.moderation.automoder.links_filter.send_message.content !== guild.moderation.automoder.links_filter.send_message.content
                     ) {
-                        updateData['moderation.automoder.links_filter.send_message.content'] = data.moderation.automoder.links_filter.send_message.content
+                        updateData['moderation.automoder.links_filter.send_message.content'] =
+                            data.moderation.automoder.links_filter.send_message.content
                     }
 
                     if (data.moderation.automoder.links_filter.send_message.embed) {
@@ -391,7 +417,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
                     if (
                         Array.isArray(data.moderation.automoder.links_filter.ignored.roles) &&
-                        JSON.stringify(data.moderation.automoder.links_filter.ignored.roles) !== JSON.stringify(guild.moderation.automoder.links_filter.ignored.roles)
+                        JSON.stringify(data.moderation.automoder.links_filter.ignored.roles) !==
+                            JSON.stringify(guild.moderation.automoder.links_filter.ignored.roles)
                     ) {
                         updateData['moderation.automoder.links_filter.ignored.roles'] = data.moderation.automoder.links_filter.ignored.roles
                     }
@@ -401,7 +428,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         JSON.stringify(data.moderation.automoder.links_filter.ignored.permissions) !==
                             JSON.stringify(guild.moderation.automoder.links_filter.ignored.permissions)
                     ) {
-                        updateData['moderation.automoder.links_filter.ignored.permissions'] = data.moderation.automoder.links_filter.ignored.permissions
+                        updateData['moderation.automoder.links_filter.ignored.permissions'] =
+                            data.moderation.automoder.links_filter.ignored.permissions
                     }
                 }
             }
@@ -431,7 +459,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 if (data.moderation.automoder.nicknames.ignored) {
                     if (
                         Array.isArray(data.moderation.automoder.nicknames.ignored.roles) &&
-                        JSON.stringify(data.moderation.automoder.nicknames.ignored.roles) !== JSON.stringify(guild.moderation.automoder.nicknames.ignored.roles)
+                        JSON.stringify(data.moderation.automoder.nicknames.ignored.roles) !==
+                            JSON.stringify(guild.moderation.automoder.nicknames.ignored.roles)
                     ) {
                         updateData['moderation.automoder.nicknames.ignored.roles'] = data.moderation.automoder.nicknames.ignored.roles
                     }
@@ -470,10 +499,12 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
                 if (
                     typeof data.moderation.automoder.newbies.minimum_account_age?.measure === 'string' &&
-                    data.moderation.automoder.newbies.minimum_account_age.measure !== guild.moderation.automoder.newbies.minimum_account_age.measure &&
+                    data.moderation.automoder.newbies.minimum_account_age.measure !==
+                        guild.moderation.automoder.newbies.minimum_account_age.measure &&
                     ['MINUTES', 'HOURS', 'DAYS'].includes(data.moderation.automoder.newbies.minimum_account_age.measure)
                 ) {
-                    updateData['moderation.automoder.newbies.minimum_account_age.measure'] = data.moderation.automoder.newbies.minimum_account_age.measure
+                    updateData['moderation.automoder.newbies.minimum_account_age.measure'] =
+                        data.moderation.automoder.newbies.minimum_account_age.measure
                 }
 
                 if (
@@ -500,14 +531,16 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 if (data.moderation.automoder.newbies.modify_roles) {
                     if (
                         Array.isArray(data.moderation.automoder.newbies.modify_roles.add) &&
-                        JSON.stringify(data.moderation.automoder.newbies.modify_roles.add) !== JSON.stringify(guild.moderation.automoder.newbies.modify_roles.add)
+                        JSON.stringify(data.moderation.automoder.newbies.modify_roles.add) !==
+                            JSON.stringify(guild.moderation.automoder.newbies.modify_roles.add)
                     ) {
                         updateData['moderation.automoder.newbies.modify_roles.add'] = data.moderation.automoder.newbies.modify_roles.add
                     }
 
                     if (
                         Array.isArray(data.moderation.automoder.newbies.modify_roles.remove) &&
-                        JSON.stringify(data.moderation.automoder.newbies.modify_roles.remove) !== JSON.stringify(guild.moderation.automoder.newbies.modify_roles.remove)
+                        JSON.stringify(data.moderation.automoder.newbies.modify_roles.remove) !==
+                            JSON.stringify(guild.moderation.automoder.newbies.modify_roles.remove)
                     ) {
                         updateData['moderation.automoder.newbies.modify_roles.remove'] = data.moderation.automoder.newbies.modify_roles.remove
                     }
@@ -524,7 +557,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
                 if (
                     Array.isArray(data.moderation.automoder.swear_filter.registry) &&
-                    JSON.stringify(data.moderation.automoder.swear_filter.registry) !== JSON.stringify(guild.moderation.automoder.swear_filter.registry)
+                    JSON.stringify(data.moderation.automoder.swear_filter.registry) !==
+                        JSON.stringify(guild.moderation.automoder.swear_filter.registry)
                 ) {
                     updateData['moderation.automoder.swear_filter.registry'] = data.moderation.automoder.swear_filter.registry
                 }
@@ -564,7 +598,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         JSON.stringify(data.moderation.automoder.swear_filter.modify_roles.remove) !==
                             JSON.stringify(guild.moderation.automoder.swear_filter.modify_roles.remove)
                     ) {
-                        updateData['moderation.automoder.swear_filter.modify_roles.remove'] = data.moderation.automoder.swear_filter.modify_roles.remove
+                        updateData['moderation.automoder.swear_filter.modify_roles.remove'] =
+                            data.moderation.automoder.swear_filter.modify_roles.remove
                     }
                 }
 
@@ -573,7 +608,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         typeof data.moderation.automoder.swear_filter.send_message.content === 'string' &&
                         data.moderation.automoder.swear_filter.send_message.content !== guild.moderation.automoder.swear_filter.send_message.content
                     ) {
-                        updateData['moderation.automoder.swear_filter.send_message.content'] = data.moderation.automoder.swear_filter.send_message.content
+                        updateData['moderation.automoder.swear_filter.send_message.content'] =
+                            data.moderation.automoder.swear_filter.send_message.content
                     }
 
                     if (data.moderation.automoder.swear_filter.send_message.embed) {
@@ -620,7 +656,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
                     if (
                         Array.isArray(data.moderation.automoder.swear_filter.ignored.roles) &&
-                        JSON.stringify(data.moderation.automoder.swear_filter.ignored.roles) !== JSON.stringify(guild.moderation.automoder.swear_filter.ignored.roles)
+                        JSON.stringify(data.moderation.automoder.swear_filter.ignored.roles) !==
+                            JSON.stringify(guild.moderation.automoder.swear_filter.ignored.roles)
                     ) {
                         updateData['moderation.automoder.swear_filter.ignored.roles']
                     }
@@ -630,7 +667,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         JSON.stringify(data.moderation.automoder.swear_filter.ignored.permissions) !==
                             JSON.stringify(guild.moderation.automoder.swear_filter.ignored.permissions)
                     ) {
-                        updateData['moderation.automoder.swear_filter.ignored.permissions'] = data.moderation.automoder.swear_filter.ignored.permissions
+                        updateData['moderation.automoder.swear_filter.ignored.permissions'] =
+                            data.moderation.automoder.swear_filter.ignored.permissions
                     }
                 }
             }
@@ -652,7 +690,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
                 if (
                     Array.isArray(data.moderation.automoder.users_slowdown.options) &&
-                    JSON.stringify(data.moderation.automoder.users_slowdown.options) !== JSON.stringify(guild.moderation.automoder.users_slowdown.options)
+                    JSON.stringify(data.moderation.automoder.users_slowdown.options) !==
+                        JSON.stringify(guild.moderation.automoder.users_slowdown.options)
                 ) {
                     updateData['moderation.automoder.users_slowdown.options'] = data.moderation.automoder.users_slowdown.options
                 }
@@ -685,16 +724,19 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         JSON.stringify(data.moderation.automoder.users_slowdown.modify_roles.remove) !==
                             JSON.stringify(guild.moderation.automoder.users_slowdown.modify_roles.remove)
                     ) {
-                        updateData['moderation.automoder.users_slowdown.modify_roles.remove'] = data.moderation.automoder.users_slowdown.modify_roles.remove
+                        updateData['moderation.automoder.users_slowdown.modify_roles.remove'] =
+                            data.moderation.automoder.users_slowdown.modify_roles.remove
                     }
                 }
 
                 if (data.moderation.automoder.users_slowdown.send_message) {
                     if (
                         typeof data.moderation.automoder.users_slowdown.send_message.content === 'string' &&
-                        data.moderation.automoder.users_slowdown.send_message.content !== guild.moderation.automoder.users_slowdown.send_message.content
+                        data.moderation.automoder.users_slowdown.send_message.content !==
+                            guild.moderation.automoder.users_slowdown.send_message.content
                     ) {
-                        updateData['moderation.automoder.users_slowdown.send_message.content'] = data.moderation.automoder.users_slowdown.send_message.content
+                        updateData['moderation.automoder.users_slowdown.send_message.content'] =
+                            data.moderation.automoder.users_slowdown.send_message.content
                     }
 
                     if (data.moderation.automoder.users_slowdown.send_message.embed) {
@@ -741,7 +783,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
 
                     if (
                         Array.isArray(data.moderation.automoder.users_slowdown.ignored.roles) &&
-                        JSON.stringify(data.moderation.automoder.users_slowdown.ignored.roles) !== JSON.stringify(guild.moderation.automoder.users_slowdown.ignored.roles)
+                        JSON.stringify(data.moderation.automoder.users_slowdown.ignored.roles) !==
+                            JSON.stringify(guild.moderation.automoder.users_slowdown.ignored.roles)
                     ) {
                         updateData['moderation.automoder.users_slowdown.ignored.roles'] = data.moderation.automoder.users_slowdown.ignored.roles
                     }
@@ -751,7 +794,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         JSON.stringify(data.moderation.automoder.users_slowdown.ignored.permissions) !==
                             JSON.stringify(guild.moderation.automoder.users_slowdown.ignored.permissions)
                     ) {
-                        updateData['moderation.automoder.users_slowdown.ignored.permissions'] = data.moderation.automoder.users_slowdown.ignored.permissions
+                        updateData['moderation.automoder.users_slowdown.ignored.permissions'] =
+                            data.moderation.automoder.users_slowdown.ignored.permissions
                     }
                 }
             }
@@ -790,7 +834,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             }
 
             if (data.modules.welcome.message) {
-                if (typeof data.modules.welcome.message.content === 'string' && data.modules.welcome.message.content !== guild.modules.welcome.message.content) {
+                if (
+                    typeof data.modules.welcome.message.content === 'string' &&
+                    data.modules.welcome.message.content !== guild.modules.welcome.message.content
+                ) {
                     updateData['modules.welcome.message.content'] = data.modules.welcome.message.content
                 }
 
@@ -862,7 +909,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             }
 
             if (data.modules.farewell.message) {
-                if (typeof data.modules.farewell.message.content === 'string' && data.modules.farewell.message.content !== guild.modules.farewell.message.content) {
+                if (
+                    typeof data.modules.farewell.message.content === 'string' &&
+                    data.modules.farewell.message.content !== guild.modules.farewell.message.content
+                ) {
                     updateData['modules.farewell.message.content'] = data.modules.farewell.message.content
                 }
 
@@ -909,7 +959,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 updateData['modules.levels.voice'] = data.modules.levels.voice
             }
 
-            if (typeof data.modules.levels.reset_on_leave === 'boolean' && data.modules.levels.reset_on_leave !== guild.modules.levels.reset_on_leave) {
+            if (
+                typeof data.modules.levels.reset_on_leave === 'boolean' &&
+                data.modules.levels.reset_on_leave !== guild.modules.levels.reset_on_leave
+            ) {
                 updateData['modules.levels.reset_on_leave'] = data.modules.levels.reset_on_leave
             }
 
@@ -1009,17 +1062,26 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 }
             }
 
-            if (Array.isArray(data.modules.levels.awards) && JSON.stringify(data.modules.levels.awards) !== JSON.stringify(guild.modules.levels.awards)) {
+            if (
+                Array.isArray(data.modules.levels.awards) &&
+                JSON.stringify(data.modules.levels.awards) !== JSON.stringify(guild.modules.levels.awards)
+            ) {
                 updateData['modules.levels.awards'] = data.modules.levels.awards.slice(0, guild.server.premium.available ? 200 : 50)
             }
         }
 
         if (data.modules.restoring) {
-            if (typeof data.modules.restoring.restore_nicknames === 'boolean' && data.modules.restoring.restore_nicknames !== guild.modules.restoring.restore_nicknames) {
+            if (
+                typeof data.modules.restoring.restore_nicknames === 'boolean' &&
+                data.modules.restoring.restore_nicknames !== guild.modules.restoring.restore_nicknames
+            ) {
                 updateData['modules.restoring.restore_nicknames'] = data.modules.restoring.restore_nicknames
             }
 
-            if (typeof data.modules.restoring.restore_roles === 'boolean' && data.modules.restoring.restore_roles !== guild.modules.restoring.restore_roles) {
+            if (
+                typeof data.modules.restoring.restore_roles === 'boolean' &&
+                data.modules.restoring.restore_roles !== guild.modules.restoring.restore_roles
+            ) {
                 updateData['modules.restoring.restore_roles'] = data.modules.restoring.restore_roles
             }
 
@@ -1068,6 +1130,14 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 guild.server.premium.available
             ) {
                 updateData['modules.music.default_volume'] = data.modules.music.default_volume
+            }
+
+            if (
+                typeof data.modules.music.default_source === 'string' &&
+                Object.keys(lavalinkSources).includes(data.modules.music.default_source) &&
+                data.modules.music.default_source !== guild.modules.music.default_source
+            ) {
+                updateData['modules.music.default_source'] = data.modules.music.default_source
             }
         }
 

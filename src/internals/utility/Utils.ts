@@ -215,6 +215,14 @@ export function capitalizeFirstLetter(string: string) {
     return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
+export function getTrackSourceByUrl(url: string) {
+    if (url.includes('open.spotify.com')) return 'Spotify'
+    if (url.includes('music.yandex.ru')) return 'YandexMusic'
+    if (url.includes('soundcloud.com')) return 'SoundCloud'
+
+    return 'UnknownSource'
+}
+
 export default {
     truncateArray,
     shuffleArray,
