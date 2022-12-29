@@ -1,28 +1,84 @@
 // Set Environments
 require('dotenv').config()
 process.env.API_URL =
-    process.env.NODE_ENV === 'development' ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.API_PORT}` : `https://api.${process.env.WEBSITE_DOMAIN}`
+    process.env.NODE_ENV === 'development'
+        ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.API_PORT}`
+        : `https://api.${process.env.WEBSITE_DOMAIN}`
 process.env.WEBSITE_URL =
-    process.env.NODE_ENV === 'development' ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.WEBSITE_PORT}` : `https://www.${process.env.WEBSITE_DOMAIN}`
+    process.env.NODE_ENV === 'development'
+        ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.WEBSITE_PORT}`
+        : `https://www.${process.env.WEBSITE_DOMAIN}`
 process.env.CLIENT_OAUTH2_REDIRECT_URI = `${process.env.API_URL}/authorize/callback`
 
+const isMasterBridge = process.env.DISCORD_CLIENT_BRIDGE_HOST === 'localhost'
+
+import { Bridge } from 'discord-cross-hosting'
 import { Server } from 'http'
 import api from './internals/api'
+import { bridgeClient, clusterManager } from './internals/Cluster'
 import logger from './internals/Logger'
-import ShardingManager from './internals/utility/ShardingManager'
+import { handleDiamondGuilds } from './internals/structures/DiamondGuild'
+import { handlePatrons } from './internals/structures/Patron'
+import { syncBills as syncQiwiBills } from './internals/utility/Qiwi'
+import { scheduleStatsCollect } from './internals/utility/Statistics'
+import { hubRefreshSubscriptions } from './modules/YouTube'
 
-export const sharding: ShardingManager = new ShardingManager('./dist/internals/utility/Client.js', { token: process.env.CLIENT_TOKEN, respawn: true })
+let bridge: Bridge, server: Server
 
-sharding.spawn({ amount: Number(process.env.CLIENT_MAX_SHARDS), delay: 20000, timeout: 60000 })
+if (isMasterBridge) {
+    server = api.listen(process.env.API_PORT, () => {
+        logger.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
+        logger.telegram.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
+    })
 
-sharding.on('shardCreate', shard => {
-    logger.info(`(Sharding Manager): Launching shard #${shard.id}`)
-    sharding.readiness.push(Date.now())
-})
+    bridge = new Bridge({
+        token: process.env.DISCORD_CLIENT_TOKEN,
+        authToken: process.env.DISCORD_CLIENT_BRIDGE_AUTH_TOKEN,
+        totalShards: Number(process.env.DISCORD_CLIENT_TOTAL_SHARDS),
+        totalMachines: Number(process.env.DISCORD_CLIENT_TOTAL_MACHINES),
+        shardsPerCluster: Number(process.env.DISCORD_CLIENT_SHARDS_PER_CLUSTER),
+        port: Number(process.env.DISCORD_CLIENT_BRIDGE_PORT)
+    })
 
-export const server: Server = api.listen(process.env.API_PORT, () => {
-    logger.info(`(API): Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
-    logger.telegram.info(`(API): Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
-})
+    bridge.on('ready', url => {
+        logger.info(`[Bridge] Bridge is ready on url ${url}`)
 
-export default { sharding, server }
+        setTimeout(startServices, 5000)
+    })
+
+    bridge.on('connect', client => logger.info(`[Bridge] Client "${client.id}" connected`))
+    bridge.on('disconnect', client => logger.warn(`[Bridge] Client "${client.id}" disconnected`))
+
+    bridge.start()
+} else {
+    startServices()
+}
+
+async function startServices() {
+    await bridgeClient.connect()
+    bridgeClient.listen(clusterManager)
+
+    try {
+        const shardData = await bridgeClient.requestShardData()
+        logger.log(`[BridgeClient] Shard data response`, JSON.stringify(shardData))
+
+        if (!shardData || !shardData.shardList) throw new Error('Invalid "shardData"')
+
+        clusterManager.totalShards = shardData.totalShards
+        clusterManager.totalClusters = shardData.shardList.length
+        clusterManager.shardList = shardData.shardList
+        clusterManager.clusterList = shardData.clusterList
+
+        await clusterManager.spawn({ timeout: -1, delay: 15000 })
+    } catch (err) {
+        logger.error('[BridgeClient]', err)
+    }
+
+    scheduleStatsCollect()
+    syncQiwiBills()
+    handleDiamondGuilds()
+    handlePatrons()
+    hubRefreshSubscriptions()
+}
+
+export default { server, bridge }

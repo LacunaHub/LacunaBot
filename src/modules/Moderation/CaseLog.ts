@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Guild, MessageEmbed, User } from 'discord.js'
+import { BaseGuildTextChannel, EmbedBuilder, Guild, User } from 'discord.js'
 import reason from '../../commands/moderation/reason'
 import db from '../../database'
 import i18n from '../../i18n'
@@ -15,10 +15,14 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
         await caseLog
             .send({
                 embeds: [
-                    new MessageEmbed()
+                    new EmbedBuilder()
                         .setAuthor({ name: t(`case_log.cases.${options.type}`), iconURL: images[options.type] })
                         .addFields([
-                            { name: t('common.command_option_types.USER'), value: options.target ? `${options.target.tag}\n(${options.target.id})` : '-', inline: true },
+                            {
+                                name: t('common.command_option_types.USER'),
+                                value: options.target ? `${options.target.tag}\n(${options.target.id})` : '-',
+                                inline: true
+                            },
                             { name: t('case_log.moderator'), value: options.executor.tag, inline: true },
                             { name: t('case_log.reason'), value: options.reason ?? '-' }
                         ])
@@ -53,6 +57,14 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
                 }
             }
         )
+
+        guild.client.emit('moduleExecution', {
+            module: 'Moderation',
+            category: 'CaseLog',
+            label: options.type,
+            guild: { id: guild.id, name: guild.name },
+            target: { id: options.target.id, name: options.target.tag }
+        })
     }
 }
 

@@ -1,12 +1,13 @@
+import { Events } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, message: string) => {
-    self.logger.info(`(Sweepers): ${message}`)
+    self.logger.log(`[DiscordCacheSweep] ${message}`)
 
     return true
 }
 
 export default {
-    name: 'cacheSweep',
+    name: Events.CacheSweep,
     handler
 }

@@ -1,6 +1,7 @@
-import { Collection, GuildChannel, MessageReaction, User } from 'discord.js'
+import { ChannelType, Collection, Events, GuildChannel, MessageReaction, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
+import { snakeToPascalCase } from '../../internals/utility/Utils'
 import { reactionAdd } from '../../modules/Reactions'
 
 const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
@@ -12,7 +13,7 @@ const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
 
     const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message
 
-    if (message.channel.type == 'DM') return false
+    if (message.channel.type == ChannelType.DM) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
 
@@ -53,7 +54,12 @@ const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
                 const overwrites = channel.permissionOverwrites.cache.get(user.id)
 
                 if (!overwrites) {
-                    await channel.permissionOverwrites.create(user.id, imReaction.overwrite_channel_permissions.permissions).catch(() => {})
+                    const overwriteOptions = Object.keys(imReaction.overwrite_channel_permissions.permissions).reduce((obj, k) => {
+                        obj[snakeToPascalCase(k)] = imReaction.overwrite_channel_permissions.permissions[k]
+                        return obj
+                    }, {})
+
+                    await channel.permissionOverwrites.create(user.id, overwriteOptions).catch(() => {})
                 }
             }
         }
@@ -68,6 +74,6 @@ const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
 }
 
 export default {
-    name: 'messageReactionAdd',
+    name: Events.MessageReactionAdd,
     handler
 }

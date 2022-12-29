@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Events, Message } from 'discord.js'
 import { InteractiveReaction, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 
@@ -25,6 +25,6 @@ const handler = async (self: Lacuna, message: Message) => {
 }
 
 export default {
-    name: 'messageReactionRemoveAll',
+    name: Events.MessageReactionRemoveAll,
     handler
 }

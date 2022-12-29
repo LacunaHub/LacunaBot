@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, MessageEmbed, Role, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Role, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,13 +8,15 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
 
         const log = role.guild.channels.cache.get(server.moderation.logs.types.role_update.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(role.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(role.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = role.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await role.guild.fetchAuditLogs({ limit: 1, type: 'ROLE_UPDATE' }) : null
+            const audit = role.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await role.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.RoleUpdate })
+                : null
             const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
@@ -32,7 +34,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.role_update_title') })
                     })
@@ -55,7 +58,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
             }
 
             if (before.name != role.name) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.role_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -79,7 +82,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
             }
 
             if (before.hexColor != role.hexColor) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.role_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -103,7 +106,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
             }
 
             if (before.permissions != role.permissions) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.role_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -122,7 +125,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                 })
             }
 
-            self.emit('moduleExecution', { module: 'Logs: Role Update', guild: { id: role.guild.id, name: role.guild.name }, target: { id: role.name, name: role.id } })
+            self.emit('moduleExecution', {
+                module: 'Logs',
+                category: 'RoleUpdate',
+                guild: { id: role.guild.id, name: role.guild.name },
+                target: { id: role.name, name: role.id }
+            })
 
             return true
         }

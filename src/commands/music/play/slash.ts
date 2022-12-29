@@ -1,9 +1,9 @@
-import { CommandInteraction, GuildMember, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, GuildMember, Message } from 'discord.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const query = interaction.options?.getString(t('commands.play.options.query.name'))
@@ -30,7 +30,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
-    const has_permissions = voice.permissionsFor(interaction.guild.me).has(['VIEW_CHANNEL', 'CONNECT', 'SPEAK', 'USE_VAD'])
+    const has_permissions = voice.permissionsFor(interaction.guild.members.me).has(['ViewChannel', 'Connect', 'Speak', 'UseVAD'])
 
     if (!has_permissions) {
         await interaction.reply({
@@ -41,7 +41,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         return false
     }
 
-    if (voice.full && !voice.permissionsFor(interaction.guild.me).has('MOVE_MEMBERS') && !voice.members.has(self.user.id)) {
+    if (voice.full && !voice.permissionsFor(interaction.guild.members.me).has('MoveMembers') && !voice.members.has(self.user.id)) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.play.text_voice_is_full', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
@@ -101,14 +101,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     let message: Message
 
     const rows = [
-        new MessageActionRow().addComponents(
-            new MessageButton().setCustomId('PLAYER-STOP').setStyle('SECONDARY').setEmoji('⏹️'),
-            new MessageButton().setCustomId('PLAYER-PREVIOUS').setStyle('SECONDARY').setEmoji('⏮️'),
-            new MessageButton().setCustomId('PLAYER-PAUSE-RESUME').setStyle('SECONDARY').setEmoji('⏸️'),
-            new MessageButton().setCustomId('PLAYER-SKIP').setStyle('SECONDARY').setEmoji('⏭️'),
-            new MessageButton().setCustomId('PLAYER-REPEAT').setStyle('SECONDARY').setEmoji('🔁')
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder().setCustomId('PLAYER-STOP').setStyle(ButtonStyle.Secondary).setEmoji('⏹️'),
+            new ButtonBuilder().setCustomId('PLAYER-PREVIOUS').setStyle(ButtonStyle.Secondary).setEmoji('⏮️'),
+            new ButtonBuilder().setCustomId('PLAYER-PAUSE-RESUME').setStyle(ButtonStyle.Secondary).setEmoji('⏸️'),
+            new ButtonBuilder().setCustomId('PLAYER-SKIP').setStyle(ButtonStyle.Secondary).setEmoji('⏭️'),
+            new ButtonBuilder().setCustomId('PLAYER-REPEAT').setStyle(ButtonStyle.Secondary).setEmoji('🔁')
         ),
-        new MessageActionRow().addComponents(new MessageButton().setCustomId('PLAYER-QUEUE').setStyle('SECONDARY').setEmoji('🎶'))
+        new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId('PLAYER-QUEUE').setStyle(ButtonStyle.Secondary).setEmoji('🎶'))
     ]
 
     if (search.loadType === 'PLAYLIST_LOADED') {
@@ -124,7 +124,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         const track = search.tracks[0]
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle(t('commands.play.text_player'))
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
             .setFooter({ text: t('commands.play.text_added_by', { requester: track.requester }) })
@@ -171,7 +171,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
 
         player.queue.add(track)
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle(t('commands.play.text_player'))
             .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
             .setFooter({ text: t('commands.play.text_added_by', { requester: track.requester }) })

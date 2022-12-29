@@ -112,7 +112,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (warn) {
-            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason })
+            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.members.me, reason })
         }
 
         if (send_message) {
@@ -132,7 +132,8 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         slowedUsers.delete(message.author.id)
 
         self.emit('moduleExecution', {
-            module: 'Automoder: Users Slowdown',
+            module: 'AutoModer',
+            category: 'UsersSlowdown',
             guild: { id: message.guild.id, name: message.guild.name },
             target: { id: message.author.id, name: message.author.tag }
         })

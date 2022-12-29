@@ -103,7 +103,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (warn) {
-            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason })
+            await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.members.me, reason })
         }
 
         if (send_message && (config.send_message.content || config.send_message.embed.active)) {
@@ -118,7 +118,8 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         self.emit('moduleExecution', {
-            module: 'Automoder: Anti Caps',
+            module: 'AutoModer',
+            category: 'AntiCaps',
             guild: { id: message.guild.id, name: message.guild.name },
             target: { id: message.author.id, name: message.author.tag }
         })

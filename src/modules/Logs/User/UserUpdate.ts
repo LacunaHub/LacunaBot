@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Guild, MessageEmbed, User, Webhook } from 'discord.js'
+import { BaseGuildTextChannel, EmbedBuilder, Guild, User, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,7 +8,7 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
 
         const log = guild.channels.cache.get(server.moderation.logs.types.user_update.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
@@ -29,7 +29,8 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.user_update_title') })
                     })
@@ -52,7 +53,7 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
             }
 
             if (before.username != user.username) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.user_update_title'))
                     .setDescription(t('logs.user_update_name_change_template', { user: `**${user.tag}**` }))
                     .addFields([
@@ -71,7 +72,7 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
             }
 
             if (before.discriminator != user.discriminator) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.user_update_title'))
                     .setDescription(t('logs.user_update_discriminator_change_template', { user: `**${user.tag}**` }))
                     .addFields([
@@ -89,7 +90,12 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 })
             }
 
-            self.emit('moduleExecution', { module: 'Logs: User Update', guild: { id: guild.id, name: guild.name }, target: { id: user.username, name: user.id } })
+            self.emit('moduleExecution', {
+                module: 'Logs',
+                category: 'UserUpdate',
+                guild: { id: guild.id, name: guild.name },
+                target: { id: user.username, name: user.id }
+            })
 
             return true
         }

@@ -1,13 +1,12 @@
-import { REST } from '@discordjs/rest'
-import { Routes } from 'discord-api-types/v9'
 import fetch from 'node-fetch'
 import db from '../database'
+import { handleModuleExecutionData } from '../events/system/ModuleExecution'
 import logger from '../internals/Logger'
+import { apiRoutes, restApi } from '../internals/utility/DiscordUtils'
 import Replacer from './Replacer'
 
-const rest = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
-
 export async function searchChannels(query: string) {
+    logger.log(`[Twitch] Searching channels with query "${query}"`)
     const response = await fetch(`https://api.twitch.tv/helix/search/channels?query=${encodeURI(query)}`, {
         method: 'GET',
         headers: {
@@ -19,7 +18,15 @@ export async function searchChannels(query: string) {
     if (response.ok) {
         const { data } = (await response.json()) as TwitchSearchResponse
 
-        return data?.length ? data.map(i => ({ id: i.id, name: i.display_name, login: i.broadcaster_login, thumbnail: i.thumbnail_url })) : []
+        if (data?.length) {
+            logger.log(`[Twitch] Found ${data.length} channels for query "${query}"`)
+
+            return data.map(i => ({ id: i.id, name: i.display_name, login: i.broadcaster_login, thumbnail: i.thumbnail_url }))
+        }
+
+        logger.log(`[Twitch] Query "${query}" gave not search results`)
+
+        return []
     }
 
     return []
@@ -57,6 +64,7 @@ export function eventSubUnsubscribe(subscription_id: string) {
 }
 
 export async function getStream(user_id: string) {
+    logger.log(`[Twitch] Getting stream of user "${user_id}"`)
     const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${user_id}`, {
         method: 'GET',
         headers: {
@@ -70,6 +78,8 @@ export async function getStream(user_id: string) {
         const stream = data[0]
 
         if (stream) {
+            logger.log(`[Twitch] Stream of user "${user_id}" found`)
+
             return {
                 user_name: stream.user_name,
                 url: `https://twitch.tv/${stream.user_login}`,
@@ -82,31 +92,45 @@ export async function getStream(user_id: string) {
             }
         }
     }
+
+    logger.log(`[Twitch] User "${user_id}" now offline`)
 }
 
 export async function handleIncomingWebhook(messageId: string, data: ITwitchIncomingWebhook) {
-    if (data.subscription.type == 'stream.online') {
+    if (data.subscription.type === 'stream.online') {
         const subscription = await db.twitchSubs.findOne({ _id: data.subscription.id })
 
-        if (!subscription) return null
+        if (!subscription) {
+            logger.log(`[Twitch] Database entry for subscription "${data.subscription.id}" not found`)
+
+            await eventSubUnsubscribe(data.subscription.id).catch(() => {})
+
+            return null
+        }
 
         if (subscription.last_eventsub_message_id == messageId) return null
         else await db.twitchSubs.updateOne({ _id: data.subscription.id }, { $set: { last_eventsub_message_id: messageId } })
 
-        logger.info(`(Twitch Eventsub): Handling incoming webhook from subscription "${data.subscription.id}"`)
+        logger.log(`[Twitch] Handling incoming webhook from subscription "${data.subscription.id}"`)
 
         const subscribedGuilds = await db.servers.find({ 'modules.subscriptions.twitch.broadcaster_id': data.event.broadcaster_user_id })
 
         if (!subscribedGuilds.length) {
+            logger.log(`[Twitch] No subscribed guilds found for subscription "${data.subscription.id}"`)
+
             await eventSubUnsubscribe(data.subscription.id).catch(() => {})
             await db.twitchSubs.deleteOne({ _id: data.subscription.id })
 
-            return
+            return null
         }
 
         const stream = await getStream(data.event.broadcaster_user_id)
 
         if (!stream) return null
+
+        logger.log(
+            `[Twitch] Sending notifications about stream "${data.event.broadcaster_user_id}" to guilds ${subscribedGuilds.map(i => i._id).join(',')}`
+        )
 
         for (const guild of subscribedGuilds) {
             const guildSubscription = guild.modules.subscriptions.twitch
@@ -115,11 +139,11 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
 
             if (!guildSubscription) continue
 
-            let webhook = (await rest.get(Routes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
+            let webhook = (await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
 
             if (!webhook) {
-                webhook = await rest
-                    .post(Routes.channelWebhooks(guildSubscription.notification_channel_id), {
+                webhook = await restApi
+                    .post(apiRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
                         body: {
                             name: data.event.broadcaster_user_name
                         }
@@ -148,8 +172,8 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
                 })
             }
 
-            await rest
-                .post(Routes.webhook(webhook.id, webhook.token), {
+            await restApi
+                .post(apiRoutes.webhook(webhook.id, webhook.token), {
                     body: {
                         content: notificationText,
                         embeds: [
@@ -158,12 +182,23 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
                                 description: stream.game,
                                 url: stream.url,
                                 thumbnail: { url: stream.game_image },
-                                image: { url: guildSubscription.display_stream_preview ? stream.preview : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg' }
+                                image: {
+                                    url: guildSubscription.display_stream_preview
+                                        ? stream.preview
+                                        : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg'
+                                }
                             }
                         ]
                     }
                 })
                 .catch(() => {})
+
+            handleModuleExecutionData({
+                module: 'Twitch',
+                category: 'SendNotification',
+                guild: { id: guild._id, name: 'Unknown' },
+                target: { id: guildSubscription.broadcaster_id, name: guildSubscription.broadcaster_name }
+            })
         }
     }
 }

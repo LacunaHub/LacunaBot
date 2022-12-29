@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, GuildEmoji, MessageEmbed, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildEmoji, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,14 +8,14 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
         const log = emoji.guild.channels.cache.get(server.moderation.logs.types.emoji_update.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(emoji.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(emoji.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = emoji.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
-                ? await emoji.guild.fetchAuditLogs({ limit: 1, type: 'EMOJI_UPDATE' })
+            const audit = emoji.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await emoji.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.EmojiUpdate })
                 : null
             const executor = audit?.entries?.first()?.executor
 
@@ -34,7 +34,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.emoji_update_title') })
                     })
@@ -57,7 +58,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             }
 
             if (before.name != emoji.name) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.emoji_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -81,7 +82,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             }
 
             self.emit('moduleExecution', {
-                module: 'Logs: Emoji Delete',
+                module: 'Logs',
+                category: 'EmojiUpdate',
                 guild: { id: emoji.guild.id, name: emoji.guild.name },
                 target: { id: emoji.id, name: emoji.name }
             })

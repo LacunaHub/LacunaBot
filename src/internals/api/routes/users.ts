@@ -1,5 +1,5 @@
 import Router from '@koa/router'
-import { Permissions } from 'discord.js'
+import { PermissionsBitField } from 'discord.js'
 import { Context } from 'koa'
 import db from '../../../database'
 import { UserDocument } from '../../../database/schemas/Users'
@@ -8,7 +8,7 @@ import OAuth2, { OAuth2Guild } from '../discord/OAuth2'
 import { authorize } from '../utility/Authorize'
 
 const router: Router = new Router({ prefix: '/users' })
-const oauth = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
+const oauth = new OAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
 
 router.get('/@me', authorize, getMe)
 router.get('/@me/bills', authorize, getBills)
@@ -25,11 +25,13 @@ async function getMe(ctx: Context) {
     if (!guilds) ctx.throw(400)
 
     for (const guild of guilds) {
-        const permissions = new Permissions(BigInt(guild.permissions))
-        const permitted = guild.owner || permissions.has('ADMINISTRATOR')
+        const permissions = new PermissionsBitField(BigInt(guild.permissions))
+        const permitted = guild.owner || permissions.has(PermissionsBitField.Flags.Administrator)
 
         if (permitted) {
-            const me = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.CLIENT_ID)).catch(() => {})) as any
+            const me = (await DiscordUtils.restApi
+                .get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.DISCORD_CLIENT_ID))
+                .catch(() => {})) as any
 
             guild['joined'] = Boolean(me)
         }

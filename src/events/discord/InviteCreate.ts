@@ -1,4 +1,4 @@
-import { Invite } from 'discord.js'
+import { Events, Invite } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { InviteCreate } from '../../modules/Logs'
@@ -14,6 +14,6 @@ const handler = async (self: Lacuna, invite: Invite) => {
 }
 
 export default {
-    name: 'inviteCreate',
+    name: Events.InviteCreate,
     handler
 }

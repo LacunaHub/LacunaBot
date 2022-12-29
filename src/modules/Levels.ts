@@ -1,5 +1,14 @@
 import Canvas, { Image, NodeCanvasRenderingContext2D } from 'canvas'
-import { BaseGuildTextChannel, BaseGuildVoiceChannel, CommandInteraction, ContextMenuInteraction, GuildMember, Message, MessageAttachment, VoiceState } from 'discord.js'
+import {
+    AttachmentBuilder,
+    BaseGuildTextChannel,
+    BaseGuildVoiceChannel,
+    ChatInputCommandInteraction,
+    ContextMenuCommandInteraction,
+    GuildMember,
+    Message,
+    VoiceState
+} from 'discord.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
@@ -8,10 +17,14 @@ import Replacer from './Replacer'
 export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean> {
     if (!server.modules.levels.active) return false
 
-    if (server.modules.levels.blocked.channels.includes(message.channel.id) || message.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id)))
+    if (
+        server.modules.levels.blocked.channels.includes(message.channel.id) ||
+        message.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))
+    )
         return false
     if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(message.channel.id)) return false
-    if (server.modules.levels.allowed.roles.length && !message.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id))) return false
+    if (server.modules.levels.allowed.roles.length && !message.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id)))
+        return false
 
     let user = await self.db.users.findOne({ _id: message.author.id })
 
@@ -107,7 +120,8 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
     }
 
     self.emit('moduleExecution', {
-        module: 'Levels: Message Create',
+        module: 'Levels',
+        category: 'MessageCreate',
         guild: { id: message.guild.id, name: message.guild.name },
         target: { id: message.author.id, name: message.author.tag }
     })
@@ -118,10 +132,14 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 export async function voiceAssign(self: Lacuna, server: ServerDocument, state: VoiceState): Promise<boolean> {
     if (!server.modules.levels.voice) return false
 
-    if (server.modules.levels.blocked.channels.includes(state.channelId) || state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id)))
+    if (
+        server.modules.levels.blocked.channels.includes(state.channelId) ||
+        state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))
+    )
         return false
     if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channelId)) return false
-    if (server.modules.levels.allowed.roles.length && !state.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id))) return false
+    if (server.modules.levels.allowed.roles.length && !state.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id)))
+        return false
     if (state.guild.afkChannelId === state.channelId) return false
 
     const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
@@ -177,7 +195,8 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
         }
 
         self.emit('moduleExecution', {
-            module: 'Levels: Voice Assign',
+            module: 'Levels',
+            category: 'VoiceAssign',
             guild: { id: state.member.guild.id, name: state.member.guild.name },
             target: { id: state.member.id, name: state.member.user.tag }
         })
@@ -221,7 +240,8 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
         const multiplier = multipliers.reduce((x, y) => x * (y.levels_voice_multiplier / 100), 100) / 100
         const time: number = (Date.now() - level.activity.voice_connected_at) / 1000
         let points: number =
-            ((time / 60) * (time / 60 / 60 <= 0 ? 1 : time / 60 / 60) + (5 / 100) * time) * ((10 / 100) * current_level < 1 ? 1 : (10 / 100) * current_level)
+            ((time / 60) * (time / 60 / 60 <= 0 ? 1 : time / 60 / 60) + (5 / 100) * time) *
+            ((10 / 100) * current_level < 1 ? 1 : (10 / 100) * current_level)
 
         points *= multiplier || 1
 
@@ -268,7 +288,8 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
         }
 
         self.emit('moduleExecution', {
-            module: 'Levels: Voice Unassign',
+            module: 'Levels',
+            category: 'VoiceUnassign',
             guild: { id: member.guild.id, name: member.guild.name },
             target: { id: member.id, name: member.user.tag }
         })
@@ -298,7 +319,8 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
         }
 
         self.emit('moduleExecution', {
-            module: 'Levels: Update Awards',
+            module: 'Levels',
+            category: 'UpdateAwards',
             guild: { id: member.guild.id, name: member.guild.name },
             target: { id: member.id, name: member.user.tag }
         })
@@ -318,7 +340,8 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
         }
 
         self.emit('moduleExecution', {
-            module: 'Levels: Update Less Awards',
+            module: 'Levels',
+            category: 'UpdatePrevAwards',
             guild: { id: member.guild.id, name: member.guild.name },
             target: { id: member.id, name: member.user.tag }
         })
@@ -350,20 +373,24 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, ref
         }
 
         self.emit('moduleExecution', {
-            module: 'Levels: Level Up Alert',
+            module: 'Levels',
+            category: 'LevelUpAlert',
             guild: { id: member.guild.id, name: member.guild.name },
             target: { id: member.id, name: member.user.tag }
         })
     }
 }
 
-export async function generateRankCard(self: Lacuna, signal: CommandInteraction | ContextMenuInteraction | Message): Promise<MessageAttachment> {
+export async function generateRankCard(
+    self: Lacuna,
+    signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message
+): Promise<AttachmentBuilder> {
     let mention: GuildMember
 
-    if (signal instanceof CommandInteraction) mention = (signal.options?.getMember('пользователь') || signal.member) as GuildMember
+    if (signal instanceof ChatInputCommandInteraction) mention = (signal.options?.getMember('пользователь') || signal.member) as GuildMember
     if (signal instanceof Message)
         mention = signal.mentions.members.first() || (signal['args'][0] ? await signal.guild.members.fetch(signal['args'][0]) : null) || signal.member
-    if (signal instanceof ContextMenuInteraction) mention = await signal.guild.members.fetch(signal.targetId)
+    if (signal instanceof ContextMenuCommandInteraction) mention = await signal.guild.members.fetch(signal.targetId)
 
     const activities = (await self.db.users.find({ 'activities.levels.guild_id': signal.guildId })).map(i => ({
         user_id: i._id,
@@ -397,7 +424,7 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
     let banner: Image
 
     try {
-        if (mention.user?.banner) banner = await Canvas.loadImage(mention.user?.bannerURL({ format: 'png', size: 600 }))
+        if (mention.user?.banner) banner = await Canvas.loadImage(mention.user?.bannerURL({ extension: 'png', size: 512 }))
     } catch (err) {
         banner = null
     }
@@ -424,12 +451,18 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
         roundImage(ctx, 0, 0, 720, 256, border_radius / 2)
         ctx.clip()
         ctx.globalAlpha = 0.2
-        ctx.drawImage(banner, rect_x / 2 - (banner.width * ratio) / 2, rect_y / 2 - (banner.height * ratio) / 2, banner.width * ratio, banner.height * ratio)
+        ctx.drawImage(
+            banner,
+            rect_x / 2 - (banner.width * ratio) / 2,
+            rect_y / 2 - (banner.height * ratio) / 2,
+            banner.width * ratio,
+            banner.height * ratio
+        )
         ctx.globalAlpha = 1.0
         ctx.restore()
     }
 
-    const avatar = await Canvas.loadImage(mention.user.displayAvatarURL({ format: 'png' }))
+    const avatar = await Canvas.loadImage(mention.user.displayAvatarURL({ extension: 'png' }))
 
     ctx.beginPath()
     ctx.arc(85, 85, 60, 0, Math.PI * 2, true)
@@ -531,7 +564,7 @@ export async function generateRankCard(self: Lacuna, signal: CommandInteraction 
     ctx.textAlign = 'end'
     ctx.fillText(`${next_xp_format}`, 695, 205)
 
-    return new MessageAttachment(canvas.toBuffer(), `lacuna-rank-${Date.now()}.png`)
+    return new AttachmentBuilder(canvas.toBuffer(), { name: `lacuna-rank-${Date.now()}.png` })
 }
 
 function neededXp(level: number): number {

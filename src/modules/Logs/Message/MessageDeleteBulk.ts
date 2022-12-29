@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Collection, Message, MessageEmbed, Webhook } from 'discord.js'
+import { BaseGuildTextChannel, Collection, EmbedBuilder, Message, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { truncateString } from '../../../internals/utility/Utils'
@@ -10,7 +10,7 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
 
         const log = message.guild.channels.cache.get(server.moderation.logs.types.message_delete_bulk.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(message.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(message.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
@@ -31,7 +31,8 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.message_delete_bulk_title') })
                     })
@@ -53,17 +54,15 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
                 )
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.message_delete_bulk_title'))
                 .addFields([
                     { name: t('logs.message_count'), value: messages.size.toString(), inline: true },
                     { name: t('common.channel'), value: `<#${message.channel.id}>`, inline: true },
-                    ...messages
-                        .first(10)
-                        .map(i => ({
-                            name: `${i.author?.tag ?? '???'} <t:${Math.round(i.createdTimestamp / 1000)}:R>`,
-                            value: truncateString(i.content || `\`[${t('common.attachment')}]\``, 100)
-                        }))
+                    ...messages.first(10).map(i => ({
+                        name: `${i.author?.tag ?? '???'} <t:${Math.round(i.createdTimestamp / 1000)}:R>`,
+                        value: truncateString(i.content || `\`[${t('common.attachment')}]\``, 100)
+                    }))
                 ])
                 .setTimestamp()
                 .setColor('#EF5350')
@@ -75,7 +74,8 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Message Delete Bulk',
+                module: 'Logs',
+                category: 'MessageDeleteBulk',
                 guild: { id: message.guild.id, name: message.guild.name },
                 target: { id: message.author ? message.author.id : message.id, name: message.author ? message.author.tag : message.type }
             })

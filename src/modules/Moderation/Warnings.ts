@@ -1,20 +1,27 @@
-import { ButtonInteraction, CommandInteraction, GuildMember, Message } from 'discord.js'
+import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, Message } from 'discord.js'
 import ms from 'ms'
 import { ServerDocument, WarningsPenalty, WarningsViolator } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
-import { generateSimpleId } from '../../internals/utility/UID'
+import { generateSimpleId } from '../../internals/utility/Utils'
 import { caseLog } from './'
 import Replacer from './../Replacer'
 
-export async function addWarn(self: Lacuna, server: ServerDocument, signal: Message | CommandInteraction | ButtonInteraction, options: WarnOptions) {
+export async function addWarn(
+    self: Lacuna,
+    server: ServerDocument,
+    signal: Message | ChatInputCommandInteraction | ButtonInteraction,
+    options: WarnOptions
+) {
     const target = options.target,
         executor = options.executor,
         reason = options.reason
     const timestamp: number = Date.now()
 
     const violator: WarningsViolator = server.moderation.warnings.violators.find(v => v.user_id == target.id)
-    const penalty: WarningsPenalty = server.moderation.warnings.penalties.find(p => (violator ? p.penalties == violator.violations.length + 1 : p.penalties == 1))
+    const penalty: WarningsPenalty = server.moderation.warnings.penalties.find(p =>
+        violator ? p.penalties == violator.violations.length + 1 : p.penalties == 1
+    )
 
     if (!violator) {
         await self.db.servers.updateOne(
@@ -152,6 +159,14 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
                 }
             )
         }
+
+        self.emit('moduleExecution', {
+            module: 'Moderation',
+            category: 'Warnings',
+            label: 'HandlePenalty',
+            guild: { id: signal.guild.id, name: signal.guild.name },
+            target: { id: target.id, name: target.user.tag }
+        })
     }
 
     if (server.moderation.case_log.types.WARN_ADD.active) {
@@ -164,6 +179,14 @@ export async function addWarn(self: Lacuna, server: ServerDocument, signal: Mess
         const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.WARN_ADD.dm_message)
 
         await target.send(dm_message).catch(self.logger.error)
+
+        self.emit('moduleExecution', {
+            module: 'Moderation',
+            category: 'Warnings',
+            label: 'SendDirectMessage',
+            guild: { id: signal.guild.id, name: signal.guild.name },
+            target: { id: target.id, name: target.user.tag }
+        })
     }
 }
 

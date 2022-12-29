@@ -1,4 +1,6 @@
-import { Client, ClientOptions, Collection, PermissionFlags, Permissions, Util } from 'discord.js'
+import { Shard as BridgeShard } from 'discord-cross-hosting'
+import { Client as ClusterClient } from 'discord-hybrid-sharding'
+import { ApplicationCommandOptionType, ApplicationCommandType, Client, ClientOptions, Collection, parseEmoji, PermissionsBitField } from 'discord.js'
 import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
 import { connect } from 'mongoose'
@@ -6,7 +8,7 @@ import qdb from 'quick.db'
 import db from '../database'
 import { ServerDocument } from '../database/schemas/Servers'
 import i18n from '../i18n'
-import Utils from '../internals/utility/Utils'
+import Utils, { snakeToPascalCase } from '../internals/utility/Utils'
 import locale from './locale'
 import logger from './Logger'
 import Command, { CommandOptions } from './structures/Command'
@@ -28,10 +30,16 @@ export default class Lacuna extends Client {
     public translator: typeof locale
     public i18n: typeof i18n
     public utils: typeof Utils
-    public PERMISSIONS_FLAGS: PermissionFlags
+    public PermissionFlags: typeof PermissionsBitField.Flags
+    public cluster: ClusterClient
+    public machine: BridgeShard
 
     constructor(options?: ClientOptions) {
         super(options)
+
+        this.cluster = null
+
+        this.machine = null
 
         this.logger = logger
 
@@ -57,7 +65,7 @@ export default class Lacuna extends Client {
 
         this.utils = Utils
 
-        this.PERMISSIONS_FLAGS = Permissions.FLAGS
+        this.PermissionFlags = PermissionsBitField.Flags
 
         this.start()
     }
@@ -72,9 +80,9 @@ export default class Lacuna extends Client {
             ERROR,
             DIAMOND,
             details: {
-                OK: Util.parseEmoji(OK),
-                ERROR: Util.parseEmoji(ERROR),
-                DIAMOND: Util.parseEmoji(DIAMOND)
+                OK: parseEmoji(OK),
+                ERROR: parseEmoji(ERROR),
+                DIAMOND: parseEmoji(DIAMOND)
             }
         }
     }
@@ -99,14 +107,21 @@ export default class Lacuna extends Client {
         )
     }
 
-    async start(): Promise<number> {
+    async start() {
         await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+        this.logger.log('[Lacuna] Connected to database')
 
-        await this.login(process.env.CLIENT_TOKEN)
+        this.cluster = new ClusterClient(this)
+        this.machine = new BridgeShard(this.cluster)
 
-        await this.loadEvents(true)
+        await this.login(process.env.DISCORD_CLIENT_TOKEN)
+        this.logger.log('[Lacuna] Connected to Discord client')
+
+        this.loadEvents(true)
+        this.loadCommands()
 
         this.application = await this.application.fetch()
+        this.logger.log('[Lacuna] Discord client application fetched')
 
         handleGiveawayEntries(this)
         handleTemporaryBanEntries(this)
@@ -115,10 +130,14 @@ export default class Lacuna extends Client {
         process.on('unhandledRejection', error => {
             const err = (error as any)?.stack ?? (error as any).message
 
-            this.logger.error('(Unhandled Rejection)', err)
+            this.logger.error('[UnhandledRejection]', err)
         })
 
-        return Date.now()
+        process.on('uncaughtException', error => {
+            const err = (error as any)?.stack ?? (error as any).message
+
+            this.logger.error('[UncaughtException]', err)
+        })
     }
 
     async updateApplicationCommands(server: ServerDocument) {
@@ -130,17 +149,19 @@ export default class Lacuna extends Client {
                 return {
                     name: command.name,
                     description: t(command.description),
-                    type: 'CHAT_INPUT',
+                    type: ApplicationCommandType.ChatInput,
                     options:
                         command.options?.map(option => {
-                            if (option.type == 'SUB_COMMAND')
+                            if (option.type === 'SUB_COMMAND')
                                 return {
                                     ...option,
+                                    type: ApplicationCommandOptionType.Subcommand,
                                     description: t(option.description),
                                     options:
                                         option.options?.map(opt => {
                                             return {
                                                 ...opt,
+                                                type: ApplicationCommandOptionType[snakeToPascalCase(opt.type)],
                                                 name: t(opt.name),
                                                 description: t(opt.description),
                                                 choices:
@@ -153,6 +174,7 @@ export default class Lacuna extends Client {
 
                             return {
                                 ...option,
+                                type: ApplicationCommandOptionType[snakeToPascalCase(option.type)],
                                 name: t(option.name),
                                 description: t(option.description),
                                 choices:
@@ -169,7 +191,7 @@ export default class Lacuna extends Client {
             .map(command => {
                 return {
                     name: t(command.pretty_name),
-                    type: command.is_user_command ? 'USER' : 'MESSAGE'
+                    type: command.is_user_command ? ApplicationCommandType.User : ApplicationCommandType.Message
                 }
             })
 
@@ -177,10 +199,12 @@ export default class Lacuna extends Client {
 
         const commands = [...slash, ...context, ...custom]
 
-        return await this.application.commands.set(commands as any, server._id)
+        return this.application.commands.set(commands as any, server._id)
     }
 
     loadCommands() {
+        this.logger.log('[Lacuna] Loading commands...')
+
         const directories: string[] = readdirSync('./dist/commands', { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())
             .map(dirent => dirent.name)
@@ -203,10 +227,12 @@ export default class Lacuna extends Client {
             amount += dirs.length
         }
 
-        this.logger.info(`(Commands): Loaded ${amount} commands from ${directories.length} categories`)
+        this.logger.log(`[Lacuna] Loaded ${amount} commands from ${directories.length} categories`)
     }
 
     loadEvents(initial = false) {
+        this.logger.log('[Lacuna]', initial ? 'Loading initial events...' : 'Loading events...')
+
         const directories: string[] = readdirSync('./dist/events', { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())
             .map(dirent => dirent.name)
@@ -230,6 +256,6 @@ export default class Lacuna extends Client {
             total += files.length
         }
 
-        this.logger.info(`(Events): Loaded ${amount} events of ${total}`)
+        this.logger.log(`[Lacuna] Loaded ${amount} events of ${total}`)
     }
 }

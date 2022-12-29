@@ -1,18 +1,8 @@
-import { addWalletBalancePrefix, resetLevelPrefix, resetWalletPrefix, setLevelPrefix, setWalletBalancePrefix } from './prefix'
 import { addWalletBalanceSlash, resetLevelSlash, resetWalletSlash, setLevelSlash, setWalletBalanceSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
 export default {
-    prefix: async (self, server, message) => {
-        const help = self.commands.get('help')
-
-        message.args = [name]
-
-        await help.executePrefix(server, message)
-
-        return true
-    },
     slash: () => {},
     name,
     description: `commands.${name}.description`,
@@ -134,27 +124,22 @@ export default {
     subcommands: [
         {
             name: 'set-level',
-            prefix: setLevelPrefix,
             slash: setLevelSlash
         },
         {
             name: 'set-wallet-balance',
-            prefix: setWalletBalancePrefix,
             slash: setWalletBalanceSlash
         },
         {
             name: 'add-wallet-balance',
-            prefix: addWalletBalancePrefix,
             slash: addWalletBalanceSlash
         },
         {
             name: 'reset-wallet',
-            prefix: resetWalletPrefix,
             slash: resetWalletSlash
         },
         {
             name: 'reset-level',
-            prefix: resetLevelPrefix,
             slash: resetLevelSlash
         }
     ],

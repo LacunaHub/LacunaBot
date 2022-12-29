@@ -1,8 +1,8 @@
-import { CommandInteraction, GuildMember, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, GuildMember } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = (interaction.options?.getMember(t('commands.user.options.user.name')) || interaction.member) as GuildMember
@@ -12,7 +12,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const created_ts = Math.round(mention.user.createdTimestamp / 1000)
     const joined_ts = Math.round(mention.joinedTimestamp / 1000)
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
         .setAuthor({ name, iconURL: mention.user.displayAvatarURL() })
         .addFields([
             { name: t('commands.user.text_registration_date'), value: `<t:${created_ts}:d> – <t:${created_ts}:R>`, inline: true },
@@ -28,11 +28,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
         ])
         .setFooter({ text: `ID: ${mention.id}` })
 
-    const row = new MessageActionRow().addComponents(
-        new MessageButton()
-            .setStyle('LINK')
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+            .setStyle(ButtonStyle.Link)
             .setLabel(t('commands.user.text_avatar_link'))
-            .setURL(mention.user.displayAvatarURL({ size: 512, format: 'png' }))
+            .setURL(mention.user.displayAvatarURL({ size: 512, extension: 'png' }))
     )
 
     await interaction.reply({ embeds: [embed], components: [row] })

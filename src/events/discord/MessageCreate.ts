@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { ChannelType, Events, Message, MessageType } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { antiCaps, linksFilter, nicknamesModeration, swearFilter, usersSlowdown } from '../../modules/Automoder'
@@ -7,7 +7,7 @@ import { messageCreate as addLevelPoints } from '../../modules/Levels'
 import { autoReact } from '../../modules/Reactions'
 
 const handler = async (self: Lacuna, message: Message) => {
-    if (message.author.bot || message.channel.type == 'DM') return false
+    if (message.author.bot || message.channel.type == ChannelType.DM) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
 
@@ -19,7 +19,7 @@ const handler = async (self: Lacuna, message: Message) => {
 
     await message.member.fetch()
 
-    if (['DEFAULT', 'REPLY'].includes(message.type)) {
+    if ([MessageType.Default, MessageType.Reply].includes(message.type)) {
         await addLevelPoints(self, server, message)
         await addWalletCash(self, server, message)
     }
@@ -30,12 +30,12 @@ const handler = async (self: Lacuna, message: Message) => {
     await swearFilter(self, server, message)
     await usersSlowdown(self, server, message)
 
-    await autoReact(server, message)
+    await autoReact(self, server, message)
 
     return true
 }
 
 export default {
-    name: 'messageCreate',
+    name: Events.MessageCreate,
     handler
 }

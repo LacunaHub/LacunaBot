@@ -1,4 +1,4 @@
-import { Sticker } from 'discord.js'
+import { Events, Sticker } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { StickerUpdate } from '../../modules/Logs'
@@ -14,6 +14,6 @@ const handler = async (self: Lacuna, before: Sticker, sticker: Sticker) => {
 }
 
 export default {
-    name: 'stickerUpdate',
+    name: Events.GuildStickerUpdate,
     handler
 }

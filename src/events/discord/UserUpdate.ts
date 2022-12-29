@@ -1,4 +1,4 @@
-import { User } from 'discord.js'
+import { Events, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { UserUpdate } from '../../modules/Logs'
@@ -20,6 +20,6 @@ const handler = async (self: Lacuna, before: User, user: User) => {
 }
 
 export default {
-    name: 'userUpdate',
+    name: Events.UserUpdate,
     handler
 }

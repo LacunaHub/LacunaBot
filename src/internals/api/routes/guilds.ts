@@ -1,12 +1,12 @@
 import Router from '@koa/router'
-import { Constants, Permissions } from 'discord.js'
+import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, PermissionsBitField } from 'discord.js'
 import { Context } from 'koa'
 import qdb from 'quick.db'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import i18n from '../../../i18n'
-import { commandOptionTypes } from '../../utility/Constants'
 import DiscordUtils from '../../utility/DiscordUtils'
+import { snakeToPascalCase } from '../../utility/Utils'
 import interfaces from '../interfaces'
 import { authorize, checkPermissions } from '../utility/Authorize'
 
@@ -31,17 +31,23 @@ async function getSettings(ctx: Context) {
     const server = await db.servers.findOne({ _id: guild_id })
     if (!server || server.server.blocked) ctx.throw(404)
 
-    const selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {})) as any
+    const selfMember = (await DiscordUtils.restApi
+        .get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.DISCORD_CLIENT_ID))
+        .catch(() => {})) as any
     if (!selfMember) ctx.throw(406)
 
     const guildChannels = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildChannels(guild_id)).catch(() => {})) as any[]) ?? []
     const guildRoles = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildRoles(guild_id)).catch(() => {})) as any[]) ?? []
     const guildEmojis = ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildEmojis(guild_id)).catch(() => {})) as any[]) ?? []
     const guildCommands =
-        ((await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild_id)).catch(() => {})) as any[]) ?? []
+        ((await DiscordUtils.restApi
+            .get(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, guild_id))
+            .catch(() => {})) as any[]) ?? []
 
     const selfRoles = selfMember
-        ? guildRoles.sort((a, b) => a.position - b.position).filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.CLIENT_ID)
+        ? guildRoles
+              .sort((a, b) => a.position - b.position)
+              .filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.DISCORD_CLIENT_ID)
         : []
     const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (DiscordUtils.compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
     const selfPermissions = selfRoles.reduce((x, y) => x | BigInt(y.permissions), 0n)
@@ -49,7 +55,7 @@ async function getSettings(ctx: Context) {
     const channels = guildChannels
         .sort((a, b) => a.parent_id - b.parent_id || a.position - b.position)
         .map(c => {
-            return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: Constants.ChannelTypes[c.type] ?? 'UNKNOWN' }
+            return { id: c.id, name: c.name, parentId: c.parent_id, position: c.position, type: ChannelType[c.type] ?? 'UNKNOWN' }
         })
     const roles = guildRoles
         .filter(r => !r.tags?.bot_id)
@@ -99,7 +105,7 @@ async function getSettings(ctx: Context) {
             emojis,
             commands,
             app_commands_registered: guildCommands.length > 0,
-            app_permissions: new Permissions(selfPermissions).toArray()
+            app_permissions: new PermissionsBitField(selfPermissions).toArray()
         },
         moderation: {
             case_log: {
@@ -154,7 +160,9 @@ async function updateSettings(ctx: Context) {
     let server = await db.servers.findOne({ _id: guild_id })
     if (!server || server.server.blocked) ctx.throw(404)
 
-    const selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.CLIENT_ID)).catch(() => {})) as any
+    const selfMember = (await DiscordUtils.restApi
+        .get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.DISCORD_CLIENT_ID))
+        .catch(() => {})) as any
     if (!selfMember) ctx.throw(406)
 
     const commands = qdb.get('commands').map(i => {
@@ -236,19 +244,19 @@ async function updateApplicationCommands(ctx: Context) {
             return {
                 name: command.name,
                 description: t(command.description),
-                type: 1,
+                type: ApplicationCommandType.ChatInput,
                 options:
                     command?.options?.map(option => {
                         if (option.type === 'SUB_COMMAND') {
                             return {
                                 ...option,
-                                type: commandOptionTypes[option.type],
+                                type: ApplicationCommandOptionType.Subcommand,
                                 description: t(option.description),
                                 options:
                                     option.options?.map(opt => {
                                         return {
                                             ...opt,
-                                            type: commandOptionTypes[opt.type],
+                                            type: ApplicationCommandOptionType[snakeToPascalCase(opt.type)],
                                             name: t(opt.name),
                                             description: t(opt.description),
                                             choices:
@@ -262,7 +270,7 @@ async function updateApplicationCommands(ctx: Context) {
 
                         return {
                             ...option,
-                            type: commandOptionTypes[option.type],
+                            type: ApplicationCommandOptionType[snakeToPascalCase(option.type)],
                             name: t(option.name),
                             description: t(option.description),
                             choices:
@@ -279,7 +287,7 @@ async function updateApplicationCommands(ctx: Context) {
         .map(command => {
             return {
                 name: t(command.pretty_name),
-                type: command.is_user_command ? 2 : 3
+                type: command.is_user_command ? ApplicationCommandType.User : ApplicationCommandType.Message
             }
         })
 
@@ -288,7 +296,7 @@ async function updateApplicationCommands(ctx: Context) {
     commands = [...slash, ...context, ...custom]
 
     try {
-        await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.CLIENT_ID, guild_id), {
+        await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, guild_id), {
             body: commands
         })
     } catch (err) {
@@ -363,6 +371,7 @@ async function updateInteractiveMessages(ctx: Context) {
                 throw new Error('UNKNOWN_METHOD')
         }
     } catch (err) {
+        console.log(err)
         ctx.throw(400, err.message)
     }
 

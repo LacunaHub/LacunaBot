@@ -1,4 +1,4 @@
-import { Util } from 'discord.js'
+import { parseEmoji } from 'discord.js'
 import database from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import { dotNotateObject } from '../../utility/Utils'
@@ -1096,7 +1096,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     .filter(emoji => !emoji.name)
                     .forEach(emoji => {
                         const index = reaction.reactions.indexOf(emoji)
-                        reaction.reactions[index] = Util.parseEmoji(emoji as any)
+                        reaction.reactions[index] = parseEmoji(emoji as any)
                     })
             }
 

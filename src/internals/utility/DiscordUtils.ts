@@ -1,7 +1,6 @@
-import { REST } from '@discordjs/rest'
-import { Routes } from 'discord-api-types/v9'
+import { REST, Routes } from 'discord.js'
 
-export const restApi = new REST({ version: '9' }).setToken(process.env.CLIENT_TOKEN)
+export const restApi = new REST({ version: '10' }).setToken(process.env.DISCORD_CLIENT_TOKEN)
 export const apiRoutes = Routes
 
 export function compareRolePositions(first: any, second: any) {

@@ -1,16 +1,17 @@
-import { Message, MessageEmbed } from 'discord.js'
+import { EmbedBuilder, Message } from 'discord.js'
 import { Player } from 'erela.js'
 import numbro from 'numbro'
+import Lacuna from '../../internals/Lacuna'
 
-const handler = async (self, player: Player) => {
+const handler = async (self: Lacuna, player: Player) => {
     const message = player.get<Message>('message')
 
     if (message) {
-        const embed = new MessageEmbed(message.embeds[0]).setDescription(
+        const embed = new EmbedBuilder(message.embeds[0]).setDescription(
             `${player.queue.current.title} \`[${numbro(player.queue.current.duration / 1000).format({ output: 'time' })}]\``
         )
 
-        if (embed.footer?.text) embed.setFooter({ text: embed.footer.text.replace(/:[\w\W]+/i, `: ${player.queue.current.requester}`) })
+        if (embed.data.footer?.text) embed.setFooter({ text: embed.data.footer.text.replace(/:[\w\W]+/i, `: ${player.queue.current.requester}`) })
 
         await message.delete().catch(() => {})
         await message.channel
@@ -18,6 +19,8 @@ const handler = async (self, player: Player) => {
             .then(message => player.set('message', message))
             .catch(() => player.set('message', null))
     }
+
+    self.logger.log(`[ErelaTrackEnd] Track playing for player ${player.guild} ended`)
 
     return true
 }

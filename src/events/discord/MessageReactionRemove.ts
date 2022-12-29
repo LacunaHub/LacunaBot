@@ -1,4 +1,4 @@
-import { Collection, GuildChannel, MessageReaction, User } from 'discord.js'
+import { ChannelType, Collection, Events, GuildChannel, MessageReaction, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { reactionRemove } from '../../modules/Reactions'
@@ -12,7 +12,7 @@ const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
 
     const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message
 
-    if (message.channel.type == 'DM') return false
+    if (message.channel.type == ChannelType.DM) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
 
@@ -64,6 +64,6 @@ const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
 }
 
 export default {
-    name: 'messageReactionRemove',
+    name: Events.MessageReactionRemove,
     handler
 }

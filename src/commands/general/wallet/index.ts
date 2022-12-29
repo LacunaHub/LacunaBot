@@ -1,18 +1,8 @@
-import { balancePrefix, transferPrefix } from './prefix'
 import { balanceSlash, transferSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
 export default {
-    prefix: async (self, server, message) => {
-        const help = self.commands.get('help')
-
-        message.args = [name]
-
-        await help.executePrefix(server, message)
-
-        return true
-    },
     slash: () => {},
     name,
     description: `commands.${name}.description`,
@@ -61,12 +51,10 @@ export default {
     subcommands: [
         {
             name: 'balance',
-            prefix: balancePrefix,
             slash: balanceSlash
         },
         {
             name: 'transfer',
-            prefix: transferPrefix,
             slash: transferSlash
         }
     ],

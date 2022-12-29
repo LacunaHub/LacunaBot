@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, MessageEmbed, Sticker, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Sticker, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,14 +8,14 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
 
         const log = sticker.guild.channels.cache.get(server.moderation.logs.types.sticker_update.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(sticker.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(sticker.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = sticker.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
-                ? await sticker.guild.fetchAuditLogs({ limit: 1, type: 'STICKER_UPDATE' })
+            const audit = sticker.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await sticker.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.StickerUpdate })
                 : null
             const executor = audit?.entries?.first()?.executor
 
@@ -34,7 +34,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.sticker_update_title') })
                     })
@@ -57,7 +58,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
             }
 
             if (before.name != sticker.name) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.sticker_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -81,7 +82,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
             }
 
             self.emit('moduleExecution', {
-                module: 'Logs: Sticker Update',
+                module: 'Logs',
+                category: 'StickerUpdate',
                 guild: { id: sticker.guild.id, name: sticker.guild.name },
                 target: { id: sticker.id, name: sticker.name }
             })

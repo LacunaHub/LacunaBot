@@ -1,8 +1,8 @@
-import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js'
+import { ChatInputCommandInteraction, EmbedBuilder, GuildMember } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export async function balanceSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function balanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {
@@ -30,7 +30,7 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
         }
     }
 
-    const embed = new MessageEmbed().setAuthor({
+    const embed = new EmbedBuilder().setAuthor({
         name: t('commands.wallet.balance.text_user_balance', { user: mention.displayName }),
         iconURL: mention.displayAvatarURL()
     })
@@ -49,7 +49,7 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     return true
 }
 
-export async function transferSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function transferSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {

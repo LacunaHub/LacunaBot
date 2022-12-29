@@ -1,9 +1,9 @@
-import { CommandInteraction, GuildMember, Message, MessageActionRow, MessageButton } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, GuildMember, Message } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import Levels from '../../../modules/Levels'
 
-export async function setLevelSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function setLevelSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember(t('commands.activities.set-level.options.user.name')) as GuildMember
@@ -91,7 +91,7 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
     return true
 }
 
-export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember(t('commands.activities.set-wallet-balance.options.user.name')) as GuildMember
@@ -195,7 +195,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     return true
 }
 
-export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember(t('commands.activities.add-wallet-balance.options.user.name')) as GuildMember
@@ -299,7 +299,7 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
     return true
 }
 
-export async function resetWalletSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function resetWalletSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const activities = await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId })
@@ -317,9 +317,9 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
     const member_id = interaction.options?.getString(t('commands.activities.reset-level.options.user_id.name'))
 
     if (member_id == 'all') {
-        const row = new MessageActionRow().setComponents(
-            new MessageButton().setCustomId('confirm').setStyle('DANGER').setLabel(t('commands.activities.reset-wallet.text_confirm')),
-            new MessageButton().setCustomId('cancel').setStyle('SECONDARY').setLabel(t('commands.activities.reset-wallet.text_cancel'))
+        const row = new ActionRowBuilder<ButtonBuilder>().setComponents(
+            new ButtonBuilder().setCustomId('confirm').setStyle(ButtonStyle.Danger).setLabel(t('commands.activities.reset-wallet.text_confirm')),
+            new ButtonBuilder().setCustomId('cancel').setStyle(ButtonStyle.Secondary).setLabel(t('commands.activities.reset-wallet.text_cancel'))
         )
 
         await interaction.deferReply({ ephemeral: true })
@@ -330,8 +330,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
         })) as Message
 
         const collector = message.createMessageComponentCollector({
-            componentType: 'BUTTON',
-            filter: i => row.components.some(c => c.customId == i.customId),
+            componentType: ComponentType.Button,
             time: 60000,
             max: 1
         })
@@ -387,7 +386,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
     return true
 }
 
-export async function resetLevelSlash(self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+export async function resetLevelSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const member = interaction.options?.getMember(t('commands.activities.reset-level.options.user.name')) as GuildMember

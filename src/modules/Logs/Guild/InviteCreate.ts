@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Guild, Invite, MessageEmbed, Webhook } from 'discord.js'
+import { BaseGuildTextChannel, EmbedBuilder, Guild, Invite, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,7 +8,7 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
 
         const log = (invite.guild as Guild).channels.cache.get(server.moderation.logs.types.invite_create.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor((invite.guild as Guild).me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor((invite.guild as Guild).members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
@@ -29,7 +29,8 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.invite_create_title') })
                     })
@@ -51,7 +52,7 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
                 )
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.invite_create_title'))
                 .addFields([
                     { name: t('logs.invite_code'), value: `[${invite.code}](${invite.url})`, inline: true },
@@ -68,7 +69,8 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Invite Create',
+                module: 'Logs',
+                category: 'InviteCreate',
                 guild: { id: invite.guild.id, name: invite.guild.name },
                 target: { id: invite.channel.name, name: invite.code }
             })

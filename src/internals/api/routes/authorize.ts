@@ -4,7 +4,7 @@ import db from '../../../database'
 import OAuth2 from '../discord/OAuth2'
 
 const router: Router = new Router({ prefix: '/authorize', methods: ['GET'] })
-const oauth = new OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET)
+const oauth = new OAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
 
 router.get('/', authorize)
 router.get('/callback', callback)
@@ -17,7 +17,9 @@ async function authorize(ctx: Context) {
         scope: encodeURIComponent('identify guilds')
     }
 
-    ctx.redirect(`https://discord.com/oauth2/authorize?client_id=${data.client_id}&redirect_uri=${data.redirect_uri}&response_type=code&scope=${data.scope}`)
+    ctx.redirect(
+        `https://discord.com/oauth2/authorize?client_id=${data.client_id}&redirect_uri=${data.redirect_uri}&response_type=code&scope=${data.scope}`
+    )
 }
 
 async function callback(ctx: Context) {
@@ -81,7 +83,7 @@ async function callback(ctx: Context) {
 async function addBot(ctx: Context) {
     const query = new URLSearchParams(ctx.query as any).toString()
 
-    ctx.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.CLIENT_ID}&permissions=997584094&${query}`)
+    ctx.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&permissions=997584094&${query}`)
 }
 
 export default router

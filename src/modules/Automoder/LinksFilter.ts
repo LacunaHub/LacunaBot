@@ -23,7 +23,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
     if (links && links.length) {
         const delete_referral_invites = config.options.includes('DELETE_REFERRAL_INVITES') && links.some(link => link.includes('discord.gg'))
 
-        if (config.options.includes('DELETE_ALL_LINKS') && !delete_referral_invites && !config.allowed_registry.some(reg => links.some(link => link.includes(reg)))) {
+        if (
+            config.options.includes('DELETE_ALL_LINKS') &&
+            !delete_referral_invites &&
+            !config.allowed_registry.some(reg => links.some(link => link.includes(reg)))
+        ) {
             if (message.deletable) await message.delete()
 
             await penalty(self, server, message)
@@ -32,7 +36,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
     }
 
-    if (config.options.includes('DELETE_REFERRAL_INVITES') && message.guild.me.permissions.has('MANAGE_GUILD')) {
+    if (config.options.includes('DELETE_REFERRAL_INVITES') && message.guild.members.me.permissions.has('ManageGuild')) {
         const guild_invites = await message.guild.invites.fetch()
         const invites = message.content.match(/discord.gg\/\w+/gi)
         const is_referral = invites ? invites.some(i => !guild_invites.some(k => k.url == `https://${i}`)) : false
@@ -141,7 +145,7 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
     }
 
     if (warn) {
-        await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.me, reason })
+        await warnings.addWarn(self, server, message, { target: message.member, executor: message.guild.members.me, reason })
     }
 
     if (send_message && (config.send_message.content || config.send_message.embed.active)) {
@@ -158,7 +162,8 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
     }
 
     self.emit('moduleExecution', {
-        module: 'Automoder: Links Filter',
+        module: 'AutoModer',
+        category: 'LinksFilter',
         guild: { id: message.guild.id, name: message.guild.name },
         target: { id: message.author.id, name: message.author.tag }
     })

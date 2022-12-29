@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, GuildChannel, MessageEmbed, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildChannel, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,14 +8,14 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
 
         const log = channel.guild.channels.cache.get(server.moderation.logs.types.channel_delete.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(channel.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(channel.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = channel.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
-                ? await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_DELETE' })
+            const audit = channel.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await channel.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.ChannelDelete })
                 : null
             const executor = audit?.entries?.first()?.executor
 
@@ -34,7 +34,8 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.channel_delete_title') })
                     })
@@ -56,9 +57,11 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
                 )
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.channel_delete_title'))
-                .setDescription(t('logs.channel_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, channel: `**${channel.name}**` }))
+                .setDescription(
+                    t('logs.channel_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, channel: `**${channel.name}**` })
+                )
                 .addFields([
                     { name: t('logs.channel_category'), value: channel?.parent?.name ?? '-', inline: true },
                     { name: t('logs.channel_position'), value: channel.rawPosition.toString(), inline: true }
@@ -74,7 +77,8 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Channel Delete',
+                module: 'Logs',
+                category: 'ChannelDelete',
                 guild: { id: channel.guild.id, name: channel.guild.name },
                 target: { id: channel.id, name: channel.name }
             })

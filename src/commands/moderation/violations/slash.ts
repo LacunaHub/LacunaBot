@@ -1,8 +1,8 @@
-import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js'
+import { ChatInputCommandInteraction, EmbedBuilder, GuildMember } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: CommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember(t('commands.violations.options.user.name')) as GuildMember
@@ -33,7 +33,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Command
     const last_7_days = violator.violations.filter(v => Date.now() - v.timestamp < 604800000)
     const last_10_violations = violator.violations.slice(Math.max(violator.violations.length - 10, 0)).sort((a, b) => a.timestamp - b.timestamp)
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
         .setAuthor({ name: t('commands.violations.text_user_violations', { target: mention.user.tag }), iconURL: mention.user.displayAvatarURL() })
         .addFields([
             { name: t('commands.violations.text_last_24_hours'), value: last_24_hours.length.toString(), inline: true },

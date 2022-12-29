@@ -115,7 +115,7 @@ export async function handleEntries(self: Lacuna): Promise<number> {
         }
     }
 
-    self.logger.log(`(Structures): Loaded ${entries} temporary bans from ${servers.length} servers`)
+    self.logger.log(`[TemporaryBan] Loaded ${entries} temporary bans from ${servers.length} servers`)
 
     return entries
 }

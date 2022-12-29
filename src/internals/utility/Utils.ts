@@ -165,7 +165,10 @@ export function createEnum(keys: any[]): {} {
 }
 
 export function shadeColor(color: string, amount: number): string {
-    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substring(-2))
+    return (
+        '#' +
+        color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substring(-2))
+    )
 }
 
 export function convertXml2Json(str: Buffer, options = {}) {
@@ -188,6 +191,30 @@ export function isValidHttpUrl(string: string) {
     return url.protocol === 'http:' || url.protocol === 'https:'
 }
 
+export function snakeToPascalCase(string: string) {
+    return string
+        .split('/')
+        .map(snake =>
+            snake
+                .split('_')
+                .map(substr => substr.charAt(0).toUpperCase() + substr.slice(1).toLowerCase())
+                .join('')
+        )
+        .join('/')
+}
+
+export function generateSimpleId(length: number = 4) {
+    if (typeof length !== 'number') length = 4
+    if (length < 4) length = 4
+    if (length > 11) length = 11
+
+    return `${Math.random().toString(36).substring(2, length).toUpperCase()}`
+}
+
+export function capitalizeFirstLetter(string: string) {
+    return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
 export default {
     truncateArray,
     shuffleArray,
@@ -202,5 +229,8 @@ export default {
     resolveObjectPath,
     dotNotateObject,
     createEnum,
-    shadeColor
+    shadeColor,
+    convertXml2Json,
+    isValidHttpUrl,
+    snakeToPascalCase
 }

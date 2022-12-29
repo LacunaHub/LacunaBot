@@ -1,17 +1,15 @@
 import { Job, scheduleJob } from 'node-schedule'
 import database from '../../database'
 import logger from '../Logger'
-import ShardingManager from '../utility/ShardingManager'
+
+export const diamondGuilds = new Map<string, DiamondGuild>()
 
 export default class DiamondGuild {
-    public sharding: ShardingManager
     public guild_id: string
     public expiration: number
     public schedule: Job
 
-    constructor(sharding: ShardingManager, guild_id: string, expiration: number) {
-        this.sharding = sharding
-
+    constructor(guild_id: string, expiration: number) {
         this.guild_id = guild_id
 
         this.expiration = expiration
@@ -29,7 +27,7 @@ export default class DiamondGuild {
 
     initialize() {
         this.schedule = scheduleJob(`DIAMOND-GUILD:${this.guild_id}`, this.expiration, () => this.expire())
-        this.sharding.diamondGuilds.set(this.guild_id, this)
+        diamondGuilds.set(this.guild_id, this)
     }
 
     async expire() {
@@ -43,21 +41,21 @@ export default class DiamondGuild {
             }
         )
 
-        logger.telegram.info(`(Utility): Lacuna Diamond on guild ${this.guild_id} was expired`)
+        logger.info(`[DiamondGuild] Lacuna Diamond on guild ${this.guild_id} was expired`)
     }
 
     cancel() {
         this.schedule.cancel()
-        this.sharding.diamondGuilds.delete(this.guild_id)
+        diamondGuilds.delete(this.guild_id)
     }
 }
 
-export async function handleDiamondGuilds(sharding: ShardingManager) {
+export async function handleDiamondGuilds() {
     const servers = await database.servers.find({ 'server.premium.available': true, 'server.premium.will_expire_on': { $gt: 0 } })
 
     for (const server of servers) {
-        new DiamondGuild(sharding, server._id, server.server.premium.will_expire_on)
+        new DiamondGuild(server._id, server.server.premium.will_expire_on)
     }
 
-    logger.info(`(Utility): Found ${servers.length} guilds with Lacuna Diamond`)
+    logger.log(`[DiamondGuild] Found ${servers.length} guilds with Lacuna Diamond`)
 }

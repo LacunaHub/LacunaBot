@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, MessageEmbed, Sticker, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Sticker, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,14 +8,14 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
 
         const log = sticker.guild.channels.cache.get(server.moderation.logs.types.sticker_delete.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(sticker.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(sticker.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = sticker.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
-                ? await sticker.guild.fetchAuditLogs({ limit: 1, type: 'STICKER_DELETE' })
+            const audit = sticker.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await sticker.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.StickerDelete })
                 : null
             const executor = audit?.entries?.first()?.executor
 
@@ -34,7 +34,8 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.sticker_delete_title') })
                     })
@@ -56,9 +57,11 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
                 )
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.sticker_delete_title'))
-                .setDescription(t('logs.sticker_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, sticker: `**${sticker.name}**` }))
+                .setDescription(
+                    t('logs.sticker_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, sticker: `**${sticker.name}**` })
+                )
                 .setFooter({ text: sticker.id })
                 .setTimestamp()
                 .setColor('#EF5350')
@@ -70,7 +73,8 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
             })
 
             self.emit('moduleExecution', {
-                module: 'Logs: Sticker Delete',
+                module: 'Logs',
+                category: 'StickerDelete',
                 guild: { id: sticker.guild.id, name: sticker.guild.name },
                 target: { id: sticker.id, name: sticker.name }
             })

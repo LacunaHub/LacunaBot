@@ -1,5 +1,6 @@
+import { Events } from 'discord.js'
 import { Manager } from 'erela.js'
-import Spotify from 'erela.js-spotify'
+import ErelaSpotify from 'erela.js-spotify'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna) => {
@@ -16,9 +17,9 @@ const handler = async (self: Lacuna) => {
                 retryDelay: 60000
             }
         ],
-        plugins: [new Spotify({ clientID: process.env.SPOTIFY_CLIENT_ID, clientSecret: process.env.SPOTIFY_CLIENT_SECRET })],
+        plugins: [new ErelaSpotify({ clientID: process.env.SPOTIFY_CLIENT_ID, clientSecret: process.env.SPOTIFY_CLIENT_SECRET })],
         clientId: self.user.id,
-        shards: Number(process.env.CLIENT_MAX_SHARDS),
+        shards: self.options.shardCount,
         send(id, payload) {
             const guild = self.guilds.cache.get(id)
 
@@ -35,19 +36,16 @@ const handler = async (self: Lacuna) => {
 
     self.player.init(self.user.id)
 
-    self.loadCommands()
     self.loadEvents()
 
-    const start_ms = Date.now() - self.readyTimestamp
-
-    self.logger.info(`(Ready): ${self.user.username} started for ${start_ms}ms`)
-    await self.logger.telegram.info(`\`Ready:\` ${self.user.username} started for ${start_ms}ms`)
+    self.logger.info(`[DiscordReady] ${self.user.username} is ready`)
+    await self.logger.telegram.info(`\`[DiscordReady]\` ${self.user.username} is ready`)
 
     return true
 }
 
 export default {
-    name: 'ready',
+    name: Events.ClientReady,
     handler,
     once: true,
     initial: true

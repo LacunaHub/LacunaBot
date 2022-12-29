@@ -1,4 +1,3 @@
-import { GuildFeatures } from 'discord.js'
 import fetch from 'node-fetch'
 import { URLSearchParams } from 'url'
 
@@ -89,6 +88,6 @@ export interface OAuth2Guild {
     icon: string | null
     owner: boolean
     permissions: number
-    features: GuildFeatures[]
+    features: string[]
     permissions_new: string
 }

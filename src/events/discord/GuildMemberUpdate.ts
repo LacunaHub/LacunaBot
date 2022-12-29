@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, GuildMember, User } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { nicknamesModeration } from '../../modules/Automoder'
@@ -40,10 +40,10 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
 
         if (
             case_log &&
-            member.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) &&
+            member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog) &&
             (server.moderation.case_log.types.MUTE_ADD.active || server.moderation.case_log.types.MUTE_REMOVE.active)
         ) {
-            const audit = await member.guild.fetchAuditLogs({ limit: 5, type: 'MEMBER_UPDATE' })
+            const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberUpdate })
             const entry = audit.entries.find(e => (e.target as User).id == member.id)
 
             if (entry && entry.executor.id !== self.user.id) {
@@ -65,6 +65,6 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
 }
 
 export default {
-    name: 'guildMemberUpdate',
+    name: Events.GuildMemberUpdate,
     handler
 }

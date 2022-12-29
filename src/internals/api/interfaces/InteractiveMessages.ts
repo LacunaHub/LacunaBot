@@ -1,7 +1,21 @@
-import { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu } from 'discord.js'
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    EmbedBuilder,
+    resolveColor,
+    StringSelectMenuBuilder,
+    StringSelectMenuOptionBuilder
+} from 'discord.js'
 import db from '../../../database'
-import { InteractiveMessage, InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponent, ServerDocument } from '../../../database/schemas/Servers'
+import {
+    InteractiveMessage,
+    InteractiveMessageButtonComponent,
+    InteractiveMessageSelectMenuComponent,
+    ServerDocument
+} from '../../../database/schemas/Servers'
 import { apiRoutes, restApi } from '../../utility/DiscordUtils'
+import { snakeToPascalCase } from '../../utility/Utils'
 
 export async function createInteractiveMessage(server: ServerDocument, data: InteractiveMessage) {
     const interactiveMessages = server.modules.interactive_messages
@@ -28,17 +42,17 @@ export async function createInteractiveMessage(server: ServerDocument, data: Int
         content: data.message?.content ?? null,
         embeds: data.message.embed.active
             ? [
-                  new MessageEmbed({
+                  new EmbedBuilder({
                       title: data.message.embed.title,
                       description: data.message.embed.description,
                       url: data.message.embed.url,
                       timestamp: data.message.embed.timestamp ? new Date(data.message.embed.timestamp) : null,
-                      color: data.message.embed.color as any,
+                      color: data.message.embed.color ? resolveColor(data.message.embed.color as any) : null,
                       fields: data.message.embed.fields,
-                      author: data.message.embed.author,
-                      thumbnail: data.message.embed.thumbnail,
-                      image: data.message.embed.image,
-                      footer: data.message.embed.footer
+                      author: data.message.embed.author as any,
+                      thumbnail: data.message.embed.thumbnail as any,
+                      image: data.message.embed.image as any,
+                      footer: data.message.embed.footer as any
                   }).toJSON()
               ]
             : [],
@@ -52,6 +66,7 @@ export async function createInteractiveMessage(server: ServerDocument, data: Int
     try {
         apiMessage = await restApi.post(apiRoutes.channelMessages(data.channel_id), { body: message })
     } catch (err) {
+        console.log(err)
         throw new Error('CANNOT_CREATE_MESSAGE')
     }
 
@@ -102,17 +117,17 @@ export async function updateInteractiveMessage(server: ServerDocument, data: Int
         content: im.message.content,
         embeds: im.message.embed.active
             ? [
-                  new MessageEmbed({
+                  new EmbedBuilder({
                       title: im.message.embed.title,
                       description: im.message.embed.description,
                       url: im.message.embed.url,
                       timestamp: im.message.embed.timestamp ? new Date(im.message.embed.timestamp) : null,
-                      color: im.message.embed.color as any,
+                      color: im.message.embed.color ? resolveColor(im.message.embed.color as any) : null,
                       fields: im.message.embed.fields,
-                      author: im.message.embed.author,
-                      thumbnail: im.message.embed.thumbnail,
-                      image: im.message.embed.image,
-                      footer: im.message.embed.footer
+                      author: im.message.embed.author as any,
+                      thumbnail: im.message.embed.thumbnail as any,
+                      image: im.message.embed.image as any,
+                      footer: im.message.embed.footer as any
                   }).toJSON()
               ]
             : [],
@@ -124,28 +139,33 @@ export async function updateInteractiveMessage(server: ServerDocument, data: Int
         message.content = data.message?.content ?? im.message.content
         message.embeds = data.message?.embed?.active
             ? [
-                  new MessageEmbed({
-                      title: typeof data.message.embed.title === 'undefined' ? im.message.embed.title : data.message.embed.title,
-                      description: typeof data.message.embed.description === 'undefined' ? im.message.embed.description : data.message.embed.description,
-                      url: typeof data.message.embed.url ? im.message.embed.url : data.message.embed.url,
-                      timestamp:
-                          typeof data.message.embed.timestamp === 'undefined'
-                              ? im.message.embed.timestamp
-                                  ? new Date(im.message.embed.timestamp)
-                                  : null
-                              : new Date(data.message.embed.timestamp),
-                      color: typeof data.message.embed.color === 'undefined' ? (im.message.embed.color as any) : (data.message.embed.color as any),
+                  new EmbedBuilder({
+                      title: data.message.embed.title ? data.message.embed.title : im.message.embed.title,
+                      description: data.message.embed.description ? data.message.embed.description : im.message.embed.description,
+                      url: data.message.embed.url ? data.message.embed.url : im.message.embed.url,
+                      timestamp: data.message.embed.timestamp
+                          ? new Date(data.message.embed.timestamp)
+                          : im.message.embed.timestamp
+                          ? new Date(im.message.embed.timestamp)
+                          : null,
+                      color: data.message.embed.color
+                          ? data.message.embed.color
+                              ? resolveColor(data.message.embed.color as any)
+                              : null
+                          : im.message.embed.color
+                          ? resolveColor(im.message.embed.color as any)
+                          : null,
                       fields: data.message.embed.fields ?? im.message.embed.fields,
                       author: {
-                          name: typeof data.message.embed.author?.name === 'undefined' ? im.message.embed.author.name : data.message.embed.author.name,
-                          url: typeof data.message.embed.author?.url === 'undefined' ? im.message.embed.author.url : data.message.embed.author.url,
-                          icon_url: typeof data.message.embed.author?.icon_url === 'undefined' ? im.message.embed.author.icon_url : data.message.embed.author.icon_url
+                          name: data.message.embed.author?.name ? data.message.embed.author.name : im.message.embed.author.name,
+                          url: data.message.embed.author?.url ? data.message.embed.author.url : im.message.embed.author.url,
+                          icon_url: data.message.embed.author?.icon_url ? data.message.embed.author.icon_url : im.message.embed.author.icon_url
                       },
-                      thumbnail: typeof data.message.embed.thumbnail === 'undefined' ? im.message.embed.thumbnail : data.message.embed.thumbnail,
-                      image: typeof data.message.embed.image === 'undefined' ? im.message.embed.image : data.message.embed.image,
+                      thumbnail: (data.message.embed.thumbnail ? data.message.embed.thumbnail : im.message.embed.thumbnail) as any,
+                      image: (data.message.embed.image ? data.message.embed.image : im.message.embed.image) as any,
                       footer: {
-                          text: typeof data.message.embed.footer?.text === 'undefined' ? im.message.embed.footer.text : data.message.embed.footer.text,
-                          icon_url: typeof data.message.embed.footer?.icon_url === 'undefined' ? im.message.embed.footer.icon_url : data.message.embed.footer.icon_url
+                          text: data.message.embed.footer?.text ? data.message.embed.footer.text : im.message.embed.footer.text,
+                          icon_url: data.message.embed.footer?.icon_url ? data.message.embed.footer.icon_url : im.message.embed.footer.icon_url
                       }
                   }).toJSON()
               ]
@@ -244,7 +264,7 @@ export async function deleteInteractiveMessage(server: ServerDocument, data: { i
 
 function resolveMessageComponents(components: (InteractiveMessageButtonComponent | InteractiveMessageSelectMenuComponent)[][]) {
     return components.map(row => {
-        return new MessageActionRow()
+        return new ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>()
             .addComponents(
                 row
                     .filter(i => {
@@ -267,18 +287,35 @@ function resolveMessageComponents(components: (InteractiveMessageButtonComponent
                             )
                     })
                     .map(i => {
-                        return i.type == 'BUTTON'
-                            ? new MessageButton({
-                                  customId: i.appearance.style == 'LINK' ? null : i.id,
-                                  ...(i.appearance as any),
-                                  url: i.appearance.style == 'LINK' ? i.appearance.url : null
-                              })
-                            : new MessageSelectMenu({
-                                  customId: i.id,
-                                  placeholder: i.placeholder,
-                                  disabled: Boolean(i.disabled),
-                                  options: i._options.map(ii => ii.appearance) as any
-                              })
+                        if (i.type === 'BUTTON') {
+                            const button = new ButtonBuilder().setStyle(ButtonStyle[snakeToPascalCase(i.appearance.style)])
+
+                            if (i.appearance.style !== 'LINK') button.setCustomId(i.id)
+                            else button.setURL(i.appearance.url)
+                            button.setLabel(i.appearance.label)
+                            if (i.appearance.emoji.name) button.setEmoji(i.appearance.emoji.id ? i.appearance.emoji : i.appearance.emoji.name)
+
+                            return button
+                        }
+
+                        if (i.type === 'SELECT_MENU') {
+                            const selectMenu = new StringSelectMenuBuilder().setCustomId(i.id)
+
+                            selectMenu.setPlaceholder(i.placeholder)
+                            selectMenu.setOptions(
+                                i._options.map(ii => {
+                                    const option = new StringSelectMenuOptionBuilder().setLabel(ii.appearance.label).setValue(ii.appearance.value)
+
+                                    if (ii.appearance.description) option.setDescription(ii.appearance.description)
+                                    if (ii.appearance.emoji.name)
+                                        option.setEmoji((ii.appearance.emoji.id ? ii.appearance.emoji : ii.appearance.emoji.name) as any)
+
+                                    return option
+                                })
+                            )
+
+                            return selectMenu
+                        }
                     })
             )
             .toJSON()

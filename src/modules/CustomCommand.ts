@@ -1,4 +1,14 @@
-import { BaseGuildTextChannel, CommandInteraction, GuildMember, GuildMemberRoleManager, MessageEmbed, Team, User } from 'discord.js'
+import {
+    ApplicationCommandOptionType,
+    BaseGuildTextChannel,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    GuildMember,
+    GuildMemberRoleManager,
+    resolveColor,
+    Team,
+    User
+} from 'discord.js'
 import IVM, { Context } from 'isolated-vm'
 import qdb from 'quick.db'
 import safeRegex from 'safe-regex'
@@ -13,12 +23,12 @@ export default class CustomCommand {
     public command: ICustomCommand
     public self: Lacuna
     public server: ServerDocument
-    public interaction: CommandInteraction
+    public interaction: ChatInputCommandInteraction
     private usedPatterns: string[]
     private usedFunctions: string[]
     private isolate: IVM.Isolate
 
-    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: CommandInteraction) {
+    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
         this.command = command
 
         this.self = self
@@ -65,9 +75,9 @@ export default class CustomCommand {
                 options: options.data.map(i => {
                     let user, channel, role
 
-                    if (i.type === 'USER') user = options.getUser(i.name)
-                    if (i.type === 'CHANNEL') channel = options.getChannel(i.name)
-                    if (i.type === 'ROLE') role = options.getRole(i.name)
+                    if (i.type === ApplicationCommandOptionType.User) user = options.getUser(i.name)
+                    if (i.type === ApplicationCommandOptionType.Channel) channel = options.getChannel(i.name)
+                    if (i.type === ApplicationCommandOptionType.Role) role = options.getRole(i.name)
 
                     return {
                         name: i.name,
@@ -249,7 +259,7 @@ export default class CustomCommand {
                 description: message.embed.description ? await this.replacePatterns(message.embed.description, ctx) : null,
                 url: url,
                 timestamp: message.embed.timestamp ? Number(await this.replacePatterns(message.embed.timestamp, ctx)) : null,
-                color: message.embed.color ?? null,
+                color: message.embed.color ? resolveColor(message.embed.color as any) : null,
                 footer: {
                     text: message.embed.footer.text ? await this.replacePatterns(message.embed.footer.text, ctx) : null,
                     icon_url: footer_icon_url
@@ -277,10 +287,10 @@ export default class CustomCommand {
             }
         }
 
-        const returning = {} as { content: string; embeds: MessageEmbed[] }
+        const returning = {} as { content: string; embeds: EmbedBuilder[] }
 
         if (content) returning.content = content
-        if (message.embed && message.embed.active) returning.embeds = [new MessageEmbed(embed)]
+        if (message.embed && message.embed.active) returning.embeds = [new EmbedBuilder(embed)]
 
         return returning
     }
@@ -349,7 +359,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'EQUAL') {
                         if (leftVal !== rightVal) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -357,7 +370,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'NOT_EQUAL') {
                         if (leftVal === rightVal) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -365,7 +381,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'STARTS_WITH') {
                         if (!leftVal.startsWith(rightVal)) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -373,7 +392,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'ENDS_WITH') {
                         if (!leftVal.endsWith(rightVal)) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -381,7 +403,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'GREATER_THAN') {
                         if (leftVal < rightVal) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -389,7 +414,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'LESS_THAN') {
                         if (leftVal > rightVal) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -397,7 +425,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'CONTAINS') {
                         if (!leftVal.includes(rightVal)) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -405,7 +436,10 @@ export default class CustomCommand {
 
                     if (compare_values.operator === 'NOT_CONTAINS') {
                         if (leftVal.includes(rightVal)) {
-                            if (message) await this.interaction.reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') }).catch(() => {})
+                            if (message)
+                                await this.interaction
+                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
+                                    .catch(() => {})
 
                             break
                         }
@@ -542,7 +576,10 @@ export default class CustomCommand {
 
                         if (wallet.currencies.some(c => c.id === currency_id)) {
                             await this.self.db.users.updateOne(
-                                { _id: member.id, 'activities.wallets': { $elemMatch: { guild_id: this.interaction.guildId, 'currencies.id': currency_id } } },
+                                {
+                                    _id: member.id,
+                                    'activities.wallets': { $elemMatch: { guild_id: this.interaction.guildId, 'currencies.id': currency_id } }
+                                },
                                 {
                                     $inc: {
                                         'activities.wallets.$[guild].currencies.$[currency].amount': amount
@@ -570,9 +607,12 @@ export default class CustomCommand {
 
         this.throttle()
 
-        this.self.logger.telegram.info(`Code Snippets (${this.interaction.guildId}:${this.interaction.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``)
+        this.self.logger.telegram.info(
+            `Code Snippets (${this.interaction.guildId}:${this.interaction.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``
+        )
         this.self.emit('commandExecution', {
             command: this.interaction.commandName,
+            options: this.interaction.options.data.map(i => ({ name: i.name, type: i.type, value: i.value ?? null })),
             guild: { name: this.interaction.guild.name, id: this.interaction.guildId },
             channel: { name: (this.interaction.channel as BaseGuildTextChannel)?.name, id: this.interaction.channelId },
             user: { name: this.interaction.user.username, id: this.interaction.user.id }
@@ -646,7 +686,10 @@ export default class CustomCommand {
             throttled.remaining--
 
             if (throttled.remaining <= 0) {
-                this.self.qdb.set(`throttling.customCommands.${this.command.id}.${path}.retry_after`, Date.now() + this.command.throttling.timeout * 1000)
+                this.self.qdb.set(
+                    `throttling.customCommands.${this.command.id}.${path}.retry_after`,
+                    Date.now() + this.command.throttling.timeout * 1000
+                )
                 this.self.qdb.set(`throttling.customCommands.${this.command.id}.${path}.remaining`, -1)
             }
         } else {

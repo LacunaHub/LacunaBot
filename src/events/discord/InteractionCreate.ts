@@ -1,18 +1,31 @@
-import { ButtonInteraction, Collection, CommandInteraction, ContextMenuInteraction, GuildChannel, Message } from 'discord.js'
+import {
+    AnySelectMenuInteraction,
+    ButtonInteraction,
+    ChatInputCommandInteraction,
+    Collection,
+    ContextMenuCommandInteraction,
+    Events,
+    GuildChannel,
+    Message
+} from 'discord.js'
 import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponent, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { buttonPressed } from '../../internals/structures/Giveaway'
+import { snakeToPascalCase } from '../../internals/utility/Utils'
 import CustomCommand from '../../modules/CustomCommand'
 import Replacer from '../../modules/Replacer'
 import reports from '../../modules/Reports'
 
-const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMenuInteraction | ButtonInteraction) => {
+const handler = async (
+    self: Lacuna,
+    interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction | AnySelectMenuInteraction
+) => {
     if (!interaction.inGuild() || interaction.inRawGuild()) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: interaction.guildId })
     interaction.member = await interaction.guild.members.fetch(interaction.user.id)
 
-    if (interaction.isCommand()) {
+    if (interaction.isChatInputCommand()) {
         const command = self.commands.find(c => c.is_slash_command && c.name == interaction.commandName)
         const customCommand = server.modules.custom_commands.find(i => i.id === interaction.commandId)
 
@@ -24,8 +37,10 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
         }
     }
 
-    if (interaction.isContextMenu()) {
-        const command = self.commands.find(c => (c.is_message_command || c.is_user_command) && self.i18n.t(server.locale, c.pretty_name) == interaction.commandName)
+    if (interaction.isContextMenuCommand()) {
+        const command = self.commands.find(
+            c => (c.is_message_command || c.is_user_command) && self.i18n.t(server.locale, c.pretty_name) == interaction.commandName
+        )
 
         if (command) await command.executeContext(server, interaction)
     }
@@ -137,7 +152,8 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
                 }
 
                 if (removeRoles.length) {
-                    const missingRoles = button.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
+                    const missingRoles =
+                        button.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
 
                     if (missingRoles) await interaction.member.roles.add(removeRoles).catch(() => {})
                     else await interaction.member.roles.remove(removeRoles).catch(() => {})
@@ -154,15 +170,20 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
                     if (overwrites && button.overwrite_channel_permissions.reversible) {
                         await overwrites.delete().catch(() => {})
                     } else {
-                        await channel.permissionOverwrites.create(interaction.user.id, button.overwrite_channel_permissions.permissions).catch(() => {})
+                        const overwriteOptions = Object.keys(button.overwrite_channel_permissions.permissions).reduce((obj, k) => {
+                            obj[snakeToPascalCase(k)] = button.overwrite_channel_permissions.permissions[k]
+                            return obj
+                        }, {})
+
+                        await channel.permissionOverwrites.create(interaction.user.id, overwriteOptions).catch(() => {})
                     }
                 }
             }
         }
     }
 
-    if (interaction.isSelectMenu()) {
-        if (/R\-\w+\-\d+/.test(interaction.customId)) {
+    if (interaction.isAnySelectMenu()) {
+        if (interaction.isStringSelectMenu() && /R\-\w+\-\d+/.test(interaction.customId)) {
             await reports.optionSelected(self, server, interaction)
 
             return true
@@ -202,7 +223,8 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
                 }
 
                 if (removeRoles.length) {
-                    const missingRoles = option.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
+                    const missingRoles =
+                        option.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
 
                     if (missingRoles) await interaction.member.roles.add(removeRoles).catch(() => {})
                     else await interaction.member.roles.remove(removeRoles).catch(() => {})
@@ -219,7 +241,12 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
                     if (overwrites && option.overwrite_channel_permissions.reversible) {
                         await overwrites.delete().catch(() => {})
                     } else {
-                        await channel.permissionOverwrites.create(interaction.user.id, option.overwrite_channel_permissions.permissions).catch(() => {})
+                        const overwriteOptions = Object.keys(option.overwrite_channel_permissions.permissions).reduce((obj, k) => {
+                            obj[snakeToPascalCase(k)] = option.overwrite_channel_permissions.permissions[k]
+                            return obj
+                        }, {})
+
+                        await channel.permissionOverwrites.create(interaction.user.id, overwriteOptions).catch(() => {})
                     }
                 }
             }
@@ -230,6 +257,6 @@ const handler = async (self: Lacuna, interaction: CommandInteraction | ContextMe
 }
 
 export default {
-    name: 'interactionCreate',
+    name: Events.InteractionCreate,
     handler
 }

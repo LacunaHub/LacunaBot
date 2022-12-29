@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, MessageEmbed, Role, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Role, Webhook } from 'discord.js'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
@@ -8,13 +8,15 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
 
         const log = role.guild.channels.cache.get(server.moderation.logs.types.role_delete.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(role.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(role.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = role.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG) ? await role.guild.fetchAuditLogs({ limit: 1, type: 'ROLE_DELETE' }) : null
+            const audit = role.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await role.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.RoleDelete })
+                : null
             const executor = audit?.entries?.first()?.executor
 
             if (!webhook) {
@@ -32,7 +34,8 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.role_delete_title') })
                     })
@@ -54,9 +57,11 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
                 )
             }
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setTitle(t('logs.role_delete_title'))
-                .setDescription(t('logs.role_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, role: `<@&${role.id}>` }))
+                .setDescription(
+                    t('logs.role_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, role: `<@&${role.id}>` })
+                )
                 .addFields([
                     { name: t('logs.role_color'), value: `\`${role.hexColor}\``, inline: true },
                     { name: t('logs.role_position'), value: role.rawPosition.toString(), inline: true }
@@ -71,7 +76,12 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
                 username: server.server.premium.available ? webhook.name : self.user.username
             })
 
-            self.emit('moduleExecution', { module: 'Logs: Role Delete', guild: { id: role.guild.id, name: role.guild.name }, target: { id: role.name, name: role.id } })
+            self.emit('moduleExecution', {
+                module: 'Logs',
+                category: 'RoleDelete',
+                guild: { id: role.guild.id, name: role.guild.name },
+                target: { id: role.name, name: role.id }
+            })
 
             return true
         }

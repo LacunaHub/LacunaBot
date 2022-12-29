@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, MessageEmbed, ThreadChannel, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, ThreadChannel, Webhook } from 'discord.js'
 import numbro from 'numbro'
 import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
@@ -9,14 +9,14 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
 
         const log = thread.guild.channels.cache.get(server.moderation.logs.types.thread_update.channel_id) as BaseGuildTextChannel
 
-        const is_ok = log && log.permissionsFor(thread.guild.me).has(self.PERMISSIONS_FLAGS.MANAGE_WEBHOOKS)
+        const is_ok = log && log.permissionsFor(thread.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (is_ok) {
             const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
             let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
 
-            const audit = thread.guild.me.permissions.has(self.PERMISSIONS_FLAGS.VIEW_AUDIT_LOG)
-                ? await thread.guild.fetchAuditLogs({ limit: 1, type: 'THREAD_UPDATE' })
+            const audit = thread.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
+                ? await thread.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.ThreadUpdate })
                 : null
             const executor = audit?.entries?.first()?.executor
 
@@ -35,7 +35,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                 }
 
                 try {
-                    webhook = await log.createWebhook(`${self.user.username}`, {
+                    webhook = await log.createWebhook({
+                        name: self.user.username,
                         avatar: self.user.displayAvatarURL(),
                         reason: t('audit_reasons.logs_webhook_create', { event: t('logs.thread_update_title') })
                     })
@@ -58,7 +59,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
             }
 
             if (before.name != thread.name) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.thread_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -82,7 +83,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
             }
 
             if (before.autoArchiveDuration != thread.autoArchiveDuration) {
-                const embed = new MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setTitle(t('logs.thread_update_title'))
                     .setDescription(
                         t('logs.update_template', {
@@ -91,8 +92,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                         })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: numbro((before.autoArchiveDuration as number) * 60).format({ output: 'time' }), inline: true },
-                        { name: t('logs.after_change'), value: numbro((thread.autoArchiveDuration as number) * 60).format({ output: 'time' }), inline: true }
+                        {
+                            name: t('logs.before_change'),
+                            value: numbro((before.autoArchiveDuration as number) * 60).format({ output: 'time' }),
+                            inline: true
+                        },
+                        {
+                            name: t('logs.after_change'),
+                            value: numbro((thread.autoArchiveDuration as number) * 60).format({ output: 'time' }),
+                            inline: true
+                        }
                     ])
                     .setFooter({ text: thread.id })
                     .setTimestamp()
@@ -106,7 +115,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
             }
 
             self.emit('moduleExecution', {
-                module: 'Logs: Thread Update',
+                module: 'Logs',
+                category: 'ThreadUpdate',
                 guild: { id: thread.guild.id, name: thread.guild.name },
                 target: { id: thread.id, name: thread.name }
             })
