@@ -2,7 +2,7 @@ import { Node } from 'erela.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, node: Node) => {
-    self.logger.log(`[ErelaNodeReconnect] Node ${node.options.identifier} reconnected`)
+    self.logger.log(`[ErelaNodeReconnect] Attempt to reconnect to Node ${node.options.identifier}`)
 
     return true
 }

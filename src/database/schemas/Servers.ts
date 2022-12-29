@@ -699,7 +699,8 @@ export default model<ServerDocument>(
                     track_max_duration: { type: Number, default: 0 },
                     default_volume: { type: Number, default: 100 },
                     allow_radio_playback: { type: Boolean, default: false },
-                    disable_skip_vote: { type: Boolean, default: false }
+                    disable_skip_vote: { type: Boolean, default: false },
+                    default_source: { type: String, default: 'YandexMusic' }
                 },
                 statistics: { type: Array, default: [] },
                 reports: {
@@ -1011,7 +1012,15 @@ export interface ServerDocument extends Document {
                 active: boolean
                 percentage_of_caps: number
                 minimum_content_length: number
-                options: ('ACTION_BAN' | 'ACTION_MUTE' | 'ACTION_KICK' | 'ACTION_WARN' | 'ACTION_MODIFY_ROLES' | 'ACTION_SEND_MESSAGE' | 'ACTION_DELETE_MESSAGE')[]
+                options: (
+                    | 'ACTION_BAN'
+                    | 'ACTION_MUTE'
+                    | 'ACTION_KICK'
+                    | 'ACTION_WARN'
+                    | 'ACTION_MODIFY_ROLES'
+                    | 'ACTION_SEND_MESSAGE'
+                    | 'ACTION_DELETE_MESSAGE'
+                )[]
                 ban_timeout?: number
                 mute_timeout?: number
                 modify_roles: {
@@ -1131,7 +1140,15 @@ export interface ServerDocument extends Document {
             swear_filter: {
                 active: boolean
                 registry: string[]
-                options: ('ACTION_BAN' | 'ACTION_MUTE' | 'ACTION_KICK' | 'ACTION_WARN' | 'ACTION_MODIFY_ROLES' | 'ACTION_SEND_MESSAGE' | 'ACTION_DELETE_MESSAGE')[]
+                options: (
+                    | 'ACTION_BAN'
+                    | 'ACTION_MUTE'
+                    | 'ACTION_KICK'
+                    | 'ACTION_WARN'
+                    | 'ACTION_MODIFY_ROLES'
+                    | 'ACTION_SEND_MESSAGE'
+                    | 'ACTION_DELETE_MESSAGE'
+                )[]
                 ban_timeout?: number
                 mute_timeout?: number
                 modify_roles: {
@@ -1162,7 +1179,15 @@ export interface ServerDocument extends Document {
             users_slowdown: {
                 active: boolean
                 messages_limit: number
-                options: ('ACTION_BAN' | 'ACTION_MUTE' | 'ACTION_KICK' | 'ACTION_WARN' | 'ACTION_MODIFY_ROLES' | 'ACTION_SEND_MESSAGE' | 'ACTION_DELETE_MESSAGE')[]
+                options: (
+                    | 'ACTION_BAN'
+                    | 'ACTION_MUTE'
+                    | 'ACTION_KICK'
+                    | 'ACTION_WARN'
+                    | 'ACTION_MODIFY_ROLES'
+                    | 'ACTION_SEND_MESSAGE'
+                    | 'ACTION_DELETE_MESSAGE'
+                )[]
                 ban_timeout?: number
                 mute_timeout?: number
                 modify_roles: {
@@ -1292,6 +1317,7 @@ export interface ServerDocument extends Document {
             default_volume: number
             allow_radio_playback: boolean
             disable_skip_vote: boolean
+            default_source: 'Spotify' | 'YandexMusic' | 'SoundCloud'
         }
         reports: {
             active: boolean

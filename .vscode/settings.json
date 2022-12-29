@@ -5,5 +5,5 @@
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
     },
-    "cSpell.words": ["bannable", "Erela", "kickable", "moderatable", "tempbans", "temprole", "temproles", "unmoderated"]
+    "cSpell.words": ["bannable", "Erela", "kickable", "lavalink", "moderatable", "tempbans", "temprole", "temproles", "unmoderated"]
 }

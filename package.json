@@ -1,6 +1,6 @@
 {
   "name": "lacuna",
-  "version": "4.1.2",
+  "version": "4.2.0",
   "description": "A Discord bot",
   "main": "dist/index.js",
   "scripts": {
@@ -28,8 +28,7 @@
     "discord-hybrid-sharding": "1.7.5",
     "discord.js": "14.7.1",
     "dotenv": "8.2.0",
-    "erela.js": "2.3.3",
-    "erela.js-spotify": "1.2.0",
+    "erela.js": "2.4.0",
     "erlpack": "github:discord/erlpack",
     "isolated-vm": "4.4.2",
     "koa": "2.13.4",

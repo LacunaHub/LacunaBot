@@ -9,14 +9,16 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
         return false
     }
 
-    if (player.voiceChannel != (interaction.member as any).voice.channelId) {
+    if (player.voiceChannel !== (interaction.member as any).voice.channelId) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.next.text_different_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
@@ -26,7 +28,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     player.destroy()
-    await interaction.reply({ content: `${self._emojis.OK} | ${t('commands.stop.text_playback_stop', { user: `**${(interaction.member as any).displayName}**` })}` })
+    await interaction.reply({
+        content: `${self._emojis.OK} | ${t('commands.stop.text_playback_stop', { user: `**${(interaction.member as any).displayName}**` })}`
+    })
 
     return true
 }

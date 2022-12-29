@@ -371,7 +371,6 @@ async function updateInteractiveMessages(ctx: Context) {
                 throw new Error('UNKNOWN_METHOD')
         }
     } catch (err) {
-        console.log(err)
         ctx.throw(400, err.message)
     }
 

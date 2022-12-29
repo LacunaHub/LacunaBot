@@ -1,7 +1,10 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, GuildMember, Message } from 'discord.js'
+import { SearchResult } from 'erela.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
+import { lavalinkSources } from '../../../internals/utility/Constants'
+import { capitalizeFirstLetter, getTrackSourceByUrl } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -11,7 +14,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!voice) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_connect_to_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_connect_to_voice', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -23,7 +28,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         server.modules.music.blocked.channels.includes(voice.id)
     ) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_disallowed_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_disallowed_voice', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -34,7 +41,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!has_permissions) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_no_required_permissions_in_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_no_required_permissions_in_voice', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -64,7 +73,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (is_url && !allowed_hosts.some(h => query.startsWith(h))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_not_allowed_host', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_not_allowed_host', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -72,7 +83,17 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     await interaction.deferReply()
-    const search = await self.player.search({ query, source: 'soundcloud' }, interaction.user.tag)
+    let search: SearchResult
+
+    try {
+        search = await self.player.search({ query, source: lavalinkSources[server.modules.music.default_source] }, interaction.user.tag)
+    } catch (err) {
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.play.text_load_failed', { user: `**${(interaction.member as any).displayName}**` })}`
+        })
+
+        return false
+    }
 
     if (search.loadType === 'LOAD_FAILED') {
         await interaction.editReply({
@@ -106,36 +127,68 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             new ButtonBuilder().setCustomId('PLAYER-PREVIOUS').setStyle(ButtonStyle.Secondary).setEmoji('⏮️'),
             new ButtonBuilder().setCustomId('PLAYER-PAUSE-RESUME').setStyle(ButtonStyle.Secondary).setEmoji('⏸️'),
             new ButtonBuilder().setCustomId('PLAYER-SKIP').setStyle(ButtonStyle.Secondary).setEmoji('⏭️'),
-            new ButtonBuilder().setCustomId('PLAYER-REPEAT').setStyle(ButtonStyle.Secondary).setEmoji('🔁')
+            new ButtonBuilder().setCustomId('PLAYER-REPEAT').setStyle(ButtonStyle.Secondary).setEmoji('➡️')
         ),
-        new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId('PLAYER-QUEUE').setStyle(ButtonStyle.Secondary).setEmoji('🎶'))
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder().setCustomId('PLAYER-QUEUE').setStyle(ButtonStyle.Secondary).setEmoji('🎶'),
+            new ButtonBuilder().setCustomId('PLAYER-VOLUME-DOWN').setStyle(ButtonStyle.Secondary).setEmoji('🔉'),
+            new ButtonBuilder().setCustomId('PLAYER-VOLUME-UP').setStyle(ButtonStyle.Secondary).setEmoji('🔊')
+        )
     ]
 
     if (search.loadType === 'PLAYLIST_LOADED') {
         if (!server.server.premium.available) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.play.text_playlist_loaded_no_premium', { user: `**${(interaction.member as any).displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('commands.play.text_playlist_loaded_no_premium', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
             })
 
             return false
         }
 
-        for (const track of search.tracks.slice(0, 99)) await player.queue.add(track)
+        if (player.queue.length >= server.modules.music.queue_max_length && server.modules.music.queue_max_length) {
+            await interaction.editReply({
+                content: `${self._emojis.ERROR} | ${t('commands.play.text_queue_limit_reached_no_premium', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
+            })
+
+            return false
+        }
+
+        player.queue.add(search.tracks.slice(0, server.modules.music.queue_max_length || 99))
 
         const track = search.tracks[0]
+        const trackSource = getTrackSourceByUrl(track.uri)
 
         const embed = new EmbedBuilder()
-            .setTitle(t('commands.play.text_player'))
-            .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
+            .setTitle(`${track.author} - ${track.title}`)
+            .addFields([
+                {
+                    name: capitalizeFirstLetter(t('commands.giveaway.create.options.duration.name')),
+                    value: track.isStream ? '♾️' : `\`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``,
+                    inline: true
+                },
+                {
+                    name: '\u200B',
+                    value: `⏭️ ${track.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.duration) / 1000)}:R>`}`,
+                    inline: true
+                },
+                {
+                    name: t('commands.play.text_source'),
+                    value: `[${self._emojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.uri})`,
+                    inline: true
+                }
+            ])
             .setFooter({ text: t('commands.play.text_added_by', { requester: track.requester }) })
 
         if (player.playing || player.paused)
-            await message.reply({
+            await interaction.editReply({
                 content: `${self._emojis.OK} | ${t('commands.play.text_playlist_added_to_queue', {
-                    user: `**${message.member.displayName}**`,
+                    user: `**${(interaction.member as any).displayName}**`,
                     playlist: `**${search.playlist.name}**`
-                })}`,
-                allowedMentions: { roles: [], users: [] }
+                })}`
             })
         else {
             message = (await interaction.editReply({ embeds: [embed], components: rows })) as Message
@@ -144,10 +197,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
         const track = search.tracks[0]
+        const trackSource = getTrackSourceByUrl(track.uri)
 
         if (player.queue.length >= server.modules.music.queue_max_length && server.modules.music.queue_max_length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.play.text_queue_limit_reached_no_premium', { user: `**${(interaction.member as any).displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('commands.play.text_queue_limit_reached_no_premium', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
             })
 
             return false
@@ -155,7 +211,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (track.isStream && !server.server.premium.available) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.play.text_track_stream_only_for_premium', { user: `**${(interaction.member as any).displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('commands.play.text_track_stream_only_for_premium', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
             })
 
             return false
@@ -163,7 +221,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (track.isStream && !server.modules.music.allow_radio_playback) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.play.text_track_stream_disabled', { user: `**${(interaction.member as any).displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('commands.play.text_track_stream_disabled', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
             })
 
             return false
@@ -172,15 +232,31 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         player.queue.add(track)
 
         const embed = new EmbedBuilder()
-            .setTitle(t('commands.play.text_player'))
-            .setDescription(`${track.title} \`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``)
+            .setTitle(`${track.author} - ${track.title}`)
+            .addFields([
+                {
+                    name: capitalizeFirstLetter(t('commands.giveaway.create.options.duration.name')),
+                    value: track.isStream ? '♾️' : `\`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``,
+                    inline: true
+                },
+                {
+                    name: '\u200B',
+                    value: `⏭️ ${track.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.duration) / 1000)}:R>`}`,
+                    inline: true
+                },
+                {
+                    name: t('commands.play.text_source'),
+                    value: `[${self._emojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.uri})`,
+                    inline: true
+                }
+            ])
             .setFooter({ text: t('commands.play.text_added_by', { requester: track.requester }) })
 
         if (player.playing || player.paused)
             await interaction.editReply({
                 content: `${self._emojis.OK} | ${t('commands.play.text_track_added_to_queue', {
                     user: `**${(interaction.member as any).displayName}**`,
-                    track: `**${track.title}**`
+                    track: `**${track.author} - ${track.title}**`
                 })}`
             })
         else {
@@ -188,7 +264,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
     }
 
-    if (player.state != 'CONNECTED') player.connect()
+    if (player.state !== 'CONNECTED') player.connect()
 
     if (!player.playing && !player.paused) {
         if (!player.get('message')) player.set('message', message)

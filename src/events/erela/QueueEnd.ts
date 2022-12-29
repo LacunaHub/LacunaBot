@@ -10,6 +10,11 @@ const handler = async (self: Lacuna, player: Player) => {
     }
 
     player.set('message', null)
+    player.set(
+        'timeout',
+        setTimeout(() => player.destroy(), 300000)
+    )
+    self.qdb.delete(`guildPlayers.${player.guild}`)
 
     self.logger.log(`[ErelaQueueEnd] Queue of player ${player.guild} ended`)
 

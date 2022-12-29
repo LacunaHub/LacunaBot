@@ -1,5 +1,6 @@
 import {
     AnySelectMenuInteraction,
+    AutocompleteInteraction,
     ButtonInteraction,
     ChatInputCommandInteraction,
     Collection,
@@ -8,17 +9,19 @@ import {
     GuildChannel,
     Message
 } from 'discord.js'
+import { SearchResult } from 'erela.js'
 import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponent, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { buttonPressed } from '../../internals/structures/Giveaway'
-import { snakeToPascalCase } from '../../internals/utility/Utils'
+import { lavalinkSources } from '../../internals/utility/Constants'
+import { snakeToPascalCase, truncateString } from '../../internals/utility/Utils'
 import CustomCommand from '../../modules/CustomCommand'
 import Replacer from '../../modules/Replacer'
 import reports from '../../modules/Reports'
 
 const handler = async (
     self: Lacuna,
-    interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction | AnySelectMenuInteraction
+    interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction | AnySelectMenuInteraction | AutocompleteInteraction
 ) => {
     if (!interaction.inGuild() || interaction.inRawGuild()) return false
 
@@ -62,9 +65,9 @@ const handler = async (
             const player = self.player.get(interaction.guild.id)
             const message = player?.get<Message>('message')
 
-            if (message?.id == interaction.message?.id) {
-                if (interaction.member.voice.channel?.id != player.voiceChannel) {
-                    interaction.reply({
+            if (message?.id === interaction.message?.id) {
+                if (interaction.member.voice.channel?.id !== player.voiceChannel) {
+                    await interaction.reply({
                         content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.next.text_different_voice', {
                             user: `**${interaction.member.displayName}**`
                         })}`,
@@ -76,52 +79,72 @@ const handler = async (
 
                 const rows = message.components
 
-                if (interaction.customId == rows[0].components[0].customId) {
-                    player.destroy()
+                const stopButton = rows[0].components[0]
+                const previousButton = rows[0].components[1]
+                const playPauseButton = rows[0].components[2]
+                const nextButton = rows[0].components[3]
+                const repeatButton = rows[0].components[4]
+                const queueButton = rows[1].components[0]
+                const volumeDownButton = rows[1].components[1]
+                const volumeUpButton = rows[1].components[2]
+
+                if (interaction.customId === stopButton.customId) {
+                    await self.commands.get('stop').executeSlash(server, interaction as any)
                 }
 
-                if (interaction.customId == rows[0].components[1].customId) {
+                if (interaction.customId === previousButton.customId) {
                     if (player.queue.previous && player.position < 5000) {
-                        await player.play(player.queue.previous)
                         player.queue.add(player.queue.current, 0)
+                        await player.play(player.queue.previous)
                     } else if (player.queue.current.isSeekable) player.seek(0)
                 }
 
-                if (interaction.customId == rows[0].components[2].customId) {
+                if (interaction.customId === playPauseButton.customId) {
                     player.pause(!player.paused)
-                    ;(rows[0].components[2] as any).setEmoji(player.paused ? '▶️' : '⏸️')
+                    ;(playPauseButton as any).data.emoji = { name: player.paused ? '▶️' : '⏸️' }
                 }
 
-                if (interaction.customId == rows[0].components[3].customId) {
+                if (interaction.customId === nextButton.customId) {
                     if (player.queueRepeat) player.queue.add(player.queue.current)
                     player.stop()
                 }
 
-                if (interaction.customId == rows[0].components[4].customId) {
-                    if (!player.trackRepeat && !player.queueRepeat) {
-                        ;(rows[0].components[4] as any).setEmoji('🔂')
-                        player.setQueueRepeat(true)
-                    } else if (player.queueRepeat) {
-                        ;(rows[0].components[4] as any).setEmoji('➡️')
+                if (interaction.customId === repeatButton.customId) {
+                    if (player.queueRepeat) {
+                        ;(repeatButton as any).data.emoji = { name: '🔂' }
+                        player.setQueueRepeat(false)
                         player.setTrackRepeat(true)
-                    } else {
-                        ;(rows[0].components[4] as any).setEmoji('🔁')
+                    } else if (player.trackRepeat) {
+                        ;(repeatButton as any).data.emoji = { name: '➡️' }
                         player.setTrackRepeat(false)
+                        player.setQueueRepeat(false)
+                    } else {
+                        ;(repeatButton as any).data.emoji = { name: '🔁' }
+                        player.setQueueRepeat(true)
                     }
                 }
 
-                if (interaction.customId == rows[1].components[0].customId) {
-                    self.commands.get('queue').executeSlash(server, interaction as any)
+                if (interaction.customId === queueButton.customId) {
+                    await self.commands.get('queue').executeSlash(server, interaction as any)
                 }
 
-                if (interaction.customId != rows[0].components[0].customId) await message.edit({ components: rows })
-                if (interaction.customId != rows[1].components[0].customId) await interaction.deferUpdate()
+                if ([volumeDownButton.customId, volumeUpButton.customId].includes(interaction.customId)) {
+                    await self.commands.get('volume').executeSlash(server, interaction as any)
+                }
+
+                if (![stopButton.customId, queueButton.customId, volumeDownButton.customId, volumeUpButton.customId].includes(interaction.customId)) {
+                    if (![previousButton.customId, nextButton.customId].includes(interaction.customId)) {
+                        await message.edit({ components: rows })
+                    }
+
+                    await interaction.deferUpdate()
+                }
             }
 
             return true
         }
 
-        const im = server.modules.interactive_messages.slice(0, server.server.premium.available ? 50 : 5).find(i => i.id == interaction.message.id)
+        const im = server.modules.interactive_messages.slice(0, server.server.premium.available ? 50 : 5).find(i => i.id === interaction.message.id)
 
         if (im) {
             await interaction.deferUpdate()
@@ -250,6 +273,67 @@ const handler = async (
                     }
                 }
             }
+        }
+    }
+
+    if (interaction.isAutocomplete()) {
+        if (interaction.commandName === 'play') {
+            const query = interaction.options?.getFocused()
+
+            if (!query) {
+                await interaction.respond([])
+
+                return false
+            }
+
+            const is_url = new RegExp(`^https?:\/\/`).test(query)
+            const { playableMusicHosts: allowed_hosts } = await self.db.json.get()
+
+            if (is_url && !allowed_hosts.some(h => query.startsWith(h))) {
+                await interaction.respond([])
+
+                return false
+            }
+
+            let search: SearchResult
+
+            try {
+                search = await self.player.search({ query, source: lavalinkSources[server.modules.music.default_source] })
+            } catch (err) {
+                await interaction.respond([])
+
+                return false
+            }
+
+            if (['LOAD_FAILED', 'NO_MATCHES'].includes(search.loadType)) {
+                await interaction.respond([])
+
+                return false
+            }
+
+            if (search.loadType === 'PLAYLIST_LOADED') {
+                await interaction.respond([
+                    {
+                        name: truncateString(search.playlist.name, 95),
+                        value: query
+                    }
+                ])
+
+                return true
+            }
+
+            const tracks = search.tracks
+                .map(i => {
+                    const trackName = truncateString(`${i.author} - ${i.title}`, 95)
+
+                    return {
+                        name: trackName,
+                        value: i.uri
+                    }
+                })
+                .slice(0, 25)
+
+            await interaction.respond(tracks)
         }
     }
 

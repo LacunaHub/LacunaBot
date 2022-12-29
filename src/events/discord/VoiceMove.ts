@@ -29,7 +29,7 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
             } else {
                 player.set(
                     'timeout',
-                    setTimeout(() => player.destroy(), 600000)
+                    setTimeout(() => player.destroy(), 300000)
                 )
             }
         }
