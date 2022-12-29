@@ -556,6 +556,7 @@
       "vc_music_allow_radio_playback_title": "Разрешить потоковое воспроизведение",
       "vc_music_queue_max_length_title": "Максимальный размер очереди",
       "vc_music_default_volume_title": "Громкость по умолчанию",
+      "vc_music_default_source_title": "Источник по умолчанию",
       "vc_voice_roles_title": "Голосовые роли",
       "vc_voice_roles_description": "Автоматическая выдача ролей при подключении к голосовым каналам",
       "vc_auto_voices_title": "Временные голосовые каналы",

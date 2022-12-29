@@ -44,7 +44,15 @@
               <q-card class="rounded-lg bg-dark-1" flat>
                 <q-list padding>
                   <q-item clickable v-ripple @click="lacunaDiamondDialog">
-                    <q-item-section class="text-subtitle1">Lacuna Diamond</q-item-section>
+                    <q-item-section>
+                      <q-item-label class="text-subtitle1">
+                        <span class="q-mr-xs">Lacuna Diamond</span>
+
+                        <q-badge v-if="diamondDiscount" color="primary">
+                          <span>SALE</span>
+                        </q-badge>
+                      </q-item-label>
+                    </q-item-section>
 
                     <q-item-section avatar side>
                       <q-avatar square size="24px">
@@ -86,7 +94,11 @@
                   :to="`/guilds/${gid}/${item.path}`"
                   :label="item.name"
                   :icon="`img:${item.icon}`"
-                ></q-route-tab>
+                >
+                  <q-badge v-if="item.new" color="primary" floating>
+                    <span>NEW</span>
+                  </q-badge>
+                </q-route-tab>
 
                 <q-route-tab
                   class="rounded-lg"
@@ -101,7 +113,15 @@
               <q-card class="rounded-lg bg-dark-1" flat>
                 <q-list padding>
                   <q-item clickable v-ripple @click="lacunaDiamondDialog">
-                    <q-item-section class="text-subtitle1">Lacuna Diamond</q-item-section>
+                    <q-item-section>
+                      <q-item-label class="text-subtitle1">
+                        <span class="q-mr-xs">Lacuna Diamond</span>
+
+                        <q-badge v-if="diamondDiscount" color="primary">
+                          <span>SALE</span>
+                        </q-badge>
+                      </q-item-label>
+                    </q-item-section>
 
                     <q-item-section avatar side>
                       <q-avatar square size="24px">
@@ -140,7 +160,15 @@
                     v-ripple
                   >
                     <q-item-section>
-                      <q-item-label class="text-subtitle1">{{ item.name }}</q-item-label>
+                      <q-item-label class="text-subtitle1">
+                        <span class="q-mr-xs">
+                          {{ item.name }}
+                        </span>
+
+                        <q-badge v-if="item.new" color="primary">
+                          <span>NEW</span>
+                        </q-badge>
+                      </q-item-label>
                     </q-item-section>
 
                     <q-item-section avatar side>
@@ -247,7 +275,8 @@ export default defineComponent({
         {
           name: this.$t('pages.guild.nav_names.VOICE_CHANNELS'),
           path: 'settings/voice-channels',
-          icon: karaokeImg
+          icon: karaokeImg,
+          new: true
         },
         { name: this.$t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: layersImg }
       ],
@@ -271,6 +300,9 @@ export default defineComponent({
           modules: this.guild.modules
         })
       )
+    },
+    diamondDiscount() {
+      return this.guild.prices.some(i => Object.values(i.discounts).some(i => i !== 0))
     }
   },
 
