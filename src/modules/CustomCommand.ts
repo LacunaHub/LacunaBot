@@ -5,6 +5,7 @@ import {
     EmbedBuilder,
     GuildMember,
     GuildMemberRoleManager,
+    resolveColor,
     Team,
     User
 } from 'discord.js'
@@ -258,7 +259,7 @@ export default class CustomCommand {
                 description: message.embed.description ? await this.replacePatterns(message.embed.description, ctx) : null,
                 url: url,
                 timestamp: message.embed.timestamp ? Number(await this.replacePatterns(message.embed.timestamp, ctx)) : null,
-                color: message.embed.color ?? null,
+                color: message.embed.color ? resolveColor(message.embed.color as any) : null,
                 footer: {
                     text: message.embed.footer.text ? await this.replacePatterns(message.embed.footer.text, ctx) : null,
                     icon_url: footer_icon_url

@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, ChannelType, EmbedBuilder, Guild, GuildMember, Message } from 'discord.js'
+import { BaseGuildTextChannel, ChannelType, EmbedBuilder, Guild, GuildMember, Message, resolveColor } from 'discord.js'
 import moment from 'moment'
 import db from '../database'
 import { MessageEmbed as IMessageEmbed } from '../database/schemas/Servers'
@@ -33,7 +33,20 @@ export default class Replacer {
                     .replace(/^\(/, '')
                     .replace(/\)$/, '')
 
-                const available: string[] = ['CHOOSE', 'DATE', 'DATENOW', 'FIXNUM', 'LOWER', 'MATH', 'NUMDECL', 'RANDOM', 'REPLACE', 'TRUNCATE', 'TRIM', 'UPPER']
+                const available: string[] = [
+                    'CHOOSE',
+                    'DATE',
+                    'DATENOW',
+                    'FIXNUM',
+                    'LOWER',
+                    'MATH',
+                    'NUMDECL',
+                    'RANDOM',
+                    'REPLACE',
+                    'TRUNCATE',
+                    'TRIM',
+                    'UPPER'
+                ]
 
                 if (available.includes(name)) {
                     let fn = null
@@ -88,7 +101,9 @@ export default class Replacer {
         const guild = this.shapers.guild
         const member = this.shapers.member
 
-        const activities = (await db.users.find({ $or: [{ 'activities.levels.guild_id': guild.id }, { 'activities.wallets.guild_id': guild.id }] })).map(i => ({
+        const activities = (
+            await db.users.find({ $or: [{ 'activities.levels.guild_id': guild.id }, { 'activities.wallets.guild_id': guild.id }] })
+        ).map(i => ({
             user: { id: i._id, ...i.user },
             level: i.activities.levels.find(i => i.guild_id == guild.id),
             wallet: i.activities.wallets.find(i => i.guild_id == guild.id)
@@ -240,7 +255,11 @@ export default class Replacer {
                     rank: memberActivity?.level?.experience?.level ?? 0,
                     current_xp: memberActivity?.level?.experience?.current ?? 0,
                     remaining_xp: memberActivity?.level
-                        ? Math.round(150 + memberActivity.level.experience.level * memberActivity.level.experience.level * 8 - memberActivity.level.experience.current)
+                        ? Math.round(
+                              150 +
+                                  memberActivity.level.experience.level * memberActivity.level.experience.level * 8 -
+                                  memberActivity.level.experience.current
+                          )
                         : 0,
                     need_xp: memberActivity?.level ? 150 + memberActivity.level.experience.level * memberActivity.level.experience.level * 8 : 0,
                     total_xp: memberActivity?.level?.experience?.total ?? 0,
@@ -342,7 +361,7 @@ export default class Replacer {
                 description: template.embed.description ? await this.replace(template.embed.description) : null,
                 url: template.embed.url ? await this.replace(template.embed.url) : null,
                 timestamp: template.embed.timestamp ? Number(await this.replace(template.embed.timestamp)) : null,
-                color: template.embed.color ? template.embed.color : null,
+                color: template.embed.color ? resolveColor(template.embed.color as any) : null,
                 footer: {
                     text: template.embed.footer.text ? await this.replace(template.embed.footer.text) : null,
                     icon_url: footer_icon_url
