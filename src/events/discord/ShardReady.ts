@@ -2,7 +2,7 @@ import { Events } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>) => {
-    if (id === 0) {
+    if (self.cluster.id === 0) {
         await self.qdb.set(
             'commands',
             self.commands
@@ -41,8 +41,8 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
         self.logger.log('[DiscordShardReady] Commands cache is written')
     }
 
-    self.logger.info(`[DiscordShardReady] Shard #${id} is ready`)
-    await self.logger.telegram.info(`\`[DiscordShardReady]\` Shard #${id} is ready`)
+    self.logger.info(`[DiscordShardReady] Shard #${id} of cluster #${self.cluster.id} is ready`)
+    await self.logger.telegram.info(`\`[DiscordShardReady]\` Shard #${id} of cluster #${self.cluster.id} is ready`)
 
     if (unavailableGuilds?.size) {
         self.logger.warn(`[DiscordShardReady] Found unavailable guilds`, ...unavailableGuilds.keys())
