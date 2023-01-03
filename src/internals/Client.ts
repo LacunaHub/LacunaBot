@@ -40,7 +40,7 @@ const client = new Lacuna({
 
         if (manager.name == 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
 
-        if (manager.name == 'MessageManager') return new LimitedCollection({ maxSize: 50 })
+        if (manager.name == 'MessageManager') return new LimitedCollection({ maxSize: 30 })
 
         if (manager.name == 'UserManager')
             return new LimitedCollection({

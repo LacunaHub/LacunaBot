@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import { Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 import qdb from 'quick.db'
-import { clusterManager } from '../Cluster'
+import { bridgeClient } from '../Cluster'
 import Lacuna from '../Lacuna'
 import logger from '../Logger'
 
@@ -10,23 +10,27 @@ export function scheduleStatsCollect() {
     rule.minute = new Range(0, 59, 5)
 
     const job = scheduleJob(rule, async () => {
-        if (![...clusterManager.clusters.values()].every(cluster => cluster.ready)) return null
+        const stats = await bridgeClient.broadcastEval((self: Lacuna) => {
+            return {
+                guilds: self.guilds.cache.size,
+                ping: self.ws.ping,
+                commandUses: self.commands
+                    .filter(c => c.is_slash_command)
+                    .map(c => {
+                        return { name: c.name, uses: c.uses }
+                    })
+            }
+        })
+        const flatStats = stats.flat()
 
-        const guildsSize: number[] = (await clusterManager.fetchClientValues('guilds.cache.size')) as number[]
-        const commandUses = await clusterManager.broadcastEval((self: Lacuna) =>
-            self.commands
-                .filter(c => c.is_slash_command)
-                .map(c => {
-                    return { name: c.name, uses: c.uses }
-                })
-        )
-
-        const guilds: number = guildsSize.reduce((a, b) => a + b, 0)
-        const pings: number[] = (await clusterManager.fetchClientValues('ws.ping')) as number[]
-        const commands = commandUses.flat().reduce((x, y) => {
-            x[y.name] = x[y.name] ? x[y.name] + y.uses : y.uses
-            return x
-        }, {})
+        const guilds: number = flatStats.reduce((a, b) => a + b.guilds, 0)
+        const pings: number[] = flatStats.map(i => i.ping)
+        const commands: { [key: string]: number } = flatStats
+            .flatMap(i => i.commandUses)
+            .reduce((x, y) => {
+                x[y.name] = x[y.name] ? x[y.name] + y.uses : y.uses
+                return x
+            }, {})
 
         qdb.push('charts.guilds', { n: guilds, ts: Date.now() })
         qdb.push('charts.pings', { d: pings, ts: Date.now() })

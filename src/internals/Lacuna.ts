@@ -4,6 +4,7 @@ import { ApplicationCommandOptionType, ApplicationCommandType, Client, ClientOpt
 import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
 import { connect } from 'mongoose'
+import { os } from 'node-os-utils'
 import qdb from 'quick.db'
 import db from '../database'
 import { ServerDocument } from '../database/schemas/Servers'
@@ -18,6 +19,9 @@ import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './stru
 import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole'
 
 export default class Lacuna extends Client {
+    public cluster: ClusterClient
+    public machine: BridgeShard
+    public hostname: string
     public logger: typeof logger
     public db: typeof db
     public qdb: typeof qdb
@@ -31,8 +35,6 @@ export default class Lacuna extends Client {
     public i18n: typeof i18n
     public utils: typeof Utils
     public PermissionFlags: typeof PermissionsBitField.Flags
-    public cluster: ClusterClient
-    public machine: BridgeShard
 
     constructor(options?: ClientOptions) {
         super(options)
@@ -40,6 +42,8 @@ export default class Lacuna extends Client {
         this.cluster = null
 
         this.machine = null
+
+        this.hostname = os.hostname()
 
         this.logger = logger
 
@@ -94,26 +98,6 @@ export default class Lacuna extends Client {
                 SOUNDCLOUD: parseEmoji(SOUNDCLOUD)
             }
         }
-    }
-
-    get playerNodesStats() {
-        const nodes = this.player?.nodes
-
-        return (
-            nodes?.map(node => {
-                return {
-                    id: node.options.identifier,
-                    connected: node.connected,
-                    cpu_load: Number(node.stats.cpu.lavalinkLoad.toFixed(2)),
-                    memory_usage: Math.round((node.stats.memory.used * 100) / node.stats.memory.reservable),
-                    uptime: node.stats.uptime,
-                    players: {
-                        playing: node.stats.playingPlayers,
-                        total: node.stats.players
-                    }
-                }
-            }) ?? []
-        )
     }
 
     async start() {
@@ -209,6 +193,26 @@ export default class Lacuna extends Client {
         const commands = [...slash, ...context, ...custom]
 
         return this.application.commands.set(commands as any, server._id)
+    }
+
+    getMusicNodes() {
+        const nodes = this.player?.nodes
+
+        return (
+            nodes?.map(node => {
+                return {
+                    id: node.options.identifier,
+                    connected: node.connected,
+                    cpu_load: Number(node.stats.cpu.lavalinkLoad.toFixed(2)),
+                    memory_usage: Math.round((node.stats.memory.used * 100) / node.stats.memory.reservable),
+                    uptime: node.stats.uptime,
+                    players: {
+                        playing: node.stats.playingPlayers,
+                        total: node.stats.players
+                    }
+                }
+            }) ?? []
+        )
     }
 
     loadCommands() {
