@@ -79,9 +79,9 @@
                 </q-item>
 
                 <q-list padding separator>
-                  <q-item v-for="cluster in state.clusters" :key="cluster.id">
+                  <q-item v-for="server in state.servers" :key="server.hostname">
                     <q-item-section avatar>
-                      <q-item-label>{{ cluster.id }}</q-item-label>
+                      <q-item-label>{{ server.hostname }}</q-item-label>
                     </q-item-section>
 
                     <q-item-section>
@@ -90,10 +90,10 @@
                           <q-linear-progress
                             class="rounded-lg"
                             track-color="dark-2"
-                            :value="cluster.cpu_usage / 100"
+                            :value="server.cpu_usage / 100"
                             size="xl"
                           >
-                            <div class="absolute-center text-white">{{ cluster.cpu_usage }}%</div>
+                            <div class="absolute-center text-white">{{ server.cpu_usage }}%</div>
                             <q-tooltip
                               class="bg-black rounded-lg"
                               anchor="top middle"
@@ -110,10 +110,10 @@
                           <q-linear-progress
                             class="rounded-lg"
                             track-color="dark-2"
-                            :value="cluster.memory_usage / 100"
+                            :value="server.memory_usage / 100"
                             size="xl"
                           >
-                            <div class="absolute-center text-white">{{ cluster.memory_usage }}%</div>
+                            <div class="absolute-center text-white">{{ server.memory_usage }}%</div>
                             <q-tooltip
                               class="bg-black rounded-lg"
                               anchor="top middle"
@@ -129,7 +129,7 @@
                     </q-item-section>
 
                     <q-item-section side>
-                      {{ cluster.uptime }}
+                      {{ $numbro(server.uptime).format({ output: 'time' }) }}
                     </q-item-section>
                   </q-item>
                 </q-list>
@@ -150,9 +150,13 @@
                 </q-item>
 
                 <q-list padding separator>
-                  <q-item v-for="shard in state.shards" :key="shard.id" :class="`${getShardColor(shard.latency)}`">
+                  <q-item
+                    v-for="shard in state.shards"
+                    :key="shard.cluster_id"
+                    :class="`${getShardColor(shard.latency)}`"
+                  >
                     <q-item-section avatar>
-                      <q-item-label>#{{ shard.id }}</q-item-label>
+                      <q-item-label>{{ shard.hostname }}#{{ shard.cluster_id }}</q-item-label>
                     </q-item-section>
 
                     <q-item-section>
@@ -208,7 +212,7 @@
                       <div>
                         <span>{{ shard.latency }}MS</span>
                         <span class="q-px-sm">-</span>
-                        <span>{{ shard.uptime }}</span>
+                        <span>{{ $numbro(shard.uptime / 1000).format({ output: 'time' }) }}</span>
                       </div>
                     </q-item-section>
                   </q-item>
@@ -403,17 +407,17 @@ export default defineComponent({
     pingsChartData() {
       const pings = this.state.charts.pings.map(p => p.d)
       const shards = this.state.shards.map(s => {
-        return { id: s.id, pings: pings.map(p => p[s.id] || 0) }
+        return { cluster_id: s.cluster_id, pings: pings.map(p => p[s.cluster_id] || 0) }
       })
 
       return {
         labels: this.state.charts.pings.map(p => this.$dt.fromMillis(p.ts).toFormat('ccc HH:mm')),
         datasets: shards.map(shard => {
           return {
-            label: `#${shard.id}`,
+            label: `#${shard.cluster_id}`,
             data: shard.pings,
-            backgroundColor: `rgba(${hexToRGB(hashCode(`#${shard.id}#${shard.id}`))}, 0.1)`,
-            borderColor: `rgba(${hexToRGB(hashCode(`#${shard.id}#${shard.id}`))}, 0.6)`,
+            backgroundColor: `rgba(${hexToRGB(hashCode(`#${shard.cluster_id}#${shard.cluster_id}`))}, 0.1)`,
+            borderColor: `rgba(${hexToRGB(hashCode(`#${shard.cluster_id}#${shard.cluster_id}`))}, 0.6)`,
             borderWidth: 1,
             pointRadius: 1.2,
             fill: 'start'
