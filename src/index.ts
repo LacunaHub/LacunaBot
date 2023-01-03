@@ -48,6 +48,23 @@ if (isMasterBridge) {
 
     bridge.on('connect', client => logger.info(`[Bridge] Client "${client.id}" connected`))
     bridge.on('disconnect', client => logger.warn(`[Bridge] Client "${client.id}" disconnected`))
+    bridge.on('clientRequest', async message => {
+        if (!message._sCustom && !message._sRequest) return false
+
+        if ((message as any).type === 'server-performance') {
+            const servers = []
+
+            for (const connection of bridge.connections) {
+                try {
+                    const response = await connection.request({ type: 'server-performance' }, 15000)
+
+                    servers.push(response)
+                } catch (err) {}
+            }
+
+            await message.reply({ data: servers })
+        }
+    })
 
     bridge.start()
 } else {
@@ -74,11 +91,16 @@ async function startServices() {
         logger.error('[BridgeClient]', err)
     }
 
-    scheduleStatsCollect()
-    syncQiwiBills()
-    handleDiamondGuilds()
-    handlePatrons()
-    hubRefreshSubscriptions()
+    if (isMasterBridge) {
+        scheduleStatsCollect()
+        syncQiwiBills()
+        handleDiamondGuilds()
+        handlePatrons()
+        hubRefreshSubscriptions()
+    }
 }
+
+process.on('uncaughtException', logger.error)
+process.on('unhandledRejection', logger.error)
 
 export default { server, bridge }

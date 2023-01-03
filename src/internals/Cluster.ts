@@ -1,5 +1,6 @@
 import { Client as BridgeClient } from 'discord-cross-hosting'
 import { HeartbeatManager, Manager as ClusterManager } from 'discord-hybrid-sharding'
+import { cpu, mem, os } from 'node-os-utils'
 import logger from './Logger'
 
 const bridgeClient = new BridgeClient({
@@ -12,12 +13,28 @@ const bridgeClient = new BridgeClient({
 })
 
 bridgeClient.on('ready', () => logger.info('[BridgeClient] Client is ready'))
+bridgeClient.on('bridgeRequest', async message => {
+    if (!message._sCustom && !message._sRequest) return false
+
+    if ((message as any).type === 'server-performance') {
+        await message.reply({
+            data: {
+                hostname: os.hostname(),
+                uptime: os.uptime(),
+                cpuUsage: await cpu.usage(),
+                memoryUsed: await mem.used()
+            }
+        })
+    }
+})
 
 const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
     restarts: {
         max: 5,
         interval: 3_600_000
-    }
+    },
+    mode: 'process',
+    respawn: true
 })
 
 clusterManager.extend(
