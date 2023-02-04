@@ -3,7 +3,7 @@ import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>) => {
     if (self.cluster.id === 0) {
-        await self.qdb.set(
+        await self.db.qdb.set(
             'commands',
             self.commands
                 .filter(c => !c.private)

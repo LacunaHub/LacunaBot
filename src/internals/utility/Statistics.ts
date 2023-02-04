@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import { Range, RecurrenceRule, scheduleJob } from 'node-schedule'
-import qdb from 'quick.db'
+import database from '../../database'
 import { bridgeClient } from '../Cluster'
 import Lacuna from '../Lacuna'
 import logger from '../Logger'
@@ -32,21 +32,21 @@ export function scheduleStatsCollect() {
                 return x
             }, {})
 
-        qdb.push('charts.guilds', { n: guilds, ts: Date.now() })
-        qdb.push('charts.pings', { d: pings, ts: Date.now() })
-        qdb.push('charts.command_uses', { d: commands, ts: Date.now() })
+        await database.qdb.push('charts.guilds', { n: guilds, ts: Date.now() })
+        await database.qdb.push('charts.pings', { d: pings, ts: Date.now() })
+        await database.qdb.push('charts.command_uses', { d: commands, ts: Date.now() })
 
-        const charts: { guilds: GuildsChart[]; pings: PingsChart[]; command_uses: any[] } = qdb.get('charts')
+        const charts: { guilds: GuildsChart[]; pings: PingsChart[]; command_uses: any[] } = (await database.qdb.get('charts')) as any
 
-        qdb.set(
+        await database.qdb.set(
             'charts.guilds',
             charts.guilds.filter(c => Date.now() - c.ts < 259200000)
         )
-        qdb.set(
+        await database.qdb.set(
             'charts.pings',
             charts.pings.filter(c => Date.now() - c.ts < 64800000)
         )
-        qdb.set(
+        await database.qdb.set(
             'charts.command_uses',
             charts.command_uses.filter(c => Date.now() - c.ts < 36000000)
         )

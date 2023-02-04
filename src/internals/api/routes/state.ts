@@ -1,6 +1,6 @@
 import Router from '@koa/router'
 import { Context } from 'koa'
-import qdb from 'quick.db'
+import database from '../../../database'
 import { bridgeClient, clusterManager } from '../../Cluster'
 import Lacuna from '../../Lacuna'
 
@@ -55,8 +55,8 @@ async function getState(ctx: Context) {
             }
         }),
         players: players,
-        charts: qdb.get('charts'),
-        stats: qdb.get('stats')
+        charts: await database.qdb.get('charts'),
+        stats: await database.qdb.get('stats')
     }
 }
 

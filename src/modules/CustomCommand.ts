@@ -10,20 +10,19 @@ import {
     User
 } from 'discord.js'
 import IVM, { Context } from 'isolated-vm'
-import qdb from 'quick.db'
+import { QuickDB } from 'quick.db'
 import safeRegex from 'safe-regex'
 import { ICustomCommand, MessageEmbed as IMessageEmbed, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import logger from '../internals/Logger'
 import { escapeRegexp, isValidHttpUrl } from '../internals/utility/Utils'
 
-const storage = new qdb.table('publicStorage')
-
 export default class CustomCommand {
     public command: ICustomCommand
     public self: Lacuna
     public server: ServerDocument
     public interaction: ChatInputCommandInteraction
+    public storage: QuickDB
     private usedPatterns: string[]
     private usedFunctions: string[]
     private isolate: IVM.Isolate
@@ -36,6 +35,8 @@ export default class CustomCommand {
         this.server = server
 
         this.interaction = interaction
+
+        this.storage = this.self.db.qdb.table('publicStorage')
 
         this.usedPatterns = []
 
@@ -297,7 +298,7 @@ export default class CustomCommand {
 
     async execute() {
         const t = this.self.i18n.t.bind(null, this.server.locale)
-        const throttled = this.throttled()
+        const throttled = await this.throttled()
 
         if (throttled.status) {
             await this.interaction.reply({
@@ -323,19 +324,19 @@ export default class CustomCommand {
             if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
             if (!value || typeof value === 'function' || value === null) throw new TypeError('INVALID_PARAMETERS')
 
-            storage.set(`${this.interaction.guildId}.${key}`, value)
+            this.storage.set(`${this.interaction.guildId}.${key}`, value)
         })
 
         ctx.global.set('getValue', (key: string) => {
             if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
 
-            return storage.get(`${this.interaction.guildId}.${key}`)
+            return this.storage.get(`${this.interaction.guildId}.${key}`)
         })
 
         ctx.global.set('deleteValue', (key: string) => {
             if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
 
-            storage.delete(`${this.interaction.guildId}.${key}`)
+            this.storage.delete(`${this.interaction.guildId}.${key}`)
         })
 
         for (const smartValue of Object.keys(this.globalValues)) {
@@ -605,7 +606,7 @@ export default class CustomCommand {
             }
         }
 
-        this.throttle()
+        await this.throttle()
 
         this.self.logger.telegram.info(
             `Code Snippets (${this.interaction.guildId}:${this.interaction.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``
@@ -623,7 +624,7 @@ export default class CustomCommand {
         return true
     }
 
-    throttled() {
+    async throttled() {
         if (this.command.options.includes('THROTTLING')) {
             let path = `${this.interaction.guildId}.users.${this.interaction.user.id}`
 
@@ -635,7 +636,7 @@ export default class CustomCommand {
                 path = `${this.interaction.guildId}.channels.${this.interaction.channelId}`
             }
 
-            const throttled = this.self.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)
+            const throttled = (await this.self.db.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)) as any
 
             if (throttled?.retry_after - Date.now() > 0) {
                 return {
@@ -645,7 +646,7 @@ export default class CustomCommand {
             }
 
             if (throttled?.remaining === -1) {
-                this.self.qdb.delete(`throttling.customCommands.${this.command.id}.${path}`)
+                await this.self.db.qdb.delete(`throttling.customCommands.${this.command.id}.${path}`)
             }
 
             return {
@@ -658,7 +659,7 @@ export default class CustomCommand {
         }
     }
 
-    throttle() {
+    async throttle() {
         if ((this.self.application.owner as Team).members.some(m => m.id === this.interaction.user.id)) return false
 
         if (this.command.options.includes('THROTTLING')) {
@@ -672,29 +673,31 @@ export default class CustomCommand {
                 path = `${this.interaction.guildId}.channels.${this.interaction.channelId}`
             }
 
-            let throttled = this.self.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)
+            let throttled = (await this.self.db.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)) as any
             if (!throttled) {
-                this.self.qdb.set(`throttling.customCommands.${this.command.id}.${path}`, {
+                await this.self.db.qdb.set(`throttling.customCommands.${this.command.id}.${path}`, {
                     retry_after: Date.now(),
                     remaining: this.command.throttling.max_uses
                 })
 
-                throttled = this.self.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)
+                throttled = (await this.self.db.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)) as any
             }
 
-            this.self.qdb.subtract(`throttling.customCommands.${this.command.id}.${path}.remaining`, 1)
+            this.self.db.qdb.sub(`throttling.customCommands.${this.command.id}.${path}.remaining`, 1)
             throttled.remaining--
 
             if (throttled.remaining <= 0) {
-                this.self.qdb.set(
+                await this.self.db.qdb.set(
                     `throttling.customCommands.${this.command.id}.${path}.retry_after`,
                     Date.now() + this.command.throttling.timeout * 1000
                 )
-                this.self.qdb.set(`throttling.customCommands.${this.command.id}.${path}.remaining`, -1)
+                await this.self.db.qdb.set(`throttling.customCommands.${this.command.id}.${path}.remaining`, -1)
             }
         } else {
-            if (this.self.qdb.has(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)) {
-                this.self.qdb.delete(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)
+            const has = await this.self.db.qdb.has(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)
+
+            if (has) {
+                await this.self.db.qdb.delete(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)
             }
         }
     }
