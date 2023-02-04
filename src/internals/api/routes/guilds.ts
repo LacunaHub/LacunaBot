@@ -1,7 +1,6 @@
 import Router from '@koa/router'
 import { ApplicationCommandOptionType, ApplicationCommandType, ChannelType, PermissionsBitField } from 'discord.js'
 import { Context } from 'koa'
-import qdb from 'quick.db'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import i18n from '../../../i18n'
@@ -74,7 +73,8 @@ async function getSettings(ctx: Context) {
         return { id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}` }
     })
 
-    const commands = qdb.get('commands').map((i: any) => {
+    const commandsCache = (await db.qdb.get('commands')) as any
+    const commands = commandsCache.map((i: any) => {
         const guildCommand = guildCommands.find(j => i.name === j.name)
 
         return {
@@ -165,7 +165,8 @@ async function updateSettings(ctx: Context) {
         .catch(() => {})) as any
     if (!selfMember) ctx.throw(406)
 
-    const commands = qdb.get('commands').map(i => {
+    const commandsCache = (await db.qdb.get('commands')) as any
+    const commands = commandsCache.map(i => {
         return { name: i.name, description: i18n.t(server.locale, i.description), group: i.group }
     })
     const { diamondPrices: prices } = await db.json.get()
@@ -235,7 +236,7 @@ async function updateApplicationCommands(ctx: Context) {
     const server = await db.servers.findOne({ _id: guild_id })
     if (!server || server.server.blocked) ctx.throw(404)
 
-    let commands = qdb.get('commands')
+    let commands = (await db.qdb.get('commands')) as any
     const t = i18n.t.bind(null, server.locale)
 
     const slash = commands

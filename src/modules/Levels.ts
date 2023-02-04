@@ -1,4 +1,4 @@
-import Canvas, { Image, NodeCanvasRenderingContext2D } from 'canvas'
+import Canvas, { CanvasRenderingContext2D, Image } from 'canvas'
 import {
     AttachmentBuilder,
     BaseGuildTextChannel,
@@ -15,16 +15,21 @@ import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
 
 export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean> {
-    if (!server.modules.levels.active) return false
+    const { levels, activities } = server.modules
 
-    if (
-        server.modules.levels.blocked.channels.includes(message.channel.id) ||
-        message.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))
-    )
-        return false
-    if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(message.channel.id)) return false
-    if (server.modules.levels.allowed.roles.length && !message.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id)))
-        return false
+    if (!levels.active) return false
+
+    const isBlockedChannel = levels.blocked.channels.includes(message.channel.id),
+        isBlockedChannelParent = levels.blocked.channels.includes((message.channel as BaseGuildTextChannel).parentId),
+        isBlockedRole = message.member.roles.cache.some(r => levels.blocked.roles.includes(r.id))
+    const isNotAllowedChannel = levels.allowed.channels.length && !levels.allowed.channels.includes(message.channel.id),
+        isNotAllowedChannelParent =
+            levels.allowed.channels.length && !levels.allowed.channels.includes((message.channel as BaseGuildTextChannel).parentId)
+    const isNotAllowedRole = levels.allowed.roles.length && !message.member.roles.cache.some(r => levels.allowed.roles.includes(r.id))
+
+    if (isBlockedChannel || isBlockedChannelParent || isBlockedRole) return false
+    if (isNotAllowedChannel || isNotAllowedChannelParent) return false
+    if (isNotAllowedRole) return false
 
     let user = await self.db.users.findOne({ _id: message.author.id })
 
@@ -69,7 +74,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
     const current_level: number = level.experience.level,
         next_level = 150 + current_level * current_level * 8
 
-    const multipliers = server.modules.activities.multipliers
+    const multipliers = activities.multipliers
         .filter(i => {
             if (i.blocked_channels.includes(message.channelId)) return false
             if (message.member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
@@ -130,81 +135,83 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 }
 
 export async function voiceAssign(self: Lacuna, server: ServerDocument, state: VoiceState): Promise<boolean> {
-    if (!server.modules.levels.voice) return false
+    const { levels } = server.modules
 
-    if (
-        server.modules.levels.blocked.channels.includes(state.channelId) ||
-        state.member.roles.cache.some(r => server.modules.levels.blocked.roles.includes(r.id))
-    )
-        return false
-    if (server.modules.levels.allowed.channels.length && !server.modules.levels.allowed.channels.includes(state.channelId)) return false
-    if (server.modules.levels.allowed.roles.length && !state.member.roles.cache.some(r => server.modules.levels.allowed.roles.includes(r.id)))
-        return false
+    if (!levels.voice) return false
+
+    const isBlockedChannel = levels.blocked.channels.includes(state.channelId),
+        isBlockedChannelParent = levels.blocked.channels.includes(state.channel.parentId),
+        isBlockedRole = state.member.roles.cache.some(r => levels.blocked.roles.includes(r.id))
+    const isNotAllowedChannel = levels.allowed.channels.length && !levels.allowed.channels.includes(state.channelId),
+        isNotAllowedChannelParent = levels.allowed.channels.length && !levels.allowed.channels.includes(state.channel.parentId)
+    const isNotAllowedRole = levels.allowed.roles.length && !state.member.roles.cache.some(r => levels.allowed.roles.includes(r.id))
+
+    if (isBlockedChannel || isBlockedChannelParent || isBlockedRole) return false
+    if (isNotAllowedChannel || isNotAllowedChannelParent) return false
+    if (isNotAllowedRole) return false
     if (state.guild.afkChannelId === state.channelId) return false
 
     const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
-    if (members.size > 1) {
-        for (const [_, member] of members) {
-            let user = await self.db.users.findOne({ _id: member.id })
+    if (members.size < 2) return false
 
-            if (!user) {
-                user = await self.db.users.create({
-                    _id: member.id,
-                    user: {
-                        username: member.user.username,
-                        discriminator: member.user.discriminator,
-                        avatar: member.user.avatar,
-                        flags: member.user.flags?.bitfield ?? 0
-                    }
-                } as any)
-            }
+    for (const [_, member] of members) {
+        let user = await self.db.users.findOne({ _id: member.id })
 
-            let level = user.activities.levels.find(i => i.guild_id == server._id)
-
-            if (!level) {
-                level = {
-                    guild_id: server._id,
-                    experience: { total: 0, current: 0, level: 0 },
-                    activity: {
-                        total_messages: 0,
-                        last_message_at: null,
-                        total_voice_time: 0,
-                        voice_connected_at: null
-                    }
+        if (!user) {
+            user = await self.db.users.create({
+                _id: member.id,
+                user: {
+                    username: member.user.username,
+                    discriminator: member.user.discriminator,
+                    avatar: member.user.avatar,
+                    flags: member.user.flags?.bitfield ?? 0
                 }
-
-                await self.db.users.updateOne(
-                    { _id: member.id },
-                    {
-                        $push: { 'activities.levels': level as never }
-                    }
-                )
-            }
-
-            if (!level.activity.voice_connected_at || Date.now() - level.activity.voice_connected_at > 36_000_000) {
-                await self.db.users.updateOne(
-                    { _id: member.id, 'activities.levels.guild_id': server._id },
-                    {
-                        $set: {
-                            'activities.levels.$.activity.voice_connected_at': Date.now()
-                        }
-                    }
-                )
-            }
+            } as any)
         }
 
-        self.emit('moduleExecution', {
-            module: 'Levels',
-            category: 'VoiceAssign',
-            guild: { id: state.member.guild.id, name: state.member.guild.name },
-            target: { id: state.member.id, name: state.member.user.tag }
-        })
+        let level = user.activities.levels.find(i => i.guild_id == server._id)
 
-        return true
+        if (!level) {
+            level = {
+                guild_id: server._id,
+                experience: { total: 0, current: 0, level: 0 },
+                activity: {
+                    total_messages: 0,
+                    last_message_at: null,
+                    total_voice_time: 0,
+                    voice_connected_at: null
+                }
+            }
+
+            await self.db.users.updateOne(
+                { _id: member.id },
+                {
+                    $push: { 'activities.levels': level as never }
+                }
+            )
+        }
+
+        if (!level.activity.voice_connected_at || Date.now() - level.activity.voice_connected_at > 36_000_000) {
+            await self.db.users.updateOne(
+                { _id: member.id, 'activities.levels.guild_id': server._id },
+                {
+                    $set: {
+                        'activities.levels.$.activity.voice_connected_at': Date.now()
+                    }
+                }
+            )
+        }
     }
 
-    return false
+    self.emit('moduleExecution', {
+        module: 'Levels',
+        category: 'VoiceAssign',
+        guild: { id: state.member.guild.id, name: state.member.guild.name },
+        target: { id: state.member.id, name: state.member.user.tag }
+    })
+
+    return true
 }
 
 export async function voiceUnassign(self: Lacuna, server: ServerDocument, state: VoiceState, channel: BaseGuildVoiceChannel) {
@@ -212,13 +219,19 @@ export async function voiceUnassign(self: Lacuna, server: ServerDocument, state:
 
     const members = channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
-    if (members) await voiceCount(self, server, members.size == 1 ? [state.member, members.first()] : [state.member], channel)
+    if (members) {
+        const targetMembers = members.size === 1 ? [state.member, members.first()] : [state.member]
+
+        await voiceCount(self, server, targetMembers, channel)
+    }
 }
 
 export async function voiceCount(self: Lacuna, server: ServerDocument, members: GuildMember[], channel: BaseGuildVoiceChannel) {
+    const { activities } = server.modules
+
     for (const member of members) {
         const user = await self.db.users.findOne({ _id: member.user.id })
-        const level = user?.activities?.levels?.find(i => i.guild_id == server._id)
+        const level = user?.activities?.levels?.find(i => i.guild_id === server._id)
 
         if (!level?.activity?.voice_connected_at) continue
 
@@ -226,7 +239,7 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
         const current_level: number = level.experience.level,
             next_level: number = 150 + current_level * current_level * 8
 
-        const multipliers = server.modules.activities.multipliers
+        const multipliers = activities.multipliers
             .filter(i => {
                 if (i.blocked_channels.includes(channel.id)) return false
                 if (member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
@@ -297,9 +310,10 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
 }
 
 export async function updateAwards(self: Lacuna, server: ServerDocument, refs: { member: GuildMember; level: number }) {
+    const { levels } = server.modules
     const member = refs.member
 
-    const awards = server.modules.levels.awards.slice(0, server.server.premium.available ? 200 : 50).sort((a, b) => b.level - a.level)
+    const awards = levels.awards.slice(0, server.server.premium.available ? 200 : 50).sort((a, b) => b.level - a.level)
     const award = awards.find(i => i.level == refs.level)
 
     const prevAwards = awards.filter(i => i.level < refs.level)
@@ -349,10 +363,11 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
 }
 
 export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, refs: { member?: GuildMember; message?: Message; level: number }) {
+    const { levels } = server.modules
     const member = refs.message ? refs.message.member : refs.member
 
-    const award = server.modules.levels.awards.find(a => a.level == refs.level)
-    const direction = award && award.alert && award.alert.active ? award.alert : server.modules.levels.level_up_alerts
+    const award = levels.awards.find(a => a.level == refs.level)
+    const direction = award && award.alert && award.alert.active ? award.alert : levels.level_up_alerts
 
     if (direction.active) {
         const replacer = new Replacer(null, { message: refs.message, guild: member.guild, member: member })
@@ -383,13 +398,11 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, ref
 
 export async function generateRankCard(
     self: Lacuna,
-    signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message
+    signal: ChatInputCommandInteraction | ContextMenuCommandInteraction
 ): Promise<AttachmentBuilder> {
     let mention: GuildMember
 
     if (signal instanceof ChatInputCommandInteraction) mention = (signal.options?.getMember('пользователь') || signal.member) as GuildMember
-    if (signal instanceof Message)
-        mention = signal.mentions.members.first() || (signal['args'][0] ? await signal.guild.members.fetch(signal['args'][0]) : null) || signal.member
     if (signal instanceof ContextMenuCommandInteraction) mention = await signal.guild.members.fetch(signal.targetId)
 
     const activities = (await self.db.users.find({ 'activities.levels.guild_id': signal.guildId })).map(i => ({
@@ -580,7 +593,7 @@ function neededTotalXp(level: number): number {
     return total
 }
 
-function roundImage(ctx: NodeCanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
+function roundImage(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
     ctx.beginPath()
     ctx.moveTo(x + radius, y)
     ctx.lineTo(x + width - radius, y)

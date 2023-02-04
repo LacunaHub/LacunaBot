@@ -1,9 +1,21 @@
 import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose'
+import { MySQLDriver, QuickDB } from 'quick.db'
 import Bills, { IBill } from './schemas/Bills'
 import Servers, { ServerDocument } from './schemas/Servers'
 import TwitchSubs, { ITwitchSub } from './schemas/TwitchSubs'
 import Users, { UserDocument } from './schemas/Users'
 import YouTubeSubs, { IYouTubeSub } from './schemas/YouTubeSubs'
+
+const [mysqlHost, mysqlPort, mysqlUser, mysqlPassword, mysqlDatabase] = process.env.DB_MYSQL_AUTH.split(':')
+const mysql = new MySQLDriver({
+    host: mysqlHost,
+    port: Number(mysqlPort),
+    user: mysqlUser,
+    password: mysqlPassword,
+    database: mysqlDatabase
+})
+
+let qdb: QuickDB
 
 export default {
     bills: {
@@ -157,7 +169,10 @@ export default {
             delete require.cache[require.resolve('../../data.json')]
             return require('../../data.json')
         }
-    }
+    },
+
+    mysql,
+    qdb
 }
 
 export interface JsonData {
