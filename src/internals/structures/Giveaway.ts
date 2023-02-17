@@ -124,7 +124,7 @@ export default class Giveaway {
         try {
             const messageManager = (this.channel as BaseGuildTextChannel)?.messages
 
-            if (messageManager) return messageManager.fetch({ message: this.message_id })
+            if (messageManager) return await messageManager.fetch({ message: this.message_id })
         } catch (err) {
             return null
         }
