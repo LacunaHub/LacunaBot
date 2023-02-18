@@ -67,7 +67,7 @@
 
             <div class="col-12">
               <q-card class="rounded-lg bg-dark-1" flat>
-                <q-item>
+                <q-item class="q-pt-md">
                   <q-item-section>
                     <q-item-label class="text-subtitle1">
                       {{ $t('pages.state.clusters_title') }}
@@ -78,67 +78,71 @@
                   </q-item-section>
                 </q-item>
 
-                <q-list padding separator>
-                  <q-item v-for="server in state.servers" :key="server.hostname">
-                    <q-item-section avatar>
-                      <q-item-label>{{ server.hostname }}</q-item-label>
-                    </q-item-section>
+                <q-list padding>
+                  <q-expansion-item v-for="server in state.servers" :key="server.hostname" expand-separator>
+                    <template #header>
+                      <q-item-section>
+                        <q-item-label>{{ server.hostname }}</q-item-label>
+                      </q-item-section>
 
-                    <q-item-section>
-                      <div class="row q-col-gutter-md">
-                        <div class="col-6">
-                          <q-linear-progress
-                            class="rounded-lg"
-                            track-color="dark-2"
-                            :value="server.cpu_usage / 100"
-                            size="xl"
-                          >
-                            <div class="absolute-center text-white">{{ server.cpu_usage }}%</div>
-                            <q-tooltip
-                              class="bg-black rounded-lg"
-                              anchor="top middle"
-                              self="bottom middle"
-                              transition-show=""
-                              transition-hide=""
+                      <q-item-section side>
+                        {{ $numbro(server.uptime).format({ output: 'time' }) }}
+                      </q-item-section>
+                    </template>
+
+                    <q-card class="rounded-lg bg-dark-1" flat>
+                      <q-card-section>
+                        <div class="row q-col-gutter-md">
+                          <div class="col-6">
+                            <q-linear-progress
+                              class="rounded-lg"
+                              track-color="dark-2"
+                              :value="server.cpu_usage / 100"
+                              size="xl"
                             >
-                              {{ $t('pages.state.cluster_cpu_usage') }}
-                            </q-tooltip>
-                          </q-linear-progress>
-                        </div>
+                              <div class="absolute-center text-white">{{ server.cpu_usage }}%</div>
+                              <q-tooltip
+                                class="bg-black rounded-lg text-body2"
+                                anchor="top middle"
+                                self="bottom middle"
+                                transition-show=""
+                                transition-hide=""
+                              >
+                                {{ $t('pages.state.cluster_cpu_usage') }}
+                              </q-tooltip>
+                            </q-linear-progress>
+                          </div>
 
-                        <div class="col-6">
-                          <q-linear-progress
-                            class="rounded-lg"
-                            track-color="dark-2"
-                            :value="server.memory_usage / 100"
-                            size="xl"
-                          >
-                            <div class="absolute-center text-white">{{ server.memory_usage }}%</div>
-                            <q-tooltip
-                              class="bg-black rounded-lg"
-                              anchor="top middle"
-                              self="bottom middle"
-                              transition-show=""
-                              transition-hide=""
+                          <div class="col-6">
+                            <q-linear-progress
+                              class="rounded-lg"
+                              track-color="dark-2"
+                              :value="server.memory_usage / 100"
+                              size="xl"
                             >
-                              {{ $t('pages.state.cluster_memory_usage') }}
-                            </q-tooltip>
-                          </q-linear-progress>
+                              <div class="absolute-center text-white">{{ server.memory_usage }}%</div>
+                              <q-tooltip
+                                class="bg-black rounded-lg text-body2"
+                                anchor="top middle"
+                                self="bottom middle"
+                                transition-show=""
+                                transition-hide=""
+                              >
+                                {{ $t('pages.state.cluster_memory_usage') }}
+                              </q-tooltip>
+                            </q-linear-progress>
+                          </div>
                         </div>
-                      </div>
-                    </q-item-section>
-
-                    <q-item-section side>
-                      {{ $numbro(server.uptime).format({ output: 'time' }) }}
-                    </q-item-section>
-                  </q-item>
+                      </q-card-section>
+                    </q-card>
+                  </q-expansion-item>
                 </q-list>
               </q-card>
             </div>
 
             <div class="col-12">
               <q-card class="rounded-lg bg-dark-1" flat>
-                <q-item>
+                <q-item class="q-pt-md">
                   <q-item-section>
                     <q-item-label class="text-subtitle1">
                       {{ $t('pages.state.shards_title') }}
@@ -149,80 +153,91 @@
                   </q-item-section>
                 </q-item>
 
-                <q-list padding separator>
-                  <q-item
+                <q-list padding>
+                  <q-expansion-item
                     v-for="shard in state.shards"
                     :key="shard.cluster_id"
                     :class="`${getShardColor(shard.latency)}`"
+                    expand-separator
                   >
-                    <q-item-section avatar>
-                      <q-item-label>{{ shard.hostname }}#{{ shard.cluster_id }}</q-item-label>
-                    </q-item-section>
+                    <template #header>
+                      <q-item-section>
+                        <q-item-label>{{ shard.hostname }}#{{ shard.cluster_id }}</q-item-label>
+                      </q-item-section>
 
-                    <q-item-section>
-                      <q-item-label>
-                        <span>
-                          <q-icon class="opacity-md" name="hub"></q-icon>
-                          {{ shard.guilds }}
+                      <q-item-section side>
+                        <div>
+                          <span>{{ shard.latency }}MS</span>
+                          <span class="q-px-sm">-</span>
+                          <span>{{ $numbro(shard.uptime / 1000).format({ output: 'time' }) }}</span>
+                        </div>
+                      </q-item-section>
+                    </template>
 
-                          <q-tooltip
-                            class="bg-black rounded-lg"
-                            anchor="top middle"
-                            self="bottom middle"
-                            transition-show=""
-                            transition-hide=""
-                          >
-                            {{ $t('pages.state.shard_guilds') }}
-                          </q-tooltip>
-                        </span>
-                        <span class="q-px-sm">-</span>
-                        <span>
-                          <q-icon class="opacity-md" name="group"></q-icon>
-                          {{ shard.cached_users }}/{{ shard.users }}
+                    <q-card class="no-border-radius bg-dark-1" flat>
+                      <q-card-section>
+                        <div class="row">
+                          <div class="col">
+                            <span>
+                              <q-icon class="opacity-md" name="hub"></q-icon>
+                              {{ shard.guilds }}
 
-                          <q-tooltip
-                            class="bg-black rounded-lg"
-                            anchor="top middle"
-                            self="bottom middle"
-                            transition-show=""
-                            transition-hide=""
-                          >
-                            {{ $t('pages.state.shard_users') }}
-                          </q-tooltip>
-                        </span>
-                        <span class="q-px-sm">-</span>
-                        <span>
-                          <q-icon class="opacity-md" name="forum"></q-icon>
-                          {{ shard.channels }}
+                              <q-tooltip
+                                class="bg-black rounded-lg text-body2"
+                                anchor="top middle"
+                                self="bottom middle"
+                                transition-show=""
+                                transition-hide=""
+                              >
+                                {{ $t('pages.state.shard_guilds') }}
+                              </q-tooltip>
+                            </span>
+                          </div>
 
-                          <q-tooltip
-                            class="bg-black rounded-lg"
-                            anchor="top middle"
-                            self="bottom middle"
-                            transition-show=""
-                            transition-hide=""
-                          >
-                            {{ $t('pages.state.shard_channels') }}
-                          </q-tooltip>
-                        </span>
-                      </q-item-label>
-                    </q-item-section>
+                          <div class="col text-center">
+                            <span>
+                              <q-icon class="opacity-md" name="group"></q-icon>
+                              {{ shard.cached_users }}/{{ shard.users }}
 
-                    <q-item-section side>
-                      <div>
-                        <span>{{ shard.latency }}MS</span>
-                        <span class="q-px-sm">-</span>
-                        <span>{{ $numbro(shard.uptime / 1000).format({ output: 'time' }) }}</span>
-                      </div>
-                    </q-item-section>
-                  </q-item>
+                              <q-tooltip
+                                class="bg-black rounded-lg text-body2"
+                                anchor="top middle"
+                                self="bottom middle"
+                                transition-show=""
+                                transition-hide=""
+                              >
+                                {{ $t('pages.state.shard_users') }}
+                              </q-tooltip>
+                            </span>
+                          </div>
+
+                          <div class="col text-right">
+                            <span>
+                              <q-icon class="opacity-md" name="forum"></q-icon>
+                              {{ shard.channels }}
+
+                              <q-tooltip
+                                class="bg-black rounded-lg text-body2"
+                                anchor="top middle"
+                                self="bottom middle"
+                                transition-show=""
+                                transition-hide=""
+                              >
+                                {{ $t('pages.state.shard_channels') }}
+                              </q-tooltip>
+                            </span>
+                          </div>
+                        </div>
+                      </q-card-section>
+                    </q-card>
+                  </q-expansion-item>
                 </q-list>
               </q-card>
             </div>
 
             <div class="col-12">
               <q-card class="rounded-lg bg-dark-1" flat>
-                <q-item>
+                <q-item class="q-pt-md">
                   <q-item-section>
                     <q-item-label class="text-subtitle1">
                       {{ $t('pages.state.players_title') }}
@@ -233,7 +248,7 @@
                   </q-item-section>
                 </q-item>
 
-                <q-list padding separator>
+                <q-list padding>
                   <q-item
                     v-for="player in state.players"
                     :key="player.id"
@@ -246,15 +261,10 @@
                     </q-item-section>
 
                     <q-item-section>
-                      <q-linear-progress
-                        class="rounded-lg"
-                        track-color="dark-2"
-                        :value="player.cpu_load / 100"
-                        size="xl"
-                      >
-                        <div class="absolute-center text-white">{{ player.cpu_load }}%</div>
+                      <q-linear-progress class="rounded-lg" track-color="dark-2" :value="player.cpu_load" size="xl">
+                        <div class="absolute-center text-white">{{ Math.round(player.cpu_load * 100) }}%</div>
                         <q-tooltip
-                          class="bg-black rounded-lg"
+                          class="bg-black rounded-lg text-body2"
                           anchor="top middle"
                           self="bottom middle"
                           transition-show=""
