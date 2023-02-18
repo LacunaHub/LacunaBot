@@ -145,7 +145,7 @@ export default class Command {
             return false
         }
 
-        const throttled = this.throttled(server, interaction)
+        const throttled = await this.throttled(server, interaction)
 
         if (throttled.status) {
             await interaction.reply({
@@ -167,7 +167,7 @@ export default class Command {
         if (subcommand) await subcommand.slash(this.self, server, interaction)
         else await this.slash(this.self, server, interaction)
 
-        this.throttle(server, interaction)
+        await this.throttle(server, interaction)
 
         this.self.emit('commandExecution', {
             command: this.name,
@@ -215,7 +215,7 @@ export default class Command {
             return false
         }
 
-        const throttled = this.throttled(server, interaction)
+        const throttled = await this.throttled(server, interaction)
 
         if (throttled.status) {
             await interaction.reply({
@@ -234,7 +234,7 @@ export default class Command {
         if (interaction.isMessageContextMenuCommand()) await this.message(this.self, server, interaction)
         if (interaction.isUserContextMenuCommand()) await this.user(this.self, server, interaction)
 
-        this.throttle(server, interaction)
+        await this.throttle(server, interaction)
 
         this.self.emit('commandExecution', {
             command: this.name,
@@ -247,7 +247,7 @@ export default class Command {
         return true
     }
 
-    throttled(server: ServerDocument, interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction) {
+    async throttled(server: ServerDocument, interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction) {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
         if (config?.options?.includes('THROTTLING')) {
@@ -261,7 +261,7 @@ export default class Command {
                 path = `${interaction.guildId}.channels.${interaction.channelId}`
             }
 
-            const throttled = this.self.qdb.get(`throttling.commands.${this.name}.${path}`)
+            const throttled = (await this.self.db.qdb.get(`throttling.commands.${this.name}.${path}`)) as any
 
             if (throttled?.retry_after - Date.now() > 0) {
                 return {
@@ -271,7 +271,7 @@ export default class Command {
             }
 
             if (throttled?.remaining === -1) {
-                this.self.qdb.delete(`throttling.commands.${this.name}.${path}`)
+                await this.self.db.qdb.delete(`throttling.commands.${this.name}.${path}`)
             }
 
             return {
@@ -284,7 +284,7 @@ export default class Command {
         }
     }
 
-    throttle(server: ServerDocument, interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction) {
+    async throttle(server: ServerDocument, interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction) {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
         if ((this.self.application.owner as Team).members.some(m => m.id === interaction.user.id)) return false
@@ -300,26 +300,28 @@ export default class Command {
                 path = `${interaction.guildId}.channels.${interaction.channelId}`
             }
 
-            let throttled = this.self.qdb.get(`throttling.commands.${this.name}.${path}`)
+            let throttled = (await this.self.db.qdb.get(`throttling.commands.${this.name}.${path}`)) as any
             if (!throttled) {
-                this.self.qdb.set(`throttling.commands.${this.name}.${path}`, {
+                await this.self.db.qdb.set(`throttling.commands.${this.name}.${path}`, {
                     retry_after: Date.now(),
                     remaining: config.throttling.max_uses
                 })
 
-                throttled = this.self.qdb.get(`throttling.commands.${this.name}.${path}`)
+                throttled = (await this.self.db.qdb.get(`throttling.commands.${this.name}.${path}`)) as any
             }
 
-            this.self.qdb.subtract(`throttling.commands.${this.name}.${path}.remaining`, 1)
+            await this.self.db.qdb.sub(`throttling.commands.${this.name}.${path}.remaining`, 1)
             throttled.remaining--
 
             if (throttled.remaining <= 0) {
-                this.self.qdb.set(`throttling.commands.${this.name}.${path}.retry_after`, Date.now() + config.throttling.timeout * 1000)
-                this.self.qdb.set(`throttling.commands.${this.name}.${path}.remaining`, -1)
+                await this.self.db.qdb.set(`throttling.commands.${this.name}.${path}.retry_after`, Date.now() + config.throttling.timeout * 1000)
+                await this.self.db.qdb.set(`throttling.commands.${this.name}.${path}.remaining`, -1)
             }
         } else {
-            if (this.self.qdb.has(`throttling.commands.${this.name}.${interaction.guildId}`)) {
-                this.self.qdb.delete(`throttling.commands.${this.name}.${interaction.guildId}`)
+            const has = await this.self.db.qdb.has(`throttling.commands.${this.name}.${interaction.guildId}`)
+
+            if (has) {
+                await this.self.db.qdb.delete(`throttling.commands.${this.name}.${interaction.guildId}`)
             }
         }
     }

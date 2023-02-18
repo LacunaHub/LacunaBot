@@ -23,7 +23,7 @@ const handler = async (self: Lacuna, player: Player) => {
             .send({ embeds: [embed], components: message.components })
             .then(message => {
                 player.set('message', message)
-                self.qdb.set(`guildPlayers.${player.guild}.messageId`, message.id)
+                self.db.qdb.set(`guildPlayers.${player.guild}.messageId`, message.id)
             })
             .catch(() => player.set('message', null))
     }

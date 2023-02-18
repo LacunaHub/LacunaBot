@@ -3,7 +3,7 @@ import { Node, Track, TrackUtils } from 'erela.js'
 import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, node: Node) {
-    const guildPlayers = self.qdb.get('guildPlayers')
+    const guildPlayers = (await self.db.qdb.get('guildPlayers')) as any
     const guildIds = Object.keys(guildPlayers ?? {})
 
     for (const guildId of guildIds) {

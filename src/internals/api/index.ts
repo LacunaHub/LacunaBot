@@ -5,6 +5,8 @@ import koaJson from 'koa-json'
 import koaMorgan from 'koa-morgan'
 import rateLimit from 'koa-ratelimit'
 import { connect } from 'mongoose'
+import { QuickDB } from 'quick.db'
+import database from '../../database'
 import authorize from './routes/authorize'
 import guilds from './routes/guilds'
 import payments from './routes/payments'
@@ -16,6 +18,9 @@ import { passKnownReferrers } from './utility/Authorize'
 const app: Koa = new Koa()
 
 connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+database.mysql.connect().then(() => {
+    database.qdb = new QuickDB({ driver: database.mysql })
+})
 
 app.use(koaBodyParser())
 app.use(koaJson())

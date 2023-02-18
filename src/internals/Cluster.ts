@@ -30,8 +30,8 @@ bridgeClient.on('bridgeRequest', async message => {
 
 const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
     restarts: {
-        max: 5,
-        interval: 3_600_000
+        max: 1,
+        interval: 30 * 60 * 1000
     },
     mode: 'process',
     respawn: true

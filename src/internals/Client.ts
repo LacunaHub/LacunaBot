@@ -28,9 +28,9 @@ const client = new Lacuna({
     ],
     partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
     makeCache: manager => {
-        if (manager.name == 'GuildBanManager') return new LimitedCollection({ maxSize: 20 })
+        if (manager.name == 'GuildBanManager') return new LimitedCollection({ maxSize: 10 })
 
-        if (manager.name == 'GuildInviteManager') return new LimitedCollection({ maxSize: 20 })
+        if (manager.name == 'GuildInviteManager') return new LimitedCollection({ maxSize: 10 })
 
         if (manager.name == 'GuildMemberManager')
             return new LimitedCollection({
@@ -40,7 +40,7 @@ const client = new Lacuna({
 
         if (manager.name == 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
 
-        if (manager.name == 'MessageManager') return new LimitedCollection({ maxSize: 30 })
+        if (manager.name == 'MessageManager') return new LimitedCollection({ maxSize: 25 })
 
         if (manager.name == 'UserManager')
             return new LimitedCollection({
@@ -52,8 +52,8 @@ const client = new Lacuna({
     },
     sweepers: {
         messages: {
-            interval: 60,
-            filter: () => v => Date.now() - v.createdTimestamp > 1800000
+            interval: 15 * 60,
+            filter: () => v => Date.now() - v.createdTimestamp > 30 * 60 * 1000
         }
     },
     shards: clusterClientInfo.SHARD_LIST,

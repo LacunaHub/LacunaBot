@@ -277,9 +277,24 @@ const handler = async (
     }
 
     if (interaction.isAutocomplete()) {
-        if (interaction.commandName === 'play') {
-            const query = interaction.options?.getFocused()
+        const query = interaction.options?.getFocused()
 
+        if (interaction.commandName === 'help') {
+            const commands = self.commands.filter(i => i.name.includes(query))
+
+            await interaction.respond(
+                commands
+                    .map(i => {
+                        return {
+                            name: `${i.name} - ${self.i18n.t(server.locale, i.description)}`,
+                            value: i.name
+                        }
+                    })
+                    .slice(0, 25)
+            )
+        }
+
+        if (interaction.commandName === 'play') {
             if (!query) {
                 await interaction.respond([])
 

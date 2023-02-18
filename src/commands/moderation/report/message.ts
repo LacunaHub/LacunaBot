@@ -1,4 +1,12 @@
-import { ActionRowBuilder, BaseGuildTextChannel, ButtonBuilder, ButtonStyle, ContextMenuCommandInteraction, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js'
+import {
+    ActionRowBuilder,
+    BaseGuildTextChannel,
+    ButtonBuilder,
+    ButtonStyle,
+    ContextMenuCommandInteraction,
+    EmbedBuilder,
+    StringSelectMenuBuilder
+} from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
 import { ServerDocument } from '../../../database/schemas/Servers'
@@ -10,7 +18,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
 
     if (!server.modules.reports.active || !server.modules.reports.channel_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_reports_disabled_or_no_channel', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_reports_disabled_or_no_channel', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -21,7 +31,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
 
     if (!channel) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_channel_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_channel_not_found', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -39,18 +51,20 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
         return false
     }
 
-    const entry = self.qdb.get(`reports.${interaction.targetId}`)
-    if (!entry) self.qdb.set(`reports.${interaction.targetId}`, { timestamp: target.createdTimestamp, users: [] })
+    const entry = (await self.db.qdb.get(`reports.${interaction.targetId}`)) as any
+    if (!entry) await self.db.qdb.set(`reports.${interaction.targetId}`, { timestamp: target.createdTimestamp, users: [] })
 
     if (entry?.users?.includes(interaction.user.id)) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_already_reported', { user: `**${(interaction.member as any).displayName}**` })}`
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_already_reported', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`
         })
 
         return false
     }
 
-    self.qdb.push(`reports.${interaction.targetId}.users`, interaction.user.id)
+    await self.db.qdb.push(`reports.${interaction.targetId}.users`, interaction.user.id)
 
     const messages = await channel.messages.fetch({ limit: 50, cache: false })
     const report = messages.find(m => m.author.id == self.user.id && m.embeds[0]?.footer?.text?.startsWith(`ID: ${target.id}`))
@@ -66,7 +80,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
             .setTimestamp(target.createdTimestamp)
 
         if (target.attachments.filter(file => Boolean(file.width)).size > 0) embed.setImage(target.attachments.first().proxyURL)
-        if (target.content) embed.setDescription(`${truncateString(target.content, 768)}${target.embeds[0] ? `\n\`[${t('common.attachments')}]\`` : ''}`)
+        if (target.content)
+            embed.setDescription(`${truncateString(target.content, 768)}${target.embeds[0] ? `\n\`[${t('common.attachments')}]\`` : ''}`)
 
         const selectMenuOptions = ['indefinitely', '10m', '30m', '1h', '2h', '5h', '12h', '1d', '3d', '7d', '14d'].map(i => {
             return {
@@ -82,9 +97,18 @@ export default async (self: Lacuna, server: ServerDocument, interaction: Context
 
         const rows = [
             new ActionRowBuilder<ButtonBuilder>().addComponents(
-                new ButtonBuilder().setCustomId(`R-KICK-${target.author.id}`).setLabel(t('commands.report.quick_actions.KICK')).setStyle(ButtonStyle.Primary),
-                new ButtonBuilder().setCustomId(`R-WARN-${target.author.id}`).setLabel(t('commands.report.quick_actions.WARN')).setStyle(ButtonStyle.Primary),
-                new ButtonBuilder().setCustomId(`R-SKIP-${target.author.id}`).setLabel(t('commands.report.quick_actions.IGNORE')).setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId(`R-KICK-${target.author.id}`)
+                    .setLabel(t('commands.report.quick_actions.KICK'))
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId(`R-WARN-${target.author.id}`)
+                    .setLabel(t('commands.report.quick_actions.WARN'))
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId(`R-SKIP-${target.author.id}`)
+                    .setLabel(t('commands.report.quick_actions.IGNORE'))
+                    .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder().setLabel(t('commands.report.text_jump_to_message')).setStyle(ButtonStyle.Link).setURL(target.url)
             ),
             new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(

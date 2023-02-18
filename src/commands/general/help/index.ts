@@ -11,7 +11,8 @@ export default {
             type: 'STRING',
             name: `commands.${name}.options.command.name`,
             description: `commands.${name}.options.command.description`,
-            required: false
+            required: false,
+            autocomplete: true
         }
     ],
     group: 'GENERAL',

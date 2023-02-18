@@ -1,4 +1,3 @@
-import qdb from 'quick.db'
 import database from '../../../database'
 import { ICustomCommand, ServerDocument } from '../../../database/schemas/Servers'
 import DiscordUtils from '../../utility/DiscordUtils'
@@ -10,7 +9,8 @@ export async function createCustomCommand(server: ServerDocument, data: ICustomC
     if (customCommands.length >= 25) throw new Error('LIMIT_REACHED')
     if (!data.components.length) throw new Error('NO_COMPONENTS')
 
-    const commandNames = [...qdb.get('commands').map(i => i.name), ...customCommands.map(i => i.command.name)]
+    const commandsCache = (await database.qdb.get('commands')) as any
+    const commandNames = [...commandsCache.map(i => i.name), ...customCommands.map(i => i.command.name)]
 
     if (commandNames.some(i => data.command.name === i)) throw new Error('NAME_CONFLICT')
 
