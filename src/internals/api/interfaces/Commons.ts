@@ -1160,6 +1160,10 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             }
         }
 
+        if (Array.isArray(data.modules.autothreads) && JSON.stringify(data.modules.autothreads) !== JSON.stringify(guild.modules.autothreads)) {
+            updateData['modules.autothreads'] = data.modules.autothreads
+        }
+
         if (Array.isArray(data.modules.autoreactions) && JSON.stringify(data.modules.autoreactions) !== JSON.stringify(guild.modules.autoreactions)) {
             for (const reaction of data.modules.autoreactions.slice(0, guild.server.premium.available ? 20 : 2)) {
                 reaction.reactions

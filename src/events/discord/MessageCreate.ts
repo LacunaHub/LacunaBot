@@ -5,6 +5,7 @@ import { antiCaps, linksFilter, nicknamesModeration, swearFilter, usersSlowdown 
 import { messageCreate as addWalletCash } from '../../modules/Economy'
 import { messageCreate as addLevelPoints } from '../../modules/Levels'
 import { autoReact } from '../../modules/Reactions'
+import { autoThread } from '../../modules/Threads'
 
 const handler = async (self: Lacuna, message: Message) => {
     if (message.author.bot || message.channel.type == ChannelType.DM) return false
@@ -30,6 +31,7 @@ const handler = async (self: Lacuna, message: Message) => {
     await swearFilter(self, server, message)
     await usersSlowdown(self, server, message)
 
+    await autoThread(self, server, message)
     await autoReact(self, server, message)
 
     return true
