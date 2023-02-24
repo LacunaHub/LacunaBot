@@ -167,7 +167,7 @@
 
                       <q-item-section side>
                         <div>
-                          <span>{{ shard.latency }}MS</span>
+                          <span>{{ Math.round(shard.latency) }}MS</span>
                           <span class="q-px-sm">-</span>
                           <span>{{ $numbro(shard.uptime / 1000).format({ output: 'time' }) }}</span>
                         </div>
