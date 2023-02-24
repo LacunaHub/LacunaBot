@@ -67,7 +67,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
         )
     }
 
-    // if (Date.now() - level.activity.last_message_at < 60000) return false
+    if (Date.now() - level.activity.last_message_at < 60000) return false
 
     const current_xp: number = level.experience.current,
         total_xp = level.experience.total
