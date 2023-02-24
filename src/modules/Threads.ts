@@ -1,12 +1,12 @@
-import Lacuna from '../internals/Lacuna'
+import { Message, TextChannel } from 'discord.js'
 import { AutoThread, ServerDocument } from '../database/schemas/Servers'
-import { Message, MessageType, TextChannel } from 'discord.js'
+import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
 
 export async function autoThread(self: Lacuna, server: ServerDocument, message: Message) {
     const auto_thread: AutoThread = server.modules.autothreads
         .slice(0, server.server.premium.available ? 20 : 2)
-        .find(ar => ar.channel_id == message.channel.id)
+        .find(at => at.channel_id == message.channel.id)
 
     if (auto_thread) {
         const content: string = message.content.toLowerCase()
@@ -18,14 +18,11 @@ export async function autoThread(self: Lacuna, server: ServerDocument, message: 
         )
             return false
 
-        const replacer = new Replacer(
-            auto_thread.name,
-            {
-                guild: message.guild,
-                member: message.member,
-                message: message
-            }
-        )
+        const replacer = new Replacer(auto_thread.name, {
+            guild: message.guild,
+            member: message.member,
+            message: message
+        })
         const name = await replacer.replace()
 
         await (message.channel as TextChannel).threads.create({
