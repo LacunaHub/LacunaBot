@@ -78,6 +78,58 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
+              {{ $t('pages.guild.ut_auto_threads_title') }}
+
+              <q-badge class="q-ml-xs" color="primary">
+                <span>NEW</span>
+              </q-badge>
+            </q-item-label>
+            <q-item-label class="text--secondary">
+              {{ $t('pages.guild.ut_auto_threads_description') }}
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side top>
+            <div>{{ guild.modules.autothreads.length }}/{{ guild.premium.available ? '20' : '2' }}</div>
+          </q-item-section>
+        </q-item>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div v-for="(autoThread, i) in guild.modules.autothreads" :key="i" class="col-12 col-sm-6 col-md-4">
+              <q-card class="rounded-lg bg-dark-2" flat>
+                <q-item class="rounded-lg" clickable v-ripple @click="autoThreadDialog(autoThread)">
+                  <q-item-section>
+                    <q-item-label>
+                      {{ guild.channelsText.find(i => i.id === autoThread.channel_id)?.name ?? autoThread.channel_id }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-card>
+            </div>
+
+            <div v-if="guild.modules.autothreads.length < 20" class="col-12">
+              <q-btn
+                @click="
+                  !guild.premium.available && guild.modules.autothreads.length >= 2
+                    ? lacunaDiamondDialog()
+                    : autoThreadDialog()
+                "
+                class="full-width dashed-border"
+                icon="add"
+                flat
+              ></q-btn>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <div class="col-12">
+      <q-card class="rounded-lg bg-dark-1" flat>
+        <q-item class="q-py-md">
+          <q-item-section>
+            <q-item-label class="text-subtitle1">
               {{ $t('pages.guild.ut_auto_reactions_title') }}
             </q-item-label>
             <q-item-label class="text--secondary">
@@ -222,6 +274,7 @@
 import { useGuildStore } from 'src/stores/guild'
 import { defineComponent } from 'vue'
 import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
+import UtilityAutoThread from 'components/dialogs/UtilityAutoThread.vue'
 import UtilityAutoReaction from 'src/components/dialogs/UtilityAutoReaction.vue'
 import UtilityInteractiveMessage from 'src/components/dialogs/UtilityInteractiveMessage.vue'
 import UtilityInteractiveReaction from 'src/components/dialogs/UtilityInteractiveReaction.vue'
@@ -242,6 +295,33 @@ export default defineComponent({
       this.$q.dialog({
         component: LacunaDiamond
       })
+    },
+    autoThreadDialog(config) {
+      this.$q
+        .dialog({
+          component: UtilityAutoThread,
+
+          componentProps: config ? { autoThreadProp: config } : null
+        })
+        .onOk(payload => {
+          const { mode, autoThread } = payload
+
+          if (mode === 'CREATE') {
+            this.guild.modules.autothreads.push(autoThread)
+          }
+
+          if (mode === 'UPDATE') {
+            const index = this.guild.modules.autothreads.findIndex(i => i.channel_id === autoThread.channel_id)
+
+            this.guild.modules.autothreads[index] = autoThread
+          }
+
+          if (mode === 'DELETE') {
+            const index = this.guild.modules.autothreads.findIndex(i => i.channel_id === autoThread.channel_id)
+
+            this.guild.modules.autothreads.splice(index, 1)
+          }
+        })
     },
     autoReactionDialog(config) {
       this.$q
