@@ -707,6 +707,7 @@ export default model<ServerDocument>(
                     active: { type: Boolean, default: false },
                     channel_id: { type: String, default: null }
                 },
+                autothreads: { type: Array, default: [] },
                 autoreactions: { type: Array, default: [] },
                 economy: {
                     active: { type: Boolean, default: false },
@@ -1329,6 +1330,7 @@ export interface ServerDocument extends Document {
             }
             minimum: number
         }
+        autothreads: AutoThread[]
         autoreactions: AutoReaction[]
         economy: {
             active: boolean
@@ -1897,6 +1899,13 @@ export interface IYouTubeSubscription {
     notification_message: { content: string }
     webhook_id: string
     webhook_token: string
+}
+
+export interface AutoThread {
+    channel_id: string
+    name: string
+    matches: string[]
+    exclude_matches: string[]
 }
 
 export interface AutoReaction {

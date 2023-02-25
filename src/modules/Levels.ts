@@ -24,11 +24,11 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
         isBlockedRole = message.member.roles.cache.some(r => levels.blocked.roles.includes(r.id))
     const isNotAllowedChannel = levels.allowed.channels.length && !levels.allowed.channels.includes(message.channel.id),
         isNotAllowedChannelParent =
-            levels.allowed.channels.length && !levels.allowed.channels.includes((message.channel as BaseGuildTextChannel).parentId)
-    const isNotAllowedRole = levels.allowed.roles.length && !message.member.roles.cache.some(r => levels.allowed.roles.includes(r.id))
+            levels.allowed.channels.length && !levels.allowed.channels.includes((message.channel as BaseGuildTextChannel).parentId),
+        isNotAllowedRole = levels.allowed.roles.length && !message.member.roles.cache.some(r => levels.allowed.roles.includes(r.id))
 
     if (isBlockedChannel || isBlockedChannelParent || isBlockedRole) return false
-    if (isNotAllowedChannel || isNotAllowedChannelParent) return false
+    if (isNotAllowedChannel) return false
     if (isNotAllowedRole) return false
 
     let user = await self.db.users.findOne({ _id: message.author.id })
@@ -143,11 +143,11 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
         isBlockedChannelParent = levels.blocked.channels.includes(state.channel.parentId),
         isBlockedRole = state.member.roles.cache.some(r => levels.blocked.roles.includes(r.id))
     const isNotAllowedChannel = levels.allowed.channels.length && !levels.allowed.channels.includes(state.channelId),
-        isNotAllowedChannelParent = levels.allowed.channels.length && !levels.allowed.channels.includes(state.channel.parentId)
-    const isNotAllowedRole = levels.allowed.roles.length && !state.member.roles.cache.some(r => levels.allowed.roles.includes(r.id))
+        isNotAllowedChannelParent = levels.allowed.channels.length && !levels.allowed.channels.includes(state.channel.parentId),
+        isNotAllowedRole = levels.allowed.roles.length && !state.member.roles.cache.some(r => levels.allowed.roles.includes(r.id))
 
     if (isBlockedChannel || isBlockedChannelParent || isBlockedRole) return false
-    if (isNotAllowedChannel || isNotAllowedChannelParent) return false
+    if (isNotAllowedChannel) return false
     if (isNotAllowedRole) return false
     if (state.guild.afkChannelId === state.channelId) return false
 
