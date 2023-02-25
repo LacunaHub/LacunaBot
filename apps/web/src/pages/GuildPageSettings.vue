@@ -275,10 +275,9 @@ export default defineComponent({
         {
           name: this.$t('pages.guild.nav_names.VOICE_CHANNELS'),
           path: 'settings/voice-channels',
-          icon: karaokeImg,
-          new: true
+          icon: karaokeImg
         },
-        { name: this.$t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: layersImg }
+        { name: this.$t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: layersImg, new: true }
       ],
       freezedGuild: {},
       guildChanged: false,

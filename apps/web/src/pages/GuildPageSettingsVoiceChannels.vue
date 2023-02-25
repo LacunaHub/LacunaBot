@@ -15,10 +15,6 @@
             <div class="col-12">
               <div>
                 {{ $t('pages.guild.vc_music_default_source_title') }}
-
-                <q-badge class="q-ml-xs" color="primary">
-                  <span>NEW</span>
-                </q-badge>
               </div>
 
               <q-btn-toggle

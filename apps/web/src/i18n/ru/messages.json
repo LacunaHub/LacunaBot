@@ -420,6 +420,12 @@
     "moderator_roles_description": "Выбранные роли получат те же права, что и владелец временного канала, но их разрешения в этом канале нельзя будет изменить. Для корректной работы, боту необходимо право администратора"
   },
 
+  "auto_threads": {
+    "add_auto_thread": "@:add автотред",
+    "edit_auto_thread": "@:edit автотред",
+    "default_name_title": "Название треда"
+  },
+
   "auto_reactions": {
     "add_auto_reaction": "@:add автореакцию",
     "edit_auto_reaction": "@:edit автореакцию",
@@ -565,6 +571,8 @@
       "ut_reports_description": "Получение жалоб на сообщения",
       "ut_auto_reactions_title": "Автореакции",
       "ut_auto_reactions_description": "Автоматическое добавление реакций на сообщение",
+      "ut_auto_threads_title": "Автотреды",
+      "ut_auto_threads_description": "Автоматическое создание тредов под сообщениями",
       "ut_ims_title": "Интерактивные сообщения",
       "ut_irs_title": "Интерактивные реакции",
       "ut_irs_description": "Выдача ролей и доступов к каналам при нажатии на реакции"
