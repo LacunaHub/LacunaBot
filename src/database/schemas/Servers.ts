@@ -755,7 +755,8 @@ export default model<ServerDocument>(
                 }
             },
             utility: {
-                giveaways: { type: Array, default: [] }
+                giveaways: { type: Array, default: [] },
+                polls: { type: Array, default: [] }
             },
             created_at: { type: Number, default: () => Date.now() },
             activity_ping_at: { type: Number, default: () => Date.now() },
@@ -1352,6 +1353,7 @@ export interface ServerDocument extends Document {
     }
     utility: {
         giveaways: Giveaway[]
+        polls: IPoll[]
     }
     created_at: number
     activity_ping_at: number
@@ -1985,6 +1987,22 @@ export interface Giveaway {
     members: string[]
     expiration_date: Date
     locale: string
+}
+
+export interface IPoll {
+    message_id: string
+    channel_id: string
+    poll_question: string
+    answer_options: IPollAnswerOption[]
+    quiz: boolean
+    multiple_answers: boolean
+}
+
+export interface IPollAnswerOption {
+    title: string
+    index: number
+    voters: string[]
+    correct?: boolean
 }
 
 export interface ChangeLog {
