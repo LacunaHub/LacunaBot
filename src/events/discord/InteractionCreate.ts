@@ -17,6 +17,7 @@ import { buttonPressed } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
 import { snakeToPascalCase, truncateString } from '../../internals/utility/Utils'
 import CustomCommand from '../../modules/CustomCommand'
+import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
 import { createPoll, onPressPollButton } from '../../modules/Polls'
 import Replacer from '../../modules/Replacer'
 import reports from '../../modules/Reports'
@@ -215,6 +216,10 @@ const handler = async (
         if (/POLL\-\d+\-OPT\-\d+/.test(interaction.customId)) {
             await onPressPollButton(self, server, interaction)
         }
+
+        if (/CL\-REASON\-\d+/.test(interaction.customId)) {
+            await onPressChangeReasonButton(self, server, interaction)
+        }
     }
 
     if (interaction.isAnySelectMenu()) {
@@ -367,6 +372,10 @@ const handler = async (
     if (interaction.isModalSubmit()) {
         if (/POLL\-\d+\-(true|false)\-(true|false)/.test(interaction.customId)) {
             await createPoll(self, server, interaction)
+        }
+
+        if (/CL\-REASON\-\d+/.test(interaction.customId)) {
+            await onSubmitChangeReasonModal(self, server, interaction)
         }
     }
 
