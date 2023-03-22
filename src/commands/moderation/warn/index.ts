@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType } from 'discord.js'
 import { addSlash, removeSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -8,18 +9,18 @@ export default {
     description: `commands.${name}.description`,
     options: [
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'add',
             description: `commands.${name}.add.description`,
             options: [
                 {
-                    type: 'USER',
+                    type: ApplicationCommandOptionType.User,
                     name: `commands.${name}.add.options.user.name`,
                     description: `commands.${name}.add.options.user.description`,
                     required: true
                 },
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.User,
                     name: `commands.${name}.add.options.reason.name`,
                     description: `commands.${name}.add.options.reason.description`,
                     required: false
@@ -27,24 +28,24 @@ export default {
             ]
         },
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'remove',
             description: `commands.${name}.remove.description`,
             options: [
                 {
-                    type: 'USER',
+                    type: ApplicationCommandOptionType.User,
                     name: `commands.${name}.remove.options.user.name`,
                     description: `commands.${name}.remove.options.user.description`,
                     required: true
                 },
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.remove.options.warn_id.name`,
                     description: `commands.${name}.remove.options.warn_id.description`,
                     required: true
                 },
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.remove.options.reason.name`,
                     description: `commands.${name}.remove.options.reason.description`,
                     required: false

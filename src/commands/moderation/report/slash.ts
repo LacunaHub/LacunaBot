@@ -42,7 +42,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    const target_id = interaction.options?.getString(t('commands.report.options.message_id.name'))
+    const target_id = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.report.options.message_id.name'))
 
     if (!target_id) {
         await interaction.reply({

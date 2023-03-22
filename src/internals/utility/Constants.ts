@@ -19,3 +19,32 @@ export const lavalinkSources = {
     YandexMusic: 'ymsearch',
     SoundCloud: 'scsearch'
 }
+
+export const emojiLetters = [
+    '🇦',
+    '🇧',
+    '🇨',
+    '🇩',
+    '🇪',
+    '🇫',
+    '🇬',
+    '🇭',
+    '🇮',
+    '🇯',
+    '🇰',
+    '🇱',
+    '🇲',
+    '🇳',
+    '🇴',
+    '🇵',
+    '🇶',
+    '🇷',
+    '🇸',
+    '🇹',
+    '🇺',
+    '🇻',
+    '🇼',
+    '🇽',
+    '🇾',
+    '🇿'
+]

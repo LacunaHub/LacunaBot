@@ -10,7 +10,9 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -26,7 +28,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
-    const sku = interaction.options?.getString(t('commands.store.buy.options.sku.name'))
+    const sku = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.store.buy.options.sku.name'))
 
     if (!sku) {
         await interaction.reply({
@@ -41,7 +43,9 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!item) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.buy.text_item_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.store.buy.text_item_not_found', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -53,7 +57,9 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (result == 'INSUFFICIENT_FUNDS') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', { user: `**${(interaction.member as any).displayName}**` })}`
+            content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`
         })
     }
 
@@ -96,7 +102,9 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -114,11 +122,13 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
     await interaction.deferReply({ ephemeral: true })
 
-    let page: number = interaction.options?.getInteger(t('commands.store.items.options.page.name'))
-        ? interaction.options.getInteger(t('commands.store.items.options.page.name')) - 1
+    let page: number = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.store.items.options.page.name'))
+        ? interaction.options.getInteger(self.i18n.t(interaction.locale, 'commands.store.items.options.page.name')) - 1
         : 0
     const chunks: Array<EconomyStoreItem[]> = chunkArray(
-        server.modules.economy.store.items.slice(0, server.server.premium.available ? 200 : 50).filter(i => !i.options.includes('LIMITED_QUANTITY') || i.quantity > 0),
+        server.modules.economy.store.items
+            .slice(0, server.server.premium.available ? 200 : 50)
+            .filter(i => !i.options.includes('LIMITED_QUANTITY') || i.quantity > 0),
         8
     )
 
@@ -141,7 +151,9 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
                     **${t('commands.store.items.text_purchase_price')}**: ${
                     item.purchase_price ? `${item.purchase_price}${currency.symbol}` : t('commands.store.items.text_price_free')
                 } (SKU: ${item.id})
-                    **${t('commands.store.items.text_contains')}**: ${item.references.map(r => `<${item.type == 'CHANNEL' ? '#' : '@&'}${r}>`).join(' ')}${
+                    **${t('commands.store.items.text_contains')}**: ${item.references
+                    .map(r => `<${item.type == 'CHANNEL' ? '#' : '@&'}${r}>`)
+                    .join(' ')}${
                     item.options.includes('LIMITED_QUANTITY') ? `\n**${t('commands.store.items.text_quantity')}**: ${item.quantity}` : ''
                 }
                 `
@@ -165,7 +177,9 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
 
     const message = (await interaction.editReply({
-        embeds: [embed.setFields(fields[page]).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
+        embeds: [
+            embed.setFields(fields[page]).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })
+        ],
         components: [
             row.setComponents(
                 new StringSelectMenuBuilder({
@@ -199,7 +213,11 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
             await i.deferUpdate()
 
             await i.editReply({
-                embeds: [embed.setFields(fields[page]).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
+                embeds: [
+                    embed
+                        .setFields(fields[page])
+                        .setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })
+                ],
                 components: [
                     row.setComponents(
                         new StringSelectMenuBuilder({
@@ -225,14 +243,18 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'INSUFFICIENT_FUNDS') {
                 await i.followUp({
-                    content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', { user: `**${(interaction.member as any).displayName}**` })}`,
+                    content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', {
+                        user: `**${(interaction.member as any).displayName}**`
+                    })}`,
                     ephemeral: true
                 })
             }
 
             if (result == 'PURCHASED') {
                 await i.followUp({
-                    content: `${self._emojis.ERROR} | ${t('commands.store.text_purchased', { user: `**${(interaction.member as any).displayName}**` })}`,
+                    content: `${self._emojis.ERROR} | ${t('commands.store.text_purchased', {
+                        user: `**${(interaction.member as any).displayName}**`
+                    })}`,
                     ephemeral: true
                 })
             }

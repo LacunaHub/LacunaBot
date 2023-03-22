@@ -374,6 +374,7 @@
             "text_no_case_id": "{user}, пожалуйста, укажите номер случая журнала модерации",
             "text_no_reason": "{user}, пожалуйста, укажите причину для случая журнала модерации",
             "text_no_case_message": "{user}, сообщение с таким номером случая не найдено. Помните, что вы можете изменить только последние 50 случаев модерации",
+            "text_no_case_entry": "{user}, запись с данным номером случая отсутствует в базе данных",
             "text_case_edited": "{user}, причина случая изменена"
         },
         "report": {
@@ -724,6 +725,41 @@
                 "text_giveaway_stopped": "{user}, розыгрыш остановлен"
             }
         },
+        "poll": {
+            "description": "Управление опросами",
+            "create": {
+                "description": "Создаёт новый опрос",
+                "options": {
+                    "quiz_mode": {
+                        "name": "режим-викторины",
+                        "description": "Опрос с правильными и неправильными ответами"
+                    },
+                    "multiple_answers": {
+                        "name": "множественный-выбор",
+                        "description": "Позволяет выбрать несколько вариантов ответа"
+                    }
+                },
+                "text_create_new_poll": "Создать новый опрос",
+                "text_poll_question": "Вопрос",
+                "text_correct_answer": "Правильный ответ",
+                "text_answer_options": "Варианты ответа",
+                "text_answer_options_placeholder": "Варианты ответов указываются с новой строки",
+                "text_no_question": "{user}, пожалуйста, укажите вопрос",
+                "text_invalid_answer_options": "{user}, пожалуйста, укажите от 2 до 10 вариантов ответа",
+                "text_no_correct_answer": "{user}, пожалуйста, укажите правильный ответ",
+                "text_quiz_mode": "Викторина",
+                "text_multiple_answers": "Выбор нескольких вариантов",
+                "text_poll_successfully_created": "{user}, опрос успешно создан",
+                "text_poll_failed_to_create": "{user}, произошла ошибка при создании опроса"
+            },
+            "text_plural_votes": "{n} голос | {n} голоса | {n} голосов",
+            "text_option_already_chosen": "{user}, вы уже выбрали этот вариант ответа",
+            "text_option_chosen_quiz_mode": "{user}, вы уже выбрали ответ {answer}",
+            "text_answer_is_correct": "{user}, вы выбрали правильный ответ ({answer})",
+            "text_incorrect_answer": "{user}, к сожалению, ответ неверный",
+            "text_you_have_chosen": "{user}, вы выбрали вариант {answer}",
+            "text_you_removed_your_vote": "{user}, вы убрали свой голос с варианта {answer}"
+        },
         "temprole": {
             "description": "Выдает роль пользователю на указанное время",
             "options": {
@@ -763,7 +799,8 @@
         },
         "reason": "Причина",
         "case_number": "Случай #{case_number}",
-        "moderator": "Модератор"
+        "moderator": "Модератор",
+        "change_reason": "Изменить причину"
     },
 
     "logs": {

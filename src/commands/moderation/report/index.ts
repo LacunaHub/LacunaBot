@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType } from 'discord.js'
 import message from './message'
 import slash from './slash'
 
@@ -11,7 +12,7 @@ export default {
     description: `commands.${name}.description`,
     options: [
         {
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             name: `commands.${name}.options.message_id.name`,
             description: `commands.${name}.options.message_id.description`,
             required: true

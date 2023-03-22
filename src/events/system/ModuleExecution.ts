@@ -36,7 +36,7 @@ export function handleModuleExecutionData(data: ModuleExecutionData) {
     //     })
     // }
 
-    logger.log(`[${module}${category ?? ''}Module] Execution from (${guild.name}:${guild.id}) for (${target.name}:${target.id})`)
+    logger.log(`[${module}${category ?? ''}${label ?? ''}Module] Execution from (${guild.name}:${guild.id}) for (${target.name}:${target.id})`)
 }
 
 export default {

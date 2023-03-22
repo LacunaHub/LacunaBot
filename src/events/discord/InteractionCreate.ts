@@ -7,7 +7,8 @@ import {
     ContextMenuCommandInteraction,
     Events,
     GuildChannel,
-    Message
+    Message,
+    ModalSubmitInteraction
 } from 'discord.js'
 import { SearchResult } from 'erela.js'
 import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponent, ServerDocument } from '../../database/schemas/Servers'
@@ -16,12 +17,20 @@ import { buttonPressed } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
 import { snakeToPascalCase, truncateString } from '../../internals/utility/Utils'
 import CustomCommand from '../../modules/CustomCommand'
+import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
+import { createPoll, onPressPollButton } from '../../modules/Polls'
 import Replacer from '../../modules/Replacer'
 import reports from '../../modules/Reports'
 
 const handler = async (
     self: Lacuna,
-    interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction | AnySelectMenuInteraction | AutocompleteInteraction
+    interaction:
+        | ChatInputCommandInteraction
+        | ContextMenuCommandInteraction
+        | ButtonInteraction
+        | AnySelectMenuInteraction
+        | AutocompleteInteraction
+        | ModalSubmitInteraction
 ) => {
     if (!interaction.inGuild() || interaction.inRawGuild()) return false
 
@@ -29,10 +38,17 @@ const handler = async (
     interaction.member = await interaction.guild.members.fetch(interaction.user.id)
 
     if (interaction.isChatInputCommand()) {
-        const command = self.commands.find(c => c.is_slash_command && c.name == interaction.commandName)
+        const command = self.commands.find(c => c.is_slash_command && c.name === interaction.commandName)
         const customCommand = server.modules.custom_commands.find(i => i.id === interaction.commandId)
 
-        if (command) await command.executeSlash(server, interaction)
+        if (command) {
+            await command.executeSlash(server, interaction)
+
+            if (interaction.commandGuildId) {
+                await self.updateApplicationCommands(server)
+            }
+        }
+
         if (!command && customCommand) {
             const custom = new CustomCommand(customCommand, self, server, interaction)
 
@@ -42,7 +58,7 @@ const handler = async (
 
     if (interaction.isContextMenuCommand()) {
         const command = self.commands.find(
-            c => (c.is_message_command || c.is_user_command) && self.i18n.t(server.locale, c.pretty_name) == interaction.commandName
+            c => (c.is_message_command || c.is_user_command) && self.i18n.t(interaction.locale, c.pretty_name) === interaction.commandName
         )
 
         if (command) await command.executeContext(server, interaction)
@@ -203,6 +219,14 @@ const handler = async (
                 }
             }
         }
+
+        if (/POLL\-\d+\-OPT\-\d+/.test(interaction.customId)) {
+            await onPressPollButton(self, server, interaction)
+        }
+
+        if (/CL\-REASON\-\d+/.test(interaction.customId)) {
+            await onPressChangeReasonButton(self, server, interaction)
+        }
     }
 
     if (interaction.isAnySelectMenu()) {
@@ -349,6 +373,16 @@ const handler = async (
                 .slice(0, 25)
 
             await interaction.respond(tracks)
+        }
+    }
+
+    if (interaction.isModalSubmit()) {
+        if (/POLL\-\d+\-(true|false)\-(true|false)/.test(interaction.customId)) {
+            await createPoll(self, server, interaction)
+        }
+
+        if (/CL\-REASON\-\d+/.test(interaction.customId)) {
+            await onSubmitChangeReasonModal(self, server, interaction)
         }
     }
 

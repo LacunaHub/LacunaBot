@@ -5,7 +5,8 @@ import Lacuna from '../../../internals/Lacuna'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = (interaction.options?.getMember(t('commands.user.options.user.name')) || interaction.member) as GuildMember
+    const mention = (interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.user.options.user.name')) ||
+        interaction.member) as GuildMember
 
     const name = mention.nickname ? `${mention.user.tag} — ${mention.nickname}` : mention.user.tag
 

@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -8,7 +9,7 @@ export default {
     description: `commands.${name}.description`,
     options: [
         {
-            type: 'INTEGER',
+            type: ApplicationCommandOptionType.Integer,
             name: `commands.${name}.options.sorting.name`,
             description: `commands.${name}.options.sorting.description`,
             required: false,
@@ -24,7 +25,7 @@ export default {
             ]
         },
         {
-            type: 'INTEGER',
+            type: ApplicationCommandOptionType.Integer,
             name: `commands.${name}.options.page.name`,
             description: `commands.${name}.options.page.description`,
             required: false,
