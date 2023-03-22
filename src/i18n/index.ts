@@ -33,6 +33,7 @@ export function format(string: string, params?: any[] | { [key: string]: any }) 
 }
 
 export function t(locale: string, key: string, params?: any[] | { [key: string]: any }) {
+    locale = locale.split('-')[0]
     const string = resolveObjectPath(key, messages[locale] ?? messages.ru) ?? resolveObjectPath(key, messages.ru) ?? key
 
     if (string === key) {

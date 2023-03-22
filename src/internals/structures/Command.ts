@@ -1,4 +1,12 @@
-import { BaseGuildTextChannel, ChatInputCommandInteraction, ContextMenuCommandInteraction, GuildMember, Message, Team } from 'discord.js'
+import {
+    ApplicationCommandOptionType,
+    BaseGuildTextChannel,
+    ChatInputCommandInteraction,
+    ContextMenuCommandInteraction,
+    GuildMember,
+    Message,
+    Team
+} from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 import { snakeToPascalCase } from '../utility/Utils'
@@ -98,7 +106,7 @@ export default class Command {
     allowed(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
-        //if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
+        if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
 
         if (config) {
             if (
@@ -335,7 +343,7 @@ export interface CommandOptions {
     name: string
     pretty_name?: string
     description: string
-    type: string
+    type: ApplicationCommandOptionType
     options: CommandOption[]
     default_permission: boolean
     group?: 'GENERAL' | 'MODERATION' | 'MUSIC' | 'UTILITY'
@@ -349,7 +357,7 @@ export interface CommandOptions {
 }
 
 export interface CommandOption {
-    type: string
+    type: ApplicationCommandOptionType
     name: string
     description: string
     required: boolean

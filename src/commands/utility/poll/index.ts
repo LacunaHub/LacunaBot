@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType } from 'discord.js'
 import { createSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -8,12 +9,12 @@ export default {
     description: `commands.${name}.description`,
     options: [
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'create',
             description: `commands.${name}.create.description`,
             options: [
                 {
-                    type: 'INTEGER',
+                    type: ApplicationCommandOptionType.Integer,
                     name: `commands.${name}.create.options.quiz_mode.name`,
                     description: `commands.${name}.create.options.quiz_mode.description`,
                     choices: [
@@ -28,7 +29,7 @@ export default {
                     ]
                 },
                 {
-                    type: 'INTEGER',
+                    type: ApplicationCommandOptionType.Integer,
                     name: `commands.${name}.create.options.multiple_answers.name`,
                     description: `commands.${name}.create.options.multiple_answers.description`,
                     choices: [

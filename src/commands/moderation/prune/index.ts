@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -8,19 +9,19 @@ export default {
     description: `commands.${name}.description`,
     options: [
         {
-            type: 'INTEGER',
+            type: ApplicationCommandOptionType.Integer,
             name: `commands.${name}.options.amount.name`,
             description: `commands.${name}.options.amount.description`,
             required: true
         },
         {
-            type: 'USER',
+            type: ApplicationCommandOptionType.User,
             name: `commands.${name}.options.user.name`,
             description: `commands.${name}.options.user.description`,
             required: false
         },
         {
-            type: 'STRING',
+            type: ApplicationCommandOptionType.String,
             name: `commands.${name}.options.reason.name`,
             description: `commands.${name}.options.reason.description`,
             required: false

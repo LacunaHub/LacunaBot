@@ -6,12 +6,14 @@ import { caseLog, warnings } from '../../../modules/Moderation'
 export async function addSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(t('commands.warn.add.options.user.name')) as GuildMember
-    const reason = interaction.options?.getString(t('commands.warn.add.options.reason.name')) ?? '-'
+    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.warn.add.options.user.name')) as GuildMember
+    const reason = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.warn.add.options.reason.name')) ?? '-'
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.add.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.add.text_user_not_found', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -38,7 +40,9 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.ManageRoles)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -47,7 +51,9 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -70,13 +76,15 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 export async function removeSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(t('commands.warn.remove.options.user.name')) as GuildMember
-    const warn_id = interaction.options?.getString(t('commands.warn.remove.options.warn_id.name')) as string | number
-    const reason = interaction.options?.getString(t('commands.warn.remove.options.reason.name')) ?? '-'
+    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.warn.remove.options.user.name')) as GuildMember
+    const warn_id = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.warn.remove.options.warn_id.name')) as string | number
+    const reason = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.warn.remove.options.reason.name')) ?? '-'
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_user_not_found', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -85,7 +93,9 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!warn_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_warn_id', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_warn_id', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -96,7 +106,9 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!violator || !violator.violations.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_violator_or_violations', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_violator_or_violations', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -118,14 +130,18 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         )
 
         await interaction.editReply({
-            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warns_removed_all', { user: `**${(interaction.member as any).displayName}**` })}`
+            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warns_removed_all', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`
         })
     } else {
         const violation = violator.violations.find((v, i) => v.id == warn_id || i + 1 == warn_id)
 
         if (!violation) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_invalid_warn_id', { user: `**${(interaction.member as any).displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_invalid_warn_id', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
             })
 
             return false

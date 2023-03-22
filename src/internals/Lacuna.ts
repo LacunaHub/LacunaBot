@@ -1,6 +1,6 @@
 import { Shard as BridgeShard } from 'discord-cross-hosting'
 import { Client as ClusterClient } from 'discord-hybrid-sharding'
-import { ApplicationCommandOptionType, ApplicationCommandType, Client, ClientOptions, Collection, parseEmoji, PermissionsBitField } from 'discord.js'
+import { Client, ClientOptions, Collection, parseEmoji, PermissionsBitField } from 'discord.js'
 import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
 import { connect } from 'mongoose'
@@ -9,7 +9,7 @@ import { QuickDB } from 'quick.db'
 import db from '../database'
 import { ServerDocument } from '../database/schemas/Servers'
 import i18n from '../i18n'
-import Utils, { snakeToPascalCase } from '../internals/utility/Utils'
+import Utils from '../internals/utility/Utils'
 import locale from './locale'
 import logger from './Logger'
 import Command, { CommandOptions } from './structures/Command'
@@ -138,65 +138,10 @@ export default class Lacuna extends Client {
     }
 
     async updateApplicationCommands(server: ServerDocument) {
-        const t = this.i18n.t.bind(null, server.locale)
-
-        const slash = this.commands
-            .filter(c => c.is_slash_command)
-            .map(command => {
-                return {
-                    name: command.name,
-                    description: t(command.description),
-                    type: ApplicationCommandType.ChatInput,
-                    options:
-                        command.options?.map(option => {
-                            if (option.type === 'SUB_COMMAND')
-                                return {
-                                    ...option,
-                                    type: ApplicationCommandOptionType.Subcommand,
-                                    description: t(option.description),
-                                    options:
-                                        option.options?.map(opt => {
-                                            return {
-                                                ...opt,
-                                                type: ApplicationCommandOptionType[snakeToPascalCase(opt.type)],
-                                                name: t(opt.name),
-                                                description: t(opt.description),
-                                                choices:
-                                                    option.choices?.map(choice => {
-                                                        return { ...choice, name: t(choice.name) }
-                                                    }) ?? null
-                                            }
-                                        }) ?? []
-                                }
-
-                            return {
-                                ...option,
-                                type: ApplicationCommandOptionType[snakeToPascalCase(option.type)],
-                                name: t(option.name),
-                                description: t(option.description),
-                                choices:
-                                    option.choices?.map(choice => {
-                                        return { ...choice, name: t(choice.name) }
-                                    }) ?? null
-                            }
-                        }) ?? []
-                }
-            })
-
-        const context = this.commands
-            .filter(i => i.is_user_command || i.is_message_command)
-            .map(command => {
-                return {
-                    name: t(command.pretty_name),
-                    type: command.is_user_command ? ApplicationCommandType.User : ApplicationCommandType.Message
-                }
-            })
-
-        const custom = server.modules.custom_commands.map(i => i.command)
-
-        const commands = [...slash, ...context, ...custom]
-
-        return this.application.commands.set(commands as any, server._id)
+        return this.application.commands.set(
+            server.modules.custom_commands.map(i => i.command),
+            server._id
+        )
     }
 
     getMusicNodes() {

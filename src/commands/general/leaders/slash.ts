@@ -9,9 +9,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const t = self.i18n.t.bind(null, server.locale)
     const locale = self.i18n.locale(server.locale)
 
-    let sorting = interaction.options?.getInteger(t('commands.leaders.options.sorting.name')) ?? 1
-    let page: number = interaction.options?.getInteger(t('commands.leaders.options.page.name'))
-        ? interaction.options.getInteger(t('commands.leaders.options.page.name')) - 1
+    let sorting = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.leaders.options.sorting.name')) ?? 1
+    let page: number = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.leaders.options.page.name'))
+        ? interaction.options.getInteger(self.i18n.t(interaction.locale, 'commands.leaders.options.page.name')) - 1
         : 0
 
     const fields = []
@@ -28,7 +28,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (sorting == 1) {
         if (!server.modules.levels.active && !server.modules.levels.voice) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_levels_disabled', { user: `**${(interaction.member as any).displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_levels_disabled', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
             })
 
             return false
@@ -72,7 +74,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     name: `#${index + 1} ${username}`,
                     value: `${t('commands.leaders.text_level', {
                         level: level.experience.level
-                    })} → :sparkles: ${current_xp_format} – ${total_xp_format}\n:incoming_envelope: ${level.activity.total_messages} :microphone2: ${voice_time}`,
+                    })} → :sparkles: ${current_xp_format} – ${total_xp_format}\n:incoming_envelope: ${
+                        level.activity.total_messages
+                    } :microphone2: ${voice_time}`,
                     inline: true
                 })
             }
@@ -84,7 +88,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (sorting == 2) {
         if (!server.modules.economy.active) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', { user: `**${(interaction.member as any).displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
             })
 
             return false
@@ -97,7 +103,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!activities?.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_no_wallets', { user: `**${(interaction.member as any).displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_no_wallets', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
             })
 
             return false

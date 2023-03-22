@@ -37,10 +37,17 @@ const handler = async (
     interaction.member = await interaction.guild.members.fetch(interaction.user.id)
 
     if (interaction.isChatInputCommand()) {
-        const command = self.commands.find(c => c.is_slash_command && c.name == interaction.commandName)
+        const command = self.commands.find(c => c.is_slash_command && c.name === interaction.commandName)
         const customCommand = server.modules.custom_commands.find(i => i.id === interaction.commandId)
 
-        if (command) await command.executeSlash(server, interaction)
+        if (command) {
+            await command.executeSlash(server, interaction)
+
+            if (interaction.commandGuildId) {
+                await self.updateApplicationCommands(server)
+            }
+        }
+
         if (!command && customCommand) {
             const custom = new CustomCommand(customCommand, self, server, interaction)
 
@@ -50,7 +57,7 @@ const handler = async (
 
     if (interaction.isContextMenuCommand()) {
         const command = self.commands.find(
-            c => (c.is_message_command || c.is_user_command) && self.i18n.t(server.locale, c.pretty_name) == interaction.commandName
+            c => (c.is_message_command || c.is_user_command) && self.i18n.t(interaction.locale, c.pretty_name) === interaction.commandName
         )
 
         if (command) await command.executeContext(server, interaction)
