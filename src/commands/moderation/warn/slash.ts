@@ -6,8 +6,8 @@ import { caseLog, warnings } from '../../../modules/Moderation'
 export async function addSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.warn.add.options.user.name')) as GuildMember
-    const reason = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.warn.add.options.reason.name')) ?? '-'
+    const mention = interaction.options?.getMember(self.i18n.t('en', 'commands.warn.add.options.user.name')) as GuildMember
+    const reason = interaction.options?.getString(self.i18n.t('en', 'commands.warn.add.options.reason.name')) ?? '-'
 
     if (!mention) {
         await interaction.reply({
@@ -76,9 +76,9 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 export async function removeSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.warn.remove.options.user.name')) as GuildMember
-    const warn_id = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.warn.remove.options.warn_id.name')) as string | number
-    const reason = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.warn.remove.options.reason.name')) ?? '-'
+    const mention = interaction.options?.getMember(self.i18n.t('en', 'commands.warn.remove.options.user.name')) as GuildMember
+    const warn_id = interaction.options?.getString(self.i18n.t('en', 'commands.warn.remove.options.warn_id.name')) as string | number
+    const reason = interaction.options?.getString(self.i18n.t('en', 'commands.warn.remove.options.reason.name')) ?? '-'
 
     if (!mention) {
         await interaction.reply({

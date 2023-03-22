@@ -9,9 +9,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const t = self.i18n.t.bind(null, server.locale)
     const locale = self.i18n.locale(server.locale)
 
-    let sorting = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.leaders.options.sorting.name')) ?? 1
-    let page: number = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.leaders.options.page.name'))
-        ? interaction.options.getInteger(self.i18n.t(interaction.locale, 'commands.leaders.options.page.name')) - 1
+    let sorting = interaction.options?.getInteger(self.i18n.t('en', 'commands.leaders.options.sorting.name')) ?? 1
+    let page: number = interaction.options?.getInteger(self.i18n.t('en', 'commands.leaders.options.page.name'))
+        ? interaction.options.getInteger(self.i18n.t('en', 'commands.leaders.options.page.name')) - 1
         : 0
 
     const fields = []

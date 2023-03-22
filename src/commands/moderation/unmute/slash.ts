@@ -6,8 +6,8 @@ import { caseLog } from '../../../modules/Moderation'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.unmute.options.user.name')) as GuildMember
-    const reason = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.unmute.options.reason.name')) ?? '-'
+    const mention = interaction.options?.getMember(self.i18n.t('en', 'commands.unmute.options.user.name')) as GuildMember
+    const reason = interaction.options?.getString(self.i18n.t('en', 'commands.unmute.options.reason.name')) ?? '-'
 
     if (!mention) {
         await interaction.reply({

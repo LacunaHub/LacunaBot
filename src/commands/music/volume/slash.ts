@@ -21,7 +21,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     let volume: number
 
     if (interaction.isChatInputCommand()) {
-        volume = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.volume.options.volume.name'))
+        volume = interaction.options?.getInteger(self.i18n.t('en', 'commands.volume.options.volume.name'))
     } else if (interaction.isButton()) {
         if (interaction.customId === 'PLAYER-VOLUME-DOWN') {
             volume = player.volume - 10

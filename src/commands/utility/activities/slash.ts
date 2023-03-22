@@ -6,8 +6,8 @@ import Levels from '../../../modules/Levels'
 export async function setLevelSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.activities.set-level.options.user.name')) as GuildMember
-    const set_level = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.activities.set-level.options.level.name'))
+    const mention = interaction.options?.getMember(self.i18n.t('en', 'commands.activities.set-level.options.user.name')) as GuildMember
+    const set_level = interaction.options?.getInteger(self.i18n.t('en', 'commands.activities.set-level.options.level.name'))
 
     if (!mention) {
         await interaction.reply({
@@ -103,8 +103,8 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     const mention = interaction.options?.getMember(
         self.i18n.t(interaction.locale, 'commands.activities.set-wallet-balance.options.user.name')
     ) as GuildMember
-    let amount = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.activities.set-wallet-balance.options.amount.name'))
-    const currency = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.activities.set-wallet-balance.options.currency.name'))
+    let amount = interaction.options?.getInteger(self.i18n.t('en', 'commands.activities.set-wallet-balance.options.amount.name'))
+    const currency = interaction.options?.getString(self.i18n.t('en', 'commands.activities.set-wallet-balance.options.currency.name'))
 
     if (!mention) {
         await interaction.reply({
@@ -213,8 +213,8 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
     const mention = interaction.options?.getMember(
         self.i18n.t(interaction.locale, 'commands.activities.add-wallet-balance.options.user.name')
     ) as GuildMember
-    let amount = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.activities.add-wallet-balance.options.amount.name'))
-    const currency = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.activities.add-wallet-balance.options.currency.name'))
+    let amount = interaction.options?.getInteger(self.i18n.t('en', 'commands.activities.add-wallet-balance.options.amount.name'))
+    const currency = interaction.options?.getString(self.i18n.t('en', 'commands.activities.add-wallet-balance.options.currency.name'))
 
     if (!mention) {
         await interaction.reply({
@@ -333,8 +333,8 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
         return false
     }
 
-    const member = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.activities.reset-level.options.user.name')) as GuildMember
-    const member_id = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.activities.reset-level.options.user_id.name'))
+    const member = interaction.options?.getMember(self.i18n.t('en', 'commands.activities.reset-level.options.user.name')) as GuildMember
+    const member_id = interaction.options?.getString(self.i18n.t('en', 'commands.activities.reset-level.options.user_id.name'))
 
     if (member_id == 'all') {
         const row = new ActionRowBuilder<ButtonBuilder>().setComponents(
@@ -413,8 +413,8 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
 export async function resetLevelSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const member = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.activities.reset-level.options.user.name')) as GuildMember
-    const member_id = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.activities.reset-level.options.user_id.name'))
+    const member = interaction.options?.getMember(self.i18n.t('en', 'commands.activities.reset-level.options.user.name')) as GuildMember
+    const member_id = interaction.options?.getString(self.i18n.t('en', 'commands.activities.reset-level.options.user_id.name'))
 
     if (!member && !member_id) {
         await interaction.reply({
