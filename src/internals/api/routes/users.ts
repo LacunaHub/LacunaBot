@@ -53,7 +53,7 @@ async function getBills(ctx: Context) {
     const user_id = ctx.request.headers['user-id'] as string
     if (!user_id) ctx.throw(400)
 
-    const bills = await db.bills.find({ 'custom_fields.user_id': user_id })
+    const bills = await db.bills.find({ 'custom_fields.user_id': user_id, type: { $ne: 'DISCORD_NITRO_BOOST' } })
 
     ctx.status = 200
     ctx.body = bills.reverse()

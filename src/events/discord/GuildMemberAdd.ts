@@ -1,6 +1,7 @@
 import { Events, GuildMember } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
+import { support_server_id } from '../../internals/utility/BillUtils'
 import { newbiesModeration, nicknamesModeration } from '../../modules/Automoder'
 import Greeting from '../../modules/Greeting'
 import { GuildMemberAdd } from '../../modules/Logs'
@@ -18,7 +19,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     await nicknamesModeration(self, server, member)
     await newbiesModeration(self, server, member)
 
-    if (member.guild.id === '740586549145763960') {
+    if (member.guild.id === support_server_id) {
         const user = await self.db.users.findOne({ _id: member.id })
 
         if (user?.premium?.available) {

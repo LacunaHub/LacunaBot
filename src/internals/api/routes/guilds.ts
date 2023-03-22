@@ -94,7 +94,10 @@ async function getSettings(ctx: Context) {
     ctx.body = {
         _id: server._id,
         locale: server.locale,
-        premium: server.server.premium,
+        premium: {
+            available: server.server.premium.available,
+            will_expire_on: server.server.premium.will_expire_on
+        },
         server: {
             bot_expert_roles: server.server.bot_expert_roles
         },
@@ -186,7 +189,10 @@ async function updateSettings(ctx: Context) {
     ctx.body = {
         _id: server._id,
         locale: server.locale,
-        premium: server.server.premium,
+        premium: {
+            available: server.server.premium.available,
+            will_expire_on: server.server.premium.will_expire_on
+        },
         server: {
             bot_expert_roles: server.server.bot_expert_roles
         },

@@ -62,11 +62,17 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                     const previous = guild.moderation.case_log.types[type]
 
                     if (JSON.stringify(current) !== JSON.stringify(previous)) {
-                        updateData[`moderation.case_log.types.${type}`] = {
+                        const caseLogTypeData = {
                             active: current.active ?? previous.active,
-                            channel_id: current.channel_id ?? previous.channel_id,
-                            custom_dm_message: current.custom_dm_message ?? previous.custom_dm_message,
-                            dm_message: {
+                            channel_id: current.channel_id ?? previous.channel_id
+                        }
+
+                        if (typeof previous.custom_dm_message !== 'undefined') {
+                            caseLogTypeData['custom_dm_message'] = current.custom_dm_message ?? previous.custom_dm_message
+                        }
+
+                        if (typeof previous.dm_message !== 'undefined') {
+                            caseLogTypeData['dm_message'] = {
                                 content: current.dm_message?.content ?? previous.dm_message.content,
                                 embed: {
                                     active: current.dm_message?.embed?.active ?? previous.dm_message.embed.active,
@@ -130,6 +136,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                                 }
                             }
                         }
+
+                        updateData[`moderation.case_log.types.${type}`] = caseLogTypeData
                     }
                 }
             }
