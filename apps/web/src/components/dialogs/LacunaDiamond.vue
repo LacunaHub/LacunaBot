@@ -1,12 +1,24 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
     <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+      <q-card-section v-if="confirmError">
+        <q-banner class="rounded-lg bg-dark-2" dense>
+          <span>
+            {{ confirmError }}
+          </span>
+
+          <template #avatar>
+            <q-icon name="error" color="negative"></q-icon>
+          </template>
+        </q-banner>
+      </q-card-section>
+
       <q-card-section v-if="guild.premium.available">
         <q-banner class="rounded-lg bg-dark-2" dense>
           <span v-if="guild.premium.will_expire_on">
             {{
               $t('lacuna_diamond.has_subscription', {
-                date: $dt.fromMillis(guild.premium.will_expire_on).toFormat('DD')
+                date: $dt.fromMillis(guild.premium.will_expire_on).toFormat('ff')
               })
             }}
           </span>
@@ -43,7 +55,7 @@
         </div>
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section v-if="provider !== 'DISCORD_NITRO_BOOST'">
         <div>
           {{ $t('lacuna_diamond.select_plan') }}
         </div>
@@ -68,6 +80,55 @@
             </div>
           </q-tab>
         </q-tabs>
+      </q-card-section>
+
+      <q-card-section v-else>
+        <q-card class="rounded-lg bg-dark-2" flat>
+          <q-card-section>
+            <ol class="q-pl-md q-my-none" type="1">
+              <i18n-t keypath="lacuna_diamond.dnb_step_1" tag="li">
+                <template #server>
+                  <a class="origin" href="https://discord.gg/srfhGjbKce" target="_blank">
+                    {{ $t('support_server').toLowerCase() }}
+                  </a>
+                </template>
+              </i18n-t>
+              <i18n-t keypath="lacuna_diamond.dnb_step_2" tag="li">
+                <template #article>
+                  <a
+                    class="origin"
+                    href="https://support.discord.com/hc/articles/360028038352-Server-Boosting-FAQ-#h_9dfb44db-c394-4339-863b-e6d1e3fb0469"
+                    target="_blank"
+                  >
+                    {{ $t('lacuna_diamond.dnb_step_2_article') }}
+                  </a>
+                </template>
+              </i18n-t>
+              <i18n-t keypath="lacuna_diamond.dnb_step_3" tag="li">
+                <template #server>
+                  <a class="origin" href="https://discord.gg/srfhGjbKce" target="_blank">
+                    {{ $t('support_server').toLowerCase() }}
+                  </a>
+                </template>
+              </i18n-t>
+              <li>
+                {{ $t('lacuna_diamond.dnb_step_4') }}
+              </li>
+            </ol>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <q-banner class="rounded-lg bg-dark-1" dense>
+              <span>
+                {{ $t('lacuna_diamond.dnb_bonuses_info') }}
+              </span>
+
+              <template #avatar>
+                <q-icon name="info" color="info"></q-icon>
+              </template>
+            </q-banner>
+          </q-card-section>
+        </q-card>
       </q-card-section>
 
       <q-card-section>
@@ -117,10 +178,11 @@
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('lacuna_diamond.pay')"
+              :label="$t(`lacuna_diamond.${provider === 'DISCORD_NITRO_BOOST' ? 'check' : 'pay'}`)"
               unelevated
               @click="onConfirm"
               :loading="confirmLoading"
+              :disable="guild.premium.available && guild.premium.will_expire_on === 0"
               no-caps
               color="primary"
             >
@@ -150,6 +212,7 @@ import rankingImg from 'src/assets/ranking.svg'
 import respectImg from 'src/assets/respect.svg'
 import qiwiLogo from 'src/assets/qiwi-logo.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
+import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
 
 export default defineComponent({
   name: 'LacunaDiamond',
@@ -162,7 +225,7 @@ export default defineComponent({
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
     let confirmLoading = ref(false),
-      confirmError = ref(false),
+      confirmError = ref(null),
       tier = ref(0),
       provider = ref('QIWI')
 
@@ -184,18 +247,23 @@ export default defineComponent({
             }
           })
           .then(response => {
-            const payUrl = response.data
+            event('checkout_progress', { event_label: provider.value })
 
-            if (payUrl) {
-              event('checkout_progress', { event_label: provider.value })
-              window.open(payUrl, '_blank')
+            if (provider.value === 'DISCORD_NITRO_BOOST') {
+              window.location.reload()
+            } else {
+              const payUrl = response.data
+
+              if (payUrl) {
+                window.open(payUrl, '_blank')
+              }
             }
 
             onDialogOK()
           })
           .catch(err => {
             console.error(err)
-            confirmError.value = true
+            confirmError.value = err.response.data
           })
           .finally(() => (confirmLoading.value = false))
       },
@@ -233,7 +301,8 @@ export default defineComponent({
       ],
       paymentProviders: [
         { name: 'QIWI', value: 'QIWI', icon: qiwiLogo },
-        { name: 'PayPal', value: 'PAYPAL', icon: paypalLogo }
+        { name: 'PayPal', value: 'PAYPAL', icon: paypalLogo },
+        { name: 'Discord Nitro Boost', value: 'DISCORD_NITRO_BOOST', icon: discordNitroBoost }
       ]
     }
   },
