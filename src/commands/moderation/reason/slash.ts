@@ -5,8 +5,8 @@ import Lacuna from '../../../internals/Lacuna'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const case_id = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.reason.options.case_id.name'))
-    const reason = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.reason.options.reason.name'))
+    const case_id = interaction.options?.getInteger(self.i18n.t('en', 'commands.reason.options.case_id.name'))
+    const reason = interaction.options?.getString(self.i18n.t('en', 'commands.reason.options.reason.name'))
 
     if (!case_id) {
         await interaction.reply({

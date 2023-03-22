@@ -16,7 +16,7 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
         return false
     }
 
-    const mention = (interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.wallet.balance.options.user.name')) ??
+    const mention = (interaction.options?.getMember(self.i18n.t('en', 'commands.wallet.balance.options.user.name')) ??
         interaction.member) as GuildMember
     const user = await self.db.users.findOne({ _id: mention.id })
     let wallet = user?.activities?.wallets?.find(i => i.guild_id == interaction.guildId)
@@ -66,9 +66,9 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
-    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.wallet.transfer.options.user.name')) as GuildMember
-    const amount = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.wallet.transfer.options.amount.name'))
-    const currency = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.wallet.transfer.options.currency.name'))
+    const mention = interaction.options?.getMember(self.i18n.t('en', 'commands.wallet.transfer.options.user.name')) as GuildMember
+    const amount = interaction.options?.getInteger(self.i18n.t('en', 'commands.wallet.transfer.options.amount.name'))
+    const currency = interaction.options?.getString(self.i18n.t('en', 'commands.wallet.transfer.options.currency.name'))
 
     if (!mention) {
         await interaction.reply({

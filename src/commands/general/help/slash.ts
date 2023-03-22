@@ -6,7 +6,7 @@ import { commandOptionTypes } from '../../../internals/utility/Constants'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const command_name: string = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.help.options.command.name'))
+    const command_name: string = interaction.options?.getString(self.i18n.t('en', 'commands.help.options.command.name'))
 
     if (!command_name) {
         const commands = self.commands.filter(c => !c.private && !(c.premium_only && !server.server.premium.available))

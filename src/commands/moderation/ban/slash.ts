@@ -10,9 +10,9 @@ import Replacer from '../../../modules/Replacer'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.ban.options.user.name')) as GuildMember
-    let duration = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.ban.options.duration.name')) as any
-    let reason = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.ban.options.reason.name')) ?? '-'
+    const mention = interaction.options?.getMember(self.i18n.t('en', 'commands.ban.options.user.name')) as GuildMember
+    let duration = interaction.options?.getString(self.i18n.t('en', 'commands.ban.options.duration.name')) as any
+    let reason = interaction.options?.getString(self.i18n.t('en', 'commands.ban.options.reason.name')) ?? '-'
 
     duration = duration && ms(duration) ? ms(duration) : null
 
