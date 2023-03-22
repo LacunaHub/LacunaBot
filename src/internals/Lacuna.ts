@@ -10,7 +10,6 @@ import db from '../database'
 import { ServerDocument } from '../database/schemas/Servers'
 import i18n from '../i18n'
 import Utils, { snakeToPascalCase } from '../internals/utility/Utils'
-import locale from './locale'
 import logger from './Logger'
 import Command, { CommandOptions } from './structures/Command'
 import Event, { EventOptions } from './structures/Event'
@@ -30,7 +29,6 @@ export default class Lacuna extends Client {
     public giveaways: Collection<string, Giveaway>
     public tempbans: Collection<string, TemporaryBan>
     public temproles: Collection<string, TemporaryRole>
-    public translator: typeof locale
     public i18n: typeof i18n
     public utils: typeof Utils
     public PermissionFlags: typeof PermissionsBitField.Flags
@@ -59,8 +57,6 @@ export default class Lacuna extends Client {
         this.tempbans = new Collection()
 
         this.temproles = new Collection()
-
-        this.translator = locale
 
         this.i18n = i18n
 
