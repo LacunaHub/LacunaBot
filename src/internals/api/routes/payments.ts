@@ -3,6 +3,7 @@ import { Context } from 'koa'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import { addDiamond } from '../../utility/BillUtils'
+import { NitroBoost } from '../../utility/DiscordNitroBoost'
 import { APIOrder, captureOrder, Order as PayPalOrder } from '../../utility/PayPal'
 import { Bill as QiwiBill } from '../../utility/Qiwi'
 import { authorize } from '../utility/Authorize'
@@ -18,13 +19,13 @@ async function createPayment(ctx: Context) {
     const { tier, provider, guild_id, guild_name } = ctx.request.body
 
     if (isNaN(tier)) ctx.throw(400)
-    if (!['QIWI', 'PAYPAL'].includes(provider)) ctx.throw(400, 'Unknown Payment Provider')
+    if (!['QIWI', 'PAYPAL', 'DISCORD_NITRO_BOOST'].includes(provider)) ctx.throw(400, 'Unknown Payment Provider')
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
     if (!server || server.server.blocked) ctx.throw(404)
 
     const userBills = await db.bills.find({ 'custom_fields.user_id': user_id })
-    if (userBills.filter(bill => Date.now() - bill.creation_timestamp < 300000).length >= 2) ctx.throw(425)
+    if (userBills.filter(bill => Date.now() - bill.creation_timestamp < 300000).length >= 5) ctx.throw(425)
 
     const { diamondPrices } = await db.json.get()
     const data = {
@@ -69,6 +70,20 @@ async function createPayment(ctx: Context) {
 
         ctx.status = 200
         ctx.body = approveLink.href
+    }
+
+    if (provider === 'DISCORD_NITRO_BOOST') {
+        if (server.server.premium.available) ctx.throw(400, 'There is already a premium on this server')
+
+        data.amount.currency = 'DNB'
+        data.amount.value = 1
+
+        const nitroBoost = new NitroBoost(data)
+        const isNitroBooster = await nitroBoost.create()
+
+        if (!isNitroBooster) ctx.throw(400, 'Could not find nitro boost on our support server')
+
+        ctx.status = 204
     }
 }
 

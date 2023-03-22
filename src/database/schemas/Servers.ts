@@ -9,7 +9,8 @@ export default model<ServerDocument>(
             server: {
                 premium: {
                     available: { type: Boolean, default: false },
-                    will_expire_on: { type: Number, default: 0 }
+                    will_expire_on: { type: Number, default: 0 },
+                    bill_id: { type: String, default: null }
                 },
                 blocked: { type: Boolean, default: false },
                 bot_expert_roles: { type: Array, default: [] }
@@ -774,6 +775,7 @@ export interface ServerDocument extends Document {
         premium: {
             available: boolean
             will_expire_on: number
+            bill_id?: string
         }
         blocked: boolean
         bot_expert_roles: string[]
