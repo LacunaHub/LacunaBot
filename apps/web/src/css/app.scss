@@ -20,6 +20,11 @@ p {
 
 a {
   color: $primary;
+  text-decoration: none;
+}
+
+a.origin:hover {
+  text-decoration: underline;
 }
 
 /* OVERWRITE FRAMEWORK STYLES */

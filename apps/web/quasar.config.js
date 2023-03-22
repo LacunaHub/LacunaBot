@@ -64,7 +64,7 @@ module.exports = configure(function (ctx) {
             // publicPath: '/',
             // analyze: true,
             env: {
-                API: ctx.dev ? 'http://192.168.1.104:3000' : 'https://api.voidlacuna.ru',
+                API: ctx.dev ? 'http://192.168.1.108:3000' : 'https://api.voidlacuna.ru',
                 GTAG: 'G-881ZHWECYQ'
             },
             // rawDefine: {}
