@@ -49,27 +49,18 @@
         <q-card-section>
           <q-banner class="rounded-lg bg-dark-2" dense>
             <span>
-              {{
-                $t(
-                  guild.guild.app_commands_registered
-                    ? 'pages.guild.cm_app_commands_refresh'
-                    : 'pages.guild.cm_no_registered_app_commands'
-                )
-              }}
+              {{ $t('pages.guild.cm_app_commands_refresh') }}
             </span>
 
             <template #avatar>
-              <q-icon
-                :name="guild.guild.app_commands_registered ? 'info' : 'error'"
-                :color="guild.guild.app_commands_registered ? 'info' : 'warning'"
-              ></q-icon>
+              <q-icon name="info" color="info"></q-icon>
             </template>
 
             <template #action>
               <q-btn
                 unelevated
                 color="primary"
-                :label="$t(guild.guild.app_commands_registered ? 'refresh' : 'try_again')"
+                :label="$t('refresh')"
                 :loading="updateCommandsLoading"
                 @click="updateAppCommands"
               >
@@ -141,9 +132,6 @@ export default defineComponent({
 
       interfaces.guilds
         .updateApplicationCommands(this.guild._id)
-        .then(() => {
-          this.guild.guild.app_commands_registered = true
-        })
         .catch(err => {
           console.error(err)
         })
