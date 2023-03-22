@@ -6,8 +6,10 @@ import Lacuna from '../../../internals/Lacuna'
 export async function createSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const quizMode = Boolean(interaction.options?.getInteger(t('commands.poll.create.options.quiz_mode.name')))
-    const multipleAnswers = Boolean(interaction.options?.getInteger(t('commands.poll.create.options.multiple_answers.name')))
+    const quizMode = Boolean(interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.poll.create.options.quiz_mode.name')))
+    const multipleAnswers = Boolean(
+        interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.poll.create.options.multiple_answers.name'))
+    )
 
     const modal = new ModalBuilder()
         .setCustomId(`POLL-${interaction.id}-${quizMode}-${multipleAnswers}`)

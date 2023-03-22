@@ -5,11 +5,13 @@ import Lacuna from '../../../internals/Lacuna'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(t('commands.violations.options.user.name')) as GuildMember
+    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.violations.options.user.name')) as GuildMember
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.violations.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.violations.text_user_not_found', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -20,7 +22,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!violator || !violator.violations.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.violations.text_no_violations', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.violations.text_no_violations', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -41,7 +45,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             { name: t('commands.violations.text_total_violations'), value: violator.violations.length.toString(), inline: true },
             {
                 name: t('commands.violations.text_last_10_violations'),
-                value: last_10_violations.map((v, i) => `${i + 1}. **${v.reason || '-'}** – <t:${Math.round(v.timestamp / 1000)}:R> \`${v.id}\``).join('\n')
+                value: last_10_violations
+                    .map((v, i) => `${i + 1}. **${v.reason || '-'}** – <t:${Math.round(v.timestamp / 1000)}:R> \`${v.id}\``)
+                    .join('\n')
             }
         ])
 

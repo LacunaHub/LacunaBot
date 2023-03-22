@@ -6,13 +6,15 @@ import { caseLog } from '../../../modules/Moderation'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const amount = interaction.options?.getInteger(t('commands.prune.options.amount.name'))
-    const mention = interaction.options?.getMember(t('commands.prune.options.user.name')) as GuildMember
-    const reason = interaction.options?.getString(t('commands.prune.options.reason.name')) ?? '-'
+    const amount = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.prune.options.amount.name'))
+    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.prune.options.user.name')) as GuildMember
+    const reason = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.prune.options.reason.name')) ?? '-'
 
     if (!amount) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.prune.text_no_amount_argument', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.prune.text_no_amount_argument', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -21,7 +23,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (Math.sign(amount) != 1 || amount < 2 || amount > 100) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.prune.text_invalid_amount_argument', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.prune.text_invalid_amount_argument', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -36,12 +40,18 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         const deleted = await (interaction.channel as BaseGuildTextChannel).bulkDelete(messages, true)
         await interaction.editReply({
-            content: `${self._emojis.OK} | ${t('commands.prune.text_messages_pruned', { user: `**${(interaction.member as any).displayName}**`, amount: deleted.size })}`
+            content: `${self._emojis.OK} | ${t('commands.prune.text_messages_pruned', {
+                user: `**${(interaction.member as any).displayName}**`,
+                amount: deleted.size
+            })}`
         })
     } else {
         const deleted = await (interaction.channel as BaseGuildTextChannel).bulkDelete(amount, true)
         await interaction.editReply({
-            content: `${self._emojis.OK} | ${t('commands.prune.text_messages_pruned', { user: `**${(interaction.member as any).displayName}**`, amount: deleted.size })}`
+            content: `${self._emojis.OK} | ${t('commands.prune.text_messages_pruned', {
+                user: `**${(interaction.member as any).displayName}**`,
+                amount: deleted.size
+            })}`
         })
     }
 

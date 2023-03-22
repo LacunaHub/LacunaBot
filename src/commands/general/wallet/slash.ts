@@ -7,14 +7,17 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
         return false
     }
 
-    const mention = (interaction.options?.getMember(t('commands.wallet.balance.options.user.name')) ?? interaction.member) as GuildMember
+    const mention = (interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.wallet.balance.options.user.name')) ??
+        interaction.member) as GuildMember
     const user = await self.db.users.findOne({ _id: mention.id })
     let wallet = user?.activities?.wallets?.find(i => i.guild_id == interaction.guildId)
 
@@ -54,20 +57,24 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
         return false
     }
 
-    const mention = interaction.options?.getMember(t('commands.wallet.transfer.options.user.name')) as GuildMember
-    const amount = interaction.options?.getInteger(t('commands.wallet.transfer.options.amount.name'))
-    const currency = interaction.options?.getString(t('commands.wallet.transfer.options.currency.name'))
+    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.wallet.transfer.options.user.name')) as GuildMember
+    const amount = interaction.options?.getInteger(self.i18n.t(interaction.locale, 'commands.wallet.transfer.options.amount.name'))
+    const currency = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.wallet.transfer.options.currency.name'))
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_no_mention', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_no_mention', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -76,7 +83,9 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!amount) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_no_amount', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_no_amount', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -103,7 +112,9 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!transaction_currency || transaction_currency.amount < amount) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_insufficient_funds', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_insufficient_funds', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 

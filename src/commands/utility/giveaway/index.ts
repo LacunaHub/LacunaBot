@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType } from 'discord.js'
 import { createSlash, endSlash, removeSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -8,30 +9,30 @@ export default {
     description: `commands.${name}.description`,
     options: [
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'create',
             description: `commands.${name}.create.description`,
             options: [
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.create.options.prize.name`,
                     description: `commands.${name}.create.options.prize.description`,
                     required: true
                 },
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.create.options.duration.name`,
                     description: `commands.${name}.create.options.duration.description`,
                     required: true
                 },
                 {
-                    type: 'INTEGER',
+                    type: ApplicationCommandOptionType.Integer,
                     name: `commands.${name}.create.options.winners_amount.name`,
                     description: `commands.${name}.create.options.winners_amount.description`,
                     required: false
                 },
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.create.options.sponsor.name`,
                     description: `commands.${name}.create.options.sponsor.description`,
                     required: false
@@ -39,12 +40,12 @@ export default {
             ]
         },
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'remove',
             description: `commands.${name}.remove.description`,
             options: [
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.remove.options.message_id.name`,
                     description: `commands.${name}.remove.options.message_id.description`,
                     required: true
@@ -52,12 +53,12 @@ export default {
             ]
         },
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'end',
             description: `commands.${name}.end.description`,
             options: [
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.end.options.message_id.name`,
                     description: `commands.${name}.end.options.message_id.description`,
                     required: true

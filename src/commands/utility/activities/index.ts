@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType } from 'discord.js'
 import { addWalletBalanceSlash, resetLevelSlash, resetWalletSlash, setLevelSlash, setWalletBalanceSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -8,18 +9,18 @@ export default {
     description: `commands.${name}.description`,
     options: [
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'set-level',
             description: `commands.${name}.set-level.description`,
             options: [
                 {
-                    type: 'USER',
+                    type: ApplicationCommandOptionType.User,
                     name: `commands.${name}.set-level.options.user.name`,
                     description: `commands.${name}.set-level.options.user.description`,
                     required: true
                 },
                 {
-                    type: 'INTEGER',
+                    type: ApplicationCommandOptionType.Integer,
                     name: `commands.${name}.set-level.options.level.name`,
                     description: `commands.${name}.set-level.options.level.description`,
                     required: true,
@@ -28,18 +29,18 @@ export default {
             ]
         },
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'add-wallet-balance',
             description: `commands.${name}.add-wallet-balance.description`,
             options: [
                 {
-                    type: 'USER',
+                    type: ApplicationCommandOptionType.User,
                     name: `commands.${name}.add-wallet-balance.options.user.name`,
                     description: `commands.${name}.add-wallet-balance.options.user.description`,
                     required: true
                 },
                 {
-                    type: 'INTEGER',
+                    type: ApplicationCommandOptionType.Integer,
                     name: `commands.${name}.add-wallet-balance.options.amount.name`,
                     description: `commands.${name}.add-wallet-balance.options.amount.description`,
                     required: true,
@@ -47,7 +48,7 @@ export default {
                     max_value: Math.pow(2, 31) - 1
                 },
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.add-wallet-balance.options.currency.name`,
                     description: `commands.${name}.add-wallet-balance.options.currency.description`,
                     required: false
@@ -55,18 +56,18 @@ export default {
             ]
         },
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'set-wallet-balance',
             description: `commands.${name}.set-wallet-balance.description`,
             options: [
                 {
-                    type: 'USER',
+                    type: ApplicationCommandOptionType.User,
                     name: `commands.${name}.set-wallet-balance.options.user.name`,
                     description: `commands.${name}.set-wallet-balance.options.user.description`,
                     required: true
                 },
                 {
-                    type: 'INTEGER',
+                    type: ApplicationCommandOptionType.Integer,
                     name: `commands.${name}.set-wallet-balance.options.amount.name`,
                     description: `commands.${name}.set-wallet-balance.options.amount.description`,
                     required: true,
@@ -74,7 +75,7 @@ export default {
                     max_value: Math.pow(2, 31) - 1
                 },
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.set-wallet-balance.options.currency.name`,
                     description: `commands.${name}.set-wallet-balance.options.currency.description`,
                     required: false
@@ -82,18 +83,18 @@ export default {
             ]
         },
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'reset-wallet',
             description: `commands.${name}.reset-wallet.description`,
             options: [
                 {
-                    type: 'USER',
+                    type: ApplicationCommandOptionType.User,
                     name: `commands.${name}.reset-wallet.options.user.name`,
                     description: `commands.${name}.reset-wallet.options.user.description`,
                     required: false
                 },
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.reset-wallet.options.user_id.name`,
                     description: `commands.${name}.reset-wallet.options.user_id.description`,
                     required: false
@@ -101,18 +102,18 @@ export default {
             ]
         },
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'reset-level',
             description: `commands.${name}.reset-level.description`,
             options: [
                 {
-                    type: 'USER',
+                    type: ApplicationCommandOptionType.User,
                     name: `commands.${name}.reset-level.options.user.name`,
                     description: `commands.${name}.reset-level.options.user.description`,
                     required: false
                 },
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.reset-level.options.user_id.name`,
                     description: `commands.${name}.reset-level.options.user_id.description`,
                     required: false

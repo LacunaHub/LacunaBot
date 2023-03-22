@@ -10,9 +10,9 @@ import Replacer from '../../../modules/Replacer'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(t('commands.ban.options.user.name')) as GuildMember
-    let duration = interaction.options?.getString(t('commands.ban.options.duration.name')) as any
-    let reason = interaction.options?.getString(t('commands.ban.options.reason.name')) ?? '-'
+    const mention = interaction.options?.getMember(self.i18n.t(interaction.locale, 'commands.ban.options.user.name')) as GuildMember
+    let duration = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.ban.options.duration.name')) as any
+    let reason = interaction.options?.getString(self.i18n.t(interaction.locale, 'commands.ban.options.reason.name')) ?? '-'
 
     duration = duration && ms(duration) ? ms(duration) : null
 
@@ -54,7 +54,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.BanMembers)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -63,7 +65,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
             ephemeral: true
         })
 

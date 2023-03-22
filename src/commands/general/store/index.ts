@@ -1,3 +1,4 @@
+import { ApplicationCommandOptionType } from 'discord.js'
 import { buySlash, itemsSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -8,12 +9,12 @@ export default {
     description: `commands.${name}.description`,
     options: [
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'buy',
             description: `commands.${name}.buy.description`,
             options: [
                 {
-                    type: 'STRING',
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.buy.options.sku.name`,
                     description: `commands.${name}.buy.options.sku.description`,
                     required: true
@@ -21,12 +22,12 @@ export default {
             ]
         },
         {
-            type: 'SUB_COMMAND',
+            type: ApplicationCommandOptionType.Subcommand,
             name: 'items',
             description: `commands.${name}.items.description`,
             options: [
                 {
-                    type: 'INTEGER',
+                    type: ApplicationCommandOptionType.Integer,
                     name: `commands.${name}.items.options.page.name`,
                     description: `commands.${name}.items.options.page.description`,
                     required: false,
