@@ -5,6 +5,9 @@ import { bridgeClient } from '../Cluster'
 import Lacuna from '../Lacuna'
 import logger from '../Logger'
 
+const totalShards = Number(process.env.DISCORD_CLIENT_TOTAL_SHARDS)
+const shardsPerCluster = Number(process.env.DISCORD_CLIENT_SHARDS_PER_CLUSTER)
+
 export function scheduleStatsCollect() {
     const rule = new RecurrenceRule()
     rule.minute = new Range(0, 59, 5)
@@ -22,6 +25,9 @@ export function scheduleStatsCollect() {
             }
         })
         const flatStats = stats.flat()
+
+        // check if all shards are spawned
+        if (flatStats.length < totalShards / shardsPerCluster) return
 
         const guilds: number = flatStats.reduce((a, b) => a + b.guilds, 0)
         const pings: number[] = flatStats.map(i => i.ping)
