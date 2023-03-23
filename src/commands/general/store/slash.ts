@@ -28,7 +28,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
-    const sku = interaction.options?.getString(self.i18n.t('en', 'commands.store.buy.options.sku.name'))
+    const sku = interaction.options?.getString('sku')
 
     if (!sku) {
         await interaction.reply({
@@ -122,9 +122,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
     await interaction.deferReply({ ephemeral: true })
 
-    let page: number = interaction.options?.getInteger(self.i18n.t('en', 'commands.store.items.options.page.name'))
-        ? interaction.options.getInteger(self.i18n.t('en', 'commands.store.items.options.page.name')) - 1
-        : 0
+    let page: number = interaction.options?.getInteger('page') ? interaction.options.getInteger('page') - 1 : 0
     const chunks: Array<EconomyStoreItem[]> = chunkArray(
         server.modules.economy.store.items
             .slice(0, server.server.premium.available ? 200 : 50)

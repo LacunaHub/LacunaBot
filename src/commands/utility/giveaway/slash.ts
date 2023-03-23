@@ -8,10 +8,10 @@ import { truncateString } from '../../../internals/utility/Utils'
 export async function createSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    let prize = interaction.options?.getString(self.i18n.t('en', 'commands.giveaway.create.options.prize.name'))
-    let duration = interaction.options?.getString(self.i18n.t('en', 'commands.giveaway.create.options.duration.name')) as any
-    let winners = interaction.options?.getInteger(self.i18n.t('en', 'commands.giveaway.create.options.winners_amount.name')) ?? 1
-    let sponsor = interaction.options?.getString(self.i18n.t('en', 'commands.giveaway.create.options.sponsor.name')) ?? interaction.user.tag
+    let prize = interaction.options?.getString('prize')
+    let duration = interaction.options?.getString('duration') as any
+    let winners = interaction.options?.getInteger('number-of-winners') ?? 1
+    let sponsor = interaction.options?.getString('sponsor') ?? interaction.user.tag
 
     duration = duration && ms(duration) ? ms(duration) : null
 
@@ -111,7 +111,7 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 export async function removeSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const message_id = interaction.options?.getString(self.i18n.t('en', 'commands.giveaway.remove.options.message_id.name'))
+    const message_id = interaction.options?.getString('message-id')
 
     if (!message_id) {
         await interaction.reply({
@@ -157,7 +157,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 export async function endSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const message_id = interaction.options?.getString(self.i18n.t('en', 'commands.giveaway.end.options.message_id.name'))
+    const message_id = interaction.options?.getString('message-id')
 
     if (!message_id) {
         await interaction.reply({

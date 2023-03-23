@@ -58,7 +58,7 @@ const handler = async (
 
     if (interaction.isContextMenuCommand()) {
         const command = self.commands.find(
-            c => (c.is_message_command || c.is_user_command) && self.i18n.t(interaction.locale, c.pretty_name) === interaction.commandName
+            c => (c.is_message_command || c.is_user_command) && self.i18n.t('en', c.pretty_name) === interaction.commandName
         )
 
         if (command) await command.executeContext(server, interaction)

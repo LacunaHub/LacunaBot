@@ -8,9 +8,9 @@ import { generateSimpleId } from '../../../internals/utility/Utils'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember(self.i18n.t('en', 'commands.temprole.options.user.name')) as GuildMember
-    const role = interaction.options?.getRole(self.i18n.t('en', 'commands.temprole.options.role.name')) as Role
-    let duration = interaction.options?.getString(self.i18n.t('en', 'commands.temprole.options.duration.name')) as any
+    const mention = interaction.options?.getMember('user') as GuildMember
+    const role = interaction.options?.getRole('role') as Role
+    let duration = interaction.options?.getString('duration') as any
 
     duration = duration && ms(duration) ? ms(duration) : null
 
