@@ -78,6 +78,7 @@ export default class Giveaway {
         if (!scheduled) this.schedule.cancel()
 
         await this.updateMessage()
+        this.self.giveaways.delete(this.messageId)
     }
 
     async getMessage() {
@@ -180,9 +181,9 @@ export async function handleEntries(self: Lacuna) {
     let handledEntries = 0
 
     for (const server of servers) {
-        const giveaways = server.utility.giveaways
+        const giveaways = server.utility.giveaways.filter(i => Date.now() < (i.expires_at ?? i.expiration_date))
 
-        for (const giveaway of giveaways.filter(i => Date.now() < i.expires_at)) {
+        for (const giveaway of giveaways) {
             new Giveaway(self, {
                 ...giveaway,
                 expires_at: giveaway.expires_at ?? giveaway.expiration_date,

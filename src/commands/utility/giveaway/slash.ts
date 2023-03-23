@@ -124,20 +124,42 @@ export async function endSlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
-    const giveaway = self.giveaways.find(g => g.messageId == message_id)
+    let giveaway = self.giveaways.get(message_id)
 
-    if (!giveaway || Date.now() > giveaway.expiresAt.getTime()) {
-        await interaction.reply({
+    await interaction.deferReply({ ephemeral: true })
+
+    if (!giveaway) {
+        const giveawayEntry = server.utility.giveaways.find(i => i.message_id === message_id)
+
+        if (giveawayEntry) {
+            giveaway = new Giveaway(self, {
+                ...giveawayEntry,
+                expires_at: Date.now() + 60000,
+                locale: server.locale
+            })
+        } else {
+            await interaction.editReply({
+                content: `${self._emojis.ERROR} | ${t('commands.giveaway.reroll.text_giveaway_not_found', {
+                    user: `**${(interaction.member as any).displayName}**`
+                })}`
+            })
+
+            return false
+        }
+    }
+
+    const giveawayMessage = await giveaway.getMessage()
+
+    if (giveawayMessage && !giveawayMessage.components.length) {
+        await interaction.editReply({
             content: `${self._emojis.ERROR} | ${t('commands.giveaway.reroll.text_giveaway_not_found', {
                 user: `**${(interaction.member as any).displayName}**`
-            })}`,
-            ephemeral: true
+            })}`
         })
 
         return false
     }
 
-    await interaction.deferReply({ ephemeral: true })
     await giveaway.delete(false)
     await interaction.deleteReply()
 
