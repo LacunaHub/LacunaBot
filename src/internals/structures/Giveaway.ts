@@ -1,212 +1,170 @@
-import { BaseGuildTextChannel, ButtonInteraction, Collection, EmbedBuilder, Message } from 'discord.js'
+import { BaseGuildTextChannel, ButtonInteraction, Collection, EmbedBuilder } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 
 export default class Giveaway {
     public self: Lacuna
-    public id: string
-    public message_id: string
-    public channel_id: string
-    public guild_id: string
+    public messageId: string
+    public channelId: string
+    public guildId: string
     public prize: string
-    public winners_amount: number
-    public members: string[]
-    public expiration_date: Date
-    public expired: boolean
+    public numberOfWinners: number
+    public participants: Collection<string, string>
+    public expiresAt: Date
     public locale: string
     public schedule: Job
 
     constructor(self: Lacuna, options: GiveawayOptions) {
         this.self = self
 
-        this.id = `${options.guild_id}:${options.message_id}`
+        this.messageId = options.message_id
 
-        this.message_id = options.message_id
+        this.channelId = options.channel_id
 
-        this.channel_id = options.channel_id
-
-        this.guild_id = options.guild_id
+        this.guildId = options.guild_id
 
         this.prize = options.prize
 
-        this.winners_amount = options.winners_amount || 1
+        this.numberOfWinners = options.number_of_winners
 
-        this.members = options.members || []
+        this.participants = new Collection((options.participants || []).map(i => [i, i]))
 
-        this.expiration_date = options.expiration_date
+        this.expiresAt = new Date(options.expires_at)
 
-        this.expired = Date.now() >= this.expiration_date.getTime() || this.expiration_date.getTime() - Date.now() <= 30000
-
-        this.locale = options.locale || 'ru'
+        this.locale = options.locale
 
         this.schedule = null
 
-        if (this.expired) {
-            this.deleteEntry()
-            this.deleteMessage()
+        const expired = Date.now() > this.expiresAt.getTime() || this.expiresAt.getTime() - Date.now() < 50000
+
+        if (expired) {
+            this.delete()
         } else {
-            if (options.initial) {
-                this.create()
-            } else {
-                this.createSchedule()
-            }
+            this.create(Boolean(options.initial))
         }
     }
 
-    get guild() {
-        return this.self.guilds.cache.get(this.guild_id)
-    }
+    async create(initial: boolean = false) {
+        this.schedule = scheduleJob(this.messageId, this.expiresAt, () => this.delete())
+        this.self.giveaways.set(this.messageId, this)
 
-    get channel() {
-        return this.guild.channels.cache.get(this.channel_id)
-    }
-
-    async create() {
-        await this.createSchedule()
-        await this.createEntry()
-    }
-
-    async createEntry() {
-        await this.self.db.servers.updateOne(
-            { _id: this.guild_id },
-            {
-                $push: {
-                    'utility.giveaways': {
-                        message_id: this.message_id,
-                        channel_id: this.channel_id,
-                        guild_id: this.guild_id,
-                        prize: this.prize,
-                        winners_amount: this.winners_amount,
-                        members: this.members,
-                        expiration_date: this.expiration_date.getTime()
-                    }
-                }
-            }
-        )
-    }
-
-    async createSchedule() {
-        this.schedule = scheduleJob(this.id, this.expiration_date, () => this.delete())
-        this.self.giveaways.set(this.id, this)
-    }
-
-    async delete(scheduled = true) {
-        if (scheduled) {
-            await this.editMessage()
-        } else {
-            await this.deleteMessage()
-        }
-
-        await this.deleteEntry()
-        await this.deleteSchedule()
-    }
-
-    async deleteEntry() {
-        await this.self.db.servers.updateOne(
-            { _id: this.guild_id },
-            {
-                $pull: {
-                    'utility.giveaways': {
-                        message_id: this.message_id
-                    }
-                }
-            }
-        )
-    }
-
-    async deleteSchedule() {
-        this.schedule.cancel()
-        this.self.giveaways.delete(this.id)
-    }
-
-    async getMessage(): Promise<Message> {
-        try {
-            const messageManager = (this.channel as BaseGuildTextChannel)?.messages
-
-            if (messageManager) return await messageManager.fetch({ message: this.message_id })
-        } catch (err) {
-            return null
-        }
-    }
-
-    async editMessage() {
-        const message = await this.getMessage()
-
-        if (!message) return null
-
-        if (this.members.length) {
-            const members: Collection<string, string> = new Collection(this.members.map(m => [m, this.message_id]))
-            const winners: string[] = members.randomKey(this.winners_amount >= members.size ? members.size : this.winners_amount)
-            const embed = new EmbedBuilder(message.embeds[0])
-                .setDescription(
-                    this.self.i18n.t(this.locale, 'commands.giveaway.end.text_winners', { winners: winners.map(w => `<@${w}>`).join(', ') })
-                )
-                .setColor('#EF5350')
-
-            await message.edit({ embeds: [embed], components: [] })
-            await message.reply({
-                content: this.self.i18n.t(this.locale, 'commands.giveaway.end.text_congrats', {
-                    winner: `${winners.map(w => `<@${w}>`)}`,
-                    prize: `**${this.prize}**`
-                })
-            })
-
-            members.clear()
-        } else {
-            const embed = new EmbedBuilder(message.embeds[0])
-                .setDescription(this.self.i18n.t(this.locale, 'commands.giveaway.end.text_no_members'))
-                .setColor('#EF5350')
-
-            await message.edit({ embeds: [embed], components: [] })
-        }
-    }
-
-    async deleteMessage() {
-        const message = await this.getMessage()
-
-        if (message) {
-            await message.delete()
-        }
-    }
-}
-
-export async function buttonPressed(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
-    const [, message_id] = interaction.customId.split('-')
-    const giveaway = self.giveaways.find(g => g.message_id == message_id)
-    const entry: GiveawayOptions = server.utility.giveaways.find(g => g.message_id == message_id)
-
-    if (giveaway && entry) {
-        if (!entry.members.includes(interaction.user.id))
-            await self.db.servers.updateOne(
-                { _id: interaction.guild.id, 'utility.giveaways.message_id': message_id },
+        if (initial) {
+            await this.self.db.servers.updateOne(
+                { _id: this.guildId },
                 {
                     $push: {
-                        'utility.giveaways.$.members': interaction.user.id
+                        'utility.giveaways': {
+                            $each: [
+                                {
+                                    message_id: this.messageId,
+                                    channel_id: this.channelId,
+                                    guild_id: this.guildId,
+                                    prize: this.prize,
+                                    expires_at: this.expiresAt.getTime(),
+                                    number_of_winners: this.numberOfWinners,
+                                    participants: []
+                                }
+                            ],
+                            $slice: -20
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    async delete(scheduled: boolean = true) {
+        if (!scheduled) this.schedule.cancel()
+
+        await this.updateMessage()
+    }
+
+    async getMessage() {
+        try {
+            const guild = this.self.guilds.cache.get(this.guildId)
+            const channel = guild?.channels?.cache?.get(this.channelId) as BaseGuildTextChannel
+
+            if (guild && channel?.messages) {
+                return await channel.messages.fetch({ message: this.messageId })
+            }
+        } catch (err) {
+            await this.self.db.servers.updateOne(
+                { _id: this.guildId },
+                {
+                    $pull: {
+                        'utility.giveaways': {
+                            message_id: this.messageId
+                        }
                     }
                 }
             )
 
-        if (!giveaway.members.includes(interaction.user.id)) {
-            await giveaway.members.push(interaction.user.id)
+            return null
+        }
+    }
 
-            const message = await giveaway.getMessage()
+    async updateMessage() {
+        const message = await this.getMessage()
 
-            const embed = new EmbedBuilder(message.embeds[0])
-            embed.data.fields[2].value = `${giveaway.members.length}`
+        if (!message) return false
 
-            await message.edit({ embeds: [embed] })
+        const t = this.self.i18n.t.bind(null, this.locale)
+        const embed = new EmbedBuilder(message.embeds[0].toJSON()).setColor('#EF5350')
 
+        if (this.participants.size) {
+            const winners = this.participants.randomKey(this.numberOfWinners > this.participants.size ? this.participants.size : this.numberOfWinners)
+
+            embed.setDescription(t('commands.giveaway.end.text_winners', { winners: winners.map(w => `<@${w}>`).join(', ') }))
+            await message.reply({
+                content: t('commands.giveaway.end.text_congrats', {
+                    winner: `${winners.map(w => `<@${w}>`)}`,
+                    prize: `**${this.prize}**`
+                })
+            })
+        } else {
+            embed.setDescription(t('commands.giveaway.end.text_no_members'))
+        }
+
+        await message.edit({ embeds: [embed], components: [] })
+
+        return true
+    }
+}
+
+export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
+    const [, messageId] = interaction.customId.split('-')
+    const giveaway = self.giveaways.get(messageId)
+
+    if (giveaway && Date.now() < giveaway.expiresAt.getTime()) {
+        const t = self.i18n.t.bind(null, server.locale)
+
+        if (giveaway.participants.has(interaction.user.id)) {
             await interaction.reply({
-                content: `${self._emojis.OK} | ${self.i18n.t(server.locale, 'commands.giveaway.create.text_participated', {
+                content: `${self._emojis.ERROR} | ${t('commands.giveaway.create.text_already_participating', {
                     user: `**${interaction.user.username}**`,
                     giveaway: `**${giveaway.prize}**`
                 })}`,
                 ephemeral: true
             })
         } else {
+            giveaway.participants.set(interaction.user.id, interaction.user.id)
+            await self.db.servers.updateOne(
+                { _id: interaction.guild.id, 'utility.giveaways.message_id': messageId },
+                {
+                    $push: {
+                        'utility.giveaways.$.participants': interaction.user.id
+                    }
+                }
+            )
+
+            const message = await giveaway.getMessage()
+            const embed = new EmbedBuilder(message.embeds[0].toJSON())
+            embed.data.fields[2].value = giveaway.participants.size.toString()
+
+            await message.edit({ embeds: [embed] })
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.giveaway.create.text_already_participating', {
+                content: `${self._emojis.OK} | ${t('commands.giveaway.create.text_participated', {
                     user: `**${interaction.user.username}**`,
                     giveaway: `**${giveaway.prize}**`
                 })}`,
@@ -216,34 +174,30 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     }
 }
 
-export async function handleEntries(self: Lacuna): Promise<number> {
-    const guilds: string[] = self.guilds.cache.map(g => g.id)
-    const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'utility.giveaways.0': { $exists: true } })
-
-    let entries = 0
+export async function handleEntries(self: Lacuna) {
+    const guildIds = self.guilds.cache.map(i => i.id)
+    const servers = await self.db.servers.find({ _id: { $in: guildIds }, 'utility.giveaways.0': { $exists: true } })
+    let handledEntries = 0
 
     for (const server of servers) {
-        const giveaways: GiveawayOptions[] = server.utility.giveaways
+        const giveaways = server.utility.giveaways
 
-        for (const giveaway of giveaways) {
+        for (const giveaway of giveaways.filter(i => Date.now() < i.expires_at)) {
             new Giveaway(self, {
-                message_id: giveaway.message_id,
-                channel_id: giveaway.channel_id,
-                guild_id: server._id,
-                prize: giveaway.prize,
-                winners_amount: giveaway.winners_amount,
-                members: giveaway.members,
-                expiration_date: new Date(giveaway.expiration_date),
-                locale: giveaway.locale
+                ...giveaway,
+                expires_at: giveaway.expires_at ?? giveaway.expiration_date,
+                number_of_winners: giveaway.number_of_winners ?? giveaway.winners_amount,
+                participants: giveaway.participants ?? giveaway.members,
+                locale: server.locale
             })
         }
 
-        entries += giveaways.length
+        handledEntries += giveaways.length
     }
 
-    self.logger.log(`[Giveaway] Loaded ${entries} giveaways from ${servers.length} servers`)
+    self.logger.log(`[Giveaway] Loaded ${handledEntries} giveaways from ${servers.length} servers`)
 
-    return entries
+    return handledEntries
 }
 
 export interface GiveawayOptions {
@@ -251,9 +205,9 @@ export interface GiveawayOptions {
     channel_id: string
     guild_id: string
     prize: string
-    winners_amount: number
-    members?: string[]
-    expiration_date: Date
+    expires_at: number
+    number_of_winners: number
+    participants: string[]
     locale: string
     initial?: boolean
 }

@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord.js'
-import { createSlash, endSlash, removeSlash } from './slash'
+import { createSlash, endSlash, rerollSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
@@ -29,7 +29,9 @@ export default {
                     type: ApplicationCommandOptionType.Integer,
                     name: `commands.${name}.create.options.winners_amount.name`,
                     description: `commands.${name}.create.options.winners_amount.description`,
-                    required: false
+                    required: false,
+                    min_value: 1,
+                    max_value: 50
                 },
                 {
                     type: ApplicationCommandOptionType.String,
@@ -41,21 +43,21 @@ export default {
         },
         {
             type: ApplicationCommandOptionType.Subcommand,
-            name: 'remove',
-            description: `commands.${name}.remove.description`,
+            name: 'end',
+            description: `commands.${name}.end.description`,
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.remove.options.message_id.name`,
-                    description: `commands.${name}.remove.options.message_id.description`,
+                    name: `commands.${name}.end.options.message_id.name`,
+                    description: `commands.${name}.end.options.message_id.description`,
                     required: true
                 }
             ]
         },
         {
             type: ApplicationCommandOptionType.Subcommand,
-            name: 'end',
-            description: `commands.${name}.end.description`,
+            name: 'reroll',
+            description: `commands.${name}.reroll.description`,
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
@@ -73,12 +75,12 @@ export default {
             name: 'create'
         },
         {
-            slash: removeSlash,
-            name: 'remove'
-        },
-        {
             slash: endSlash,
             name: 'end'
+        },
+        {
+            slash: rerollSlash,
+            name: 'reroll'
         }
     ],
     permissions: {

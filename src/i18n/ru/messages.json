@@ -680,21 +680,8 @@
                 "text_participated": "{user}, вы приняли участие в розыгрыше {giveaway}",
                 "text_already_participating": "{user}, вы уже участвуете в розыгрыше {giveaway}"
             },
-            "remove": {
-                "description": "Удаляет розыгрыш",
-                "options": {
-                    "message_id": {
-                        "name": "id-сообщения",
-                        "description": "Идентификатор сообщения с розыгрышем"
-                    }
-                },
-
-                "text_no_message_id": "{user}, пожалуйста, укажите идентификатор сообщения",
-                "text_giveaway_not_found": "{user}, розыгрыш не найден",
-                "text_ga_message_not_found": "{user}, сообщение розыгрыша не найдено"
-            },
             "end": {
-                "description": "Завершает розыгрыш",
+                "description": "Принудительно завершает розыгрыш",
                 "options": {
                     "message_id": {
                         "name": "id-сообщения",
@@ -704,8 +691,13 @@
 
                 "text_no_members": "Участники розыгрыша не найдены",
                 "text_winners": "Победители: {winners}",
-                "text_congrats": "Мои поздравления {winner}! Вы выиграли {prize}!",
-                "text_giveaway_stopped": "{user}, розыгрыш остановлен"
+                "text_congrats": "Мои поздравления {winner}! Вы выиграли {prize}!"
+            },
+            "reroll": {
+                "description": "Заново выбирает победителей розыгрыша",
+
+                "text_no_message_id": "{user}, пожалуйста, укажите идентификатор сообщения",
+                "text_giveaway_not_found": "{user}, розыгрыш не найден"
             }
         },
         "poll": {
