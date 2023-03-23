@@ -9,7 +9,7 @@ import { capitalizeFirstLetter, getTrackSourceByUrl } from '../../../internals/u
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const query = interaction.options?.getString(self.i18n.t('en', 'commands.play.options.query.name'))
+    const query = interaction.options?.getString('query')
     const voice = (interaction.member as GuildMember).voice?.channel
 
     if (!voice) {

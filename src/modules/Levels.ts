@@ -402,8 +402,7 @@ export async function generateRankCard(
 ): Promise<AttachmentBuilder> {
     let mention: GuildMember
 
-    if (signal instanceof ChatInputCommandInteraction)
-        mention = (signal.options?.getMember(self.i18n.t('en', 'commands.rank.options.user.name')) || signal.member) as GuildMember
+    if (signal instanceof ChatInputCommandInteraction) mention = (signal.options?.getMember('user') || signal.member) as GuildMember
     if (signal instanceof ContextMenuCommandInteraction) mention = await signal.guild.members.fetch(signal.targetId)
 
     const activities = (await self.db.users.find({ 'activities.levels.guild_id': signal.guildId })).map(i => ({

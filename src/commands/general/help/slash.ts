@@ -6,9 +6,9 @@ import { commandOptionTypes } from '../../../internals/utility/Constants'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const command_name: string = interaction.options?.getString(self.i18n.t('en', 'commands.help.options.command.name'))
+    const commandName: string = interaction.options?.getString('command')
 
-    if (!command_name) {
+    if (!commandName) {
         const commands = self.commands.filter(c => !c.private && !(c.premium_only && !server.server.premium.available))
         const customCommand = server.modules.custom_commands.map(i => i.command)
 
@@ -60,8 +60,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         await interaction.reply({ embeds: [embed], components: [row] })
     } else {
-        const command = self.commands.find(c => !c.private && c.name == command_name)
-        const customCommand = server.modules.custom_commands.map(i => i.command).find(i => i.name == command_name)
+        const command = self.commands.find(c => !c.private && c.name == commandName)
+        const customCommand = server.modules.custom_commands.map(i => i.command).find(i => i.name == commandName)
 
         if (!command && !customCommand) {
             await interaction.reply({

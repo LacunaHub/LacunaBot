@@ -355,6 +355,7 @@
             "text_no_case_id": "{user}, please specify the case number of the moderation log",
             "text_no_reason": "{user}, please specify the reason for the moderation log case",
             "text_no_case_message": "{user}, a message with this case number was not found. Remember that you can only change the last 50 cases of moderation",
+            "text_no_case_entry": "{user}, there is no record with this case number in the database",
             "text_case_edited": "{user}, the reason for the case has been changed"
         },
         "report": {
@@ -460,18 +461,19 @@
             }
         },
         "next": {
-            "description": "Plays the next track in the queue",
             "text_no_track_playback": "{user}, track playback is not running on this server",
-            "text_different_voice": "{user}, you are not connected to a voice channel or are in another",
-            "text_no_playback": "{user}, music is not playing now",
-            "text_track_skip": "{user}, playback is fast-forwarded"
+            "text_different_voice": "{user}, you are not connected to a voice channel or are in another"
         },
         "play": {
             "description": "Plays music in the voice channel",
             "options": {
                 "query": {
                     "name": "query",
-                    "description": "Link or track title"
+                    "description": "Link to track, playlist, album or track name"
+                },
+                "source": {
+                    "name": "source",
+                    "description": "Searching for tracks in a specific source"
                 }
             },
             "text_connect_to_voice": "{user}, you must first connect to some voice channel",
@@ -493,22 +495,13 @@
             "text_unknown_error": "{user}, an unexpected error occurred while playing the track",
             "text_not_allowed_host": "{user}, the specified link is not in the list of allowed. Please contact the support server",
             "text_player": "Player",
-            "text_added_by": "Added by: {requester}"
-        },
-        "previous": {
-            "description": "Plays the previous track in the queue",
-            "text_no_previous_track": "{user}, previous track not found",
-            "text_track_previous": "{user}, the previous track is now playing"
+            "text_added_by": "Added by {requester}",
+            "text_source": "Source"
         },
         "queue": {
             "description": "Shows the current playback queue",
-            "text_no_track_queue": "{user}, the play queue is empty"
-        },
-        "repeat": {
-            "description": "Turns the repeat mode for playback",
-            "text_track_repeat": "{user}, repeating the current track is enabled",
-            "text_queue_repeat": "{user}, queue repeat is enabled",
-            "text_no_repeat": "{user}, track repetition is turned off"
+            "text_no_track_queue": "{user}, the play queue is empty",
+            "text_select_playback_track": "Select the track you want to play"
         },
         "stop": {
             "description": "Stops music playback",
@@ -680,6 +673,41 @@
                 "text_giveaway_stopped": "{user}, the giveaway is stopped"
             }
         },
+        "poll": {
+            "description": "Polls management",
+            "create": {
+                "description": "Creates a new poll",
+                "options": {
+                    "quiz_mode": {
+                        "name": "quiz-mode",
+                        "description": "A poll with correct and wrong answers"
+                    },
+                    "multiple_answers": {
+                        "name": "multiple-answers",
+                        "description": "Allows you to choose several answer options"
+                    }
+                },
+                "text_create_new_poll": "Create a new poll",
+                "text_poll_question": "Question",
+                "text_correct_answer": "Correct answer",
+                "text_answer_options": "Answer options",
+                "text_answer_options_placeholder": "Answer options are listed on a new line",
+                "text_no_question": "{user}, please specify the question",
+                "text_invalid_answer_options": "{user}, please specify 2 to 10 answer options",
+                "text_no_correct_answer": "{user}, please specify the correct answer",
+                "text_quiz_mode": "Quiz",
+                "text_multiple_answers": "Multiple choice",
+                "text_poll_successfully_created": "{user}, the poll was successfully created",
+                "text_poll_failed_to_create": "{user}, an error occurred while creating the poll"
+            },
+            "text_plural_votes": "{n} vote | {n} votes",
+            "text_option_already_chosen": "{user}, you have already chosen this answer option",
+            "text_option_chosen_quiz_mode": "{user}, you have already chosen {answer}",
+            "text_answer_is_correct": "{user}, you have selected the correct answer ({answer})",
+            "text_incorrect_answer": "{user}, oops, the answer is wrong",
+            "text_you_have_chosen": "{user}, you have chosen {answer}",
+            "text_you_removed_your_vote": "{user}, you removed your vote from option {answer}"
+        },
         "temprole": {
             "description": "Gives a role to the user for the specified time",
             "options": {
@@ -717,7 +745,8 @@
         },
         "reason": "Reason",
         "case_number": "Case #{case_number}",
-        "moderator": "Moderator"
+        "moderator": "Moderator",
+        "change_reason": "Change reason"
     },
     "logs": {
         "update_template": "{user} changes {change}",
