@@ -70,7 +70,7 @@
 
                     <q-select
                       v-model="guild.modules.levels.allowed.channels"
-                      :options="[...guild.channelsText, ...guild.channelsVoice]"
+                      :options="guild.channels"
                       option-label="name"
                       option-value="id"
                       :disable="!guild.modules.levels.active && !guild.modules.levels.voice"
@@ -128,7 +128,7 @@
 
                     <q-select
                       v-model="guild.modules.levels.blocked.channels"
-                      :options="[...guild.channelsText, ...guild.channelsVoice]"
+                      :options="guild.channels"
                       option-label="name"
                       option-value="id"
                       :disable="!guild.modules.levels.active && !guild.modules.levels.voice"

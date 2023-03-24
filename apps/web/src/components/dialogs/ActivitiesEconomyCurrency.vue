@@ -175,7 +175,7 @@
 
                   <q-select
                     v-model="currency.income.allowed.channels"
-                    :options="[...guild.channelsText, ...guild.channelsVoice]"
+                    :options="guild.channels"
                     option-label="name"
                     option-value="id"
                     class="q-pt-sm"
@@ -227,7 +227,7 @@
 
                   <q-select
                     v-model="currency.income.blocked.channels"
-                    :options="[...guild.channelsText, ...guild.channelsVoice]"
+                    :options="guild.channels"
                     option-label="name"
                     option-value="id"
                     class="q-pt-sm"

@@ -159,7 +159,7 @@
 
                   <q-select
                     v-model="multiplier.allowed_channels"
-                    :options="[...guild.channelsText, ...guild.channelsVoice]"
+                    :options="guild.channels"
                     option-label="name"
                     option-value="id"
                     class="q-pt-sm"
@@ -211,7 +211,7 @@
 
                   <q-select
                     v-model="multiplier.blocked_channels"
-                    :options="[...guild.channelsText, ...guild.channelsVoice]"
+                    :options="guild.channels"
                     option-label="name"
                     option-value="id"
                     class="q-pt-sm"
