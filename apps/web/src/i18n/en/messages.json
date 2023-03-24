@@ -234,7 +234,8 @@
       "PER_GUILD": "Per guild"
     },
     "throttling_max_uses_title": "Max uses",
-    "throttling_timeout_title": "Throttling timeout"
+    "throttling_timeout_title": "Throttling timeout",
+    "permissions_now_unavailable": "Open the Discord server settings and go to the \"Integrations\" tab to set permissions for the command."
   },
   "custom_command": {
     "add_custom_command": "@:add command",

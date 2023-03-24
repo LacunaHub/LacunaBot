@@ -239,7 +239,8 @@
       "PER_GUILD": "На сервер"
     },
     "throttling_max_uses_title": "Максимум использований",
-    "throttling_timeout_title": "Повторное использование"
+    "throttling_timeout_title": "Повторное использование",
+    "permissions_now_unavailable": "Откройте настройки сервера Discord и перейдите во вкладку \"Интеграции\", чтобы настроить разрешения для команды."
   },
 
   "custom_command": {
