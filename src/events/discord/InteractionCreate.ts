@@ -13,7 +13,7 @@ import {
 import { SearchResult } from 'erela.js'
 import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponent, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { buttonPressed } from '../../internals/structures/Giveaway'
+import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
 import { snakeToPascalCase, truncateString } from '../../internals/utility/Utils'
 import CustomCommand from '../../modules/CustomCommand'
@@ -66,7 +66,7 @@ const handler = async (
 
     if (interaction.isButton()) {
         if (/GIVEAWAY\-\d+/.test(interaction.customId)) {
-            await buttonPressed(self, server, interaction)
+            await onPressGiveawayButton(self, server, interaction)
 
             return true
         }

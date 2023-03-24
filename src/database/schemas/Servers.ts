@@ -1985,9 +1985,16 @@ export interface Giveaway {
     channel_id: string
     guild_id: string
     prize: string
+    expires_at: number
+    number_of_winners: number
+    participants: string[]
+    /** @deprecated */
     winners_amount: number
+    /** @deprecated */
     members: string[]
-    expiration_date: Date
+    /** @deprecated */
+    expiration_date: number
+    /** @deprecated */
     locale: string
 }
 

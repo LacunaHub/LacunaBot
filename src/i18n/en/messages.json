@@ -647,20 +647,8 @@
                 "text_participated": "{user}, you participated in the {giveaway}",
                 "text_already_participating": "{user}, you are already participating in the\ngiveaway {giveaway}"
             },
-            "remove": {
-                "description": "Deletes the giveaway",
-                "options": {
-                    "message_id": {
-                        "name": "message-id",
-                        "description": "Id of the message with the giveaway"
-                    }
-                },
-                "text_no_message_id": "{user}, please enter the message Id",
-                "text_giveaway_not_found": "{user}, giveaway not found",
-                "text_ga_message_not_found": "{user}, giveaway message not found"
-            },
             "end": {
-                "description": "Ends a giveaway",
+                "description": "Immediately end a giveaway",
                 "options": {
                     "message_id": {
                         "name": "message-id",
@@ -669,8 +657,12 @@
                 },
                 "text_no_members": "No members were found",
                 "text_winners": "Winners: {winners}",
-                "text_congrats": "Congratulations {winner}! You won {prize}!",
-                "text_giveaway_stopped": "{user}, the giveaway is stopped"
+                "text_congrats": "Congratulations {winner}! You won {prize}!"
+            },
+            "reroll": {
+                "description": "Rolls new winners for an ended giveaway",
+                "text_no_message_id": "{user}, please specify the message identifier",
+                "text_giveaway_not_found": "{user}, giveaway not found"
             }
         },
         "poll": {
