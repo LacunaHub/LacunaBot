@@ -86,39 +86,19 @@ export default class Command {
     denied(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
-        //if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
+        if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
 
         if (this.private) return false
 
-        if (config) {
-            if (config.inactive) return false
-
-            if (config.permissions.blocked_channels.includes(signal.channel.id)) return false
-
-            if (config.permissions.allowed_channels.length && !config.permissions.allowed_channels.includes(signal.channel.id)) return false
-
-            if ((signal.member as GuildMember).roles.cache.some(r => config.permissions.blocked_roles.includes(r.id))) return false
-        }
+        if (config?.inactive) return false
 
         return true
     }
 
-    allowed(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
-        const config = server.commands.configuration.find(i => i.name === this.name)
-
+    allowed(signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
         if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
 
-        if (config) {
-            if (
-                config.permissions.allowed_roles.length &&
-                (signal.member as GuildMember).roles.cache.some(r => config.permissions.allowed_roles.includes(r.id))
-            )
-                return true
-
-            if (!config.permissions.allowed_roles.length && !this.permissions.user.length) return true
-        }
-
-        if (!config && !this.permissions.user.length) return true
+        if (!this.permissions.user.length) return true
 
         if (
             this.permissions.user.length &&
@@ -133,7 +113,7 @@ export default class Command {
         const t = this.self.i18n.t.bind(null, server.locale)
 
         const denied: boolean = this.denied(server, interaction),
-            allowed: boolean = this.allowed(server, interaction)
+            allowed: boolean = this.allowed(interaction)
 
         if (!denied || !allowed) {
             await interaction.reply({
@@ -203,7 +183,7 @@ export default class Command {
         const t = this.self.i18n.t.bind(null, server.locale)
 
         const denied: boolean = this.denied(server, interaction),
-            allowed: boolean = this.allowed(server, interaction)
+            allowed: boolean = this.allowed(interaction)
 
         if (!denied || !allowed) {
             await interaction.reply({
