@@ -1839,6 +1839,7 @@ export interface LevelAward {
     level: number
     single: boolean
     references: string[]
+    remove_references?: string[]
     alert: {
         active: boolean
         format: 'DM' | 'CHANNEL' | 'CURRENT_CHANNEL'

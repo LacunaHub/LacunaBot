@@ -368,10 +368,13 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
     const prevAward = prevAwards[0]
 
     if (award) {
-        if (award.type == 'ROLE') {
+        if (award.type === 'ROLE') {
             const roles = member.guild.roles.cache.filter(r => r.editable && award.references.includes(r.id))
 
             if (roles.size) await member.roles.add(roles).catch(self.logger.error)
+            if (award.remove_references?.length) {
+                await member.roles.remove(award.remove_references.slice(0, 5)).catch(() => {})
+            }
 
             for (const prevAward of prevAwards.filter(i => i.single)) {
                 const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevAward.references.includes(r.id))
@@ -393,6 +396,9 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
             const roles = member.guild.roles.cache.filter(r => r.editable && prevAward.references.includes(r.id))
 
             if (roles.size) await member.roles.add(roles).catch(self.logger.error)
+            if (prevAward.remove_references?.length) {
+                await member.roles.remove(prevAward.remove_references.slice(0, 5)).catch(() => {})
+            }
 
             for (const prevPrevAward of prevAwards.slice(1).filter(i => i.single)) {
                 const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevPrevAward.references.includes(r.id))
