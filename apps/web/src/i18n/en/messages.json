@@ -16,6 +16,7 @@
   "copied_to_clipboard": "Copied to clipboard",
   "none": "None",
   "try_again": "Try again",
+  "support_server": "Support server",
   "common": {
     "channel": "Channel",
     "channels": "Channels",
@@ -76,8 +77,8 @@
       "USE_APPLICATION_COMMANDS": "Use application commands",
       "REQUEST_TO_SPEAK": "Request to speak",
       "MANAGE_THREADS": "Manage threads",
-      "USE_PUBLIC_THREADS": "Use public threads",
-      "USE_PRIVATE_THREADS": "Use private threads",
+      "CREATE_PUBLIC_THREADS": "Use public threads",
+      "CREATE_PRIVATE_THREADS": "Use private threads",
       "USE_EXTERNAL_STICKERS": "Use external stickers",
       "SEND_MESSAGES_IN_THREADS": "Send messages in threads",
       "START_EMBEDDED_ACTIVITIES": "Start embedded activities",
@@ -186,7 +187,7 @@
   },
   "lacuna_diamond": {
     "has_subscription": "This server already has bonuses that expire on {date}, but you can prolong them",
-    "unlimited_subscription": "The server has time-unlimited bonuses it is not recommended extending them",
+    "unlimited_subscription": "The server has time-unlimited bonuses",
     "bonus_music_description": "Unlimited tracks in the queue, listening to playlists, streams playback, and volume changing",
     "bonus_increased_limits_description": "More levels awards, store items, voice roles, temporary voice channels, autoreactions, and interactive reactions",
     "bonus_personalization_description": "Ability to change the avatar and webhook name in the actions log",
@@ -196,7 +197,14 @@
     "select_plan": "Select plan",
     "select_payment_method": "Payment method",
     "wait_few_minutes": "Bonuses activation takes some time, please wait a few minutes after payment",
-    "pay": "Pay"
+    "pay": "Pay",
+    "dnb_step_1": "Join our {server}",
+    "dnb_step_2": "Check out {article}, which has step-by-step instructions on how to boost a server",
+    "dnb_step_2_article": "this article",
+    "dnb_step_3": "Make sure to select our {server}, then boost it",
+    "dnb_step_4": "After that, click on the \"Check\" button below and bonuses will be available to you",
+    "dnb_bonuses_info": "Bonuses will be available as long as you are a support server booster. You can only activate bonuses for one server.",
+    "check": "Check"
   },
   "message_editor": {
     "message_embed": "Embed message",
@@ -226,7 +234,8 @@
       "PER_GUILD": "Per guild"
     },
     "throttling_max_uses_title": "Max uses",
-    "throttling_timeout_title": "Throttling timeout"
+    "throttling_timeout_title": "Throttling timeout",
+    "permissions_now_unavailable": "Open the Discord server settings and go to the \"Integrations\" tab to set permissions for the command."
   },
   "custom_command": {
     "add_custom_command": "@:add command",
@@ -403,6 +412,11 @@
     "moderator_roles_title": "Moderator roles",
     "moderator_roles_description": "Selected roles will get the same permissions as the owner of the temporary channel, but their permissions in that channel cannot be changed. The bot needs the administrator permission to work correctly"
   },
+  "auto_threads": {
+    "add_auto_thread": "@:add auto-thread",
+    "edit_auto_thread": "@:edit auto-thread",
+    "default_name_title": "Thread name"
+  },
   "auto_reactions": {
     "add_auto_reaction": "@:add auto reaction",
     "edit_auto_reaction": "@:edit auto reaction",
@@ -534,6 +548,7 @@
       "vc_music_allow_radio_playback_title": "Allow radio playback",
       "vc_music_queue_max_length_title": "Max length of the queue",
       "vc_music_default_volume_title": "Default volume",
+      "vc_music_default_source_title": "Default source",
       "vc_voice_roles_title": "Voice roles",
       "vc_voice_roles_description": "Automatic addition of roles when connecting to voice channel",
       "vc_auto_voices_title": "Temporary voice channels",
@@ -542,6 +557,8 @@
       "ut_reports_description": "Receiving reports to messages",
       "ut_auto_reactions_title": "Auto reactions",
       "ut_auto_reactions_description": "Automatically add reactions to the message",
+      "ut_auto_threads_title": "Auto-threads",
+      "ut_auto_threads_description": "Automatic thread creation for messages",
       "ut_ims_title": "Interactive messages",
       "ut_irs_title": "Interactive reactions",
       "ut_irs_description": "Adding roles and channel accesses by clicking on reactions"

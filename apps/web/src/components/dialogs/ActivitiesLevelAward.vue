@@ -74,6 +74,55 @@
               </template>
             </q-select>
           </div>
+
+          <div class="col-12">
+            <div>
+              {{ $t('level_award.remove_references_title') }}
+            </div>
+
+            <q-select
+              v-model="award.remove_references"
+              :options="guild.rolesUnmanaged"
+              option-label="name"
+              option-value="id"
+              use-chips
+              class="q-pt-sm"
+              multiple
+              filled
+              dense
+              hide-bottom-space
+              emit-value
+              map-options
+              :max-values="5"
+            >
+              <template #selected-item="{ opt, index, removeAtIndex }">
+                <q-chip
+                  class="rounded-lg"
+                  square
+                  :label="opt.name ?? opt"
+                  size="sm"
+                  :style="`background: ${opt.color}`"
+                  :ripple="false"
+                  removable
+                  @remove="removeAtIndex(index)"
+                ></q-chip>
+              </template>
+
+              <template #option="{ opt, toggleOption, selected }">
+                <q-item
+                  clickable
+                  @click="toggleOption(opt)"
+                  :active="selected"
+                  :disable="opt.higher"
+                  active-class="menu-item--active"
+                >
+                  <q-item-section>
+                    <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+          </div>
         </div>
       </q-card-section>
 
@@ -280,6 +329,7 @@ export default defineComponent({
             level: 1,
             single: false,
             references: [],
+            remove_references: [],
             alert: {
               active: false,
               format: 'DM',
@@ -303,6 +353,10 @@ export default defineComponent({
             }
           }
     )
+
+    if (typeof award.value.remove_references === 'undefined') {
+      award.value.remove_references = []
+    }
 
     const isValid = computed(() => {
       return (

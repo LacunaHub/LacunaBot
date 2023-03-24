@@ -79,10 +79,6 @@
           <q-item-section>
             <q-item-label class="text-subtitle1">
               {{ $t('pages.guild.ut_auto_threads_title') }}
-
-              <q-badge class="q-ml-xs" color="primary">
-                <span>NEW</span>
-              </q-badge>
             </q-item-label>
             <q-item-label class="text--secondary">
               {{ $t('pages.guild.ut_auto_threads_description') }}
