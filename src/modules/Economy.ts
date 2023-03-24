@@ -2,6 +2,7 @@ import { BaseGuildTextChannel, BaseGuildVoiceChannel, Collection, Guild, GuildMe
 import { EconomyStoreItem, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import TemporaryRole from '../internals/structures/TemporaryRole'
+import { hasRestrictedPermissions } from './Levels'
 
 export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message) {
     if (!server.modules.economy.active || !server.modules.economy.currencies.length) return false
@@ -42,10 +43,16 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
     }
 
     for (const currency of server.modules.economy.currencies) {
-        if (currency.income.allowed.channels.length && !currency.income.allowed.channels.includes(message.channelId)) continue
-        if (currency.income.allowed.roles.length && !message.member.roles.cache.some(r => currency.income.allowed.roles.includes(r.id))) continue
-        if (currency.income.blocked.channels.includes(message.channelId)) continue
-        if (message.member.roles.cache.some(r => currency.income.blocked.roles.includes(r.id))) continue
+        const hasRestrictions = hasRestrictedPermissions({
+            channel: message.channel as any,
+            roles: message.member.roles.cache,
+            allowedChannels: currency.income.allowed.channels,
+            allowedRoles: currency.income.allowed.roles,
+            blockedChannels: currency.income.blocked.channels,
+            blockedRoles: currency.income.blocked.roles
+        })
+
+        if (hasRestrictions) continue
 
         if (
             currency.income.messages.rate_limit_per_user &&
@@ -55,10 +62,16 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 
         const multipliers = server.modules.activities.multipliers
             .filter(i => {
-                if (i.blocked_channels.includes(message.channelId)) return false
-                if (message.member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
-                if (i.allowed_channels.length && !i.allowed_channels.includes(message.channelId)) return false
-                if (i.allowed_roles.length && !message.member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
+                const hasRestrictions = hasRestrictedPermissions({
+                    channel: message.channel as any,
+                    roles: message.member.roles.cache,
+                    allowedChannels: i.allowed_channels,
+                    allowedRoles: i.allowed_roles,
+                    blockedChannels: i.blocked_channels,
+                    blockedRoles: i.blocked_roles
+                })
+
+                if (hasRestrictions) return false
 
                 return i.options.includes('ECONOMY_TEXT')
             })
@@ -194,10 +207,16 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
         const time: number = (Date.now() - wallet.activity.voice_connected_at) / 60000
 
         for (const currency of server.modules.economy.currencies) {
-            if (currency.income.allowed.channels.length && !currency.income.allowed.channels.includes(channel.id)) continue
-            if (currency.income.allowed.roles.length && !member.roles.cache.some(r => currency.income.allowed.roles.includes(r.id))) continue
-            if (currency.income.blocked.channels.includes(channel.id)) continue
-            if (member.roles.cache.some(r => currency.income.blocked.roles.includes(r.id))) continue
+            const hasRestrictions = hasRestrictedPermissions({
+                channel: channel,
+                roles: member.roles.cache,
+                allowedChannels: currency.income.allowed.channels,
+                allowedRoles: currency.income.allowed.roles,
+                blockedChannels: currency.income.blocked.channels,
+                blockedRoles: currency.income.blocked.roles
+            })
+
+            if (hasRestrictions) continue
 
             const multipliers = server.modules.activities.multipliers
                 .filter(i => {

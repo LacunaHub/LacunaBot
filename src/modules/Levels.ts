@@ -4,9 +4,11 @@ import {
     BaseGuildTextChannel,
     BaseGuildVoiceChannel,
     ChatInputCommandInteraction,
+    Collection,
     ContextMenuCommandInteraction,
     GuildMember,
     Message,
+    Role,
     VoiceState
 } from 'discord.js'
 import numbro from 'numbro'
@@ -14,22 +16,56 @@ import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
 
+export function hasRestrictedPermissions(options: IHasRestrictedPermissionsOptions) {
+    const { channel, roles, allowedChannels, allowedRoles, blockedChannels, blockedRoles } = options
+
+    if (blockedRoles.length) {
+        const isBlockedRole = roles.some(i => blockedRoles.includes(i.id))
+
+        if (isBlockedRole) return true
+    }
+
+    if (allowedRoles.length) {
+        const isNotAllowedRole = !roles.some(i => allowedRoles.includes(i.id))
+
+        if (isNotAllowedRole) return true
+    }
+
+    if (blockedChannels.length) {
+        const isBlockedChannel = blockedChannels.includes(channel.id),
+            isBlockedChannelParent = channel.parentId && blockedChannels.includes(channel.parentId)
+
+        if (isBlockedChannel || isBlockedChannelParent) return true
+    }
+
+    if (allowedChannels.length) {
+        const isAllowedChannel = allowedChannels.includes(channel.id),
+            isAllowedChannelParent = channel.parentId && allowedChannels.includes(channel.parentId)
+
+        if (isAllowedChannel) return false
+        if (isAllowedChannelParent) return false
+
+        return true
+    }
+
+    return false
+}
+
 export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean> {
     const { levels, activities } = server.modules
 
     if (!levels.active) return false
 
-    const isBlockedChannel = levels.blocked.channels.includes(message.channel.id),
-        isBlockedChannelParent = levels.blocked.channels.includes((message.channel as BaseGuildTextChannel).parentId),
-        isBlockedRole = message.member.roles.cache.some(r => levels.blocked.roles.includes(r.id))
-    const isNotAllowedChannel = levels.allowed.channels.length && !levels.allowed.channels.includes(message.channel.id),
-        isNotAllowedChannelParent =
-            levels.allowed.channels.length && !levels.allowed.channels.includes((message.channel as BaseGuildTextChannel).parentId),
-        isNotAllowedRole = levels.allowed.roles.length && !message.member.roles.cache.some(r => levels.allowed.roles.includes(r.id))
+    const hasRestrictions = hasRestrictedPermissions({
+        channel: message.channel as any,
+        roles: message.member.roles.cache,
+        allowedChannels: levels.allowed.channels,
+        allowedRoles: levels.allowed.roles,
+        blockedChannels: levels.blocked.channels,
+        blockedRoles: levels.blocked.roles
+    })
 
-    if (isBlockedChannel || isBlockedChannelParent || isBlockedRole) return false
-    if (isNotAllowedChannel) return false
-    if (isNotAllowedRole) return false
+    if (hasRestrictions) return false
 
     let user = await self.db.users.findOne({ _id: message.author.id })
 
@@ -76,10 +112,16 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 
     const multipliers = activities.multipliers
         .filter(i => {
-            if (i.blocked_channels.includes(message.channelId)) return false
-            if (message.member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
-            if (i.allowed_channels.length && !i.allowed_channels.includes(message.channelId)) return false
-            if (i.allowed_roles.length && !message.member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
+            const hasRestrictions = hasRestrictedPermissions({
+                channel: message.channel as any,
+                roles: message.member.roles.cache,
+                allowedChannels: i.allowed_channels,
+                allowedRoles: i.allowed_roles,
+                blockedChannels: i.blocked_channels,
+                blockedRoles: i.blocked_roles
+            })
+
+            if (hasRestrictions) return false
 
             return i.options.includes('LEVELS_TEXT')
         })
@@ -139,16 +181,16 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
 
     if (!levels.voice) return false
 
-    const isBlockedChannel = levels.blocked.channels.includes(state.channelId),
-        isBlockedChannelParent = levels.blocked.channels.includes(state.channel.parentId),
-        isBlockedRole = state.member.roles.cache.some(r => levels.blocked.roles.includes(r.id))
-    const isNotAllowedChannel = levels.allowed.channels.length && !levels.allowed.channels.includes(state.channelId),
-        isNotAllowedChannelParent = levels.allowed.channels.length && !levels.allowed.channels.includes(state.channel.parentId),
-        isNotAllowedRole = levels.allowed.roles.length && !state.member.roles.cache.some(r => levels.allowed.roles.includes(r.id))
+    const hasRestrictions = hasRestrictedPermissions({
+        channel: state.channel,
+        roles: state.member.roles.cache,
+        allowedChannels: levels.allowed.channels,
+        allowedRoles: levels.allowed.roles,
+        blockedChannels: levels.blocked.channels,
+        blockedRoles: levels.blocked.roles
+    })
 
-    if (isBlockedChannel || isBlockedChannelParent || isBlockedRole) return false
-    if (isNotAllowedChannel) return false
-    if (isNotAllowedRole) return false
+    if (hasRestrictions) return false
     if (state.guild.afkChannelId === state.channelId) return false
 
     const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
@@ -241,10 +283,16 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
 
         const multipliers = activities.multipliers
             .filter(i => {
-                if (i.blocked_channels.includes(channel.id)) return false
-                if (member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
-                if (i.allowed_channels.length && !i.allowed_channels.includes(channel.id)) return false
-                if (i.allowed_roles.length && !member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
+                const hasRestrictions = hasRestrictedPermissions({
+                    channel: channel,
+                    roles: member.roles.cache,
+                    allowedChannels: i.allowed_channels,
+                    allowedRoles: i.allowed_roles,
+                    blockedChannels: i.blocked_channels,
+                    blockedRoles: i.blocked_roles
+                })
+
+                if (hasRestrictions) return false
 
                 return i.options.includes('LEVELS_VOICE')
             })
@@ -320,10 +368,13 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
     const prevAward = prevAwards[0]
 
     if (award) {
-        if (award.type == 'ROLE') {
+        if (award.type === 'ROLE') {
             const roles = member.guild.roles.cache.filter(r => r.editable && award.references.includes(r.id))
 
             if (roles.size) await member.roles.add(roles).catch(self.logger.error)
+            if (award.remove_references?.length) {
+                await member.roles.remove(award.remove_references.slice(0, 5)).catch(() => {})
+            }
 
             for (const prevAward of prevAwards.filter(i => i.single)) {
                 const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevAward.references.includes(r.id))
@@ -345,6 +396,9 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
             const roles = member.guild.roles.cache.filter(r => r.editable && prevAward.references.includes(r.id))
 
             if (roles.size) await member.roles.add(roles).catch(self.logger.error)
+            if (prevAward.remove_references?.length) {
+                await member.roles.remove(prevAward.remove_references.slice(0, 5)).catch(() => {})
+            }
 
             for (const prevPrevAward of prevAwards.slice(1).filter(i => i.single)) {
                 const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevPrevAward.references.includes(r.id))
@@ -615,4 +669,13 @@ export default {
     updateAwards,
     sendLevelUpAlert,
     generateRankCard
+}
+
+export interface IHasRestrictedPermissionsOptions {
+    channel: BaseGuildTextChannel | BaseGuildVoiceChannel
+    roles: Collection<string, Role>
+    allowedChannels: string[]
+    allowedRoles: string[]
+    blockedChannels: string[]
+    blockedRoles: string[]
 }
