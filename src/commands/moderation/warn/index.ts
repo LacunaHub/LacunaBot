@@ -20,7 +20,7 @@ export default {
                     required: true
                 },
                 {
-                    type: ApplicationCommandOptionType.User,
+                    type: ApplicationCommandOptionType.String,
                     name: `commands.${name}.add.options.reason.name`,
                     description: `commands.${name}.add.options.reason.description`,
                     required: false

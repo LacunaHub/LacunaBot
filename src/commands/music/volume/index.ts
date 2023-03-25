@@ -12,7 +12,9 @@ export default {
             type: ApplicationCommandOptionType.Integer,
             name: `commands.${name}.options.volume.name`,
             description: `commands.${name}.options.volume.description`,
-            required: true
+            required: true,
+            min_value: 1,
+            max_value: 100
         }
     ],
     group: 'MUSIC',
