@@ -1,34 +1,44 @@
 import { Message, TextChannel } from 'discord.js'
+import { split } from 'unicode-default-word-boundary'
 import { AutoThread, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
 
 export async function autoThread(self: Lacuna, server: ServerDocument, message: Message) {
-    const auto_thread: AutoThread = server.modules.autothreads
-        .slice(0, server.server.premium.available ? 20 : 2)
-        .find(at => at.channel_id == message.channel.id)
+    const at: AutoThread = server.modules.autothreads.slice(0, server.server.premium.available ? 20 : 2).find(i => i.channel_id == message.channel.id)
 
-    if (auto_thread) {
+    if (at) {
         const content: string = message.content.toLowerCase()
-        const split: string[] = content.split(/\s+/)
+        const splitted: string[] = split(content)
 
-        if (
-            (auto_thread.matches.length && !auto_thread.matches.some(m => split.includes(m.toLowerCase()))) ||
-            (auto_thread.exclude_matches.length && auto_thread.exclude_matches.some(m => split.includes(m.toLowerCase())))
-        )
-            return false
+        if (at.matches.length) {
+            const match = at.matches.map(i => i.toLowerCase()).some(i => splitted.includes(i))
 
-        const replacer = new Replacer(auto_thread.name, {
+            if (!match) return false
+        }
+
+        if (at.exclude_matches.length) {
+            const match = at.exclude_matches.map(i => i.toLowerCase()).some(i => splitted.includes(i))
+
+            if (match) return false
+        }
+
+        const replacer = new Replacer(at.name, {
             guild: message.guild,
             member: message.member,
             message: message
         })
         const name = await replacer.replace()
 
-        await (message.channel as TextChannel).threads.create({
-            name: name,
-            startMessage: message
-        })
+        try {
+            await (message.channel as TextChannel).threads.create({
+                name: name.slice(0, 100),
+                startMessage: message
+            })
+        } catch (err) {
+            self.logger.error(err)
+            return false
+        }
 
         self.emit('moduleExecution', {
             module: 'AutoThreads',

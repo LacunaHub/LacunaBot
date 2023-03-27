@@ -9,7 +9,6 @@ import {
 } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
-import { snakeToPascalCase } from '../utility/Utils'
 
 export default class Command {
     public self: Lacuna
@@ -83,7 +82,7 @@ export default class Command {
         this.self.commands.set(this.name, this)
     }
 
-    denied(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
+    isExecutable(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction): boolean {
         const config = server.commands.configuration.find(i => i.name === this.name)
 
         if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
@@ -95,27 +94,11 @@ export default class Command {
         return true
     }
 
-    allowed(signal: ChatInputCommandInteraction | ContextMenuCommandInteraction | Message): boolean {
-        if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
-
-        if (!this.permissions.user.length) return true
-
-        if (
-            this.permissions.user.length &&
-            (signal.member as GuildMember).permissions.has(this.permissions.user.map(i => snakeToPascalCase(i)) as any)
-        )
-            return true
-
-        return false
-    }
-
     async executeSlash(server: ServerDocument, interaction: ChatInputCommandInteraction): Promise<boolean> {
         const t = this.self.i18n.t.bind(null, server.locale)
+        const executable: boolean = this.isExecutable(server, interaction)
 
-        const denied: boolean = this.denied(server, interaction),
-            allowed: boolean = this.allowed(interaction)
-
-        if (!denied || !allowed) {
+        if (!executable) {
             await interaction.reply({
                 content: `${this.self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.user.username}**` })}`,
                 ephemeral: true
@@ -181,11 +164,9 @@ export default class Command {
 
     async executeContext(server: ServerDocument, interaction: ContextMenuCommandInteraction): Promise<boolean> {
         const t = this.self.i18n.t.bind(null, server.locale)
+        const executable: boolean = this.isExecutable(server, interaction)
 
-        const denied: boolean = this.denied(server, interaction),
-            allowed: boolean = this.allowed(interaction)
-
-        if (!denied || !allowed) {
+        if (!executable) {
             await interaction.reply({
                 content: `${this.self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.user.tag}**` })}`,
                 ephemeral: true

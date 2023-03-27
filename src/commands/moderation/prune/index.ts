@@ -12,7 +12,9 @@ export default {
             type: ApplicationCommandOptionType.Integer,
             name: `commands.${name}.options.amount.name`,
             description: `commands.${name}.options.amount.description`,
-            required: true
+            required: true,
+            min_value: 1,
+            max_value: 100
         },
         {
             type: ApplicationCommandOptionType.User,

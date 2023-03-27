@@ -24,7 +24,8 @@ export default {
                     name: `commands.${name}.set-level.options.level.name`,
                     description: `commands.${name}.set-level.options.level.description`,
                     required: true,
-                    min_value: 0
+                    min_value: 1,
+                    max_value: 2500
                 }
             ]
         },

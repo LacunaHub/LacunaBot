@@ -13,6 +13,7 @@ const oauth = new OAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIE
 router.get('/@me', authorize, getMe)
 router.get('/@me/bills', authorize, getBills)
 router.get('/@me/activities', authorize, getActivities)
+router.get('/patrons', getPatrons)
 
 async function getMe(ctx: Context) {
     const user_id = ctx.request.headers['user-id'] as string
@@ -70,6 +71,35 @@ async function getActivities(ctx: Context) {
     ctx.body = {
         levels: user.activities.levels
     }
+}
+
+async function getPatrons(ctx: Context) {
+    const patrons = await db.users.find({ 'premium.last_charge_timestamp': { $ne: null } })
+    const bills = await db.bills.find({
+        type: { $in: ['QIWI', 'PAYPAL'] },
+        'status.value': 'PAID',
+        'custom_fields.user_id': { $in: patrons.map(i => i._id) }
+    })
+
+    ctx.status = 200
+    ctx.body = patrons.map(i => {
+        const userBills = bills.filter(ii => ii.custom_fields.user_id === i._id)
+
+        return {
+            _id: i._id,
+            avatar: i.user.avatar,
+            username: i.user.username,
+            discriminator: i.user.discriminator,
+            is_active: i.premium.available,
+            supported_amount: userBills.reduce(
+                (x, y) => {
+                    x[y.currency] += y.amount
+                    return x
+                },
+                { RUB: 0, USD: 0 }
+            )
+        }
+    })
 }
 
 export default router

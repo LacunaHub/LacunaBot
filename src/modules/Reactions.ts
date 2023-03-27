@@ -1,4 +1,5 @@
 import { BaseGuildTextChannel, Collection, Message, MessageReaction, MessageType, User } from 'discord.js'
+import { split } from 'unicode-default-word-boundary'
 import { AutoReaction, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import { snakeToPascalCase } from '../internals/utility/Utils'
@@ -219,28 +220,33 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
 }
 
 export async function autoReact(self: Lacuna, server: ServerDocument, message: Message) {
-    const auto_reaction: AutoReaction = server.modules.autoreactions
+    const ar: AutoReaction = server.modules.autoreactions
         .slice(0, server.server.premium.available ? 20 : 2)
-        .find(ar => ar.channel_id == message.channel.id)
+        .find(i => i.channel_id == message.channel.id)
 
-    if (auto_reaction) {
-        if (
-            auto_reaction.message_types &&
-            auto_reaction.message_types.length &&
-            !auto_reaction.message_types.map(i => MessageType[snakeToPascalCase(i)]).includes(message.type)
-        )
-            return false
+    if (ar) {
+        if (ar.message_types?.length) {
+            const includesMessageType = ar.message_types.map(i => MessageType[snakeToPascalCase(i)]).includes(message.type)
+
+            if (!includesMessageType) return false
+        }
 
         const content: string = message.content.toLowerCase()
-        const split: string[] = content.split(/\s{1,}/)
+        const splitted: string[] = split(content)
 
-        if (
-            (auto_reaction.matches.length && !auto_reaction.matches.some(m => split.includes(m.toLowerCase()))) ||
-            (auto_reaction.exclude_matches.length && auto_reaction.exclude_matches.some(m => split.includes(m.toLowerCase())))
-        )
-            return false
+        if (ar.matches.length) {
+            const match = ar.matches.map(i => i.toLowerCase()).some(i => splitted.includes(i))
 
-        for (const emoji of auto_reaction.reactions) {
+            if (!match) return false
+        }
+
+        if (ar.exclude_matches.length) {
+            const match = ar.exclude_matches.map(i => i.toLowerCase()).some(i => splitted.includes(i))
+
+            if (match) return false
+        }
+
+        for (const emoji of ar.reactions) {
             await message.react(emoji.id || emoji.name)
         }
 
