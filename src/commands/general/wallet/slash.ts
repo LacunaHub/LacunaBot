@@ -106,8 +106,8 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
         }
     }
 
-    const currency_id = server.modules.economy.currencies.find(c => c.name == currency || c.symbol == currency)?.id ?? 'DEFAULT'
-    const transaction_currency = wallet.currencies.find(c => c.id == currency_id)
+    const currency_id = server.modules.economy.currencies.find(i => i.id === currency)?.id ?? 'DEFAULT'
+    const transaction_currency = wallet.currencies.find(i => i.id === currency_id)
 
     if (!transaction_currency || transaction_currency.amount < amount) {
         await interaction.reply({

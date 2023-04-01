@@ -310,11 +310,46 @@ const handler = async (
                 commands
                     .map(i => {
                         return {
-                            name: `${i.name} - ${self.i18n.t(server.locale, i.description)}`,
+                            name: `${i.name} - ${self.i18n.t(interaction.locale, i.description)}`,
                             value: i.name
                         }
                     })
                     .slice(0, 25)
+            )
+        }
+
+        if (interaction.commandName === 'store') {
+            const items = server.modules.economy.store.items
+                .slice(0, server.server.premium.available ? 200 : 50)
+                .filter(i => [i.id, i.name, i.description].some(ii => ii.includes(query)))
+
+            await interaction.respond(
+                items
+                    .map(i => {
+                        const currency = server.modules.economy.currencies.find(ii => ii.id === i.currency_id)
+                        const price = i.purchase_price
+                            ? `${i.purchase_price} ${currency.name}`
+                            : self.i18n.t(interaction.locale, 'commands.store.items.text_price_free')
+
+                        return {
+                            name: `${i.name} (${price})`,
+                            value: i.id
+                        }
+                    })
+                    .slice(0, 25)
+            )
+        }
+
+        if (['wallet', 'activities'].includes(interaction.commandName)) {
+            const currencies = server.modules.economy.currencies.filter(i => [i.id, i.name, i.symbol].some(ii => ii.includes(query)))
+
+            await interaction.respond(
+                currencies.map(i => {
+                    return {
+                        name: i.name,
+                        value: i.id
+                    }
+                })
             )
         }
 

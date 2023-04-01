@@ -167,8 +167,8 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
         )
     }
 
-    const currency_id = server.modules.economy.currencies.find(c => c.name == currency || c.symbol == currency)?.id ?? 'DEFAULT'
-    const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id == currency_id)
+    const currency_id = server.modules.economy.currencies.find(i => i.id === currency)?.id ?? 'DEFAULT'
+    const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id === currency_id)
 
     if (wallet.currencies.some(c => c.id == currency_id)) {
         await self.db.users.updateOne(
@@ -275,8 +275,8 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
         )
     }
 
-    const currency_id = server.modules.economy.currencies.find(c => c.name == currency || c.symbol == currency)?.id ?? 'DEFAULT'
-    const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id == currency_id)
+    const currency_id = server.modules.economy.currencies.find(i => i.id === currency)?.id ?? 'DEFAULT'
+    const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id === currency_id)
 
     if (wallet.currencies.some(c => c.id == currency_id)) {
         await self.db.users.updateOne(
