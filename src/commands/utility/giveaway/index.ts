@@ -15,19 +15,19 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.create.options.prize.name`,
+                    name: 'common.command_options.prize',
                     description: `commands.${name}.create.options.prize.description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.create.options.duration.name`,
+                    name: 'common.command_options.duration',
                     description: `commands.${name}.create.options.duration.description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: `commands.${name}.create.options.winners_amount.name`,
+                    name: 'common.command_options.winners_amount',
                     description: `commands.${name}.create.options.winners_amount.description`,
                     required: false,
                     min_value: 1,
@@ -35,7 +35,7 @@ export default {
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.create.options.sponsor.name`,
+                    name: 'common.command_options.sponsor',
                     description: `commands.${name}.create.options.sponsor.description`,
                     required: false
                 }
@@ -48,7 +48,7 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.end.options.message_id.name`,
+                    name: 'common.command_options.message_id',
                     description: `commands.${name}.end.options.message_id.description`,
                     required: true
                 }
@@ -61,7 +61,7 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.end.options.message_id.name`,
+                    name: 'common.command_options.message_id',
                     description: `commands.${name}.end.options.message_id.description`,
                     required: true
                 }

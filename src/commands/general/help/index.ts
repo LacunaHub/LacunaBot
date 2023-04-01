@@ -10,7 +10,7 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.String,
-            name: `commands.${name}.options.command.name`,
+            name: 'common.command_options.command',
             description: `commands.${name}.options.command.description`,
             required: false,
             autocomplete: true

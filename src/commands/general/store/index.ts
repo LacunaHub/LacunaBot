@@ -15,9 +15,10 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.buy.options.sku.name`,
+                    name: 'common.command_options.sku',
                     description: `commands.${name}.buy.options.sku.description`,
-                    required: true
+                    required: true,
+                    autocomplete: true
                 }
             ]
         },
@@ -28,7 +29,7 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: `commands.${name}.items.options.page.name`,
+                    name: 'common.command_options.page',
                     description: `commands.${name}.items.options.page.description`,
                     required: false,
                     min_value: 1

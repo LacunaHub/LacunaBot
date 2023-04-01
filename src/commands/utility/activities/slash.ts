@@ -101,7 +101,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
-    let amount = interaction.options?.getInteger('balance')
+    let amount = interaction.options?.getInteger('amount')
     const currency = interaction.options?.getString('currency')
 
     if (!mention) {
@@ -209,7 +209,7 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
-    let amount = interaction.options?.getInteger('quantity')
+    let amount = interaction.options?.getInteger('amount')
     const currency = interaction.options?.getString('currency')
 
     if (!mention) {

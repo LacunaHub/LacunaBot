@@ -15,13 +15,13 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: `commands.${name}.add.options.user.name`,
+                    name: 'common.command_options.user',
                     description: `commands.${name}.add.options.user.description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.add.options.reason.name`,
+                    name: 'common.command_options.reason',
                     description: `commands.${name}.add.options.reason.description`,
                     required: false
                 }
@@ -34,19 +34,19 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: `commands.${name}.remove.options.user.name`,
+                    name: 'common.command_options.user',
                     description: `commands.${name}.remove.options.user.description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.remove.options.warn_id.name`,
+                    name: 'common.command_options.warn_id',
                     description: `commands.${name}.remove.options.warn_id.description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.remove.options.reason.name`,
+                    name: 'common.command_options.reason',
                     description: `commands.${name}.remove.options.reason.description`,
                     required: false
                 }

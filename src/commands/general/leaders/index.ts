@@ -10,7 +10,7 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.Integer,
-            name: `commands.${name}.options.sorting.name`,
+            name: 'common.command_options.sorting',
             description: `commands.${name}.options.sorting.description`,
             required: false,
             choices: [
@@ -26,7 +26,7 @@ export default {
         },
         {
             type: ApplicationCommandOptionType.Integer,
-            name: `commands.${name}.options.page.name`,
+            name: 'common.command_options.page',
             description: `commands.${name}.options.page.description`,
             required: false,
             min_value: 1

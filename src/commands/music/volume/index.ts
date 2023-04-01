@@ -10,7 +10,7 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.Integer,
-            name: `commands.${name}.options.volume.name`,
+            name: 'common.command_options.volume',
             description: `commands.${name}.options.volume.description`,
             required: true,
             min_value: 1,

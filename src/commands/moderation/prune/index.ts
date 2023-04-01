@@ -10,7 +10,7 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.Integer,
-            name: `commands.${name}.options.amount.name`,
+            name: 'common.command_options.amount',
             description: `commands.${name}.options.amount.description`,
             required: true,
             min_value: 1,
@@ -18,13 +18,13 @@ export default {
         },
         {
             type: ApplicationCommandOptionType.User,
-            name: `commands.${name}.options.user.name`,
+            name: 'common.command_options.user',
             description: `commands.${name}.options.user.description`,
             required: false
         },
         {
             type: ApplicationCommandOptionType.String,
-            name: `commands.${name}.options.reason.name`,
+            name: 'common.command_options.reason',
             description: `commands.${name}.options.reason.description`,
             required: false
         }

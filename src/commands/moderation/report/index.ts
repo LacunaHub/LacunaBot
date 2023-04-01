@@ -13,7 +13,7 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.String,
-            name: `commands.${name}.options.message_id.name`,
+            name: 'common.command_options.message_id',
             description: `commands.${name}.options.message_id.description`,
             required: true
         }

@@ -15,13 +15,13 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: `commands.${name}.set-level.options.user.name`,
+                    name: 'common.command_options.user',
                     description: `commands.${name}.set-level.options.user.description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: `commands.${name}.set-level.options.level.name`,
+                    name: 'common.command_options.level',
                     description: `commands.${name}.set-level.options.level.description`,
                     required: true,
                     min_value: 1,
@@ -36,13 +36,13 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: `commands.${name}.add-wallet-balance.options.user.name`,
+                    name: 'common.command_options.user',
                     description: `commands.${name}.add-wallet-balance.options.user.description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: `commands.${name}.add-wallet-balance.options.amount.name`,
+                    name: 'common.command_options.amount',
                     description: `commands.${name}.add-wallet-balance.options.amount.description`,
                     required: true,
                     min_value: 1,
@@ -50,9 +50,10 @@ export default {
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.add-wallet-balance.options.currency.name`,
+                    name: 'common.command_options.currency',
                     description: `commands.${name}.add-wallet-balance.options.currency.description`,
-                    required: false
+                    required: false,
+                    autocomplete: true
                 }
             ]
         },
@@ -63,13 +64,13 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: `commands.${name}.set-wallet-balance.options.user.name`,
+                    name: 'common.command_options.user',
                     description: `commands.${name}.set-wallet-balance.options.user.description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: `commands.${name}.set-wallet-balance.options.amount.name`,
+                    name: 'common.command_options.amount',
                     description: `commands.${name}.set-wallet-balance.options.amount.description`,
                     required: true,
                     min_value: -(Math.pow(2, 31) - 1),
@@ -77,9 +78,10 @@ export default {
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.set-wallet-balance.options.currency.name`,
+                    name: 'common.command_options.currency',
                     description: `commands.${name}.set-wallet-balance.options.currency.description`,
-                    required: false
+                    required: false,
+                    autocomplete: true
                 }
             ]
         },
@@ -90,13 +92,13 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: `commands.${name}.reset-wallet.options.user.name`,
+                    name: 'common.command_options.user',
                     description: `commands.${name}.reset-wallet.options.user.description`,
                     required: false
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.reset-wallet.options.user_id.name`,
+                    name: 'common.command_options.user_id',
                     description: `commands.${name}.reset-wallet.options.user_id.description`,
                     required: false
                 }
@@ -109,13 +111,13 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: `commands.${name}.reset-level.options.user.name`,
+                    name: 'common.command_options.user',
                     description: `commands.${name}.reset-level.options.user.description`,
                     required: false
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.reset-level.options.user_id.name`,
+                    name: 'common.command_options.user_id',
                     description: `commands.${name}.reset-level.options.user_id.description`,
                     required: false
                 }
