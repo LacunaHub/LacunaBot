@@ -3,7 +3,7 @@ import { MySQLDriver, QuickDB } from 'quick.db'
 import Bills, { IBill } from './schemas/Bills'
 import Servers, { ServerDocument } from './schemas/Servers'
 import TwitchSubs, { ITwitchSub } from './schemas/TwitchSubs'
-import Users, { UserDocument } from './schemas/Users'
+import Users from './schemas/Users'
 import YouTubeSubs, { IYouTubeSub } from './schemas/YouTubeSubs'
 
 const [mysqlHost, mysqlPort, mysqlUser, mysqlPassword, mysqlDatabase] = process.env.DB_MYSQL_AUTH.split(':')
@@ -127,42 +127,7 @@ export default {
         }
     },
 
-    users: {
-        async create(doc: UserDocument) {
-            return await Users.create(doc)
-        },
-        async deleteMany(filter: FilterQuery<UserDocument>, options?: QueryOptions) {
-            return await Users.deleteMany(filter, options)
-        },
-        async deleteOne(filter: FilterQuery<UserDocument>, options?: QueryOptions) {
-            return await Users.deleteOne(filter, options)
-        },
-        async fetch(filter: FilterQuery<UserDocument>) {
-            let document = await Users.findOne(filter)
-
-            if (!document) {
-                try {
-                    document = await Users.create(filter as any)
-                } catch (err) {
-                    document = null
-                }
-            }
-
-            return document
-        },
-        async find(filter: FilterQuery<UserDocument>) {
-            return await Users.find(filter)
-        },
-        async findOne(filter: FilterQuery<UserDocument>, projection?: any, options?: QueryOptions) {
-            return await Users.findOne(filter, projection, options)
-        },
-        async updateMany(filter: FilterQuery<UserDocument>, update?: UpdateQuery<UserDocument>, options?: QueryOptions) {
-            return await Users.updateMany(filter, update, options)
-        },
-        async updateOne(filter: FilterQuery<UserDocument>, update?: UpdateQuery<UserDocument>, options?: QueryOptions) {
-            return await Users.updateOne(filter, update, options)
-        }
-    },
+    users: Users,
 
     json: {
         async get(): Promise<JsonData> {

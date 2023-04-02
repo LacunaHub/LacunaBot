@@ -5,6 +5,7 @@ import { support_server_id } from '../../internals/utility/BillUtils'
 import { newbiesModeration, nicknamesModeration } from '../../modules/Automoder'
 import Greeting from '../../modules/Greeting'
 import { GuildMemberAdd } from '../../modules/Logs'
+import { checkReportsOnGuildMemberAdd } from '../../modules/Reports'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
     if (member.partial) {
@@ -18,6 +19,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     await GuildMemberAdd(self, server, member)
     await nicknamesModeration(self, server, member)
     await newbiesModeration(self, server, member)
+    await checkReportsOnGuildMemberAdd(self, server, member)
 
     if (member.guild.id === support_server_id) {
         const user = await self.db.users.findOne({ _id: member.id })

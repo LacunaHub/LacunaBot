@@ -6,47 +6,50 @@ import {
     ChatInputCommandInteraction,
     Collection,
     EmbedBuilder,
+    GuildMember,
     Message,
+    ModalSubmitInteraction,
     StringSelectMenuBuilder
 } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
-import { truncateString } from '../../../internals/utility/Utils'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction | ModalSubmitInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    if (!server.modules.reports.active || !server.modules.reports.channel_id) {
+    let mention: GuildMember
+    let reason: string
+
+    if (interaction.isChatInputCommand()) {
+        mention = interaction.options?.getMember('user') as GuildMember
+        reason = interaction.options?.getString('reason')
+    }
+
+    if (interaction.isModalSubmit()) {
+        const [, targetId] = interaction.customId.split('-')
+        const cache = self.cache.get(`REPORT-${targetId}-${interaction.user.id}`)
+
+        mention = cache?.targetMember
+        reason = interaction.fields
+            .getTextInputValue('REPORT-REASON')
+            .trim()
+            .replace(/\s{2,}/, ' ')
+    }
+
+    if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_reports_disabled_or_no_channel', {
-                user: `**${(interaction.member as any).displayName}**`
-            })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_mention', { user: `**${interaction.member['displayName']}**` })}`,
             ephemeral: true
         })
 
         return false
     }
 
-    const channel = interaction.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
-
-    if (!channel) {
+    if (!reason || reason.length < 20) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_channel_not_found', {
-                user: `**${(interaction.member as any).displayName}**`
-            })}`,
-            ephemeral: true
-        })
-
-        return false
-    }
-
-    const target_id = interaction.options?.getString('message-id')
-
-    if (!target_id) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_message_id', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_invalid_reason', { user: `**${interaction.member['displayName']}**` })}`,
             ephemeral: true
         })
 
@@ -54,103 +57,151 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     await interaction.deferReply({ ephemeral: true })
-    const target = await interaction.channel.messages.fetch({ message: target_id }).catch(() => {})
 
-    if (!target) {
-        await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_message', { user: `**${(interaction.member as any).displayName}**` })}`
-        })
+    let mentionUser = await self.db.users.findOne({ _id: mention.id })
 
-        return false
+    if (!mentionUser) {
+        mentionUser = await self.db.users.create({
+            _id: mention.id,
+            user: {
+                username: mention.user.username,
+                discriminator: mention.user.discriminator,
+                avatar: mention.user.displayAvatarURL(),
+                flags: mention.user.flags
+            }
+        } as any)
     }
 
-    const entry = (await self.db.qdb.get(`reports.${target_id}`)) as any
-    if (!entry) await self.db.qdb.set(`reports.${target_id}`, { timestamp: target.createdTimestamp, users: [] })
+    const report = mentionUser.reports.find(i => i.sender_id === interaction.user.id)
 
-    if (entry?.users?.includes(interaction.user.id)) {
+    if (report && Date.now() - report.created_at < ms('24h')) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_already_reported', {
-                user: `**${(interaction.member as any).displayName}**`
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_user_recently_reported', {
+                user: `**${interaction.member['displayName']}**`
             })}`
         })
 
         return false
     }
 
-    await self.db.qdb.push(`reports.${target_id}.users`, interaction.user.id)
+    const reportCount = await self.db.users.countDocuments({ 'reports.created_at': { $gt: Date.now() - ms('24h') } })
 
-    const messages = (await channel.messages.fetch({ limit: 50, cache: false }).catch(() => {})) as Collection<string, Message>
-    const report = messages?.find(m => m.author.id == self.user.id && m.embeds[0]?.footer?.text?.startsWith(`ID: ${target.id}`))
-
-    if (!report) {
-        const embed = new EmbedBuilder()
-            .setAuthor({ name: target.author.tag, iconURL: target.author.displayAvatarURL() })
-            .addFields([
-                { name: t('commands.report.text_message_channel'), value: `<#${target.channelId}>`, inline: true },
-                { name: t('commands.report.text_report_count'), value: '1', inline: true }
-            ])
-            .setFooter({ text: `ID: ${target.id}` })
-            .setTimestamp(target.createdTimestamp)
-
-        if (target.attachments.filter(file => Boolean(file.width)).size > 0) embed.setImage(target.attachments.first().proxyURL)
-        if (target.content)
-            embed.setDescription(`${truncateString(target.content, 768)}${target.embeds[0] ? `\n\`[${t('common.attachments')}]\`` : ''}`)
-
-        const selectMenuOptions = ['indefinitely', '10m', '30m', '1h', '2h', '5h', '12h', '1d', '3d', '7d', '14d'].map(i => {
-            return {
-                label:
-                    i == 'indefinitely'
-                        ? t('indefinitely').toLowerCase()
-                        : moment(Date.now() + ms(i))
-                              .locale(server.locale)
-                              .fromNow(true),
-                value: i
-            }
+    if (reportCount >= 3) {
+        await interaction.editReply({
+            content: `${self._emojis.ERROR} | ${t('commands.report.text_to_many_recent_reports', {
+                user: `**${interaction.member['displayName']}**`
+            })}`
         })
 
-        const rows = [
-            new ActionRowBuilder<ButtonBuilder>().addComponents(
-                new ButtonBuilder()
-                    .setCustomId(`R-KICK-${target.author.id}`)
-                    .setLabel(t('commands.report.quick_actions.KICK'))
-                    .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                    .setCustomId(`R-WARN-${target.author.id}`)
-                    .setLabel(t('commands.report.quick_actions.WARN'))
-                    .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                    .setCustomId(`R-SKIP-${target.author.id}`)
-                    .setLabel(t('commands.report.quick_actions.IGNORE'))
-                    .setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder().setLabel(t('commands.report.text_jump_to_message')).setStyle(ButtonStyle.Link).setURL(target.url)
-            ),
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId(`R-BAN-${target.author.id}`)
-                    .setPlaceholder(t('commands.report.quick_actions.BAN'))
-                    .setOptions(selectMenuOptions)
-            ),
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId(`R-MUTE-${target.author.id}`)
-                    .setPlaceholder(t('commands.report.quick_actions.MUTE'))
-                    .setOptions(selectMenuOptions.slice(1))
-            )
-        ]
+        return false
+    }
 
-        await channel.send({ embeds: [embed], components: rows }).catch(self.logger.error)
-    } else {
-        const embed = new EmbedBuilder(report.embeds[0])
-        const count = embed.data.fields[1].value
+    await self.db.users.updateOne(
+        { _id: mention.id },
+        {
+            $push: {
+                reports: {
+                    $each: [
+                        {
+                            sender_id: interaction.user.id,
+                            guild_id: interaction.guildId,
+                            reason,
+                            created_at: Date.now()
+                        }
+                    ],
+                    $slice: -100
+                }
+            }
+        }
+    )
 
-        embed.data.fields[1].value = (Number(count) + 1).toString()
+    if (server.modules.reports.active && server.modules.reports.channel_id) {
+        const channel = interaction.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
 
-        await report.edit({ embeds: [embed] }).catch(self.logger.error)
+        if (channel) {
+            let reportMessages: Collection<string, Message>, reportMessage: Message
+
+            try {
+                reportMessages = await channel.messages.fetch({ limit: 50, cache: false })
+                reportMessage = reportMessages?.find(i => {
+                    return i.author.id === self.user.id && i.embeds[0]?.footer?.text?.startsWith(`ID: ${mention.id}`) && i.components.length
+                })
+            } catch (err) {}
+
+            if (reportMessage) {
+                const embed = new EmbedBuilder(reportMessage.embeds[0])
+                const fields = embed.data.fields.length === 25 ? embed.data.fields.slice(1, 25) : embed.data.fields
+
+                embed.setFields([
+                    ...fields,
+                    {
+                        name: `${interaction.user.tag} <t:${Math.round(Date.now() / 1000)}:R>`,
+                        value: reason
+                    }
+                ])
+
+                await reportMessage.edit({ embeds: [embed] }).catch(self.logger.error)
+            } else {
+                const embed = new EmbedBuilder()
+                    .setAuthor({ name: mention.user.tag, iconURL: mention.user.displayAvatarURL() })
+                    .addFields([
+                        {
+                            name: `${interaction.user.tag} <t:${Math.round(Date.now() / 1000)}:R>`,
+                            value: reason
+                        }
+                    ])
+                    .setFooter({ text: `ID: ${mention.id}` })
+
+                const selectMenuOptions = ['indefinitely', '10m', '30m', '1h', '2h', '5h', '12h', '1d', '3d', '7d', '14d'].map(i => {
+                    return {
+                        label:
+                            i === 'indefinitely'
+                                ? t('indefinitely').toLowerCase()
+                                : moment(Date.now() + ms(i))
+                                      .locale(server.locale)
+                                      .fromNow(true),
+                        value: i
+                    }
+                })
+
+                const rows = [
+                    new ActionRowBuilder<ButtonBuilder>().addComponents(
+                        new ButtonBuilder()
+                            .setCustomId(`R-KICK-${mention.id}`)
+                            .setLabel(t('commands.report.quick_actions.KICK'))
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                            .setCustomId(`R-WARN-${mention.id}`)
+                            .setLabel(t('commands.report.quick_actions.WARN'))
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                            .setCustomId(`R-SKIP-${mention.id}`)
+                            .setLabel(t('commands.report.quick_actions.IGNORE'))
+                            .setStyle(ButtonStyle.Secondary)
+                    ),
+                    new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+                        new StringSelectMenuBuilder()
+                            .setCustomId(`R-BAN-${mention.id}`)
+                            .setPlaceholder(t('commands.report.quick_actions.BAN'))
+                            .setOptions(selectMenuOptions)
+                    ),
+                    new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+                        new StringSelectMenuBuilder()
+                            .setCustomId(`R-MUTE-${mention.id}`)
+                            .setPlaceholder(t('commands.report.quick_actions.MUTE'))
+                            .setOptions(selectMenuOptions.slice(1))
+                    )
+                ]
+
+                await channel.send({ embeds: [embed], components: rows }).catch(self.logger.error)
+            }
+        }
     }
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.report.text_report_confirm', { user: `**${(interaction.member as any).displayName}**` })}`
+        content: `${self._emojis.OK} | ${t('commands.report.text_user_reported', { user: `**${(interaction.member as any).displayName}**` })}`
     })
+    self.cache.delete(`REPORT-${mention.id}-${interaction.user.id}`)
 
     return true
 }

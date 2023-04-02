@@ -1,6 +1,6 @@
 import { Shard as BridgeShard } from 'discord-cross-hosting'
 import { Client as ClusterClient } from 'discord-hybrid-sharding'
-import { Client, ClientOptions, Collection, parseEmoji, PermissionsBitField } from 'discord.js'
+import { Client, ClientOptions, Collection, LimitedCollection, parseEmoji, PermissionsBitField } from 'discord.js'
 import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
 import { connect } from 'mongoose'
@@ -23,6 +23,7 @@ export default class Lacuna extends Client {
     public hostname: string
     public logger: typeof logger
     public db: typeof db
+    public cache: LimitedCollection<string, any>
     public commands: Collection<string, Command>
     public events: Collection<string, Event>
     public player: Manager
@@ -45,6 +46,8 @@ export default class Lacuna extends Client {
         this.logger = logger
 
         this.db = db
+
+        this.cache = new LimitedCollection({ maxSize: 100 })
 
         this.commands = new Collection()
 
