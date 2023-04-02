@@ -20,7 +20,7 @@ import CustomCommand from '../../modules/CustomCommand'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
 import { createPoll, onPressPollButton } from '../../modules/Polls'
 import Replacer from '../../modules/Replacer'
-import reports from '../../modules/Reports'
+import { onPressReportButton, onSelectReportOption } from '../../modules/Reports'
 
 const handler = async (
     self: Lacuna,
@@ -72,7 +72,7 @@ const handler = async (
         }
 
         if (/R\-\w+\-\d+/.test(interaction.customId)) {
-            await reports.buttonPressed(self, server, interaction)
+            await onPressReportButton(self, server, interaction)
 
             return true
         }
@@ -231,7 +231,7 @@ const handler = async (
 
     if (interaction.isAnySelectMenu()) {
         if (interaction.isStringSelectMenu() && /R\-\w+\-\d+/.test(interaction.customId)) {
-            await reports.optionSelected(self, server, interaction)
+            await onSelectReportOption(self, server, interaction)
 
             return true
         }
@@ -418,6 +418,11 @@ const handler = async (
 
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {
             await onSubmitChangeReasonModal(self, server, interaction)
+        }
+
+        if (/REPORT\-\d+/.test(interaction.customId)) {
+            const reportCommand = self.commands.get('report')
+            await reportCommand.executeSlash(server, interaction as any)
         }
     }
 

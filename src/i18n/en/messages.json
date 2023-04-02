@@ -363,29 +363,28 @@
             "name": "Send report",
             "description": "Report a user",
             "options": {
-                "message_id": {
-                    "description": "Identifier of the message to which the report will be sent"
-                },
                 "user": {
                     "description": "Who should be the target of the report"
+                },
+                "reason": {
+                    "description": "What do you want to report about"
                 }
             },
-            "text_reports_disabled_or_no_channel": "{user}, reports are disabled on this server or no channel is set for them",
-            "text_channel_not_found": "{user}, the channel for reports was not found, it may have been deleted",
-            "text_already_reported": "{user}, you have already sent a report about this message",
-            "text_no_message_id": "{user}, please specify the identifier of the message to which you want to send your report",
-            "text_no_message": "{user}, there is no message with the specified identifier in the current channel",
-            "text_report_confirm": "{user}, the report about the message has been successfully sent",
-            "text_message_channel": "Channel of message",
-            "text_report_count": "Number of reports",
-            "text_jump_to_message": "Jump to message",
+            "text_no_mention": "{user}, please specify the user you wish to report",
+            "text_invalid_reason": "{user}, please correctly specify report reason",
+            "text_user_recently_reported": "{user}, you have recently sent a report about this user",
+            "text_to_many_recent_reports": "{user}, you have reached the daily report limit",
+            "text_user_reported": "{user}, thank you for letting us know about this",
             "quick_actions": {
                 "KICK": "Kick",
                 "WARN": "Warn",
                 "IGNORE": "Ignore",
                 "BAN": "Ban",
                 "MUTE": "Mute"
-            }
+            },
+            "text_potentially_unwanted_user": "Potentially unwanted user due to received reports",
+            "text_total_reports": "Total reports",
+            "text_recent_reports": "Recent reports"
         },
         "unmute": {
             "description": "Unmute a user",

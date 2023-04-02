@@ -1,37 +1,27 @@
-import { ButtonInteraction, GuildMember, SelectMenuInteraction } from 'discord.js'
+import { BaseGuildTextChannel, ButtonInteraction, EmbedBuilder, GuildMember, StringSelectMenuInteraction } from 'discord.js'
 import ms from 'ms'
 import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import TemporaryBan from '../internals/structures/TemporaryBan'
+import { capitalizeFirstLetter } from '../internals/utility/Utils'
 import { caseLog, warnings } from './Moderation'
 
-export async function buttonPressed(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
+export async function onPressReportButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
+    const t = self.i18n.t.bind(null, server.locale)
     const [, action, user_id] = interaction.customId.split('-')
 
-    const member = await interaction.guild.members.fetch(user_id).catch(() => {})
-    const t = self.i18n.t.bind(null, server.locale)
+    let member: GuildMember
     const reason = '-'
 
+    await interaction.deferUpdate()
+
+    try {
+        member = await interaction.guild.members.fetch({ user: user_id })
+    } catch (err) {}
+
     if (!member) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
-        })
-
-        await removeComponentsFromMessage(interaction)
-
-        return
-    }
-
-    if (member.id == interaction.user.id) {
-        await removeComponentsFromMessage(interaction)
-
-        return
-    }
-
-    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
+        await interaction.followUp({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${interaction.member['displayName']}**` })}`,
             ephemeral: true
         })
 
@@ -40,13 +30,31 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
+    if (member.id === interaction.user.id) {
+        await interaction.followUp({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_self_quick_action', { user: `**${interaction.member['displayName']}**` })}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
+        await interaction.followUp({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${interaction.member['displayName']}**` })}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
     if (
         server.moderation.deny_moderate_users_with_mp &&
         member.permissions.has(self.PermissionFlags[action == 'KICK' ? 'KickMembers' : 'ManageRoles'])
     ) {
-        await interaction.reply({
+        await interaction.followUp({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member['displayName']}**`
             })}`,
             ephemeral: true
         })
@@ -57,9 +65,9 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     }
 
     if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
-        await interaction.reply({
+        await interaction.followUp({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member['displayName']}**`
             })}`,
             ephemeral: true
         })
@@ -69,39 +77,39 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
-    if (action == 'KICK') {
+    if (action === 'KICK') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.KickMembers)) {
-            await interaction.reply({
-                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
+            await interaction.followUp({
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.member['displayName']}**` })}`,
                 ephemeral: true
             })
 
-            return
+            return false
         }
 
         if (!member.kickable) {
-            await interaction.reply({
+            await interaction.followUp({
                 content: `${self._emojis.ERROR} | ${t('commands.kick.text_cant_kick_user', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member['displayName']}**`
                 })}`,
                 ephemeral: true
             })
 
-            return
+            return false
         }
 
         await member.kick(reason).catch(() => {})
         await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: member.user, executor: interaction.user, reason })
     }
 
-    if (action == 'WARN') {
+    if (action === 'WARN') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.ManageRoles)) {
-            await interaction.reply({
-                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
+            await interaction.followUp({
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.member['displayName']}**` })}`,
                 ephemeral: true
             })
 
-            return
+            return false
         }
 
         await warnings.addWarn(self, server, interaction, { target: member, executor: interaction.member as any, reason })
@@ -112,39 +120,29 @@ export async function buttonPressed(self: Lacuna, server: ServerDocument, intera
     self.emit('moduleExecution', {
         module: 'Moderation',
         category: 'Reports',
-        label: action,
+        label: capitalizeFirstLetter(action.toLowerCase()),
         guild: { id: interaction.guild.id, name: interaction.guild.name },
         target: { id: member.id, name: member.user.tag }
     })
 }
 
-export async function optionSelected(self: Lacuna, server: ServerDocument, interaction: SelectMenuInteraction) {
-    const [, action, user_id] = interaction.customId.split('-')
-    const member = (await interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
+export async function onSelectReportOption(self: Lacuna, server: ServerDocument, interaction: StringSelectMenuInteraction) {
     const t = self.i18n.t.bind(null, server.locale)
+    const [, action, user_id] = interaction.customId.split('-')
+
+    let member: GuildMember
     const duration = interaction.values[0]
     const reason = '-'
 
+    await interaction.deferUpdate()
+
+    try {
+        member = await interaction.guild.members.fetch({ user: user_id })
+    } catch (err) {}
+
     if (!member) {
-        await interaction.reply({
+        await interaction.followUp({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${(interaction.member as any).displayName}**` })}`,
-            ephemeral: true
-        })
-
-        await removeComponentsFromMessage(interaction)
-
-        return
-    }
-
-    if (member.id == interaction.user.id) {
-        await removeComponentsFromMessage(interaction)
-
-        return
-    }
-
-    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
         })
 
@@ -153,11 +151,29 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
         return false
     }
 
+    if (member.id == interaction.user.id) {
+        await interaction.followUp({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_self_quick_action', { user: `**${interaction.member['displayName']}**` })}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
+    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
+        await interaction.followUp({
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
     if (
         server.moderation.deny_moderate_users_with_mp &&
         member.permissions.has(self.PermissionFlags[action == 'BAN' ? 'BanMembers' : 'ModerateMembers'])
     ) {
-        await interaction.reply({
+        await interaction.followUp({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
                 user: `**${(interaction.member as any).displayName}**`
             })}`,
@@ -170,7 +186,7 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
     }
 
     if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
-        await interaction.reply({
+        await interaction.followUp({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
                 user: `**${(interaction.member as any).displayName}**`
             })}`,
@@ -182,25 +198,25 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
         return false
     }
 
-    if (action == 'BAN') {
+    if (action === 'BAN') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.BanMembers)) {
-            await interaction.reply({
+            await interaction.followUp({
                 content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
-            return
+            return false
         }
 
         if (!member.bannable) {
-            await interaction.reply({
+            await interaction.followUp({
                 content: `${self._emojis.ERROR} | ${t('commands.ban.text_cant_ban_user', {
                     user: `**${(interaction.member as any).displayName}**`
                 })}`,
                 ephemeral: true
             })
 
-            return
+            return false
         }
 
         if (duration == 'indefinitely') {
@@ -218,31 +234,31 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
         await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_ADD', target: member.user, executor: interaction.user, reason })
     }
 
-    if (action == 'MUTE') {
+    if (action === 'MUTE') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.ModerateMembers)) {
-            await interaction.reply({
+            await interaction.followUp({
                 content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
                 ephemeral: true
             })
 
-            return
+            return false
         }
 
         if (!member.manageable) {
-            await interaction.reply({
+            await interaction.followUp({
                 content: `${self._emojis.ERROR} | ${t('commands.mute.text_cant_mute_user', {
                     user: `**${(interaction.member as any).displayName}**`
                 })}`,
                 ephemeral: true
             })
 
-            return
+            return false
         }
 
         await member.disableCommunicationUntil(Date.now() + ms(duration), reason)
 
         if (server.moderation.mutes.rar) {
-            const current_roles = member.roles.cache.filter(r => r.editable && r.id != interaction.guildId).map(r => r.id)
+            const current_roles = member.roles.cache.filter(r => r.editable && r.id !== interaction.guildId).map(r => r.id)
 
             await self.db.servers.updateOne(
                 { _id: interaction.guildId },
@@ -267,23 +283,80 @@ export async function optionSelected(self: Lacuna, server: ServerDocument, inter
         await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_ADD', target: member.user, executor: interaction.user, reason })
     }
 
+    await removeComponentsFromMessage(interaction)
+
     self.emit('moduleExecution', {
         module: 'Moderation',
         category: 'Reports',
-        label: action,
+        label: capitalizeFirstLetter(action.toLowerCase()),
         guild: { id: interaction.guild.id, name: interaction.guild.name },
         target: { id: member.id, name: member.user.tag }
     })
-
-    await removeComponentsFromMessage(interaction)
 }
 
-async function removeComponentsFromMessage(interaction: ButtonInteraction | SelectMenuInteraction) {
-    const message = await interaction.channel.messages.fetch({ message: interaction.message.id })
-    await message?.edit({ components: [] })
+export async function checkReportsOnGuildMemberAdd(self: Lacuna, server: ServerDocument, member: GuildMember) {
+    if (!server.modules.reports.notify_about_unwanted_users) return false
+
+    const t = self.i18n.t.bind(null, server.locale)
+    const user = await self.db.users.findOne({ _id: member.id })
+
+    if (!user?.reports?.length) return false
+
+    if (server.modules.reports.active && server.modules.reports.channel_id) {
+        const channel = member.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
+
+        if (channel) {
+            const last24h = user.reports.filter(i => Date.now() - i.created_at < ms('24h')),
+                last7d = user.reports.filter(i => Date.now() - i.created_at < ms('7d')),
+                last10Reports = user.reports.slice(Math.max(user.reports.length - 10, 0)).sort((a, b) => b.created_at - a.created_at)
+
+            const embed = new EmbedBuilder()
+                .setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL() })
+                .setDescription(t('commands.report.text_potentially_unwanted_user'))
+                .addFields([
+                    {
+                        name: t('commands.report.text_total_reports'),
+                        value: user.reports.length.toString(),
+                        inline: true
+                    },
+                    {
+                        name: t('commands.violations.text_last_24_hours'),
+                        value: last24h.length.toString(),
+                        inline: true
+                    },
+                    {
+                        name: t('commands.violations.text_last_7_days'),
+                        value: last7d.length.toString(),
+                        inline: true
+                    },
+                    {
+                        name: t('commands.report.text_recent_reports'),
+                        value: '\u200B'
+                    },
+                    ...last10Reports.map(i => {
+                        return {
+                            name: `<t:${Math.round(i.created_at / 1000)}:R>`,
+                            value: i.reason
+                        }
+                    })
+                ])
+                .setColor('#FFA726')
+
+            try {
+                await channel.send({ embeds: [embed] })
+            } catch (err) {}
+        }
+    }
+}
+
+async function removeComponentsFromMessage(interaction: ButtonInteraction | StringSelectMenuInteraction) {
+    try {
+        const message = await interaction.channel.messages.fetch({ message: interaction.message.id })
+        await message.edit({ components: [] })
+    } catch (err) {}
 }
 
 export default {
-    buttonPressed,
-    optionSelected
+    onPressReportButton,
+    onSelectReportOption
 }

@@ -20,6 +20,7 @@ export default model<UserDocument>(
                 levels: { type: Array, default: [] },
                 wallets: { type: Array, default: [] }
             },
+            reports: { type: Array, default: [] },
             created_at: { type: Number, default: () => Date.now() }
         },
         { versionKey: false }
@@ -45,6 +46,7 @@ export interface UserDocument extends Document {
         levels: IUserLevel[]
         wallets: IUserWallet[]
     }
+    reports: IUserReport[]
     created_at: number
 }
 
@@ -86,3 +88,10 @@ export interface IWalletTransaction {
 }
 
 export type WalletTransactionType = 'PURCHASE' | 'SALE' | 'TRANSFER_TO' | 'TRANSFER_FROM' | 'EXCHANGE'
+
+export interface IUserReport {
+    sender_id: string
+    guild_id: string
+    reason: string
+    created_at: number
+}

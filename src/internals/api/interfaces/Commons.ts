@@ -1166,6 +1166,13 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             if (typeof data.modules.reports.channel_id === 'string' && data.modules.reports.channel_id !== guild.modules.reports.channel_id) {
                 updateData['modules.reports.channel_id'] = data.modules.reports.channel_id
             }
+
+            if (
+                typeof data.modules.reports.notify_about_unwanted_users === 'boolean' &&
+                data.modules.reports.notify_about_unwanted_users !== guild.modules.reports.notify_about_unwanted_users
+            ) {
+                updateData['modules.reports.notify_about_unwanted_users'] = data.modules.reports.notify_about_unwanted_users
+            }
         }
 
         if (Array.isArray(data.modules.autothreads) && JSON.stringify(data.modules.autothreads) !== JSON.stringify(guild.modules.autothreads)) {
