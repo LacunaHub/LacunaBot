@@ -38,7 +38,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             .replace(/\s{2,}/, ' ')
     }
 
-    if (!mention) {
+    if (!mention || mention.user.bot) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.report.text_no_mention', { user: `**${interaction.member['displayName']}**` })}`,
             ephemeral: true
