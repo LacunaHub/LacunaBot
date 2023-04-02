@@ -18,9 +18,8 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
     if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
 
     const content: string = message.content.toLowerCase()
-    const split: string[] = content.split(/\s{1,}/)
 
-    if (config.registry.some(reg => split.includes(reg.toLowerCase()))) {
+    if (config.registry.some(reg => content.includes(reg.toLowerCase()))) {
         const ban = config.options.includes('ACTION_BAN')
         const kick = config.options.includes('ACTION_KICK')
         const mute = config.options.includes('ACTION_MUTE')
