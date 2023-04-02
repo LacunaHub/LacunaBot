@@ -234,7 +234,8 @@
       "PER_GUILD": "На сервер"
     },
     "throttling_max_uses_title": "Максимум користувачів",
-    "throttling_timeout_title": "Повторне використання"
+    "throttling_timeout_title": "Повторне використання",
+    "permissions_now_unavailable": "Откройте настройки сервера Discord и перейдите во вкладку \"Интеграции\", чтобы настроить разрешения для команды."
   },
   "custom_command": {
     "add_custom_command": "@:add команду",
@@ -341,7 +342,8 @@
     "edit_award": "@:add нагороду",
     "level_title": "Рівень",
     "next_remove_title": "Прибирати нагороду при отриманні наступної",
-    "custom_alert_title": "Індивідуальне сповіщення"
+    "custom_alert_title": "Індивідуальне сповіщення",
+    "remove_references_title": "Убрать роли при получении награды"
   },
   "economy_currency": {
     "add_currency": "@:add валюту",
@@ -554,6 +556,7 @@
       "vc_auto_voices_description": "Автоматичне створення та видалення голосових каналів",
       "ut_reports_title": "Репорти",
       "ut_reports_description": "Отримання скарг на повідомлення",
+      "ut_reports_notify_about_unwanted_users_title": "Уведомлять о присоединении потенциально нежелательных пользователей",
       "ut_auto_reactions_title": "Автореакції",
       "ut_auto_reactions_description": "Автоматичне додавання реакцій на повідомлення",
       "ut_auto_threads_title": "Автотреди",

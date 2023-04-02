@@ -579,6 +579,7 @@
       "vc_auto_voices_description": "Автоматическое создание и удаление голосовых каналов",
       "ut_reports_title": "Репорты",
       "ut_reports_description": "Получение жалоб на сообщения",
+      "ut_reports_notify_about_unwanted_users_title": "Уведомлять о присоединении потенциально нежелательных пользователей",
       "ut_auto_reactions_title": "Автореакции",
       "ut_auto_reactions_description": "Автоматическое добавление реакций на сообщение",
       "ut_auto_threads_title": "Автотреды",

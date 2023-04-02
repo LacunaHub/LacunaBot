@@ -70,6 +70,24 @@
             </div>
           </div>
         </q-card-section>
+
+        <q-list class="q-px-none q-pb-md" dense>
+          <q-item tag="label" :disable="!guild.modules.reports.active" v-ripple="guild.modules.reports.active">
+            <q-item-section>
+              <q-item-label>
+                {{ $t('pages.guild.ut_reports_notify_about_unwanted_users_title') }}
+              </q-item-label>
+            </q-item-section>
+
+            <q-item-section side>
+              <q-checkbox
+                v-model="guild.modules.reports.notify_about_unwanted_users"
+                :disable="!guild.modules.reports.active"
+                dense
+              ></q-checkbox>
+            </q-item-section>
+          </q-item>
+        </q-list>
       </q-card>
     </div>
 

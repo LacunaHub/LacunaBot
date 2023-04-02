@@ -342,7 +342,8 @@
     "edit_award": "@:edit award",
     "level_title": "Level",
     "next_remove_title": "Remove an award when you receive the next one",
-    "custom_alert_title": "Custom notification"
+    "custom_alert_title": "Custom notification",
+    "remove_references_title": "Remove roles when receiving awards"
   },
   "economy_currency": {
     "add_currency": "@:add currency",
@@ -555,6 +556,7 @@
       "vc_auto_voices_description": "Automatic creation and deletion of voice channels",
       "ut_reports_title": "Reports",
       "ut_reports_description": "Receiving reports to messages",
+      "ut_reports_notify_about_unwanted_users_title": "Notify potentially unwanted users when they join",
       "ut_auto_reactions_title": "Auto reactions",
       "ut_auto_reactions_description": "Automatically add reactions to the message",
       "ut_auto_threads_title": "Auto-threads",
