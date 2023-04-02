@@ -247,7 +247,8 @@
 
             "text_registration_date": "Дата регистрации",
             "text_join_date": "Дата вступления",
-            "text_avatar_link": "Ссылка на аватар"
+            "text_avatar_link": "Ссылка на аватар",
+            "text_banner_link": "Ссылка на баннер"
         },
         "wallet": {
             "description": "Операции с кошельком",

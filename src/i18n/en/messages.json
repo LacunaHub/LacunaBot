@@ -236,7 +236,8 @@
             },
             "text_registration_date": "Registration date",
             "text_join_date": "Join date",
-            "text_avatar_link": "Avatar URL"
+            "text_avatar_link": "Avatar URL",
+            "text_banner_link": "Banner URL"
         },
         "wallet": {
             "description": "Wallet operations",
