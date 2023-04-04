@@ -387,6 +387,20 @@
             "text_total_reports": "Total reports",
             "text_recent_reports": "Recent reports"
         },
+        "unban": {
+            "description": "Unban a user from the server",
+            "options": {
+                "user_id": {
+                    "description": "Who needs to be unbanned"
+                },
+                "reason": {
+                    "description": "Unban reason"
+                }
+            },
+            "text_invalid_user_id": "{user}, please specify the user identifier you want to unban",
+            "text_ban_not_found": "{user}, failed to find a banned user with the specified identifier",
+            "text_user_unbanned": "{user}, user {target} has been successfully unbanned"
+        },
         "unmute": {
             "description": "Unmute a user",
             "options": {
