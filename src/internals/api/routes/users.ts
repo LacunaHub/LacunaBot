@@ -89,20 +89,20 @@ async function getPatrons(ctx: Context) {
     ctx.status = 200
     ctx.body = patrons.map(i => {
         const userBills = bills.filter(ii => ii.custom_fields.user_id === i._id)
+        const supportedAmount = userBills.reduce(
+            (x, y) => {
+                x[y.currency] += y.amount
+                return x
+            },
+            { RUB: 0, USD: 0 }
+        )
 
         return {
             _id: i._id,
             avatar: i.user.avatar,
             username: i.user.username,
-            discriminator: i.user.discriminator,
             is_active: i.premium.available,
-            supported_amount: userBills.reduce(
-                (x, y) => {
-                    x[y.currency] += y.amount
-                    return x
-                },
-                { RUB: 0, USD: 0 }
-            )
+            is_big_patron: supportedAmount.RUB >= 1000 || supportedAmount.USD >= 15
         }
     })
 }
