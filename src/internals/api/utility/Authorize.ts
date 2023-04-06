@@ -1,21 +1,25 @@
-import { PermissionsBitField } from 'discord.js'
+import { APIUser, PermissionsBitField, RESTAPIPartialCurrentUserGuild } from 'discord.js'
 import { Context, Next } from 'koa'
 import db from '../../../database'
-import OAuth2, { OAuth2Guild, OAuth2User } from '../discord/OAuth2'
+import DiscordOAuth2 from '../discord/OAuth2'
 import { isBotExpert } from './Utils'
 
-const oauth2 = new OAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
+const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
 
 export async function authorize(ctx: Context, next: Next) {
-    const access_token = ctx.request.headers.authorization
+    const accessToken = ctx.request.headers.authorization
 
-    if (!access_token || access_token === 'null') ctx.throw(401)
+    if (!accessToken || accessToken === 'null') ctx.throw(401)
 
-    const user = (await oauth2.getUser(access_token).catch(() => {})) as OAuth2User
+    let currentUser: APIUser
 
-    if (!user) ctx.throw(403)
+    try {
+        currentUser = await OAuth2.getUser(accessToken)
+    } catch (err) {}
 
-    ctx.request.headers['user-id'] = user.id
+    if (!currentUser) ctx.throw(403)
+
+    ctx.request.headers['user-id'] = currentUser.id
 
     await next()
 }
@@ -26,15 +30,18 @@ export async function checkPermissions(ctx: Context, next: Next) {
 
     if (!guild_id) ctx.throw(400)
 
-    const guilds = (await oauth2.getUserGuilds(ctx.request.headers.authorization).catch(() => {})) as OAuth2Guild[]
+    let currentUserGuilds: RESTAPIPartialCurrentUserGuild[]
 
-    if (!guilds) ctx.throw(403)
+    try {
+        currentUserGuilds = await OAuth2.getUserGuilds(ctx.request.headers.authorization)
+    } catch (err) {}
 
-    const guild = guilds.find(g => g.id == guild_id)
+    if (!currentUserGuilds) ctx.throw(403)
 
-    const is_root_user = (await db.json.get()).rootUsers.includes(user_id)
+    const guild = currentUserGuilds.find(g => g.id === guild_id)
+    const isRootUser = (await db.json.get()).rootUsers.includes(user_id)
 
-    if (is_root_user) {
+    if (isRootUser) {
         ctx.request.headers['partial-guild'] = JSON.stringify(guild ?? {})
 
         await next()
@@ -45,9 +52,9 @@ export async function checkPermissions(ctx: Context, next: Next) {
     if (!guild) ctx.throw(404)
 
     const permissions = new PermissionsBitField(BigInt(guild.permissions))
-    const is_bot_expert = await isBotExpert(guild_id, user_id)
+    const isExpert = await isBotExpert(guild_id, user_id)
 
-    if (!guild.owner && !permissions.has(PermissionsBitField.Flags.Administrator) && !is_bot_expert) ctx.throw(403)
+    if (!guild.owner && !permissions.has(PermissionsBitField.Flags.Administrator) && !isExpert) ctx.throw(403)
 
     ctx.request.headers['partial-guild'] = JSON.stringify(guild)
 

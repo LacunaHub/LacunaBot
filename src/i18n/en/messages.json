@@ -826,5 +826,11 @@
         "irs": "Interactive reactions",
         "ims": "Interactive messages",
         "voice_roles": "Voice roles"
+    },
+    "role_connections": {
+        "registration_date": {
+            "name": "Registration date",
+            "description": "How many days ago the user was registered"
+        }
     }
 }
