@@ -183,6 +183,7 @@
     "guilds": "Guilds",
     "state": "State",
     "docs": "Docs",
+    "patrons": "Patrons",
     "help": "Help"
   },
   "lacuna_diamond": {
@@ -461,7 +462,6 @@
       "close_window_and_go_back": "You can close this window and go back to Discord.",
       "something_went_wrong": "Something went wrong. Try it later."
     },
-
     "dashboard": {
       "profile": "Profile",
       "my_guilds": "My Guilds",
@@ -595,6 +595,13 @@
       "ft_utility_description": "Interactive messages and reactions, creating temporary voice channels, automatically adding roles, custom commands and more!",
       "ready_title": "Ready to start?",
       "ready_description": "Create your best community!"
+    },
+    "patrons": {
+      "gratitude_message_p1": "We want to express our sincere gratitude for your financial support of our bot! Your generous donation helps us further develop and improve our bot so that it can continue to provide useful services and be a useful tool for users.",
+      "gratitude_message_p2": "Your kind donation makes a real difference in our work, and we appreciate your trust and support. Together we can make Lacuna even better by offering new features, improving the interface and making it more efficient.",
+      "gratitude_message_p3": "We are deeply grateful for the loyal cooperation and trust you show in our project. Your support inspires us and gives us the energy to keep working. We are committed to continuing to develop and improve Lacuna so that it continues to be a valuable tool for you and other users.",
+      "active_patrons_title": "Active patrons",
+      "former_patrons_title": "Formerly supported"
     },
     "state": {
       "total_guilds": "Total guilds",

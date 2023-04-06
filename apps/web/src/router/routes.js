@@ -40,6 +40,10 @@ const routes = [
             {
                 path: 'state',
                 component: () => import('src/pages/StatePage.vue')
+            },
+            {
+                path: 'patrons',
+                component: () => import('src/pages/PatronsPage.vue')
             }
         ],
         beforeEnter: to => {
