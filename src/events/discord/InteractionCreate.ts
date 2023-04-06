@@ -353,6 +353,25 @@ const handler = async (
             )
         }
 
+        if (interaction.commandName === 'unban') {
+            if (interaction.guild.bans.cache.size < 100) {
+                await interaction.guild.bans.fetch({ limit: 100, cache: true })
+            }
+
+            const bans = interaction.guild.bans.cache.filter(i => [i.user.id, i.user.tag].some(ii => ii.includes(query)))
+
+            await interaction.respond(
+                bans
+                    .map(i => {
+                        return {
+                            name: i.user.tag,
+                            value: i.user.id
+                        }
+                    })
+                    .slice(0, 25)
+            )
+        }
+
         if (interaction.commandName === 'play') {
             if (!query) {
                 await interaction.respond([])
