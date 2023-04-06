@@ -455,6 +455,13 @@
     "references_description": "Roles or channels that will be linked to the selected reaction"
   },
   "pages": {
+    "authorization": {
+      "authorization_successful": "Authorization successful",
+      "authorization_failed": "Authorization failed",
+      "close_window_and_go_back": "You can close this window and go back to Discord.",
+      "something_went_wrong": "Something went wrong. Try it later."
+    },
+
     "dashboard": {
       "profile": "Profile",
       "my_guilds": "My Guilds",

@@ -476,6 +476,13 @@
   },
 
   "pages": {
+    "authorization": {
+      "authorization_successful": "Авторизация прошла успешно",
+      "authorization_failed": "Авторизация не удалась",
+      "close_window_and_go_back": "Вы можете закрыть это окно и вернуться в Discord.",
+      "something_went_wrong": "Что-то пошло не так. Попробуйте позже."
+    },
+
     "dashboard": {
       "profile": "Профиль",
       "my_guilds": "Мои Сообщества",

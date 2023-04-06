@@ -66,8 +66,20 @@ const routes = [
                     const query = new URLSearchParams(to.query).toString()
                     window.location.href = `${process.env.API}/authorize/add?${query}`
                 }
+            },
+            {
+                path: 'linked-roles',
+                beforeEnter: () => {
+                    event('link_follow', { event_category: 'links', event_label: 'Linked Roles' })
+                    window.location.href = `${process.env.API}/authorize/linked-roles`
+                }
             }
         ]
+    },
+
+    {
+        path: '/authorization',
+        component: () => import('src/pages/AuthorizationResultPage.vue')
     },
 
     {
