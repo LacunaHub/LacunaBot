@@ -1,14 +1,14 @@
 import Router from '@koa/router'
-import { PermissionsBitField } from 'discord.js'
+import { PermissionsBitField, RESTAPIPartialCurrentUserGuild } from 'discord.js'
 import { Context } from 'koa'
 import db from '../../../database'
 import { UserDocument } from '../../../database/schemas/Users'
 import DiscordUtils from '../../utility/DiscordUtils'
-import OAuth2, { OAuth2Guild } from '../discord/OAuth2'
+import DiscordOAuth2 from '../discord/OAuth2'
 import { authorize } from '../utility/Authorize'
 
 const router: Router = new Router({ prefix: '/users' })
-const oauth = new OAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
+const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
 
 router.get('/@me', authorize, getMe)
 router.get('/@me/bills', authorize, getBills)
@@ -22,7 +22,12 @@ async function getMe(ctx: Context) {
     const user: UserDocument = await db.users.findOne({ _id: user_id })
     if (!user) ctx.throw(404)
 
-    const guilds = (await oauth.getUserGuilds(ctx.request.headers.authorization).catch(() => {})) as OAuth2Guild[]
+    let guilds: RESTAPIPartialCurrentUserGuild[]
+
+    try {
+        guilds = await OAuth2.getUserGuilds(ctx.request.headers.authorization)
+    } catch (err) {}
+
     if (!guilds) ctx.throw(400)
 
     for (const guild of guilds) {

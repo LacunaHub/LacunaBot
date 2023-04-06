@@ -31,7 +31,8 @@ app.use(
 )
 app.use(koaCors({ credentials: true }))
 
-app.proxy = process.env.WEBSITE_DOMAIN != 'localhost'
+app.proxy = process.env.WEBSITE_DOMAIN !== 'localhost'
+app.keys = ['discord_oauth_state']
 
 app.use(passKnownReferrers)
 
