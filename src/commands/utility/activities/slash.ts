@@ -101,7 +101,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
-    let amount = interaction.options?.getInteger('balance')
+    let amount = interaction.options?.getInteger('amount')
     const currency = interaction.options?.getString('currency')
 
     if (!mention) {
@@ -167,8 +167,8 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
         )
     }
 
-    const currency_id = server.modules.economy.currencies.find(c => c.name == currency || c.symbol == currency)?.id ?? 'DEFAULT'
-    const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id == currency_id)
+    const currency_id = server.modules.economy.currencies.find(i => i.id === currency)?.id ?? 'DEFAULT'
+    const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id === currency_id)
 
     if (wallet.currencies.some(c => c.id == currency_id)) {
         await self.db.users.updateOne(
@@ -209,7 +209,7 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
-    let amount = interaction.options?.getInteger('quantity')
+    let amount = interaction.options?.getInteger('amount')
     const currency = interaction.options?.getString('currency')
 
     if (!mention) {
@@ -275,8 +275,8 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
         )
     }
 
-    const currency_id = server.modules.economy.currencies.find(c => c.name == currency || c.symbol == currency)?.id ?? 'DEFAULT'
-    const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id == currency_id)
+    const currency_id = server.modules.economy.currencies.find(i => i.id === currency)?.id ?? 'DEFAULT'
+    const { symbol: currency_symbol } = server.modules.economy.currencies.find(c => c.id === currency_id)
 
     if (wallet.currencies.some(c => c.id == currency_id)) {
         await self.db.users.updateOne(

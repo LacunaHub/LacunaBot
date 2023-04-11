@@ -20,7 +20,7 @@ import CustomCommand from '../../modules/CustomCommand'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
 import { createPoll, onPressPollButton } from '../../modules/Polls'
 import Replacer from '../../modules/Replacer'
-import reports from '../../modules/Reports'
+import { onPressReportButton, onSelectReportOption } from '../../modules/Reports'
 
 const handler = async (
     self: Lacuna,
@@ -72,7 +72,7 @@ const handler = async (
         }
 
         if (/R\-\w+\-\d+/.test(interaction.customId)) {
-            await reports.buttonPressed(self, server, interaction)
+            await onPressReportButton(self, server, interaction)
 
             return true
         }
@@ -231,7 +231,7 @@ const handler = async (
 
     if (interaction.isAnySelectMenu()) {
         if (interaction.isStringSelectMenu() && /R\-\w+\-\d+/.test(interaction.customId)) {
-            await reports.optionSelected(self, server, interaction)
+            await onSelectReportOption(self, server, interaction)
 
             return true
         }
@@ -310,8 +310,62 @@ const handler = async (
                 commands
                     .map(i => {
                         return {
-                            name: `${i.name} - ${self.i18n.t(server.locale, i.description)}`,
+                            name: `${i.name} - ${self.i18n.t(interaction.locale, i.description)}`,
                             value: i.name
+                        }
+                    })
+                    .slice(0, 25)
+            )
+        }
+
+        if (interaction.commandName === 'store') {
+            const items = server.modules.economy.store.items
+                .slice(0, server.server.premium.available ? 200 : 50)
+                .filter(i => [i.id, i.name, i.description].some(ii => ii.includes(query)))
+
+            await interaction.respond(
+                items
+                    .map(i => {
+                        const currency = server.modules.economy.currencies.find(ii => ii.id === i.currency_id)
+                        const price = i.purchase_price
+                            ? `${i.purchase_price} ${currency.name}`
+                            : self.i18n.t(interaction.locale, 'commands.store.items.text_price_free')
+
+                        return {
+                            name: `${i.name} (${price})`,
+                            value: i.id
+                        }
+                    })
+                    .slice(0, 25)
+            )
+        }
+
+        if (['wallet', 'activities'].includes(interaction.commandName)) {
+            const currencies = server.modules.economy.currencies.filter(i => [i.id, i.name, i.symbol].some(ii => ii.includes(query)))
+
+            await interaction.respond(
+                currencies.map(i => {
+                    return {
+                        name: i.name,
+                        value: i.id
+                    }
+                })
+            )
+        }
+
+        if (interaction.commandName === 'unban') {
+            if (interaction.guild.bans.cache.size < 100) {
+                await interaction.guild.bans.fetch({ limit: 100, cache: true })
+            }
+
+            const bans = interaction.guild.bans.cache.filter(i => [i.user.id, i.user.tag].some(ii => ii.includes(query)))
+
+            await interaction.respond(
+                bans
+                    .map(i => {
+                        return {
+                            name: i.user.tag,
+                            value: i.user.id
                         }
                     })
                     .slice(0, 25)
@@ -383,6 +437,11 @@ const handler = async (
 
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {
             await onSubmitChangeReasonModal(self, server, interaction)
+        }
+
+        if (/REPORT\-\d+/.test(interaction.customId)) {
+            const reportCommand = self.commands.get('report')
+            await reportCommand.executeSlash(server, interaction as any)
         }
     }
 

@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, Events, PermissionsBitField } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
+import RoleConnectionMetadata from '../../internals/utility/RoleConnectionMetadata'
 import { snakeToPascalCase } from '../../internals/utility/Utils'
 
 const { version } = require('../../../package.json')
@@ -136,7 +137,26 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
                     })
             )
 
-            self.logger.log('[DiscordShardReady] Commands were overwritten due to a version change')
+            await self.application.editRoleConnectionMetadataRecords(
+                RoleConnectionMetadata.map(i => {
+                    return {
+                        key: i.key,
+                        type: i.type,
+                        name: t('en', i.name),
+                        nameLocalizations: {
+                            ru: t('ru', i.name),
+                            uk: t('uk', i.name)
+                        },
+                        description: t('en', i.description),
+                        descriptionLocalizations: {
+                            ru: t('ru', i.description),
+                            uk: t('uk', i.description)
+                        }
+                    }
+                })
+            )
+
+            self.logger.log('[DiscordShardReady] Commands and role connections have been overwritten due to a version change')
         }
     }
 

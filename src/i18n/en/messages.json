@@ -22,6 +22,31 @@
             "UTILITY": "Utility",
             "CUSTOM": "Custom"
         },
+        "command_options": {
+            "command": "command",
+            "sorting": "sorting",
+            "page": "page",
+            "user": "user",
+            "sku": "sku",
+            "currency": "currency",
+            "duration": "duration",
+            "reason": "reason",
+            "amount": "amount",
+            "message_id": "message-id",
+            "user_id": "user-id",
+            "case_id": "case-number",
+            "warn_id": "warning-number",
+            "query": "query",
+            "source": "source",
+            "volume": "volume",
+            "level": "level",
+            "prize": "prize",
+            "winners_amount": "number-of-winners",
+            "sponsor": "sponsor",
+            "quiz_mode": "quiz-mode",
+            "multiple_answers": "multiple-answers",
+            "role": "role"
+        },
         "permissions_keys": {
             "CREATE_INSTANT_INVITE": "Create instant invite",
             "KICK_MEMBERS": "Kick members",
@@ -88,7 +113,7 @@
     },
     "commands": {
         "about": {
-            "description": "Outputs information about the bot",
+            "description": "Basic information about the bot",
             "text_developer": "Developer",
             "text_version": "Current version",
             "text_latency": "Latency",
@@ -100,11 +125,10 @@
             "text_state": "State"
         },
         "help": {
-            "description": "Outputs the list of available commands",
+            "description": "List of available commands and their description",
             "options": {
                 "command": {
-                    "name": "command",
-                    "description": "Command name"
+                    "description": "Additional information about the specified command"
                 }
             },
             "text_commands_list": "Command list",
@@ -125,10 +149,9 @@
             "text_required_permissions_author": "For the command author"
         },
         "leaders": {
-            "description": "Outputs the leaderboard",
+            "description": "Leaderboard of server by activity",
             "options": {
                 "sorting": {
-                    "name": "sort",
                     "description": "Sorting the leaderboard by selected activity type",
                     "choices": {
                         "level": "by level",
@@ -136,7 +159,6 @@
                     }
                 },
                 "page": {
-                    "name": "page",
                     "description": "Leaderboard page number"
                 }
             },
@@ -151,19 +173,18 @@
             "text_next_page": "Next page"
         },
         "rank": {
-            "name": "Show rank",
-            "description": "Outputs a rank card",
+            "name": "Show level",
+            "description": "Level card",
             "options": {
                 "user": {
-                    "name": "user",
-                    "description": "Outputs a rank card for the specified user"
+                    "description": "Whose level card needs to be shown"
                 }
             },
             "text_render_error": "{user}, an error occurred while creating a rank card",
             "text_no_rank_card": "{user}, rank card not found"
         },
         "server": {
-            "description": "Outputs server information",
+            "description": "Current server information",
             "text_owner": "Owner",
             "text_guild_id": "Guild ID",
             "text_total_members": "Number of members",
@@ -177,10 +198,9 @@
         "store": {
             "description": "Server item store",
             "buy": {
-                "description": "Purchase of a store item",
+                "description": "Buying items in the server store",
                 "options": {
                     "sku": {
-                        "name": "sku",
                         "description": "Item SKU in store"
                     }
                 },
@@ -188,10 +208,9 @@
                 "text_item_not_found": "{user}, item with this SKU not found"
             },
             "items": {
-                "description": "Outputs store items",
+                "description": "List of items available for purchase in the server store",
                 "options": {
                     "page": {
-                        "name": "page",
                         "description": "Item store page number"
                     }
                 },
@@ -209,25 +228,24 @@
             "text_purchase_success": "{user}, you have purchased an item {item}"
         },
         "user": {
-            "description": "Outputs information about user",
+            "description": "User account information",
             "options": {
                 "user": {
-                    "name": "user",
-                    "description": "Outputs information about specified user"
+                    "description": "Account information of the specified user"
                 }
             },
             "text_registration_date": "Registration date",
             "text_join_date": "Join date",
-            "text_avatar_link": "Avatar URL"
+            "text_avatar_link": "Avatar URL",
+            "text_banner_link": "Banner URL"
         },
         "wallet": {
             "description": "Wallet operations",
             "balance": {
-                "description": "Outputs wallet balance",
+                "description": "Show wallet balance",
                 "options": {
                     "user": {
-                        "name": "user",
-                        "description": "Outputs wallet balance of specified user"
+                        "description": "Whose wallet balance needs to be shown"
                     }
                 },
                 "text_empty_wallet": "Wallet is empty",
@@ -237,16 +255,13 @@
                 "description": "Transferring funds to another wallet",
                 "options": {
                     "user": {
-                        "name": "user",
-                        "description": "User to whom funds will be transferred"
+                        "description": "Who needs to transfer funds"
                     },
                     "amount": {
-                        "name": "amount",
                         "description": "Number of funds of transfer"
                     },
                     "currency": {
-                        "name": "currency",
-                        "description": "Name or currency symbol for transaction"
+                        "description": "What currency will be used for the transfer"
                     }
                 },
                 "text_no_mention": "{user}, please specify user to whom you wish to make transfer",
@@ -256,18 +271,15 @@
             }
         },
         "ban": {
-            "description": "Bans a user",
+            "description": "Ban a user from the server",
             "options": {
                 "user": {
-                    "name": "user",
-                    "description": "User to be banned"
+                    "description": "Who needs to be banned"
                 },
                 "duration": {
-                    "name": "duration",
-                    "description": "Ban duration (example: 10m)"
+                    "description": "Duration of ban"
                 },
                 "reason": {
-                    "name": "reason",
                     "description": "Ban reason"
                 }
             },
@@ -281,15 +293,13 @@
             "text_user_banned": "{user}, user {target} is banned on the server"
         },
         "kick": {
-            "description": "Kicks a user from server",
+            "description": "Kick a user from the server",
             "options": {
                 "user": {
-                    "name": "user",
-                    "description": "User to be kicked from the server"
+                    "description": "Who needs to be kicked out"
                 },
                 "reason": {
-                    "name": "reason",
-                    "description": "Kick reason"
+                    "description": "Reason of kick"
                 }
             },
             "text_user_not_found": "{user}, please specify the user you want to kick out",
@@ -298,18 +308,15 @@
             "text_user_kicked": "{user}, user {target} was kicked from the server"
         },
         "mute": {
-            "description": "Mutes a user",
+            "description": "Temporarily mute a user",
             "options": {
                 "user": {
-                    "name": "user",
-                    "description": "User to be muted"
+                    "description": "Who needs to be muted"
                 },
                 "duration": {
-                    "name": "duration",
-                    "description": "Mute duration (example: 10m)"
+                    "description": "Duration of mute"
                 },
                 "reason": {
-                    "name": "reason",
                     "description": "Mute reason"
                 }
             },
@@ -320,18 +327,15 @@
             "text_user_muted": "{user}, user {target} has been muted"
         },
         "prune": {
-            "description": "Clears messages in the channel",
+            "description": "Clearing the last messages in the channel (messages older than 2 weeks are ignored)",
             "options": {
                 "amount": {
-                    "name": "amount",
-                    "description": "Number of messages to be deleted"
+                    "description": "How many messages need to be cleared"
                 },
                 "user": {
-                    "name": "user",
-                    "description": "Deletes only the specified user's messages"
+                    "description": "From whom to clear messages"
                 },
                 "reason": {
-                    "name": "reason",
                     "description": "Reason for clearing messages"
                 }
             },
@@ -340,14 +344,12 @@
             "text_messages_pruned": "{user}, cleared messages: {amount}"
         },
         "reason": {
-            "description": "Changes the cause of the case in the moderation log",
+            "description": "Change the reason for the case in the moderation log",
             "options": {
                 "case_id": {
-                    "name": "case-number",
-                    "description": "Unique serial number of the case in the journal"
+                    "description": "The serial number of the case in the mod log"
                 },
                 "reason": {
-                    "name": "reason",
                     "description": "New reason for case"
                 }
             },
@@ -360,39 +362,52 @@
         },
         "report": {
             "name": "Send report",
-            "description": "Sends a report about the message",
+            "description": "Report a user",
             "options": {
-                "message_id": {
-                    "name": "message-id",
-                    "description": "Identifier of the message to which the report will be sent"
+                "user": {
+                    "description": "Who should be the target of the report"
+                },
+                "reason": {
+                    "description": "What do you want to report about"
                 }
             },
-            "text_reports_disabled_or_no_channel": "{user}, reports are disabled on this server or no channel is set for them",
-            "text_channel_not_found": "{user}, the channel for reports was not found, it may have been deleted",
-            "text_already_reported": "{user}, you have already sent a report about this message",
-            "text_no_message_id": "{user}, please specify the identifier of the message to which you want to send your report",
-            "text_no_message": "{user}, there is no message with the specified identifier in the current channel",
-            "text_report_confirm": "{user}, the report about the message has been successfully sent",
-            "text_message_channel": "Channel of message",
-            "text_report_count": "Number of reports",
-            "text_jump_to_message": "Jump to message",
+            "text_no_mention": "{user}, please specify the user you wish to report",
+            "text_invalid_reason": "{user}, please correctly specify report reason",
+            "text_user_recently_reported": "{user}, you have recently sent a report about this user",
+            "text_to_many_recent_reports": "{user}, you have reached the daily report limit",
+            "text_user_reported": "{user}, thank you for letting us know about this",
             "quick_actions": {
                 "KICK": "Kick",
                 "WARN": "Warn",
                 "IGNORE": "Ignore",
                 "BAN": "Ban",
                 "MUTE": "Mute"
-            }
+            },
+            "text_potentially_unwanted_user": "Potentially unwanted user due to received reports",
+            "text_total_reports": "Total reports",
+            "text_recent_reports": "Recent reports"
         },
-        "unmute": {
-            "description": "Removes mute from the user",
+        "unban": {
+            "description": "Unban a user from the server",
             "options": {
-                "user": {
-                    "name": "user",
-                    "description": "User who needs to unmute"
+                "user_id": {
+                    "description": "Who needs to be unbanned"
                 },
                 "reason": {
-                    "name": "reason",
+                    "description": "Unban reason"
+                }
+            },
+            "text_invalid_user_id": "{user}, please specify the user identifier you want to unban",
+            "text_ban_not_found": "{user}, failed to find a banned user with the specified identifier",
+            "text_user_unbanned": "{user}, user {target} has been successfully unbanned"
+        },
+        "unmute": {
+            "description": "Unmute a user",
+            "options": {
+                "user": {
+                    "description": "Who needs to be unmuted"
+                },
+                "reason": {
                     "description": "Unmute reason"
                 }
             },
@@ -401,11 +416,10 @@
             "text_user_unmuted": "{user}, user {target} has been successfully unmuted"
         },
         "violations": {
-            "description": "Outputs a list of user warnings",
+            "description": "List of user warnings",
             "options": {
                 "user": {
-                    "name": "user",
-                    "description": "Shows the warnings of a specified user"
+                    "description": "Whose warning list to display"
                 }
             },
             "text_user_not_found": "{user}, you specified an invalid or non-existent user",
@@ -419,14 +433,12 @@
         "warn": {
             "description": "Issuance and removal of warnings",
             "add": {
-                "description": "Warns a user",
+                "description": "Issue a warning to a user",
                 "options": {
                     "user": {
-                        "name": "user",
-                        "description": "User to be warned"
+                        "description": "Who needs to be warned"
                     },
                     "reason": {
-                        "name": "reason",
                         "description": "Warn reason"
                     }
                 },
@@ -437,18 +449,15 @@
                 "text_user_warned": "{user}, user {target} has been warned"
             },
             "remove": {
-                "description": "Removes warnings from the user",
+                "description": "Remove warnings from a user",
                 "options": {
                     "user": {
-                        "name": "user",
-                        "description": "User who needs to remove the warning"
+                        "description": "Who needs to have the warning removed"
                     },
                     "warn_id": {
-                        "name": "warning-number",
                         "description": "Identifier, warning sequence number or \"all\" to remove all warnings"
                     },
                     "reason": {
-                        "name": "reason",
                         "description": "Reason for removing the warning"
                     }
                 },
@@ -465,14 +474,12 @@
             "text_different_voice": "{user}, you are not connected to a voice channel or are in another"
         },
         "play": {
-            "description": "Plays music in the voice channel",
+            "description": "Searching for and playing music in the voice channel",
             "options": {
                 "query": {
-                    "name": "query",
                     "description": "Link to track, playlist, album or track name"
                 },
                 "source": {
-                    "name": "source",
                     "description": "Searching for tracks in a specific source"
                 }
             },
@@ -499,19 +506,18 @@
             "text_source": "Source"
         },
         "queue": {
-            "description": "Shows the current playback queue",
+            "description": "Current music playback queue",
             "text_no_track_queue": "{user}, the play queue is empty",
             "text_select_playback_track": "Select the track you want to play"
         },
         "stop": {
-            "description": "Stops music playback",
+            "description": "Stop music playback and clear the queue",
             "text_playback_stop": "{user}, playback stopped"
         },
         "volume": {
-            "description": "Changes the playback volume",
+            "description": "Change the music playback volume",
             "options": {
                 "volume": {
-                    "name": "volume",
                     "description": "Playback volume"
                 }
             },
@@ -522,53 +528,45 @@
         "activities": {
             "description": "Activity management",
             "set-level": {
-                "description": "Sets the level to members",
+                "description": "Set a level for a user",
                 "options": {
                     "user": {
-                        "name": "user",
-                        "description": "The user to whom the level will be set"
+                        "description": "Who needs to set the level"
                     },
                     "level": {
-                        "name": "level",
-                        "description": "Level to be set"
+                        "description": "What level should be set"
                     }
                 },
-                "text_no_mention": "{user}, please specify the member",
+                "text_no_mention": "{user}, please specify the user",
                 "text_no_level": "{user}, the level must be in the range from 1 to 2500",
                 "text_set_success": "{user}, the level has been successfully set"
             },
             "add-wallet-balance": {
-                "description": "Adds currency to members",
+                "description": "Add currency to a user",
                 "options": {
                     "user": {
-                        "name": "user",
-                        "description": "The user to whom the wallet balance will be changed"
+                        "description": "Who needs to add a currency"
                     },
                     "amount": {
-                        "name": "quantity",
-                        "description": "The amount of funds by which you need to replenish the balance (up to 2^31)"
+                        "description": "How much currency should be added"
                     },
                     "currency": {
-                        "name": "currency",
-                        "description": "Currency name or symbol"
+                        "description": "Addable currency"
                     }
                 },
                 "text_add_success": "{user}, wallet balance {target} increased by {amount}"
             },
             "set-wallet-balance": {
-                "description": "Sets the wallet balance",
+                "description": "Set a user's wallet balance",
                 "options": {
                     "user": {
-                        "name": "user",
-                        "description": "The user to whom the wallet balance will be set"
+                        "description": "Who needs to set a wallet balance"
                     },
                     "amount": {
-                        "name": "balance",
-                        "description": "Set wallet balance (from -2^31 to 2^31)"
+                        "description": "What wallet balance should be set"
                     },
                     "currency": {
-                        "name": "currency",
-                        "description": "Currency name or symbol"
+                        "description": "Set currency"
                     }
                 },
                 "text_no_mention": "{user}, please specify the user to whom you want to set the wallet balance",
@@ -576,15 +574,13 @@
                 "text_set_success": "{user}, wallet balance {target} is set to {amount}"
             },
             "reset-wallet": {
-                "description": "Drops wallets to members",
+                "description": "Reset wallet to user",
                 "options": {
                     "user": {
-                        "name": "user",
-                        "description": "The user to whom the wallet will be reset"
+                        "description": "Who needs to reset the wallet"
                     },
                     "user_id": {
-                        "name": "user-id",
-                        "description": "Reset the wallet by user Id or specify \"all\" to reset wallets to everyone"
+                        "description": "Reset wallet by user identifier or specify \"all\" to reset all wallets"
                     }
                 },
                 "text_nothing_to_reset": "{user}, no existing wallets",
@@ -596,14 +592,12 @@
                 "text_reset_user": "{user}, wallet successfully reset"
             },
             "reset-level": {
-                "description": "Resets the level of participants",
+                "description": "Reset level to user",
                 "options": {
                     "user": {
-                        "name": "user",
-                        "description": "The specified user will be reset to level"
+                        "description": "Who needs to reset the level"
                     },
                     "user_id": {
-                        "name": "user-id",
                         "description": "Reset the level by user Id or specify \"all\" to reset the level to all"
                     }
                 },
@@ -612,25 +606,21 @@
             }
         },
         "giveaway": {
-            "description": "Creates and deletes giveaways",
+            "description": "Giveaways management",
             "create": {
-                "description": "Creates a new giveaway",
+                "description": "Create a new giveaway",
                 "options": {
                     "prize": {
-                        "name": "prize",
                         "description": "Prize for winning the giveaway"
                     },
                     "duration": {
-                        "name": "duration",
                         "description": "Duration of the giveaway"
                     },
                     "winners_amount": {
-                        "name": "number-of-winners",
-                        "description": "Number of winners to be selected randomly"
+                        "description": "How many giveaway winners will there be"
                     },
                     "sponsor": {
-                        "name": "sponsor",
-                        "description": "Who sponsored this giveaway?"
+                        "description": "Who sponsored this giveaway"
                     }
                 },
                 "text_no_prize": "{user}, you did not specify a prize for winning the giveaway",
@@ -651,7 +641,6 @@
                 "description": "Immediately end a giveaway",
                 "options": {
                     "message_id": {
-                        "name": "message-id",
                         "description": "Id of the message with the giveaway"
                     }
                 },
@@ -660,7 +649,7 @@
                 "text_congrats": "Congratulations {winner}! You won {prize}!"
             },
             "reroll": {
-                "description": "Rolls new winners for an ended giveaway",
+                "description": "Rolls new winners for a giveaway",
                 "text_no_message_id": "{user}, please specify the message identifier",
                 "text_giveaway_not_found": "{user}, giveaway not found"
             }
@@ -668,18 +657,16 @@
         "poll": {
             "description": "Polls management",
             "create": {
-                "description": "Creates a new poll",
+                "description": "Create a new poll",
                 "options": {
                     "quiz_mode": {
-                        "name": "quiz-mode",
                         "description": "A poll with correct and wrong answers"
                     },
                     "multiple_answers": {
-                        "name": "multiple-answers",
                         "description": "Allows you to choose several answer options"
                     }
                 },
-                "text_create_new_poll": "Create a new poll",
+                "text_create_new_poll": "New poll",
                 "text_poll_question": "Question",
                 "text_correct_answer": "Correct answer",
                 "text_answer_options": "Answer options",
@@ -701,19 +688,16 @@
             "text_you_removed_your_vote": "{user}, you removed your vote from option {answer}"
         },
         "temprole": {
-            "description": "Gives a role to the user for the specified time",
+            "description": "Temporarily add a role to a user",
             "options": {
                 "user": {
-                    "name": "user",
-                    "description": "The user to whom the role will be assigned"
+                    "description": "Who needs to be given the role"
                 },
                 "role": {
-                    "name": "role",
-                    "description": "The role to be given"
+                    "description": "What role should be given out"
                 },
                 "duration": {
-                    "name": "duration",
-                    "description": "The time for which the role will be given"
+                    "description": "For how long will the role be given out"
                 }
             },
             "text_no_mention": "{user}, please specify the member",
@@ -842,5 +826,11 @@
         "irs": "Interactive reactions",
         "ims": "Interactive messages",
         "voice_roles": "Voice roles"
+    },
+    "role_connections": {
+        "registration_date": {
+            "name": "Registration date",
+            "description": "How many days ago the user was registered"
+        }
     }
 }

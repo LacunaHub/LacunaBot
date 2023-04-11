@@ -13,7 +13,7 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.User,
-            name: `commands.${name}.options.user.name`,
+            name: 'common.command_options.user',
             description: `commands.${name}.options.user.description`,
             required: false
         }

@@ -28,7 +28,7 @@ const client = new Lacuna({
     ],
     partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
     makeCache: manager => {
-        if (manager.name == 'GuildBanManager') return new LimitedCollection({ maxSize: 10 })
+        if (manager.name == 'GuildBanManager') return new LimitedCollection({ maxSize: 100 })
 
         if (manager.name == 'GuildInviteManager') return new LimitedCollection({ maxSize: 10 })
 

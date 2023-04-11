@@ -1,8 +1,7 @@
-import { BaseGuildTextChannel, Collection, Message, MessageReaction, MessageType, User } from 'discord.js'
+import { BaseGuildTextChannel, Collection, Message, MessageReaction, User } from 'discord.js'
 import { split } from 'unicode-default-word-boundary'
 import { AutoReaction, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
-import { snakeToPascalCase } from '../internals/utility/Utils'
 
 export function generateId() {
     return `L${Math.random().toString(36).substring(2, 9).toUpperCase()}`
@@ -219,6 +218,19 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
     }
 }
 
+export const autoReactionMessageTypes = {
+    DEFAULT: 0,
+    CHANNEL_PINNED_MESSAGE: 6,
+    GUILD_MEMBER_JOIN: 7,
+    USER_PREMIUM_GUILD_SUBSCRIPTION: 8,
+    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1: 9,
+    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2: 10,
+    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3: 11,
+    CHANNEL_FOLLOW_ADD: 12,
+    THREAD_CREATED: 18,
+    REPLY: 19
+}
+
 export async function autoReact(self: Lacuna, server: ServerDocument, message: Message) {
     const ar: AutoReaction = server.modules.autoreactions
         .slice(0, server.server.premium.available ? 20 : 2)
@@ -226,7 +238,7 @@ export async function autoReact(self: Lacuna, server: ServerDocument, message: M
 
     if (ar) {
         if (ar.message_types?.length) {
-            const includesMessageType = ar.message_types.map(i => MessageType[snakeToPascalCase(i)]).includes(message.type)
+            const includesMessageType = ar.message_types.map(i => autoReactionMessageTypes[i]).includes(message.type)
 
             if (!includesMessageType) return false
         }

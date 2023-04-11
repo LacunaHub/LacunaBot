@@ -10,13 +10,13 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.Integer,
-            name: `commands.${name}.options.case_id.name`,
+            name: 'common.command_options.case_id',
             description: `commands.${name}.options.case_id.description`,
             required: true
         },
         {
             type: ApplicationCommandOptionType.String,
-            name: `commands.${name}.options.reason.name`,
+            name: 'common.command_options.reason',
             description: `commands.${name}.options.reason.description`,
             required: true
         }

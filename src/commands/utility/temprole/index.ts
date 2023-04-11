@@ -10,19 +10,19 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.User,
-            name: `commands.${name}.options.user.name`,
+            name: 'common.command_options.user',
             description: `commands.${name}.options.user.description`,
             required: true
         },
         {
             type: ApplicationCommandOptionType.Role,
-            name: `commands.${name}.options.role.name`,
+            name: 'common.command_options.role',
             description: `commands.${name}.options.role.description`,
             required: true
         },
         {
             type: ApplicationCommandOptionType.String,
-            name: `commands.${name}.options.duration.name`,
+            name: 'common.command_options.duration',
             description: `commands.${name}.options.duration.description`,
             required: true
         }

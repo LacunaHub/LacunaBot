@@ -10,13 +10,13 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.User,
-            name: `commands.${name}.options.user.name`,
+            name: 'common.command_options.user',
             description: `commands.${name}.options.user.description`,
             required: true
         },
         {
             type: ApplicationCommandOptionType.String,
-            name: `commands.${name}.options.reason.name`,
+            name: 'common.command_options.reason',
             description: `commands.${name}.options.reason.description`,
             required: false
         }

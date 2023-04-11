@@ -15,7 +15,7 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: `commands.${name}.create.options.quiz_mode.name`,
+                    name: 'common.command_options.quiz_mode',
                     description: `commands.${name}.create.options.quiz_mode.description`,
                     choices: [
                         {
@@ -30,7 +30,7 @@ export default {
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: `commands.${name}.create.options.multiple_answers.name`,
+                    name: 'common.command_options.multiple_answers',
                     description: `commands.${name}.create.options.multiple_answers.description`,
                     choices: [
                         {

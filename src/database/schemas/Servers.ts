@@ -706,7 +706,8 @@ export default model<ServerDocument>(
                 statistics: { type: Array, default: [] },
                 reports: {
                     active: { type: Boolean, default: false },
-                    channel_id: { type: String, default: null }
+                    channel_id: { type: String, default: null },
+                    notify_about_unwanted_users: { type: Boolean, default: true }
                 },
                 autothreads: { type: Array, default: [] },
                 autoreactions: { type: Array, default: [] },
@@ -1326,11 +1327,14 @@ export interface ServerDocument extends Document {
         reports: {
             active: boolean
             channel_id: string
+            notify_about_unwanted_users: boolean
+            /** @deprecated */
             emoji: {
                 animated: boolean
                 id: string
                 name: string
             }
+            /** @deprecated */
             minimum: number
         }
         autothreads: AutoThread[]

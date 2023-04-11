@@ -1,123 +1,114 @@
-import { Guild } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 
 export default class TemporaryBan {
     public self: Lacuna
-    public user_id: string
-    public guild_id: string
-    public expires: Date
+    public userId: string
+    public guildId: string
+    public expiresAt: Date
     public reason?: string
     public schedule: Job
 
     constructor(self: Lacuna, options: TemporaryBanOptions) {
         this.self = self
 
-        this.user_id = options.user_id
+        this.userId = options.user_id
 
-        this.guild_id = options.guild_id
+        this.guildId = options.guild_id
 
-        this.expires = new Date(options.expires_timestamp)
+        this.expiresAt = new Date(options.expires_timestamp)
 
         this.reason = options.reason ?? null
 
         this.schedule = null
 
-        if (Date.now() >= this.expires.getTime() || this.expires.getTime() - Date.now() <= 30000) {
-            this.unban()
-            this.deleteEntry()
+        const expired = Date.now() >= this.expiresAt.getTime() || this.expiresAt.getTime() - Date.now() <= 50000
 
-            return
+        if (expired) {
+            this.delete()
+        } else {
+            this.create(Boolean(options.initial))
         }
-
-        if (options.initial) this.create()
-        else this.createSchedule()
     }
 
-    async create() {
-        await this.ban()
-        await this.createEntry()
-        await this.createSchedule()
-    }
+    async create(initial: boolean = true) {
+        this.schedule = scheduleJob(`BAN:${this.guildId}:${this.userId}`, this.expiresAt, () => this.delete())
+        this.self.tempbans.set(`${this.guildId}:${this.userId}`, this)
 
-    async createEntry() {
-        await this.self.db.servers.updateOne(
-            { _id: this.guild_id },
-            {
-                $push: {
-                    'moderation.tempbans': {
-                        user_id: this.user_id,
-                        expires_timestamp: this.expires.getTime()
+        if (initial) {
+            await this.createBan()
+            await this.self.db.servers.updateOne(
+                { _id: this.guildId },
+                {
+                    $push: {
+                        'moderation.tempbans': {
+                            user_id: this.userId,
+                            expires_timestamp: this.expiresAt.getTime()
+                        }
                     }
                 }
-            }
-        )
-    }
-
-    async createSchedule() {
-        this.schedule = scheduleJob(`${this.guild_id}:${this.user_id}`, this.expires, () => this.delete())
-        this.self.tempbans.set(`${this.guild_id}:${this.user_id}`, this)
-    }
-
-    async ban() {
-        const guild = this.self.guilds.cache.get(this.guild_id)
-
-        if (guild && guild.available) {
-            await guild.members.ban(this.user_id, { reason: this.reason }).catch(() => {})
+            )
         }
     }
 
-    async delete() {
-        await this.unban()
-        await this.deleteEntry()
-        this.schedule.cancel()
-        this.self.tempbans.delete(`${this.guild_id}:${this.user_id}`)
-    }
+    async delete(scheduled: boolean = true, reason?: string) {
+        if (!scheduled) this.schedule.cancel()
 
-    async deleteEntry() {
         await this.self.db.servers.updateOne(
-            { _id: this.guild_id },
+            { _id: this.guildId },
             {
                 $pull: {
                     'moderation.tempbans': {
-                        user_id: this.user_id
+                        user_id: this.userId
                     }
                 }
             }
         )
+
+        await this.removeBan(reason)
+        this.self.tempbans.delete(`${this.guildId}:${this.userId}`)
     }
 
-    async unban() {
-        const guild: Guild = this.self.guilds.cache.get(this.guild_id)
+    async createBan() {
+        try {
+            const guild = this.self.guilds.cache.get(this.guildId)
 
-        if (guild && guild.available) {
-            await guild.members.unban(this.user_id).catch(() => {})
-        }
+            if (guild) {
+                return await guild.bans.create(this.userId, { reason: this.reason })
+            }
+        } catch (err) {}
+    }
+
+    async removeBan(reason?: string) {
+        try {
+            const guild = this.self.guilds.cache.get(this.guildId)
+
+            if (guild) {
+                return await guild.bans.remove(this.userId, reason)
+            }
+        } catch (err) {}
     }
 }
 
 export async function handleEntries(self: Lacuna): Promise<number> {
     const guilds: string[] = self.guilds.cache.map(g => g.id)
     const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'moderation.tempbans.0': { $exists: true } })
+    let handledEntries = 0
 
-    let entries = 0
+    for (const server of servers) {
+        const tempbans = server.moderation.tempbans
 
-    if (servers.length) {
-        for (const server of servers) {
-            const tempbans = server.moderation.tempbans
-
-            for (const ban of tempbans) {
-                new TemporaryBan(self, { user_id: ban.user_id, guild_id: server._id, expires_timestamp: ban.expires_timestamp })
-            }
-
-            entries += tempbans.length
+        for (const ban of tempbans) {
+            new TemporaryBan(self, { user_id: ban.user_id, guild_id: server._id, expires_timestamp: ban.expires_timestamp })
         }
+
+        handledEntries += tempbans.length
     }
 
-    self.logger.log(`[TemporaryBan] Loaded ${entries} temporary bans from ${servers.length} servers`)
+    self.logger.log(`[TemporaryBan] Loaded ${handledEntries} temporary bans from ${servers.length} servers`)
 
-    return entries
+    return handledEntries
 }
 
 export interface TemporaryBanOptions {

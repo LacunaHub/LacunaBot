@@ -1,93 +1,185 @@
+import { randomUUID } from 'crypto'
+import {
+    APIApplicationRoleConnection,
+    OAuth2Scopes,
+    RESTAPIPartialCurrentUserGuild,
+    RESTGetAPICurrentUserResult,
+    RESTGetAPIOAuth2CurrentAuthorizationResult,
+    RESTPostOAuth2AccessTokenResult,
+    RESTPostOAuth2RefreshTokenResult
+} from 'discord.js'
 import fetch from 'node-fetch'
 import { URLSearchParams } from 'url'
 
 export default class OAuth2 {
-    public client_id: string
-    public client_secret: string
-    public redirect_uri: string
-    public authorize_url: string
-    public get_token_url: string
-    public revoke_token_url: string
+    public clientId: string
+    public clientSecret: string
+    public redirectUri: string
+    public baseAuthorizationURL: string
+    public tokenURL: string
+    public tokeRevocationURL: string
 
-    constructor(client_id: string, client_secret: string) {
-        this.client_id = client_id
+    constructor(clientId: string, clientSecret: string) {
+        this.clientId = clientId
 
-        this.client_secret = client_secret
+        this.clientSecret = clientSecret
 
-        this.redirect_uri = process.env.CLIENT_OAUTH2_REDIRECT_URI
+        this.redirectUri = process.env.CLIENT_OAUTH2_REDIRECT_URI
 
-        this.authorize_url = 'https://discord.com/api/oauth2/authorize'
+        this.baseAuthorizationURL = 'https://discord.com/api/oauth2/authorize'
 
-        this.get_token_url = 'https://discord.com/api/oauth2/token'
+        this.tokenURL = 'https://discord.com/api/oauth2/token'
 
-        this.revoke_token_url = 'https://discord.com/api/oauth2/token/revoke'
+        this.tokeRevocationURL = 'https://discord.com/api/oauth2/token/revoke'
     }
 
-    async requestToken(code: string) {
-        const payload = {
-            grant_type: 'authorization_code',
-            code: code,
-            redirect_uri: this.redirect_uri,
-            scope: 'identify guilds'
+    getOAuthURL(scope: OAuth2Scopes[], redirectUri = this.redirectUri) {
+        const url = new URL(this.baseAuthorizationURL),
+            state = randomUUID()
+
+        url.searchParams.set('client_id', this.clientId)
+        url.searchParams.set('redirect_uri', redirectUri)
+        url.searchParams.set('response_type', 'code')
+        url.searchParams.set('state', state)
+        url.searchParams.set('scope', scope.join(' '))
+        url.searchParams.set('prompt', 'consent')
+
+        return { url, state }
+    }
+
+    async exchangeCode(code: string, redirectUri = this.redirectUri): Promise<RESTPostOAuth2AccessTokenResult> {
+        const searchParams = new URLSearchParams()
+
+        searchParams.append('client_id', this.clientId)
+        searchParams.append('client_secret', this.clientSecret)
+        searchParams.append('code', code)
+        searchParams.append('redirect_uri', redirectUri)
+        searchParams.append('grant_type', 'authorization_code')
+
+        try {
+            const response = await fetch(this.tokenURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: searchParams
+            })
+
+            if (!response.ok) {
+                throw new Error(`(${response.status} ${response.statusText}) Failed to exchange code`)
+            }
+
+            return await response.json()
+        } catch (err) {
+            throw new Error(err)
         }
-
-        const res = await fetch(this.get_token_url, {
-            method: 'POST',
-            headers: {
-                Authorization: `Basic ${Buffer.from(`${this.client_id}:${this.client_secret}`).toString('base64')}`,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams(payload)
-        })
-
-        return res.json()
     }
 
-    async getUser(access_token: string): Promise<OAuth2User> {
-        const res = await fetch('https://discord.com/api/users/@me', {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-                'Content-Type': 'application/json'
+    async refreshToken(refreshToken: string): Promise<RESTPostOAuth2RefreshTokenResult> {
+        const searchParams = new URLSearchParams()
+
+        searchParams.append('client_id', this.clientId)
+        searchParams.append('client_secret', this.clientSecret)
+        searchParams.append('grant_type', 'refresh_token')
+        searchParams.append('refresh_token', refreshToken)
+
+        try {
+            const response = await fetch(this.tokenURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: searchParams
+            })
+
+            if (!response.ok) {
+                throw new Error(`(${response.status} ${response.statusText}) Failed to refresh token`)
             }
-        })
 
-        return res.json()
+            return await response.json()
+        } catch (err) {
+            throw new Error(err)
+        }
     }
 
-    async getUserGuilds(access_token: string): Promise<OAuth2Guild[]> {
-        const res = await fetch('https://discord.com/api/users/@me/guilds', {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-                'Content-Type': 'application/json'
+    async getUser(accessToken: string): Promise<RESTGetAPICurrentUserResult> {
+        try {
+            const response = await fetch('https://discord.com/api/users/@me', {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+
+            if (!response.ok) {
+                throw new Error(`(${response.status} ${response.statusText}) Failed to get user`)
             }
-        })
 
-        return res.json()
+            return await response.json()
+        } catch (err) {
+            throw new Error(err)
+        }
     }
-}
 
-export interface OAuth2User {
-    id: string
-    username: string
-    avatar: string | null
-    discriminator: string
-    public_flags: number
-    flags: number
-    banner: string | null
-    banner_color: string
-    accent_color: number | null
-    locale: string
-    mfa_enabled: boolean
-}
+    async getUserAuthorization(accessToken: string): Promise<RESTGetAPIOAuth2CurrentAuthorizationResult> {
+        try {
+            const response = await fetch('https://discord.com/api/oauth2/@me', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
 
-export interface OAuth2Guild {
-    id: string
-    name: string
-    icon: string | null
-    owner: boolean
-    permissions: number
-    features: string[]
-    permissions_new: string
+            if (!response.ok) {
+                throw new Error(`(${response.status} ${response.statusText}) Failed to get user authorization`)
+            }
+
+            return await response.json()
+        } catch (err) {
+            throw new Error(err)
+        }
+    }
+
+    async getUserGuilds(accessToken: string): Promise<RESTAPIPartialCurrentUserGuild[]> {
+        try {
+            const response = await fetch('https://discord.com/api/users/@me/guilds', {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (!response.ok) {
+                throw new Error(`(${response.status} ${response.statusText}) Failed to get user guilds`)
+            }
+
+            return await response.json()
+        } catch (err) {
+            throw new Error(err)
+        }
+    }
+
+    async updateUserRoleConnection(
+        accessToken: string,
+        roleConnection: Partial<APIApplicationRoleConnection>
+    ): Promise<APIApplicationRoleConnection> {
+        try {
+            const response = await fetch(`https://discord.com/api/users/@me/applications/${this.clientId}/role-connection`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(roleConnection)
+            })
+
+            if (!response.ok) {
+                throw new Error(`(${response.status} ${response.statusText}) Failed to update user role connection`)
+            }
+
+            return await response.json()
+        } catch (err) {
+            throw new Error(err)
+        }
+    }
 }

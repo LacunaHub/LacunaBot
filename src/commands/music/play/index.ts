@@ -10,7 +10,7 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.String,
-            name: `commands.${name}.options.query.name`,
+            name: 'common.command_options.query',
             description: `commands.${name}.options.query.description`,
             required: true,
             autocomplete: true

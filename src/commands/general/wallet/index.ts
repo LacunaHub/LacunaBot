@@ -15,7 +15,7 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: `commands.${name}.balance.options.user.name`,
+                    name: 'common.command_options.user',
                     description: `commands.${name}.balance.options.user.description`,
                     required: false
                 }
@@ -28,22 +28,23 @@ export default {
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: `commands.${name}.transfer.options.user.name`,
+                    name: 'common.command_options.user',
                     description: `commands.${name}.transfer.options.user.description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: `commands.${name}.transfer.options.amount.name`,
+                    name: 'common.command_options.amount',
                     description: `commands.${name}.transfer.options.amount.description`,
                     required: true,
                     min_value: 1
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: `commands.${name}.transfer.options.currency.name`,
+                    name: 'common.command_options.currency',
                     description: `commands.${name}.transfer.options.currency.description`,
-                    required: false
+                    required: false,
+                    autocomplete: true
                 }
             ]
         }
