@@ -52,6 +52,7 @@ import { defineComponent, ref } from 'vue'
 import { interfaces } from 'src/boot/axios'
 import { decimalToHex } from 'src/utils/Utils'
 import PatronAvatar from 'src/components/PatronAvatar.vue'
+import { event } from 'vue-gtag'
 
 export default defineComponent({
   name: 'PatronsPage',
@@ -93,9 +94,10 @@ export default defineComponent({
         })
         .catch(err => (this.pageLoadingError = err.message))
     },
-    onHeartClick(event) {
+    onHeartClick(e) {
       const color = decimalToHex(Math.floor(Math.random() * (0xffffff + 1)))
-      event.srcElement.style.setProperty('color', `#${color}`, 'important')
+      e.srcElement.style.setProperty('color', `#${color}`, 'important')
+      event('patrons_heart_click', { event_category: 'clicks' })
     }
   },
 
