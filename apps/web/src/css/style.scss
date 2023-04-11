@@ -78,6 +78,10 @@
   transform: rotate(-5deg);
 }
 
+.rotate-10 {
+  transform: rotate(10deg);
+}
+
 .menu-item--active {
   color: $almost-white-1;
   background: $secondary;
@@ -85,6 +89,14 @@
 
 .break-word {
   word-break: break-word;
+}
+
+.patron-avatar {
+  border: 3px solid $dark-1;
+}
+
+.big-patron-avatar {
+  border: 3px solid $primary;
 }
 
 /* STYLISH */

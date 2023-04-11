@@ -131,6 +131,13 @@ const interfaces = {
                     Authorization: Cookies.get('access_token')
                 }
             })
+        },
+        getPatrons() {
+            return api.get('/users/patrons', {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
         }
     }
 }

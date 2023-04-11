@@ -40,6 +40,10 @@ const routes = [
             {
                 path: 'state',
                 component: () => import('src/pages/StatePage.vue')
+            },
+            {
+                path: 'patrons',
+                component: () => import('src/pages/PatronsPage.vue')
             }
         ],
         beforeEnter: to => {
@@ -66,8 +70,20 @@ const routes = [
                     const query = new URLSearchParams(to.query).toString()
                     window.location.href = `${process.env.API}/authorize/add?${query}`
                 }
+            },
+            {
+                path: 'linked-roles',
+                beforeEnter: () => {
+                    event('link_follow', { event_category: 'links', event_label: 'Linked Roles' })
+                    window.location.href = `${process.env.API}/authorize/linked-roles`
+                }
             }
         ]
+    },
+
+    {
+        path: '/authorization',
+        component: () => import('src/pages/AuthorizationResultPage.vue')
     },
 
     {

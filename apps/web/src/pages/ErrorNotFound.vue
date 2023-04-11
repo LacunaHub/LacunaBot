@@ -1,13 +1,13 @@
 <template>
   <div class="fullscreen bg-dark-2 text-white text-center q-pa-md flex flex-center">
     <div>
-      <div style="font-size: 30vh">404</div>
+      <div class="text-h1">404</div>
 
-      <div class="text-h2 text--secondary">
+      <div class="text-h6">
         {{ $t('pages.error.not_found') }}
       </div>
 
-      <q-btn class="q-mt-xl" color="white" text-color="primary" unelevated to="/" icon="home" no-caps />
+      <q-btn class="q-mt-xl text--secondary" unelevated to="/" icon="home" no-caps flat round />
     </div>
   </div>
 </template>

@@ -35,6 +35,11 @@
             {{ $t('header.docs') }}
           </span>
         </a>
+        <router-link to="/patrons" class="header-link text-uppercase q-mr-lg" active-class="header-link--active">
+          <span>
+            {{ $t('header.patrons') }}
+          </span>
+        </router-link>
         <a href="https://discord.gg/9NeMc3J" target="_blank" class="header-link text-uppercase">
           <span>
             {{ $t('header.help') }}
@@ -130,6 +135,14 @@
           <q-item-section>
             <q-item-label>
               {{ $t('header.docs') }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable to="/patrons" active-class="nav-item--active" v-ripple @click="toggleMobileNav">
+          <q-item-section>
+            <q-item-label>
+              {{ $t('header.patrons') }}
             </q-item-label>
           </q-item-section>
         </q-item>
