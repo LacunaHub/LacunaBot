@@ -6,9 +6,12 @@ import { UserDocument } from '../../../database/schemas/Users'
 import DiscordUtils from '../../utility/DiscordUtils'
 import DiscordOAuth2 from '../discord/OAuth2'
 import { authorize } from '../utility/Authorize'
+import { createRateLimitMiddleware } from '../utility/Utils'
 
 const router: Router = new Router({ prefix: '/users' })
 const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
+
+router.use(createRateLimitMiddleware(10, 150000))
 
 router.get('/@me', authorize, getMe)
 router.get('/@me/bills', authorize, getBills)

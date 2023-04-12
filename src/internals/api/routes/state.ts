@@ -3,9 +3,12 @@ import { Context } from 'koa'
 import database from '../../../database'
 import { bridgeClient, clusterManager } from '../../Cluster'
 import Lacuna from '../../Lacuna'
+import { createRateLimitMiddleware } from '../utility/Utils'
 
 const { version } = require('../../../../package.json')
 const router: Router = new Router({ prefix: '/state' })
+
+router.use(createRateLimitMiddleware(5, 120000))
 
 router.get('/', getState)
 

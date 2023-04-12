@@ -15,9 +15,11 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import DiscordUtils from '../../utility/DiscordUtils'
 import interfaces from '../interfaces'
 import { authorize, checkPermissions } from '../utility/Authorize'
+import { createRateLimitMiddleware } from '../utility/Utils'
 
 const router: Router = new Router({ prefix: '/guilds' })
 
+router.use(createRateLimitMiddleware(20, 300000))
 router.use(authorize)
 
 router.get('/:guild_id/settings', checkPermissions, getSettings)

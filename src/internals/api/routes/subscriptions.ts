@@ -8,11 +8,13 @@ import { eventSubUnsubscribe, handleIncomingWebhook, searchChannels as searchTwi
 import { handleHubBubWebhook, searchChannels as searchYouTubeChannels } from '../../../modules/YouTube'
 import { convertXml2Json } from '../../utility/Utils'
 import { authorize } from '../utility/Authorize'
+import { createRateLimitMiddleware } from '../utility/Utils'
 
 const router: Router = new Router({ prefix: '/subscriptions' })
+const rateLimitMiddleware = createRateLimitMiddleware(5, 300000)
 
-router.get('/twitch/search', authorize, searchTwitch)
-router.get('/youtube/search', authorize, searchYouTube)
+router.get('/twitch/search', rateLimitMiddleware, authorize, searchTwitch)
+router.get('/youtube/search', rateLimitMiddleware, authorize, searchYouTube)
 router.post('/twitch/eventsub-webhook', eventSubAuthentication, eventSubWebhook)
 router.get('/youtube/hubbub-webhook', hubbubWebhookChallenge)
 router.post('/youtube/hubbub-webhook', hubbubWebhook)
