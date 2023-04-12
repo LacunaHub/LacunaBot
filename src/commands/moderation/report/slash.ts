@@ -66,7 +66,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             user: {
                 username: mention.user.username,
                 discriminator: mention.user.discriminator,
-                avatar: mention.user.displayAvatarURL(),
+                avatar: mention.user.avatar,
                 flags: mention.user.flags
             }
         } as any)

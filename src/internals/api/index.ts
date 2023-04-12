@@ -3,7 +3,6 @@ import Koa from 'koa'
 import koaBodyParser from 'koa-bodyparser'
 import koaJson from 'koa-json'
 import koaMorgan from 'koa-morgan'
-import rateLimit from 'koa-ratelimit'
 import { connect } from 'mongoose'
 import { QuickDB } from 'quick.db'
 import database from '../../database'
@@ -35,17 +34,6 @@ app.proxy = process.env.WEBSITE_DOMAIN !== 'localhost'
 app.keys = ['discord_oauth_state']
 
 app.use(passKnownReferrers)
-
-app.use(
-    rateLimit({
-        driver: 'memory',
-        db: new Map(),
-        duration: 300000,
-        max: 50,
-        errorMessage: 'Rate Limit Reached',
-        id: ctx => (ctx.request.headers['x-forwarded-for'] as string) || ctx.ip
-    })
-)
 
 app.use(authorize.routes()).use(authorize.allowedMethods())
 app.use(guilds.routes()).use(guilds.allowedMethods())

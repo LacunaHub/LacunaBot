@@ -166,7 +166,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             .setTitle(`${track.author} - ${track.title}`)
             .addFields([
                 {
-                    name: capitalizeFirstLetter(t('commands.giveaway.create.options.duration.name')),
+                    name: capitalizeFirstLetter(t('common.command_options.duration')),
                     value: track.isStream ? '♾️' : `\`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``,
                     inline: true
                 },
@@ -235,7 +235,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             .setTitle(`${track.author} - ${track.title}`)
             .addFields([
                 {
-                    name: capitalizeFirstLetter(t('commands.giveaway.create.options.duration.name')),
+                    name: capitalizeFirstLetter(t('common.command_options.duration')),
                     value: track.isStream ? '♾️' : `\`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``,
                     inline: true
                 },
