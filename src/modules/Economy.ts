@@ -137,7 +137,7 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
                     user: {
                         username: member.user.username,
                         discriminator: member.user.discriminator,
-                        avatar: member.avatar,
+                        avatar: member.user.avatar,
                         flags: member.user.flags?.bitfield ?? 0
                     }
                 } as any)
