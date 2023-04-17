@@ -84,7 +84,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    const reportCount = await self.db.users.countDocuments({ 'reports.created_at': { $gt: Date.now() - ms('24h') } })
+    const reportCount = await self.db.users.countDocuments({
+        'reports.sender_id': interaction.user.id,
+        'reports.created_at': { $gt: Date.now() - ms('24h') }
+    })
 
     if (reportCount >= 3) {
         await interaction.editReply({
