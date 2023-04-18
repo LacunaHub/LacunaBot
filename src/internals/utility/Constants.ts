@@ -48,3 +48,5 @@ export const emojiLetters = [
     '🇾',
     '🇿'
 ]
+
+export const guildVerificationLevelNames = ['NONE', 'LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH']
