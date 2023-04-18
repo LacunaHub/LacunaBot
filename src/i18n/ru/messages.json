@@ -119,6 +119,7 @@
 
             "text_developer": "Разработчик",
             "text_version": "Текущая версия",
+            "text_shard": "Фрагмент",
             "text_latency": "Задержка",
             "text_total_guilds": "Всего сообществ",
             "text_total_users": "Всего пользователей",
