@@ -1,5 +1,5 @@
 import { Client as BridgeClient } from 'discord-cross-hosting'
-import { HeartbeatManager, Manager as ClusterManager } from 'discord-hybrid-sharding'
+import { ClusterManager, HeartbeatManager } from 'discord-hybrid-sharding'
 import { cpu, mem, os } from 'node-os-utils'
 import logger from './Logger'
 

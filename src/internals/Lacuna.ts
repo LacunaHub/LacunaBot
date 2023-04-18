@@ -1,5 +1,5 @@
 import { Shard as BridgeShard } from 'discord-cross-hosting'
-import { Client as ClusterClient } from 'discord-hybrid-sharding'
+import { ClusterClient } from 'discord-hybrid-sharding'
 import { Client, ClientOptions, Collection, LimitedCollection, parseEmoji, PermissionsBitField } from 'discord.js'
 import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
@@ -18,7 +18,7 @@ import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './stru
 import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole'
 
 export default class Lacuna extends Client {
-    public cluster: ClusterClient
+    public cluster: ClusterClient<Lacuna>
     public machine: BridgeShard
     public hostname: string
     public logger: typeof logger

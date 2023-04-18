@@ -14,9 +14,9 @@ const isMasterBridge = process.env.DISCORD_CLIENT_BRIDGE_HOST === 'localhost'
 
 import { Bridge } from 'discord-cross-hosting'
 import { Server } from 'http'
-import api from './internals/api'
 import { bridgeClient, clusterManager } from './internals/Cluster'
 import logger from './internals/Logger'
+import api from './internals/api'
 import { handleDiamondGuilds } from './internals/structures/DiamondGuild'
 import { handlePatrons } from './internals/structures/Patron'
 import { syncBills as syncQiwiBills } from './internals/utility/Qiwi'
@@ -83,7 +83,7 @@ async function startServices() {
 
         clusterManager.totalShards = shardData.totalShards
         clusterManager.totalClusters = shardData.shardList.length
-        clusterManager.shardList = shardData.shardList
+        clusterManager.shardList = shardData.shardList.flat()
         clusterManager.clusterList = shardData.clusterList
 
         await clusterManager.spawn({ timeout: -1, delay: 15000 })
