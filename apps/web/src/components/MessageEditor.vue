@@ -184,7 +184,7 @@
 
               <q-input
                 v-model.trim="messageEmbed.description"
-                class="rounded-t-lg q-pt-sm"
+                class="rounded-lg q-pt-sm"
                 type="textarea"
                 :disable="!messageEmbed.active || disable"
                 filled
@@ -203,6 +203,7 @@
                   <div class="col-12 col-md-12">
                     <q-input
                       v-model.trim="field.name"
+                      class="rounded-t-lg"
                       :maxlength="256"
                       :disable="!messageEmbed.active || disable"
                       filled
@@ -215,7 +216,7 @@
 
                     <q-input
                       v-model.trim="field.value"
-                      class="q-pt-none"
+                      class="q-pt-none no-border-radius"
                       autogrow
                       :maxlength="1024"
                       :disable="!messageEmbed.active || disable"
@@ -228,7 +229,7 @@
 
                     <q-separator></q-separator>
 
-                    <q-toolbar class="bg-dark-2 rounded-b-lg">
+                    <q-toolbar class="rounded-b-lg" style="background: rgba(130, 120, 150, 0.057)">
                       <q-checkbox
                         v-model="field.inline"
                         dense
@@ -240,12 +241,12 @@
 
                       <q-btn
                         @click="messageEmbed.fields.splice(i, 1)"
-                        icon="block"
+                        :label="$t('remove')"
                         :disable="!messageEmbed.active || disable"
-                        unelevated
-                        no-caps
                         color="negative"
-                        dense
+                        flat
+                        no-caps
+                        unelevated
                       />
                     </q-toolbar>
                   </div>

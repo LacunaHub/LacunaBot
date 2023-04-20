@@ -39,12 +39,18 @@ a.origin:hover {
 }
 
 :not(.q-textarea) > .q-field__inner > .q-field__control,
-.q-textarea--autogrow > .q-field__inner > .q-field__control {
+.q-textarea--autogrow:not(.no-border-radius) > .q-field__inner > .q-field__control,
+.q-textarea:is(.rounded-lg) > .q-field__inner > .q-field__control {
   border-radius: $border-radius-lg !important;
 }
 
-.q-textarea:is(.rounded-b-lg) > .q-field__inner > .q-field__control {
+.q-textarea:is(.rounded-b-lg) > .q-field__inner > .q-field__control,
+.q-field:is(.rounded-b-lg) > .q-field__inner > .q-field__control {
   border-radius: 0 0 $border-radius-lg $border-radius-lg !important;
+}
+
+.q-field:is(.rounded-t-lg) > .q-field__inner > .q-field__control {
+  border-radius: $border-radius-lg $border-radius-lg 0 0 !important;
 }
 
 .q-linear-progress__track,
