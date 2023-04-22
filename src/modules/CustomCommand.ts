@@ -221,7 +221,7 @@ export default class CustomCommand {
                     .replace(/RegExp/gi, '')
 
                 const script = this.isolate.compileScriptSync(pattern)
-                const value = await script.run(ctx, { timeout: 2500 })
+                const value = await script.run(ctx, { timeout: 2500, promise: true })
 
                 string = string.replace(regexp, () => {
                     return typeof value === 'undefined' ? '' : value
@@ -313,9 +313,13 @@ export default class CustomCommand {
         }
 
         const ctx = this.isolate.createContextSync()
-        ctx.global.set('global', ctx.global.derefInto())
+        ctx.global.setSync('global', ctx.global.derefInto())
 
-        ctx.global.set('setValue', (key: string, value: any) => {
+        for (const smartValue of Object.keys(this.globalValues)) {
+            ctx.global.setSync(smartValue, this.globalValues[smartValue], { copy: true })
+        }
+
+        ctx.global.setSync('setValue', (key: string, value: any) => {
             this.usedFunctions.push('setValue')
             const used = this.usedFunctions.filter(i => i === 'setValue')
 
@@ -327,21 +331,27 @@ export default class CustomCommand {
             this.storage.set(`${this.interaction.guildId}.${key}`, value)
         })
 
-        ctx.global.set('getValue', (key: string) => {
-            if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
+        ctx.evalClosureSync(
+            `
+            getValue = function(...args) {
+                return $0.apply(undefined, args, { arguments: { copy: true }, result: { promise: true, copy: true } })
+            }
+        `,
+            [
+                (key: string) => {
+                    if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
 
-            return this.storage.get(`${this.interaction.guildId}.${key}`)
-        })
+                    return this.storage.get(`${this.interaction.guildId}.${key}`)
+                }
+            ],
+            { arguments: { reference: true } }
+        )
 
-        ctx.global.set('deleteValue', (key: string) => {
+        ctx.global.setSync('deleteValue', (key: string) => {
             if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
 
             this.storage.delete(`${this.interaction.guildId}.${key}`)
         })
-
-        for (const smartValue of Object.keys(this.globalValues)) {
-            ctx.global.set(smartValue, this.globalValues[smartValue], { copy: true })
-        }
 
         for (const component of this.command.components) {
             if (component.type === 'CONDITION') {

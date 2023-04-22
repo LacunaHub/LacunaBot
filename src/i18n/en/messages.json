@@ -116,6 +116,7 @@
             "description": "Basic information about the bot",
             "text_developer": "Developer",
             "text_version": "Current version",
+            "text_shard": "Shard",
             "text_latency": "Latency",
             "text_total_guilds": "Total guilds",
             "text_total_users": "Total users",

@@ -28,7 +28,7 @@ async function getState(ctx: Context) {
     const flatStats = stats.flat()
 
     const { data: servers } = await bridgeClient.request({ type: 'server-performance' }, { timeout: 15000, internal: false })
-    const players = await [...clusterManager.clusters.values()][0].eval('this.getMusicNodes()')
+    const players = await [...clusterManager.clusters.values()][0].eval('this.getMusicNodes()', null, 10000)
 
     ctx.status = 200
     ctx.body = {

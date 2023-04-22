@@ -1,5 +1,5 @@
 import { Shard as BridgeShard } from 'discord-cross-hosting'
-import { Client as ClusterClient } from 'discord-hybrid-sharding'
+import { ClusterClient } from 'discord-hybrid-sharding'
 import { Client, ClientOptions, Collection, LimitedCollection, parseEmoji, PermissionsBitField } from 'discord.js'
 import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
@@ -18,7 +18,7 @@ import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './stru
 import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole'
 
 export default class Lacuna extends Client {
-    public cluster: ClusterClient
+    public cluster: ClusterClient<Lacuna>
     public machine: BridgeShard
     public hostname: string
     public logger: typeof logger
@@ -137,10 +137,30 @@ export default class Lacuna extends Client {
     }
 
     async updateApplicationCommands(server: ServerDocument) {
-        return this.application.commands.set(
+        const commands = await this.application.commands.set(
             server.modules.custom_commands.map(i => i.command),
             server._id
         )
+
+        await this.db.servers.updateOne(
+            { _id: server._id },
+            {
+                $set: {
+                    'modules.custom_commands': commands.map(i => {
+                        const custom = server.modules.custom_commands.find(ii => ii.command.name === i.name)
+
+                        return {
+                            id: i.id,
+                            options: custom.options,
+                            components: custom.components,
+                            command: custom.command
+                        }
+                    })
+                }
+            }
+        )
+
+        return commands
     }
 
     getMusicNodes() {

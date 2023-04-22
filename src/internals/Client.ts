@@ -1,4 +1,4 @@
-import { Client as ClusterClient } from 'discord-hybrid-sharding'
+import { ClusterClient } from 'discord-hybrid-sharding'
 import { Collection, GatewayIntentBits, LimitedCollection, Partials } from 'discord.js'
 import Lacuna from './Lacuna'
 
@@ -44,7 +44,7 @@ const client = new Lacuna({
 
         if (manager.name == 'UserManager')
             return new LimitedCollection({
-                maxSize: 5000,
+                maxSize: 1000,
                 keepOverLimit: v => v.id == process.env.DISCORD_CLIENT_ID
             })
 

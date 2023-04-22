@@ -116,6 +116,7 @@
             "description": "Базовая информация о боте",
             "text_developer": "Розробник",
             "text_version": "Поточна версія",
+            "text_shard": "Фрагмент",
             "text_latency": "Затримка",
             "text_total_guilds": "Всього спільнот",
             "text_total_users": "Всього користувачів",
