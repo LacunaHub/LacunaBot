@@ -227,7 +227,19 @@ export default defineComponent({
   setup() {
     useMeta({
       title: 'Lacuna',
-      titleTemplate: title => `${title} – Discord Bot`
+      titleTemplate: title => `${title} – Discord Bot`,
+      meta: {
+        description: {
+          name: 'description',
+          content:
+            "Lacuna is a feature-rich Discord bot designed to enhance your server's community management and moderation experience. With a wide range of commands and customizable settings, Lacuna offers powerful tools to help you maintain a thriving and well-governed server."
+        },
+        keywords: {
+          name: 'keywords',
+          content:
+            'discord bot, community management, moderation, server management, customizable commands, automated tasks, server analytics, user moderation, automated moderation, custom roles, server settings'
+        }
+      }
     })
   },
 

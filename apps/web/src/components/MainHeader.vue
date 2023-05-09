@@ -30,7 +30,7 @@
             {{ $t('header.state') }}
           </span>
         </router-link>
-        <a href="https://docs.voidlacuna.ru" target="_blank" class="header-link text-uppercase q-mr-lg">
+        <a href="https://docs.lacunabot.com" target="_blank" class="header-link text-uppercase q-mr-lg">
           <span>
             {{ $t('header.docs') }}
           </span>
@@ -49,8 +49,9 @@
 
       <q-separator class="gt-sm" spaced="lg" inset vertical></q-separator>
 
-      <q-btn v-if="!user.access_token" dense flat to="/authorize">
-        <q-icon name="login" size="32px"></q-icon>
+      <q-btn v-if="!user.access_token" flat to="/authorize">
+        {{ $t('header.login') }}
+        <q-icon class="q-ml-sm" name="login" size="24px"></q-icon>
       </q-btn>
 
       <q-btn v-else dense flat>
@@ -59,8 +60,8 @@
         </q-avatar>
         <q-icon class="gt-sm" name="arrow_drop_down" size="16px"></q-icon>
 
-        <q-menu class="bg-dark-2">
-          <q-list dense>
+        <q-menu class="bg-dark-2" style="min-width: max-content">
+          <q-list>
             <q-item clickable active-class="" to="/@me">
               <q-item-section>
                 {{ $t('pages.dashboard.profile') }}
@@ -80,15 +81,31 @@
               </q-item-section>
 
               <q-menu class="bg-dark-2" anchor="top left" self="top right">
-                <q-list v-for="locale in availableLocales" :key="locale.value" dense>
+                <q-list>
                   <q-item
+                    v-for="locale in availableLocales"
+                    :key="locale.value"
                     clickable
                     @click="setLocale(locale.value)"
                     :active="currentLocale === locale.value"
                     active-class="menu-item--active"
                   >
                     <q-item-section>
-                      {{ locale.label }}
+                      <q-item-label>
+                        {{ locale.label }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item clickable href="https://crowdin.com/project/lacuna" target="_blank">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ $t('pages.guild.gs_translate_title') }}
+                      </q-item-label>
+                    </q-item-section>
+
+                    <q-item-section side>
+                      <q-icon name="open_in_new" size="16px"></q-icon>
                     </q-item-section>
                   </q-item>
                 </q-list>
@@ -131,7 +148,7 @@
           </q-item-section>
         </q-item>
 
-        <q-item clickable href="https://docs.voidlacuna.ru" target="_blank" v-ripple @click="toggleMobileNav">
+        <q-item clickable href="https://docs.lacunabot.com" target="_blank" v-ripple @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
               {{ $t('header.docs') }}

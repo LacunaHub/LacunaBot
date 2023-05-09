@@ -64,10 +64,16 @@
           v-model.number="tier"
           class="rounded-lg bg-dark-2 q-mt-sm"
           align="justify"
-          active-bg-color="primary"
+          active-bg-color="secondary"
           indicator-color="transparent"
         >
-          <q-tab v-for="(period, i) in periods" :key="period.name" :name="i" no-caps>
+          <q-tab
+            v-for="(period, i) in periods"
+            :key="period.name"
+            :name="i"
+            no-caps
+            :style="{ width: `calc(100% / ${periods.length})` }"
+          >
             <div>
               <del v-if="period.discounts[currency.name]" class="q-mr-xs opacity-lg">
                 {{ period.prices[currency.name] }}{{ currency.symbol }}
@@ -136,7 +142,32 @@
           {{ $t('lacuna_diamond.select_payment_method') }}
         </div>
 
+        <q-tabs
+          v-model="provider"
+          class="rounded-lg bg-dark-2 q-mt-sm"
+          align="justify"
+          active-bg-color="secondary"
+          indicator-color="transparent"
+        >
+          <q-tab
+            v-for="provider in paymentProviders"
+            :key="provider.value"
+            :name="provider.value"
+            no-caps
+            :style="{ width: `calc(100% / ${paymentProviders.length})` }"
+          >
+            <q-avatar size="32px">
+              <img :src="provider.icon" />
+            </q-avatar>
+
+            <div class="text-white">
+              {{ provider.name }}
+            </div>
+          </q-tab>
+        </q-tabs>
+
         <q-select
+          v-if="false"
           v-model="provider"
           :options="paymentProviders"
           option-label="name"

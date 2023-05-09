@@ -53,7 +53,18 @@ export default defineComponent({
     const user = useUserStore()
 
     useMeta({
-      title: 'My Profile'
+      title: 'My Profile',
+      meta: {
+        description: {
+          name: 'description',
+          content:
+            'Access your Lacuna Dashboard to manage your profile, view a list of Discord guilds connected to Lacuna.'
+        },
+        keywords: {
+          name: 'keywords',
+          content: 'my profile, discord guilds, bills, user activities'
+        }
+      }
     })
 
     return {

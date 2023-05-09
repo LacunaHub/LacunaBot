@@ -14,8 +14,50 @@
           {{ $t('pages.patrons.gratitude_message_p3') }}
         </div>
 
+        <div class="col-12">
+          <div class="row q-col-gutter-md">
+            <div class="col-6">
+              <q-btn
+                class="full-width"
+                style="background-color: #ff424d"
+                unelevated
+                no-caps
+                href="https://www.patreon.com/xelitte"
+                target="_blank"
+              >
+                <q-icon class="q-mr-xs" name="fab fa-patreon" size="24px"></q-icon>
+
+                <span>Patreon</span>
+              </q-btn>
+            </div>
+
+            <div class="col-6">
+              <q-btn
+                class="full-width"
+                style="background-color: #f15f2c"
+                unelevated
+                no-caps
+                href="https://boosty.to/xelitte"
+                target="_blank"
+              >
+                <q-avatar class="q-mr-xs" size="24px">
+                  <img src="~assets/boosty-logo-white.svg" />
+                </q-avatar>
+
+                <span>Boosty</span>
+              </q-btn>
+            </div>
+          </div>
+        </div>
+
         <div class="col-12 text-center">
-          <q-icon class="heart cursor-pointer" name="favorite" color="primary" size="xl" @click="onHeartClick"></q-icon>
+          <q-icon
+            class="heart cursor-pointer"
+            name="favorite"
+            color="primary"
+            size="64px"
+            @click="onHeartClick"
+          ></q-icon>
         </div>
 
         <div class="col-12">
@@ -61,7 +103,18 @@ export default defineComponent({
 
   setup() {
     useMeta({
-      title: 'Patrons'
+      title: 'Patrons',
+      meta: {
+        description: {
+          name: 'description',
+          content:
+            "Acknowledge and appreciate the active and former patrons who have supported Lacuna Discord Bot. Join our community of supporters and help us enhance the bot's features and services."
+        },
+        keywords: {
+          name: 'keywords',
+          content: 'patrons, supporters, community, active patrons, former patrons'
+        }
+      }
     })
 
     const patrons = ref([])
