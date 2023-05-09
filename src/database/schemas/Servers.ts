@@ -1469,7 +1469,10 @@ export interface ICustomCommandComponent {
         }
     }
     action?: {
-        type: 'REPLY' | 'SEND_MESSAGE' | 'MODIFY_ROLES' | 'FORWARD_TO_COMMAND' | 'MODIFY_WALLET'
+        type: 'REPLY' | 'SEND_MESSAGE' | 'MODIFY_ROLES' | 'FORWARD_TO_COMMAND' | 'MODIFY_WALLET' | 'EXECUTE_CODE'
+        execute_code?: {
+            code: string
+        }
         reply?: {
             options: 'EPHEMERAL'[]
             message: {
