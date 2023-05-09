@@ -7,7 +7,7 @@ process.env.API_URL =
 process.env.WEBSITE_URL =
     process.env.NODE_ENV === 'development'
         ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.WEBSITE_PORT}`
-        : `https://www.${process.env.WEBSITE_DOMAIN}`
+        : `https://${process.env.WEBSITE_DOMAIN}`
 process.env.CLIENT_OAUTH2_REDIRECT_URI = `${process.env.API_URL}/authorize/callback`
 
 const isMasterBridge = process.env.DISCORD_CLIENT_BRIDGE_HOST === 'localhost'
