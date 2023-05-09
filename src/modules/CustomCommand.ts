@@ -1,10 +1,16 @@
+import { chunkArray } from 'discord-hybrid-sharding'
 import {
+    ActionRowBuilder,
     ApplicationCommandOptionType,
     BaseGuildTextChannel,
+    ButtonBuilder,
+    ButtonStyle,
     ChatInputCommandInteraction,
     EmbedBuilder,
     GuildMember,
     GuildMemberRoleManager,
+    InteractionDeferReplyOptions,
+    InteractionReplyOptions,
     resolveColor,
     Team,
     User
@@ -51,11 +57,11 @@ export default class CustomCommand {
         })
     }
 
-    get globalValues() {
+    async getGlobalValues() {
         let { channel, commandId, commandName, guild, member, options } = this.interaction
 
-        channel.fetch()
-        guild.fetch()
+        await channel.fetch()
+        await guild.fetch()
 
         return {
             channel: {
@@ -315,15 +321,16 @@ export default class CustomCommand {
         const ctx = this.isolate.createContextSync()
         ctx.global.setSync('global', ctx.global.derefInto())
 
-        for (const smartValue of Object.keys(this.globalValues)) {
-            ctx.global.setSync(smartValue, this.globalValues[smartValue], { copy: true })
+        const globalValues = await this.getGlobalValues()
+
+        for (const smartValue of Object.keys(globalValues)) {
+            ctx.global.setSync(smartValue, globalValues[smartValue], { copy: true })
         }
 
         ctx.global.setSync('setValue', (key: string, value: any) => {
-            this.usedFunctions.push('setValue')
-            const used = this.usedFunctions.filter(i => i === 'setValue')
+            const used = this.useFunction('setValue')
 
-            if (used.length > 5) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+            if (used > 5) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
 
             if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
             if (!value || typeof value === 'function' || value === null) throw new TypeError('INVALID_PARAMETERS')
@@ -352,6 +359,10 @@ export default class CustomCommand {
 
             this.storage.delete(`${this.interaction.guildId}.${key}`)
         })
+
+        if (this.command.components.length > 1 && this.command.components.some(i => i.action?.type === 'EXECUTE_CODE')) {
+            this.command.components = [this.command.components.find(i => i.action?.type === 'EXECUTE_CODE')]
+        }
 
         for (const component of this.command.components) {
             if (component.type === 'CONDITION') {
@@ -460,6 +471,360 @@ export default class CustomCommand {
 
             if (component.type === 'ACTION') {
                 const { action } = component
+
+                if (action.type === 'EXECUTE_CODE' && this.server.server.premium.available) {
+                    const functions = {
+                        deferReply: async (rawOptions: InteractionDeferReplyOptions) => {
+                            const used = this.useFunction('deferReply')
+
+                            if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+
+                            const options = {
+                                ephemeral: Boolean(rawOptions?.ephemeral)
+                            }
+
+                            await this.interaction.deferReply(options)
+                        },
+                        deleteReply: async () => {
+                            const used = this.useFunction('deleteReply')
+
+                            if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+
+                            await this.interaction.deleteReply()
+                        },
+                        editReply: async (rawOptions: InteractionReplyOptions) => {
+                            const used = this.useFunction('editReply')
+
+                            if (used > 3) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+
+                            const components = rawOptions?.components?.length
+                                ? chunkArray(
+                                      (rawOptions.components as any[]).filter(i => i.type === 'Button' && i.style === 'Link'),
+                                      5
+                                  )
+                                : []
+                            const options = {
+                                content: rawOptions?.content ?? undefined,
+                                embeds: rawOptions?.embeds?.length
+                                    ? rawOptions.embeds.map(i => {
+                                          return new EmbedBuilder(i as any).toJSON()
+                                      })
+                                    : undefined,
+                                components: components.length
+                                    ? components.slice(0, 5).map(i => {
+                                          return new ActionRowBuilder<ButtonBuilder>()
+                                              .addComponents(
+                                                  i.map(ii => {
+                                                      return new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(ii.label).setURL(ii.url)
+                                                  })
+                                              )
+                                              .toJSON()
+                                      })
+                                    : undefined,
+                                tts: Boolean(rawOptions?.tts),
+                                ephemeral: Boolean(rawOptions?.ephemeral)
+                            }
+
+                            await this.interaction.editReply(options)
+                        },
+                        followUpReply: async (rawOptions: InteractionReplyOptions) => {
+                            const used = this.useFunction('followUpReply')
+
+                            if (used > 3) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+
+                            const components = rawOptions?.components?.length
+                                ? chunkArray(
+                                      (rawOptions.components as any[]).filter(i => i.type === 'Button' && i.style === 'Link'),
+                                      5
+                                  )
+                                : []
+                            const options = {
+                                content: rawOptions?.content ?? undefined,
+                                embeds: rawOptions?.embeds?.length
+                                    ? rawOptions.embeds.map(i => {
+                                          return new EmbedBuilder(i as any).toJSON()
+                                      })
+                                    : undefined,
+                                components: components.length
+                                    ? components.slice(0, 5).map(i => {
+                                          return new ActionRowBuilder<ButtonBuilder>()
+                                              .addComponents(
+                                                  i.map(ii => {
+                                                      return new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(ii.label).setURL(ii.url)
+                                                  })
+                                              )
+                                              .toJSON()
+                                      })
+                                    : undefined,
+                                tts: Boolean(rawOptions?.tts),
+                                ephemeral: Boolean(rawOptions?.ephemeral)
+                            }
+
+                            await this.interaction.followUp(options)
+                        },
+                        getUserActivity: async (userId: string) => {
+                            const used = this.useFunction('getUserActivity')
+
+                            if (used > 3) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (typeof userId !== 'string') throw new TypeError('INVALID_ARGUMENTS')
+
+                            const user = await this.self.db.users.findOne({ _id: userId })
+                            const userActivities = {
+                                level: user?.activities?.levels?.find?.(i => i.guild_id === this.interaction.guildId),
+                                wallet: user?.activities?.wallets?.find?.(i => i.guild_id === this.interaction.guildId)
+                            }
+
+                            return {
+                                level: {
+                                    rank: userActivities?.level?.experience?.level ?? 0,
+                                    current_xp: userActivities?.level?.experience?.current ?? 0,
+                                    total_xp: userActivities?.level?.experience?.total ?? 0,
+                                    total_messages: userActivities?.level?.activity?.total_messages ?? 0,
+                                    voice_time: userActivities?.level?.activity?.total_voice_time ?? 0
+                                },
+                                wallet: userActivities?.wallet?.currencies
+                                    ?.reduce((x, y) => {
+                                        return y.id === 'DEFAULT' ? [y, ...x] : [...x, y]
+                                    }, [])
+                                    ?.map(i => i.amount) ?? [0]
+                            }
+                        },
+                        reply: async (rawOptions: InteractionReplyOptions) => {
+                            const used = this.useFunction('reply')
+
+                            if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+
+                            const components = rawOptions?.components?.length
+                                ? chunkArray(
+                                      (rawOptions.components as any[]).filter(i => i.type === 'Button' && i.style === 'Link'),
+                                      5
+                                  )
+                                : []
+                            const options = {
+                                content: rawOptions?.content ?? undefined,
+                                embeds: rawOptions?.embeds?.length
+                                    ? rawOptions.embeds.map(i => {
+                                          return new EmbedBuilder(i as any).toJSON()
+                                      })
+                                    : undefined,
+                                components: components.length
+                                    ? components.slice(0, 5).map(i => {
+                                          return new ActionRowBuilder<ButtonBuilder>()
+                                              .addComponents(
+                                                  i.map(ii => {
+                                                      return new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(ii.label).setURL(ii.url)
+                                                  })
+                                              )
+                                              .toJSON()
+                                      })
+                                    : undefined,
+                                tts: Boolean(rawOptions?.tts),
+                                ephemeral: Boolean(rawOptions?.ephemeral)
+                            }
+
+                            await this.interaction.reply(options)
+                        },
+                        modifyUserRoles: async (userId: string, roles: string[], mode: 'add' | 'remove' | 'set' = 'add') => {
+                            const used = this.useFunction('modifyUserRoles')
+
+                            if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (typeof userId !== 'string' || !Array.isArray(roles) || !roles.every(i => typeof i === 'string'))
+                                throw new TypeError('INVALID_ARGUMENTS')
+
+                            const member = await this.interaction.guild.members.fetch({ user: userId })
+
+                            if (mode === 'add') {
+                                await member.roles.add(roles)
+                            }
+
+                            if (mode === 'remove') {
+                                await member.roles.remove(roles)
+                            }
+
+                            if (mode === 'set') {
+                                await member.roles.set(roles)
+                            }
+                        },
+                        modifyUserWallet: async (userId: string, amount: number, currencyId: string = 'DEFAULT') => {
+                            const used = this.useFunction('modifyUserWallet')
+
+                            if (used > 2) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (typeof userId !== 'string' || typeof amount !== 'number' || (currencyId && typeof currencyId !== 'string'))
+                                throw new TypeError('INVALID_ARGUMENTS')
+                            if (!this.server.modules.economy.active) throw new Error('ECONOMY_IS_DISABLED')
+
+                            const member = await this.interaction.guild.members.fetch({ user: userId })
+                            let currency = this.server.modules.economy.currencies.find(i => i.id === currencyId)
+
+                            if (!currency) {
+                                currency = this.server.modules.economy.currencies.find(i => i.id === 'DEFAULT')
+                            }
+
+                            const INT32_MAX = Math.pow(2, 31) - 1
+                            amount = isNaN(amount) ? 0 : amount
+
+                            if (amount > INT32_MAX || amount < -INT32_MAX)
+                                amount = amount > INT32_MAX ? INT32_MAX : amount < -INT32_MAX ? -INT32_MAX : 0
+
+                            let user = await this.self.db.users.findOne({ _id: member.id })
+
+                            if (!user) {
+                                user = await this.self.db.users.create({
+                                    _id: member.id,
+                                    user: {
+                                        username: member.user.username,
+                                        discriminator: member.user.discriminator,
+                                        avatar: member.user.avatar,
+                                        flags: member.user.flags?.bitfield ?? 0
+                                    }
+                                } as any)
+                            }
+
+                            let wallet = user.activities.wallets.find(i => i.guild_id == this.interaction.guildId)
+
+                            if (!wallet) {
+                                wallet = {
+                                    guild_id: this.interaction.guildId,
+                                    currencies: [],
+                                    transactions: [],
+                                    activity: {
+                                        last_message_at: 0,
+                                        voice_connected_at: 0
+                                    }
+                                }
+
+                                await this.self.db.users.updateOne(
+                                    { _id: member.id },
+                                    {
+                                        $push: { 'activities.wallets': wallet as never }
+                                    }
+                                )
+                            }
+
+                            const walletCurrency = wallet.currencies.find(i => i.id === currency.id)
+
+                            if (walletCurrency?.amount - Math.abs(amount) < 0) throw new Error('CURRENCY_AMOUNT_CANNOT_BE_NEGATIVE')
+
+                            if (walletCurrency) {
+                                await this.self.db.users.updateOne(
+                                    {
+                                        _id: member.id,
+                                        'activities.wallets': { $elemMatch: { guild_id: this.interaction.guildId, 'currencies.id': currency.id } }
+                                    },
+                                    {
+                                        $inc: {
+                                            'activities.wallets.$[guild].currencies.$[currency].amount': amount
+                                        }
+                                    },
+                                    { arrayFilters: [{ 'guild.guild_id': this.interaction.guildId }, { 'currency.id': currency.id }] }
+                                )
+                            } else {
+                                await this.self.db.users.updateOne(
+                                    { _id: member.id, 'activities.wallets.guild_id': this.interaction.guildId },
+                                    {
+                                        $push: {
+                                            'activities.wallets.$.currencies': {
+                                                id: currency.id,
+                                                amount: amount
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                        },
+                        sendMessage: async (channelId: string, rawOptions: InteractionReplyOptions) => {
+                            const used = this.useFunction('sendMessage')
+
+                            if (used > 2) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (typeof channelId !== 'string') throw new TypeError('INVALID_ARGUMENTS')
+
+                            const channel = this.interaction.guild.channels.cache.get(channelId) as BaseGuildTextChannel
+
+                            if (!channel) throw new Error('UNKNOWN_CHANNEL')
+
+                            const components = rawOptions?.components?.length
+                                ? chunkArray(
+                                      (rawOptions.components as any[]).filter(i => i.type === 'Button' && i.style === 'Link'),
+                                      5
+                                  )
+                                : []
+                            const options = {
+                                content: rawOptions?.content ?? null,
+                                embeds: rawOptions?.embeds?.length
+                                    ? rawOptions.embeds.map(i => {
+                                          return new EmbedBuilder(i as any).toJSON()
+                                      })
+                                    : [],
+                                components: components.slice(0, 5).map(i => {
+                                    return new ActionRowBuilder<ButtonBuilder>()
+                                        .addComponents(
+                                            i.map(ii => {
+                                                return new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(ii.label).setURL(ii.url)
+                                            })
+                                        )
+                                        .toJSON()
+                                })
+                            }
+
+                            const message = await channel.send(options)
+
+                            return {
+                                channel: {
+                                    id: channel.id,
+                                    name: channel.name,
+                                    type: channel.type,
+                                    parentId: channel.parentId,
+                                    nsfw: channel.nsfw,
+                                    position: channel.rawPosition,
+                                    topic: channel.topic,
+                                    lastMessageId: channel.lastMessageId,
+                                    rateLimitPerUser: channel.rateLimitPerUser,
+                                    createdTimestamp: channel.createdTimestamp
+                                },
+                                createdTimestamp: message.createdTimestamp,
+                                crosspostable: message.crosspostable,
+                                editedTimestamp: message.editedTimestamp,
+                                id: message.id,
+                                pinnable: message.pinnable,
+                                url: message.url
+                            }
+                        }
+                    }
+
+                    ctx.evalClosureSync(
+                        Object.keys(functions)
+                            .map((i, idx) => {
+                                return `
+                                    ${i} = function(...args) {
+                                        return $${idx}.apply(undefined, args, { arguments: { copy: true }, result: { promise: true, copy: true } })
+                                    }
+                                `
+                            })
+                            .join(';'),
+                        Object.values(functions),
+                        { arguments: { reference: true } }
+                    )
+
+                    const { execute_code } = action
+
+                    try {
+                        const code = execute_code.code.slice(0, 4000)
+
+                        const script = await this.isolate.compileScript(`(async () => { ${code} })()`)
+                        await script.run(ctx, { timeout: 7500, promise: true })
+                        this.usedPatterns.push(code)
+                    } catch (err) {
+                        const error = err.toString().replace(/<isolated-vm>:?/, '')
+
+                        if (!this.interaction.replied) {
+                            await this.interaction.reply({
+                                embeds: [new EmbedBuilder().setDescription(error).setColor('Red')]
+                            })
+                        }
+                    }
+
+                    break
+                }
 
                 if (action.type === 'REPLY') {
                     const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
@@ -710,5 +1075,10 @@ export default class CustomCommand {
                 await this.self.db.qdb.delete(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)
             }
         }
+    }
+
+    useFunction(name: string) {
+        this.usedFunctions.push(name)
+        return this.usedFunctions.filter(i => i === name).length
     }
 }
