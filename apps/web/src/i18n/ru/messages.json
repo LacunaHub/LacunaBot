@@ -267,7 +267,8 @@
       "SEND_MESSAGE": "Отправить сообщение",
       "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
       "FORWARD_TO_COMMAND": "Перенаправить на команду",
-      "MODIFY_WALLET": "Изменить кошелёк"
+      "MODIFY_WALLET": "Изменить кошелёк",
+      "EXECUTE_CODE": "Выполнить код"
     },
     "cv_operator_title": "Оператор",
     "cv_operators": {

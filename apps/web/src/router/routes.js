@@ -58,6 +58,7 @@ const routes = [
         children: [
             {
                 path: '',
+                component: () => import('pages/LandingPage.vue'),
                 beforeEnter: () => {
                     event('login', { method: 'Discord' })
                     window.location.href = `${process.env.API}/authorize`
@@ -65,6 +66,7 @@ const routes = [
             },
             {
                 path: 'add',
+                component: () => import('pages/LandingPage.vue'),
                 beforeEnter: to => {
                     event('link_follow', { event_category: 'links', event_label: 'Add Bot' })
                     const query = new URLSearchParams(to.query).toString()
@@ -73,6 +75,7 @@ const routes = [
             },
             {
                 path: 'linked-roles',
+                component: () => import('pages/LandingPage.vue'),
                 beforeEnter: () => {
                     event('link_follow', { event_category: 'links', event_label: 'Linked Roles' })
                     window.location.href = `${process.env.API}/authorize/linked-roles`

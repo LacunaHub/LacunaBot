@@ -286,6 +286,22 @@
                           {{ $t(`custom_command.component_names.${action}`) }}
                         </q-item-label>
                       </q-item-section>
+
+                      <q-item-section v-if="action === 'EXECUTE_CODE'" avatar side>
+                        <q-avatar size="24px">
+                          <img src="~assets/lacuna-diamond.svg" />
+
+                          <q-tooltip
+                            class="bg-black rounded-lg text-body2"
+                            anchor="top middle"
+                            self="bottom middle"
+                            transition-show=""
+                            transition-hide=""
+                          >
+                            Only with Lacuna Diamond
+                          </q-tooltip>
+                        </q-avatar>
+                      </q-item-section>
                     </q-item>
                   </q-list>
                 </q-btn-dropdown>
@@ -304,6 +320,22 @@
                           $t(`custom_command.component_names.${component.condition?.type ?? component.action?.type}`)
                         }}
                       </q-item-label>
+                    </q-item-section>
+
+                    <q-item-section v-if="component.action?.type === 'EXECUTE_CODE'" avatar side>
+                      <q-avatar size="24px">
+                        <img src="~assets/lacuna-diamond.svg" />
+
+                        <q-tooltip
+                          class="bg-black rounded-lg text-body2"
+                          anchor="top middle"
+                          self="bottom middle"
+                          transition-show=""
+                          transition-hide=""
+                        >
+                          Only with Lacuna Diamond
+                        </q-tooltip>
+                      </q-avatar>
                     </q-item-section>
                   </q-item>
 
@@ -409,6 +441,7 @@ import CustomCommandActionModifyRoles from './CustomCommandActionModifyRoles.vue
 import CustomCommandActionForwardToCommand from './CustomCommandActionForwardToCommand.vue'
 import CustomCommandConditionCompareValues from './CustomCommandConditionCompareValues.vue'
 import CustomCommandActionModifyWallet from './CustomCommandActionModifyWallet.vue'
+import CustomCommandActionExecuteCode from './CustomCommandActionExecuteCode.vue'
 
 export default defineComponent({
   name: 'CustomCommand',
@@ -517,7 +550,7 @@ export default defineComponent({
   data() {
     return {
       conditions: ['COMPARE_VALUES'],
-      actions: ['REPLY', 'SEND_MESSAGE', 'MODIFY_ROLES', 'FORWARD_TO_COMMAND', 'MODIFY_WALLET']
+      actions: ['EXECUTE_CODE', 'REPLY', 'SEND_MESSAGE', 'MODIFY_ROLES', 'FORWARD_TO_COMMAND', 'MODIFY_WALLET']
     }
   },
 
@@ -638,6 +671,19 @@ export default defineComponent({
           }
         })
       }
+
+      if (type === 'EXECUTE_CODE') {
+        this.command.components = []
+        this.command.components.push({
+          type: 'ACTION',
+          action: {
+            type,
+            execute_code: {
+              code: ''
+            }
+          }
+        })
+      }
     },
     moveComponent(from, to) {
       const component = this.command.components[from]
@@ -650,6 +696,8 @@ export default defineComponent({
       this.command.components.splice(position, 0, component)
     },
     isComponentLimitReached(type) {
+      if (this.command.components.some(i => i.action?.type === 'EXECUTE_CODE')) return true
+
       const [componentType, subType] = type.split(':')
       const components = this.command.components.filter(
         i => i.type === componentType && (i.condition?.type === subType || i.action?.type === subType)
@@ -688,6 +736,7 @@ export default defineComponent({
       if (component.action?.type === 'MODIFY_ROLES') dialogComponent = CustomCommandActionModifyRoles
       if (component.action?.type === 'FORWARD_TO_COMMAND') dialogComponent = CustomCommandActionForwardToCommand
       if (component.action?.type === 'MODIFY_WALLET') dialogComponent = CustomCommandActionModifyWallet
+      if (component.action?.type === 'EXECUTE_CODE') dialogComponent = CustomCommandActionExecuteCode
 
       if (component.condition?.type === 'COMPARE_VALUES') dialogComponent = CustomCommandConditionCompareValues
 

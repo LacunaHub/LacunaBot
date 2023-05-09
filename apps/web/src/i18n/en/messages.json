@@ -261,7 +261,8 @@
       "SEND_MESSAGE": "Send message",
       "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
       "FORWARD_TO_COMMAND": "Forward to command",
-      "MODIFY_WALLET": "Modify wallet"
+      "MODIFY_WALLET": "Modify wallet",
+      "EXECUTE_CODE": "Execute code"
     },
     "cv_operator_title": "Operator",
     "cv_operators": {

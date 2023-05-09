@@ -261,7 +261,8 @@
       "SEND_MESSAGE": "Відправити повідомлення",
       "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
       "FORWARD_TO_COMMAND": "Перенаправити на команду",
-      "MODIFY_WALLET": "Змінити гаманець"
+      "MODIFY_WALLET": "Змінити гаманець",
+      "EXECUTE_CODE": "Выполнить код"
     },
     "cv_operator_title": "Оператор",
     "cv_operators": {
