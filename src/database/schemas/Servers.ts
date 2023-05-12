@@ -748,7 +748,8 @@ export default model<ServerDocument>(
                 },
                 subscriptions: {
                     twitch: { type: Array, default: [] },
-                    youtube: { type: Array, default: [] }
+                    youtube: { type: Array, default: [] },
+                    telegram: { type: Array, default: [] }
                 },
                 interactive_messages: { type: Array, default: [] },
                 custom_commands: { type: Array, default: [] },
@@ -1350,6 +1351,7 @@ export interface ServerDocument extends Document {
         subscriptions: {
             twitch: ITwitchSubscription[]
             youtube: IYouTubeSubscription[]
+            telegram: ITelegramSubscription[]
         }
         interactive_messages: InteractiveMessage[]
         custom_commands: ICustomCommand[]
@@ -1911,6 +1913,17 @@ export interface IYouTubeSubscription {
     notification_message: { content: string }
     webhook_id: string
     webhook_token: string
+}
+
+export interface ITelegramSubscription {
+    channel_id: number
+    channel_name: string
+    channel_username: string
+    notification_channel_id: string
+    webhook_id: string
+    webhook_token: string
+    options: ('CROSSPOST_MESSAGE' | 'MENTION_EVERYONE' | 'MENTION_ROLES')[]
+    role_mentions?: string[]
 }
 
 export interface AutoThread {

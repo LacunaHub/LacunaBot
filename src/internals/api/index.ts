@@ -1,6 +1,6 @@
 import koaCors from '@koa/cors'
 import Koa from 'koa'
-import koaBodyParser from 'koa-bodyparser'
+import koaBody from 'koa-body'
 import koaJson from 'koa-json'
 import koaMorgan from 'koa-morgan'
 import { connect } from 'mongoose'
@@ -21,7 +21,7 @@ database.mysql.connect().then(() => {
     database.qdb = new QuickDB({ driver: database.mysql })
 })
 
-app.use(koaBodyParser())
+app.use(koaBody({ jsonLimit: '50mb' }))
 app.use(koaJson())
 app.use(
     koaMorgan('[API: :date[iso]] – :req[x-forwarded-for] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', {
