@@ -808,7 +808,13 @@ export default class CustomCommand {
                     const { execute_code } = action
 
                     try {
-                        const code = execute_code.code.slice(0, 4000)
+                        let code = execute_code.code
+                            .slice(0, 4000)
+                            // Remove unsafe regexp and RegExp class
+                            .replace(/\/((.|\n)+?)\//g, value => {
+                                return safeRegex(value) === true ? value : '/unsafe/'
+                            })
+                            .replace(/RegExp/gi, '')
 
                         const script = await this.isolate.compileScript(`(async () => { ${code} })()`)
                         await script.run(ctx, { timeout: 7500, promise: true })
