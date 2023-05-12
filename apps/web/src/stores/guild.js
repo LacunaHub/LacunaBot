@@ -51,6 +51,9 @@ export const useGuildStore = defineStore('guild', {
         channelsForum() {
             return this.channels.filter(i => ['GuildForum'].includes(i.type))
         },
+        channelsAnnouncement() {
+            return this.channels.filter(i => ['GuildNews'].includes(i.type))
+        },
         roles(state) {
             return state.guild.roles
         },

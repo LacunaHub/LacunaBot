@@ -40,6 +40,13 @@ const interfaces = {
                 }
             })
         },
+        updateTelegramSubscriptions(gid, options) {
+            return api.post(`/guilds/${gid}/subscriptions/telegram/${options.method}`, options.data, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
         updateTwitchSubscriptions(gid, options) {
             return api.post(`/guilds/${gid}/subscriptions/twitch/${options.method}`, options.data, {
                 headers: {
@@ -94,6 +101,13 @@ const interfaces = {
     },
 
     subscriptions: {
+        searchTelegramChannels(gid, options) {
+            return api.get(`/subscriptions/telegram/search?gid=${gid}&q=${encodeURI(options.query)}`, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
         searchTwitchChannels(gid, options) {
             return api.get(`/subscriptions/twitch/search?gid=${gid}&q=${encodeURI(options.query)}`, {
                 headers: {

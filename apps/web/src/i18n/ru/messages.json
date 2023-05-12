@@ -405,7 +405,10 @@
     "twitch_display_stream_preview": "Показывать предпросмотр стрима",
     "youtube_channel_name_title": "Название или идентификатор канала",
     "notifications_channel_title": "Канал для оповещений",
-    "notifications_text": "Текст оповещений"
+    "notifications_text": "Текст оповещений",
+    "telegram_help_note": "Для того, чтобы связать Telegram и Discord, необходимо добавить бота {botLink} в нужный канал, затем ввести его название в поле ниже.",
+    "mention_roles_title": "Упомянуть роли",
+    "crosspost_message_title": "Опубликовать сообщение"
   },
 
   "voice_roles": {

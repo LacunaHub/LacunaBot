@@ -391,7 +391,10 @@
     "twitch_display_stream_preview": "Show stream preview",
     "youtube_channel_name_title": "Name or channel identifier",
     "notifications_channel_title": "Notification channel",
-    "notifications_text": "Notification text"
+    "notifications_text": "Notification text",
+    "telegram_help_note": "To link Telegram and Discord, add the bot {botLink} to the desired channel and then enter its name in the field below.",
+    "mention_roles_title": "Mention roles",
+    "crosspost_message_title": "Crosspost message"
   },
   "voice_roles": {
     "add_voice_role": "@:add voice role",
