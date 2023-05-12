@@ -2,6 +2,7 @@ import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose'
 import { MySQLDriver, QuickDB } from 'quick.db'
 import Bills, { IBill } from './schemas/Bills'
 import Servers, { ServerDocument } from './schemas/Servers'
+import TelegramSubs from './schemas/TelegramSubs'
 import TwitchSubs, { ITwitchSub } from './schemas/TwitchSubs'
 import Users from './schemas/Users'
 import YouTubeSubs, { IYouTubeSub } from './schemas/YouTubeSubs'
@@ -78,6 +79,8 @@ export default {
             return await Servers.updateOne(filter, update, options)
         }
     },
+
+    telegramSubs: TelegramSubs,
 
     twitchSubs: {
         async create(doc: ITwitchSub) {

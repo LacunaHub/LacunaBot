@@ -4,6 +4,7 @@ import { Context, Next } from 'koa'
 import rawBodyParser from 'raw-body'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
+import { handleTelegramWebhook, searchChannels as searchTelegramChannels } from '../../../modules/Telegram'
 import { eventSubUnsubscribe, handleIncomingWebhook, searchChannels as searchTwitchChannels } from '../../../modules/Twitch'
 import { handleHubBubWebhook, searchChannels as searchYouTubeChannels } from '../../../modules/YouTube'
 import { convertXml2Json } from '../../utility/Utils'
@@ -15,9 +16,11 @@ const rateLimitMiddleware = createRateLimitMiddleware(5, 300000)
 
 router.get('/twitch/search', rateLimitMiddleware, authorize, searchTwitch)
 router.get('/youtube/search', rateLimitMiddleware, authorize, searchYouTube)
+router.get('/telegram/search', searchTelegram)
 router.post('/twitch/eventsub-webhook', eventSubAuthentication, eventSubWebhook)
 router.get('/youtube/hubbub-webhook', hubbubWebhookChallenge)
 router.post('/youtube/hubbub-webhook', hubbubWebhook)
+router.post('/telegram/webhook', telegramWebhook)
 
 async function searchTwitch(ctx: Context) {
     const guild_id = ctx.query.gid as string
@@ -57,6 +60,22 @@ async function searchYouTube(ctx: Context) {
 
     ctx.status = 200
     ctx.body = channels.filter(channel => !added.some(s => s.channel_id == channel.id))
+}
+
+async function searchTelegram(ctx: Context) {
+    const guild_id = ctx.query.gid as string
+    const query = ctx.query.q as string
+
+    if (!guild_id || !query) ctx.throw(400)
+
+    const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
+
+    if (!server || server.server.blocked) ctx.throw(404)
+
+    const channel = await searchTelegramChannels(query)
+
+    ctx.status = 200
+    ctx.body = channel ? [channel] : []
 }
 
 async function eventSubWebhook(ctx: Context) {
@@ -205,6 +224,25 @@ async function hubbubWebhook(ctx: Context) {
         publishedTimestamp,
         updatedTimestamp
     })
+
+    ctx.status = 204
+}
+
+async function telegramWebhook(ctx: Context) {
+    const tbSignature = ctx.request.headers['x-tb-signature'] as string,
+        data = ctx.request.body
+
+    if (!tbSignature) ctx.throw(403)
+
+    const [sigAlgorithm, sigHmac] = tbSignature.split('=')
+    const signature = crypto
+        .createHmac(sigAlgorithm, process.env.TELEGRAM_PUBLIC_BOT_HMAC_SECRET)
+        .update(`${data.channel_id}:${data.message_id}`)
+        .digest('hex')
+
+    if (sigHmac !== signature) ctx.throw(403)
+
+    handleTelegramWebhook(data)
 
     ctx.status = 204
 }

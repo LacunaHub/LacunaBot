@@ -29,6 +29,7 @@ router.post('/:guild_id/autovoices/:method', checkPermissions, updateAutoVoices)
 router.post('/:guild_id/custom-commands/:method', checkPermissions, updateCustomCommand)
 router.post('/:guild_id/interactive-messages/:method', checkPermissions, updateInteractiveMessages)
 router.post('/:guild_id/reactions/:method', checkPermissions, updateInteractiveReaction)
+router.post('/:guild_id/subscriptions/telegram/:method', checkPermissions, updateTelegramSubscription)
 router.post('/:guild_id/subscriptions/twitch/:method', checkPermissions, updateTwitchSubscriptions)
 router.post('/:guild_id/subscriptions/youtube/:method', checkPermissions, updateYouTubeSubscriptions)
 
@@ -358,6 +359,41 @@ async function updateInteractiveReaction(ctx: Context) {
 
             case 'delete':
                 response = await interfaces.deleteInteractiveReaction(server, data)
+                break
+
+            default:
+                throw new Error('UNKNOWN_METHOD')
+        }
+    } catch (err) {
+        ctx.throw(400, err.message)
+    }
+
+    ctx.status = 200
+    ctx.body = response
+}
+
+async function updateTelegramSubscription(ctx: Context) {
+    const guild_id: string = ctx.params.guild_id
+    const method: string = ctx.params.method
+    const data = ctx.request.body
+
+    const server = await db.servers.findOne({ _id: guild_id })
+    if (!server || server.server.blocked) ctx.throw(404)
+
+    let response: any
+
+    try {
+        switch (method) {
+            case 'create':
+                response = await interfaces.createTelegramSubscription(server, data)
+                break
+
+            case 'update':
+                response = await interfaces.updateTelegramSubscription(server, data)
+                break
+
+            case 'delete':
+                response = await interfaces.deleteTelegramSubscription(server, data)
                 break
 
             default:
