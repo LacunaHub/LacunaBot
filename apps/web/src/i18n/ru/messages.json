@@ -43,6 +43,7 @@
     "ignored_channels": "@:common.ignored @.lower:common.channels",
     "ignored_roles": "@:common.ignored @.lower:common.roles",
     "ignored_permissions": "@:common.ignored @.lower:common.permissions",
+    "select_file": "Выберите файл",
     "permissions_keys": {
       "ADMINISTRATOR": "Администратор",
       "CREATE_INSTANT_INVITE": "Создавать приглашение",
@@ -250,6 +251,8 @@
     "edit_custom_command": "@:edit команду",
     "import_command": "Импортировать команду",
     "export_command": "Экспортировать команду",
+    "publish_command": "Опубликовать команду",
+    "command_templates": "Шаблоны",
     "command_name_title": "Название команды",
     "command_description_title": "Описание команды",
     "command_options_title": "Аргументы команды",

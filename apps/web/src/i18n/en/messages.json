@@ -42,6 +42,7 @@
     "ignored_channels": "@:common.ignored @.lower:common.channels",
     "ignored_roles": "@:common.ignored @.lower:common.roles",
     "ignored_permissions": "@:common.ignored @.lower:common.permissions",
+    "select_file": "Select file",
     "permissions_keys": {
       "ADMINISTRATOR": "Administrator",
       "CREATE_INSTANT_INVITE": "Create instant invite",
@@ -244,6 +245,8 @@
     "edit_custom_command": "@:edit command",
     "import_command": "Import command",
     "export_command": "Export command",
+    "publish_command": "Publish command",
+    "command_templates": "Templates",
     "command_name_title": "Command name",
     "command_description_title": "Command description",
     "command_options_title": "Command arguments",

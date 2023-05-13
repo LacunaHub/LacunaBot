@@ -39,19 +39,14 @@
           <q-card-section v-if="mode === 'CREATE'">
             <div class="row q-col-gutter-md">
               <div class="col-12">
-                <div>
-                  {{ $t('custom_command.import_command') }}
-                </div>
-
-                <q-file
-                  v-model="commandFile"
-                  class="q-pt-sm"
-                  accept=".json"
-                  filled
-                  dense
-                  hide-bottom-space
-                  @update:model-value="onImport"
-                ></q-file>
+                <q-btn
+                  class="full-width"
+                  :label="$t('custom_command.import_command')"
+                  unelevated
+                  no-caps
+                  color="secondary"
+                  @click="importCommandDialog"
+                />
               </div>
             </div>
           </q-card-section>
@@ -397,11 +392,19 @@
               color="primary"
               @click="onConfirm"
             >
-              <q-list dense>
+              <q-list>
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
                       {{ $t('delete') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item clickable v-close-popup @click="onPublish" :disable="confirmLoading">
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('custom_command.publish_command') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -432,7 +435,6 @@ import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { interfaces } from 'src/boot/axios'
 import { discordAppCommandNameRegexp, customCommandComponentLimits } from 'src/utils/Constants'
-import { resolveCustomCommandJSON } from 'src/utils/Utils'
 import { event } from 'vue-gtag'
 import CustomCommandOption from './CustomCommandOption.vue'
 import CustomCommandActionReply from './CustomCommandActionReply.vue'
@@ -442,6 +444,7 @@ import CustomCommandActionForwardToCommand from './CustomCommandActionForwardToC
 import CustomCommandConditionCompareValues from './CustomCommandConditionCompareValues.vue'
 import CustomCommandActionModifyWallet from './CustomCommandActionModifyWallet.vue'
 import CustomCommandActionExecuteCode from './CustomCommandActionExecuteCode.vue'
+import CustomCommandImport from './CustomCommandImport.vue'
 
 export default defineComponent({
   name: 'CustomCommand',
@@ -451,7 +454,7 @@ export default defineComponent({
   props: {
     commandProp: {
       type: Object,
-      required: true
+      default: null
     }
   },
 
@@ -705,6 +708,17 @@ export default defineComponent({
 
       return components.length >= customCommandComponentLimits[subType]
     },
+    importCommandDialog() {
+      this.$q
+        .dialog({
+          component: CustomCommandImport
+        })
+        .onOk(payload => {
+          const { command } = payload
+
+          this.command = command
+        })
+    },
     optionDialog(opt) {
       this.$q
         .dialog({
@@ -754,25 +768,21 @@ export default defineComponent({
           this.command.components[index] = component
         })
     },
-    onImport(file) {
-      if (this.mode !== 'CREATE') return
+    onPublish() {
+      if (this.mode !== 'UPDATE' || !this.isValid) return
 
-      const reader = new FileReader()
+      this.confirmLoading = true
 
-      reader.onload = e => {
-        let json
-
-        try {
-          json = JSON.parse(e.target.result)
-        } catch (err) {
-          json = null
-        }
-
-        this.command = resolveCustomCommandJSON(json)
-        event('import_custom_command', { event_category: 'utility' })
-      }
-
-      reader.readAsText(file)
+      return interfaces.common
+        .publishCustomCommand(this.guild._id, { data: this.command })
+        .then(() => {
+          event('publish_custom_command', { event_category: 'utility' })
+        })
+        .catch(err => {
+          this.confirmError = err.response.data
+          console.log(err)
+        })
+        .finally(() => (this.confirmLoading = false))
     },
     onExport() {
       if (this.mode !== 'UPDATE') return
