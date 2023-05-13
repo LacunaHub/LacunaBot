@@ -42,6 +42,7 @@
     "ignored_channels": "@:common.ignored @.lower:common.channels",
     "ignored_roles": "@:common.ignored @.lower:common.roles",
     "ignored_permissions": "@:common.ignored @.lower:common.permissions",
+    "select_file": "Select file",
     "permissions_keys": {
       "ADMINISTRATOR": "Administrator",
       "CREATE_INSTANT_INVITE": "Create instant invite",
@@ -184,7 +185,8 @@
     "state": "State",
     "docs": "Docs",
     "patrons": "Patrons",
-    "help": "Help"
+    "help": "Community",
+    "login": "Login"
   },
   "lacuna_diamond": {
     "has_subscription": "This server already has bonuses that expire on {date}, but you can prolong them",
@@ -243,6 +245,8 @@
     "edit_custom_command": "@:edit command",
     "import_command": "Import command",
     "export_command": "Export command",
+    "publish_command": "Publish command",
+    "command_templates": "Templates",
     "command_name_title": "Command name",
     "command_description_title": "Command description",
     "command_options_title": "Command arguments",
@@ -261,7 +265,8 @@
       "SEND_MESSAGE": "Send message",
       "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
       "FORWARD_TO_COMMAND": "Forward to command",
-      "MODIFY_WALLET": "Modify wallet"
+      "MODIFY_WALLET": "Modify wallet",
+      "EXECUTE_CODE": "Execute code"
     },
     "cv_operator_title": "Operator",
     "cv_operators": {
@@ -389,7 +394,10 @@
     "twitch_display_stream_preview": "Show stream preview",
     "youtube_channel_name_title": "Name or channel identifier",
     "notifications_channel_title": "Notification channel",
-    "notifications_text": "Notification text"
+    "notifications_text": "Notification text",
+    "telegram_help_note": "To link Telegram and Discord, add the bot {botLink} to the desired channel and then enter its name in the field below.",
+    "mention_roles_title": "Mention roles",
+    "crosspost_message_title": "Crosspost message"
   },
   "voice_roles": {
     "add_voice_role": "@:add voice role",

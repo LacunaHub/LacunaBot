@@ -250,6 +250,21 @@ export function resolveCustomCommandJSON(data) {
             }
 
             if (component.type === 'ACTION') {
+                if (component.action?.type === 'EXECUTE_CODE') {
+                    json.components.push({
+                        type: component.type,
+                        action: {
+                            type: component.action.type,
+                            execute_code: {
+                                code:
+                                    typeof component.action.execute_code?.code === 'string'
+                                        ? component.action.execute_code.code
+                                        : ''
+                            }
+                        }
+                    })
+                }
+
                 if (component.action?.type === 'REPLY') {
                     json.components.push({
                         type: component.type,

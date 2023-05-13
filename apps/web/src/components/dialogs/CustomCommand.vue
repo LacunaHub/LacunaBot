@@ -39,19 +39,14 @@
           <q-card-section v-if="mode === 'CREATE'">
             <div class="row q-col-gutter-md">
               <div class="col-12">
-                <div>
-                  {{ $t('custom_command.import_command') }}
-                </div>
-
-                <q-file
-                  v-model="commandFile"
-                  class="q-pt-sm"
-                  accept=".json"
-                  filled
-                  dense
-                  hide-bottom-space
-                  @update:model-value="onImport"
-                ></q-file>
+                <q-btn
+                  class="full-width"
+                  :label="$t('custom_command.import_command')"
+                  unelevated
+                  no-caps
+                  color="secondary"
+                  @click="importCommandDialog"
+                />
               </div>
             </div>
           </q-card-section>
@@ -286,6 +281,22 @@
                           {{ $t(`custom_command.component_names.${action}`) }}
                         </q-item-label>
                       </q-item-section>
+
+                      <q-item-section v-if="action === 'EXECUTE_CODE'" avatar side>
+                        <q-avatar size="24px">
+                          <img src="~assets/lacuna-diamond.svg" />
+
+                          <q-tooltip
+                            class="bg-black rounded-lg text-body2"
+                            anchor="top middle"
+                            self="bottom middle"
+                            transition-show=""
+                            transition-hide=""
+                          >
+                            Only with Lacuna Diamond
+                          </q-tooltip>
+                        </q-avatar>
+                      </q-item-section>
                     </q-item>
                   </q-list>
                 </q-btn-dropdown>
@@ -304,6 +315,22 @@
                           $t(`custom_command.component_names.${component.condition?.type ?? component.action?.type}`)
                         }}
                       </q-item-label>
+                    </q-item-section>
+
+                    <q-item-section v-if="component.action?.type === 'EXECUTE_CODE'" avatar side>
+                      <q-avatar size="24px">
+                        <img src="~assets/lacuna-diamond.svg" />
+
+                        <q-tooltip
+                          class="bg-black rounded-lg text-body2"
+                          anchor="top middle"
+                          self="bottom middle"
+                          transition-show=""
+                          transition-hide=""
+                        >
+                          Only with Lacuna Diamond
+                        </q-tooltip>
+                      </q-avatar>
                     </q-item-section>
                   </q-item>
 
@@ -365,11 +392,19 @@
               color="primary"
               @click="onConfirm"
             >
-              <q-list dense>
+              <q-list>
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
                       {{ $t('delete') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item clickable v-close-popup @click="onPublish" :disable="confirmLoading">
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('custom_command.publish_command') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -400,7 +435,6 @@ import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { interfaces } from 'src/boot/axios'
 import { discordAppCommandNameRegexp, customCommandComponentLimits } from 'src/utils/Constants'
-import { resolveCustomCommandJSON } from 'src/utils/Utils'
 import { event } from 'vue-gtag'
 import CustomCommandOption from './CustomCommandOption.vue'
 import CustomCommandActionReply from './CustomCommandActionReply.vue'
@@ -409,6 +443,8 @@ import CustomCommandActionModifyRoles from './CustomCommandActionModifyRoles.vue
 import CustomCommandActionForwardToCommand from './CustomCommandActionForwardToCommand.vue'
 import CustomCommandConditionCompareValues from './CustomCommandConditionCompareValues.vue'
 import CustomCommandActionModifyWallet from './CustomCommandActionModifyWallet.vue'
+import CustomCommandActionExecuteCode from './CustomCommandActionExecuteCode.vue'
+import CustomCommandImport from './CustomCommandImport.vue'
 
 export default defineComponent({
   name: 'CustomCommand',
@@ -418,7 +454,7 @@ export default defineComponent({
   props: {
     commandProp: {
       type: Object,
-      required: true
+      default: null
     }
   },
 
@@ -517,7 +553,7 @@ export default defineComponent({
   data() {
     return {
       conditions: ['COMPARE_VALUES'],
-      actions: ['REPLY', 'SEND_MESSAGE', 'MODIFY_ROLES', 'FORWARD_TO_COMMAND', 'MODIFY_WALLET']
+      actions: ['EXECUTE_CODE', 'REPLY', 'SEND_MESSAGE', 'MODIFY_ROLES', 'FORWARD_TO_COMMAND', 'MODIFY_WALLET']
     }
   },
 
@@ -638,6 +674,19 @@ export default defineComponent({
           }
         })
       }
+
+      if (type === 'EXECUTE_CODE') {
+        this.command.components = []
+        this.command.components.push({
+          type: 'ACTION',
+          action: {
+            type,
+            execute_code: {
+              code: ''
+            }
+          }
+        })
+      }
     },
     moveComponent(from, to) {
       const component = this.command.components[from]
@@ -650,12 +699,25 @@ export default defineComponent({
       this.command.components.splice(position, 0, component)
     },
     isComponentLimitReached(type) {
+      if (this.command.components.some(i => i.action?.type === 'EXECUTE_CODE')) return true
+
       const [componentType, subType] = type.split(':')
       const components = this.command.components.filter(
         i => i.type === componentType && (i.condition?.type === subType || i.action?.type === subType)
       )
 
       return components.length >= customCommandComponentLimits[subType]
+    },
+    importCommandDialog() {
+      this.$q
+        .dialog({
+          component: CustomCommandImport
+        })
+        .onOk(payload => {
+          const { command } = payload
+
+          this.command = command
+        })
     },
     optionDialog(opt) {
       this.$q
@@ -688,6 +750,7 @@ export default defineComponent({
       if (component.action?.type === 'MODIFY_ROLES') dialogComponent = CustomCommandActionModifyRoles
       if (component.action?.type === 'FORWARD_TO_COMMAND') dialogComponent = CustomCommandActionForwardToCommand
       if (component.action?.type === 'MODIFY_WALLET') dialogComponent = CustomCommandActionModifyWallet
+      if (component.action?.type === 'EXECUTE_CODE') dialogComponent = CustomCommandActionExecuteCode
 
       if (component.condition?.type === 'COMPARE_VALUES') dialogComponent = CustomCommandConditionCompareValues
 
@@ -705,25 +768,21 @@ export default defineComponent({
           this.command.components[index] = component
         })
     },
-    onImport(file) {
-      if (this.mode !== 'CREATE') return
+    onPublish() {
+      if (this.mode !== 'UPDATE' || !this.isValid) return
 
-      const reader = new FileReader()
+      this.confirmLoading = true
 
-      reader.onload = e => {
-        let json
-
-        try {
-          json = JSON.parse(e.target.result)
-        } catch (err) {
-          json = null
-        }
-
-        this.command = resolveCustomCommandJSON(json)
-        event('import_custom_command', { event_category: 'utility' })
-      }
-
-      reader.readAsText(file)
+      return interfaces.common
+        .publishCustomCommand(this.guild._id, { data: this.command })
+        .then(() => {
+          event('publish_custom_command', { event_category: 'utility' })
+        })
+        .catch(err => {
+          this.confirmError = err.response.data
+          console.log(err)
+        })
+        .finally(() => (this.confirmLoading = false))
     },
     onExport() {
       if (this.mode !== 'UPDATE') return

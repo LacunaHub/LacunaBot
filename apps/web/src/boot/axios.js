@@ -11,6 +11,29 @@ import { Cookies } from 'quasar'
 const api = axios.create({ baseURL: process.env.API })
 
 const interfaces = {
+    common: {
+        getCustomCommands() {
+            return api.get(`/common/custom-commands`, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
+        getCustomCommand(commandId, guildId) {
+            return api.get(`/common/custom-commands/${commandId}?guild_id=${guildId}`, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
+        publishCustomCommand(guildId, options) {
+            return api.post(`/common/custom-commands?guild_id=${guildId}`, options.data, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        }
+    },
     guilds: {
         getSettings(gid) {
             return api.get(`/guilds/${gid}/settings`, {
@@ -35,6 +58,13 @@ const interfaces = {
         },
         updateCustomCommands(gid, options) {
             return api.post(`/guilds/${gid}/custom-commands/${options.method}`, options.data, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
+        updateTelegramSubscriptions(gid, options) {
+            return api.post(`/guilds/${gid}/subscriptions/telegram/${options.method}`, options.data, {
                 headers: {
                     Authorization: Cookies.get('access_token')
                 }
@@ -94,6 +124,13 @@ const interfaces = {
     },
 
     subscriptions: {
+        searchTelegramChannels(gid, options) {
+            return api.get(`/subscriptions/telegram/search?gid=${gid}&q=${encodeURI(options.query)}`, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
         searchTwitchChannels(gid, options) {
             return api.get(`/subscriptions/twitch/search?gid=${gid}&q=${encodeURI(options.query)}`, {
                 headers: {

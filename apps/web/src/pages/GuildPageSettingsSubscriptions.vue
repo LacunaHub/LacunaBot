@@ -4,6 +4,51 @@
       <q-card class="rounded-lg bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
+            <q-item-label class="text-subtitle1">Telegram</q-item-label>
+          </q-item-section>
+
+          <q-item-section side top>
+            <div>{{ guild.modules.subscriptions.telegram.length }}/{{ guild.premium.available ? '10' : '1' }}</div>
+          </q-item-section>
+        </q-item>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div
+              v-for="telegram in guild.modules.subscriptions.telegram"
+              :key="telegram.channel_id"
+              class="col-12 col-sm-6 col-md-4"
+            >
+              <q-card class="rounded-lg bg-dark-2" flat>
+                <q-item class="rounded-lg" clickable v-ripple @click="telegramDialog(telegram)">
+                  <q-item-section>
+                    <q-item-label class="ellipsis"> @{{ telegram.channel_username }} </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-card>
+            </div>
+
+            <div v-if="guild.modules.subscriptions.telegram.length < 10" class="col-12">
+              <q-btn
+                @click="
+                  !guild.premium.available && guild.modules.subscriptions.telegram.length >= 1
+                    ? lacunaDiamondDialog()
+                    : telegramDialog()
+                "
+                class="full-width dashed-border"
+                icon="add"
+                flat
+              ></q-btn>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <div class="col-12">
+      <q-card class="rounded-lg bg-dark-1" flat>
+        <q-item class="q-py-md">
+          <q-item-section>
             <q-item-label class="text-subtitle1">Twitch</q-item-label>
           </q-item-section>
 
@@ -114,6 +159,7 @@ import { defineComponent } from 'vue'
 import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import SubscriptionsTwitch from 'src/components/dialogs/SubscriptionsTwitch.vue'
 import SubscriptionsYouTube from 'src/components/dialogs/SubscriptionsYouTube.vue'
+import SubscriptionsTelegram from 'src/components/dialogs/SubscriptionsTelegram.vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsSubscriptions',
@@ -131,6 +177,35 @@ export default defineComponent({
       this.$q.dialog({
         component: LacunaDiamond
       })
+    },
+    telegramDialog(config) {
+      this.$q
+        .dialog({
+          component: SubscriptionsTelegram,
+
+          componentProps: config ? { telegramProp: config } : null
+        })
+        .onOk(payload => {
+          const { mode, telegram } = payload
+
+          if (mode === 'CREATE') {
+            this.guild.modules.subscriptions.telegram.push(telegram)
+          }
+
+          if (mode === 'UPDATE') {
+            const index = this.guild.modules.subscriptions.telegram.findIndex(i => i.channel_id === telegram.channel_id)
+
+            this.guild.modules.subscriptions.telegram[index] = telegram
+          }
+
+          if (mode === 'DELETE') {
+            const index = this.guild.modules.subscriptions.telegram.findIndex(
+              i => i.broadcaster_id === telegram.channel_id
+            )
+
+            this.guild.modules.subscriptions.telegram.splice(index, 1)
+          }
+        })
     },
     twitchDialog(config) {
       this.$q

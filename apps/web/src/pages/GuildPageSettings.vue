@@ -214,7 +214,7 @@
 </template>
 
 <script>
-import { defineComponent, toRaw } from 'vue'
+import { defineComponent, toRaw, ref } from 'vue'
 import { useGuildStore } from 'src/stores/guild'
 import { useUserStore } from 'src/stores/user'
 import GuildCardMini from 'src/components/GuildCardMini.vue'
@@ -237,8 +237,26 @@ export default defineComponent({
   setup() {
     const guild = useGuildStore()
     const user = useUserStore()
+    const title = ref(null)
 
-    return { guild, user }
+    useMeta(() => {
+      return {
+        title: title.value,
+        meta: {
+          description: {
+            name: 'description',
+            content:
+              "Configure and customize Lacuna's settings for your guild. Explore a range of options and features to tailor the bot's behavior according to your server's needs."
+          },
+          keywords: {
+            name: 'keywords',
+            content: 'guild settings, bot configuration, customization, features'
+          }
+        }
+      }
+    })
+
+    return { guild, user, title }
   },
 
   components: {
@@ -370,15 +388,15 @@ export default defineComponent({
   async mounted() {
     await this.getSettings()
 
-    useMeta({
-      title: this.guild.guild.name
-    })
+    this.title = this.guild.guild.name
 
     this.$watch(
       'guildClone',
       (value, before) => {
         if (
           JSON.stringify(before.modules.custom_commands) !== JSON.stringify(value.modules.custom_commands) ||
+          JSON.stringify(before.modules.subscriptions.telegram) !==
+            JSON.stringify(value.modules.subscriptions.telegram) ||
           JSON.stringify(before.modules.subscriptions.twitch) !== JSON.stringify(value.modules.subscriptions.twitch) ||
           JSON.stringify(before.modules.subscriptions.youtube) !==
             JSON.stringify(value.modules.subscriptions.youtube) ||

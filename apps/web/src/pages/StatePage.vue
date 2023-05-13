@@ -370,7 +370,18 @@ export default defineComponent({
 
   setup() {
     useMeta({
-      title: 'State'
+      title: 'State',
+      meta: {
+        description: {
+          name: 'description',
+          content:
+            'Stay informed about the status and statistics of Lacuna. Get real-time updates on uptime, performance, and service availability.'
+        },
+        keywords: {
+          name: 'keywords',
+          content: 'status page, service stats, uptime, performance'
+        }
+      }
     })
   },
 
