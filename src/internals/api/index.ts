@@ -1,12 +1,13 @@
 import koaCors from '@koa/cors'
 import Koa from 'koa'
-import koaBodyParser from 'koa-bodyparser'
+import koaBody from 'koa-body'
 import koaJson from 'koa-json'
 import koaMorgan from 'koa-morgan'
 import { connect } from 'mongoose'
 import { QuickDB } from 'quick.db'
 import database from '../../database'
 import authorize from './routes/authorize'
+import common from './routes/common'
 import guilds from './routes/guilds'
 import payments from './routes/payments'
 import state from './routes/state'
@@ -21,7 +22,7 @@ database.mysql.connect().then(() => {
     database.qdb = new QuickDB({ driver: database.mysql })
 })
 
-app.use(koaBodyParser())
+app.use(koaBody({ jsonLimit: '50mb' }))
 app.use(koaJson())
 app.use(
     koaMorgan('[API: :date[iso]] – :req[x-forwarded-for] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', {
@@ -36,6 +37,7 @@ app.keys = ['discord_oauth_state']
 app.use(passKnownReferrers)
 
 app.use(authorize.routes()).use(authorize.allowedMethods())
+app.use(common.routes()).use(common.allowedMethods())
 app.use(guilds.routes()).use(guilds.allowedMethods())
 app.use(payments.routes()).use(payments.allowedMethods())
 app.use(state.routes()).use(state.allowedMethods())

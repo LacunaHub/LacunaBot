@@ -3,6 +3,7 @@ import { updateSettings } from './Commons'
 import { createCustomCommand, deleteCustomCommand, updateCustomCommand } from './CustomCommands'
 import { createInteractiveMessage, deleteInteractiveMessage, updateInteractiveMessage } from './InteractiveMessages'
 import { createInteractiveReaction, deleteInteractiveReaction, updateInteractiveReaction } from './InteractiveReactions'
+import { createTelegramSubscription, deleteTelegramSubscription, updateTelegramSubscription } from './TelegramSubscriptions'
 import { createTwitchSubscription, deleteTwitchSubscription, updateTwitchSubscription } from './TwitchSubscriptions'
 import { createYouTubeSubscription, deleteYouTubeSubscription, updateYouTubeSubscription } from './YouTubeSubscriptions'
 
@@ -20,6 +21,9 @@ export default {
     createInteractiveReaction,
     updateInteractiveReaction,
     deleteInteractiveReaction,
+    createTelegramSubscription,
+    deleteTelegramSubscription,
+    updateTelegramSubscription,
     createTwitchSubscription,
     updateTwitchSubscription,
     deleteTwitchSubscription,

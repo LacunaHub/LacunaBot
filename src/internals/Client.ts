@@ -10,7 +10,7 @@ const client = new Lacuna({
         status: 'online',
         activities: [
             {
-                name: `voidlacuna.ru (v${version.split('.').slice(0, 2).join('.')})`
+                name: `lacunabot.com (v${version.split('.').slice(0, 2).join('.')})`
             }
         ]
     },

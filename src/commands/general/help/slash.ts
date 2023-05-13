@@ -41,8 +41,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             new ButtonBuilder()
                 .setStyle(ButtonStyle.Link)
                 .setLabel(t('commands.help.text_dashboard_link'))
-                .setURL(`https://www.voidlacuna.ru/guilds/${interaction.guildId}/settings`),
-            new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('commands.help.text_docs_link')).setURL('https://docs.voidlacuna.ru')
+                .setURL(`${process.env.WEBSITE_URL}/guilds/${interaction.guildId}/settings`),
+            new ButtonBuilder()
+                .setStyle(ButtonStyle.Link)
+                .setLabel(t('commands.help.text_docs_link'))
+                .setURL(`https://docs.${process.env.WEBSITE_DOMAIN}`)
         )
 
         if (categories.general.size)
