@@ -73,9 +73,10 @@ async function searchTelegram(ctx: Context) {
     if (!server || server.server.blocked) ctx.throw(404)
 
     const channel = await searchTelegramChannels(query)
+    const added = server.modules.subscriptions.telegram.some(i => i.channel_id === channel.id)
 
     ctx.status = 200
-    ctx.body = channel ? [channel] : []
+    ctx.body = channel && !added ? [channel] : []
 }
 
 async function eventSubWebhook(ctx: Context) {
