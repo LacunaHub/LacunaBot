@@ -206,13 +206,15 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
     return true
 }
 
-export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument, channel: VoiceChannel) {
+export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument, state: VoiceState, channel: VoiceChannel) {
     const autovoice = server.modules.voice_manager.autovoices.find(i => i.children?.some(c => c.channel_id == channel?.id))
 
     if (autovoice && channel.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)) {
         const child = autovoice.children?.find(c => c.channel_id == channel.id)
 
-        if (child && !channel.members.size) {
+        if (!child) return false
+
+        if (!channel.members.size) {
             await self.db.servers.updateOne(
                 { _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id },
                 {
@@ -232,7 +234,7 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
                 guild: { id: channel.guild.id, name: channel.guild.name },
                 target: { id: channel.id, name: channel.name }
             })
-        } else if (child && channel.members.size) {
+        } else if (channel.members.size && state.member.id === child.owner_id) {
             const childIndex: number = autovoice.children?.indexOf(child)
 
             await self.db.servers.updateOne(

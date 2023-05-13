@@ -42,7 +42,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
     await levelsVoiceUnassign(self, server, state, channel)
     await economyVoiceUnassign(self, server, state, channel)
 
-    await deleteTemporaryVoice(self, server, channel)
+    await deleteTemporaryVoice(self, server, state, channel)
     await VoiceDisconnect(self, server, state, channel)
 
     return true
