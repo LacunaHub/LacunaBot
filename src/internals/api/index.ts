@@ -7,6 +7,7 @@ import { connect } from 'mongoose'
 import { QuickDB } from 'quick.db'
 import database from '../../database'
 import authorize from './routes/authorize'
+import common from './routes/common'
 import guilds from './routes/guilds'
 import payments from './routes/payments'
 import state from './routes/state'
@@ -36,6 +37,7 @@ app.keys = ['discord_oauth_state']
 app.use(passKnownReferrers)
 
 app.use(authorize.routes()).use(authorize.allowedMethods())
+app.use(common.routes()).use(common.allowedMethods())
 app.use(guilds.routes()).use(guilds.allowedMethods())
 app.use(payments.routes()).use(payments.allowedMethods())
 app.use(state.routes()).use(state.allowedMethods())

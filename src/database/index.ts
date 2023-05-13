@@ -1,6 +1,7 @@
 import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose'
 import { MySQLDriver, QuickDB } from 'quick.db'
 import Bills, { IBill } from './schemas/Bills'
+import CustomCommands from './schemas/CustomCommands'
 import Servers, { ServerDocument } from './schemas/Servers'
 import TelegramSubs from './schemas/TelegramSubs'
 import TwitchSubs, { ITwitchSub } from './schemas/TwitchSubs'
@@ -42,6 +43,8 @@ export default {
             return await Bills.updateOne(filter, update, options)
         }
     },
+
+    customCommands: CustomCommands,
 
     servers: {
         async create(doc: ServerDocument) {
