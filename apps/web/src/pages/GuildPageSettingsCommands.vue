@@ -46,7 +46,7 @@
           </q-item-section>
         </q-item>
 
-        <q-card-section>
+        <!-- <q-card-section>
           <q-banner class="rounded-lg bg-dark-2" dense>
             <span>
               {{ $t('pages.guild.cm_app_commands_refresh') }}
@@ -70,7 +70,7 @@
               </q-btn>
             </template>
           </q-banner>
-        </q-card-section>
+        </q-card-section> -->
 
         <q-card-section>
           <div class="row q-col-gutter-md">
