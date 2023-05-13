@@ -30,7 +30,7 @@
     "dotenv": "8.2.0",
     "erela.js": "2.4.0",
     "erlpack": "github:discord/erlpack",
-    "isolated-vm": "4.4.2",
+    "isolated-vm": "4.5.0",
     "koa": "2.13.4",
     "koa-body": "6.0.1",
     "koa-bodyparser": "4.4.0",
