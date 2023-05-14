@@ -409,7 +409,8 @@
     "youtube_channel_name_title": "Название или идентификатор канала",
     "notifications_channel_title": "Канал для оповещений",
     "notifications_text": "Текст оповещений",
-    "telegram_help_note": "Для того, чтобы связать Telegram и Discord, необходимо добавить бота {botLink} в нужный канал, затем ввести его название в поле ниже.",
+    "telegram_help_note": "Для того, чтобы связать Telegram и Discord, необходимо добавить бота {botLink} в нужный канал, затем ввести его название или идентификатор в поле ниже.",
+    "telegram_channel_name_subtitle": "Уникальный идентификатор или имя выбранного канала (в формате {'@'}channelusername)",
     "mention_roles_title": "Упомянуть роли",
     "crosspost_message_title": "Опубликовать сообщение"
   },
