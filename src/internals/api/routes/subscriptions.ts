@@ -132,7 +132,7 @@ function eventSubAuthentication(ctx: Context, next: Next) {
 
     const signature = crypto
         .createHmac('sha256', process.env.TWITCH_SIGNING_SECRET)
-        .update(messageId + messageTimestamp + ctx.request.rawBody)
+        .update(messageId + messageTimestamp + JSON.stringify(ctx.request.body))
         .digest('hex')
 
     if (messageSignature == `sha256=${signature}`) next()
