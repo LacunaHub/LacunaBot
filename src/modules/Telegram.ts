@@ -10,7 +10,9 @@ const telegramBaseApiUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_P
 const [telegramBotId] = process.env.TELEGRAM_PUBLIC_BOT_TOKEN.split(':')
 
 export async function searchChannels(query: string) {
-    query = query.startsWith('@') ? query : `@${query}`
+    if (isNaN(query as any)) {
+        query = query.startsWith('@') ? query : `@${query}`
+    }
 
     try {
         const getChatResponse = await fetch(`${telegramBaseApiUrl}/getChat?chat_id=${query}`)

@@ -180,17 +180,6 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
     const { levels } = server.modules
 
     if (!levels.voice) return false
-
-    const hasRestrictions = hasRestrictedPermissions({
-        channel: state.channel,
-        roles: state.member.roles.cache,
-        allowedChannels: levels.allowed.channels,
-        allowedRoles: levels.allowed.roles,
-        blockedChannels: levels.blocked.channels,
-        blockedRoles: levels.blocked.roles
-    })
-
-    if (hasRestrictions) return false
     if (state.guild.afkChannelId === state.channelId) return false
 
     const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
@@ -198,6 +187,17 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
     if (members.size < 2) return false
 
     for (const [_, member] of members) {
+        const hasRestrictions = hasRestrictedPermissions({
+            channel: state.channel,
+            roles: member.roles.cache,
+            allowedChannels: levels.allowed.channels,
+            allowedRoles: levels.allowed.roles,
+            blockedChannels: levels.blocked.channels,
+            blockedRoles: levels.blocked.roles
+        })
+
+        if (hasRestrictions) continue
+
         let user = await self.db.users.findOne({ _id: member.id })
 
         if (!user) {
