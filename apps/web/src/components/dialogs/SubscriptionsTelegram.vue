@@ -42,6 +42,10 @@
               {{ $t('subscriptions.twitch_channel_name_title') }}
             </div>
 
+            <div v-if="mode === 'CREATE'" class="text--secondary">
+              {{ $t('subscriptions.telegram_channel_name_subtitle') }}
+            </div>
+
             <q-select
               v-if="mode === 'CREATE'"
               v-model="telegram.channel"
