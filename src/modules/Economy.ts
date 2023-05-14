@@ -127,66 +127,64 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
 
     const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
-    if (members.size > 1) {
-        for (const [, member] of members) {
-            let user = await self.db.users.findOne({ _id: member.id })
+    if (members.size < 2) return false
 
-            if (!user) {
-                user = await self.db.users.create({
-                    _id: member.id,
-                    user: {
-                        username: member.user.username,
-                        discriminator: member.user.discriminator,
-                        avatar: member.user.avatar,
-                        flags: member.user.flags?.bitfield ?? 0
-                    }
-                } as any)
-            }
+    for (const [, member] of members) {
+        let user = await self.db.users.findOne({ _id: member.id })
 
-            let wallet = user.activities.wallets.find(i => i.guild_id == member.guild.id)
-
-            if (!wallet) {
-                wallet = {
-                    guild_id: member.guild.id,
-                    currencies: [],
-                    transactions: [],
-                    activity: {
-                        last_message_at: 0,
-                        voice_connected_at: 0
-                    }
+        if (!user) {
+            user = await self.db.users.create({
+                _id: member.id,
+                user: {
+                    username: member.user.username,
+                    discriminator: member.user.discriminator,
+                    avatar: member.user.avatar,
+                    flags: member.user.flags?.bitfield ?? 0
                 }
-
-                await self.db.users.updateOne(
-                    { _id: member.id },
-                    {
-                        $push: { 'activities.wallets': wallet as never }
-                    }
-                )
-            }
-
-            if (!wallet.activity.voice_connected_at || Date.now() - wallet.activity.voice_connected_at > 36_000_000) {
-                await self.db.users.updateOne(
-                    { _id: member.id, 'activities.wallets.guild_id': member.guild.id },
-                    {
-                        $set: {
-                            'activities.wallets.$.activity.voice_connected_at': Date.now()
-                        }
-                    }
-                )
-            }
+            } as any)
         }
 
-        self.emit('moduleExecution', {
-            module: 'Economy',
-            category: 'VoiceAssign',
-            guild: { id: state.guild.id, name: state.guild.name },
-            target: { id: state.id, name: state.member.user.tag }
-        })
+        let wallet = user.activities.wallets.find(i => i.guild_id == member.guild.id)
 
-        return true
+        if (!wallet) {
+            wallet = {
+                guild_id: member.guild.id,
+                currencies: [],
+                transactions: [],
+                activity: {
+                    last_message_at: 0,
+                    voice_connected_at: 0
+                }
+            }
+
+            await self.db.users.updateOne(
+                { _id: member.id },
+                {
+                    $push: { 'activities.wallets': wallet as never }
+                }
+            )
+        }
+
+        if (!wallet.activity.voice_connected_at || Date.now() - wallet.activity.voice_connected_at > 36_000_000) {
+            await self.db.users.updateOne(
+                { _id: member.id, 'activities.wallets.guild_id': member.guild.id },
+                {
+                    $set: {
+                        'activities.wallets.$.activity.voice_connected_at': Date.now()
+                    }
+                }
+            )
+        }
     }
 
-    return false
+    self.emit('moduleExecution', {
+        module: 'Economy',
+        category: 'VoiceAssign',
+        guild: { id: state.guild.id, name: state.guild.name },
+        target: { id: state.id, name: state.member.user.tag }
+    })
+
+    return true
 }
 
 export async function voiceUnassign(self: Lacuna, server: ServerDocument, state: VoiceState, channel: BaseGuildVoiceChannel) {
