@@ -230,6 +230,7 @@ import activitiesImg from 'src/assets/activities.svg'
 import bellImg from 'src/assets/bell.svg'
 import karaokeImg from 'src/assets/karaoke.svg'
 import layersImg from 'src/assets/layers.svg'
+import UserSurvey from 'src/components/dialogs/UserSurvey.vue'
 
 export default defineComponent({
   name: 'GuildPageSettings',
@@ -418,6 +419,33 @@ export default defineComponent({
     )
 
     this.pageLoading = false
+
+    if (this.guild.change_log.length) {
+      const userSurveyRemindAfter = this.$q.localStorage.getItem('user-survey-remind-after')
+
+      if (!userSurveyRemindAfter || (typeof userSurveyRemindAfter === 'number' && Date.now() > userSurveyRemindAfter)) {
+        this.$q
+          .dialog({
+            component: UserSurvey
+          })
+          .onOk(() => {
+            const now = new Date()
+
+            this.$q.notify({
+              message: this.$t('user_survey.survey_submitted'),
+              classes: 'rounded-lg q-notification-custom',
+              color: 'black',
+              icon: 'done',
+              iconColor: 'positive',
+              timeout: 5000
+            })
+            this.$q.localStorage.set('user-survey-remind-after', now.setMonth(now.getMonth() + 6))
+          })
+          .onCancel(() => {
+            this.$q.localStorage.set('user-survey-remind-after', Date.now() + 1000 * 60 * 60 * 24 * 3)
+          })
+      }
+    }
   }
 })
 </script>

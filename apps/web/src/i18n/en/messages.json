@@ -17,6 +17,7 @@
   "none": "None",
   "try_again": "Try again",
   "support_server": "Support server",
+  "remind_later": "Remind later",
   "common": {
     "channel": "Channel",
     "channels": "Channels",
@@ -208,6 +209,13 @@
     "dnb_step_4": "After that, click on the \"Check\" button below and bonuses will be available to you",
     "dnb_bonuses_info": "Bonuses will be available as long as you are a support server booster. You can only activate bonuses for one server.",
     "check": "Check"
+  },
+  "user_survey": {
+    "it_would_help_us": "It would help us if you could take 10 seconds of your time to rate your experience with us.",
+    "how_satisfied": "How satisfied are you with the bot?",
+    "how_many_members": "How many members are on your server?",
+    "tell_us_more": "Tell us more about your experience",
+    "survey_submitted": "Thanks! You help us become better."
   },
   "message_editor": {
     "message_embed": "Embed message",

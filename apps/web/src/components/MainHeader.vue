@@ -1,7 +1,15 @@
 <template>
   <q-header class="bg-black">
     <q-toolbar class="q-py-xs q-px-md">
-      <q-btn v-if="$q.screen.lt.md" dense flat @click="toggleMobileNav">
+      <q-btn
+        v-if="$q.screen.lt.md"
+        dense
+        flat
+        :style="{
+          'margin-right': user.access_token ? '' : '62px'
+        }"
+        @click="toggleMobileNav"
+      >
         <q-icon name="menu" size="28px"></q-icon>
       </q-btn>
 
@@ -49,7 +57,7 @@
 
       <q-separator class="gt-sm" spaced="lg" inset vertical></q-separator>
 
-      <q-btn v-if="!user.access_token" flat to="/authorize">
+      <q-btn v-if="!user.access_token" class="q-px-sm" flat to="/authorize">
         {{ $t('header.login') }}
         <q-icon class="q-ml-sm" name="login" size="24px"></q-icon>
       </q-btn>
