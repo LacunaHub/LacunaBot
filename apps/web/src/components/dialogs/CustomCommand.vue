@@ -9,18 +9,6 @@
         </q-item-section>
       </q-item>
 
-      <q-card-section v-if="confirmError">
-        <q-banner class="rounded-lg bg-dark-2" dense>
-          <span>
-            {{ $t(`errors.custom_commands.${confirmError}`) }}
-          </span>
-
-          <template #avatar>
-            <q-icon name="error" color="negative"></q-icon>
-          </template>
-        </q-banner>
-      </q-card-section>
-
       <q-tabs
         v-model="currentTab"
         class="bg-dark-2"
@@ -431,7 +419,7 @@
 
 <script>
 import { computed, defineComponent, ref } from 'vue'
-import { useDialogPluginComponent } from 'quasar'
+import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { interfaces } from 'src/boot/axios'
 import { discordAppCommandNameRegexp, customCommandComponentLimits } from 'src/utils/Constants'
@@ -445,6 +433,7 @@ import CustomCommandConditionCompareValues from './CustomCommandConditionCompare
 import CustomCommandActionModifyWallet from './CustomCommandActionModifyWallet.vue'
 import CustomCommandActionExecuteCode from './CustomCommandActionExecuteCode.vue'
 import CustomCommandImport from './CustomCommandImport.vue'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   name: 'CustomCommand',
@@ -459,6 +448,9 @@ export default defineComponent({
   },
 
   setup(props) {
+    const $q = useQuasar(),
+      { t: $t } = useI18n()
+
     const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
@@ -479,7 +471,6 @@ export default defineComponent({
     )
 
     let confirmLoading = ref(false),
-      confirmError = ref(null),
       currentTab = ref('general'),
       commandFile = ref(null)
 
@@ -502,7 +493,6 @@ export default defineComponent({
       command,
 
       confirmLoading,
-      confirmError,
       currentTab,
       commandFile,
 
@@ -518,8 +508,16 @@ export default defineComponent({
               onDialogOK({ mode: mode.value, command: response.data })
             })
             .catch(err => {
-              confirmError.value = err.response.data
-              console.log(err)
+              console.error(err)
+
+              $q.notify({
+                message: $t(`errors.custom_commands.${err.response.data}`),
+                classes: 'rounded-lg q-notification-custom',
+                color: 'black',
+                icon: 'error',
+                iconColor: 'negative',
+                timeout: 5000
+              })
             })
             .finally(() => (confirmLoading.value = false))
         }
@@ -542,8 +540,16 @@ export default defineComponent({
             onDialogOK({ mode: 'DELETE', command: command.value })
           })
           .catch(err => {
-            confirmError.value = err.response.data
-            console.log(err)
+            console.error(err)
+
+            $q.notify({
+              message: $t(`errors.custom_commands.${err.response.data}`),
+              classes: 'rounded-lg q-notification-custom',
+              color: 'black',
+              icon: 'error',
+              iconColor: 'negative',
+              timeout: 5000
+            })
           })
           .finally(() => (confirmLoading.value = false))
       }
@@ -777,10 +783,27 @@ export default defineComponent({
         .publishCustomCommand(this.guild._id, { data: this.command })
         .then(() => {
           event('publish_custom_command', { event_category: 'utility' })
+
+          this.$q.notify({
+            message: this.$t(`custom_command.command_sent_for_review`),
+            classes: 'rounded-lg q-notification-custom',
+            color: 'black',
+            icon: 'done',
+            iconColor: 'positive',
+            timeout: 5000
+          })
         })
         .catch(err => {
-          this.confirmError = err.response.data
-          console.log(err)
+          console.error(err)
+
+          this.$q.notify({
+            message: this.$t(`errors.custom_commands.${err.response.data}`),
+            classes: 'rounded-lg q-notification-custom',
+            color: 'black',
+            icon: 'error',
+            iconColor: 'negative',
+            timeout: 5000
+          })
         })
         .finally(() => (this.confirmLoading = false))
     },

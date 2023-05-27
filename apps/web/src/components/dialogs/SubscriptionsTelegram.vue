@@ -9,18 +9,6 @@
         </q-item-section>
       </q-item>
 
-      <q-card-section v-if="confirmError">
-        <q-banner class="rounded-lg bg-dark-2" dense>
-          <span>
-            {{ $t(`errors.subscriptions.${confirmError}`) }}
-          </span>
-
-          <template #avatar>
-            <q-icon name="error" color="negative"></q-icon>
-          </template>
-        </q-banner>
-      </q-card-section>
-
       <q-card-section v-if="mode === 'CREATE'">
         <q-banner class="rounded-lg bg-dark-2" dense>
           <i18n-t keypath="subscriptions.telegram_help_note" tag="span">
@@ -304,9 +292,10 @@
 
 <script>
 import { computed, defineComponent, ref } from 'vue'
-import { useDialogPluginComponent } from 'quasar'
+import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { interfaces } from 'src/boot/axios'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   name: 'SubscriptionsTelegram',
@@ -321,6 +310,9 @@ export default defineComponent({
   },
 
   setup(props) {
+    const $q = useQuasar(),
+      { t: $t } = useI18n()
+
     const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
@@ -336,7 +328,6 @@ export default defineComponent({
     )
 
     let confirmLoading = ref(false),
-      confirmError = ref(null),
       foundChannels = ref([])
 
     const isValid = computed(() => {
@@ -350,7 +341,6 @@ export default defineComponent({
       telegram,
 
       confirmLoading,
-      confirmError,
       foundChannels,
 
       isValid,
@@ -365,8 +355,16 @@ export default defineComponent({
               onDialogOK({ mode: mode.value, telegram: response.data })
             })
             .catch(err => {
-              confirmError.value = err.response.data
-              console.log(err)
+              console.error(err)
+
+              $q.notify({
+                message: $t(`errors.subscriptions.${err.response.data}`),
+                classes: 'rounded-lg q-notification-custom',
+                color: 'black',
+                icon: 'error',
+                iconColor: 'negative',
+                timeout: 5000
+              })
             })
             .finally(() => (confirmLoading.value = false))
         }
@@ -389,8 +387,16 @@ export default defineComponent({
             onDialogOK({ mode: 'DELETE', telegram: telegram.value })
           })
           .catch(err => {
-            confirmError.value = err.response.data
-            console.log(err)
+            console.error(err)
+
+            $q.notify({
+              message: $t(`errors.subscriptions.${err.response.data}`),
+              classes: 'rounded-lg q-notification-custom',
+              color: 'black',
+              icon: 'error',
+              iconColor: 'negative',
+              timeout: 5000
+            })
           })
           .finally(() => (confirmLoading.value = false))
       }

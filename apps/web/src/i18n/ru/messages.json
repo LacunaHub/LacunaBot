@@ -262,6 +262,7 @@
     "import_command": "Импортировать команду",
     "export_command": "Экспортировать команду",
     "publish_command": "Опубликовать команду",
+    "command_sent_for_review": "Команда отправлена на проверку",
     "command_templates": "Шаблоны",
     "command_name_title": "Название команды",
     "command_description_title": "Описание команды",

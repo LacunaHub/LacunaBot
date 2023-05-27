@@ -9,18 +9,6 @@
         </q-item-section>
       </q-item>
 
-      <q-card-section v-if="confirmError">
-        <q-banner class="rounded-lg bg-dark-2" dense>
-          <span>
-            {{ $t(`errors.auto_voices.${confirmError}`) }}
-          </span>
-
-          <template #avatar>
-            <q-icon name="error" color="negative"></q-icon>
-          </template>
-        </q-banner>
-      </q-card-section>
-
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -441,9 +429,10 @@
 
 <script>
 import { computed, defineComponent, ref } from 'vue'
-import { useDialogPluginComponent } from 'quasar'
+import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { interfaces } from 'src/boot/axios'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   name: 'VoiceChannelsAutoVoice',
@@ -458,6 +447,9 @@ export default defineComponent({
   },
 
   setup(props) {
+    const $q = useQuasar(),
+      { t: $t } = useI18n()
+
     const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
@@ -481,9 +473,7 @@ export default defineComponent({
           }
     )
 
-    let confirmLoading = ref(false),
-      confirmError = ref(null)
-
+    const confirmLoading = ref(false)
     const isValid = computed(() => {
       return autoVoice.value.channel_id
     })
@@ -499,7 +489,6 @@ export default defineComponent({
       autoVoice,
 
       confirmLoading,
-      confirmError,
 
       isValid,
       unusedVoiceChannels,
@@ -514,8 +503,16 @@ export default defineComponent({
               onDialogOK({ mode: mode.value, autoVoice: response.data })
             })
             .catch(err => {
-              confirmError.value = err.response.data
-              console.log(err)
+              console.error(err)
+
+              $q.notify({
+                message: $t(`errors.auto_voices.${err.response.data}`),
+                classes: 'rounded-lg q-notification-custom',
+                color: 'black',
+                icon: 'error',
+                iconColor: 'negative',
+                timeout: 5000
+              })
             })
             .finally(() => (confirmLoading.value = false))
         }
@@ -538,8 +535,16 @@ export default defineComponent({
             onDialogOK({ mode: 'DELETE', autoVoice: autoVoice.value })
           })
           .catch(err => {
-            confirmError.value = err.response.data
-            console.log(err)
+            console.error(err)
+
+            $q.notify({
+              message: $t(`errors.auto_voices.${err.response.data}`),
+              classes: 'rounded-lg q-notification-custom',
+              color: 'black',
+              icon: 'error',
+              iconColor: 'negative',
+              timeout: 5000
+            })
           })
           .finally(() => (confirmLoading.value = false))
       }

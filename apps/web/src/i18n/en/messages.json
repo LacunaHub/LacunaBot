@@ -255,6 +255,7 @@
     "import_command": "Import command",
     "export_command": "Export command",
     "publish_command": "Publish command",
+    "command_sent_for_review": "Command has been sent for review",
     "command_templates": "Templates",
     "command_name_title": "Command name",
     "command_description_title": "Command description",

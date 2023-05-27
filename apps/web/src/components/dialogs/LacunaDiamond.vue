@@ -1,18 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
     <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section v-if="confirmError">
-        <q-banner class="rounded-lg bg-dark-2" dense>
-          <span>
-            {{ confirmError }}
-          </span>
-
-          <template #avatar>
-            <q-icon name="error" color="negative"></q-icon>
-          </template>
-        </q-banner>
-      </q-card-section>
-
       <q-card-section v-if="guild.premium.available">
         <q-banner class="rounded-lg bg-dark-2" dense>
           <span v-if="guild.premium.will_expire_on">
@@ -232,7 +220,7 @@
 import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
 import { defineComponent, ref } from 'vue'
-import { useDialogPluginComponent } from 'quasar'
+import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { event } from 'vue-gtag'
 
 import musicNotesImg from 'src/assets/music-notes.svg'
@@ -251,12 +239,12 @@ export default defineComponent({
   emits: [...useDialogPluginComponent.emits],
 
   setup() {
-    const guild = useGuildStore()
+    const $q = useQuasar()
 
+    const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
     let confirmLoading = ref(false),
-      confirmError = ref(null),
       tier = ref(0),
       provider = ref('QIWI')
 
@@ -294,7 +282,15 @@ export default defineComponent({
           })
           .catch(err => {
             console.error(err)
-            confirmError.value = err.response.data
+
+            $q.notify({
+              message: err.response.data,
+              classes: 'rounded-lg q-notification-custom',
+              color: 'black',
+              icon: 'error',
+              iconColor: 'negative',
+              timeout: 5000
+            })
           })
           .finally(() => (confirmLoading.value = false))
       },
@@ -308,7 +304,6 @@ export default defineComponent({
       },
 
       confirmLoading,
-      confirmError,
       tier,
       provider
     }
