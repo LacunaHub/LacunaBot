@@ -442,6 +442,7 @@ export default defineComponent({
             this.$q.localStorage.set('user-survey-remind-after', now.setMonth(now.getMonth() + 6))
           })
           .onCancel(() => {
+            event('user_survey_remind_later', { event_category: 'utility' })
             this.$q.localStorage.set('user-survey-remind-after', Date.now() + 1000 * 60 * 60 * 24 * 3)
           })
       }
