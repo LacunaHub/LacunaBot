@@ -15,11 +15,16 @@
 <script>
 import { defineComponent } from 'vue'
 import MainHeader from 'src/components/MainHeader.vue'
+import { useChangeLogStore } from 'src/stores/change-log'
 
 export default defineComponent({
   name: 'MainLayout',
 
-  setup() {},
+  setup() {
+    const changeLog = useChangeLogStore()
+
+    changeLog.getChangeLog()
+  },
 
   components: {
     MainHeader

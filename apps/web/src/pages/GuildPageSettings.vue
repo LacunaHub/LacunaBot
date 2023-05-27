@@ -222,7 +222,6 @@ import { interfaces } from 'src/boot/axios'
 import { useMeta } from 'quasar'
 import { decimalToHex, objectDifferences } from 'src/utils/Utils'
 import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
-
 import controlPanelImg from 'src/assets/control-panel.svg'
 import slashCommandImg from 'src/assets/slash-command.svg'
 import shieldImg from 'src/assets/shield.svg'
@@ -231,6 +230,9 @@ import bellImg from 'src/assets/bell.svg'
 import karaokeImg from 'src/assets/karaoke.svg'
 import layersImg from 'src/assets/layers.svg'
 import UserSurvey from 'src/components/dialogs/UserSurvey.vue'
+import { useChangeLogStore } from 'src/stores/change-log'
+import ChangeLog from 'src/components/dialogs/ChangeLog.vue'
+import { event } from 'vue-gtag'
 
 export default defineComponent({
   name: 'GuildPageSettings',
@@ -238,6 +240,7 @@ export default defineComponent({
   setup() {
     const guild = useGuildStore()
     const user = useUserStore()
+    const changeLog = useChangeLogStore()
     const title = ref(null)
 
     useMeta(() => {
@@ -257,7 +260,7 @@ export default defineComponent({
       }
     })
 
-    return { guild, user, title }
+    return { guild, user, changeLog, title }
   },
 
   components: {
@@ -419,6 +422,14 @@ export default defineComponent({
     )
 
     this.pageLoading = false
+
+    const changeLogViewedVersion = this.$q.localStorage.getItem('change-log-viewed-version')
+
+    if (changeLogViewedVersion !== this.changeLog.current.version) {
+      this.$q.dialog({
+        component: ChangeLog
+      })
+    }
 
     if (this.guild.change_log.length) {
       const userSurveyRemindAfter = this.$q.localStorage.getItem('user-survey-remind-after')

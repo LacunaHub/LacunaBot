@@ -53,7 +53,7 @@
           <div class="text-h5">
             {{ $t('pages.landing.bf_stability_title') }}
           </div>
-          <p class="text--secondary">
+          <p class="text--secondary q-my-none">
             {{ $t('pages.landing.bf_stability_description') }}
           </p>
         </div>
@@ -62,7 +62,7 @@
           <div class="text-h5">
             {{ $t('pages.landing.bf_ease_title') }}
           </div>
-          <p class="text--secondary">
+          <p class="text--secondary q-my-none">
             {{ $t('pages.landing.bf_ease_description') }}
           </p>
         </div>
@@ -71,7 +71,7 @@
           <div class="text-h5">
             {{ $t('pages.landing.bf_functionality_title') }}
           </div>
-          <p class="text--secondary">
+          <p class="text--secondary q-my-none">
             {{ $t('pages.landing.bf_functionality_description') }}
           </p>
         </div>

@@ -119,6 +119,11 @@
                 </q-list>
               </q-menu>
             </q-item>
+            <q-item clickable @click="changeLogDialog">
+              <q-item-section>
+                {{ $t('header.change_log') }}
+              </q-item-section>
+            </q-item>
             <q-item clickable @click="user.logout">
               <q-item-section class="text-red">
                 {{ $t('logout') }}
@@ -189,6 +194,7 @@ import { useUserStore } from 'src/stores/user'
 import { defineComponent } from 'vue'
 import { availableLocales } from 'src/utils/Constants'
 import { getLocale } from 'src/utils/Utils'
+import ChangeLog from './dialogs/ChangeLog.vue'
 
 export default defineComponent({
   name: 'MainHeader',
@@ -217,6 +223,11 @@ export default defineComponent({
       this.$i18n.locale = locale
       this.currentLocale = locale
       localStorage.setItem('locale', locale)
+    },
+    changeLogDialog() {
+      this.$q.dialog({
+        component: ChangeLog
+      })
     }
   }
 })

@@ -187,7 +187,8 @@
     "docs": "Docs",
     "patrons": "Patrons",
     "help": "Community",
-    "login": "Login"
+    "login": "Login",
+    "change_log": "Change log"
   },
   "lacuna_diamond": {
     "has_subscription": "This server already has bonuses that expire on {date}, but you can prolong them",
