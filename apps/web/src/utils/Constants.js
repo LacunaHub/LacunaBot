@@ -90,7 +90,9 @@ export const customCommandComponentLimits = {
     SEND_MESSAGE: 2,
     MODIFY_ROLES: 2,
     FORWARD_TO_COMMAND: 1,
-    MODIFY_WALLET: 2
+    MODIFY_WALLET: 2,
+    SHOW_MODAL: 1,
+    OVERWRITE_CHANNEL_PERMISSIONS: 1
 }
 
 export const availableLocales = [

@@ -18,6 +18,12 @@
   "try_again": "Попробовать еще раз",
   "support_server": "Сервер поддержки",
   "remind_later": "Напомнить позже",
+  "disable": "Отключить",
+  "import": "Импортировать",
+  "export": "Экспортировать",
+  "publish": "Опубликовать",
+  "name": "Название",
+  "identifier": "Идентификатор",
 
   "common": {
     "channel": "Канал",
@@ -283,7 +289,9 @@
       "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
       "FORWARD_TO_COMMAND": "Перенаправить на команду",
       "MODIFY_WALLET": "Изменить кошелёк",
-      "EXECUTE_CODE": "Выполнить код"
+      "EXECUTE_CODE": "Выполнить код",
+      "SHOW_MODAL": "Открыть модальное окно",
+      "OVERWRITE_CHANNEL_PERMISSIONS": "@:common.actions_keys.OVERWRITE_CHANNEL_PERMISSIONS"
     },
     "cv_operator_title": "Оператор",
     "cv_operators": {
@@ -308,7 +316,11 @@
     "mw_amount_title": "Количество валюты",
     "mw_user_id_description": "Изменить кошелёк указанного пользователя (по умолчанию указан автор команды)",
     "mw_currency_id_title": "Идентификатор валюты",
-    "mw_currency_id_description": "Укажите, если хотите выдать другую валюту, а не стандартную"
+    "mw_currency_id_description": "Укажите, если хотите выдать другую валюту, а не стандартную",
+    "sm_field_placeholder_title": "Заполнитель",
+    "sm_field_min_length_title": "Минимум символов",
+    "sm_field_max_length_title": "Максимум символов",
+    "sm_field_default_value_title": "Значение по умолчанию"
   },
 
   "automoder": {
@@ -430,6 +442,25 @@
     "add_voice_role": "@:add голосовую роль",
     "edit_voice_role": "@:edit голосовую роль",
     "bound_channels_description": "Оставьте поле пустым, если хотите, чтобы роль выдавалась при подключении к любому каналу"
+  },
+
+  "automation": {
+    "trigger_title": "Триггер",
+    "trigger_names": {
+      "GUILD_MEMBER_ADD": "@:common.action_log_keys.guild_member_add",
+      "GUILD_MEMBER_REMOVE": "@:common.action_log_keys.guild_member_remove",
+      "INTERACTION_BUTTON": "Нажатие на кнопку",
+      "INTERACTION_SELECT_MENU": "Выбор опции в списке",
+      "INTERACTION_MODAL_SUBMIT": "Отправка формы модального окна",
+      "MESSAGE_CREATE": "Отправка сообщения",
+      "MESSAGE_DELETE": "@:common.action_log_keys.message_delete",
+      "MESSAGE_REACTION_ADD": "Добавление реакции на сообщение",
+      "MESSAGE_UPDATE": "@:common.action_log_keys.message_update",
+      "ROLE_MEMBER_ADD": "@:common.action_log_keys.role_member_add",
+      "ROLE_MEMBER_REMOVE": "@:common.action_log_keys.role_member_remove",
+      "VOICE_CONNECT": "@:common.action_log_keys.voice_connect",
+      "VOICE_DISCONNECT": "@:common.action_log_keys.voice_disconnect"
+    }
   },
 
   "auto_voices": {

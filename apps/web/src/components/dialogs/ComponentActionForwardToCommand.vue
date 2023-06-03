@@ -1,34 +1,28 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
+    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.message') }}
+              {{ $t('custom_command.command_name_title') }}
             </div>
 
-            <MessageEditor
-              :message="component.action.reply.message"
-              hide-replacers
-              hide-code-snippets
+            <q-select
+              v-model="component.action.forward_to_command"
+              :options="guild.guild.commands"
+              option-label="name"
+              option-value="name"
               class="q-pt-sm"
-            />
+              filled
+              dense
+              hide-bottom-space
+              emit-value
+              map-options
+            ></q-select>
           </div>
         </div>
       </q-card-section>
-
-      <q-item v-for="option in ['EPHEMERAL']" :key="option" class="q-my-sm" tag="label" dense v-ripple>
-        <q-item-section>
-          <q-item-label>
-            {{ $t(`common.actions_keys.EPHEMERAL_REPLY`) }}
-          </q-item-label>
-        </q-item-section>
-
-        <q-item-section side>
-          <q-checkbox v-model="component.action.reply.options" :val="option" dense></q-checkbox>
-        </q-item-section>
-      </q-item>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -37,7 +31,15 @@
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('done')"
+              unelevated
+              no-caps
+              color="primary"
+              :disable="!isValid"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -46,12 +48,12 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
-import MessageEditor from '../MessageEditor.vue'
+import { useGuildStore } from 'src/stores/guild'
 
 export default defineComponent({
-  name: 'CustomCommandActionReply',
+  name: 'ComponentActionForwardToCommand',
 
   emits: [...useDialogPluginComponent.emits],
 
@@ -62,18 +64,22 @@ export default defineComponent({
     }
   },
 
-  components: {
-    MessageEditor
-  },
-
   setup(props) {
+    const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
     const component = ref(JSON.parse(JSON.stringify(props.componentProp)))
 
+    const isValid = computed(() => {
+      return Boolean(component.value.action.forward_to_command)
+    })
+
     return {
+      guild,
       dialogRef,
       component,
+
+      isValid,
 
       onConfirm() {
         onDialogOK({ component: component.value })

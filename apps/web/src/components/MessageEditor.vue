@@ -25,6 +25,17 @@
         dense
       ></q-btn>
       <q-btn
+        v-if="withComponents"
+        v-model="currentView"
+        @click="switchView('COMPONENTS')"
+        :disable="disable"
+        class="q-mr-xs"
+        icon="table_rows"
+        :color="currentView === 'COMPONENTS' ? 'secondary' : ''"
+        unelevated
+        dense
+      ></q-btn>
+      <q-btn
         v-if="!disablePreview"
         v-model="currentView"
         @click="switchView('PREVIEW')"
@@ -355,6 +366,69 @@
         </q-card-section>
       </q-card>
 
+      <q-card v-if="currentView === 'COMPONENTS'" key="COMPONENTS" class="bg-dark-2 rounded-b-lg" flat>
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div v-for="(row, i) in messageComponents" :key="i" class="col-12">
+              <q-card class="bg-transparent rounded-lg" flat bordered>
+                <q-card-section>
+                  <div class="row q-col-gutter-sm">
+                    <div class="col-auto" v-for="(component, ii) in row" :key="ii">
+                      <q-chip
+                        class="rounded-lg full-width no-shadow"
+                        square
+                        :label="component.label"
+                        :ripple="false"
+                        :style="{ background: imButtonStyles[component.style.toUpperCase()] }"
+                        clickable
+                        removable
+                        @click="buttonDialog(component, i, ii)"
+                        @remove="row.length === 1 ? messageComponents.splice(i, 1) : row.splice(ii, 1)"
+                      ></q-chip>
+                    </div>
+
+                    <div v-if="row.length < 5" class="col-auto">
+                      <q-chip
+                        class="rounded-lg dashed-border no-shadow full-width"
+                        outline
+                        square
+                        clickable
+                        @click="addButtonComponent(i)"
+                      >
+                        <q-icon name="add" size="24px"></q-icon>
+                      </q-chip>
+                    </div>
+                  </div>
+                </q-card-section>
+
+                <q-card-actions align="right">
+                  <q-btn
+                    @click="messageComponents.splice(i, 1)"
+                    :label="$t('remove')"
+                    color="negative"
+                    flat
+                    no-caps
+                    unelevated
+                  ></q-btn>
+                </q-card-actions>
+              </q-card>
+            </div>
+
+            <div class="col-12">
+              <q-btn
+                class="full-width dashed-border"
+                icon="add"
+                flat
+                @click="addRowComponent"
+                :disable="messageComponents >= 5"
+                unelevated
+                no-caps
+              />
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+
       <q-card v-if="currentView === 'PREVIEW'" key="PREVIEW" class="bg-dark-2 rounded-b-lg" flat>
         <q-item>
           <q-item-section avatar top>
@@ -487,6 +561,25 @@
 
                 <div class="q-pt-sm"></div>
               </q-card>
+            </div>
+
+            <div v-if="withComponents" class="q-pt-xs">
+              <div class="row q-col-gutter-xs">
+                <div v-for="(row, i) in messageComponents" :key="i" class="col-12">
+                  <div class="row q-col-gutter-sm">
+                    <div v-for="(component, ii) in row" :key="ii" class="col-auto">
+                      <q-chip
+                        class="full-width no-shadow"
+                        style="border-radius: 4px !important"
+                        square
+                        :ripple="false"
+                        :label="component.label"
+                        :style="{ background: imButtonStyles[component.style.toUpperCase()] }"
+                      ></q-chip>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </q-item-section>
         </q-item>
@@ -646,6 +739,8 @@ import { useGuildStore } from 'src/stores/guild'
 import { resolveEmbed, suid } from 'src/utils/Utils'
 import { defineComponent } from 'vue'
 import replacers from 'src/utils/replacers.json'
+import { imButtonStyles } from '../utils/Constants'
+import MessageEditorButtonComponent from './dialogs/MessageEditorButtonComponent.vue'
 
 export default defineComponent({
   name: 'MessageEditor',
@@ -655,7 +750,8 @@ export default defineComponent({
 
     return {
       guild,
-      replacers
+      replacers,
+      imButtonStyles
     }
   },
 
@@ -673,6 +769,10 @@ export default defineComponent({
     disableEmbed: {
       type: Boolean,
       default: false
+    },
+    disableComponents: {
+      type: Boolean,
+      default: true
     },
     disablePreview: {
       type: Boolean,
@@ -702,6 +802,9 @@ export default defineComponent({
             : {}
         )
       ),
+      messageComponents: JSON.parse(
+        JSON.stringify(this.message.components && !this.disableComponents ? this.message.components : [])
+      ),
       replacersModal: false,
       replacersModalTab: 'replacers',
       mentionsModal: false,
@@ -714,6 +817,9 @@ export default defineComponent({
   computed: {
     withEmbed() {
       return typeof this.message.embed !== 'undefined' && !this.disableEmbed
+    },
+    withComponents() {
+      return !this.disableComponents
     }
   },
 
@@ -757,6 +863,41 @@ export default defineComponent({
       if (this.withEmbed && this.messageEmbed.fields.length < 25) {
         this.messageEmbed.fields.push({ name: '', value: '', inline: false, key: suid(6) })
       }
+    },
+    addRowComponent() {
+      if (this.withComponents && this.messageComponents.length < 5) {
+        this.messageComponents.push([])
+      }
+    },
+    addButtonComponent(rowIndex) {
+      const row = this.messageComponents[rowIndex]
+
+      if (!row) return
+
+      row.push({
+        type: 'Button',
+        customId: `button-${row.length + 1}`,
+        disabled: false,
+        emoji: { name: null, id: null, animated: false },
+        label: 'Button',
+        style: 'Primary',
+        url: null
+      })
+    },
+    buttonDialog(btn, rowIndex, componentIndex) {
+      const row = this.messageComponents[rowIndex]
+
+      this.$q
+        .dialog({
+          component: MessageEditorButtonComponent,
+
+          componentProps: {
+            buttonProp: btn
+          }
+        })
+        .onOk(({ button }) => {
+          row[componentIndex] = button
+        })
     }
   },
 
@@ -766,6 +907,13 @@ export default defineComponent({
       handler: debounce(function (value) {
         // eslint-disable-next-line vue/no-mutating-props
         this.message.embed = resolveEmbed(value)
+      }, 500)
+    },
+    messageComponents: {
+      deep: true,
+      handler: debounce(function (value) {
+        // eslint-disable-next-line vue/no-mutating-props
+        this.message.components = value
       }, 500)
     }
   }

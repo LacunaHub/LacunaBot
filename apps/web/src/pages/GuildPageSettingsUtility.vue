@@ -96,6 +96,60 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
+              {{ 'Автоматизация' }}
+            </q-item-label>
+
+            <q-item-label class="text--secondary">
+              <q-badge class="q-mr-xs" color="primary">
+                <span>NEW</span>
+              </q-badge>
+              <q-badge class="q-mr-xs" color="warning">
+                <span>BETA</span>
+              </q-badge>
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side top>
+            <div>{{ guild.modules.automation.length }}/{{ guild.premium.available ? '20' : '5' }}</div>
+          </q-item-section>
+        </q-item>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div v-for="(automation, i) in guild.modules.automation" :key="i" class="col-12 col-sm-6 col-md-4">
+              <q-card class="rounded-lg bg-dark-2" flat>
+                <q-item class="rounded-lg" clickable v-ripple @click="automationDialog(automation)">
+                  <q-item-section>
+                    <q-item-label>
+                      {{ automation.name }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-card>
+            </div>
+
+            <div v-if="guild.modules.automation.length < 20" class="col-12">
+              <q-btn
+                @click="
+                  !guild.premium.available && guild.modules.automation.length >= 5
+                    ? lacunaDiamondDialog()
+                    : automationDialog()
+                "
+                class="full-width dashed-border"
+                icon="add"
+                flat
+              ></q-btn>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <div class="col-12">
+      <q-card class="rounded-lg bg-dark-1" flat>
+        <q-item class="q-py-md">
+          <q-item-section>
+            <q-item-label class="text-subtitle1">
               {{ $t('pages.guild.ut_auto_threads_title') }}
             </q-item-label>
             <q-item-label class="text--secondary">
@@ -292,6 +346,7 @@ import UtilityAutoThread from 'components/dialogs/UtilityAutoThread.vue'
 import UtilityAutoReaction from 'src/components/dialogs/UtilityAutoReaction.vue'
 import UtilityInteractiveMessage from 'src/components/dialogs/UtilityInteractiveMessage.vue'
 import UtilityInteractiveReaction from 'src/components/dialogs/UtilityInteractiveReaction.vue'
+import AutomationTask from 'src/components/dialogs/AutomationTask.vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsUtility',
@@ -309,6 +364,33 @@ export default defineComponent({
       this.$q.dialog({
         component: LacunaDiamond
       })
+    },
+    automationDialog(config) {
+      this.$q
+        .dialog({
+          component: AutomationTask,
+
+          componentProps: config ? { automationProp: config } : null
+        })
+        .onOk(payload => {
+          const { mode, automation } = payload
+
+          if (mode === 'CREATE') {
+            this.guild.modules.automation.push(automation)
+          }
+
+          if (mode === 'UPDATE') {
+            const index = this.guild.modules.automation.findIndex(i => i.id === automation.id)
+
+            this.guild.modules.automation[index] = automation
+          }
+
+          if (mode === 'DELETE') {
+            const index = this.guild.modules.automation.findIndex(i => i.id === automation.id)
+
+            this.guild.modules.automation.splice(index, 1)
+          }
+        })
     },
     autoThreadDialog(config) {
       this.$q

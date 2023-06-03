@@ -1,14 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'custom_command.add_custom_command' : 'custom_command.edit_custom_command') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="q-dialog-card rounded-lg bg-dark-1" flat style="width: 1000px">
       <q-tabs
         v-model="currentTab"
         class="bg-dark-2"
@@ -23,17 +15,17 @@
       </q-tabs>
 
       <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
-        <q-tab-panel name="general" class="q-pa-none" style="overflow-y: hidden">
+        <q-tab-panel name="general" class="q-pa-none">
           <q-card-section v-if="mode === 'CREATE'">
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <q-btn
                   class="full-width"
-                  :label="$t('custom_command.import_command')"
+                  :label="$t('import')"
                   unelevated
                   no-caps
                   color="secondary"
-                  @click="importCommandDialog"
+                  @click="importAutomationDialog"
                 />
               </div>
             </div>
@@ -43,11 +35,11 @@
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <div>
-                  {{ $t('custom_command.command_name_title') }}
+                  {{ $t('name') }}
                 </div>
 
                 <q-input
-                  v-model.trim="command.command.name"
+                  v-model.trim="automation.name"
                   class="q-pt-sm"
                   :maxlength="32"
                   filled
@@ -58,166 +50,59 @@
 
               <div class="col-12">
                 <div>
-                  {{ $t('custom_command.command_description_title') }}
+                  {{ $t('automation.trigger_title') }}
                 </div>
 
-                <q-input
-                  v-model.trim="command.command.description"
+                <q-select
+                  v-model="automation.trigger"
+                  :options="triggers"
                   class="q-pt-sm"
-                  :maxlength="100"
                   filled
                   dense
                   hide-bottom-space
-                ></q-input>
-              </div>
+                  emit-value
+                  map-options
+                >
+                  <template #option="{ opt, toggleOption, selected }">
+                    <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                      <q-item-section>
+                        <q-item-label>
+                          {{ $t(`automation.trigger_names.${opt}`) }}
+                        </q-item-label>
 
-              <div class="col-12">
-                <div>
-                  {{ $t('custom_command.command_options_title') }}
-                </div>
+                        <q-item-label class="text--secondary" caption>
+                          {{ opt }}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
 
-                <div class="row q-col-gutter-sm q-pt-sm">
-                  <div class="col-auto" v-for="(option, i) in command.command.options" :key="i">
-                    <q-chip
-                      class="rounded-lg full-width no-shadow"
-                      square
-                      :label="option.name"
-                      :ripple="false"
-                      clickable
-                      removable
-                      @click="optionDialog(option)"
-                      @remove="command.command.options.splice(i, 1)"
-                    ></q-chip>
-                  </div>
-
-                  <div v-if="command.command.options.length < 25" class="col-auto">
-                    <q-chip
-                      class="rounded-lg dashed-border no-shadow full-width"
-                      outline
-                      square
-                      clickable
-                      @click="optionDialog()"
-                    >
-                      <q-icon name="add" size="24px"></q-icon>
-                    </q-chip>
-                  </div>
-                </div>
+                  <template #selected-item="{ opt }">
+                    <span>
+                      {{ $t(`automation.trigger_names.${opt}`) }}
+                    </span>
+                  </template>
+                </q-select>
               </div>
             </div>
           </q-card-section>
 
-          <q-item class="q-my-sm" tag="label" dense v-ripple>
-            <q-item-section>
-              <q-item-label>
-                {{ $t('command.throttling_title') }}
-              </q-item-label>
-            </q-item-section>
+          <q-list class="q-px-none q-py-md">
+            <q-item tag="label" dense v-ripple>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('disable') }}
+                </q-item-label>
+              </q-item-section>
 
-            <q-item-section side>
-              <q-checkbox
-                v-model="command.options"
-                val="THROTTLING"
-                dense
-                @update:model-value="onSelectOption"
-              ></q-checkbox>
-            </q-item-section>
-          </q-item>
-
-          <transition enter-active-class="animated fadeInUp">
-            <q-card-section v-if="command.options.includes('THROTTLING')">
-              <div class="row q-col-gutter-md">
-                <div class="col-12">
-                  <div>
-                    {{ $t('command.throttling_scope_title') }}
-                  </div>
-
-                  <q-select
-                    v-model="command.throttling.type"
-                    :options="['PER_USER', 'PER_CHANNEL', 'PER_GUILD']"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                  >
-                    <template #selected-item="{ opt }">
-                      <span>
-                        {{ $t(`command.throttling_scopes.${opt}`) }}
-                      </span>
-                    </template>
-
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label>
-                            {{ $t(`command.throttling_scopes.${opt}`) }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
-
-                <div class="col-12">
-                  <div>
-                    {{ $t('command.throttling_max_uses_title') }}
-                  </div>
-
-                  <q-slider
-                    v-model.number="command.throttling.max_uses"
-                    class="q-pt-sm q-px-sm"
-                    :min="1"
-                    :max="10"
-                    snap
-                    marker-labels
-                  ></q-slider>
-                </div>
-
-                <div class="col-12">
-                  <div>
-                    {{ $t('command.throttling_timeout_title') }}
-                  </div>
-
-                  <q-select
-                    v-model.number="command.throttling.timeout"
-                    :options="[60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                  >
-                    <template #selected-item="{ opt }">
-                      <span>
-                        {{
-                          $dt
-                            .now()
-                            .plus({ seconds: opt })
-                            .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                        }}
-                      </span>
-                    </template>
-
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label>
-                            {{
-                              $dt
-                                .now()
-                                .plus({ seconds: opt })
-                                .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                            }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
-              </div>
-            </q-card-section>
-          </transition>
+              <q-item-section side>
+                <q-checkbox v-model="automation.options" val="DISABLED" dense></q-checkbox>
+              </q-item-section>
+            </q-item>
+          </q-list>
         </q-tab-panel>
 
-        <q-tab-panel name="components" class="q-pa-none" style="overflow-y: hidden">
+        <q-tab-panel name="components" class="q-pa-none">
           <q-card-section>
             <div class="row q-col-gutter-md">
               <div class="col-12 col-md-6">
@@ -292,9 +177,9 @@
             </div>
           </q-card-section>
 
-          <q-card-section v-if="command.components.length">
+          <q-card-section v-if="automation.components.length">
             <div class="row q-col-gutter-md">
-              <div v-for="(component, i) in command.components" :key="i" class="col-12">
+              <div v-for="(component, i) in automation.components" :key="i" class="col-12">
                 <q-card flat bordered class="bg-transparent rounded-lg">
                   <q-item class="rounded-t-lg" clickable v-ripple @click="componentDialog(component, i)">
                     <q-item-section>
@@ -335,7 +220,7 @@
                       icon="delete"
                       no-caps
                       unelevated
-                      @click="command.components.splice(i, 1)"
+                      @click="automation.components.splice(i, 1)"
                     ></q-btn>
                   </q-card-actions>
                 </q-card>
@@ -392,7 +277,7 @@
                 <q-item clickable v-close-popup @click="onPublish" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('custom_command.publish_command') }}
+                      {{ $t('publish') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -400,7 +285,7 @@
                 <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('custom_command.export_command') }}
+                      {{ $t('export') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -418,32 +303,32 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
+import { defineComponent, ref, computed } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { useGuildStore } from 'src/stores/guild'
-import { interfaces } from 'src/boot/axios'
-import { discordAppCommandNameRegexp, customCommandComponentLimits } from 'src/utils/Constants'
-import { event } from 'vue-gtag'
-import CustomCommandOption from './CustomCommandOption.vue'
+import { suid } from 'src/utils/Utils'
+import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
 import ComponentActionReply from './ComponentActionReply.vue'
 import ComponentActionSendMessage from './ComponentActionSendMessage.vue'
 import ComponentActionModifyRoles from './ComponentActionModifyRoles.vue'
 import ComponentActionForwardToCommand from './ComponentActionForwardToCommand.vue'
 import ComponentConditionCompareValues from './ComponentConditionCompareValues.vue'
 import ComponentActionModifyWallet from './ComponentActionModifyWallet.vue'
-import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
-import CustomCommandImport from './CustomCommandImport.vue'
-import ComponentActionShowModal from './ComponentActionShowModal.vue'
 import ComponentActionOverwriteChannelPermissions from './ComponentActionOverwriteChannelPermissions.vue'
-import { useI18n } from 'vue-i18n'
+import { customCommandComponentLimits } from 'src/utils/Constants'
+import ComponentActionShowModal from './ComponentActionShowModal.vue'
+import AutomationTaskImport from './AutomationTaskImport.vue'
+import { event } from 'vue-gtag'
+import { interfaces } from 'src/boot/axios'
 
 export default defineComponent({
-  name: 'CustomCommand',
+  name: 'AutomationTask',
 
   emits: [...useDialogPluginComponent.emits],
 
   props: {
-    commandProp: {
+    automationProp: {
       type: Object,
       default: null
     }
@@ -452,76 +337,46 @@ export default defineComponent({
   setup(props) {
     const $q = useQuasar(),
       { t: $t } = useI18n()
-
+    const { dialogRef, onDialogOK, onDialogHide, onDialogCancel } = useDialogPluginComponent()
     const guild = useGuildStore()
-    const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
-    const mode = ref(props.commandProp ? 'UPDATE' : 'CREATE')
-    const command = ref(
+    const mode = ref(props.automationProp ? 'UPDATE' : 'CREATE')
+    const automation = ref(
       mode.value === 'UPDATE'
-        ? JSON.parse(JSON.stringify(props.commandProp))
+        ? JSON.parse(JSON.stringify(props.automationProp))
         : {
+            id: suid(6),
+            name: null,
             options: [],
-            components: [],
-            command: {
-              type: 1,
-              name: '',
-              description: null,
-              options: []
-            }
+            trigger: null,
+            components: []
           }
     )
 
-    let confirmLoading = ref(false),
+    const confirmLoading = ref(false),
       currentTab = ref('general'),
-      commandFile = ref(null)
+      automationFile = ref(null)
 
     const isValid = computed(() => {
-      return Boolean(
-        discordAppCommandNameRegexp.test(command.value.command.name) &&
-          !guild.guild.commands.some(i => i.name === command.value.command.name) &&
-          !guild.modules.custom_commands.some(
-            i => i.command.name === command.value.command.name && i.id !== command.value.id
-          ) &&
-          command.value.command.description &&
-          command.value.components.length
-      )
+      return Boolean(automation.value.name && automation.value.trigger && automation.value.components.length)
     })
 
     return {
-      guild,
       dialogRef,
+      guild,
+
       mode,
-      command,
+      automation,
 
       confirmLoading,
       currentTab,
-      commandFile,
+      automationFile,
 
       isValid,
 
       onConfirm() {
         if (isValid.value) {
-          confirmLoading.value = true
-
-          interfaces.guilds
-            .updateCustomCommands(guild._id, { method: mode.value.toLowerCase(), data: command.value })
-            .then(response => {
-              onDialogOK({ mode: mode.value, command: response.data })
-            })
-            .catch(err => {
-              console.error(err)
-
-              $q.notify({
-                message: $t(`errors.custom_commands.${err.response.data}`),
-                classes: 'rounded-lg q-notification-custom',
-                color: 'black',
-                icon: 'error',
-                iconColor: 'negative',
-                timeout: 5000
-              })
-            })
-            .finally(() => (confirmLoading.value = false))
+          onDialogOK({ mode: mode.value, automation: automation.value })
         }
       },
 
@@ -534,39 +389,33 @@ export default defineComponent({
       },
 
       onDelete() {
-        confirmLoading.value = true
-
-        interfaces.guilds
-          .updateCustomCommands(guild._id, { method: 'delete', data: command.value })
-          .then(() => {
-            onDialogOK({ mode: 'DELETE', command: command.value })
-          })
-          .catch(err => {
-            console.error(err)
-
-            $q.notify({
-              message: $t(`errors.custom_commands.${err.response.data}`),
-              classes: 'rounded-lg q-notification-custom',
-              color: 'black',
-              icon: 'error',
-              iconColor: 'negative',
-              timeout: 5000
-            })
-          })
-          .finally(() => (confirmLoading.value = false))
+        onDialogOK({ mode: 'DELETE', automation: automation.value })
       }
     }
   },
 
   data() {
     return {
+      triggers: [
+        'GUILD_MEMBER_ADD',
+        'GUILD_MEMBER_REMOVE',
+        'INTERACTION_BUTTON',
+        'INTERACTION_SELECT_MENU',
+        'INTERACTION_MODAL_SUBMIT',
+        'MESSAGE_CREATE',
+        'MESSAGE_DELETE',
+        'MESSAGE_UPDATE',
+        'ROLE_MEMBER_ADD',
+        'ROLE_MEMBER_REMOVE',
+        'VOICE_CONNECT',
+        'VOICE_DISCONNECT'
+      ],
       conditions: ['COMPARE_VALUES'],
       actions: [
         'EXECUTE_CODE',
         'REPLY',
         'SEND_MESSAGE',
         'MODIFY_ROLES',
-        'FORWARD_TO_COMMAND',
         'MODIFY_WALLET',
         'SHOW_MODAL',
         'OVERWRITE_CHANNEL_PERMISSIONS'
@@ -575,16 +424,24 @@ export default defineComponent({
   },
 
   methods: {
+    importAutomationDialog() {
+      this.$q
+        .dialog({
+          component: AutomationTaskImport
+        })
+        .onOk(({ automation }) => {
+          this.automation = automation
+        })
+    },
     addCondition(type) {
       if (this.isComponentLimitReached(`CONDITION:${type}`)) return
 
       if (type === 'COMPARE_VALUES') {
-        this.command.components.push({
+        this.automation.components.push({
           type: 'CONDITION',
           condition: {
             type,
             compare_values: {
-              options: [],
               operator: 'EQUAL',
               left: '',
               right: ''
@@ -596,8 +453,21 @@ export default defineComponent({
     addAction(type) {
       if (this.isComponentLimitReached(`ACTION:${type}`)) return
 
+      if (type === 'EXECUTE_CODE') {
+        this.automation.components = []
+        this.automation.components.push({
+          type: 'ACTION',
+          action: {
+            type,
+            execute_code: {
+              code: ''
+            }
+          }
+        })
+      }
+
       if (type === 'REPLY') {
-        this.command.components.push({
+        this.automation.components.push({
           type: 'ACTION',
           action: {
             type,
@@ -625,7 +495,7 @@ export default defineComponent({
       }
 
       if (type === 'SEND_MESSAGE') {
-        this.command.components.push({
+        this.automation.components.push({
           type: 'ACTION',
           action: {
             type,
@@ -655,7 +525,7 @@ export default defineComponent({
       }
 
       if (type === 'MODIFY_ROLES') {
-        this.command.components.push({
+        this.automation.components.push({
           type: 'ACTION',
           action: {
             type,
@@ -668,18 +538,8 @@ export default defineComponent({
         })
       }
 
-      if (type === 'FORWARD_TO_COMMAND') {
-        this.command.components.push({
-          type: 'ACTION',
-          action: {
-            type,
-            forward_to_command: 'about'
-          }
-        })
-      }
-
       if (type === 'MODIFY_WALLET') {
-        this.command.components.push({
+        this.automation.components.push({
           type: 'ACTION',
           action: {
             type,
@@ -692,21 +552,8 @@ export default defineComponent({
         })
       }
 
-      if (type === 'EXECUTE_CODE') {
-        this.command.components = []
-        this.command.components.push({
-          type: 'ACTION',
-          action: {
-            type,
-            execute_code: {
-              code: ''
-            }
-          }
-        })
-      }
-
       if (type === 'SHOW_MODAL') {
-        this.command.components.push({
+        this.automation.components.push({
           type: 'ACTION',
           action: {
             type,
@@ -720,7 +567,7 @@ export default defineComponent({
       }
 
       if (type === 'OVERWRITE_CHANNEL_PERMISSIONS') {
-        this.command.components.push({
+        this.automation.components.push({
           type: 'ACTION',
           action: {
             type,
@@ -733,59 +580,15 @@ export default defineComponent({
         })
       }
     },
-    moveComponent(from, to) {
-      const component = this.command.components[from]
-      let position = to === 0 ? from - 1 : from + 1
-
-      if (position < 0) position = this.command.components.length - 1
-      else if (position > this.command.components.length - 1) position = 0
-
-      this.command.components.splice(from, 1)
-      this.command.components.splice(position, 0, component)
-    },
     isComponentLimitReached(type) {
-      if (this.command.components.some(i => i.action?.type === 'EXECUTE_CODE')) return true
+      if (this.automation.components.some(i => i.action?.type === 'EXECUTE_CODE')) return true
 
       const [componentType, subType] = type.split(':')
-      const components = this.command.components.filter(
+      const components = this.automation.components.filter(
         i => i.type === componentType && (i.condition?.type === subType || i.action?.type === subType)
       )
 
       return components.length >= customCommandComponentLimits[subType]
-    },
-    importCommandDialog() {
-      this.$q
-        .dialog({
-          component: CustomCommandImport
-        })
-        .onOk(payload => {
-          const { command } = payload
-
-          this.command = command
-        })
-    },
-    optionDialog(opt) {
-      this.$q
-        .dialog({
-          component: CustomCommandOption,
-
-          componentProps: {
-            optionProp: opt
-          }
-        })
-        .onOk(payload => {
-          const { mode, option } = payload
-
-          if (mode === 'CREATE' && this.command.command.options.length < 25) {
-            this.command.command.options.push(option)
-          }
-
-          if (mode === 'UPDATE') {
-            const index = this.command.command.options.findIndex(i => i.name === opt.name)
-
-            this.command.command.options[index] = option
-          }
-        })
     },
     componentDialog(component, index) {
       let dialogComponent
@@ -813,8 +616,18 @@ export default defineComponent({
         .onOk(payload => {
           const { component } = payload
 
-          this.command.components[index] = component
+          this.automation.components[index] = component
         })
+    },
+    moveComponent(from, to) {
+      const component = this.automation.components[from]
+      let position = to === 0 ? from - 1 : from + 1
+
+      if (position < 0) position = this.automation.components.length - 1
+      else if (position > this.automation.components.length - 1) position = 0
+
+      this.automation.components.splice(from, 1)
+      this.automation.components.splice(position, 0, component)
     },
     onPublish() {
       if (this.mode !== 'UPDATE' || !this.isValid) return
@@ -822,9 +635,9 @@ export default defineComponent({
       this.confirmLoading = true
 
       return interfaces.common
-        .publishCustomCommand(this.guild._id, { data: this.command })
+        .publishAutomationTask(this.guild._id, { data: this.automation })
         .then(() => {
-          event('publish_custom_command', { event_category: 'utility' })
+          event('publish_automation', { event_category: 'utility' })
 
           this.$q.notify({
             message: this.$t(`custom_command.command_sent_for_review`),
@@ -839,7 +652,7 @@ export default defineComponent({
           console.error(err)
 
           this.$q.notify({
-            message: this.$t(`errors.custom_commands.${err.response.data}`),
+            message: err.response.data,
             classes: 'rounded-lg q-notification-custom',
             color: 'black',
             icon: 'error',
@@ -852,30 +665,17 @@ export default defineComponent({
     onExport() {
       if (this.mode !== 'UPDATE') return
 
-      const data = JSON.stringify(this.command)
+      const data = JSON.stringify(this.automation)
       const link = document.createElement('a')
 
       link.style.display = 'none'
       link.setAttribute('href', `data:application/json;charset=utf-8,${encodeURIComponent(data)}`)
-      link.setAttribute('download', `${this.command.id}.json`)
+      link.setAttribute('download', `${this.automation.id}.json`)
 
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      event('export_custom_command', { event_category: 'utility' })
-    },
-    onSelectOption(options) {
-      if (options.includes('THROTTLING') && !this.command.throttling) {
-        this.command.throttling = {
-          type: 'PER_USER',
-          max_uses: 1,
-          timeout: 60
-        }
-      }
-
-      if (!options.includes('THROTTLING')) {
-        delete this.command.throttling
-      }
+      event('export_automation', { event_category: 'utility' })
     }
   }
 })

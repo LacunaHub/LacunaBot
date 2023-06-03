@@ -10,6 +10,7 @@
 
 const { configure } = require('quasar/wrappers')
 const path = require('path')
+const { readFileSync } = require('fs')
 
 module.exports = configure(function (ctx) {
     return {
@@ -66,7 +67,8 @@ module.exports = configure(function (ctx) {
             // analyze: true,
             env: {
                 API: ctx.dev ? 'http://localhost:3000' : 'https://api.lacunabot.com',
-                GTAG: 'G-881ZHWECYQ'
+                GTAG: 'G-881ZHWECYQ',
+                MONACO_LIB: readFileSync(__dirname + '\\src\\utils\\monaco-lib.d.ts', 'utf-8')
             },
             // rawDefine: {}
             // ignorePublicFolder: true,

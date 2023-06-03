@@ -119,7 +119,7 @@ import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 
 export default defineComponent({
-  name: 'CustomCommandActionModifyWallet',
+  name: 'ComponentActionModifyWallet',
 
   emits: [...useDialogPluginComponent.emits],
 
