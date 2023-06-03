@@ -1,6 +1,7 @@
 import { VoiceChannel, VoiceState } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
+import Automation from '../../modules/Automation'
 import { voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
 import { voiceUnassign as levelsVoiceUnassign } from '../../modules/Levels'
 import { VoiceDisconnect } from '../../modules/Logs'
@@ -44,6 +45,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
 
     await deleteTemporaryVoice(self, server, state, channel)
     await VoiceDisconnect(self, server, state, channel)
+    await Automation.handleEvent('VOICE_DISCONNECT', self, server, state)
 
     return true
 }

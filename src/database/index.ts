@@ -1,5 +1,6 @@
 import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose'
 import { MySQLDriver, QuickDB } from 'quick.db'
+import AutomationTasks from './schemas/AutomationTasks'
 import Bills, { IBill } from './schemas/Bills'
 import CustomCommands from './schemas/CustomCommands'
 import Servers, { ServerDocument } from './schemas/Servers'
@@ -20,6 +21,8 @@ const mysql = new MySQLDriver({
 let qdb: QuickDB
 
 export default {
+    automationTasks: AutomationTasks,
+
     bills: {
         async create(doc: IBill) {
             return await Bills.create(doc)

@@ -755,7 +755,8 @@ export default model<ServerDocument>(
                 custom_commands: { type: Array, default: [] },
                 activities: {
                     multipliers: { type: Array, default: [] }
-                }
+                },
+                automation: { type: Array, default: [] }
             },
             utility: {
                 giveaways: { type: Array, default: [] },
@@ -1358,6 +1359,7 @@ export interface ServerDocument extends Document {
         activities: {
             multipliers: ActivityMultiplier[]
         }
+        automation: IAutomation[]
     }
     utility: {
         giveaways: Giveaway[]
@@ -1471,7 +1473,15 @@ export interface ICustomCommandComponent {
         }
     }
     action?: {
-        type: 'REPLY' | 'SEND_MESSAGE' | 'MODIFY_ROLES' | 'FORWARD_TO_COMMAND' | 'MODIFY_WALLET' | 'EXECUTE_CODE'
+        type:
+            | 'REPLY'
+            | 'SEND_MESSAGE'
+            | 'MODIFY_ROLES'
+            | 'FORWARD_TO_COMMAND'
+            | 'MODIFY_WALLET'
+            | 'EXECUTE_CODE'
+            | 'SHOW_MODAL'
+            | 'OVERWRITE_CHANNEL_PERMISSIONS'
         execute_code?: {
             code: string
         }
@@ -1503,6 +1513,18 @@ export interface ICustomCommandComponent {
             amount: string
             user_id: string
             currency_id: string
+        }
+        show_modal?: {
+            title: string
+            customId: string
+            components: any[][]
+        }
+        overwrite_channel_permissions?: {
+            channels: string[]
+            permissions: {
+                [key: string]: boolean
+            }
+            user_or_role: string
         }
     }
 }
@@ -1999,6 +2021,87 @@ export interface ActivityMultiplier {
     levels_voice_multiplier?: number
     economy_text_multiplier?: number
     economy_voice_multiplier?: number
+}
+
+export interface IAutomation {
+    id: string
+    name: string
+    options: 'DISABLED'[]
+    trigger: IAutomationTrigger
+    components: IAutomationComponent[]
+}
+
+export type IAutomationTrigger =
+    | 'GUILD_MEMBER_ADD'
+    | 'GUILD_MEMBER_REMOVE'
+    | 'INTERACTION_BUTTON'
+    | 'INTERACTION_SELECT_MENU'
+    | 'INTERACTION_MODAL_SUBMIT'
+    | 'MESSAGE_CREATE'
+    | 'MESSAGE_DELETE'
+    | 'MESSAGE_REACTION_ADD'
+    | 'MESSAGE_UPDATE'
+    | 'ROLE_MEMBER_ADD'
+    | 'ROLE_MEMBER_REMOVE'
+    | 'VOICE_CONNECT'
+    | 'VOICE_DISCONNECT'
+
+export interface IAutomationComponent {
+    type: 'ACTION' | 'CONDITION'
+    condition?: {
+        type: 'COMPARE_VALUES'
+        compare_values?: {
+            operator: 'EQUAL' | 'NOT_EQUAL' | 'GREATER_THAN' | 'LESS_THAN' | 'STARTS_WITH' | 'ENDS_WITH' | 'CONTAINS' | 'NOT_CONTAINS'
+            left: string
+            right: string
+        }
+    }
+    action?: {
+        type: 'EXECUTE_CODE' | 'REPLY' | 'SEND_MESSAGE' | 'MODIFY_ROLES' | 'MODIFY_WALLET' | 'SHOW_MODAL' | 'OVERWRITE_CHANNEL_PERMISSIONS'
+        execute_code?: {
+            code: string
+        }
+        reply?: {
+            options: 'EPHEMERAL'[]
+            message: {
+                content: string
+                embed: MessageEmbed
+                components: any[][]
+            }
+        }
+        send_message?: {
+            options: 'TTS'[]
+            format: 'CHANNEL' | 'CURRENT_CHANNEL'
+            channel_id: string
+            message: {
+                content: string
+                embed: MessageEmbed
+                components: any[][]
+            }
+        }
+        modify_roles?: {
+            add: string[]
+            remove: string[]
+            user_id: string
+        }
+        modify_wallet?: {
+            amount: string
+            user_id: string
+            currency_id: string
+        }
+        show_modal?: {
+            title: string
+            customId: string
+            components: any[][]
+        }
+        overwrite_channel_permissions?: {
+            channels: string[]
+            permissions: {
+                [key: string]: boolean
+            }
+            user_or_role: string
+        }
+    }
 }
 
 export interface Giveaway {

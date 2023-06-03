@@ -1,6 +1,7 @@
 import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
+import Automation from '../../modules/Automation'
 import Farewell from '../../modules/Farewell'
 import { GuildMemberRemove } from '../../modules/Logs'
 import { caseLog } from '../../modules/Moderation'
@@ -26,8 +27,8 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     }
 
     await Farewell(self, server, member)
-
     await GuildMemberRemove(self, server, member)
+    await Automation.handleEvent('GUILD_MEMBER_REMOVE', self, server, member)
 
     if (server.modules.levels.reset_on_leave) {
         const user = await self.db.users.findOne({ _id: member.id })
