@@ -1218,6 +1218,22 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             ) {
                 updateData['modules.economy.store.items'] = data.modules.economy.store.items
             }
+
+            if (data.modules.economy.transfer) {
+                if (
+                    Array.isArray(data.modules.economy.transfer.allowed_roles) &&
+                    JSON.stringify(data.modules.economy.transfer.allowed_roles) !== JSON.stringify(guild.modules.economy.transfer.allowed_roles)
+                ) {
+                    updateData['modules.economy.transfer.allowed_roles'] = data.modules.economy.transfer.allowed_roles
+                }
+
+                if (
+                    Array.isArray(data.modules.economy.transfer.blocked_roles) &&
+                    JSON.stringify(data.modules.economy.transfer.blocked_roles) !== JSON.stringify(guild.modules.economy.transfer.blocked_roles)
+                ) {
+                    updateData['modules.economy.transfer.blocked_roles'] = data.modules.economy.transfer.blocked_roles
+                }
+            }
         }
 
         if (data.modules.activities) {

@@ -65,6 +65,22 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
+    const isNotAllowedRole =
+            server.modules.economy.transfer.allowed_roles.length &&
+            !(interaction.member as any).roles.cache.some(i => server.modules.economy.transfer.allowed_roles.includes(i.id)),
+        isBlockedRole = (interaction.member as any).roles.cache.some(i => server.modules.economy.transfer.blocked_roles.includes(i.id))
+
+    if (isNotAllowedRole || isBlockedRole) {
+        await interaction.reply({
+            content: `${self._emojis.ERROR} | ${t('common.command_denied', {
+                user: `**${(interaction.member as any).displayName}**`
+            })}`,
+            ephemeral: true
+        })
+
+        return false
+    }
+
     const mention = interaction.options?.getMember('user') as GuildMember
     const amount = interaction.options?.getInteger('amount')
     const currency = interaction.options?.getString('currency')

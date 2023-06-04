@@ -744,6 +744,10 @@ export default model<ServerDocument>(
                     },
                     store: {
                         items: { type: Array, default: [] }
+                    },
+                    transfer: {
+                        allowed_roles: { type: Array, default: [] },
+                        blocked_roles: { type: Array, default: [] }
                     }
                 },
                 subscriptions: {
@@ -1347,6 +1351,10 @@ export interface ServerDocument extends Document {
             currencies: EconomyCurrency[]
             store: {
                 items: EconomyStoreItem[]
+            }
+            transfer: {
+                allowed_roles: string[]
+                blocked_roles: string[]
             }
         }
         subscriptions: {
