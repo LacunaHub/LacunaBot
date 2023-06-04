@@ -6,8 +6,6 @@ import { antiCaps, linksFilter, swearFilter } from '../../modules/Automoder'
 import { MessageUpdate } from '../../modules/Logs'
 
 const handler = async (self: Lacuna, before: Message, message: Message) => {
-    let partial = before.partial || message.partial
-
     before = before.partial ? await before.fetch() : before
     message = message.partial ? await message.fetch() : message
 
@@ -21,8 +19,6 @@ const handler = async (self: Lacuna, before: Message, message: Message) => {
     await swearFilter(self, server, message)
     await MessageUpdate(self, server, before, message)
     await Automation.handleEvent('MESSAGE_UPDATE', self, server, message)
-
-    if (partial) message.channel.messages.cache.sweep(m => [before.id, message.id].includes(m.id))
 
     return true
 }

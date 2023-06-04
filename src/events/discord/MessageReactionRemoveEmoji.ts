@@ -3,10 +3,7 @@ import { InteractiveReaction, ServerDocument } from '../../database/schemas/Serv
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, reaction: MessageReaction) => {
-    let partial = reaction.partial
-
-    reaction = partial ? await reaction.fetch() : reaction
-
+    reaction = reaction.partial ? await reaction.fetch() : reaction
     const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
@@ -26,8 +23,6 @@ const handler = async (self: Lacuna, reaction: MessageReaction) => {
             }
         )
     }
-
-    message.reactions.cache.delete(reaction.emoji.id || reaction.emoji.name)
 
     return true
 }

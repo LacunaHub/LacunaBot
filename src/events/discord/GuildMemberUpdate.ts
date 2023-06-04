@@ -10,11 +10,15 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
     if (self.user.id == member.id) return false
 
     if (before.partial) {
-        before = (await before.fetch().catch(() => {})) as GuildMember
+        try {
+            before = await before.fetch()
+        } catch (err) {}
     }
 
     if (member.partial) {
-        member = (await member.fetch().catch(() => {})) as GuildMember
+        try {
+            member = await member.fetch()
+        } catch (err) {}
     }
 
     if (!before || !member) return false

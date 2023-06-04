@@ -8,7 +8,9 @@ import { caseLog } from '../../modules/Moderation'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
     if (member.partial) {
-        member = (await member.fetch().catch(() => {})) as GuildMember
+        try {
+            member = await member.fetch()
+        } catch (err) {}
     }
 
     if (!member || !member.guild) return false
