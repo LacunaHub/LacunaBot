@@ -1,6 +1,7 @@
 import { ChannelType, Events, Message } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
+import Automation from '../../modules/Automation'
 import { antiCaps, linksFilter, swearFilter } from '../../modules/Automoder'
 import { MessageUpdate } from '../../modules/Logs'
 
@@ -18,8 +19,8 @@ const handler = async (self: Lacuna, before: Message, message: Message) => {
     await antiCaps(self, server, message)
     await linksFilter(self, server, message)
     await swearFilter(self, server, message)
-
     await MessageUpdate(self, server, before, message)
+    await Automation.handleEvent('MESSAGE_UPDATE', self, server, message)
 
     if (partial) message.channel.messages.cache.sweep(m => [before.id, message.id].includes(m.id))
 

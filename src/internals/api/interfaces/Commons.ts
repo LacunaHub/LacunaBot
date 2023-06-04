@@ -1228,6 +1228,14 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 updateData['modules.activities.multipliers'] = data.modules.activities.multipliers.slice(0, guild.server.premium.available ? 10 : 1)
             }
         }
+
+        if (
+            data.modules.automation &&
+            Array.isArray(data.modules.automation) &&
+            JSON.stringify(data.modules.automation) !== JSON.stringify(guild.modules.automation)
+        ) {
+            updateData['modules.automation'] = data.modules.automation
+        }
     }
 
     if (Object.keys(updateData).length) {

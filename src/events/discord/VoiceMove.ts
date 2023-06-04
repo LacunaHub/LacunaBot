@@ -1,6 +1,7 @@
 import { VoiceState } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
+import Automation from '../../modules/Automation'
 import { voiceAssign as economyVoiceAssign, voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
 import { voiceAssign as levelsVoiceAssign, voiceUnassign as levelsVoiceUnassign } from '../../modules/Levels'
 import { VoiceMove } from '../../modules/Logs'
@@ -62,6 +63,7 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
 
     await createTemporaryVoiceOnMove(self, server, before, state)
     await VoiceMove(self, server, before, state)
+    await Automation.handleEvent('VOICE_CONNECT', self, server, state)
 
     return true
 }

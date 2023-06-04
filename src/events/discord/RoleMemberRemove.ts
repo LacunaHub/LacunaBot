@@ -1,5 +1,6 @@
 import { Collection, GuildMember, Role } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
+import Automation from '../../modules/Automation'
 import { RoleMemberRemove } from '../../modules/Logs'
 
 const handler = async (self: Lacuna, member: GuildMember, roles: Collection<string, Role>) => {
@@ -10,6 +11,7 @@ const handler = async (self: Lacuna, member: GuildMember, roles: Collection<stri
     if (temprole && roles.some(i => i.id == temprole.role_id)) await temprole.delete()
 
     await RoleMemberRemove(self, server, member, roles)
+    await Automation.handleEvent('ROLE_MEMBER_REMOVE', self, server, member)
 
     return true
 }

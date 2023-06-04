@@ -162,7 +162,8 @@ async function getSettings(ctx: Context) {
             subscriptions: server.modules.subscriptions,
             interactive_messages: server.modules.interactive_messages,
             activities: server.modules.activities,
-            custom_commands: server.modules.custom_commands
+            custom_commands: server.modules.custom_commands,
+            automation: server.modules.automation
         },
         prices,
         change_log: server.change_log.reverse()
@@ -239,7 +240,8 @@ async function updateSettings(ctx: Context) {
             subscriptions: server.modules.subscriptions,
             interactive_messages: server.modules.interactive_messages,
             activities: server.modules.activities,
-            custom_commands: server.modules.custom_commands
+            custom_commands: server.modules.custom_commands,
+            automation: server.modules.automation
         },
         prices,
         change_log: server.change_log.reverse()

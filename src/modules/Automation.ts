@@ -1,131 +1,113 @@
 import {
-    ApplicationCommandOptionType,
+    AnySelectMenuInteraction,
     BaseGuildTextChannel,
-    ChatInputCommandInteraction,
+    ButtonInteraction,
     Collection,
     EmbedBuilder,
+    Guild,
     GuildMember,
-    GuildMemberRoleManager,
     InteractionDeferReplyOptions,
+    InteractionEditReplyOptions,
     InteractionReplyOptions,
+    Message,
     ModalComponentData,
-    resolveColor,
-    Team,
-    User
+    ModalSubmitInteraction,
+    StringSelectMenuInteraction,
+    VoiceState,
+    resolveColor
 } from 'discord.js'
 import IVM, { Context } from 'isolated-vm'
 import { QuickDB } from 'quick.db'
 import safeRegex from 'safe-regex'
-import { ICustomCommand, MessageEmbed as IMessageEmbed, ServerDocument } from '../database/schemas/Servers'
+import { IAutomation, IAutomationTrigger, MessageEmbed as IMessageEmbed, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
-import logger from '../internals/Logger'
-import { escapeRegexp, isValidHttpUrl, snakeToPascalCase, transformMessageComponents, transformModalComponents } from '../internals/utility/Utils'
+import Logger from '../internals/Logger'
+import {
+    escapeRegexp,
+    isValidHttpUrl,
+    snakeToPascalCase,
+    transformMessageComponents,
+    transformMessageEmbeds,
+    transformModalComponents
+} from '../internals/utility/Utils'
 
-export default class CustomCommand {
-    public command: ICustomCommand
+export default class Automation {
     public self: Lacuna
     public server: ServerDocument
-    public interaction: ChatInputCommandInteraction
-    public storage: QuickDB
+    public automation: IAutomation
+    public signal: IAutomationSignal
+    private storage: QuickDB
+    private isolate: IVM.Isolate
     private usedPatterns: string[]
     private usedFunctions: string[]
-    private isolate: IVM.Isolate
 
-    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
-        this.command = command
-
+    constructor(self: Lacuna, server: ServerDocument, automation: IAutomation, signal: IAutomationSignal) {
         this.self = self
 
         this.server = server
 
-        this.interaction = interaction
+        this.automation = automation
+
+        this.signal = signal
 
         this.storage = this.self.db.qdb.table('publicStorage')
-
-        this.usedPatterns = []
-
-        this.usedFunctions = []
 
         this.isolate = new IVM.Isolate({
             memoryLimit: 16,
             onCatastrophicError(message) {
-                logger.error('(Catastrophic Error):', message)
-                logger.telegram.error('Catastrophic Error:', message)
+                Logger.error('(Catastrophic Error):', message)
+                Logger.telegram.error('Catastrophic Error:', message)
             }
         })
+
+        this.usedPatterns = []
+
+        this.usedFunctions = []
+    }
+
+    get signalType() {
+        let type = 'Unknown'
+
+        if (this.signal instanceof GuildMember) type = 'GuildMember'
+        if (this.signal instanceof ButtonInteraction) type = 'ButtonInteraction'
+        if (this.signal instanceof StringSelectMenuInteraction) type = 'StringSelectMenuInteraction'
+        if (this.signal instanceof ModalSubmitInteraction) type = 'ModalSubmitInteraction'
+        if (this.signal instanceof Message) type = 'Message'
+        if (this.signal instanceof VoiceState) type = 'VoiceState'
+
+        return type
     }
 
     async getGlobalValues() {
-        let { channel, commandId, commandName, guild, member, options } = this.interaction
+        let guild: Guild,
+            member: GuildMember,
+            channel: BaseGuildTextChannel,
+            interaction: ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction,
+            message: Message,
+            voiceState: VoiceState
 
-        await channel.fetch()
-        await guild.fetch()
+        guild = this.signal.guild
+
+        if (this.signalType === 'GuildMember') {
+            member = this.signal as GuildMember
+        } else {
+            member = this.signal['member']
+            channel = this.signal['channel']
+        }
+
+        if (['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType)) {
+            interaction = this.signal as any
+        }
+
+        if (this.signalType === 'Message') {
+            message = this.signal as Message
+        }
+
+        if (this.signalType === 'VoiceState') {
+            voiceState = this.signal as VoiceState
+        }
 
         return {
-            channel: {
-                createdTimestamp: channel.createdTimestamp,
-                full: channel['full'],
-                id: channel.id,
-                lastMessageId: channel.lastMessageId,
-                name: channel.name,
-                nsfw: channel['nsfw'],
-                type: channel.type,
-                parentId: channel.parentId,
-                position: channel['rawPosition'],
-                rateLimitPerUser: channel.rateLimitPerUser,
-                topic: channel['topic']
-            },
-            command: {
-                id: commandId,
-                name: commandName,
-                options: options.data.map(i => {
-                    let user, channel, role
-
-                    if (i.type === ApplicationCommandOptionType.User) user = options.getUser(i.name)
-                    if (i.type === ApplicationCommandOptionType.Channel) channel = options.getChannel(i.name)
-                    if (i.type === ApplicationCommandOptionType.Role) role = options.getRole(i.name)
-
-                    return {
-                        name: i.name,
-                        value: i.value,
-                        user: user
-                            ? {
-                                  id: user.id,
-                                  username: user.username,
-                                  discriminator: user.discriminator,
-                                  avatar: user.displayAvatarURL(),
-                                  createdTimestamp: user.createdTimestamp
-                              }
-                            : undefined,
-                        channel: channel
-                            ? {
-                                  id: channel.id,
-                                  name: channel.name,
-                                  type: channel.type,
-                                  parentId: channel.parentId,
-                                  nsfw: channel.nsfw,
-                                  position: channel.rawPosition,
-                                  topic: channel.topic,
-                                  lastMessageId: channel.lastMessageId,
-                                  rateLimitPerUser: channel.rateLimitPerUser,
-                                  createdTimestamp: channel.createdTimestamp
-                              }
-                            : undefined,
-                        role: role
-                            ? {
-                                  id: role.id,
-                                  name: role.name,
-                                  color: role.hexColor,
-                                  icon: role.iconURL(),
-                                  hoist: role.hoist,
-                                  managed: role.managed,
-                                  mentionable: role.mentionable,
-                                  position: role.rawPosition
-                              }
-                            : undefined
-                    }
-                })
-            },
             guild: {
                 id: guild.id,
                 name: guild.name,
@@ -183,13 +165,13 @@ export default class CustomCommand {
                     id: member.user.id,
                     username: member.user.username,
                     discriminator: member.user.discriminator,
-                    avatar: (member.user as User).displayAvatarURL(),
-                    createdTimestamp: member.user['createdTimestamp']
+                    avatar: member.user.displayAvatarURL(),
+                    createdTimestamp: member.user.createdTimestamp
                 },
-                avatar: (member as GuildMember).displayAvatarURL(),
-                nickname: member['nickname'],
+                avatar: member.displayAvatarURL(),
+                nickname: member.nickname,
                 pending: member.pending,
-                roles: (member.roles as GuildMemberRoleManager).cache.map(i => {
+                roles: member.roles.cache.map(i => {
                     return {
                         id: i.id,
                         name: i.name,
@@ -201,8 +183,54 @@ export default class CustomCommand {
                         position: i.rawPosition
                     }
                 }),
-                permissions: (member as GuildMember).permissions.toArray(),
-                joinedTimestamp: member['joinedTimestamp']
+                permissions: member.permissions.toArray(),
+                joinedTimestamp: member.joinedTimestamp
+            },
+            channel: {
+                createdTimestamp: channel.createdTimestamp,
+                full: channel['full'],
+                id: channel.id,
+                lastMessageId: channel.lastMessageId,
+                name: channel.name,
+                nsfw: channel.nsfw,
+                type: channel.type,
+                parentId: channel.parentId,
+                position: channel.rawPosition,
+                rateLimitPerUser: channel.rateLimitPerUser,
+                topic: channel.topic
+            },
+            interaction: {
+                customId: interaction?.customId,
+                fields: (interaction as ModalSubmitInteraction)?.fields?.fields?.toJSON(),
+                guildLocale: interaction?.guildLocale,
+                id: interaction?.id,
+                locale: interaction?.locale,
+                values: (interaction as AnySelectMenuInteraction)?.values
+            },
+            message: {
+                cleanContent: message?.cleanContent,
+                content: message?.content,
+                createTimestamp: message?.createdTimestamp,
+                crosspostable: message?.crosspostable,
+                editedTimestamp: message?.editedTimestamp,
+                embeds: message?.embeds,
+                flags: message?.flags,
+                id: message?.id,
+                mentions: message?.mentions?.toJSON(),
+                pinnable: message?.pinnable,
+                type: message?.type,
+                url: message?.url
+            },
+            voiceState: {
+                deaf: voiceState?.deaf,
+                id: voiceState?.id,
+                mute: voiceState?.mute,
+                selfDeaf: voiceState?.selfDeaf,
+                selfMute: voiceState?.selfMute,
+                selfVideo: voiceState?.selfVideo,
+                serverDeaf: voiceState?.serverDeaf,
+                serverMute: voiceState?.serverMute,
+                streaming: voiceState?.streaming
             }
         }
     }
@@ -242,7 +270,7 @@ export default class CustomCommand {
         return string
     }
 
-    async handleTemplateMessage(message: { content: string; embed: IMessageEmbed; components?: any[][] }, ctx: Context) {
+    async transformTemplateMessage(message: { content: string; embed: IMessageEmbed; components?: any[][] }, ctx: Context) {
         const content = await this.replacePatterns(message.content, ctx)
         let embed = {}
 
@@ -304,28 +332,13 @@ export default class CustomCommand {
     }
 
     async execute() {
-        const t = this.self.i18n.t.bind(null, this.server.locale)
-        const throttled = await this.throttled()
-
-        if (throttled.status) {
-            await this.interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_throttled', {
-                    user: `**${this.interaction.user.username}**`,
-                    time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
-                })}`,
-                ephemeral: true
-            })
-
-            return false
-        }
-
         const ctx = this.isolate.createContextSync()
         ctx.global.setSync('global', ctx.global.derefInto())
 
         const globalValues = await this.getGlobalValues()
 
-        for (const smartValue of Object.keys(globalValues)) {
-            ctx.global.setSync(smartValue, globalValues[smartValue], { copy: true })
+        for (const value of Object.keys(globalValues)) {
+            ctx.global.setSync(value, globalValues[value], { copy: true })
         }
 
         ctx.global.setSync('setValue', (key: string, value: any) => {
@@ -336,7 +349,7 @@ export default class CustomCommand {
             if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
             if (!value || typeof value === 'function' || value === null) throw new TypeError('INVALID_PARAMETERS')
 
-            this.storage.set(`${this.interaction.guildId}.${key}`, value)
+            this.storage.set(`${globalValues.guild.id}.${key}`, value)
         })
 
         ctx.evalClosureSync(
@@ -349,7 +362,7 @@ export default class CustomCommand {
                 (key: string) => {
                     if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
 
-                    return this.storage.get(`${this.interaction.guildId}.${key}`)
+                    return this.storage.get(`${globalValues.guild.id}.${key}`)
                 }
             ],
             { arguments: { reference: true } }
@@ -358,14 +371,14 @@ export default class CustomCommand {
         ctx.global.setSync('deleteValue', (key: string) => {
             if (typeof key !== 'string' || !key.length) throw new TypeError('INVALID_PARAMETERS')
 
-            this.storage.delete(`${this.interaction.guildId}.${key}`)
+            this.storage.delete(`${globalValues.guild.id}.${key}`)
         })
 
-        if (this.command.components.length > 1 && this.command.components.some(i => i.action?.type === 'EXECUTE_CODE')) {
-            this.command.components = [this.command.components.find(i => i.action?.type === 'EXECUTE_CODE')]
+        if (this.automation.components.length > 1 && this.automation.components.some(i => i.action?.type === 'EXECUTE_CODE')) {
+            this.automation.components = [this.automation.components.find(i => i.action?.type === 'EXECUTE_CODE')]
         }
 
-        for (const component of this.command.components) {
+        for (const component of this.automation.components) {
             if (component.type === 'CONDITION') {
                 const { condition } = component
 
@@ -375,97 +388,36 @@ export default class CustomCommand {
                     const leftVal = await this.replacePatterns(compare_values.left, ctx)
                     const rightVal = await this.replacePatterns(compare_values.right, ctx)
 
-                    const message =
-                        compare_values.options.includes('FALSE_REPLY') && compare_values.false_reply
-                            ? await this.handleTemplateMessage(compare_values.false_reply, ctx)
-                            : null
-
                     if (compare_values.operator === 'EQUAL') {
-                        if (leftVal !== rightVal) {
-                            if (message)
-                                await this.interaction
-                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
-                                    .catch(() => {})
-
-                            break
-                        }
+                        if (leftVal !== rightVal) break
                     }
 
                     if (compare_values.operator === 'NOT_EQUAL') {
-                        if (leftVal === rightVal) {
-                            if (message)
-                                await this.interaction
-                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
-                                    .catch(() => {})
-
-                            break
-                        }
+                        if (leftVal === rightVal) break
                     }
 
                     if (compare_values.operator === 'STARTS_WITH') {
-                        if (!leftVal.startsWith(rightVal)) {
-                            if (message)
-                                await this.interaction
-                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
-                                    .catch(() => {})
-
-                            break
-                        }
+                        if (!leftVal.startsWith(rightVal)) break
                     }
 
                     if (compare_values.operator === 'ENDS_WITH') {
-                        if (!leftVal.endsWith(rightVal)) {
-                            if (message)
-                                await this.interaction
-                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
-                                    .catch(() => {})
-
-                            break
-                        }
+                        if (!leftVal.endsWith(rightVal)) break
                     }
 
                     if (compare_values.operator === 'GREATER_THAN') {
-                        if (leftVal < rightVal) {
-                            if (message)
-                                await this.interaction
-                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
-                                    .catch(() => {})
-
-                            break
-                        }
+                        if (leftVal < rightVal) break
                     }
 
                     if (compare_values.operator === 'LESS_THAN') {
-                        if (leftVal > rightVal) {
-                            if (message)
-                                await this.interaction
-                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
-                                    .catch(() => {})
-
-                            break
-                        }
+                        if (leftVal > rightVal) break
                     }
 
                     if (compare_values.operator === 'CONTAINS') {
-                        if (!leftVal.includes(rightVal)) {
-                            if (message)
-                                await this.interaction
-                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
-                                    .catch(() => {})
-
-                            break
-                        }
+                        if (!leftVal.includes(rightVal)) break
                     }
 
                     if (compare_values.operator === 'NOT_CONTAINS') {
-                        if (leftVal.includes(rightVal)) {
-                            if (message)
-                                await this.interaction
-                                    .reply({ ...message, ephemeral: compare_values.options.includes('FALSE_REPLY_EPHEMERAL') })
-                                    .catch(() => {})
-
-                            break
-                        }
+                        if (leftVal.includes(rightVal)) break
                     }
                 }
             }
@@ -474,62 +426,72 @@ export default class CustomCommand {
                 const { action } = component
 
                 if (action.type === 'EXECUTE_CODE' && this.server.server.premium.available) {
+                    const interaction = this.signal as ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction
+
                     const functions = {
                         deferReply: async (rawOptions: InteractionDeferReplyOptions) => {
                             const used = this.useFunction('deferReply')
 
                             if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (!['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType))
+                                throw new TypeError('Method "deferReply" only available for Button, SelectMenu and Modal')
 
                             const options = {
                                 ephemeral: Boolean(rawOptions?.ephemeral)
                             }
 
-                            await this.interaction.deferReply(options)
+                            await interaction.deferReply(options)
+                        },
+                        deferUpdate: async () => {
+                            const used = this.useFunction('deferUpdate')
+
+                            if (used > 3) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (!['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType))
+                                throw new TypeError('Method "deferUpdate" only available for Button, SelectMenu and Modal')
+
+                            await interaction.deferUpdate()
                         },
                         deleteReply: async () => {
                             const used = this.useFunction('deleteReply')
 
                             if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (!['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType))
+                                throw new TypeError('Method "deleteReply" only available for Button, SelectMenu and Modal')
 
-                            await this.interaction.deleteReply()
+                            await interaction.deleteReply()
                         },
-                        editReply: async (rawOptions: InteractionReplyOptions) => {
+                        editReply: async (rawOptions: InteractionEditReplyOptions) => {
                             const used = this.useFunction('editReply')
 
                             if (used > 3) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (!['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType))
+                                throw new TypeError('Method "editReply" only available for Button, SelectMenu and Modal')
 
                             const options = {
                                 content: rawOptions?.content ?? undefined,
-                                embeds: rawOptions?.embeds?.length
-                                    ? rawOptions.embeds.map(i => {
-                                          return new EmbedBuilder(i as any).toJSON()
-                                      })
-                                    : undefined,
-                                components: transformMessageComponents(rawOptions?.components as any),
-                                tts: Boolean(rawOptions?.tts),
-                                ephemeral: Boolean(rawOptions?.ephemeral)
+                                embeds: transformMessageEmbeds(rawOptions?.embeds as any),
+                                components: transformMessageComponents(rawOptions?.components as any)
                             }
 
-                            await this.interaction.editReply(options)
+                            await interaction.deferUpdate()
+                            await interaction.editReply(options)
                         },
                         followUpReply: async (rawOptions: InteractionReplyOptions) => {
                             const used = this.useFunction('followUpReply')
 
                             if (used > 3) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (!['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType))
+                                throw new TypeError('Method "followUpReply" only available for Button, SelectMenu and Modal')
 
                             const options = {
                                 content: rawOptions?.content ?? undefined,
-                                embeds: rawOptions?.embeds?.length
-                                    ? rawOptions.embeds.map(i => {
-                                          return new EmbedBuilder(i as any).toJSON()
-                                      })
-                                    : undefined,
+                                embeds: transformMessageEmbeds(rawOptions?.embeds as any),
                                 components: transformMessageComponents(rawOptions?.components as any),
                                 tts: Boolean(rawOptions?.tts),
                                 ephemeral: Boolean(rawOptions?.ephemeral)
                             }
 
-                            await this.interaction.followUp(options)
+                            await interaction.followUp(options)
                         },
                         getUserActivity: async (userId: string) => {
                             const used = this.useFunction('getUserActivity')
@@ -539,8 +501,8 @@ export default class CustomCommand {
 
                             const user = await this.self.db.users.findOne({ _id: userId })
                             const userActivities = {
-                                level: user?.activities?.levels?.find?.(i => i.guild_id === this.interaction.guildId),
-                                wallet: user?.activities?.wallets?.find?.(i => i.guild_id === this.interaction.guildId)
+                                level: user?.activities?.levels?.find?.(i => i.guild_id === interaction.guildId),
+                                wallet: user?.activities?.wallets?.find?.(i => i.guild_id === interaction.guildId)
                             }
 
                             return {
@@ -562,25 +524,25 @@ export default class CustomCommand {
                             const used = this.useFunction('reply')
 
                             if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (!['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType))
+                                throw new TypeError('Method "reply" only available for Button, SelectMenu and Modal')
 
                             const options = {
                                 content: rawOptions?.content ?? undefined,
-                                embeds: rawOptions?.embeds?.length
-                                    ? rawOptions.embeds.map(i => {
-                                          return new EmbedBuilder(i as any).toJSON()
-                                      })
-                                    : undefined,
+                                embeds: transformMessageEmbeds(rawOptions?.embeds as any),
                                 components: transformMessageComponents(rawOptions?.components as any),
                                 tts: Boolean(rawOptions?.tts),
                                 ephemeral: Boolean(rawOptions?.ephemeral)
                             }
 
-                            await this.interaction.reply(options)
+                            await interaction.reply(options)
                         },
                         showModal: async (rawOptions: ModalComponentData) => {
                             const used = this.useFunction('showModal')
 
                             if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (!['ButtonInteraction', 'StringSelectMenuInteraction'].includes(this.signalType))
+                                throw new TypeError('Method "showModal" only available for Button and SelectMenu')
 
                             const options = {
                                 title: rawOptions?.title,
@@ -588,7 +550,9 @@ export default class CustomCommand {
                                 components: transformModalComponents(rawOptions?.components as any) as any
                             }
 
-                            await this.interaction.showModal(options)
+                            if ('showModal' in interaction) {
+                                await interaction.showModal(options)
+                            }
                         },
                         modifyUserRoles: async (userId: string, roles: string[], mode: 'add' | 'remove' | 'set' = 'add') => {
                             const used = this.useFunction('modifyUserRoles')
@@ -597,7 +561,7 @@ export default class CustomCommand {
                             if (typeof userId !== 'string' || !Array.isArray(roles) || !roles.every(i => typeof i === 'string'))
                                 throw new TypeError('INVALID_ARGUMENTS')
 
-                            const member = await this.interaction.guild.members.fetch({ user: userId })
+                            const member = await interaction.guild.members.fetch({ user: userId })
 
                             if (mode === 'add') {
                                 await member.roles.add(roles)
@@ -619,7 +583,7 @@ export default class CustomCommand {
                                 throw new TypeError('INVALID_ARGUMENTS')
                             if (!this.server.modules.economy.active) throw new Error('ECONOMY_IS_DISABLED')
 
-                            const member = await this.interaction.guild.members.fetch({ user: userId })
+                            const member = await interaction.guild.members.fetch({ user: userId })
                             let currency = this.server.modules.economy.currencies.find(i => i.id === currencyId)
 
                             if (!currency) {
@@ -646,11 +610,11 @@ export default class CustomCommand {
                                 } as any)
                             }
 
-                            let wallet = user.activities.wallets.find(i => i.guild_id == this.interaction.guildId)
+                            let wallet = user.activities.wallets.find(i => i.guild_id === interaction.guildId)
 
                             if (!wallet) {
                                 wallet = {
-                                    guild_id: this.interaction.guildId,
+                                    guild_id: interaction.guildId,
                                     currencies: [],
                                     transactions: [],
                                     activity: {
@@ -675,18 +639,18 @@ export default class CustomCommand {
                                 await this.self.db.users.updateOne(
                                     {
                                         _id: member.id,
-                                        'activities.wallets': { $elemMatch: { guild_id: this.interaction.guildId, 'currencies.id': currency.id } }
+                                        'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency.id } }
                                     },
                                     {
                                         $inc: {
                                             'activities.wallets.$[guild].currencies.$[currency].amount': amount
                                         }
                                     },
-                                    { arrayFilters: [{ 'guild.guild_id': this.interaction.guildId }, { 'currency.id': currency.id }] }
+                                    { arrayFilters: [{ 'guild.guild_id': interaction.guildId }, { 'currency.id': currency.id }] }
                                 )
                             } else {
                                 await this.self.db.users.updateOne(
-                                    { _id: member.id, 'activities.wallets.guild_id': this.interaction.guildId },
+                                    { _id: member.id, 'activities.wallets.guild_id': interaction.guildId },
                                     {
                                         $push: {
                                             'activities.wallets.$.currencies': {
@@ -704,17 +668,13 @@ export default class CustomCommand {
                             if (used > 2) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
                             if (typeof channelId !== 'string') throw new TypeError('INVALID_ARGUMENTS')
 
-                            const channel = this.interaction.guild.channels.cache.get(channelId) as BaseGuildTextChannel
+                            const channel = interaction.guild.channels.cache.get(channelId) as BaseGuildTextChannel
 
                             if (!channel) throw new Error('UNKNOWN_CHANNEL')
 
                             const options = {
                                 content: rawOptions?.content ?? null,
-                                embeds: rawOptions?.embeds?.length
-                                    ? rawOptions.embeds.map(i => {
-                                          return new EmbedBuilder(i as any).toJSON()
-                                      })
-                                    : [],
+                                embeds: transformMessageEmbeds(rawOptions?.embeds as any),
                                 components: transformMessageComponents(rawOptions?.components as any)
                             }
 
@@ -733,6 +693,34 @@ export default class CustomCommand {
                                 pinnable: message.pinnable,
                                 type: message.type,
                                 url: message.url
+                            }
+                        },
+                        overwriteChannelPermissions: async (channelIds: string[], permissions: { [key: string]: boolean }, userOrRole: string) => {
+                            const used = this.useFunction('overwriteChannelPermissions')
+
+                            if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (!Array.isArray(channelIds) || !channelIds.every(i => typeof i === 'string') || typeof userOrRole !== 'string')
+                                throw new TypeError('INVALID_ARGUMENTS')
+
+                            const channels = this.signal.guild.channels.cache.filter(i => i.manageable && channelIds.includes(i.id)) as Collection<
+                                string,
+                                BaseGuildTextChannel
+                            >
+                            const overwriteOptions = Object.keys(permissions).reduce((obj, k) => {
+                                obj[snakeToPascalCase(k)] = permissions[k]
+                                return obj
+                            }, {})
+
+                            for (const channel of channels.first(5)) {
+                                const overwrites = channel.permissionOverwrites.cache.get(userOrRole)
+
+                                try {
+                                    if (overwrites) {
+                                        await overwrites.edit(overwriteOptions)
+                                    } else {
+                                        await channel.permissionOverwrites.create(userOrRole, overwriteOptions)
+                                    }
+                                } catch (err) {}
                             }
                         }
                     }
@@ -769,10 +757,17 @@ export default class CustomCommand {
                         const error = err.toString().replace(/<isolated-vm>:?/, '')
                         const embed = new EmbedBuilder().setDescription(error).setColor('Red')
 
-                        if (this.interaction.deferred || this.interaction.replied) {
-                            await this.interaction.followUp({ embeds: [embed], ephemeral: true })
-                        } else {
-                            await this.interaction.reply({ embeds: [embed], ephemeral: true })
+                        if (['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType)) {
+                            if (interaction.deferred || interaction.replied) {
+                                await interaction.followUp({ embeds: [embed], ephemeral: true })
+                            } else {
+                                await interaction.reply({ embeds: [embed], ephemeral: true })
+                            }
+                        }
+
+                        if (this.signalType === 'Message') {
+                            const message = this.signal as Message
+                            await message.reply({ embeds: [embed] })
                         }
                     }
 
@@ -780,79 +775,75 @@ export default class CustomCommand {
                 }
 
                 if (action.type === 'REPLY') {
-                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const index = this.automation.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
                     const { reply } = action
 
                     if (index > 0) continue
 
-                    const message = await this.handleTemplateMessage(reply.message, ctx)
+                    if ('reply' in this.signal) {
+                        const message = await this.transformTemplateMessage(reply.message, ctx)
 
-                    await this.interaction.reply({ ...message, ephemeral: reply.options.includes('EPHEMERAL') }).catch(() => {})
+                        try {
+                            if (this.signal instanceof Message) {
+                                await this.signal.reply({ ...message })
+                            } else {
+                                await this.signal.reply({ ...message, ephemeral: reply.options.includes('EPHEMERAL') })
+                            }
+                        } catch (err) {}
+                    }
                 }
 
                 if (action.type === 'SEND_MESSAGE') {
-                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const index = this.automation.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
                     const { send_message } = action
 
                     if (index > 1) continue
 
-                    const message = await this.handleTemplateMessage(send_message.message, ctx)
+                    try {
+                        const message = await this.transformTemplateMessage(send_message.message, ctx)
+                        const channel = this.signal.guild.channels.cache.get(send_message.channel_id) as BaseGuildTextChannel
 
-                    if (send_message.format === 'CHANNEL') {
-                        const channel = this.interaction.guild.channels.cache.get(send_message.channel_id) as BaseGuildTextChannel
-
-                        if (channel) await channel.send({ ...message, tts: send_message.options.includes('TTS') }).catch(() => {})
-                    }
-
-                    if (send_message.format === 'CURRENT_CHANNEL') {
-                        await this.interaction.channel.send({ ...message, tts: send_message.options.includes('TTS') }).catch(() => {})
-                    }
+                        if (channel) {
+                            await channel.send({ ...message, tts: send_message.options.includes('TTS') })
+                        }
+                    } catch (err) {}
                 }
 
                 if (action.type === 'MODIFY_ROLES') {
-                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const index = this.automation.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
                     const { modify_roles } = action
 
                     if (index > 1) continue
 
-                    const user_id = modify_roles.user_id ? await this.replacePatterns(modify_roles.user_id, ctx) : this.interaction.user.id
-                    const member = (await this.interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
+                    try {
+                        const user_id = await this.replacePatterns(modify_roles.user_id, ctx)
+                        const member = await this.signal.guild.members.fetch({ user: user_id })
 
-                    if (member) {
-                        if (modify_roles.add.length) {
-                            const roles = this.interaction.guild.roles.cache.filter(i => i.editable && modify_roles.add.includes(i.id))
+                        if (member) {
+                            if (modify_roles.add.length) {
+                                await member.roles.add(modify_roles.add)
+                            }
 
-                            if (roles.size) await member.roles.add(roles).catch(() => {})
+                            if (modify_roles.remove.length) {
+                                await member.roles.remove(modify_roles.remove)
+                            }
                         }
-
-                        if (modify_roles.remove.length) {
-                            const roles = this.interaction.guild.roles.cache.filter(i => i.editable && modify_roles.remove.includes(i.id))
-
-                            if (roles.size) await member.roles.remove(roles).catch(() => {})
-                        }
-                    }
-                }
-
-                if (action.type === 'FORWARD_TO_COMMAND') {
-                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
-                    const { forward_to_command } = action
-
-                    if (index > 0) continue
-
-                    const command = this.self.commands.find(i => i.is_slash_command && i.name === forward_to_command)
-
-                    if (command) await command.executeSlash(this.server, this.interaction)
+                    } catch (err) {}
                 }
 
                 if (action.type === 'MODIFY_WALLET') {
-                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const index = this.automation.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
                     const { modify_wallet } = action
 
                     if (index > 1) continue
                     if (!this.server.modules.economy.active) continue
 
-                    const user_id = modify_wallet.user_id ? await this.replacePatterns(modify_wallet.user_id, ctx) : this.interaction.user.id
-                    const member = (await this.interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
+                    const user_id = await this.replacePatterns(modify_wallet.user_id, ctx)
+                    let member: GuildMember
+
+                    try {
+                        member = await this.signal.guild.members.fetch({ user: user_id })
+                    } catch (err) {}
 
                     if (member) {
                         const currency_id = modify_wallet.currency_id ? await this.replacePatterns(modify_wallet.currency_id, ctx) : 'DEFAULT'
@@ -882,11 +873,11 @@ export default class CustomCommand {
                             } as any)
                         }
 
-                        let wallet = user.activities.wallets.find(i => i.guild_id == this.interaction.guildId)
+                        let wallet = user.activities.wallets.find(i => i.guild_id == this.signal.guild.id)
 
                         if (!wallet) {
                             wallet = {
-                                guild_id: this.interaction.guildId,
+                                guild_id: this.signal.guild.id,
                                 currencies: [],
                                 transactions: [],
                                 activity: {
@@ -911,18 +902,18 @@ export default class CustomCommand {
                             await this.self.db.users.updateOne(
                                 {
                                     _id: member.id,
-                                    'activities.wallets': { $elemMatch: { guild_id: this.interaction.guildId, 'currencies.id': currency_id } }
+                                    'activities.wallets': { $elemMatch: { guild_id: this.signal.guild.id, 'currencies.id': currency_id } }
                                 },
                                 {
                                     $inc: {
                                         'activities.wallets.$[guild].currencies.$[currency].amount': amount
                                     }
                                 },
-                                { arrayFilters: [{ 'guild.guild_id': this.interaction.guildId }, { 'currency.id': currency_id }] }
+                                { arrayFilters: [{ 'guild.guild_id': this.signal.guild.id }, { 'currency.id': currency_id }] }
                             )
                         } else {
                             await this.self.db.users.updateOne(
-                                { _id: member.id, 'activities.wallets.guild_id': this.interaction.guildId },
+                                { _id: member.id, 'activities.wallets.guild_id': this.signal.guild.id },
                                 {
                                     $push: {
                                         'activities.wallets.$.currencies': {
@@ -937,27 +928,29 @@ export default class CustomCommand {
                 }
 
                 if (action.type === 'SHOW_MODAL') {
-                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const index = this.automation.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
                     const { show_modal } = action
 
                     if (index > 1) continue
 
                     try {
-                        await this.interaction.showModal({
-                            title: show_modal.title,
-                            customId: show_modal.customId,
-                            components: transformModalComponents(show_modal.components) as any
-                        })
+                        if ('showModal' in this.signal) {
+                            await this.signal.showModal({
+                                title: show_modal.title,
+                                customId: show_modal.customId,
+                                components: transformModalComponents(show_modal.components) as any
+                            })
+                        }
                     } catch (err) {}
                 }
 
                 if (action.type === 'OVERWRITE_CHANNEL_PERMISSIONS') {
-                    const index = this.command.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
+                    const index = this.automation.components.filter(i => i.type === 'ACTION' && i.action.type === action.type).indexOf(component)
                     const { overwrite_channel_permissions } = action
 
                     if (index > 1) continue
 
-                    const channels = this.interaction.guild.channels.cache.filter(
+                    const channels = this.signal.guild.channels.cache.filter(
                         i => i.manageable && overwrite_channel_permissions.channels.includes(i.id)
                     ) as Collection<string, BaseGuildTextChannel>
                     const userOrRole = await this.replacePatterns(overwrite_channel_permissions.user_or_role, ctx)
@@ -981,17 +974,14 @@ export default class CustomCommand {
             }
         }
 
-        await this.throttle()
-
         this.self.logger.telegram.info(
-            `Code Snippets (${this.interaction.guildId}:${this.interaction.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``
+            `Code Snippets (${this.signal.guild.id}:${globalValues.member.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``
         )
-        this.self.emit('commandExecution', {
-            command: this.interaction.commandName,
-            options: this.interaction.options.data.map(i => ({ name: i.name, type: i.type, value: i.value ?? null })),
-            guild: { name: this.interaction.guild.name, id: this.interaction.guildId },
-            channel: { name: (this.interaction.channel as BaseGuildTextChannel)?.name, id: this.interaction.channelId },
-            user: { name: this.interaction.user.username, id: this.interaction.user.id }
+        this.self.emit('moduleExecution', {
+            module: 'Automation',
+            category: snakeToPascalCase(this.automation.trigger),
+            guild: { id: this.signal.guild.id, name: this.signal.guild.name },
+            target: { id: globalValues.member.user.id, name: globalValues.member.user.username }
         })
 
         if (!this.isolate.isDisposed) this.isolate.dispose()
@@ -999,86 +989,24 @@ export default class CustomCommand {
         return true
     }
 
-    async throttled() {
-        if (this.command.options.includes('THROTTLING')) {
-            let path = `${this.interaction.guildId}.users.${this.interaction.user.id}`
-
-            if (this.command.throttling?.type === 'PER_GUILD') {
-                path = `${this.interaction.guildId}.guild`
-            }
-
-            if (this.command.throttling?.type === 'PER_CHANNEL') {
-                path = `${this.interaction.guildId}.channels.${this.interaction.channelId}`
-            }
-
-            const throttled = (await this.self.db.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)) as any
-
-            if (throttled?.retry_after - Date.now() > 0) {
-                return {
-                    status: true,
-                    retry_after: throttled.retry_after
-                }
-            }
-
-            if (throttled?.remaining === -1) {
-                await this.self.db.qdb.delete(`throttling.customCommands.${this.command.id}.${path}`)
-            }
-
-            return {
-                status: false
-            }
-        }
-
-        return {
-            status: false
-        }
-    }
-
-    async throttle() {
-        if ((this.self.application.owner as Team).members.some(m => m.id === this.interaction.user.id)) return false
-
-        if (this.command.options.includes('THROTTLING')) {
-            let path = `${this.interaction.guildId}.users.${this.interaction.user.id}`
-
-            if (this.command.throttling?.type === 'PER_GUILD') {
-                path = `${this.interaction.guildId}.guild`
-            }
-
-            if (this.command.throttling?.type === 'PER_CHANNEL') {
-                path = `${this.interaction.guildId}.channels.${this.interaction.channelId}`
-            }
-
-            let throttled = (await this.self.db.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)) as any
-            if (!throttled) {
-                await this.self.db.qdb.set(`throttling.customCommands.${this.command.id}.${path}`, {
-                    retry_after: Date.now(),
-                    remaining: this.command.throttling.max_uses
-                })
-
-                throttled = (await this.self.db.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)) as any
-            }
-
-            this.self.db.qdb.sub(`throttling.customCommands.${this.command.id}.${path}.remaining`, 1)
-            throttled.remaining--
-
-            if (throttled.remaining <= 0) {
-                await this.self.db.qdb.set(
-                    `throttling.customCommands.${this.command.id}.${path}.retry_after`,
-                    Date.now() + this.command.throttling.timeout * 1000
-                )
-                await this.self.db.qdb.set(`throttling.customCommands.${this.command.id}.${path}.remaining`, -1)
-            }
-        } else {
-            const has = await this.self.db.qdb.has(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)
-
-            if (has) {
-                await this.self.db.qdb.delete(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)
-            }
-        }
-    }
-
     useFunction(name: string) {
         this.usedFunctions.push(name)
         return this.usedFunctions.filter(i => i === name).length
     }
+
+    static async handleEvent(eventName: IAutomationTrigger, self: Lacuna, server: ServerDocument, signal: IAutomationSignal) {
+        const automation = server.modules.automation.find(i => i.trigger === eventName && !i.options.includes('DISABLED'))
+
+        if (automation) {
+            if ('customId' in signal) {
+                signal['customId' as any] = signal.customId.replace('UD-', '')
+            }
+
+            const am = new Automation(self, server, automation, signal)
+
+            await am.execute()
+        }
+    }
 }
+
+export type IAutomationSignal = GuildMember | ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction | Message | VoiceState
