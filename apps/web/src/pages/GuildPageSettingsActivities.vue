@@ -597,6 +597,104 @@
             </div>
           </div>
         </q-card-section>
+
+        <q-item class="q-py-md">
+          <q-item-section>
+            <q-item-label class="text-subtitle1">
+              {{ $t('pages.guild.ac_economy_transfer_permissions') }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-6">
+              <div>
+                {{ $t('common.allowed_roles') }}
+              </div>
+
+              <q-select
+                v-model="guild.modules.economy.transfer.allowed_roles"
+                :options="guild.roles"
+                option-label="name"
+                option-value="id"
+                :disable="!guild.modules.economy.active"
+                use-chips
+                class="q-pt-sm"
+                multiple
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt, index, removeAtIndex }">
+                  <q-chip
+                    class="rounded-lg"
+                    square
+                    :label="opt.name ?? opt"
+                    size="sm"
+                    :style="`background: ${opt.color}`"
+                    :ripple="false"
+                    removable
+                    @remove="removeAtIndex(index)"
+                  ></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section>
+                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+
+            <div class="col-6">
+              <div>
+                {{ $t('common.blocked_roles') }}
+              </div>
+
+              <q-select
+                v-model="guild.modules.economy.transfer.blocked_roles"
+                :options="guild.roles"
+                option-label="name"
+                option-value="id"
+                :disable="!guild.modules.economy.active"
+                use-chips
+                class="q-pt-sm"
+                multiple
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt, index, removeAtIndex }">
+                  <q-chip
+                    class="rounded-lg"
+                    square
+                    :label="opt.name ?? opt"
+                    size="sm"
+                    :style="`background: ${opt.color}`"
+                    :ripple="false"
+                    removable
+                    @remove="removeAtIndex(index)"
+                  ></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section>
+                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+          </div>
+        </q-card-section>
       </q-card>
     </div>
 
