@@ -1,16 +1,6 @@
-// Set Environments
-require('dotenv').config()
-process.env.API_URL =
-    process.env.NODE_ENV === 'development'
-        ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.API_PORT}`
-        : `https://api.${process.env.WEBSITE_DOMAIN}`
-process.env.WEBSITE_URL =
-    process.env.NODE_ENV === 'development'
-        ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.WEBSITE_PORT}`
-        : `https://${process.env.WEBSITE_DOMAIN}`
-process.env.CLIENT_OAUTH2_REDIRECT_URI = `${process.env.API_URL}/authorize/callback`
+import { configureEnvironments } from './internals/utility/Utils'
 
-const isMasterBridge = process.env.DISCORD_CLIENT_BRIDGE_HOST === 'localhost'
+configureEnvironments()
 
 import { Bridge } from 'discord-cross-hosting'
 import { Server } from 'http'
@@ -24,6 +14,7 @@ import { scheduleStatsCollect } from './internals/utility/Statistics'
 import { hubRefreshSubscriptions } from './modules/YouTube'
 
 let bridge: Bridge, server: Server
+const isMasterBridge = process.env.DISCORD_CLIENT_BRIDGE_HOST === 'localhost'
 
 if (isMasterBridge) {
     server = api.listen(process.env.API_PORT, () => {
