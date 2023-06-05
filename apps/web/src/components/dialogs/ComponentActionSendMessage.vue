@@ -93,6 +93,7 @@
               :message="component.action.send_message.message"
               hide-replacers
               hide-code-snippets
+              :disable-components="false"
               class="q-pt-sm"
             />
           </div>
@@ -121,7 +122,7 @@ import MessageEditor from '../MessageEditor.vue'
 import { useGuildStore } from 'src/stores/guild'
 
 export default defineComponent({
-  name: 'CustomCommandActionSendMessage',
+  name: 'ComponentActionSendMessage',
 
   emits: [...useDialogPluginComponent.emits],
 

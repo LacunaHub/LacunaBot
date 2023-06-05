@@ -152,7 +152,7 @@ import { useDialogPluginComponent } from 'quasar'
 const memberCountVariants = ['1-49', '50-99', '100-499', '500-2499', '2500-9999', '10000+']
 
 export default defineComponent({
-  name: 'ModerationCaseType',
+  name: 'UserSurvey',
 
   emits: [...useDialogPluginComponent.emits],
 

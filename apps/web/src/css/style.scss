@@ -99,6 +99,16 @@
   border: 3px solid $primary;
 }
 
+.q-dialog-card {
+  max-width: 90vw !important;
+  overflow: hidden;
+}
+
+.q-dialog-card-body {
+  max-height: 75vh;
+  overflow: auto;
+}
+
 /* STYLISH */
 
 code {

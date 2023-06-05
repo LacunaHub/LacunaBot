@@ -18,6 +18,12 @@
   "try_again": "Try again",
   "support_server": "Support server",
   "remind_later": "Remind later",
+  "disable": "Disable",
+  "import": "Import",
+  "export": "Export",
+  "publish": "Publish",
+  "name": "Name",
+  "identifier": "Identifier",
   "common": {
     "channel": "Channel",
     "channels": "Channels",
@@ -187,7 +193,8 @@
     "docs": "Docs",
     "patrons": "Patrons",
     "help": "Community",
-    "login": "Login"
+    "login": "Login",
+    "change_log": "Change log"
   },
   "lacuna_diamond": {
     "has_subscription": "This server already has bonuses that expire on {date}, but you can prolong them",
@@ -254,6 +261,7 @@
     "import_command": "Import command",
     "export_command": "Export command",
     "publish_command": "Publish command",
+    "command_sent_for_review": "Command has been sent for review",
     "command_templates": "Templates",
     "command_name_title": "Command name",
     "command_description_title": "Command description",
@@ -274,7 +282,9 @@
       "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
       "FORWARD_TO_COMMAND": "Forward to command",
       "MODIFY_WALLET": "Modify wallet",
-      "EXECUTE_CODE": "Execute code"
+      "EXECUTE_CODE": "Execute code",
+      "SHOW_MODAL": "Open modal window",
+      "OVERWRITE_CHANNEL_PERMISSIONS": "@:common.actions_keys.OVERWRITE_CHANNEL_PERMISSIONS"
     },
     "cv_operator_title": "Operator",
     "cv_operators": {
@@ -299,7 +309,11 @@
     "mw_amount_title": "Currency amount",
     "mw_user_id_description": "Change wallet of the specified user (default author of the command)",
     "mw_currency_id_title": "Currency ID",
-    "mw_currency_id_description": "Specify if you want to add a different currency than the standard one"
+    "mw_currency_id_description": "Specify if you want to add a different currency than the standard one",
+    "sm_field_placeholder_title": "Placeholder",
+    "sm_field_min_length_title": "Min length",
+    "sm_field_max_length_title": "Max length",
+    "sm_field_default_value_title": "Default value"
   },
   "automoder": {
     "titles": {
@@ -412,6 +426,24 @@
     "add_voice_role": "@:add voice role",
     "edit_voice_role": "@:edit voice role",
     "bound_channels_description": "Leave the field empty if you want the role to be issued when connecting to any channel"
+  },
+  "automation": {
+    "trigger_title": "Trigger",
+    "trigger_names": {
+      "GUILD_MEMBER_ADD": "@:common.action_log_keys.guild_member_add",
+      "GUILD_MEMBER_REMOVE": "@:common.action_log_keys.guild_member_remove",
+      "INTERACTION_BUTTON": "Button click",
+      "INTERACTION_SELECT_MENU": "Menu option select",
+      "INTERACTION_MODAL_SUBMIT": "Modal form submit",
+      "MESSAGE_CREATE": "Message sending",
+      "MESSAGE_DELETE": "@:common.action_log_keys.message_delete",
+      "MESSAGE_REACTION_ADD": "Reaction added to a message",
+      "MESSAGE_UPDATE": "@:common.action_log_keys.message_update",
+      "ROLE_MEMBER_ADD": "@:common.action_log_keys.role_member_add",
+      "ROLE_MEMBER_REMOVE": "@:common.action_log_keys.role_member_remove",
+      "VOICE_CONNECT": "@:common.action_log_keys.voice_connect",
+      "VOICE_DISCONNECT": "@:common.action_log_keys.voice_disconnect"
+    }
   },
   "auto_voices": {
     "add_auto_voice": "@:add voice trigger",
@@ -568,6 +600,7 @@
       "ac_economy_reset_on_leave_title": "Reset the wallet when member leaves",
       "ac_economy_currencies_title": "Currencies",
       "ac_economy_store_items_title": "Store items",
+      "ac_economy_transfer_permissions": "Permissions of the transfer command",
       "ac_multipliers_title": "Experience and earning multipliers",
       "vc_music_title": "Music",
       "vc_music_allow_radio_playback_title": "Allow radio playback",

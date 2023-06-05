@@ -108,6 +108,7 @@
                 :message="component.condition.compare_values.false_reply"
                 hide-replacers
                 hide-code-snippets
+                :disable-components="false"
                 class="q-pt-sm"
               />
             </div>
@@ -168,7 +169,7 @@ import { useDialogPluginComponent } from 'quasar'
 import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({
-  name: 'CustomCommandConditionCompareValues',
+  name: 'ComponentConditionCompareValues',
 
   emits: [...useDialogPluginComponent.emits],
 

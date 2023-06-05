@@ -148,7 +148,7 @@ import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 
 export default defineComponent({
-  name: 'CustomCommandActionModifyRoles',
+  name: 'ComponentActionModifyRoles',
 
   emits: [...useDialogPluginComponent.emits],
 

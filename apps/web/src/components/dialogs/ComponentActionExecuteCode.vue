@@ -1,25 +1,23 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section>
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    no-esc-dismiss
+    no-shake
+  >
+    <q-card class="rounded-lg bg-dark-1" flat style="width: 1280px; max-width: 90vw">
+      <q-card-section class="q-pa-none">
         <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('custom_command.command_name_title') }}
-            </div>
-
-            <q-select
-              v-model="component.action.forward_to_command"
-              :options="guild.guild.commands"
-              option-label="name"
-              option-value="name"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            ></q-select>
+          <div class="col-12 full-height">
+            <vue-monaco-editor
+              v-model:value="component.action.execute_code.code"
+              theme="vs-dark"
+              height="70vh"
+              language="javascript"
+              :options="editorOptions"
+            ></vue-monaco-editor>
           </div>
         </div>
       </q-card-section>
@@ -53,7 +51,7 @@ import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 
 export default defineComponent({
-  name: 'CustomCommandActionForwardToCommand',
+  name: 'ComponentActionExecuteCode',
 
   emits: [...useDialogPluginComponent.emits],
 
@@ -68,17 +66,29 @@ export default defineComponent({
     const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
+    const editorOptions = {
+      fixedOverflowWidgets: true,
+      tabSize: 2,
+      minimap: {
+        enabled: false
+      },
+      padding: {
+        top: 16
+      }
+    }
+
     const component = ref(JSON.parse(JSON.stringify(props.componentProp)))
 
     const isValid = computed(() => {
-      return Boolean(component.value.action.forward_to_command)
+      return Boolean(component.value.action.execute_code.code)
     })
 
     return {
       guild,
       dialogRef,
-      component,
+      editorOptions,
 
+      component,
       isValid,
 
       onConfirm() {

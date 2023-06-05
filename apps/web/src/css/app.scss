@@ -14,10 +14,6 @@ body.body--dark {
   color: $almost-white-1;
 }
 
-p {
-  margin: 0;
-}
-
 a {
   color: $primary;
   text-decoration: none;
@@ -25,6 +21,10 @@ a {
 
 a.origin:hover {
   text-decoration: underline;
+}
+
+ul {
+  padding-left: 16px;
 }
 
 /* OVERWRITE FRAMEWORK STYLES */

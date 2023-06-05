@@ -12,6 +12,27 @@ const api = axios.create({ baseURL: process.env.API })
 
 const interfaces = {
     common: {
+        getAutomationTasks() {
+            return api.get(`/common/automation-tasks`, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
+        getAutomationTask(automationId, guildId) {
+            return api.get(`/common/automation-tasks/${automationId}?guild_id=${guildId}`, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
+        publishAutomationTask(guildId, options) {
+            return api.post(`/common/automation-tasks?guild_id=${guildId}`, options.data, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
         getCustomCommands() {
             return api.get(`/common/custom-commands`, {
                 headers: {
