@@ -16,6 +16,7 @@ import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
 import { snakeToPascalCase, truncateString } from '../../internals/utility/Utils'
+import Automation from '../../modules/Automation'
 import CustomCommand from '../../modules/CustomCommand'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
 import { createPoll, onPressPollButton } from '../../modules/Polls'
@@ -227,6 +228,10 @@ const handler = async (
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {
             await onPressChangeReasonButton(self, server, interaction)
         }
+
+        if (/UD\-.*/.test(interaction.customId)) {
+            await Automation.handleEvent('INTERACTION_BUTTON', self, server, interaction)
+        }
     }
 
     if (interaction.isAnySelectMenu()) {
@@ -297,6 +302,10 @@ const handler = async (
                     }
                 }
             }
+        }
+
+        if (/UD\-.*/.test(interaction.customId) && interaction.isStringSelectMenu()) {
+            await Automation.handleEvent('INTERACTION_SELECT_MENU', self, server, interaction)
         }
     }
 
@@ -443,6 +452,8 @@ const handler = async (
             const reportCommand = self.commands.get('report')
             await reportCommand.executeSlash(server, interaction as any)
         }
+
+        await Automation.handleEvent('INTERACTION_MODAL_SUBMIT', self, server, interaction)
     }
 
     return true

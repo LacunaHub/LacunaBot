@@ -1,8 +1,8 @@
 import Router from '@koa/router'
 import { Context } from 'koa'
 import database from '../../../database'
-import { bridgeClient, clusterManager } from '../../Cluster'
 import Lacuna from '../../Lacuna'
+import { bridgeClient } from '../index'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
 const { version } = require('../../../../package.json')
@@ -22,13 +22,12 @@ async function getState(ctx: Context) {
             cachedUsers: self.users.cache.size,
             channels: self.channels.cache.size,
             latency: self.ws.ping,
-            uptime: self.uptime
+            uptime: self.uptime,
+            musicNodes: self.cluster.id === 0 ? self.getMusicNodes() : []
         }
     })
     const flatStats = stats.flat()
-
     const { data: servers } = await bridgeClient.request({ type: 'server-performance' }, { timeout: 15000, internal: false })
-    const players = await [...clusterManager.clusters.values()][0].eval('this.getMusicNodes()', null, 10000)
 
     ctx.status = 200
     ctx.body = {
@@ -57,7 +56,7 @@ async function getState(ctx: Context) {
                 uptime: i.uptime
             }
         }),
-        players: players,
+        players: flatStats[0].musicNodes,
         charts: await database.qdb.get('charts'),
         stats: await database.qdb.get('stats')
     }

@@ -253,6 +253,7 @@ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
 Пример `.env`
 
 ```make
+NODE_ENV=development
 API_PORT=3000
 DB_URL=mongodb://127.0.0.1:27017/lacuna
 DB_MYSQL_AUTH=HOST:PORT:USER:PASSWORD:DATABASE

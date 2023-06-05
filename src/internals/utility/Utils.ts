@@ -1,3 +1,15 @@
+import {
+    APIEmbed,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    EmbedBuilder,
+    ModalActionRowComponentBuilder,
+    StringSelectMenuBuilder,
+    TextInputBuilder,
+    TextInputStyle
+} from 'discord.js'
+import dotenv from 'dotenv'
 import { parseString } from 'xml2js'
 
 const snowflakeRegexp = /\d{17,20}/
@@ -221,6 +233,95 @@ export function getTrackSourceByUrl(url: string) {
     if (url.includes('soundcloud.com')) return 'SoundCloud'
 
     return 'UnknownSource'
+}
+
+export function transformMessageEmbeds(embeds: APIEmbed[]) {
+    if (!Array.isArray(embeds)) return undefined
+
+    return embeds.slice(0, 5).map(embed => {
+        return new EmbedBuilder(embed).toJSON()
+    })
+}
+
+export function transformMessageComponents(components: any[][]) {
+    if (!Array.isArray(components)) return undefined
+
+    components = components.filter(i => Array.isArray(i))
+
+    return components.slice(0, 5).map(row => {
+        return new ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>()
+            .addComponents(
+                row.map(component => {
+                    if (component.type === 'Button') {
+                        const button = new ButtonBuilder()
+
+                        if (typeof component.customId === 'string') button.setCustomId(`UD-${component.customId}`)
+                        button.setDisabled(Boolean(component.disabled))
+                        if (component.emoji && component.emoji?.name) button.setEmoji(component.emoji.id ? component.emoji : component.emoji.name)
+                        if (typeof component.label === 'string') button.setLabel(component.label)
+                        button.setStyle(ButtonStyle[component.style] as any)
+                        if (typeof component.url === 'string') button.setURL(component.url)
+
+                        return button
+                    }
+
+                    if (component.type === 'SelectMenu') {
+                        const selectMenu = new StringSelectMenuBuilder()
+
+                        if (typeof component.customId === 'string') selectMenu.setCustomId(`UD-${component.customId}`)
+                        selectMenu.setDisabled(Boolean(component.disabled))
+                        if (typeof component.maxValues === 'number') selectMenu.setMaxValues(component.maxValues)
+                        if (typeof component.minValues === 'number') selectMenu.setMinValues(component.minValues)
+                        selectMenu.setOptions(...component.options)
+                        if (typeof component.placeholder === 'string') selectMenu.setPlaceholder(component.placeholder)
+
+                        return selectMenu
+                    }
+                })
+            )
+            .toJSON()
+    })
+}
+
+export function transformModalComponents(components: any[][]) {
+    if (!Array.isArray(components)) return undefined
+
+    components = components.filter(i => Array.isArray(i))
+
+    return components.slice(0, 5).map(row => {
+        return new ActionRowBuilder<ModalActionRowComponentBuilder>()
+            .addComponents(
+                row.map(component => {
+                    const field = new TextInputBuilder()
+
+                    field.setCustomId(`UD-${component.customId}`)
+                    if (typeof component.label === 'string') field.setLabel(component.label)
+                    if (typeof component.maxLength === 'number') field.setMaxLength(component.maxLength)
+                    if (typeof component.minLength === 'number') field.setMinLength(component.minLength)
+                    if (typeof component.placeholder === 'string') field.setPlaceholder(component.placeholder)
+                    field.setRequired(Boolean(component.required))
+                    field.setStyle(TextInputStyle[component.style] as any)
+                    if (typeof component.value === 'string') field.setValue(component.value)
+
+                    return field
+                })
+            )
+            .toJSON()
+    })
+}
+
+export function configureEnvironments() {
+    dotenv.config()
+
+    process.env.API_URL =
+        process.env.NODE_ENV === 'development'
+            ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.API_PORT}`
+            : `https://api.${process.env.WEBSITE_DOMAIN}`
+    process.env.WEBSITE_URL =
+        process.env.NODE_ENV === 'development'
+            ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.WEBSITE_PORT}`
+            : `https://${process.env.WEBSITE_DOMAIN}`
+    process.env.CLIENT_OAUTH2_REDIRECT_URI = `${process.env.API_URL}/authorize/callback`
 }
 
 export default {

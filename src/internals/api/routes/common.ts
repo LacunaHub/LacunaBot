@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 import { Context } from 'koa'
 import database from '../../../database'
-import { ICustomCommand } from '../../../database/schemas/Servers'
+import { IAutomation, ICustomCommand } from '../../../database/schemas/Servers'
 import { authorize } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
@@ -9,9 +9,89 @@ const router = new Router({ prefix: '/common' })
 
 router.use(createRateLimitMiddleware(15, 60000))
 
+router.get('/automation-tasks/:automation_id', authorize, getAutomationTask)
+router.get('/automation-tasks', authorize, getAutomationTasks)
+router.post('/automation-tasks', authorize, publishAutomationTask)
 router.get('/custom-commands/:command_id', authorize, getCustomCommand)
 router.get('/custom-commands', authorize, getCustomCommands)
 router.post('/custom-commands', authorize, publishCustomCommand)
+
+async function getAutomationTask(ctx: Context) {
+    const automationId = ctx.params.automation_id as string
+    const guildId = ctx.query.guild_id as string
+
+    const automation = await database.automationTasks.findOne({ _id: automationId, published: true })
+
+    if (!automation) ctx.throw(404)
+
+    const server = await database.servers.findOne({ _id: guildId })
+
+    if (!server || server.server.blocked) ctx.throw(404)
+
+    if (!automation.uses.some(i => i.guild_id === guildId)) {
+        await database.customCommands.updateOne(
+            { _id: automationId },
+            {
+                $push: {
+                    uses: {
+                        guild_id: guildId,
+                        timestamp: Date.now()
+                    }
+                },
+                $inc: {
+                    total_uses: 1
+                }
+            }
+        )
+    }
+
+    ctx.status = 200
+    ctx.body = {
+        _id: automation._id,
+        data: automation.data
+    }
+}
+
+async function getAutomationTasks(ctx: Context) {
+    const automationTasks = await database.automationTasks.find({ published: true }).sort({ total_uses: -1 })
+
+    ctx.status = 200
+    ctx.body = automationTasks.map(i => {
+        return {
+            _id: i._id,
+            name: i.name,
+            total_uses: i.total_uses,
+            uses: i.uses
+        }
+    })
+}
+
+async function publishAutomationTask(ctx: Context) {
+    const guildId = ctx.query.guild_id as string,
+        userId = ctx.request.headers['user-id'] as string
+    const data = ctx.request.body as IAutomation
+
+    if (typeof data?.id !== 'string' || typeof data?.name !== 'string' || typeof data?.trigger !== 'string' || !data?.components?.length)
+        ctx.throw(400)
+
+    const server = await database.servers.findOne({ _id: guildId })
+
+    if (!server || server.server.blocked) ctx.throw(404)
+
+    const automation = await database.automationTasks.findOne({ _id: data.id })
+
+    if (automation) ctx.throw(409)
+
+    await database.automationTasks.create({
+        _id: data.id,
+        author_id: userId,
+        guild_id: guildId,
+        name: data.name,
+        data: JSON.stringify(data)
+    })
+
+    ctx.status = 204
+}
 
 async function getCustomCommand(ctx: Context) {
     const commandId = ctx.params.command_id as string

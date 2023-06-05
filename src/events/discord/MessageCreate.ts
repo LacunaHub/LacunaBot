@@ -1,6 +1,7 @@
 import { ChannelType, Events, Message, MessageType } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
+import Automation from '../../modules/Automation'
 import { antiCaps, linksFilter, nicknamesModeration, swearFilter, usersSlowdown } from '../../modules/Automoder'
 import { messageCreate as addWalletCash } from '../../modules/Economy'
 import { messageCreate as addLevelPoints } from '../../modules/Levels'
@@ -33,6 +34,7 @@ const handler = async (self: Lacuna, message: Message) => {
 
     await autoThread(self, server, message)
     await autoReact(self, server, message)
+    await Automation.handleEvent('MESSAGE_CREATE', self, server, message)
 
     return true
 }

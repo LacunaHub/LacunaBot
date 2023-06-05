@@ -1,10 +1,8 @@
 {
     "apps": [
         {
-            "name": "lacuna",
-            "script": "./dist/index.js",
-            "exec_interpreter": "node",
-            "exec_mode": "fork"
+            "name": "bot",
+            "script": "./dist/index.js"
         }
     ]
 }

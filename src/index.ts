@@ -1,22 +1,15 @@
-// Set Environments
-require('dotenv').config()
-process.env.API_URL =
-    process.env.NODE_ENV === 'development'
-        ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.API_PORT}`
-        : `https://api.${process.env.WEBSITE_DOMAIN}`
-process.env.WEBSITE_URL =
-    process.env.NODE_ENV === 'development'
-        ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.WEBSITE_PORT}`
-        : `https://${process.env.WEBSITE_DOMAIN}`
-process.env.CLIENT_OAUTH2_REDIRECT_URI = `${process.env.API_URL}/authorize/callback`
+import { configureEnvironments } from './internals/utility/Utils'
 
-const isMasterBridge = process.env.DISCORD_CLIENT_BRIDGE_HOST === 'localhost'
+configureEnvironments()
 
 import { Bridge } from 'discord-cross-hosting'
 import { Server } from 'http'
+import { connect } from 'mongoose'
+import pm2 from 'pm2'
+import { QuickDB } from 'quick.db'
+import database from './database'
 import { bridgeClient, clusterManager } from './internals/Cluster'
 import logger from './internals/Logger'
-import api from './internals/api'
 import { handleDiamondGuilds } from './internals/structures/DiamondGuild'
 import { handlePatrons } from './internals/structures/Patron'
 import { syncBills as syncQiwiBills } from './internals/utility/Qiwi'
@@ -24,13 +17,9 @@ import { scheduleStatsCollect } from './internals/utility/Statistics'
 import { hubRefreshSubscriptions } from './modules/YouTube'
 
 let bridge: Bridge, server: Server
+const isMasterBridge = process.env.DISCORD_CLIENT_BRIDGE_HOST === 'localhost'
 
 if (isMasterBridge) {
-    server = api.listen(process.env.API_PORT, () => {
-        logger.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
-        logger.telegram.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${api.proxy}`)
-    })
-
     bridge = new Bridge({
         token: process.env.DISCORD_CLIENT_TOKEN,
         authToken: process.env.DISCORD_CLIENT_BRIDGE_AUTH_TOKEN,
@@ -42,6 +31,14 @@ if (isMasterBridge) {
 
     bridge.on('ready', url => {
         logger.info(`[Bridge] Bridge is ready on url ${url}`)
+
+        pm2.start(
+            {
+                script: './dist/internals/api/index.js',
+                name: 'api'
+            },
+            () => {}
+        )
 
         setTimeout(startServices, 5000)
     })
@@ -55,6 +52,8 @@ if (isMasterBridge) {
             const servers = []
 
             for (const connection of bridge.connections) {
+                if (connection['agent'] !== 'bot') continue
+
                 try {
                     const response = await connection.request({ type: 'server-performance' }, 15000)
 
@@ -72,6 +71,10 @@ if (isMasterBridge) {
 }
 
 async function startServices() {
+    connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    await database.mysql.connect()
+    database.qdb = new QuickDB({ driver: database.mysql })
+
     await bridgeClient.connect()
     bridgeClient.listen(clusterManager)
 

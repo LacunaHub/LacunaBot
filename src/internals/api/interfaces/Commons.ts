@@ -1218,6 +1218,22 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             ) {
                 updateData['modules.economy.store.items'] = data.modules.economy.store.items
             }
+
+            if (data.modules.economy.transfer) {
+                if (
+                    Array.isArray(data.modules.economy.transfer.allowed_roles) &&
+                    JSON.stringify(data.modules.economy.transfer.allowed_roles) !== JSON.stringify(guild.modules.economy.transfer.allowed_roles)
+                ) {
+                    updateData['modules.economy.transfer.allowed_roles'] = data.modules.economy.transfer.allowed_roles
+                }
+
+                if (
+                    Array.isArray(data.modules.economy.transfer.blocked_roles) &&
+                    JSON.stringify(data.modules.economy.transfer.blocked_roles) !== JSON.stringify(guild.modules.economy.transfer.blocked_roles)
+                ) {
+                    updateData['modules.economy.transfer.blocked_roles'] = data.modules.economy.transfer.blocked_roles
+                }
+            }
         }
 
         if (data.modules.activities) {
@@ -1227,6 +1243,14 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             ) {
                 updateData['modules.activities.multipliers'] = data.modules.activities.multipliers.slice(0, guild.server.premium.available ? 10 : 1)
             }
+        }
+
+        if (
+            data.modules.automation &&
+            Array.isArray(data.modules.automation) &&
+            JSON.stringify(data.modules.automation) !== JSON.stringify(guild.modules.automation)
+        ) {
+            updateData['modules.automation'] = data.modules.automation
         }
     }
 

@@ -1,5 +1,5 @@
 import { ClusterClient } from 'discord-hybrid-sharding'
-import { Collection, GatewayIntentBits, LimitedCollection, Partials } from 'discord.js'
+import { Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
 import Lacuna from './Lacuna'
 
 const { version } = require('../../package.json')
@@ -17,7 +17,7 @@ const client = new Lacuna({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildBans,
+        GatewayIntentBits.GuildModeration,
         GatewayIntentBits.GuildEmojisAndStickers,
         GatewayIntentBits.GuildWebhooks,
         GatewayIntentBits.GuildInvites,
@@ -28,32 +28,71 @@ const client = new Lacuna({
     ],
     partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
     makeCache: manager => {
-        if (manager.name == 'GuildBanManager') return new LimitedCollection({ maxSize: 100 })
+        if (manager.name === 'GuildBanManager') return new LimitedCollection({ maxSize: 100 })
 
-        if (manager.name == 'GuildInviteManager') return new LimitedCollection({ maxSize: 10 })
+        if (manager.name === 'GuildInviteManager') return new LimitedCollection({ maxSize: 10 })
 
-        if (manager.name == 'GuildMemberManager')
+        if (manager.name === 'GuildMemberManager')
             return new LimitedCollection({
                 maxSize: 1000,
-                keepOverLimit: v => v.id == process.env.DISCORD_CLIENT_ID || v.voice.channelId
+                keepOverLimit: v => v.id === process.env.DISCORD_CLIENT_ID || Boolean(v.voice.channelId)
             })
 
-        if (manager.name == 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
+        if (manager.name === 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
 
-        if (manager.name == 'MessageManager') return new LimitedCollection({ maxSize: 25 })
+        if (manager.name === 'MessageManager') return new LimitedCollection({ maxSize: 25 })
 
-        if (manager.name == 'UserManager')
+        if (manager.name === 'UserManager')
             return new LimitedCollection({
                 maxSize: 1000,
-                keepOverLimit: v => v.id == process.env.DISCORD_CLIENT_ID
+                keepOverLimit: v => v.id === process.env.DISCORD_CLIENT_ID
             })
 
         return new Collection()
     },
     sweepers: {
+        ...Options.DefaultSweeperSettings,
+        bans: {
+            interval: 15 * 60,
+            filter: () => ban => {
+                return true
+            }
+        },
+        invites: {
+            interval: 15 * 60,
+            lifetime: 30 * 60
+        },
+        guildMembers: {
+            interval: 60 * 60 * 12,
+            filter: () => member => {
+                return Boolean(member.voice?.channelId) === false && member.id !== process.env.DISCORD_CLIENT_ID
+            }
+        },
         messages: {
             interval: 15 * 60,
-            filter: () => v => Date.now() - v.createdTimestamp > 30 * 60 * 1000
+            lifetime: 30 * 60
+        },
+        reactions: {
+            interval: 15 * 60,
+            filter: () => reaction => {
+                return Date.now() - reaction.message.createdTimestamp > 30 * 60 * 1000
+            }
+        },
+        threads: {
+            interval: 30 * 60,
+            lifetime: 60 * 60 * 6
+        },
+        users: {
+            interval: 60 * 60 * 12,
+            filter: () => user => {
+                return user.id !== process.env.DISCORD_CLIENT_ID
+            }
+        },
+        voiceStates: {
+            interval: 60 * 60,
+            filter: () => state => {
+                return Boolean(state.channelId) === false
+            }
         }
     },
     shards: clusterClientInfo.SHARD_LIST,
