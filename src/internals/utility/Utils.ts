@@ -294,7 +294,7 @@ export function transformModalComponents(components: any[][]) {
                 row.map(component => {
                     const field = new TextInputBuilder()
 
-                    field.setCustomId(`UD-${component.customId}`)
+                    if (typeof component.customId === 'string') field.setCustomId(component.customId)
                     if (typeof component.label === 'string') field.setLabel(component.label)
                     if (typeof component.maxLength === 'number') field.setMaxLength(component.maxLength)
                     if (typeof component.minLength === 'number') field.setMinLength(component.minLength)
