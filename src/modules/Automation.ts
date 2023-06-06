@@ -937,7 +937,7 @@ export default class Automation {
                         if ('showModal' in this.signal) {
                             await this.signal.showModal({
                                 title: show_modal.title,
-                                customId: show_modal.customId,
+                                customId: `UD-${show_modal.customId}`,
                                 components: transformModalComponents(show_modal.components) as any
                             })
                         }
