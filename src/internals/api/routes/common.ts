@@ -29,7 +29,7 @@ async function getAutomationTask(ctx: Context) {
     if (!server || server.server.blocked) ctx.throw(404)
 
     if (!automation.uses.some(i => i.guild_id === guildId)) {
-        await database.customCommands.updateOne(
+        await database.automationTasks.updateOne(
             { _id: automationId },
             {
                 $push: {
