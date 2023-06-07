@@ -995,7 +995,9 @@ export default class Automation {
     }
 
     static async handleEvent(eventName: IAutomationTrigger, self: Lacuna, server: ServerDocument, signal: IAutomationSignal) {
-        const automation = server.modules.automation.find(i => i.trigger === eventName && !i.options.includes('DISABLED'))
+        const automation = server.modules.automation
+            .slice(0, server.server.premium.available ? 20 : 5)
+            .find(i => i.trigger === eventName && !i.options.includes('DISABLED'))
 
         if (automation) {
             if ('customId' in signal) {

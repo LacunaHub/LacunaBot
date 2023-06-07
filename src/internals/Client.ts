@@ -63,7 +63,7 @@ const client = new Lacuna({
             lifetime: 30 * 60
         },
         guildMembers: {
-            interval: 60 * 60 * 12,
+            interval: 30 * 60,
             filter: () => member => {
                 return Boolean(member.voice?.channelId) === false && member.id !== process.env.DISCORD_CLIENT_ID
             }
@@ -79,17 +79,17 @@ const client = new Lacuna({
             }
         },
         threads: {
-            interval: 30 * 60,
-            lifetime: 60 * 60 * 6
+            interval: 15 * 60,
+            lifetime: 30 * 60
         },
         users: {
-            interval: 60 * 60 * 12,
+            interval: 30 * 60,
             filter: () => user => {
                 return user.id !== process.env.DISCORD_CLIENT_ID
             }
         },
         voiceStates: {
-            interval: 60 * 60,
+            interval: 15 * 60,
             filter: () => state => {
                 return Boolean(state.channelId) === false
             }
