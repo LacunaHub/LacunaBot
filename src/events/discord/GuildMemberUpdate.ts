@@ -7,7 +7,13 @@ import { GuildMemberUpdate } from '../../modules/Logs'
 import { caseLog } from '../../modules/Moderation'
 
 const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) => {
-    if (self.user.id === member.id) return false
+    if (self.user.id == member.id) return false
+
+    if (before.partial) {
+        try {
+            before = await before.fetch()
+        } catch (err) {}
+    }
 
     if (member.partial) {
         try {
@@ -19,23 +25,19 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
 
-    if ('roles' in before) {
-        if (member.roles.cache.some(r => !before.roles.cache.has(r.id))) {
-            const roles = member.roles.cache.filter(r => !before.roles.cache.has(r.id))
+    if (member.roles.cache.some(r => !before.roles.cache.has(r.id))) {
+        const roles = member.roles.cache.filter(r => !before.roles.cache.has(r.id))
 
-            self.emit('roleMemberAdd', member, roles)
-        }
-
-        if (before.roles.cache.some(r => !member.roles.cache.has(r.id))) {
-            const roles = before.roles.cache.filter(r => !member.roles.cache.has(r.id))
-
-            self.emit('roleMemberRemove', member, roles)
-        }
+        self.emit('roleMemberAdd', member, roles)
     }
 
-    if (member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED') && before.pending && !member.pending) {
-        await Greeting(self, server, member)
+    if (before.roles.cache.some(r => !member.roles.cache.has(r.id))) {
+        const roles = before.roles.cache.filter(r => !member.roles.cache.has(r.id))
+
+        self.emit('roleMemberRemove', member, roles)
     }
+
+    if (member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED') && before.pending && !member.pending) await Greeting(self, server, member)
 
     if (before.communicationDisabledUntilTimestamp !== member.communicationDisabledUntilTimestamp) {
         const case_log = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
