@@ -42,7 +42,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                     initial: true
                 })
             } else {
-                await message.guild.members.ban(message.author.id, { reason }).catch(self.logger.error)
+                try {
+                    await message.guild.members.ban(message.author.id, { reason })
+                } catch (err) {
+                    self.logger.handleError({ module: 'AntiCaps', action: 'Ban', error: err, guild_id: message.guildId })
+                }
             }
 
             await caseLog.createCaseEntry(message.guild, { type: 'BAN_ADD', target: message.author, executor: self.user, reason })
@@ -52,7 +56,12 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             const expires_timestamp = Date.now() + (config.mute_timeout ? config.mute_timeout * 1000 : ms('2h'))
             reason += ` (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`
 
-            await message.member.disableCommunicationUntil(expires_timestamp, reason).catch(() => {})
+            try {
+                await message.member.disableCommunicationUntil(expires_timestamp, reason)
+            } catch (err) {
+                self.logger.handleError({ module: 'AntiCaps', action: 'DisableCommunication', error: err, guild_id: message.guildId })
+            }
+
             await caseLog.createCaseEntry(message.guild, { type: 'MUTE_ADD', target: message.author, executor: self.user, reason })
 
             if (server.moderation.mutes.rar) {
@@ -75,12 +84,21 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                     ...message.member.roles.cache.filter(r => !r.editable).map(r => r.id)
                 ]
 
-                await message.member.roles.set(strict_roles, reason).catch(self.logger.error)
+                try {
+                    await message.member.roles.set(strict_roles, reason)
+                } catch (err) {
+                    self.logger.handleError({ module: 'AntiCaps', action: 'RemoveAllRoles', error: err, guild_id: message.guildId })
+                }
             }
         }
 
         if (kick && !ban && !mute && message.member.kickable) {
-            await message.member.kick(reason).catch(self.logger.error)
+            try {
+                await message.member.kick(reason)
+            } catch (err) {
+                self.logger.handleError({ module: 'AntiCaps', action: 'Kick', error: err, guild_id: message.guildId })
+            }
+
             await caseLog.createCaseEntry(message.guild, { type: 'KICK', target: message.author, executor: self.user, reason })
         }
 
@@ -89,7 +107,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                 const editable = message.guild.roles.cache.filter(r => r.editable && config.modify_roles.add.includes(r.id))
 
                 if (editable.size) {
-                    await message.member.roles.add(editable, reason).catch(self.logger.error)
+                    try {
+                        await message.member.roles.add(editable, reason)
+                    } catch (err) {
+                        self.logger.handleError({ module: 'AntiCaps', action: 'ModifyRolesAdd', error: err, guild_id: message.guildId })
+                    }
                 }
             }
 
@@ -97,7 +119,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                 const editable = message.guild.roles.cache.filter(r => r.editable && config.modify_roles.remove.includes(r.id))
 
                 if (editable.size) {
-                    await message.member.roles.remove(editable, reason).catch(self.logger.error)
+                    try {
+                        await message.member.roles.remove(editable, reason)
+                    } catch (err) {
+                        self.logger.handleError({ module: 'AntiCaps', action: 'ModifyRolesRemove', error: err, guild_id: message.guildId })
+                    }
                 }
             }
         }
@@ -110,11 +136,21 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             const replacer = new Replacer(null, { message: message, guild: message.guild, member: message.member })
             const content = await replacer.replaceTemplateMessage(config.send_message)
 
-            await message.channel.send(content).catch(self.logger.error)
+            try {
+                await message.channel.send(content)
+            } catch (err) {
+                self.logger.handleError({ module: 'AntiCaps', action: 'SendMessage', error: err, guild_id: message.guildId })
+            }
         }
 
         if (delete_message) {
-            if (message.deletable) await message.delete().catch(self.logger.error)
+            if (message.deletable) {
+                try {
+                    await message.delete()
+                } catch (err) {
+                    self.logger.handleError({ module: 'AntiCaps', action: 'DeleteMessage', error: err, guild_id: message.guildId })
+                }
+            }
         }
 
         self.emit('moduleExecution', {

@@ -103,7 +103,9 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
         if (!subscription) {
             logger.log(`[Twitch] Database entry for subscription "${data.subscription.id}" not found`)
 
-            await eventSubUnsubscribe(data.subscription.id).catch(() => {})
+            try {
+                await eventSubUnsubscribe(data.subscription.id)
+            } catch (err) {}
 
             return null
         }
@@ -118,8 +120,10 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
         if (!subscribedGuilds.length) {
             logger.log(`[Twitch] No subscribed guilds found for subscription "${data.subscription.id}"`)
 
-            await eventSubUnsubscribe(data.subscription.id).catch(() => {})
-            await db.twitchSubs.deleteOne({ _id: data.subscription.id })
+            try {
+                await eventSubUnsubscribe(data.subscription.id)
+                await db.twitchSubs.deleteOne({ _id: data.subscription.id })
+            } catch (err) {}
 
             return null
         }
@@ -135,20 +139,24 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
         for (const guild of subscribedGuilds) {
             const guildSubscription = guild.modules.subscriptions.twitch
                 .slice(0, guild.server.premium.available ? 10 : 1)
-                .find(i => i.broadcaster_id == data.event.broadcaster_user_id)
+                .find(i => i.broadcaster_id === data.event.broadcaster_user_id)
 
             if (!guildSubscription) continue
 
-            let webhook = (await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
+            let webhook: any
+
+            try {
+                webhook = await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
+            } catch (err) {}
 
             if (!webhook) {
-                webhook = await restApi
-                    .post(apiRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
+                try {
+                    webhook = await restApi.post(apiRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
                         body: {
                             name: data.event.broadcaster_user_name
                         }
                     })
-                    .catch(() => {})
+                } catch (err) {}
 
                 if (webhook)
                     await db.servers.updateOne(
@@ -172,8 +180,8 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
                 })
             }
 
-            await restApi
-                .post(apiRoutes.webhook(webhook.id, webhook.token), {
+            try {
+                await restApi.post(apiRoutes.webhook(webhook.id, webhook.token), {
                     body: {
                         content: notificationText,
                         embeds: [
@@ -191,7 +199,7 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
                         ]
                     }
                 })
-                .catch(() => {})
+            } catch (err) {}
 
             handleModuleExecutionData({
                 module: 'Twitch',

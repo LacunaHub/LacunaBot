@@ -78,7 +78,11 @@ export async function addWarn(
                     initial: true
                 })
             } else {
-                await signal.guild.members.ban(target.user.id, { reason }).catch(self.logger.error)
+                try {
+                    await signal.guild.members.ban(target.user.id, { reason })
+                } catch (err) {
+                    self.logger.handleError({ module: 'WarningPenalty', action: 'Ban', error: err, guild_id: signal.guildId })
+                }
             }
 
             await caseLog.createCaseEntry(signal.guild, { type: 'BAN_ADD', target: target.user, executor: self.user, reason })
@@ -90,7 +94,12 @@ export async function addWarn(
             if (duration < ms('1m')) duration = ms('1m')
             else if (duration > ms('28d')) duration = ms('28d')
 
-            await target.disableCommunicationUntil(Date.now() + duration, reason).catch(() => {})
+            try {
+                await target.disableCommunicationUntil(Date.now() + duration, reason)
+            } catch (err) {
+                self.logger.handleError({ module: 'WarningPenalty', action: 'DisableCommunication', error: err, guild_id: signal.guildId })
+            }
+
             await caseLog.createCaseEntry(signal.guild, { type: 'MUTE_ADD', target: target.user, executor: self.user, reason })
 
             if (server.moderation.mutes.rar) {
@@ -113,12 +122,21 @@ export async function addWarn(
                     ...target.roles.cache.filter(r => !r.editable).map(r => r.id)
                 ]
 
-                await target.roles.set(strict_roles, reason).catch(self.logger.error)
+                try {
+                    await target.roles.set(strict_roles, reason)
+                } catch (err) {
+                    self.logger.handleError({ module: 'WarningPenalty', action: 'RemoveAllRoles', error: err, guild_id: signal.guildId })
+                }
             }
         }
 
         if (kick && !ban && !mute && target.kickable) {
-            await target.kick(reason).catch(() => {})
+            try {
+                await target.kick(reason)
+            } catch (err) {
+                self.logger.handleError({ module: 'WarningPenalty', action: 'Kick', error: err, guild_id: signal.guildId })
+            }
+
             await caseLog.createCaseEntry(signal.guild, { type: 'KICK', target: target.user, executor: self.user, reason })
         }
 
@@ -127,7 +145,11 @@ export async function addWarn(
                 const editable = signal.guild.roles.cache.filter(r => r.editable && penalty.modify_roles.add.includes(r.id))
 
                 if (editable.size) {
-                    await target.roles.add(editable, reason).catch(self.logger.error)
+                    try {
+                        await target.roles.add(editable, reason)
+                    } catch (err) {
+                        self.logger.handleError({ module: 'WarningPenalty', action: 'ModifyRolesAdd', error: err, guild_id: signal.guildId })
+                    }
                 }
             }
 
@@ -135,7 +157,11 @@ export async function addWarn(
                 const editable = signal.guild.roles.cache.filter(r => r.editable && penalty.modify_roles.remove.includes(r.id))
 
                 if (editable.size) {
-                    await target.roles.remove(editable, reason).catch(self.logger.error)
+                    try {
+                        await target.roles.remove(editable, reason)
+                    } catch (err) {
+                        self.logger.handleError({ module: 'WarningPenalty', action: 'ModifyRolesRemove', error: err, guild_id: signal.guildId })
+                    }
                 }
             }
         }
@@ -144,7 +170,11 @@ export async function addWarn(
             const replacer = new Replacer(null, { message: signal instanceof Message ? signal : undefined, guild: signal.guild, member: target })
             const content = await replacer.replaceTemplateMessage(penalty.send_message)
 
-            await signal.channel.send(content).catch(self.logger.error)
+            try {
+                await signal.channel.send(content)
+            } catch (err) {
+                self.logger.handleError({ module: 'WarningPenalty', action: 'SendMessage', error: err, guild_id: signal.guildId })
+            }
         }
 
         if (reset_violations) {
@@ -178,7 +208,11 @@ export async function addWarn(
         })
         const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.WARN_ADD.dm_message)
 
-        await target.send(dm_message).catch(self.logger.error)
+        try {
+            await target.send(dm_message)
+        } catch (err) {
+            self.logger.handleError({ module: 'Warnings', action: 'SendDirectMessage', error: err, guild_id: signal.guildId })
+        }
 
         self.emit('moduleExecution', {
             module: 'Moderation',

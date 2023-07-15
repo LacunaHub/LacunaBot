@@ -5,4 +5,4 @@ import nicknamesModeration from './NicknamesModeration'
 import swearFilter from './SwearFilter'
 import usersSlowdown from './UsersSlowdown'
 
-export { antiCaps, linksFilter, newbiesModeration, nicknamesModeration, swearFilter, usersSlowdown }
+export default { antiCaps, linksFilter, newbiesModeration, nicknamesModeration, swearFilter, usersSlowdown }

@@ -83,7 +83,7 @@ async function eventSubWebhook(ctx: Context) {
     const messageId = ctx.request.headers['twitch-eventsub-message-id'] as string
     const messageType = ctx.request.headers['twitch-eventsub-message-type']
 
-    if (messageType == 'webhook_callback_verification') {
+    if (messageType === 'webhook_callback_verification') {
         ctx.status = 200
         ctx.set('Content-Type', 'text/plain')
         ctx.body = ctx.request.body.challenge
@@ -91,10 +91,13 @@ async function eventSubWebhook(ctx: Context) {
         return
     }
 
-    if (messageType == 'revocation') {
+    if (messageType === 'revocation') {
         const { subscription } = ctx.request.body
 
-        await eventSubUnsubscribe(subscription.id).catch(() => {})
+        try {
+            await eventSubUnsubscribe(subscription.id)
+        } catch (err) {}
+
         await db.twitchSubs.deleteOne({ _id: subscription.id })
         await db.servers.updateMany(
             { 'modules.subscriptions.twitch.broadcaster_id': subscription.condition.broadcaster_user_id },

@@ -38,9 +38,11 @@ async function getMe(ctx: Context) {
         const permitted = guild.owner || permissions.has(PermissionsBitField.Flags.Administrator)
 
         if (permitted) {
-            const me = (await DiscordUtils.restApi
-                .get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.DISCORD_CLIENT_ID))
-                .catch(() => {})) as any
+            let me: any
+
+            try {
+                me = await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.DISCORD_CLIENT_ID))
+            } catch (err) {}
 
             guild['joined'] = Boolean(me)
         }

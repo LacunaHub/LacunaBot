@@ -36,7 +36,8 @@ export async function autoThread(self: Lacuna, server: ServerDocument, message: 
                 startMessage: message
             })
         } catch (err) {
-            self.logger.error(err)
+            self.logger.handleError({ module: 'AutoThreads', action: 'CreateThread', error: err, guild_id: message.guildId })
+
             return false
         }
 

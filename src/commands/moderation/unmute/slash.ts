@@ -32,7 +32,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     await interaction.deferReply({ ephemeral: true })
-    await mention.disableCommunicationUntil(null, reason).catch(() => {})
+
+    try {
+        await mention.disableCommunicationUntil(null, reason)
+    } catch (err) {
+        self.logger.handleError({ module: 'UnmuteCommand', action: 'EnableCommunication', error: err, guild_id: interaction.guildId })
+    }
 
     if (server.moderation.mutes.rar) {
         const returnable_roles = server.moderation.mutes.rar_data.find(r => r.user_id == mention.id)
@@ -54,7 +59,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: interaction.user, reason })
-
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.unmute.text_user_unmuted', {
             user: `**${(interaction.member as any).displayName}**`,

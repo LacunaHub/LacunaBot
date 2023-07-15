@@ -33,8 +33,10 @@ export default class Patron {
     }
 
     async expire() {
-        await database.users.updateOne({ _id: this.user_id }, { $set: { 'premium.available': false } })
-        await discord.restApi.delete(discord.apiRoutes.guildMemberRole(support_server_id, this.user_id, active_patron_role_id)).catch(() => {})
+        try {
+            await database.users.updateOne({ _id: this.user_id }, { $set: { 'premium.available': false } })
+            await discord.restApi.delete(discord.apiRoutes.guildMemberRole(support_server_id, this.user_id, active_patron_role_id))
+        } catch (err) {}
     }
 
     cancel() {

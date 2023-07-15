@@ -111,6 +111,8 @@ export async function createPoll(self: Lacuna, server: ServerDocument, interacti
             ephemeral: true
         })
 
+        self.logger.handleError({ module: 'Polls', action: 'SendPollMessage', error: err, guild_id: interaction.guildId })
+
         return
     }
 

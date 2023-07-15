@@ -143,7 +143,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     }
                 ])
 
-                await reportMessage.edit({ embeds: [embed] }).catch(self.logger.error)
+                try {
+                    await reportMessage.edit({ embeds: [embed] })
+                } catch (err) {
+                    self.logger.handleError({ module: 'ReportCommand', action: 'EditReportMessage', error: err, guild_id: interaction.guildId })
+                }
             } else {
                 const embed = new EmbedBuilder()
                     .setAuthor({ name: mention.user.tag, iconURL: mention.user.displayAvatarURL() })
@@ -196,7 +200,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     )
                 ]
 
-                await channel.send({ embeds: [embed], components: rows }).catch(self.logger.error)
+                try {
+                    await channel.send({ embeds: [embed], components: rows })
+                } catch (err) {
+                    self.logger.handleError({ module: 'ReportCommand', action: 'SendReportMessage', error: err, guild_id: interaction.guildId })
+                }
             }
         }
     }

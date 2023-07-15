@@ -1,13 +1,13 @@
 import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { nicknamesModeration } from '../../modules/Automoder'
+import Automoder from '../../modules/Automoder'
 import Greeting from '../../modules/Greeting'
-import { GuildMemberUpdate } from '../../modules/Logs'
+import Logs from '../../modules/Logs'
 import { caseLog } from '../../modules/Moderation'
 
 const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) => {
-    if (self.user.id == member.id) return false
+    if (self.user.id === member.id) return false
 
     if (before.partial) {
         try {
@@ -24,20 +24,22 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
     if (!before || !member) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
+    const addedRoles = member.roles.cache.filter(r => !before.roles.cache.has(r.id)),
+        removedRoles = before.roles.cache.filter(r => !member.roles.cache.has(r.id))
 
-    if (member.roles.cache.some(r => !before.roles.cache.has(r.id))) {
-        const roles = member.roles.cache.filter(r => !before.roles.cache.has(r.id))
-
-        self.emit('roleMemberAdd', member, roles)
+    if (addedRoles.size) {
+        self.emit('roleMemberAdd', member, addedRoles)
     }
 
-    if (before.roles.cache.some(r => !member.roles.cache.has(r.id))) {
-        const roles = before.roles.cache.filter(r => !member.roles.cache.has(r.id))
-
-        self.emit('roleMemberRemove', member, roles)
+    if (removedRoles.size) {
+        self.emit('roleMemberRemove', member, removedRoles)
     }
 
-    if (member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED') && before.pending && !member.pending) await Greeting(self, server, member)
+    if (member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED') && before.pending && !member.pending) {
+        await Greeting(self, server, member)
+    }
+
+    await Automoder.nicknamesModeration(self, server, member)
 
     if (before.communicationDisabledUntilTimestamp !== member.communicationDisabledUntilTimestamp) {
         const case_log = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
@@ -61,9 +63,7 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
         }
     }
 
-    await GuildMemberUpdate(self, server, before, member)
-
-    await nicknamesModeration(self, server, member)
+    await Logs.GuildMemberUpdate(self, server, before, member)
 
     return true
 }

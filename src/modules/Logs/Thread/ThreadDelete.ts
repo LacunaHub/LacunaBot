@@ -1,61 +1,24 @@
-import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, ThreadChannel, Webhook } from 'discord.js'
-import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, ThreadChannel } from 'discord.js'
+import { fetchLogWebhook } from '..'
+import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, thread: ThreadChannel): Promise<boolean> {
     if (server.moderation.logs.types.thread_delete.active) {
         const t = self.i18n.t.bind(null, server.locale)
 
-        const log = thread.guild.channels.cache.get(server.moderation.logs.types.thread_delete.channel_id) as BaseGuildTextChannel
+        const logChannel = thread.guild.channels.cache.get(server.moderation.logs.types.thread_delete.channel_id) as BaseGuildTextChannel
+        const isOk = logChannel && logChannel.permissionsFor(thread.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
-        const is_ok = log && log.permissionsFor(thread.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
+        if (isOk) {
+            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
 
-        if (is_ok) {
-            const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
-            let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
+            if (!webhook) return false
 
             const audit = thread.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await thread.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.ThreadDelete })
                 : null
             const executor = audit?.entries?.first()?.executor
-
-            if (!webhook) {
-                if (logs_webhook) {
-                    await self.db.servers.updateOne(
-                        { _id: thread.guild.id },
-                        {
-                            $pull: {
-                                'moderation.logs.webhooks': {
-                                    channel_id: log.id
-                                }
-                            }
-                        }
-                    )
-                }
-
-                try {
-                    webhook = await log.createWebhook({
-                        name: self.user.username,
-                        avatar: self.user.displayAvatarURL(),
-                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.thread_delete_title') })
-                    })
-                } catch (err) {
-                    return false
-                }
-
-                await self.db.servers.updateOne(
-                    { _id: thread.guild.id },
-                    {
-                        $push: {
-                            'moderation.logs.webhooks': {
-                                id: webhook.id,
-                                token: webhook.token,
-                                channel_id: webhook.channelId
-                            }
-                        }
-                    }
-                )
-            }
 
             const embed = new EmbedBuilder()
                 .setTitle(t('logs.thread_delete_title'))
@@ -67,11 +30,17 @@ export default async function (self: Lacuna, server: ServerDocument, thread: Thr
                 .setTimestamp()
                 .setColor('#EF5350')
 
-            await webhook.send({
-                embeds: [embed],
-                avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                username: server.server.premium.available ? webhook.name : self.user.username
-            })
+            try {
+                await webhook.send({
+                    embeds: [embed],
+                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    username: server.server.premium.available ? webhook.name : self.user.username
+                })
+            } catch (err) {
+                self.logger.handleError({ module: 'LogsThreadDelete', action: 'SendMessageViaWebhook', error: err, guild_id: thread.guildId })
+
+                return false
+            }
 
             self.emit('moduleExecution', {
                 module: 'Logs',

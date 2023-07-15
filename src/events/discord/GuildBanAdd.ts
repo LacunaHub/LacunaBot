@@ -1,7 +1,7 @@
 import { AuditLogEvent, BaseGuildTextChannel, Events, GuildBan, User } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { GuildBanAdd } from '../../modules/Logs'
+import Logs from '../../modules/Logs'
 import { caseLog } from '../../modules/Moderation'
 
 const handler = async (self: Lacuna, ban: GuildBan) => {
@@ -20,7 +20,7 @@ const handler = async (self: Lacuna, ban: GuildBan) => {
         }
     }
 
-    await GuildBanAdd(self, server, ban.guild, ban.user)
+    await Logs.GuildBanAdd(self, server, ban.guild, ban.user)
 
     return true
 }

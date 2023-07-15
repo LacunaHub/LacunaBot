@@ -1,64 +1,27 @@
-import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Guild, Webhook } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Guild } from 'discord.js'
 import numbro from 'numbro'
-import { LogsWebhook, ServerDocument } from '../../../database/schemas/Servers'
+import { fetchLogWebhook } from '..'
+import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: Guild, guild: Guild): Promise<boolean> {
     if (server.moderation.logs.types.guild_update.active) {
         const t = self.i18n.t.bind(null, server.locale)
 
-        const log = guild.channels.cache.get(server.moderation.logs.types.guild_update.channel_id) as BaseGuildTextChannel
+        const logChannel = guild.channels.cache.get(server.moderation.logs.types.guild_update.channel_id) as BaseGuildTextChannel
+        const isOk = logChannel && logChannel.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
-        const is_ok = log && log.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)
+        if (isOk) {
+            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
 
-        if (is_ok) {
-            const logs_webhook: LogsWebhook = server.moderation.logs.webhooks.find(w => w.channel_id == log.id)
-            let webhook = logs_webhook ? ((await self.fetchWebhook(logs_webhook.id, logs_webhook.token).catch(() => {})) as Webhook) : null
+            if (!webhook) return false
 
             const audit = guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.GuildUpdate })
                 : null
             const executor = audit?.entries?.first()?.executor
 
-            if (!webhook) {
-                if (logs_webhook) {
-                    await self.db.servers.updateOne(
-                        { _id: guild.id },
-                        {
-                            $pull: {
-                                'moderation.logs.webhooks': {
-                                    channel_id: log.id
-                                }
-                            }
-                        }
-                    )
-                }
-
-                try {
-                    webhook = await log.createWebhook({
-                        name: self.user.username,
-                        avatar: self.user.displayAvatarURL(),
-                        reason: t('audit_reasons.logs_webhook_create', { event: t('logs.guild_update_title') })
-                    })
-                } catch (err) {
-                    return false
-                }
-
-                await self.db.servers.updateOne(
-                    { _id: guild.id },
-                    {
-                        $push: {
-                            'moderation.logs.webhooks': {
-                                id: webhook.id,
-                                token: webhook.token,
-                                channel_id: webhook.channelId
-                            }
-                        }
-                    }
-                )
-            }
-
-            if (before.name != guild.name) {
+            if (before.name !== guild.name) {
                 const embed = new EmbedBuilder()
                     .setTitle(t('logs.guild_update_title'))
                     .setDescription(
@@ -74,14 +37,20 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTimestamp()
                     .setColor('#FFA726')
 
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
-                })
+                try {
+                    await webhook.send({
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        username: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                } catch (err) {
+                    self.logger.handleError({ module: 'LogsGuildUpdateName', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+
+                    return false
+                }
             }
 
-            if (before.afkChannelId != guild.afkChannelId) {
+            if (before.afkChannelId !== guild.afkChannelId) {
                 const embed = new EmbedBuilder()
                     .setTitle(t('logs.guild_update_title'))
                     .setDescription(
@@ -97,14 +66,20 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTimestamp()
                     .setColor('#FFA726')
 
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
-                })
+                try {
+                    await webhook.send({
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        username: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                } catch (err) {
+                    self.logger.handleError({ module: 'LogsGuildUpdateAfkChannel', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+
+                    return false
+                }
             }
 
-            if (before.afkTimeout != guild.afkTimeout) {
+            if (before.afkTimeout !== guild.afkTimeout) {
                 const embed = new EmbedBuilder()
                     .setTitle(t('logs.guild_update_title'))
                     .setDescription(
@@ -128,14 +103,20 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTimestamp()
                     .setColor('#FFA726')
 
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
-                })
+                try {
+                    await webhook.send({
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        username: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                } catch (err) {
+                    self.logger.handleError({ module: 'LogsGuildUpdateAfkTimeout', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+
+                    return false
+                }
             }
 
-            if (before.description != guild.description) {
+            if (before.description !== guild.description) {
                 const embed = new EmbedBuilder()
                     .setTitle(t('logs.guild_update_title'))
                     .setDescription(
@@ -151,11 +132,17 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTimestamp()
                     .setColor('#FFA726')
 
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
-                })
+                try {
+                    await webhook.send({
+                        embeds: [embed],
+                        avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                        username: server.server.premium.available ? webhook.name : self.user.username
+                    })
+                } catch (err) {
+                    self.logger.handleError({ module: 'LogsGuildUpdateDescription', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+
+                    return false
+                }
             }
 
             self.emit('moduleExecution', {

@@ -66,9 +66,16 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                             target: { id: member.id, name: member.user.tag }
                         })
                     } catch (err) {
-                        self.logger.error('An error occurred', err)
+                        self.logger.handleError({
+                            module: 'InteractiveReactions',
+                            action: 'CreatePermissionOverwrites',
+                            error: err,
+                            guild_id: message.guildId
+                        })
 
-                        if (message.deletable) await reaction.users.remove(user.id)
+                        if (message.deletable) {
+                            await reaction.users.remove(user.id)
+                        }
 
                         return false
                     }
@@ -91,9 +98,16 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                                 target: { id: member.id, name: member.user.tag }
                             })
                         } catch (err) {
-                            self.logger.error('An error occurred', err)
+                            self.logger.handleError({
+                                module: 'InteractiveReactions',
+                                action: 'RemoveRoles',
+                                error: err,
+                                guild_id: message.guildId
+                            })
 
-                            if (message.deletable) await reaction.users.remove(user.id)
+                            if (message.deletable) {
+                                await reaction.users.remove(user.id)
+                            }
 
                             return false
                         }
@@ -108,7 +122,9 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         const has_single_element: boolean = single_elements.some(sr => sr.references.some(r => member.roles.cache.has(r)))
 
                         if (has_single_element) {
-                            if (message.deletable) await reaction.users.remove(user.id)
+                            if (message.deletable) {
+                                await reaction.users.remove(user.id)
+                            }
 
                             return false
                         }
@@ -116,9 +132,16 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         try {
                             await member.roles.add(roles, t('audit_reasons.irs'))
                         } catch (err) {
-                            self.logger.error('An error occurred', err)
+                            self.logger.handleError({
+                                module: 'InteractiveReactions',
+                                action: 'AddSingleRoles',
+                                error: err,
+                                guild_id: message.guildId
+                            })
 
-                            if (message.deletable) await reaction.users.remove(user.id)
+                            if (message.deletable) {
+                                await reaction.users.remove(user.id)
+                            }
 
                             return false
                         }
@@ -126,9 +149,16 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         try {
                             await member.roles.add(roles, t('audit_reasons.irs'))
                         } catch (err) {
-                            self.logger.error('An error occurred', err)
+                            self.logger.handleError({
+                                module: 'InteractiveReactions',
+                                action: 'AddRoles',
+                                error: err,
+                                guild_id: message.guildId
+                            })
 
-                            if (message.deletable) await reaction.users.remove(user.id)
+                            if (message.deletable) {
+                                await reaction.users.remove(user.id)
+                            }
 
                             return false
                         }
@@ -185,7 +215,12 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                             }
                         }
                     } catch (err) {
-                        self.logger.error('An error occurred', err)
+                        self.logger.handleError({
+                            module: 'InteractiveReactions',
+                            action: 'DeletePermissionOverwrites',
+                            error: err,
+                            guild_id: message.guildId
+                        })
 
                         return false
                     }
@@ -208,7 +243,12 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                             target: { id: member.id, name: member.user.tag }
                         })
                     } catch (err) {
-                        self.logger.error('An error occurred', err)
+                        self.logger.handleError({
+                            module: 'InteractiveReactions',
+                            action: 'RemoveRoles',
+                            error: err,
+                            guild_id: message.guildId
+                        })
 
                         return false
                     }
@@ -259,7 +299,16 @@ export async function autoReact(self: Lacuna, server: ServerDocument, message: M
         }
 
         for (const emoji of ar.reactions) {
-            await message.react(emoji.id || emoji.name)
+            try {
+                await message.react(emoji.id || emoji.name)
+            } catch (err) {
+                self.logger.handleError({
+                    module: 'AutoReactions',
+                    action: 'AddReaction',
+                    error: err,
+                    guild_id: message.guildId
+                })
+            }
         }
 
         self.emit('moduleExecution', {

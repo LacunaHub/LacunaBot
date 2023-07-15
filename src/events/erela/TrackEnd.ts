@@ -18,14 +18,15 @@ const handler = async (self: Lacuna, player: Player) => {
 
         if (embed.data.footer?.text) embed.setFooter({ text: embed.data.footer.text.replace(/\s[\w\W]+/i, ` ${track.requester}`) })
 
-        await message.delete().catch(() => {})
-        await message.channel
-            .send({ embeds: [embed], components: message.components })
-            .then(message => {
-                player.set('message', message)
-                self.db.qdb.set(`guildPlayers.${player.guild}.messageId`, message.id)
-            })
-            .catch(() => player.set('message', null))
+        try {
+            await message.delete()
+            const playerMessage = await message.channel.send({ embeds: [embed], components: message.components })
+            player.set('message', playerMessage)
+            self.db.qdb.set(`guildPlayers.${player.guild}.messageId`, message.id)
+        } catch (err) {
+            self.logger.handleError({ module: 'TrackEnd', action: 'RecreatePlayerMessage', error: err, guild_id: player.guild })
+            player.set('message', null)
+        }
     }
 
     self.logger.log(`[ErelaTrackEnd] Track playing for player ${player.guild} ended`)

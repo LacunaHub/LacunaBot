@@ -234,6 +234,8 @@ export default class CustomCommand {
             } catch (err) {
                 const error = err.toString().replace(/<isolated-vm>:?/, '')
                 string = string.replace(regexp, () => error)
+
+                this.self.logger.handleError({ module: 'CustomCommands', action: 'ReplacePatterns', error: err, guild_id: this.interaction.guildId })
             }
         }
 
@@ -774,6 +776,13 @@ export default class CustomCommand {
                         } else {
                             await this.interaction.reply({ embeds: [embed], ephemeral: true })
                         }
+
+                        this.self.logger.handleError({
+                            module: 'CustomCommands',
+                            action: 'ExecuteCodeAction',
+                            error: err,
+                            guild_id: this.interaction.guildId
+                        })
                     }
 
                     break
@@ -787,7 +796,16 @@ export default class CustomCommand {
 
                     const message = await this.handleTemplateMessage(reply.message, ctx)
 
-                    await this.interaction.reply({ ...message, ephemeral: reply.options.includes('EPHEMERAL') }).catch(() => {})
+                    try {
+                        await this.interaction.reply({ ...message, ephemeral: reply.options.includes('EPHEMERAL') })
+                    } catch (err) {
+                        this.self.logger.handleError({
+                            module: 'CustomCommands',
+                            action: 'ReplyAction',
+                            error: err,
+                            guild_id: this.interaction.guildId
+                        })
+                    }
                 }
 
                 if (action.type === 'SEND_MESSAGE') {
@@ -796,16 +814,27 @@ export default class CustomCommand {
 
                     if (index > 1) continue
 
-                    const message = await this.handleTemplateMessage(send_message.message, ctx)
+                    try {
+                        const message = await this.handleTemplateMessage(send_message.message, ctx)
 
-                    if (send_message.format === 'CHANNEL') {
-                        const channel = this.interaction.guild.channels.cache.get(send_message.channel_id) as BaseGuildTextChannel
+                        if (send_message.format === 'CHANNEL') {
+                            const channel = this.interaction.guild.channels.cache.get(send_message.channel_id) as BaseGuildTextChannel
 
-                        if (channel) await channel.send({ ...message, tts: send_message.options.includes('TTS') }).catch(() => {})
-                    }
+                            if (channel) {
+                                await channel.send({ ...message, tts: send_message.options.includes('TTS') })
+                            }
+                        }
 
-                    if (send_message.format === 'CURRENT_CHANNEL') {
-                        await this.interaction.channel.send({ ...message, tts: send_message.options.includes('TTS') }).catch(() => {})
+                        if (send_message.format === 'CURRENT_CHANNEL') {
+                            await this.interaction.channel.send({ ...message, tts: send_message.options.includes('TTS') })
+                        }
+                    } catch (err) {
+                        this.self.logger.handleError({
+                            module: 'CustomCommands',
+                            action: 'SendMessageAction',
+                            error: err,
+                            guild_id: this.interaction.guildId
+                        })
                     }
                 }
 
@@ -815,21 +844,26 @@ export default class CustomCommand {
 
                     if (index > 1) continue
 
-                    const user_id = modify_roles.user_id ? await this.replacePatterns(modify_roles.user_id, ctx) : this.interaction.user.id
-                    const member = (await this.interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
+                    try {
+                        const user_id = await this.replacePatterns(modify_roles.user_id, ctx)
+                        const member = await this.interaction.guild.members.fetch({ user: user_id })
 
-                    if (member) {
-                        if (modify_roles.add.length) {
-                            const roles = this.interaction.guild.roles.cache.filter(i => i.editable && modify_roles.add.includes(i.id))
+                        if (member) {
+                            if (modify_roles.add.length) {
+                                await member.roles.add(modify_roles.add)
+                            }
 
-                            if (roles.size) await member.roles.add(roles).catch(() => {})
+                            if (modify_roles.remove.length) {
+                                await member.roles.remove(modify_roles.remove)
+                            }
                         }
-
-                        if (modify_roles.remove.length) {
-                            const roles = this.interaction.guild.roles.cache.filter(i => i.editable && modify_roles.remove.includes(i.id))
-
-                            if (roles.size) await member.roles.remove(roles).catch(() => {})
-                        }
+                    } catch (err) {
+                        this.self.logger.handleError({
+                            module: 'CustomCommands',
+                            action: 'ModifyRolesAction',
+                            error: err,
+                            guild_id: this.interaction.guildId
+                        })
                     }
                 }
 
@@ -841,7 +875,9 @@ export default class CustomCommand {
 
                     const command = this.self.commands.find(i => i.is_slash_command && i.name === forward_to_command)
 
-                    if (command) await command.executeSlash(this.server, this.interaction)
+                    if (command) {
+                        await command.executeSlash(this.server, this.interaction)
+                    }
                 }
 
                 if (action.type === 'MODIFY_WALLET') {
@@ -851,8 +887,19 @@ export default class CustomCommand {
                     if (index > 1) continue
                     if (!this.server.modules.economy.active) continue
 
-                    const user_id = modify_wallet.user_id ? await this.replacePatterns(modify_wallet.user_id, ctx) : this.interaction.user.id
-                    const member = (await this.interaction.guild.members.fetch(user_id).catch(() => {})) as GuildMember
+                    const user_id = await this.replacePatterns(modify_wallet.user_id, ctx)
+                    let member: GuildMember
+
+                    try {
+                        member = await this.interaction.guild.members.fetch({ user: user_id })
+                    } catch (err) {
+                        this.self.logger.handleError({
+                            module: 'CustomCommands',
+                            action: 'ModifyRolesActionFetchMember',
+                            error: err,
+                            guild_id: this.interaction.guildId
+                        })
+                    }
 
                     if (member) {
                         const currency_id = modify_wallet.currency_id ? await this.replacePatterns(modify_wallet.currency_id, ctx) : 'DEFAULT'
@@ -945,10 +992,17 @@ export default class CustomCommand {
                     try {
                         await this.interaction.showModal({
                             title: show_modal.title,
-                            customId: show_modal.customId,
+                            customId: `UD-${show_modal.customId}`,
                             components: transformModalComponents(show_modal.components) as any
                         })
-                    } catch (err) {}
+                    } catch (err) {
+                        this.self.logger.handleError({
+                            module: 'CustomCommands',
+                            action: 'ShowModalAction',
+                            error: err,
+                            guild_id: this.interaction.guildId
+                        })
+                    }
                 }
 
                 if (action.type === 'OVERWRITE_CHANNEL_PERMISSIONS') {
@@ -975,7 +1029,14 @@ export default class CustomCommand {
                             } else {
                                 await channel.permissionOverwrites.create(userOrRole, overwriteOptions)
                             }
-                        } catch (err) {}
+                        } catch (err) {
+                            this.self.logger.handleError({
+                                module: 'CustomCommands',
+                                action: 'OverwriteChannelPermissionsAction',
+                                error: err,
+                                guild_id: this.interaction.guildId
+                            })
+                        }
                     }
                 }
             }

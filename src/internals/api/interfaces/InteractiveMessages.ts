@@ -107,7 +107,7 @@ export async function createInteractiveMessage(server: ServerDocument, data: Int
 
 export async function updateInteractiveMessage(server: ServerDocument, data: InteractiveMessage) {
     const interactiveMessages = server.modules.interactive_messages
-    const im = interactiveMessages.find(i => i.id == data.id)
+    const im = interactiveMessages.find(i => i.id === data.id)
 
     if (!im) throw new Error('NOT_FOUND')
 
@@ -241,11 +241,13 @@ export async function updateInteractiveMessage(server: ServerDocument, data: Int
 
 export async function deleteInteractiveMessage(server: ServerDocument, data: { id: string }) {
     const interactiveMessages = server.modules.interactive_messages
-    const im = interactiveMessages.find(i => i.id == data.id)
+    const im = interactiveMessages.find(i => i.id === data.id)
 
     if (!im) throw new Error('NOT_FOUND')
 
-    await restApi.delete(apiRoutes.channelMessage(im.channel_id, im.id)).catch(() => {})
+    try {
+        await restApi.delete(apiRoutes.channelMessage(im.channel_id, im.id))
+    } catch (err) {}
 
     await db.servers.updateOne(
         { _id: server._id },

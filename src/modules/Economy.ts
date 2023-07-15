@@ -323,15 +323,21 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
         } else return 'PURCHASED'
     }
 
-    if (item.type == 'CHANNEL') {
+    if (item.type === 'CHANNEL') {
         const channels = guild.channels.cache.filter(c => c.manageable && item.references.includes(c.id)) as Collection<string, BaseGuildTextChannel>
 
         if (channels.size) {
-            for (const [, channel] of channels) await channel.permissionOverwrites.create(member.id, { ViewChannel: true }).catch(() => {})
+            for (const [, channel] of channels) {
+                try {
+                    await channel.permissionOverwrites.create(member.id, { ViewChannel: true })
+                } catch (err) {
+                    this.self.logger.handleError({ module: 'Economy', action: 'PurchaseItemCreateOverwrites', error: err, guild_id: guild.id })
+                }
+            }
         }
     }
 
-    if (item.type == 'ROLE') {
+    if (item.type === 'ROLE') {
         const roles = guild.roles.cache.filter(r => r.editable && item.references.includes(r.id))
 
         if (roles.size) {
@@ -345,7 +351,13 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
                         initial: true
                     })
                 }
-            } else await member.roles.add(roles).catch(() => {})
+            } else {
+                try {
+                    await member.roles.add(roles)
+                } catch (err) {
+                    this.self.logger.handleError({ module: 'Economy', action: 'PurchaseItemAddRoles', error: err, guild_id: guild.id })
+                }
+            }
         }
     }
 

@@ -3,24 +3,22 @@ import {
     AutocompleteInteraction,
     ButtonInteraction,
     ChatInputCommandInteraction,
-    Collection,
     ContextMenuCommandInteraction,
     Events,
-    GuildChannel,
     Message,
     ModalSubmitInteraction
 } from 'discord.js'
 import { SearchResult } from 'erela.js'
-import { InteractiveMessageButtonComponent, InteractiveMessageSelectMenuComponent, ServerDocument } from '../../database/schemas/Servers'
+import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
-import { snakeToPascalCase, truncateString } from '../../internals/utility/Utils'
+import { truncateString } from '../../internals/utility/Utils'
 import Automation from '../../modules/Automation'
 import CustomCommand from '../../modules/CustomCommand'
+import InteractiveMessages from '../../modules/InteractiveMessages'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
 import { createPoll, onPressPollButton } from '../../modules/Polls'
-import Replacer from '../../modules/Replacer'
 import { onPressReportButton, onSelectReportOption } from '../../modules/Reports'
 
 const handler = async (
@@ -62,20 +60,14 @@ const handler = async (
             c => (c.is_message_command || c.is_user_command) && self.i18n.t('en', c.pretty_name) === interaction.commandName
         )
 
-        if (command) await command.executeContext(server, interaction)
+        if (command) {
+            await command.executeContext(server, interaction)
+        }
     }
 
     if (interaction.isButton()) {
-        if (/GIVEAWAY\-\d+/.test(interaction.customId)) {
-            await onPressGiveawayButton(self, server, interaction)
-
-            return true
-        }
-
-        if (/R\-\w+\-\d+/.test(interaction.customId)) {
-            await onPressReportButton(self, server, interaction)
-
-            return true
+        if (/UD\-.*/.test(interaction.customId)) {
+            await Automation.handleEvent('INTERACTION_BUTTON', self, server, interaction)
         }
 
         if (interaction.customId.startsWith('PLAYER')) {
@@ -161,64 +153,18 @@ const handler = async (
             return true
         }
 
-        const im = server.modules.interactive_messages.slice(0, server.server.premium.available ? 50 : 5).find(i => i.id === interaction.message.id)
+        await InteractiveMessages.handleButtonClick(self, server, interaction)
 
-        if (im) {
-            await interaction.deferUpdate()
+        if (/GIVEAWAY\-\d+/.test(interaction.customId)) {
+            await onPressGiveawayButton(self, server, interaction)
 
-            const buttons = im.components.flat().filter(i => i.type == 'BUTTON')
-            const button = buttons.find(i => i.id == interaction.customId) as InteractiveMessageButtonComponent
+            return true
+        }
 
-            if (button.options.includes('RESTRICT_ROLES') && Array.isArray(button.restricted_roles)) {
-                if (interaction.member.roles.cache.some(i => button.restricted_roles.includes(i.id))) return false
-            }
+        if (/R\-\w+\-\d+/.test(interaction.customId)) {
+            await onPressReportButton(self, server, interaction)
 
-            if (button?.options?.includes('EPHEMERAL_REPLY') && button?.ephemeral_reply) {
-                const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
-                const content = await replacer.replaceTemplateMessage(button.ephemeral_reply)
-
-                await interaction.followUp({ ...content, ephemeral: true }).catch(() => {})
-            }
-
-            if (button?.options?.includes('MODIFY_ROLES') && button?.modify_roles) {
-                const addRoles = interaction.guild.roles.cache.filter(i => i.editable && button.modify_roles.add.includes(i.id)).first(8)
-                const removeRoles = interaction.guild.roles.cache.filter(i => i.editable && button.modify_roles.remove.includes(i.id)).first(8)
-
-                if (addRoles.length) {
-                    const hasRoles = button.modify_roles.reversible_add && interaction.member.roles.cache.hasAny(...addRoles.map(i => i.id))
-
-                    if (hasRoles) await interaction.member.roles.remove(addRoles).catch(() => {})
-                    else await interaction.member.roles.add(addRoles).catch(() => {})
-                }
-
-                if (removeRoles.length) {
-                    const missingRoles =
-                        button.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
-
-                    if (missingRoles) await interaction.member.roles.add(removeRoles).catch(() => {})
-                    else await interaction.member.roles.remove(removeRoles).catch(() => {})
-                }
-            }
-
-            if (button?.options?.includes('OVERWRITE_CHANNEL_PERMISSIONS') && button?.overwrite_channel_permissions) {
-                // prettier-ignore
-                const channels = interaction.guild.channels.cache.filter(i => i.manageable && button.overwrite_channel_permissions.channels.includes(i.id)) as Collection<string, GuildChannel>
-
-                for (const channel of channels.first(8)) {
-                    const overwrites = channel.permissionOverwrites.cache.get(interaction.user.id)
-
-                    if (overwrites && button.overwrite_channel_permissions.reversible) {
-                        await overwrites.delete().catch(() => {})
-                    } else {
-                        const overwriteOptions = Object.keys(button.overwrite_channel_permissions.permissions).reduce((obj, k) => {
-                            obj[snakeToPascalCase(k)] = button.overwrite_channel_permissions.permissions[k]
-                            return obj
-                        }, {})
-
-                        await channel.permissionOverwrites.create(interaction.user.id, overwriteOptions).catch(() => {})
-                    }
-                }
-            }
+            return true
         }
 
         if (/POLL\-\d+\-OPT\-\d+/.test(interaction.customId)) {
@@ -228,84 +174,19 @@ const handler = async (
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {
             await onPressChangeReasonButton(self, server, interaction)
         }
-
-        if (/UD\-.*/.test(interaction.customId)) {
-            await Automation.handleEvent('INTERACTION_BUTTON', self, server, interaction)
-        }
     }
 
     if (interaction.isAnySelectMenu()) {
+        if (/UD\-.*/.test(interaction.customId) && interaction.isStringSelectMenu()) {
+            await Automation.handleEvent('INTERACTION_SELECT_MENU', self, server, interaction)
+        }
+
+        await InteractiveMessages.handleSelectMenuSelection(self, server, interaction)
+
         if (interaction.isStringSelectMenu() && /R\-\w+\-\d+/.test(interaction.customId)) {
             await onSelectReportOption(self, server, interaction)
 
             return true
-        }
-
-        const im = server.modules.interactive_messages.slice(0, server.server.premium.available ? 50 : 5).find(i => i.id == interaction.message.id)
-
-        if (im) {
-            await interaction.deferUpdate()
-
-            const selects = im.components.flat().filter(i => i.type == 'SELECT_MENU')
-            const select = selects.find(i => i.id == interaction.customId) as InteractiveMessageSelectMenuComponent
-            const value = interaction.values[0]
-
-            const option = select?._options?.find(i => i.appearance.value == value)
-
-            if (option.options.includes('RESTRICT_ROLES') && Array.isArray(option.restricted_roles)) {
-                if (interaction.member.roles.cache.some(i => option.restricted_roles.includes(i.id))) return false
-            }
-
-            if (option?.options.includes('EPHEMERAL_REPLY') && option.ephemeral_reply) {
-                const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
-                const content = await replacer.replaceTemplateMessage(option.ephemeral_reply)
-
-                await interaction.followUp({ ...content, ephemeral: true }).catch(() => {})
-            }
-
-            if (option?.options?.includes('MODIFY_ROLES') && option?.modify_roles) {
-                const addRoles = interaction.guild.roles.cache.filter(i => i.editable && option.modify_roles.add.includes(i.id)).first(8)
-                const removeRoles = interaction.guild.roles.cache.filter(i => i.editable && option.modify_roles.remove.includes(i.id)).first(8)
-
-                if (addRoles.length) {
-                    const hasRoles = option.modify_roles.reversible_add && interaction.member.roles.cache.hasAny(...addRoles.map(i => i.id))
-
-                    if (hasRoles) await interaction.member.roles.remove(addRoles).catch(() => {})
-                    else await interaction.member.roles.add(addRoles).catch(() => {})
-                }
-
-                if (removeRoles.length) {
-                    const missingRoles =
-                        option.modify_roles.reversible_remove && !interaction.member.roles.cache.hasAll(...removeRoles.map(i => i.id))
-
-                    if (missingRoles) await interaction.member.roles.add(removeRoles).catch(() => {})
-                    else await interaction.member.roles.remove(removeRoles).catch(() => {})
-                }
-            }
-
-            if (option?.options?.includes('OVERWRITE_CHANNEL_PERMISSIONS') && option?.overwrite_channel_permissions) {
-                // prettier-ignore
-                const channels = interaction.guild.channels.cache.filter(i => i.manageable && option.overwrite_channel_permissions.channels.includes(i.id)) as Collection<string, GuildChannel>
-
-                for (const channel of channels.first(8)) {
-                    const overwrites = channel.permissionOverwrites.cache.get(interaction.user.id)
-
-                    if (overwrites && option.overwrite_channel_permissions.reversible) {
-                        await overwrites.delete().catch(() => {})
-                    } else {
-                        const overwriteOptions = Object.keys(option.overwrite_channel_permissions.permissions).reduce((obj, k) => {
-                            obj[snakeToPascalCase(k)] = option.overwrite_channel_permissions.permissions[k]
-                            return obj
-                        }, {})
-
-                        await channel.permissionOverwrites.create(interaction.user.id, overwriteOptions).catch(() => {})
-                    }
-                }
-            }
-        }
-
-        if (/UD\-.*/.test(interaction.customId) && interaction.isStringSelectMenu()) {
-            await Automation.handleEvent('INTERACTION_SELECT_MENU', self, server, interaction)
         }
     }
 
@@ -440,6 +321,10 @@ const handler = async (
     }
 
     if (interaction.isModalSubmit()) {
+        if (/UD\-.*/.test(interaction.customId) && interaction.isStringSelectMenu()) {
+            await Automation.handleEvent('INTERACTION_MODAL_SUBMIT', self, server, interaction)
+        }
+
         if (/POLL\-\d+\-(true|false)\-(true|false)/.test(interaction.customId)) {
             await createPoll(self, server, interaction)
         }
@@ -452,8 +337,6 @@ const handler = async (
             const reportCommand = self.commands.get('report')
             await reportCommand.executeSlash(server, interaction as any)
         }
-
-        await Automation.handleEvent('INTERACTION_MODAL_SUBMIT', self, server, interaction)
     }
 
     return true

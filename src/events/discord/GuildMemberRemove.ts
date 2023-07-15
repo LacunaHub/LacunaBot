@@ -3,7 +3,7 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/Automation'
 import Farewell from '../../modules/Farewell'
-import { GuildMemberRemove } from '../../modules/Logs'
+import Logs from '../../modules/Logs'
 import { caseLog } from '../../modules/Moderation'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
@@ -17,9 +17,16 @@ const handler = async (self: Lacuna, member: GuildMember) => {
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
 
-    const case_log = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
+    await Farewell(self, server, member)
+    await Automation.handleEvent('GUILD_MEMBER_REMOVE', self, server, member)
 
-    if (case_log && member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog) && server.moderation.case_log.types.KICK.active) {
+    const caseLogChannel = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
+
+    if (
+        caseLogChannel &&
+        member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog) &&
+        server.moderation.case_log.types.KICK.active
+    ) {
         const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberKick })
         const entry = audit.entries.find(e => (e.target as User).id == member.id)
 
@@ -27,10 +34,6 @@ const handler = async (self: Lacuna, member: GuildMember) => {
             await caseLog.createCaseEntry(member.guild, { type: 'KICK', target: member.user, executor: entry.executor, reason: entry.reason })
         }
     }
-
-    await Farewell(self, server, member)
-    await GuildMemberRemove(self, server, member)
-    await Automation.handleEvent('GUILD_MEMBER_REMOVE', self, server, member)
 
     if (server.modules.levels.reset_on_leave) {
         const user = await self.db.users.findOne({ _id: member.id })
@@ -61,6 +64,8 @@ const handler = async (self: Lacuna, member: GuildMember) => {
             )
         }
     }
+
+    await Logs.GuildMemberRemove(self, server, member)
 
     return true
 }

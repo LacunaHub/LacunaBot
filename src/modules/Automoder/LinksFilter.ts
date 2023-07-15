@@ -28,7 +28,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             !delete_referral_invites &&
             !config.allowed_registry.some(reg => links.some(link => link.includes(reg)))
         ) {
-            if (message.deletable) await message.delete()
+            if (message.deletable) {
+                try {
+                    await message.delete()
+                } catch (err) {}
+            }
 
             await penalty(self, server, message)
 
@@ -42,7 +46,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         const is_referral = invites ? invites.some(i => !guild_invites.some(k => k.url == `https://${i}`)) : false
 
         if (is_referral) {
-            if (message.deletable) await message.delete().catch(self.logger.error)
+            if (message.deletable) {
+                try {
+                    await message.delete()
+                } catch (err) {}
+            }
 
             await penalty(self, server, message)
 
@@ -84,7 +92,11 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
                 initial: true
             })
         } else {
-            await message.guild.members.ban(message.author.id, { reason }).catch(self.logger.error)
+            try {
+                await message.guild.members.ban(message.author.id, { reason })
+            } catch (err) {
+                self.logger.handleError({ module: 'LinksFilter', action: 'Ban', error: err, guild_id: message.guildId })
+            }
         }
 
         await caseLog.createCaseEntry(message.guild, { type: 'BAN_ADD', target: message.author, executor: self.user, reason })
@@ -94,7 +106,12 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
         const expires_timestamp = Date.now() + (config.mute_timeout ? config.mute_timeout * 1000 : ms('2h'))
         reason += ` (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`
 
-        await message.member.disableCommunicationUntil(expires_timestamp, reason).catch(() => {})
+        try {
+            await message.member.disableCommunicationUntil(expires_timestamp, reason)
+        } catch (err) {
+            self.logger.handleError({ module: 'LinksFilter', action: 'DisableCommunication', error: err, guild_id: message.guildId })
+        }
+
         await caseLog.createCaseEntry(message.guild, { type: 'MUTE_ADD', target: message.author, executor: self.user, reason })
 
         if (server.moderation.mutes.rar) {
@@ -117,12 +134,19 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
                 ...message.member.roles.cache.filter(r => !r.editable).map(r => r.id)
             ]
 
-            await message.member.roles.set(strict_roles, reason).catch(self.logger.error)
+            try {
+                await message.member.roles.set(strict_roles, reason)
+            } catch (err) {
+                self.logger.handleError({ module: 'LinksFilter', action: 'RemoveAllRoles', error: err, guild_id: message.guildId })
+            }
         }
     }
 
     if (kick && !ban && !mute && message.member.kickable) {
-        await message.member.kick(reason).catch(self.logger.error)
+        try {
+            await message.member.kick(reason)
+        } catch (err) {}
+
         await caseLog.createCaseEntry(message.guild, { type: 'KICK', target: message.author, executor: self.user, reason })
     }
 
@@ -131,7 +155,11 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
             const editable = message.guild.roles.cache.filter(r => r.editable && config.modify_roles.add.includes(r.id))
 
             if (editable.size) {
-                await message.member.roles.add(editable, reason).catch(self.logger.error)
+                try {
+                    await message.member.roles.add(editable, reason)
+                } catch (err) {
+                    self.logger.handleError({ module: 'LinksFilter', action: 'ModifyRolesAdd', error: err, guild_id: message.guildId })
+                }
             }
         }
 
@@ -139,7 +167,11 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
             const editable = message.guild.roles.cache.filter(r => r.editable && config.modify_roles.remove.includes(r.id))
 
             if (editable.size) {
-                await message.member.roles.remove(editable, reason).catch(self.logger.error)
+                try {
+                    await message.member.roles.remove(editable, reason)
+                } catch (err) {
+                    self.logger.handleError({ module: 'LinksFilter', action: 'ModifyRolesRemove', error: err, guild_id: message.guildId })
+                }
             }
         }
     }
@@ -152,11 +184,21 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
         const replacer = new Replacer(null, { message: message, guild: message.guild, member: message.member })
         const content = await replacer.replaceTemplateMessage(config.send_message)
 
-        await message.channel.send(content).catch(self.logger.error)
+        try {
+            await message.channel.send(content)
+        } catch (err) {
+            self.logger.handleError({ module: 'LinksFilter', action: 'SendMessage', error: err, guild_id: message.guildId })
+        }
     }
 
     if (delete_message) {
-        if (message.deletable) await message.delete().catch(self.logger.error)
+        if (message.deletable) {
+            try {
+                await message.delete()
+            } catch (err) {
+                self.logger.handleError({ module: 'LinksFilter', action: 'DeleteMessage', error: err, guild_id: message.guildId })
+            }
+        }
 
         return true
     }

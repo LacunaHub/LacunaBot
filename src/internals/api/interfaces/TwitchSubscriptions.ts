@@ -9,7 +9,7 @@ export async function createTwitchSubscription(server: ServerDocument, data: any
 
     if (subscriptions.length >= 1 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
     if (subscriptions.length >= 10) throw new Error('LIMIT_REACHED')
-    if (subscriptions.some(s => s.broadcaster_id == data.broadcaster.id)) throw new Error('ALREADY_SUBSCRIBED')
+    if (subscriptions.some(s => s.broadcaster_id === data.broadcaster.id)) throw new Error('ALREADY_SUBSCRIBED')
 
     const twitchSub = await database.twitchSubs.findOne({ broadcaster_id: data.broadcaster.id })
 
@@ -34,14 +34,16 @@ export async function createTwitchSubscription(server: ServerDocument, data: any
         } as any)
     }
 
-    const webhook = (await DiscordUtils.restApi
-        .post(DiscordUtils.apiRoutes.channelWebhooks(data.notification_channel_id), {
+    let webhook: any
+
+    try {
+        webhook = await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.channelWebhooks(data.notification_channel_id), {
             body: {
                 name: data.broadcaster.name,
                 avatar: await DataResolver.resolveImage(data.broadcaster.thumbnail)
             }
         })
-        .catch(() => {})) as any
+    } catch (err) {}
 
     const subscription = {
         broadcaster_id: data.broadcaster.id,
@@ -68,7 +70,7 @@ export async function createTwitchSubscription(server: ServerDocument, data: any
 
 export async function updateTwitchSubscription(server: ServerDocument, data: any) {
     const subscriptions = server.modules.subscriptions.twitch
-    const subscription = subscriptions.find(i => i.broadcaster_id == data.broadcaster_id)
+    const subscription = subscriptions.find(i => i.broadcaster_id === data.broadcaster_id)
 
     if (!subscription) throw new Error('NOT_FOUND')
 
@@ -83,14 +85,14 @@ export async function updateTwitchSubscription(server: ServerDocument, data: any
         }
     )
 
-    if (subscription.notification_channel_id != data.notification_channel_id) {
-        await DiscordUtils.restApi
-            .patch(DiscordUtils.apiRoutes.webhook(subscription.webhook_id), {
+    if (subscription.notification_channel_id !== data.notification_channel_id) {
+        try {
+            await DiscordUtils.restApi.patch(DiscordUtils.apiRoutes.webhook(subscription.webhook_id), {
                 body: {
                     channel_id: data.notification_channel_id
                 }
             })
-            .catch(() => {})
+        } catch (err) {}
     }
 
     return data
@@ -98,7 +100,7 @@ export async function updateTwitchSubscription(server: ServerDocument, data: any
 
 export async function deleteTwitchSubscription(server: ServerDocument, data: any) {
     const subscriptions = server.modules.subscriptions.twitch
-    const subscription = subscriptions.find(s => s.broadcaster_id == data.broadcaster_id)
+    const subscription = subscriptions.find(s => s.broadcaster_id === data.broadcaster_id)
 
     if (!subscription) throw new Error('NOT_FOUND')
 
@@ -118,11 +120,17 @@ export async function deleteTwitchSubscription(server: ServerDocument, data: any
     if (!subscribedGuilds.length) {
         const twitchSub = await database.twitchSubs.findOne({ broadcaster_id: subscription.broadcaster_id })
 
-        await eventSubUnsubscribe(twitchSub?._id).catch(() => {})
-        await database.twitchSubs.deleteMany({ broadcaster_id: subscription.broadcaster_id })
+        try {
+            await eventSubUnsubscribe(twitchSub?._id)
+            await database.twitchSubs.deleteMany({ broadcaster_id: subscription.broadcaster_id })
+        } catch (err) {}
     }
 
-    if (subscription.webhook_id) await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.webhook(subscription.webhook_id, subscription.webhook_token)).catch(() => {})
+    if (subscription.webhook_id) {
+        try {
+            await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.webhook(subscription.webhook_id, subscription.webhook_token))
+        } catch (err) {}
+    }
 
     return data
 }

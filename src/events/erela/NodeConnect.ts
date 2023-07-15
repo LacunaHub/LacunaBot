@@ -22,7 +22,11 @@ async function handler(self: Lacuna, node: Node) {
         let message: Message
 
         if (textChannel?.messages) {
-            message = (await textChannel.messages.fetch({ message: guildPlayer.messageId }).catch(() => {})) as Message
+            try {
+                message = await textChannel.messages.fetch({ message: guildPlayer.messageId })
+            } catch (err) {
+                self.logger.handleError({ module: 'NodeConnect', action: 'FetchPlayerMessage', error: err, guild_id: guildId })
+            }
         }
 
         if (!voiceChannel || !message || voiceChannel.members.size < 1) {

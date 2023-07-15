@@ -9,7 +9,7 @@ export async function createYouTubeSubscription(server: ServerDocument, data: an
 
     if (subscriptions.length >= 1 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
     if (subscriptions.length >= 10) throw new Error('LIMIT_REACHED')
-    if (subscriptions.some(s => s.channel_id == data.channel.id)) throw new Error('ALREADY_SUBSCRIBED')
+    if (subscriptions.some(s => s.channel_id === data.channel.id)) throw new Error('ALREADY_SUBSCRIBED')
 
     const youtubeSub = await database.youtubeSubs.findOne({ _id: data.channel.id })
 
@@ -25,14 +25,16 @@ export async function createYouTubeSubscription(server: ServerDocument, data: an
         } else return 'youtube_subscribe_error'
     }
 
-    const webhook = (await DiscordUtils.restApi
-        .post(DiscordUtils.apiRoutes.channelWebhooks(data.notification_channel_id), {
+    let webhook: any
+
+    try {
+        webhook = await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.channelWebhooks(data.notification_channel_id), {
             body: {
                 name: data.channel.name,
                 avatar: await DataResolver.resolveImage(data.channel.thumbnail)
             }
         })
-        .catch(() => {})) as any
+    } catch (err) {}
 
     const subscription = {
         channel_id: data.channel.id,
@@ -58,7 +60,7 @@ export async function createYouTubeSubscription(server: ServerDocument, data: an
 
 export async function updateYouTubeSubscription(server: ServerDocument, data: any) {
     const subscriptions = server.modules.subscriptions.youtube
-    const subscription = subscriptions.find(i => i.channel_id == data.channel_id)
+    const subscription = subscriptions.find(i => i.channel_id === data.channel_id)
 
     if (!subscription) throw new Error('NOT_FOUND')
 
@@ -72,14 +74,14 @@ export async function updateYouTubeSubscription(server: ServerDocument, data: an
         }
     )
 
-    if (subscription.notification_channel_id != data.notification_channel_id) {
-        await DiscordUtils.restApi
-            .patch(DiscordUtils.apiRoutes.webhook(subscription.webhook_id), {
+    if (subscription.notification_channel_id !== data.notification_channel_id) {
+        try {
+            await DiscordUtils.restApi.patch(DiscordUtils.apiRoutes.webhook(subscription.webhook_id), {
                 body: {
                     channel_id: data.notification_channel_id
                 }
             })
-            .catch(() => {})
+        } catch (err) {}
     }
 
     return data
@@ -87,7 +89,7 @@ export async function updateYouTubeSubscription(server: ServerDocument, data: an
 
 export async function deleteYouTubeSubscription(server: ServerDocument, data: any) {
     const subscriptions = server.modules.subscriptions.youtube
-    const subscription = subscriptions.find(s => s.channel_id == data.channel_id)
+    const subscription = subscriptions.find(s => s.channel_id === data.channel_id)
 
     if (!subscription) throw new Error('NOT_FOUND')
 
@@ -105,11 +107,17 @@ export async function deleteYouTubeSubscription(server: ServerDocument, data: an
     const subscribedGuilds = await database.servers.find({ 'modules.subscriptions.youtube.channel_id': subscription.channel_id })
 
     if (!subscribedGuilds.length) {
-        await hubSubscribe(subscription.channel_id, 'unsubscribe').catch(() => {})
-        await database.youtubeSubs.deleteOne({ _id: subscription.channel_id })
+        try {
+            await hubSubscribe(subscription.channel_id, 'unsubscribe')
+            await database.youtubeSubs.deleteOne({ _id: subscription.channel_id })
+        } catch (err) {}
     }
 
-    if (subscription.webhook_id) await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.webhook(subscription.webhook_id, subscription.webhook_token)).catch(() => {})
+    if (subscription.webhook_id) {
+        try {
+            await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.webhook(subscription.webhook_id, subscription.webhook_token))
+        } catch (err) {}
+    }
 
     return true
 }

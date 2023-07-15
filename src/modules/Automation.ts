@@ -262,6 +262,8 @@ export default class Automation {
             } catch (err) {
                 const error = err.toString().replace(/<isolated-vm>:?/, '')
                 string = string.replace(regexp, () => error)
+
+                this.self.logger.handleError({ module: 'Automation', action: 'ReplacePatterns', error: err, guild_id: this.signal.guild.id })
             }
         }
 
@@ -769,6 +771,13 @@ export default class Automation {
                             const message = this.signal as Message
                             await message.reply({ embeds: [embed] })
                         }
+
+                        this.self.logger.handleError({
+                            module: 'Automation',
+                            action: 'ExecuteCodeAction',
+                            error: err,
+                            guild_id: this.signal.guild.id
+                        })
                     }
 
                     break
@@ -789,7 +798,9 @@ export default class Automation {
                             } else {
                                 await this.signal.reply({ ...message, ephemeral: reply.options.includes('EPHEMERAL') })
                             }
-                        } catch (err) {}
+                        } catch (err) {
+                            this.self.logger.handleError({ module: 'Automation', action: 'ReplyAction', error: err, guild_id: this.signal.guildId })
+                        }
                     }
                 }
 
@@ -806,7 +817,14 @@ export default class Automation {
                         if (channel) {
                             await channel.send({ ...message, tts: send_message.options.includes('TTS') })
                         }
-                    } catch (err) {}
+                    } catch (err) {
+                        this.self.logger.handleError({
+                            module: 'Automation',
+                            action: 'SendMessageAction',
+                            error: err,
+                            guild_id: this.signal.guild.id
+                        })
+                    }
                 }
 
                 if (action.type === 'MODIFY_ROLES') {
@@ -828,7 +846,14 @@ export default class Automation {
                                 await member.roles.remove(modify_roles.remove)
                             }
                         }
-                    } catch (err) {}
+                    } catch (err) {
+                        this.self.logger.handleError({
+                            module: 'Automation',
+                            action: 'ModifyRolesAction',
+                            error: err,
+                            guild_id: this.signal.guild.id
+                        })
+                    }
                 }
 
                 if (action.type === 'MODIFY_WALLET') {
@@ -843,7 +868,14 @@ export default class Automation {
 
                     try {
                         member = await this.signal.guild.members.fetch({ user: user_id })
-                    } catch (err) {}
+                    } catch (err) {
+                        this.self.logger.handleError({
+                            module: 'Automation',
+                            action: 'ModifyRolesActionFetchMember',
+                            error: err,
+                            guild_id: this.signal.guild.id
+                        })
+                    }
 
                     if (member) {
                         const currency_id = modify_wallet.currency_id ? await this.replacePatterns(modify_wallet.currency_id, ctx) : 'DEFAULT'
@@ -941,7 +973,9 @@ export default class Automation {
                                 components: transformModalComponents(show_modal.components) as any
                             })
                         }
-                    } catch (err) {}
+                    } catch (err) {
+                        this.self.logger.handleError({ module: 'Automation', action: 'ShowModalAction', error: err, guild_id: this.signal.guild.id })
+                    }
                 }
 
                 if (action.type === 'OVERWRITE_CHANNEL_PERMISSIONS') {
@@ -968,7 +1002,14 @@ export default class Automation {
                             } else {
                                 await channel.permissionOverwrites.create(userOrRole, overwriteOptions)
                             }
-                        } catch (err) {}
+                        } catch (err) {
+                            this.self.logger.handleError({
+                                module: 'Automation',
+                                action: 'OverwriteChannelPermissionsAction',
+                                error: err,
+                                guild_id: this.signal.guild.id
+                            })
+                        }
                     }
                 }
             }

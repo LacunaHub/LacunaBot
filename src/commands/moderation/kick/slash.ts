@@ -19,7 +19,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (mention.id == (interaction.member as any).id) {
+    if (mention.id === (interaction.member as any).id) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.kick.text_self_action', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true
@@ -74,12 +74,20 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         const replacer = new Replacer(null, { guild: interaction.guild, member: mention, penalty: { reason } })
         const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.KICK.dm_message)
 
-        await mention.send(dm_message).catch(self.logger.error)
+        try {
+            await mention.send(dm_message)
+        } catch (err) {
+            self.logger.handleError({ module: 'KickCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
+        }
     }
 
-    await mention.kick(reason).catch(self.logger.error)
-    await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })
+    try {
+        await mention.kick(reason)
+    } catch (err) {
+        self.logger.handleError({ module: 'KickCommand', action: 'Kick', error: err, guild_id: interaction.guildId })
+    }
 
+    await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.kick.text_user_kicked', {
             user: `**${(interaction.member as any).displayName}**`,

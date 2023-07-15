@@ -4,7 +4,7 @@ import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/Automation'
 import { voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
 import { voiceUnassign as levelsVoiceUnassign } from '../../modules/Levels'
-import { VoiceDisconnect } from '../../modules/Logs'
+import Logs from '../../modules/Logs'
 import { deleteTemporaryVoice } from '../../modules/VoiceManager'
 
 const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) => {
@@ -30,22 +30,28 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
         }
     }
 
-    const voice_roles_bound = server.modules.voice_manager.voice_roles
-        .slice(0, server.server.premium.available ? 20 : 2)
-        .filter(r => !r.bound_channels_id.length || r.bound_channels_id.includes(channel.id))
-
-    if (voice_roles_bound.length) {
-        const voice_roles = state.guild.roles.cache.filter(r => r.editable && voice_roles_bound.some(b => b.role_id == r.id))
-
-        if (voice_roles.size) await state.member.roles.remove(voice_roles).catch(self.logger.error)
-    }
-
+    await Automation.handleEvent('VOICE_DISCONNECT', self, server, state)
+    await deleteTemporaryVoice(self, server, state, channel)
     await levelsVoiceUnassign(self, server, state, channel)
     await economyVoiceUnassign(self, server, state, channel)
 
-    await deleteTemporaryVoice(self, server, state, channel)
-    await VoiceDisconnect(self, server, state, channel)
-    await Automation.handleEvent('VOICE_DISCONNECT', self, server, state)
+    const voiceRolesBound = server.modules.voice_manager.voice_roles
+        .slice(0, server.server.premium.available ? 20 : 2)
+        .filter(r => !r.bound_channels_id.length || r.bound_channels_id.includes(channel.id))
+
+    if (voiceRolesBound.length) {
+        const voice_roles = state.guild.roles.cache.filter(r => r.editable && voiceRolesBound.some(b => b.role_id == r.id))
+
+        try {
+            if (voice_roles.size) {
+                await state.member.roles.remove(voice_roles, 'Voice roles')
+            }
+        } catch (err) {
+            self.logger.handleError({ module: 'VoiceRoles', action: 'RemoveRoles', error: err, guild_id: state.guild.id })
+        }
+    }
+
+    await Logs.VoiceDisconnect(self, server, state, channel)
 
     return true
 }

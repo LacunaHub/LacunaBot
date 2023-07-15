@@ -90,13 +90,13 @@ export async function updateTelegramSubscription(server: ServerDocument, data: a
     )
 
     if (subscription.notification_channel_id !== data.notification_channel_id) {
-        await DiscordUtils.restApi
-            .patch(DiscordUtils.apiRoutes.webhook(subscription.webhook_id), {
+        try {
+            await DiscordUtils.restApi.patch(DiscordUtils.apiRoutes.webhook(subscription.webhook_id), {
                 body: {
                     channel_id: data.notification_channel_id
                 }
             })
-            .catch(() => {})
+        } catch (err) {}
     }
 
     return data
@@ -125,8 +125,11 @@ export async function deleteTelegramSubscription(server: ServerDocument, data: a
         await database.telegramSubs.deleteOne({ _id: subscription.channel_id })
     }
 
-    if (subscription.webhook_id)
-        await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.webhook(subscription.webhook_id, subscription.webhook_token)).catch(() => {})
+    if (subscription.webhook_id) {
+        try {
+            await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.webhook(subscription.webhook_id, subscription.webhook_token))
+        } catch (err) {}
+    }
 
     return true
 }

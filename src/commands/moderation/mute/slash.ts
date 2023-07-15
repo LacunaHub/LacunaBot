@@ -89,7 +89,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             .fromNow(true)})`
     }
 
-    await mention.disableCommunicationUntil(Date.now() + duration, reason).catch(() => {})
+    try {
+        await mention.disableCommunicationUntil(Date.now() + duration, reason)
+    } catch (err) {
+        self.logger.handleError({ module: 'MuteCommand', action: 'DisableCommunication', error: err, guild_id: interaction.guildId })
+    }
 
     if (server.moderation.mutes.rar) {
         const current_roles = mention.roles.cache.filter(r => r.editable && r.id != interaction.guildId).map(r => r.id)
@@ -111,18 +115,25 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             ...mention.roles.cache.filter(r => !r.editable).map(r => r.id)
         ]
 
-        await mention.roles.set(strict_roles, reason).catch(self.logger.error)
+        try {
+            await mention.roles.set(strict_roles, reason)
+        } catch (err) {
+            self.logger.handleError({ module: 'MuteCommand', action: 'RemoveAllRoles', error: err, guild_id: interaction.guildId })
+        }
     }
 
     if (server.moderation.case_log.types.MUTE_ADD.active) {
         const replacer = new Replacer(null, { guild: interaction.guild, member: mention, penalty: { reason } })
         const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.MUTE_ADD.dm_message)
 
-        await mention.send(dm_message).catch(self.logger.error)
+        try {
+            await mention.send(dm_message)
+        } catch (err) {
+            self.logger.handleError({ module: 'MuteCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
+        }
     }
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_ADD', target: mention.user, executor: interaction.user, reason })
-
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.mute.text_user_muted', {
             user: `**${(interaction.member as any).displayName}**`,
