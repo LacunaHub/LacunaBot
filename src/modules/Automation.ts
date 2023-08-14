@@ -17,7 +17,7 @@ import {
     resolveColor
 } from 'discord.js'
 import IVM, { Context } from 'isolated-vm'
-import { QuickDB } from 'quick.db'
+import { Database as QDatabase } from 'quickmongo'
 import safeRegex from 'safe-regex'
 import { IAutomation, IAutomationTrigger, MessageEmbed as IMessageEmbed, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
@@ -36,7 +36,7 @@ export default class Automation {
     public server: ServerDocument
     public automation: IAutomation
     public signal: IAutomationSignal
-    private storage: QuickDB
+    private storage: QDatabase
     private isolate: IVM.Isolate
     private usedPatterns: string[]
     private usedFunctions: string[]
@@ -50,7 +50,7 @@ export default class Automation {
 
         this.signal = signal
 
-        this.storage = this.self.db.qdb.table('publicStorage')
+        this.storage = new this.self.db.qdb.table('public-storage')
 
         this.isolate = new IVM.Isolate({
             memoryLimit: 16,

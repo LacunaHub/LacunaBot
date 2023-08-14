@@ -14,7 +14,7 @@ import {
     User
 } from 'discord.js'
 import IVM, { Context } from 'isolated-vm'
-import { QuickDB } from 'quick.db'
+import { Database as QDatabase } from 'quickmongo'
 import safeRegex from 'safe-regex'
 import { ICustomCommand, MessageEmbed as IMessageEmbed, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
@@ -26,7 +26,7 @@ export default class CustomCommand {
     public self: Lacuna
     public server: ServerDocument
     public interaction: ChatInputCommandInteraction
-    public storage: QuickDB
+    public storage: QDatabase
     private usedPatterns: string[]
     private usedFunctions: string[]
     private isolate: IVM.Isolate
@@ -40,7 +40,7 @@ export default class CustomCommand {
 
         this.interaction = interaction
 
-        this.storage = this.self.db.qdb.table('publicStorage')
+        this.storage = new this.self.db.qdb.table('public-storage')
 
         this.usedPatterns = []
 

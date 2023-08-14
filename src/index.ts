@@ -6,7 +6,6 @@ import { Bridge } from 'discord-cross-hosting'
 import { Server } from 'http'
 import { connect } from 'mongoose'
 import pm2 from 'pm2'
-import { QuickDB } from 'quick.db'
 import database from './database'
 import { bridgeClient, clusterManager } from './internals/Cluster'
 import logger from './internals/Logger'
@@ -71,9 +70,8 @@ if (isMasterBridge) {
 }
 
 async function startServices() {
-    connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-    await database.mysql.connect()
-    database.qdb = new QuickDB({ driver: database.mysql })
+    await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    await database.qdb.connect()
 
     await bridgeClient.connect()
     bridgeClient.listen(clusterManager)

@@ -1,5 +1,5 @@
 import { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose'
-import { MySQLDriver, QuickDB } from 'quick.db'
+import { Database as QDatabase } from 'quickmongo'
 import AutomationTasks from './schemas/AutomationTasks'
 import Bills, { IBill } from './schemas/Bills'
 import CustomCommands from './schemas/CustomCommands'
@@ -9,16 +9,14 @@ import TwitchSubs, { ITwitchSub } from './schemas/TwitchSubs'
 import Users from './schemas/Users'
 import YouTubeSubs, { IYouTubeSub } from './schemas/YouTubeSubs'
 
-const [mysqlHost, mysqlPort, mysqlUser, mysqlPassword, mysqlDatabase] = process.env.DB_MYSQL_AUTH.split(':')
-const mysql = new MySQLDriver({
-    host: mysqlHost,
-    port: Number(mysqlPort),
-    user: mysqlUser,
-    password: mysqlPassword,
-    database: mysqlDatabase
-})
-
-let qdb: QuickDB
+// const [mysqlHost, mysqlPort, mysqlUser, mysqlPassword, mysqlDatabase] = process.env.DB_MYSQL_AUTH.split(':')
+// const mysql = new MySQLDriver({
+//     host: mysqlHost,
+//     port: Number(mysqlPort),
+//     user: mysqlUser,
+//     password: mysqlPassword,
+//     database: mysqlDatabase
+// })
 
 export default {
     automationTasks: AutomationTasks,
@@ -145,8 +143,7 @@ export default {
         }
     },
 
-    mysql,
-    qdb
+    qdb: new QDatabase(process.env.QMONGO_DB_URL, { collectionName: 'internal-storage' })
 }
 
 export interface JsonData {
