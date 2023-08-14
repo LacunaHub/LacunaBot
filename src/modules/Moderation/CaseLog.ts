@@ -17,6 +17,8 @@ import db from '../../database'
 import { ServerDocument } from '../../database/schemas/Servers'
 import i18n from '../../i18n'
 import Lacuna from '../../internals/Lacuna'
+import Logger from '../../internals/Logger'
+import { snakeToPascalCase } from '../../internals/utility/Utils'
 import { images } from '../Logs'
 
 export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageOptions) {
@@ -52,6 +54,8 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
                 ]
             })
         } catch (err) {
+            Logger.handleError({ module: 'CaseLog', action: 'SendCaseMessage', error: err, guild_id: guild.id })
+
             return
         }
 
@@ -83,7 +87,7 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
         guild.client.emit('moduleExecution', {
             module: 'Moderation',
             category: 'CaseLog',
-            label: options.type,
+            label: snakeToPascalCase(options.type),
             guild: { id: guild.id, name: guild.name },
             target: { id: options.target.id, name: options.target.tag }
         })

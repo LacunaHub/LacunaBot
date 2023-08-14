@@ -74,21 +74,13 @@ export async function handleTelegramWebhook(data: ITelegramWebhookData) {
 
         if (!guildSubscription) continue
 
-        let webhook
+        let webhook: any
 
         try {
             webhook = await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
         } catch (err) {}
 
         if (!webhook) {
-            webhook = await restApi
-                .post(apiRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
-                    body: {
-                        name: `@${data.channel_username}`
-                    }
-                })
-                .catch(() => {})
-
             try {
                 webhook = await restApi.post(apiRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
                     body: {

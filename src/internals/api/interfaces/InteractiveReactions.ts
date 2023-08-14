@@ -11,28 +11,35 @@ export async function createInteractiveReaction(server: ServerDocument, data: Pa
 
     if (interactiveReactions.length >= 50 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
     if (interactiveReactions.length >= 200) throw new Error('LIMIT_REACHED')
-    if (interactiveReactions.some(r => r.message.id == data.message.id && r.emoji.name == emoji.name)) throw new Error('EMOJI_ALREADY_USED')
+    if (interactiveReactions.some(r => r.message.id === data.message.id && r.emoji.name === emoji.name)) throw new Error('EMOJI_ALREADY_USED')
     if (
         interactiveReactions.some(
-            r => r.message.id == data.message.id && (r.element.single || r.element.global_single) && r.references.some(ref => data.references.includes(ref))
+            r =>
+                r.message.id == data.message.id &&
+                (r.element.single || r.element.global_single) &&
+                r.references.some(ref => data.references.includes(ref))
         )
     )
         throw new Error('REFERENCE_IS_SINGLE')
 
-    const message = await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.channelMessage(data.message.channel_id, data.message.id)).catch(() => {})
+    let message: any
+    let puttedReaction: any
+
+    try {
+        message = await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.channelMessage(data.message.channel_id, data.message.id))
+    } catch (err) {}
 
     if (!message) throw new Error('UNKNOWN_MESSAGE')
 
-    // prettier-ignore
-    const puttedReaction = await DiscordUtils.restApi
-        .put(
+    try {
+        puttedReaction = await DiscordUtils.restApi.put(
             DiscordUtils.apiRoutes.channelMessageOwnReaction(
                 data.message.channel_id,
                 data.message.id,
                 encodeURIComponent(emoji.id ? `${emoji.name}:${emoji.id}` : emoji.name)
             )
         )
-        .catch(() => {})
+    } catch (err) {}
 
     if (!puttedReaction) throw new Error('CANNOT_CREATE_REACTION')
 
@@ -64,8 +71,8 @@ export async function createInteractiveReaction(server: ServerDocument, data: Pa
 }
 
 export async function updateInteractiveReaction(server: ServerDocument, data: InteractiveReaction) {
-    const ir = server.modules.reactions.find(r => r.id == data.id)
-    if (!ir) throw new Error('NOT_FOUND')
+    const interactiveReaction = server.modules.reactions.find(r => r.id === data.id)
+    if (!interactiveReaction) throw new Error('NOT_FOUND')
 
     if (
         server.modules.reactions.some(
@@ -79,7 +86,7 @@ export async function updateInteractiveReaction(server: ServerDocument, data: In
         return 'reference_is_single'
 
     await database.servers.updateOne(
-        { _id: server._id, 'modules.reactions.id': ir.id },
+        { _id: server._id, 'modules.reactions.id': interactiveReaction.id },
         {
             $set: {
                 'modules.reactions.$.element.single': data.element.single,
@@ -93,8 +100,8 @@ export async function updateInteractiveReaction(server: ServerDocument, data: In
 }
 
 export async function deleteInteractiveReaction(server: ServerDocument, data: { id: string }) {
-    const ir = server.modules.reactions.find(r => r.id == data.id)
-    if (!ir) throw new Error('NOT_FOUND')
+    const interactiveReaction = server.modules.reactions.find(r => r.id === data.id)
+    if (!interactiveReaction) throw new Error('NOT_FOUND')
 
     await database.servers.updateOne(
         { _id: server._id },
@@ -107,15 +114,19 @@ export async function deleteInteractiveReaction(server: ServerDocument, data: { 
         }
     )
 
-    await DiscordUtils.restApi
-        .delete(
+    try {
+        await DiscordUtils.restApi.delete(
             DiscordUtils.apiRoutes.channelMessageReaction(
-                ir.message.channel_id,
-                ir.message.id,
-                encodeURIComponent(ir.emoji.id ? `${ir.emoji.name}:${ir.emoji.id}` : ir.emoji.name)
+                interactiveReaction.message.channel_id,
+                interactiveReaction.message.id,
+                encodeURIComponent(
+                    interactiveReaction.emoji.id
+                        ? `${interactiveReaction.emoji.name}:${interactiveReaction.emoji.id}`
+                        : interactiveReaction.emoji.name
+                )
             )
         )
-        .catch(() => {})
+    } catch (err) {}
 
     return data
 }

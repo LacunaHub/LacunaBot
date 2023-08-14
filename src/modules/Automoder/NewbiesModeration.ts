@@ -40,7 +40,11 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                     initial: true
                 })
             } else {
-                await member.guild.members.ban(member.id, { reason }).catch(self.logger.error)
+                try {
+                    await member.guild.members.ban(member.id, { reason })
+                } catch (err) {
+                    self.logger.handleError({ module: 'NewbiesModeration', action: 'Ban', error: err, guild_id: member.guild.id })
+                }
             }
 
             await caseLog.createCaseEntry(member.guild, { type: 'BAN_ADD', target: member.user, executor: self.user, reason })
@@ -50,7 +54,12 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             const expires_timestamp = Date.now() + (config.mute_timeout ? config.mute_timeout * 1000 : ms('2h'))
             reason += ` (${moment(expires_timestamp).locale(server.locale).fromNow(true)})`
 
-            await member.disableCommunicationUntil(expires_timestamp, reason).catch(() => {})
+            try {
+                await member.disableCommunicationUntil(expires_timestamp, reason)
+            } catch (err) {
+                self.logger.handleError({ module: 'NewbiesModeration', action: 'DisableCommunication', error: err, guild_id: member.guild.id })
+            }
+
             await caseLog.createCaseEntry(member.guild, { type: 'MUTE_ADD', target: member.user, executor: self.user, reason })
 
             if (server.moderation.mutes.rar) {
@@ -73,12 +82,18 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                     ...member.roles.cache.filter(r => !r.editable).map(r => r.id)
                 ]
 
-                await member.roles.set(strict_roles, reason).catch(self.logger.error)
+                try {
+                    await member.roles.set(strict_roles, reason)
+                } catch (err) {
+                    self.logger.handleError({ module: 'NewbiesModeration', action: 'RemoveAllRoles', error: err, guild_id: member.guild.id })
+                }
             }
         }
 
         if (kick && !ban && !mute && member.kickable) {
-            await member.kick(reason).catch(self.logger.error)
+            try {
+                await member.kick(reason)
+            } catch (err) {}
             await caseLog.createCaseEntry(member.guild, { type: 'KICK', target: member.user, executor: self.user, reason })
         }
 
@@ -87,7 +102,11 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 const editable = member.guild.roles.cache.filter(r => r.editable && config.modify_roles.add.includes(r.id))
 
                 if (editable.size) {
-                    await member.roles.add(editable, reason).catch(self.logger.error)
+                    try {
+                        await member.roles.add(editable, reason)
+                    } catch (err) {
+                        self.logger.handleError({ module: 'NewbiesModeration', action: 'ModifyRolesAdd', error: err, guild_id: member.guild.id })
+                    }
                 }
             }
 
@@ -95,7 +114,11 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 const editable = member.guild.roles.cache.filter(r => r.editable && config.modify_roles.remove.includes(r.id))
 
                 if (editable.size) {
-                    await member.roles.remove(editable, reason).catch(self.logger.error)
+                    try {
+                        await member.roles.remove(editable, reason)
+                    } catch (err) {
+                        self.logger.handleError({ module: 'NewbiesModeration', action: 'ModifyRolesRemove', error: err, guild_id: member.guild.id })
+                    }
                 }
             }
         }

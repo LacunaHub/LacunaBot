@@ -98,7 +98,12 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             return false
         }
 
-        await member.kick(reason).catch(() => {})
+        try {
+            await member.kick(reason)
+        } catch (err) {
+            self.logger.handleError({ module: 'Reports', action: 'KickQuickAction', error: err, guild_id: interaction.guildId })
+        }
+
         await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: member.user, executor: interaction.user, reason })
     }
 
@@ -151,7 +156,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
         return false
     }
 
-    if (member.id == interaction.user.id) {
+    if (member.id === interaction.user.id) {
         await interaction.followUp({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_self_quick_action', { user: `**${interaction.member['displayName']}**` })}`,
             ephemeral: true
@@ -219,8 +224,12 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        if (duration == 'indefinitely') {
-            await interaction.guild.members.ban(member, { reason }).catch(() => {})
+        if (duration === 'indefinitely') {
+            try {
+                await interaction.guild.members.ban(member, { reason })
+            } catch (err) {
+                self.logger.handleError({ module: 'Reports', action: 'BanQuickAction', error: err, guild_id: interaction.guildId })
+            }
         } else {
             new TemporaryBan(self, {
                 user_id: member.id,
@@ -255,7 +264,11 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        await member.disableCommunicationUntil(Date.now() + ms(duration), reason)
+        try {
+            await member.disableCommunicationUntil(Date.now() + ms(duration), reason)
+        } catch (err) {
+            self.logger.handleError({ module: 'Reports', action: 'MuteQuickAction', error: err, guild_id: interaction.guildId })
+        }
 
         if (server.moderation.mutes.rar) {
             const current_roles = member.roles.cache.filter(r => r.editable && r.id !== interaction.guildId).map(r => r.id)
@@ -277,7 +290,11 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
                 ...member.roles.cache.filter(r => !r.editable).map(r => r.id)
             ]
 
-            await member.roles.set(strict_roles, reason).catch(self.logger.error)
+            try {
+                await member.roles.set(strict_roles, reason)
+            } catch (err) {
+                self.logger.handleError({ module: 'Reports', action: 'RemoveAllRoles', error: err, guild_id: interaction.guildId })
+            }
         }
 
         await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_ADD', target: member.user, executor: interaction.user, reason })
@@ -344,7 +361,9 @@ export async function checkReportsOnGuildMemberAdd(self: Lacuna, server: ServerD
 
             try {
                 await channel.send({ embeds: [embed] })
-            } catch (err) {}
+            } catch (err) {
+                self.logger.handleError({ module: 'Reports', action: 'SendNotificationAboutUnwantedUser', error: err, guild_id: member.guild.id })
+            }
         }
     }
 }

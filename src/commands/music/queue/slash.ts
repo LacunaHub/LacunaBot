@@ -33,7 +33,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     const chunks: Queue[] = chunkArray(player.queue, 25)
     let page: number = 0
-
     const selectMenuOptions = []
 
     for (const chunk of chunks) {
@@ -115,19 +114,17 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             rows[0].components[1].setLabel(t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }))
 
             await i.deferUpdate()
-            await i
-                .editReply({
-                    components: [
-                        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                            new StringSelectMenuBuilder()
-                                .setCustomId('QUEUE-SELECT-TRACK')
-                                .setPlaceholder(t('commands.queue.text_select_playback_track'))
-                                .addOptions(selectMenuOptions[page])
-                        ),
-                        ...rows
-                    ]
-                })
-                .catch(() => {})
+            await i.editReply({
+                components: [
+                    new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+                        new StringSelectMenuBuilder()
+                            .setCustomId('QUEUE-SELECT-TRACK')
+                            .setPlaceholder(t('commands.queue.text_select_playback_track'))
+                            .addOptions(selectMenuOptions[page])
+                    ),
+                    ...rows
+                ]
+            })
         }
 
         collector.resetTimer()

@@ -1,3 +1,6 @@
+import { BaseGuildTextChannel, Webhook } from 'discord.js'
+import { LogsWebhook } from '../../database/schemas/Servers'
+import Lacuna from '../../internals/Lacuna'
 import ChannelCreate from './Channel/ChannelCreate'
 import ChannelDelete from './Channel/ChannelDelete'
 import ChannelUpdate from './Channel/ChannelUpdate'
@@ -35,7 +38,62 @@ import VoiceServerMute from './Voice/VoiceServerMute'
 import VoiceServerUndeaf from './Voice/VoiceServerUndeaf'
 import VoiceServerUnmute from './Voice/VoiceServerUnmute'
 
-export {
+export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextChannel, webhooks: LogsWebhook[]) {
+    const logWebhook = webhooks.find(i => i.channel_id === logChannel.id)
+    let webhook: Webhook
+
+    if (logWebhook) {
+        try {
+            webhook = await self.fetchWebhook(logWebhook.id, logWebhook.token)
+        } catch (err) {
+            self.logger.handleError({ module: 'Logs', action: 'FetchWebhook', error: err, guild_id: logChannel.guildId })
+        }
+    }
+
+    if (!webhook) {
+        if (logWebhook) {
+            await self.db.servers.updateOne(
+                { _id: logChannel.guildId },
+                {
+                    $pull: {
+                        'moderation.logs.webhooks': {
+                            channel_id: logChannel.id
+                        }
+                    }
+                }
+            )
+        }
+
+        try {
+            webhook = await logChannel.createWebhook({
+                name: self.user.username,
+                avatar: self.user.displayAvatarURL(),
+                reason: 'Logs: No webhook for the logs'
+            })
+        } catch (err) {
+            self.logger.handleError({ module: 'Logs', action: 'CreateWebhook', error: err, guild_id: logChannel.guildId })
+
+            return null
+        }
+
+        await self.db.servers.updateOne(
+            { _id: logChannel.guildId },
+            {
+                $push: {
+                    'moderation.logs.webhooks': {
+                        id: webhook.id,
+                        token: webhook.token,
+                        channel_id: webhook.channelId
+                    }
+                }
+            }
+        )
+    }
+
+    return webhook
+}
+
+export default {
     ChannelCreate,
     ChannelDelete,
     ChannelUpdate,

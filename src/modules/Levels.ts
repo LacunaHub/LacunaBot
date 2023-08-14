@@ -371,15 +371,28 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
         if (award.type === 'ROLE') {
             const roles = member.guild.roles.cache.filter(r => r.editable && award.references.includes(r.id))
 
-            if (roles.size) await member.roles.add(roles).catch(self.logger.error)
-            if (award.remove_references?.length) {
-                await member.roles.remove(award.remove_references.slice(0, 5)).catch(() => {})
+            try {
+                if (roles.size) {
+                    await member.roles.add(roles)
+                }
+
+                if (award.remove_references?.length) {
+                    await member.roles.remove(award.remove_references.slice(0, 5))
+                }
+            } catch (err) {
+                self.logger.handleError({ module: 'Levels', action: 'AssignRoleAwards', error: err, guild_id: server._id })
             }
 
             for (const prevAward of prevAwards.filter(i => i.single)) {
                 const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevAward.references.includes(r.id))
 
-                if (prevRoles.size) await member.roles.remove(prevRoles).catch(self.logger.error)
+                if (prevRoles.size) {
+                    try {
+                        await member.roles.remove(prevRoles)
+                    } catch (err) {
+                        self.logger.handleError({ module: 'Levels', action: 'RemovePreviousAwards', error: err, guild_id: server._id })
+                    }
+                }
             }
         }
 
@@ -395,15 +408,28 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
         if (prevAward.type === 'ROLE') {
             const roles = member.guild.roles.cache.filter(r => r.editable && prevAward.references.includes(r.id))
 
-            if (roles.size) await member.roles.add(roles).catch(self.logger.error)
-            if (prevAward.remove_references?.length) {
-                await member.roles.remove(prevAward.remove_references.slice(0, 5)).catch(() => {})
+            try {
+                if (roles.size) {
+                    await member.roles.add(roles)
+                }
+
+                if (prevAward.remove_references?.length) {
+                    await member.roles.remove(prevAward.remove_references.slice(0, 5))
+                }
+            } catch (err) {
+                self.logger.handleError({ module: 'Levels', action: 'AssignRoleAwards', error: err, guild_id: server._id })
             }
 
             for (const prevPrevAward of prevAwards.slice(1).filter(i => i.single)) {
                 const prevRoles = member.guild.roles.cache.filter(r => r.editable && prevPrevAward.references.includes(r.id))
 
-                if (prevRoles.size) await member.roles.remove(prevRoles).catch(self.logger.error)
+                if (prevRoles.size) {
+                    try {
+                        await member.roles.remove(prevRoles)
+                    } catch (err) {
+                        self.logger.handleError({ module: 'Levels', action: 'RemovePreviousAwards', error: err, guild_id: server._id })
+                    }
+                }
             }
         }
 
@@ -427,18 +453,24 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, ref
         const replacer = new Replacer(null, { message: refs.message, guild: member.guild, member: member })
         const congrats = await replacer.replaceTemplateMessage(direction.message)
 
-        if (direction.format === 'CURRENT_CHANNEL' && refs.message) {
-            await refs.message.channel.send(congrats).catch(self.logger.error)
-        }
+        try {
+            if (direction.format === 'CURRENT_CHANNEL' && refs.message) {
+                await refs.message.channel.send(congrats)
+            }
 
-        if (direction.format === 'DM') {
-            await member.send(congrats).catch(self.logger.error)
-        }
+            if (direction.format === 'DM') {
+                await member.send(congrats)
+            }
 
-        if (direction.format === 'CHANNEL') {
-            const channel = member.guild.channels.cache.get(direction.channel_id) as BaseGuildTextChannel
+            if (direction.format === 'CHANNEL') {
+                const channel = member.guild.channels.cache.get(direction.channel_id) as BaseGuildTextChannel
 
-            if (channel) await channel.send(congrats).catch(self.logger.error)
+                if (channel) {
+                    await channel.send(congrats)
+                }
+            }
+        } catch (err) {
+            self.logger.handleError({ module: 'Levels', action: 'SendLevelUpMessage', error: err, guild_id: server._id })
         }
 
         self.emit('moduleExecution', {

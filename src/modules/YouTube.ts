@@ -71,7 +71,9 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
     if (!subscription) {
         logger.log(`[YouTube] Database entry for subscription "${data.channelId}" not found`)
 
-        await hubSubscribe(data.channelId, 'unsubscribe').catch(() => {})
+        try {
+            await hubSubscribe(data.channelId, 'unsubscribe')
+        } catch (err) {}
 
         return
     }
@@ -86,8 +88,10 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
     if (!subscribedGuilds.length) {
         logger.log(`[YouTube] No subscribed guilds found for subscription "${data.channelId}"`)
 
-        await hubSubscribe(data.channelId, 'unsubscribe').catch(() => {})
-        await db.youtubeSubs.deleteOne({ _id: data.channelId })
+        try {
+            await hubSubscribe(data.channelId, 'unsubscribe')
+            await db.youtubeSubs.deleteOne({ _id: data.channelId })
+        } catch (err) {}
 
         return
     }
@@ -103,16 +107,20 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
 
         if (!guildSubscription) continue
 
-        let webhook = (await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)).catch(() => {})) as any
+        let webhook: any
+
+        try {
+            webhook = await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
+        } catch (err) {}
 
         if (!webhook) {
-            webhook = await restApi
-                .post(apiRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
+            try {
+                webhook = await restApi.post(apiRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
                     body: {
                         name: data.channelName
                     }
                 })
-                .catch(() => {})
+            } catch (err) {}
 
             if (webhook)
                 await db.servers.updateOne(
@@ -137,13 +145,13 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
             })
         }
 
-        await restApi
-            .post(apiRoutes.webhook(webhook.id, webhook.token), {
+        try {
+            await restApi.post(apiRoutes.webhook(webhook.id, webhook.token), {
                 body: {
                     content: hasVideoUrl ? notificationText : notificationText ? `${notificationText}\n${videoUrl}` : videoUrl
                 }
             })
-            .catch(() => {})
+        } catch (err) {}
 
         handleModuleExecutionData({
             module: 'YouTube',

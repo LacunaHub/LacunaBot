@@ -9,7 +9,6 @@ import koaBody from 'koa-body'
 import koaJson from 'koa-json'
 import koaMorgan from 'koa-morgan'
 import { connect } from 'mongoose'
-import { QuickDB } from 'quick.db'
 import database from '../../database'
 import Logger from '../Logger'
 import authorize from './routes/authorize'
@@ -52,9 +51,7 @@ app.use(subscriptions.routes()).use(subscriptions.allowedMethods())
 app.use(users.routes()).use(users.allowedMethods())
 
 connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-database.mysql.connect().then(() => {
-    database.qdb = new QuickDB({ driver: database.mysql })
-})
+database.qdb.connect()
 
 bridgeClient.connect()
 app.listen(process.env.API_PORT, () => {

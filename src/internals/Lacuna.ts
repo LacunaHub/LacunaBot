@@ -5,7 +5,6 @@ import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
 import { connect } from 'mongoose'
 import { os } from 'node-os-utils'
-import { QuickDB } from 'quick.db'
 import db from '../database'
 import { ServerDocument } from '../database/schemas/Servers'
 import i18n from '../i18n'
@@ -100,12 +99,8 @@ export default class Lacuna extends Client {
         await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
         this.logger.log('[Lacuna] Connected to MongoDB')
 
-        await this.db.mysql.connect()
-        this.logger.log('[Lacuna] Connected to MySQL')
-
-        const qdb = new QuickDB({ driver: this.db.mysql })
-        this.db.qdb = qdb
-        this.logger.log('[Lacuna] QuickDB initialized')
+        await this.db.qdb.connect()
+        this.logger.log('[Lacuna] QuickMongo initialized')
 
         this.cluster = new ClusterClient(this)
         this.machine = new BridgeShard(this.cluster)

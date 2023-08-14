@@ -90,6 +90,8 @@ export default class Giveaway {
                 return await channel.messages.fetch({ message: this.messageId })
             }
         } catch (err) {
+            this.self.logger.handleError({ module: 'Giveaways', action: 'FetchGiveawayMessage', error: err, guild_id: this.guildId })
+
             await this.self.db.servers.updateOne(
                 { _id: this.guildId },
                 {
@@ -117,17 +119,26 @@ export default class Giveaway {
             const winners = this.participants.randomKey(this.numberOfWinners > this.participants.size ? this.participants.size : this.numberOfWinners)
 
             embed.setDescription(t('commands.giveaway.end.text_winners', { winners: winners.map(w => `<@${w}>`).join(', ') }))
-            await message.reply({
-                content: t('commands.giveaway.end.text_congrats', {
-                    winner: `${winners.map(w => `<@${w}>`)}`,
-                    prize: `**${this.prize}**`
+
+            try {
+                await message.reply({
+                    content: t('commands.giveaway.end.text_congrats', {
+                        winner: `${winners.map(w => `<@${w}>`)}`,
+                        prize: `**${this.prize}**`
+                    })
                 })
-            })
+            } catch (err) {
+                this.self.logger.handleError({ module: 'Giveaways', action: 'SendCongrats', error: err, guild_id: this.guildId })
+            }
         } else {
             embed.setDescription(t('commands.giveaway.end.text_no_members'))
         }
 
-        await message.edit({ embeds: [embed], components: [] })
+        try {
+            await message.edit({ embeds: [embed], components: [] })
+        } catch (err) {
+            this.self.logger.handleError({ module: 'Giveaways', action: 'UpdateGiveawayMessage', error: err, guild_id: this.guildId })
+        }
 
         return true
     }

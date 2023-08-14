@@ -7,7 +7,9 @@ const handler = async (self: Lacuna, guild: Guild) => {
 
     const player = self.player.get(guild.id)
 
-    if (player) player.destroy()
+    if (player) {
+        player.destroy()
+    }
 
     self.guilds.cache.delete(guild.id)
 

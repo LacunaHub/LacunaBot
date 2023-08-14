@@ -6,7 +6,11 @@ const handler = async (self: Lacuna, player: Player) => {
     const message = player.get<Message>('message')
 
     if (message) {
-        await message.edit({ components: [] }).catch(() => {})
+        try {
+            await message.edit({ components: [] })
+        } catch (err) {
+            self.logger.handleError({ module: 'QueueEnd', action: 'RemoveComponentsFromPlayerMessage', error: err, guild_id: player.guild })
+        }
     }
 
     player.set('message', null)

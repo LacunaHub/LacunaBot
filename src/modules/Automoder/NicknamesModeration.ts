@@ -23,8 +23,12 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
         name = adjectives[random]
     }
 
-    if (member.manageable && name != member.displayName) {
-        await member.setNickname(name, reason).catch(self.logger.error)
+    if (member.manageable && name !== member.displayName) {
+        try {
+            await member.setNickname(name, reason)
+        } catch (err) {
+            self.logger.handleError({ module: 'NicknameModeration', action: 'SetNickname', error: err, guild_id: member.guild.id })
+        }
 
         self.emit('moduleExecution', {
             module: 'AutoModer',

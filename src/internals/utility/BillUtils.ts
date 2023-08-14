@@ -67,7 +67,9 @@ export async function addPremium(bill: IBill, period: number) {
     patron_roles.push(bill.custom_fields.tier >= 2 ? big_patron_role_id : patron_role_id)
 
     for (const role of patron_roles) {
-        await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.guildMemberRole(support_server_id, bill.custom_fields.user_id, role)).catch(() => {})
+        try {
+            await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.guildMemberRole(support_server_id, bill.custom_fields.user_id, role))
+        } catch (err) {}
     }
 
     const patron = patrons.get(bill.custom_fields.user_id)

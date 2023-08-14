@@ -48,7 +48,15 @@ export default class TemporaryRole {
     }
 
     async getMember(): Promise<GuildMember> {
-        return (await this.guild.members.fetch(this.user_id).catch(() => {})) as GuildMember
+        let member: GuildMember
+
+        try {
+            member = await this.guild.members.fetch({ user: this.user_id })
+        } catch (err) {
+            this.self.logger.handleError({ module: 'TemporaryRole', action: 'FetchGuildMember', error: err, guild_id: this.guild_id })
+        }
+
+        return member
     }
 
     async create() {
@@ -83,7 +91,11 @@ export default class TemporaryRole {
         const member: GuildMember = await this.getMember()
 
         if (member) {
-            await member.roles.add(this.role_id, 'Temporary Role').catch(() => {})
+            try {
+                await member.roles.add(this.role_id, 'Temporary Role')
+            } catch (err) {
+                this.self.logger.handleError({ module: 'TemporaryRole', action: 'AddRoles', error: err, guild_id: this.guild_id })
+            }
         }
     }
 
@@ -111,7 +123,11 @@ export default class TemporaryRole {
         const member: GuildMember = await this.getMember()
 
         if (member && member.roles.cache.has(this.role_id)) {
-            await member.roles.remove(this.role_id, 'Temporary Role').catch(() => {})
+            try {
+                await member.roles.remove(this.role_id, 'Temporary Role')
+            } catch (err) {
+                this.self.logger.handleError({ module: 'TemporaryRole', action: 'RemoveRoles', error: err, guild_id: this.guild_id })
+            }
         } else {
             await this.deleteEntry()
         }

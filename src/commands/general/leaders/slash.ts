@@ -1,4 +1,13 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message } from 'discord.js'
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ChatInputCommandInteraction,
+    ComponentType,
+    EmbedBuilder,
+    GuildMember,
+    Message
+} from 'discord.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import { IUserLevel, IUserWallet } from '../../../database/schemas/Users'
@@ -14,7 +23,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     const fields = []
     let chunks: Array<IUserLevel[] | IUserWallet[]> = []
-
     const sorting_choices = Object.values(locale.commands.leaders.options.sorting.choices)
 
     if (sorting > sorting_choices.length || sorting < 1) sorting = 1
@@ -23,7 +31,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await interaction.deferReply({ ephemeral: true })
 
-    if (sorting == 1) {
+    if (sorting === 1) {
         if (!server.modules.levels.active && !server.modules.levels.voice) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.leaders.text_levels_disabled', {
@@ -55,7 +63,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
             for (const level of chunk as IUserLevel[]) {
                 const index = sorted.indexOf(level as any)
-
                 const current_xp_format =
                     level.experience.current >= 1000
                         ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 1 }).toUpperCase()
@@ -65,7 +72,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                         ? numbro(Math.floor(level.experience.total)).format({ average: true, mantissa: 1 }).toUpperCase()
                         : level.experience.total.toFixed(1)
                 const voice_time = numbro(level.activity.total_voice_time).format({ output: 'time' })
-
                 const username = (level as any).user?.username ?? (level as any)?.user?.id
 
                 current.push({
@@ -83,7 +89,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
     }
 
-    if (sorting == 2) {
+    if (sorting === 2) {
         if (!server.modules.economy.active) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
@@ -96,7 +102,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         const activities = (await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId })).map(i => ({
             user: { id: i._id, ...i.user },
-            ...i.activities.wallets.find(i => i.guild_id == interaction.guildId)
+            ...i.activities.wallets.find(i => i.guild_id === interaction.guildId)
         }))
 
         if (!activities?.length) {
@@ -117,7 +123,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
             for (const wallet of chunk as IUserWallet[]) {
                 const index = sorted.indexOf(wallet as any)
-
                 const currencies = wallet.currencies
                     .map(i => {
                         const currency = server.modules.economy.currencies.find(c => c.id == i.id)
@@ -125,7 +130,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                         if (currency) return `${currency.name} → ${i.amount.toFixed(2)}${currency.symbol}`
                     })
                     .join('\n')
-
                 const username = (wallet as any).user?.username ?? (wallet as any)?.user?.id
 
                 current.push({
@@ -182,7 +186,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         for (const chunk of field) {
             const [index, user_id] = chunk.name.split(' ')
-            const member = isSnowflake(user_id) ? await interaction.guild.members.fetch(user_id).catch(() => {}) : user_id
+            let member: GuildMember
+
+            if (isSnowflake(user_id)) {
+                try {
+                    member = await interaction.guild.members.fetch({ user: user_id })
+                } catch (err) {}
+            }
 
             chunk.name = `${index} ${member?.displayName ?? user_id}`
         }

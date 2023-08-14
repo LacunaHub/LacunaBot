@@ -7,7 +7,7 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
     } else if (!state.channelId) {
         self.emit('voiceDisconnect', state, before.channel)
     } else if (before.channelId && state.channelId) {
-        if (before.channelId != state.channelId) {
+        if (before.channelId !== state.channelId) {
             self.emit('voiceMove', before, state)
         }
 

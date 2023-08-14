@@ -89,7 +89,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         const replacer = new Replacer(null, { guild: interaction.guild, member: mention, penalty: { reason } })
         const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.BAN_ADD.dm_message)
 
-        await mention.send(dm_message).catch(self.logger.error)
+        try {
+            await mention.send(dm_message)
+        } catch (err) {
+            self.logger.handleError({ module: 'BanCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
+        }
     }
 
     if (duration) {
@@ -101,11 +105,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             initial: true
         })
     } else {
-        await interaction.guild.members.ban(mention, { reason: reason }).catch(self.logger.error)
+        try {
+            await interaction.guild.bans.create(mention.id, { reason: reason })
+        } catch (err) {
+            self.logger.handleError({ module: 'BanCommand', action: 'Ban', error: err, guild_id: interaction.guildId })
+        }
     }
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_ADD', target: mention.user, executor: interaction.user, reason })
-
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.ban.text_user_banned', {
             user: `**${(interaction.member as any).displayName}**`,

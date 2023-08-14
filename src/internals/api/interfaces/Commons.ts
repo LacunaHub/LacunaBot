@@ -667,7 +667,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         JSON.stringify(data.moderation.automoder.swear_filter.ignored.roles) !==
                             JSON.stringify(guild.moderation.automoder.swear_filter.ignored.roles)
                     ) {
-                        updateData['moderation.automoder.swear_filter.ignored.roles']
+                        updateData['moderation.automoder.swear_filter.ignored.roles'] = data.moderation.automoder.swear_filter.ignored.roles
                     }
 
                     if (
