@@ -321,7 +321,7 @@ const handler = async (
     }
 
     if (interaction.isModalSubmit()) {
-        if (/UD\-.*/.test(interaction.customId) && interaction.isStringSelectMenu()) {
+        if (/UD\-.*/.test(interaction.customId)) {
             await Automation.handleEvent('INTERACTION_MODAL_SUBMIT', self, server, interaction)
         }
 
