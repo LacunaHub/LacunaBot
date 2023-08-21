@@ -26,10 +26,17 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6" v-for="(bonus, i) in bonuses" :key="i">
-            <q-item class="no-padding">
+            <q-item :class="`no-padding q-item__${bonus.name}`">
               <q-item-section avatar top>
-                <q-avatar size="38px" square>
-                  <img :src="bonus.icon" />
+                <q-avatar size="64px" square>
+                  <lord-icon
+                    :src="bonus.icon"
+                    trigger="hover"
+                    :colors="bonus.iconColors"
+                    style="width: 100%; height: 100%"
+                    :target="`.q-item__${bonus.name}`"
+                  >
+                  </lord-icon>
                 </q-avatar>
               </q-item-section>
 
@@ -43,40 +50,7 @@
         </div>
       </q-card-section>
 
-      <q-card-section v-if="provider !== 'DISCORD_NITRO_BOOST'">
-        <div>
-          {{ $t('lacuna_diamond.select_plan') }}
-        </div>
-
-        <q-tabs
-          v-model.number="tier"
-          class="rounded-lg bg-dark-2 q-mt-sm"
-          align="justify"
-          active-bg-color="secondary"
-          indicator-color="transparent"
-        >
-          <q-tab
-            v-for="(period, i) in periods"
-            :key="period.name"
-            :name="i"
-            no-caps
-            :style="{ width: `calc(100% / ${periods.length})` }"
-          >
-            <div>
-              <del v-if="period.discounts[currency.name]" class="q-mr-xs opacity-lg">
-                {{ period.prices[currency.name] }}{{ currency.symbol }}
-              </del>
-              <span class="text-h5 text-white">
-                {{ period.prices[currency.name] - period.discounts[currency.name] }}{{ currency.symbol }}
-              </span>
-              <br />
-              <span class="text-caption">{{ period.name }}</span>
-            </div>
-          </q-tab>
-        </q-tabs>
-      </q-card-section>
-
-      <q-card-section v-else>
+      <q-card-section v-if="provider === 'DISCORD_NITRO_BOOST'">
         <q-card class="rounded-lg bg-dark-2" flat>
           <q-card-section>
             <ol class="q-pl-md q-my-none" type="1">
@@ -125,6 +99,74 @@
         </q-card>
       </q-card-section>
 
+      <q-card-section v-else-if="provider === 'PATREON'">
+        <q-card class="rounded-lg bg-dark-2" flat>
+          <q-card-section>
+            <q-btn
+              class="full-width"
+              style="background-color: #ff424d"
+              unelevated
+              no-caps
+              href="https://www.patreon.com/xelitte/join"
+              target="_blank"
+            >
+              <q-icon class="q-mr-xs" name="fab fa-patreon" size="24px"></q-icon>
+
+              <span>Become a Patron</span>
+            </q-btn>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <q-banner class="rounded-lg bg-dark-1" dense>
+              <span>
+                {{ $t('lacuna_diamond.patreon_after_checkout') }}
+
+                <b>
+                  {{ $t('lacuna_diamond.patreon_after_checkout_important_info') }}
+                </b>
+              </span>
+
+              <template #avatar>
+                <q-icon name="info" color="info"></q-icon>
+              </template>
+            </q-banner>
+          </q-card-section>
+        </q-card>
+      </q-card-section>
+
+      <q-card-section v-else>
+        <div>
+          {{ $t('lacuna_diamond.select_plan') }}
+        </div>
+
+        <q-tabs
+          v-model.number="tier"
+          class="rounded-lg bg-dark-2 q-mt-sm"
+          align="justify"
+          active-bg-color="secondary"
+          indicator-color="transparent"
+        >
+          <q-tab
+            v-for="(period, i) in periods"
+            :key="period.name"
+            :name="i"
+            no-caps
+            :style="{ width: $q.screen.lt.sm ? 'fit-content' : `calc(100% / ${periods.length})` }"
+          >
+            <div>
+              <del v-if="period.discounts[currency.name]" class="q-mr-xs opacity-lg">
+                {{ period.prices[currency.name] }}{{ currency.symbol }}
+              </del>
+              <span class="text-h5 text-white">
+                {{ period.prices[currency.name] - period.discounts[currency.name] }}{{ currency.symbol }}
+              </span>
+              <br />
+              <span class="text-caption">{{ period.name }}</span>
+            </div>
+          </q-tab>
+        </q-tabs>
+      </q-card-section>
+
       <q-card-section>
         <div>
           {{ $t('lacuna_diamond.select_payment_method') }}
@@ -142,10 +184,17 @@
             :key="provider.value"
             :name="provider.value"
             no-caps
-            :style="{ width: `calc(100% / ${paymentProviders.length})` }"
+            :style="{ width: $q.screen.lt.sm ? 'fit-content' : `calc(100% / ${paymentProviders.length})` }"
           >
-            <q-avatar size="32px">
-              <img :src="provider.icon" />
+            <q-avatar size="32px" square>
+              <q-icon
+                v-if="provider.value === 'PATREON'"
+                name="fab fa-patreon"
+                size="20px"
+                style="color: #ff424d"
+              ></q-icon>
+
+              <img v-else :src="provider.icon" />
             </q-avatar>
 
             <div class="text-white">
@@ -154,8 +203,7 @@
           </q-tab>
         </q-tabs>
 
-        <q-select
-          v-if="false"
+        <!-- <q-select
           v-model="provider"
           :options="paymentProviders"
           option-label="name"
@@ -167,7 +215,7 @@
           map-options
         >
           <template #prepend>
-            <q-avatar size="32px">
+            <q-avatar size="32px" square>
               <img :src="paymentProviders.find(i => i.value === provider).icon" alt="" />
             </q-avatar>
           </template>
@@ -185,7 +233,7 @@
               </q-item-section>
             </q-item>
           </template>
-        </q-select>
+        </q-select> -->
       </q-card-section>
 
       <q-card-section>
@@ -197,7 +245,7 @@
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t(`lacuna_diamond.${provider === 'DISCORD_NITRO_BOOST' ? 'check' : 'pay'}`)"
+              :label="$t(`lacuna_diamond.${['DISCORD_NITRO_BOOST', 'PATREON'].includes(provider) ? 'check' : 'pay'}`)"
               unelevated
               @click="onConfirm"
               :loading="confirmLoading"
@@ -268,7 +316,7 @@ export default defineComponent({
           .then(response => {
             event('checkout_progress', { event_label: provider.value })
 
-            if (provider.value === 'DISCORD_NITRO_BOOST') {
+            if (['DISCORD_NITRO_BOOST', 'PATREON'].includes(provider.value)) {
               window.location.reload()
             } else {
               const payUrl = response.data
@@ -312,22 +360,47 @@ export default defineComponent({
   data() {
     return {
       bonuses: [
-        { description: this.$t('lacuna_diamond.bonus_music_description'), icon: musicNotesImg },
         {
+          name: 'music',
+          description: this.$t('lacuna_diamond.bonus_music_description'),
+          icon: 'https://cdn.lordicon.com/pmkcstki.json',
+          iconColors: 'primary:#00bcd4'
+        },
+        {
+          name: 'limits',
           description: this.$t('lacuna_diamond.bonus_increased_limits_description'),
-          icon: plusMoreImg
+          icon: 'https://cdn.lordicon.com/orshjpvs.json',
+          iconColors: 'primary:#3a3347,secondary:#ebe6ef'
         },
-        { description: this.$t('lacuna_diamond.bonus_personalization_description'), icon: cleanerImg },
         {
-          description: this.$t('lacuna_diamond.bonus_more_subscriptions_description'),
-          icon: bellSingleImg
+          name: 'personalization',
+          description: this.$t('lacuna_diamond.bonus_personalization_description'),
+          icon: 'https://cdn.lordicon.com/pjlunxyy.json',
+          iconColors: 'primary:#3a3347,secondary:#646e78,tertiary:#ab6836,quaternary:#51acf7'
         },
-        { description: this.$t('lacuna_diamond.bonus_activities_description'), icon: rankingImg },
-        { description: this.$t('lacuna_diamond.bonus_respect_description'), icon: respectImg }
+        {
+          name: 'subscriptions',
+          description: this.$t('lacuna_diamond.bonus_custom_behavior_with_code_description'),
+          icon: 'https://cdn.lordicon.com/qatykyxz.json',
+          iconColors: 'primary:#121331,secondary:#00bcd4'
+        },
+        {
+          name: 'activities',
+          description: this.$t('lacuna_diamond.bonus_activities_description'),
+          icon: 'https://cdn.lordicon.com/qmcsqnle.json',
+          iconColors: 'primary:#ffc738,secondary:#b26836'
+        },
+        {
+          name: 'respect',
+          description: this.$t('lacuna_diamond.bonus_respect_description'),
+          icon: 'https://cdn.lordicon.com/cmfqmqbx.json',
+          iconColors: 'primary:#f9c9c0,secondary:#4bb3fd,tertiary:#f28ba8'
+        }
       ],
       paymentProviders: [
         { name: 'QIWI', value: 'QIWI', icon: qiwiLogo },
         { name: 'PayPal', value: 'PAYPAL', icon: paypalLogo },
+        { name: 'Patreon', value: 'PATREON' },
         { name: 'Discord Nitro Boost', value: 'DISCORD_NITRO_BOOST', icon: discordNitroBoost }
       ]
     }

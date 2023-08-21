@@ -1,17 +1,39 @@
 <template>
-  <q-card class="bg-dark-1 rounded-lg" flat>
-    <q-item class="q-py-md rounded-t-lg">
-      <q-item-section v-if="!dataLoading">
-        <q-item-label>
+  <q-card class="bg-dark-1" flat>
+    <q-item class="q-py-md">
+      <q-item-section>
+        <q-item-label class="text-subtitle1">
           {{ $t('pages.landing.ft_activities_title') }}
         </q-item-label>
       </q-item-section>
     </q-item>
 
-    <q-list class="q-px-none q-pb-md">
+    <q-list v-if="pageLoading" padding>
+      <q-item v-for="i in 3" :key="i">
+        <q-item-section avatar>
+          <q-skeleton class="rounded-circle" type="QAvatar" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>
+            <q-skeleton type="text" width="20%" />
+          </q-item-label>
+
+          <q-item-label>
+            <q-skeleton type="text" width="10%" />
+          </q-item-label>
+        </q-item-section>
+
+        <q-item-label side>
+          <q-skeleton class="rounded-circle" type="QAvatar" />
+        </q-item-label>
+      </q-item>
+    </q-list>
+
+    <q-list v-else padding>
       <q-item v-for="level in levels" :key="level.guild_id">
         <q-item-section avatar>
-          <q-avatar>
+          <q-avatar size="48px">
             <img :src="level.guild.iconURL" :alt="level.guild.name" />
           </q-avatar>
         </q-item-section>
@@ -42,7 +64,7 @@
             :value="level.progress.value"
             color="primary"
             track-color="dark-2"
-            size="42px"
+            size="48px"
           >
             {{ level.experience.level }}
             <q-tooltip
@@ -58,69 +80,73 @@
         </q-item-section>
       </q-item>
     </q-list>
-
-    <q-inner-loading class="rounded-lg" :showing="dataLoading">
-      <q-spinner-tail color="white" size="32px"></q-spinner-tail>
-    </q-inner-loading>
   </q-card>
 </template>
 
 <script>
 import { interfaces } from 'src/boot/axios'
 import { useUserStore } from 'src/stores/user'
-import { defineComponent } from 'vue'
+import { computed, defineComponent, onActivated, onMounted, ref, watch } from 'vue'
 
 export default defineComponent({
   name: 'DashboardPageProfile',
 
-  setup() {
+  props: {
+    parentLoading: {
+      type: Boolean,
+      default: true
+    }
+  },
+
+  setup(props) {
+    const pageLoading = ref(true)
     const user = useUserStore()
 
-    return { user }
-  },
+    const activities = ref({}),
+      levels = computed(() => {
+        return (
+          activities.value.levels
+            ?.filter(i => user.guilds.some(ii => i.guild_id === ii.id))
+            ?.map(i => {
+              const guild = user.guilds.find(ii => i.guild_id === ii.id)
+              const formula = 150 + i.experience.level * i.experience.level * 8
 
-  data() {
-    return {
-      dataLoading: true
-    }
-  },
-
-  computed: {
-    levels() {
-      return (
-        this.user.activities?.levels
-          ?.filter(i => this.user.guilds.some(ii => i.guild_id === ii.id))
-          ?.map(i => {
-            const guild = this.user.guilds.find(ii => i.guild_id === ii.id)
-            const formula = 150 + i.experience.level * i.experience.level * 8
-
-            return {
-              ...i,
-              guild,
-              progress: {
-                next: formula,
-                value: Math.floor((i.experience.current * 100) / formula)
+              return {
+                ...i,
+                guild,
+                progress: {
+                  next: formula,
+                  value: Math.floor((i.experience.current * 100) / formula)
+                }
               }
-            }
-          }) ?? []
-      )
-    }
-  },
-
-  methods: {
-    async getActivities() {
-      return interfaces.users.getActivities().then(response => {
-        const { data } = response
-
-        this.user.$patch({ activities: data })
+            }) ?? []
+        )
       })
+
+    const getActivities = async () => {
+      try {
+        const response = await interfaces.users.getActivities(),
+          { data } = response
+
+        return (activities.value = data)
+      } catch (err) {}
     }
-  },
 
-  async mounted() {
-    if (!this.user.activities) await this.getActivities()
+    onMounted(async () => {
+      const hook = async () => {
+        await getActivities()
 
-    this.dataLoading = false
+        return (pageLoading.value = false)
+      }
+
+      if (props.parentLoading) {
+        watch(() => props.parentLoading, hook)
+      } else {
+        await hook()
+      }
+    })
+
+    return { pageLoading, user, activities, levels }
   }
 })
 </script>

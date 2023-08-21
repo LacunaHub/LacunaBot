@@ -27,6 +27,16 @@ ul {
   padding-left: 16px;
 }
 
+em.gradient {
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-image: linear-gradient(90deg, $primary, $primary 33%, $accent);
+  color: transparent;
+  display: inline;
+  font-style: normal !important;
+  font-weight: inherit !important;
+}
+
 /* OVERWRITE FRAMEWORK STYLES */
 
 .q-field--filled .q-field__control {
@@ -66,10 +76,16 @@ ul {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12) !important;
 }
 
+.q-carousel-section > div > div.q-carousel__slides-container > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* OTHER */
 
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
   height: 8px;
 }
 
@@ -79,7 +95,11 @@ ul {
 
 ::-webkit-scrollbar-thumb {
   background: black;
-  border-radius: 999px;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba($color: #000000, $alpha: 0.4);
 }
 
 /* TRANSITIONS & ANIMATIONS */

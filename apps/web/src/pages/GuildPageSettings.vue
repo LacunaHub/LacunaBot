@@ -12,7 +12,7 @@
               <q-card class="rounded-lg bg-dark-1" flat>
                 <q-item class="q-pt-md">
                   <q-item-section avatar>
-                    <q-avatar>
+                    <q-avatar size="48px">
                       <img :src="guild.iconURL" alt="Guild Icon" />
                     </q-avatar>
                   </q-item-section>

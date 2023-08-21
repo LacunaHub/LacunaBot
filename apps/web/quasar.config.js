@@ -29,7 +29,7 @@ module.exports = configure(function (ctx) {
         // app boot file (/src/boot)
         // --> boot files are part of "main.js"
         // https://v2.quasar.dev/quasar-cli/boot-files
-        boot: ['analytics', 'i18n', 'axios', 'emoji-picker', 'luxon', 'markdown', 'monaco-editor', 'numbro'],
+        boot: ['analytics', 'i18n', 'axios', 'emoji-picker', 'lottie', 'luxon', 'markdown', 'monaco-editor', 'numbro'],
 
         // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
         css: ['app.scss', 'style.scss', 'emoji-picker.scss'],
@@ -91,7 +91,15 @@ module.exports = configure(function (ctx) {
                         include: path.resolve(__dirname, './src/i18n/**')
                     }
                 ]
-            ]
+            ],
+
+            viteVuePluginOptions: {
+                template: {
+                    compilerOptions: {
+                        isCustomElement: tag => ['lord-icon'].includes(tag)
+                    }
+                }
+            }
         },
 
         // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer

@@ -9,9 +9,7 @@ export const useUserStore = defineStore('user', {
         avatar: Cookies.get('user_avatar'),
         access_token: Cookies.get('access_token'),
         flags: 0,
-        _guilds: [],
-        bills: [],
-        activities: null
+        _guilds: []
     }),
 
     getters: {

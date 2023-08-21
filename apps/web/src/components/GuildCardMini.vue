@@ -2,7 +2,7 @@
   <q-card class="g-card rounded-lg bg-dark-1 cursor-pointer" :style="joined ? '' : 'opacity: 0.4'" flat>
     <q-item class="rounded-lg" clickable v-ripple>
       <q-item-section avatar>
-        <q-avatar>
+        <q-avatar size="48px">
           <img :src="icon" :alt="name" />
         </q-avatar>
       </q-item-section>

@@ -1,22 +1,64 @@
 <template>
-  <q-page class="q-pa-md row justify-center items-start">
-    <div v-if="pageLoading" class="absolute-center">
+  <q-page class="q-ma-md row justify-center items-start">
+    <!-- <div v-if="pageLoading" class="absolute-center">
       <q-spinner-tail color="white" size="64px"></q-spinner-tail>
-    </div>
+    </div> -->
+
+    <!-- <div v-if="!pageLoading" class="row q-col-gutter-md dashboard-page-container">
+      <div class="col-12">
+        <div class="shadow-0 rounded-lg">
+          <q-toolbar class="bg-dark-1 q-py-md rounded-t-lg">
+            <q-item-section avatar>
+              <q-skeleton class="rounded-circle" type="QAvatar" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>
+                <q-skeleton type="text" width="100px" />
+              </q-item-label>
+            </q-item-section>
+          </q-toolbar>
+
+          <q-tabs class="bg-dark-1 rounded-b-lg" align="left" indicator-color="transparent">
+            <q-tab :ripple="false">
+              <q-skeleton type="rect" width="100%" />
+            </q-tab>
+            <q-tab :ripple="false">
+              <q-skeleton type="rect" width="100%" />
+            </q-tab>
+            <q-tab :ripple="false">
+              <q-skeleton type="rect" width="100%" />
+            </q-tab>
+          </q-tabs>
+        </div>
+      </div>
+    </div> -->
 
     <transition enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown" appear>
-      <div v-if="!pageLoading" class="row full-width" style="max-width: 720px">
-        <div class="col-12 q-mb-md">
+      <div id="dashboard-page-container" class="row q-col-gutter-md">
+        <div class="col-12">
           <div class="shadow-0 rounded-lg">
-            <q-toolbar class="bg-dark-1 q-py-sm rounded-t-lg">
+            <q-toolbar v-if="pageLoading" class="bg-dark-1 q-py-md rounded-t-lg">
               <q-item-section avatar>
-                <q-avatar>
+                <q-skeleton class="rounded-circle" type="QAvatar" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  <q-skeleton type="text" width="100px" />
+                </q-item-label>
+              </q-item-section>
+            </q-toolbar>
+
+            <q-toolbar v-else class="bg-dark-1 q-py-md rounded-t-lg">
+              <q-item-section avatar>
+                <q-avatar size="48px">
                   <img :src="user.avatarURL" alt="User Avatar" />
                 </q-avatar>
               </q-item-section>
 
               <q-item-section>
-                <q-item-label>{{ user.tag }}</q-item-label>
+                <q-item-label>{{ user.name }}</q-item-label>
               </q-item-section>
             </q-toolbar>
 
@@ -31,7 +73,9 @@
         <div class="col-12">
           <router-view v-slot="{ Component }">
             <transition enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown" mode="out-in">
-              <component :is="Component"></component>
+              <keep-alive>
+                <component :is="Component" :parent-loading="pageLoading"></component>
+              </keep-alive>
             </transition>
           </router-view>
         </div>
@@ -42,15 +86,18 @@
 
 <script>
 import { interfaces } from 'src/boot/axios'
-import { defineComponent, ref } from 'vue'
+import { defineComponent, onMounted, ref } from 'vue'
 import { useUserStore } from 'src/stores/user'
 import { useMeta } from 'quasar'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
-  name: 'ProfilePage',
+  name: 'DashboardPage',
 
   setup() {
-    const user = useUserStore()
+    const pageLoading = ref(true)
+    const user = useUserStore(),
+      router = useRouter()
 
     useMeta({
       title: 'My Profile',
@@ -67,39 +114,67 @@ export default defineComponent({
       }
     })
 
+    const getMe = async () => {
+      try {
+        const response = await interfaces.users.getMe(),
+          { data } = response
+
+        user.$patch({ _guilds: data.guilds, flags: data.user.flags })
+      } catch (err) {
+        const { status } = err.response
+
+        if (status === 401) {
+          await router.push({ path: '/authorize' })
+        }
+      }
+    }
+
+    onMounted(async () => {
+      await getMe()
+
+      pageLoading.value = false
+    })
+
     return {
+      pageLoading,
       user
     }
-  },
-
-  data() {
-    return {
-      pageLoading: true
-    }
-  },
-
-  methods: {
-    async getMe() {
-      return interfaces.users
-        .getMe()
-        .then(response => {
-          const { data } = response
-
-          //this.user.refreshCookies(data.user)
-          this.user.$patch({ _guilds: data.guilds, flags: data.user.flags })
-        })
-        .catch(err => {
-          const { status } = err.response
-
-          if (status === 401) this.$router.push({ path: '/authorize' })
-        })
-    }
-  },
-
-  async mounted() {
-    await this.getMe()
-
-    this.pageLoading = false
   }
+
+  // methods: {
+  //   async getMe() {
+  //     return interfaces.users
+  //       .getMe()
+  //       .then(response => {
+  //         const { data } = response
+
+  //         //this.user.refreshCookies(data.user)
+  //         this.user.$patch({ _guilds: data.guilds, flags: data.user.flags })
+  //       })
+  //       .catch(err => {
+  //         const { status } = err.response
+
+  //         if (status === 401) this.$router.push({ path: '/authorize' })
+  //       })
+  //   }
+  // },
+
+  // async mounted() {
+  //   await this.getMe()
+
+  //   this.pageLoading = false
+  // }
 })
 </script>
+
+<style lang="scss" scoped>
+#dashboard-page-container {
+  @media (max-width: $breakpoint-md-max) {
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  max-width: 50%;
+  min-width: 50%;
+}
+</style>

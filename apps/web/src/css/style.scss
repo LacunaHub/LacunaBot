@@ -48,6 +48,10 @@
   border-radius: $border-radius-lg !important;
 }
 
+.rounded-circle {
+  border-radius: 999px !important;
+}
+
 .rounded-t-lg {
   border-radius: $border-radius-lg $border-radius-lg 0 0 !important;
 }
