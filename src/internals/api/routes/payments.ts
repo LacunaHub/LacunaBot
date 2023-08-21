@@ -2,10 +2,11 @@ import Router from '@koa/router'
 import { Context } from 'koa'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
-import { addDiamond } from '../../utility/BillUtils'
-import { NitroBoost } from '../../utility/DiscordNitroBoost'
-import { APIOrder, captureOrder, Order as PayPalOrder } from '../../utility/PayPal'
-import { Bill as QiwiBill } from '../../utility/Qiwi'
+import { snakeToPascalCase } from '../../utility/Utils'
+import { addDiamond, diamond_subscriber_role_id, server_booster_role_id } from '../../utility/billing'
+import { DiscordRolesCheckout } from '../../utility/billing/providers/DiscordRoles'
+import { APIOrder, Order as PayPalOrder, captureOrder } from '../../utility/billing/providers/PayPal'
+import { Bill as QiwiBill } from '../../utility/billing/providers/QIWI'
 import { authorize } from '../utility/Authorize'
 
 const router: Router = new Router({ prefix: '/payments' })
@@ -19,7 +20,7 @@ async function createPayment(ctx: Context) {
     const { tier, provider, guild_id, guild_name } = ctx.request.body
 
     if (isNaN(tier)) ctx.throw(400)
-    if (!['QIWI', 'PAYPAL', 'DISCORD_NITRO_BOOST'].includes(provider)) ctx.throw(400, 'Unknown Payment Provider')
+    if (!['QIWI', 'PAYPAL', 'DISCORD_NITRO_BOOST', 'PATREON'].includes(provider)) ctx.throw(400, 'Unknown Payment Provider')
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
     if (!server || server.server.blocked) ctx.throw(404)
@@ -72,19 +73,68 @@ async function createPayment(ctx: Context) {
         ctx.body = approveLink.href
     }
 
-    if (provider === 'DISCORD_NITRO_BOOST') {
-        if (server.server.premium.available) ctx.throw(400, 'There is already a premium on this server')
+    if (['DISCORD_NITRO_BOOST', 'PATREON'].includes(provider)) {
+        if (server.server.premium.available) ctx.throw(400, 'This server already has Lacuna Diamond')
 
-        data.amount.currency = 'DNB'
+        data.amount.currency = 'DRC'
         data.amount.value = 1
 
-        const nitroBoost = new NitroBoost(data)
-        const isNitroBooster = await nitroBoost.create()
+        let roleIds = [diamond_subscriber_role_id],
+            maxActiveBills = 2
 
-        if (!isNitroBooster) ctx.throw(400, 'Could not find nitro boost on our support server')
+        if (provider === 'DISCORD_NITRO_BOOST') {
+            roleIds = [server_booster_role_id]
+            maxActiveBills = 1
+        }
+
+        const discordRolesCheckout = new DiscordRolesCheckout(data, provider, roleIds, maxActiveBills)
+        const rolesMember = await discordRolesCheckout.create()
+        let message: string
+
+        if (rolesMember === 'NO_ROLES') {
+            message = `You're not a Diamond Subscriber on ${snakeToPascalCase(provider)}.`
+
+            if (provider === 'DISCORD_NITRO_BOOST') {
+                message = "You're not a Server Booster on our support server."
+            }
+        }
+
+        if (rolesMember === 'MAX_ACTIVE_BILLS') {
+            message = `You've reached the maximum number (${maxActiveBills}) of Diamond servers.`
+        }
+
+        if (typeof message === 'string') ctx.throw(400, message)
 
         ctx.status = 204
     }
+
+    // if (provider === 'DISCORD_NITRO_BOOST') {
+    //     if (server.server.premium.available) ctx.throw(400, 'There is already a premium on this server')
+
+    //     data.amount.currency = 'DNB'
+    //     data.amount.value = 1
+
+    //     const nitroBoost = new NitroBoost(data)
+    //     const isNitroBooster = await nitroBoost.create()
+
+    //     if (!isNitroBooster) ctx.throw(400, 'Could not find nitro boost on our support server')
+
+    //     ctx.status = 204
+    // }
+
+    // if (provider === 'PATREON') {
+    //     if (server.server.premium.available) ctx.throw(400, 'There is already a premium on this server')
+
+    //     data.amount.currency = 'PAT'
+    //     data.amount.value = 1
+
+    //     const diamondSubscription = new PatreonDiamondSubscription(data)
+    //     const isDiamondSubscriber = await diamondSubscription.create()
+
+    //     if (!isDiamondSubscriber) ctx.throw(400, "You're not a Diamond Subscriber on Patreon or have reached the limit")
+
+    //     ctx.status = 204
+    // }
 }
 
 async function chargePayment(ctx: Context) {

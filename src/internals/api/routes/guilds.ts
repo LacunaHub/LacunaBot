@@ -12,6 +12,8 @@ import {
 import { Context } from 'koa'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
+import { diamondGuilds } from '../../structures/DiamondGuild'
+import { addDiamond } from '../../utility/billing'
 import DiscordUtils from '../../utility/DiscordUtils'
 import interfaces from '../interfaces'
 import { authorize, checkPermissions } from '../utility/Authorize'
@@ -32,6 +34,7 @@ router.post('/:guild_id/reactions/:method', checkPermissions, updateInteractiveR
 router.post('/:guild_id/subscriptions/telegram/:method', checkPermissions, updateTelegramSubscription)
 router.post('/:guild_id/subscriptions/twitch/:method', checkPermissions, updateTwitchSubscriptions)
 router.post('/:guild_id/subscriptions/youtube/:method', checkPermissions, updateYouTubeSubscriptions)
+router.post('/:guild_id/transfer-diamond/:to_guild_id', checkPermissions, transferDiamond)
 
 async function getSettings(ctx: Context) {
     const guild_id: string = ctx.params.guild_id
@@ -512,6 +515,54 @@ async function updateAutoVoices(ctx: Context) {
 
     ctx.status = 200
     ctx.body = response
+}
+
+async function transferDiamond(ctx: Context) {
+    const guildId = ctx.params.guild_id,
+        toGuildId = ctx.params.to_guild_id
+
+    const server = await db.servers.findOne({ _id: guildId })
+
+    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server.server.premium.available || !server.server.premium.bill_id) ctx.throw(400)
+
+    const bill = await db.bills.findOne({ _id: server.server.premium.bill_id })
+    const toServer = await db.servers.findOne({ _id: toGuildId })
+
+    if (!bill) ctx.throw(400)
+    if (!toServer || toServer.server.blocked) ctx.throw(404)
+    if (toServer.server.premium.available) ctx.throw(400)
+
+    await db.servers.updateOne(
+        { _id: guildId },
+        {
+            $set: {
+                'server.premium.available': false,
+                'server.premium.will_expire_on': 0,
+                'server.premium.bill_id': null
+            }
+        }
+    )
+
+    await db.bills.updateOne(
+        { _id: server.server.premium.bill_id },
+        {
+            $set: {
+                'custom_fields.reference_id': toGuildId
+            }
+        }
+    )
+
+    bill.custom_fields.reference_id = toGuildId
+    const diamondGuild = diamondGuilds.get(guildId)
+
+    if (diamondGuild) {
+        diamondGuild.cancel()
+    }
+
+    await addDiamond(bill)
+
+    ctx.status = 204
 }
 
 export default router

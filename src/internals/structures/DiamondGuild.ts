@@ -2,8 +2,8 @@ import { Job, scheduleJob } from 'node-schedule'
 import database from '../../database'
 import { IBill } from '../../database/schemas/Bills'
 import logger from '../Logger'
-import { addDiamond } from '../utility/BillUtils'
-import { isNitroBooster } from '../utility/DiscordNitroBoost'
+import { addDiamond, diamond_subscriber_role_id, server_booster_role_id } from '../utility/billing'
+import { isRolesMember } from '../utility/billing/providers/DiscordRoles'
 
 export const diamondGuilds = new Map<string, DiamondGuild>()
 
@@ -38,17 +38,23 @@ export default class DiamondGuild {
 
     async expire() {
         let bill: IBill,
-            nitroBooster: boolean = false
+            rolesMember: boolean = false
 
         if (this.bill_id) {
             bill = await database.bills.findOne({ _id: this.bill_id })
 
-            if (bill?.type === 'DISCORD_NITRO_BOOST') {
-                nitroBooster = await isNitroBooster(bill.custom_fields.user_id)
+            if (['DISCORD_NITRO_BOOST', 'PATREON'].includes(bill?.type)) {
+                let roleIds = [diamond_subscriber_role_id]
+
+                if (bill.type === 'DISCORD_NITRO_BOOST') {
+                    roleIds = [server_booster_role_id]
+                }
+
+                rolesMember = await isRolesMember(bill.custom_fields.user_id, roleIds)
             }
         }
 
-        if (nitroBooster) {
+        if (rolesMember) {
             await addDiamond(bill)
         } else {
             await database.servers.updateOne(
@@ -62,7 +68,7 @@ export default class DiamondGuild {
                 }
             )
 
-            if (bill?.type === 'DISCORD_NITRO_BOOST') {
+            if (['DISCORD_NITRO_BOOST', 'PATREON'].includes(bill?.type)) {
                 await database.bills.updateOne({ _id: bill._id }, { $set: { 'status.value': 'REJECTED' } })
             }
 

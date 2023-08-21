@@ -1,8 +1,8 @@
 import { Job, scheduleJob } from 'node-schedule'
 import database from '../../database'
 import logger from '../Logger'
-import { active_patron_role_id, support_server_id } from '../utility/BillUtils'
 import discord from '../utility/DiscordUtils'
+import { active_patron_role_id, support_server_id } from '../utility/billing'
 
 export const patrons = new Map<string, Patron>()
 
