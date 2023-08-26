@@ -20,7 +20,7 @@ async function createPayment(ctx: Context) {
     const { tier, provider, guild_id, guild_name } = ctx.request.body
 
     if (isNaN(tier)) ctx.throw(400)
-    if (!['QIWI', 'PAYPAL', 'DISCORD_NITRO_BOOST', 'PATREON'].includes(provider)) ctx.throw(400, 'Unknown Payment Provider')
+    if (!['QIWI', 'PAYPAL', 'DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider)) ctx.throw(400, 'Unknown Payment Provider')
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
     if (!server || server.server.blocked) ctx.throw(404)
@@ -73,7 +73,7 @@ async function createPayment(ctx: Context) {
         ctx.body = approveLink.href
     }
 
-    if (['DISCORD_NITRO_BOOST', 'PATREON'].includes(provider)) {
+    if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider)) {
         if (server.server.premium.available) ctx.throw(400, 'This server already has Lacuna Diamond')
 
         data.amount.currency = 'DRC'

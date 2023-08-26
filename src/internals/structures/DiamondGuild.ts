@@ -43,7 +43,7 @@ export default class DiamondGuild {
         if (this.bill_id) {
             bill = await database.bills.findOne({ _id: this.bill_id })
 
-            if (['DISCORD_NITRO_BOOST', 'PATREON'].includes(bill?.type)) {
+            if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(bill?.type)) {
                 let roleIds = [diamond_subscriber_role_id]
 
                 if (bill.type === 'DISCORD_NITRO_BOOST') {
@@ -68,7 +68,7 @@ export default class DiamondGuild {
                 }
             )
 
-            if (['DISCORD_NITRO_BOOST', 'PATREON'].includes(bill?.type)) {
+            if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(bill?.type)) {
                 await database.bills.updateOne({ _id: bill._id }, { $set: { 'status.value': 'REJECTED' } })
             }
 

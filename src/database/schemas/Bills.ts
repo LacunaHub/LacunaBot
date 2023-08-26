@@ -30,7 +30,7 @@ export default model<IBill>(
 export interface IBill extends Document {
     _id: string
     external_id?: string
-    type: 'QIWI' | 'PAYPAL' | 'DISCORD_NITRO_BOOST' | 'PATREON'
+    type: 'QIWI' | 'PAYPAL' | 'DISCORD_NITRO_BOOST' | 'PATREON' | 'BOOSTY'
     amount: number
     currency: string
     status: {

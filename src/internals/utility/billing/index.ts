@@ -24,7 +24,7 @@ export async function addDiamond(bill: IBill, server?: ServerDocument) {
 
     if (months > 0) {
         const date = server.server.premium.will_expire_on ? moment(server.server.premium.will_expire_on) : moment()
-        let period = (['DISCORD_NITRO_BOOST', 'PATREON'].includes(bill.type) ? date.add(6, 'hours') : date.add(months, 'M')).valueOf()
+        let period = (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(bill.type) ? date.add(6, 'hours') : date.add(months, 'M')).valueOf()
 
         await database.servers.updateOne(
             { _id: server._id },
@@ -46,7 +46,7 @@ export async function addDiamond(bill: IBill, server?: ServerDocument) {
 
         if (bill.type === 'DISCORD_NITRO_BOOST') {
             logger.log(`[Billing] Nitro Boost "${bill._id}" for guild ${server._id} successfully verified`)
-        } else if (bill.type === 'PATREON') {
+        } else if (['PATREON', 'BOOSTY'].includes(bill.type)) {
             logger.log(`[Billing] Diamond Subscription "${bill._id}" for guild ${server._id} successfully verified`)
         } else {
             logger.log(`[Billing] Bill "${bill._id}" for guild ${server._id} successfully charged`)
