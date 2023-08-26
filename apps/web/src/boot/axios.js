@@ -125,6 +125,13 @@ const interfaces = {
                     Authorization: Cookies.get('access_token')
                 }
             })
+        },
+        transferDiamond(guildId, toGuildId) {
+            return api.post(`/guilds/${guildId}/transfer-diamond/${toGuildId}`, null, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
         }
     },
 
@@ -185,6 +192,13 @@ const interfaces = {
         },
         getActivities() {
             return api.get('/users/@me/activities', {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
+        getDiamondGuilds() {
+            return api.get('/users/@me/diamond-guilds', {
                 headers: {
                     Authorization: Cookies.get('access_token')
                 }

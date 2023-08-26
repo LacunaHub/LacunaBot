@@ -243,7 +243,7 @@
           </div>
 
           <div class="col-6">
-            <q-btn
+            <q-btn-dropdown
               class="full-width"
               :label="$t(`lacuna_diamond.${['DISCORD_NITRO_BOOST', 'PATREON'].includes(provider) ? 'check' : 'pay'}`)"
               unelevated
@@ -252,11 +252,27 @@
               :disable="guild.premium.available && guild.premium.will_expire_on === 0"
               no-caps
               color="primary"
+              split
             >
+              <q-list>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="transferDialog"
+                  :disable="!guild.guild.owner || guild.premium.available"
+                >
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('transfer') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+
               <template #loading>
                 <q-spinner-dots color="white"></q-spinner-dots>
               </template>
-            </q-btn>
+            </q-btn-dropdown>
           </div>
         </div>
       </q-card-section>
@@ -271,15 +287,10 @@ import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { event } from 'vue-gtag'
 
-import musicNotesImg from 'src/assets/music-notes.svg'
-import plusMoreImg from 'src/assets/plus-more.svg'
-import cleanerImg from 'src/assets/cleaner.svg'
-import bellSingleImg from 'src/assets/bell-single.svg'
-import rankingImg from 'src/assets/ranking.svg'
-import respectImg from 'src/assets/respect.svg'
 import qiwiLogo from 'src/assets/qiwi-logo.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
 import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
+import LacunaDiamondTransfer from './LacunaDiamondTransfer.vue'
 
 export default defineComponent({
   name: 'LacunaDiamond',
@@ -296,10 +307,21 @@ export default defineComponent({
       tier = ref(0),
       provider = ref('QIWI')
 
+    const transferDialog = () => {
+      return $q
+        .dialog({
+          component: LacunaDiamondTransfer
+        })
+        .onOk(() => {
+          window.location.reload()
+        })
+    }
+
     return {
       guild,
-
       dialogRef,
+
+      transferDialog,
 
       onConfirm() {
         confirmLoading.value = true

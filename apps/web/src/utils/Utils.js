@@ -486,3 +486,9 @@ function resolveCustomBehaviorComponents(rawComponents) {
 export function getLocale() {
     return (localStorage.getItem('locale') ?? navigator.languages?.[0] ?? navigator.language ?? 'en').split('-')[0]
 }
+
+export function getGuildIconURL(guildId, icon) {
+    return guildId && icon
+        ? `https://cdn.discordapp.com/icons/${guildId}/${icon}.png`
+        : `https://cdn.discordapp.com/embed/avatars/${'0001' % 5}.png`
+}

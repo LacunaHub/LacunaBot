@@ -24,6 +24,7 @@
   "publish": "Publish",
   "name": "Name",
   "identifier": "Identifier",
+  "transfer": "Transfer",
   "common": {
     "channel": "Channel",
     "channels": "Channels",
@@ -217,7 +218,8 @@
     "dnb_step_3": "Make sure to select our {server}, then boost it",
     "dnb_step_4": "After that, click on the \"Check\" button below and bonuses will be available to you",
     "dnb_bonuses_info": "Bonuses will be available as long as you are a support server booster. You can only activate bonuses for one server.",
-    "check": "Check"
+    "check": "Check",
+    "transferring_description": "Premium features will be transferred from the selected community to the current community."
   },
   "user_survey": {
     "it_would_help_us": "It would help us if you could take 10 seconds of your time to rate your experience with us.",
@@ -515,6 +517,7 @@
     },
     "dashboard": {
       "profile": "Profile",
+      "no_activities": "Looks like you haven't been active",
       "my_guilds": "My Guilds",
       "no_guilds": "You don't have any guilds available.",
       "bills": "Invoices",
