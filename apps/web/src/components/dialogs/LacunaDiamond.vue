@@ -110,7 +110,7 @@
               href="https://www.patreon.com/xelitte/join"
               target="_blank"
             >
-              <q-icon class="q-mr-xs" name="fab fa-patreon" size="24px"></q-icon>
+              <q-icon class="q-mr-sm" name="fab fa-patreon" size="24px"></q-icon>
 
               <span>Become a Patron</span>
             </q-btn>
@@ -122,7 +122,44 @@
                 {{ $t('lacuna_diamond.patreon_after_checkout') }}
 
                 <b>
-                  {{ $t('lacuna_diamond.patreon_after_checkout_important_info') }}
+                  {{ $t('lacuna_diamond.patreon_after_checkout_important_info', { platform: 'Patreon' }) }}
+                </b>
+              </span>
+
+              <template #avatar>
+                <q-icon name="info" color="info"></q-icon>
+              </template>
+            </q-banner>
+          </q-card-section>
+        </q-card>
+      </q-card-section>
+
+      <q-card-section v-else-if="provider === 'BOOSTY'">
+        <q-card class="rounded-lg bg-dark-2" flat>
+          <q-card-section>
+            <q-btn
+              class="full-width"
+              style="background-color: #f15f2c"
+              unelevated
+              no-caps
+              href="https://boosty.to/xelitte/purchase/2062351"
+              target="_blank"
+            >
+              <q-avatar class="q-mr-xs" size="24px" square>
+                <img src="~assets/boosty-logo-white.svg" />
+              </q-avatar>
+
+              <span>Subscribe</span>
+            </q-btn>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <q-banner class="rounded-lg bg-dark-1" dense>
+              <span>
+                {{ $t('lacuna_diamond.patreon_after_checkout') }}
+
+                <b>
+                  {{ $t('lacuna_diamond.patreon_after_checkout_important_info', { platform: 'Boosty' }) }}
                 </b>
               </span>
 
@@ -245,7 +282,11 @@
           <div class="col-6">
             <q-btn-dropdown
               class="full-width"
-              :label="$t(`lacuna_diamond.${['DISCORD_NITRO_BOOST', 'PATREON'].includes(provider) ? 'check' : 'pay'}`)"
+              :label="
+                $t(
+                  `lacuna_diamond.${['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider) ? 'check' : 'pay'}`
+                )
+              "
               unelevated
               @click="onConfirm"
               :loading="confirmLoading"
@@ -289,6 +330,7 @@ import { event } from 'vue-gtag'
 
 import qiwiLogo from 'src/assets/qiwi-logo.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
+import boostyLogo from 'src/assets/boosty-logo.svg'
 import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
 import LacunaDiamondTransfer from './LacunaDiamondTransfer.vue'
 
@@ -338,7 +380,7 @@ export default defineComponent({
           .then(response => {
             event('checkout_progress', { event_label: provider.value })
 
-            if (['DISCORD_NITRO_BOOST', 'PATREON'].includes(provider.value)) {
+            if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider.value)) {
               window.location.reload()
             } else {
               const payUrl = response.data
@@ -423,6 +465,7 @@ export default defineComponent({
         { name: 'QIWI', value: 'QIWI', icon: qiwiLogo },
         { name: 'PayPal', value: 'PAYPAL', icon: paypalLogo },
         { name: 'Patreon', value: 'PATREON' },
+        { name: 'Boosty', value: 'BOOSTY', icon: boostyLogo },
         { name: 'Discord Nitro Boost', value: 'DISCORD_NITRO_BOOST', icon: discordNitroBoost }
       ]
     }

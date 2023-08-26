@@ -211,7 +211,7 @@
     "wait_few_minutes": "Bonuses activation takes some time, please wait a few minutes after payment",
     "pay": "Pay",
     "patreon_after_checkout": "Once you're a patron, click on the check button below to activate your bonuses.",
-    "patreon_after_checkout_important_info": "You must connect your Discord to Patreon and stay on our support server to access the bonuses.",
+    "patreon_after_checkout_important_info": "You must connect your Discord to {platform} and stay on our support server to access the bonuses.",
     "dnb_step_1": "Join our {server}",
     "dnb_step_2": "Check out {article}, which has step-by-step instructions on how to boost a server",
     "dnb_step_2_article": "this article",
