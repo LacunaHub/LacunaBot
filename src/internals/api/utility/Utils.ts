@@ -14,7 +14,7 @@ export async function isBotExpert(guild_id: string, user_id: string): Promise<bo
     return server && member ? member.roles.some(r => server.server.bot_expert_roles.includes(r)) : false
 }
 
-export function createRateLimitMiddleware(max: number, duration: number) {
+export function createRateLimitMiddleware(max: number, duration: number = 60000) {
     return rateLimit({
         driver: 'memory',
         db: new Map(),

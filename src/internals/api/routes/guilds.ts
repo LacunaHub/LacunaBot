@@ -24,20 +24,17 @@ import { createRateLimitMiddleware } from '../utility/Utils'
 const router: Router = new Router({ prefix: '/guilds' })
 const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
 
-router.use(createRateLimitMiddleware(20, 300000))
-router.use(authorize)
-
-router.get('/:guild_id/settings', checkPermissions, getSettings)
-router.post('/:guild_id/settings', checkPermissions, updateSettings)
-router.post('/:guild_id/application-commands', checkPermissions, updateApplicationCommands)
-router.post('/:guild_id/autovoices/:method', checkPermissions, updateAutoVoices)
-router.post('/:guild_id/custom-commands/:method', checkPermissions, updateCustomCommand)
-router.post('/:guild_id/interactive-messages/:method', checkPermissions, updateInteractiveMessages)
-router.post('/:guild_id/reactions/:method', checkPermissions, updateInteractiveReaction)
-router.post('/:guild_id/subscriptions/telegram/:method', checkPermissions, updateTelegramSubscription)
-router.post('/:guild_id/subscriptions/twitch/:method', checkPermissions, updateTwitchSubscriptions)
-router.post('/:guild_id/subscriptions/youtube/:method', checkPermissions, updateYouTubeSubscriptions)
-router.post('/:guild_id/transfer-diamond/:to_guild_id', checkPermissions, transferDiamond)
+router.get('/:guild_id/settings', createRateLimitMiddleware(10), authorize, checkPermissions, getSettings)
+router.post('/:guild_id/settings', createRateLimitMiddleware(10), authorize, checkPermissions, updateSettings)
+router.post('/:guild_id/application-commands', createRateLimitMiddleware(5), authorize, checkPermissions, updateApplicationCommands)
+router.post('/:guild_id/autovoices/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateAutoVoices)
+router.post('/:guild_id/custom-commands/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateCustomCommand)
+router.post('/:guild_id/interactive-messages/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateInteractiveMessages)
+router.post('/:guild_id/reactions/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateInteractiveReaction)
+router.post('/:guild_id/subscriptions/telegram/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateTelegramSubscription)
+router.post('/:guild_id/subscriptions/twitch/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateTwitchSubscriptions)
+router.post('/:guild_id/subscriptions/youtube/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateYouTubeSubscriptions)
+router.post('/:guild_id/transfer-diamond/:to_guild_id', createRateLimitMiddleware(5, 1000 * 60 * 5), authorize, transferDiamond)
 
 async function getSettings(ctx: Context) {
     const guild_id: string = ctx.params.guild_id

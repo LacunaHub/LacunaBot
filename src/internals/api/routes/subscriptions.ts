@@ -12,11 +12,10 @@ import { authorize } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
 const router: Router = new Router({ prefix: '/subscriptions' })
-const rateLimitMiddleware = createRateLimitMiddleware(5, 300000)
 
-router.get('/twitch/search', rateLimitMiddleware, authorize, searchTwitch)
-router.get('/youtube/search', rateLimitMiddleware, authorize, searchYouTube)
-router.get('/telegram/search', searchTelegram)
+router.get('/twitch/search', createRateLimitMiddleware(5, 1000 * 60 * 2), authorize, searchTwitch)
+router.get('/youtube/search', createRateLimitMiddleware(5, 1000 * 60 * 5), authorize, searchYouTube)
+router.get('/telegram/search', createRateLimitMiddleware(5), authorize, searchTelegram)
 router.post('/twitch/eventsub-webhook', eventSubAuthentication, eventSubWebhook)
 router.get('/youtube/hubbub-webhook', hubbubWebhookChallenge)
 router.post('/youtube/hubbub-webhook', hubbubWebhook)

@@ -7,14 +7,12 @@ import { createRateLimitMiddleware } from '../utility/Utils'
 
 const router = new Router({ prefix: '/common' })
 
-router.use(createRateLimitMiddleware(15, 60000))
-
-router.get('/automation-tasks/:automation_id', authorize, getAutomationTask)
-router.get('/automation-tasks', authorize, getAutomationTasks)
-router.post('/automation-tasks', authorize, publishAutomationTask)
-router.get('/custom-commands/:command_id', authorize, getCustomCommand)
-router.get('/custom-commands', authorize, getCustomCommands)
-router.post('/custom-commands', authorize, publishCustomCommand)
+router.get('/automation-tasks/:automation_id', createRateLimitMiddleware(10), authorize, getAutomationTask)
+router.get('/automation-tasks', createRateLimitMiddleware(10), authorize, getAutomationTasks)
+router.post('/automation-tasks', createRateLimitMiddleware(5), authorize, publishAutomationTask)
+router.get('/custom-commands/:command_id', createRateLimitMiddleware(10), authorize, getCustomCommand)
+router.get('/custom-commands', createRateLimitMiddleware(10), authorize, getCustomCommands)
+router.post('/custom-commands', createRateLimitMiddleware(5), authorize, publishCustomCommand)
 
 async function getAutomationTask(ctx: Context) {
     const automationId = ctx.params.automation_id as string
