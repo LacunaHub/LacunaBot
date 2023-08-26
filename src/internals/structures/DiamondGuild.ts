@@ -87,6 +87,9 @@ export async function handleDiamondGuilds() {
 
     for (const server of servers) {
         const { will_expire_on, bill_id } = server.server.premium
+        const diamondGuild = diamondGuilds.get(server._id)
+
+        if (diamondGuild) continue
 
         new DiamondGuild(server._id, will_expire_on, bill_id)
     }

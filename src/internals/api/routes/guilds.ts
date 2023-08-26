@@ -7,7 +7,8 @@ import {
     APIRole,
     ChannelType,
     makeURLSearchParams,
-    PermissionsBitField
+    PermissionsBitField,
+    RESTAPIPartialCurrentUserGuild
 } from 'discord.js'
 import { Context } from 'koa'
 import db from '../../../database'
@@ -15,11 +16,13 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import { diamondGuilds } from '../../structures/DiamondGuild'
 import { addDiamond } from '../../utility/billing'
 import DiscordUtils from '../../utility/DiscordUtils'
+import DiscordOAuth2 from '../discord/OAuth2'
 import interfaces from '../interfaces'
 import { authorize, checkPermissions } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
 const router: Router = new Router({ prefix: '/guilds' })
+const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
 
 router.use(createRateLimitMiddleware(20, 300000))
 router.use(authorize)
@@ -521,15 +524,29 @@ async function transferDiamond(ctx: Context) {
     const guildId = ctx.params.guild_id,
         toGuildId = ctx.params.to_guild_id
 
+    let userGuilds: RESTAPIPartialCurrentUserGuild[] = []
+
+    try {
+        userGuilds = await OAuth2.getUserGuilds(ctx.request.headers.authorization)
+    } catch (err) {
+        ctx.throw(400)
+    }
+
+    const isGuildOwner = userGuilds.filter(i => [guildId, toGuildId].includes(i.id)).every(i => i.owner)
+
+    if (!isGuildOwner) ctx.throw(403)
+
     const server = await db.servers.findOne({ _id: guildId })
 
     if (!server || server.server.blocked) ctx.throw(404)
     if (!server.server.premium.available || !server.server.premium.bill_id) ctx.throw(400)
 
     const bill = await db.bills.findOne({ _id: server.server.premium.bill_id })
-    const toServer = await db.servers.findOne({ _id: toGuildId })
 
     if (!bill) ctx.throw(400)
+
+    const toServer = await db.servers.findOne({ _id: toGuildId })
+
     if (!toServer || toServer.server.blocked) ctx.throw(404)
     if (toServer.server.premium.available) ctx.throw(400)
 
