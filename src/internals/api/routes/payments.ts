@@ -107,34 +107,6 @@ async function createPayment(ctx: Context) {
 
         ctx.status = 204
     }
-
-    // if (provider === 'DISCORD_NITRO_BOOST') {
-    //     if (server.server.premium.available) ctx.throw(400, 'There is already a premium on this server')
-
-    //     data.amount.currency = 'DNB'
-    //     data.amount.value = 1
-
-    //     const nitroBoost = new NitroBoost(data)
-    //     const isNitroBooster = await nitroBoost.create()
-
-    //     if (!isNitroBooster) ctx.throw(400, 'Could not find nitro boost on our support server')
-
-    //     ctx.status = 204
-    // }
-
-    // if (provider === 'PATREON') {
-    //     if (server.server.premium.available) ctx.throw(400, 'There is already a premium on this server')
-
-    //     data.amount.currency = 'PAT'
-    //     data.amount.value = 1
-
-    //     const diamondSubscription = new PatreonDiamondSubscription(data)
-    //     const isDiamondSubscriber = await diamondSubscription.create()
-
-    //     if (!isDiamondSubscriber) ctx.throw(400, "You're not a Diamond Subscriber on Patreon or have reached the limit")
-
-    //     ctx.status = 204
-    // }
 }
 
 async function chargePayment(ctx: Context) {
