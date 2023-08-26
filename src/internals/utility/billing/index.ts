@@ -7,12 +7,12 @@ import DiamondGuild, { diamondGuilds } from '../../structures/DiamondGuild'
 import Patron, { patrons } from '../../structures/Patron'
 import DiscordUtils from '../DiscordUtils'
 
-export const support_server_id = '464286783148916736'
+export const support_server_id = '740586549145763960'
 export const active_patron_role_id = '968097093388468274'
 export const big_patron_role_id = '896416992079265824'
 export const patron_role_id = '746825813806284866'
-export const server_booster_role_id = '1141374662803193928'
-export const diamond_subscriber_role_id = '1141360397010620506'
+export const server_booster_role_id = '746752483115794583'
+export const diamond_subscriber_role_id = '1140832301228490872'
 
 export async function addDiamond(bill: IBill, server?: ServerDocument) {
     if (!server) {
@@ -24,7 +24,7 @@ export async function addDiamond(bill: IBill, server?: ServerDocument) {
 
     if (months > 0) {
         const date = server.server.premium.will_expire_on ? moment(server.server.premium.will_expire_on) : moment()
-        let period = (['DISCORD_NITRO_BOOST', 'PATREON'].includes(bill.type) ? date.add(1, 'minutes') : date.add(months, 'M')).valueOf()
+        let period = (['DISCORD_NITRO_BOOST', 'PATREON'].includes(bill.type) ? date.add(6, 'hours') : date.add(months, 'M')).valueOf()
 
         await database.servers.updateOne(
             { _id: server._id },
