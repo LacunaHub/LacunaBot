@@ -10,7 +10,7 @@
         transition-duration="200"
         animated
         navigation
-        swipeable
+        :swipeable="$q.screen.lt.md"
         @update:model-value="onUpdateCarouselSlide"
       >
         <q-carousel-slide name="introduction" class="row items-center content-center q-col-gutter-md">
