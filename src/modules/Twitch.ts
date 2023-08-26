@@ -63,6 +63,16 @@ export function eventSubUnsubscribe(subscription_id: string) {
     })
 }
 
+export function getEventSubsByUserId(userId: string) {
+    return fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?user_id=${userId}`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            'Client-Id': process.env.TWITCH_CLIENT_ID
+        }
+    })
+}
+
 export async function getStream(user_id: string) {
     logger.log(`[Twitch] Getting stream of user "${user_id}"`)
     const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${user_id}`, {

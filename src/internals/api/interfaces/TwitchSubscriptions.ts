@@ -1,7 +1,7 @@
 import { DataResolver } from 'discord.js'
 import database from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
-import { eventSubSubscribe, eventSubUnsubscribe, ITwitchIncomingWebhook } from '../../../modules/Twitch'
+import { eventSubSubscribe, eventSubUnsubscribe, getEventSubsByUserId, ITwitchIncomingWebhook } from '../../../modules/Twitch'
 import DiscordUtils from '../../utility/DiscordUtils'
 
 export async function createTwitchSubscription(server: ServerDocument, data: any) {
@@ -14,13 +14,27 @@ export async function createTwitchSubscription(server: ServerDocument, data: any
     const twitchSub = await database.twitchSubs.findOne({ broadcaster_id: data.broadcaster.id })
 
     if (!twitchSub) {
-        const eventSubResponse = await eventSubSubscribe('stream.online', data.broadcaster.id)
-        let eventSub: ITwitchIncomingWebhook['subscription']
+        let eventSubResponse = await eventSubSubscribe('stream.online', data.broadcaster.id),
+            eventSub: ITwitchIncomingWebhook['subscription']
+
+        if (eventSubResponse.status === 409) {
+            const getSubsResponse = await getEventSubsByUserId(data.broadcaster.id)
+
+            if (getSubsResponse.ok) {
+                const json = await getSubsResponse.json()
+
+                for (const sub of json.data) {
+                    await eventSubUnsubscribe(sub.id)
+                }
+
+                eventSubResponse = await eventSubSubscribe('stream.online', data.broadcaster.id)
+            }
+        }
 
         if (eventSubResponse.ok) {
-            const { data } = await eventSubResponse.json()
+            const json = await eventSubResponse.json()
 
-            eventSub = data[0]
+            eventSub = json.data[0]
         }
 
         if (!eventSub) throw new Error('CANNOT_SUBSCRIBE')
