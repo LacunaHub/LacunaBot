@@ -9,10 +9,7 @@ import pm2 from 'pm2'
 import database from './database'
 import { bridgeClient, clusterManager } from './internals/Cluster'
 import logger from './internals/Logger'
-import { handleDiamondGuilds } from './internals/structures/DiamondGuild'
-import { handlePatrons } from './internals/structures/Patron'
 import { scheduleStatsCollect } from './internals/utility/Statistics'
-import { syncBills as syncQiwiBills } from './internals/utility/billing/providers/QIWI'
 import { hubRefreshSubscriptions } from './modules/YouTube'
 
 let bridge: Bridge, server: Server
@@ -94,9 +91,6 @@ async function startServices() {
 
     if (isMasterBridge) {
         scheduleStatsCollect()
-        syncQiwiBills()
-        handleDiamondGuilds()
-        handlePatrons()
         hubRefreshSubscriptions()
     }
 }
