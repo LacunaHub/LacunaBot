@@ -1,6 +1,8 @@
 <template>
   <q-layout view="lhh lpr lff">
-    <MainHeader />
+    <transition enter-active-class="animated slideInDown" leave-active-class="animated slideOutUp" mode="in-out">
+      <MainHeader v-if="$route.path !== '/'" />
+    </transition>
 
     <q-page-container>
       <router-view v-slot="{ Component }">

@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-black">
+  <q-header class="bg-black fixed fixed-top">
     <q-toolbar class="q-py-xs q-px-md">
       <q-btn
         v-if="$q.screen.lt.md"
@@ -14,7 +14,7 @@
       </q-btn>
 
       <q-toolbar-title :class="`${$q.screen.lt.md ? 'row justify-center' : ''}`">
-        <router-link to="/" class="toolbar-title-logo">
+        <router-link to="/@me/guilds" class="toolbar-title-logo">
           <q-avatar size="60px">
             <img src="~/assets/lacuna-logo.svg" />
           </q-avatar>

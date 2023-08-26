@@ -1,207 +1,215 @@
 <template>
   <q-page>
-    <section class="flex flex-center about-section">
-      <div class="row items-center">
-        <div class="col-12 text-center">
-          <q-avatar :size="$q.screen.lt.sm ? '128px' : '256px'">
-            <img src="~assets/lacuna-logo.svg" alt="Lacuna" />
-          </q-avatar>
-        </div>
-
-        <div class="col-12 text-center">
-          <div :class="`${$q.screen.lt.sm ? 'text-h5' : 'text-h4'}`">
-            {{ $t('pages.landing.title') }}
-          </div>
-          <div class="text--secondary">
-            {{ $t('pages.landing.description') }}
-          </div>
-
-          <div class="q-mt-lg"></div>
-
-          <q-btn
-            :class="`${$q.screen.lt.sm ? 'partial-full-width' : 'q-mr-lg'}`"
-            :label="$t('pages.landing.add_to_me')"
-            icon="discord"
-            @click="addToMe"
-            color="primary"
-            size="large"
-            unelevated
-            no-caps
-          ></q-btn>
-
-          <div v-if="$q.screen.lt.sm" class="q-my-md"></div>
-
-          <q-btn
-            :class="`${$q.screen.lt.sm ? 'partial-full-width' : ''}`"
-            :label="$t('pages.landing.learn_more')"
-            color="dark-1"
-            size="large"
-            unelevated
-            no-caps
-            @click="scrollToFeatures"
-          ></q-btn>
-        </div>
-      </div>
-    </section>
-
-    <section class="flex flex-center details-sector">
-      <div
-        :class="`row items-start q-col-gutter-md q-pa-lg ${$q.screen.lt.md ? 'text-center' : ''}`"
-        style="width: 1280px"
+    <section class="q-carousel-section" thanks="SVGBackgrounds.com" @wheel="onWheel">
+      <q-carousel
+        v-model="currentCarouselSlide"
+        ref="carousel"
+        control-color="primary"
+        transition-prev="slide-right"
+        transition-next="slide-left"
+        transition-duration="200"
+        animated
+        navigation
+        :swipeable="$q.screen.lt.md"
+        @update:model-value="onUpdateCarouselSlide"
       >
-        <div class="col-12 col-sm-6 col-md-4">
-          <div class="text-h5">
-            {{ $t('pages.landing.bf_stability_title') }}
+        <q-carousel-slide name="introduction" class="row items-center content-center q-col-gutter-md">
+          <div class="col-12 col-md-6">
+            <div
+              :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h2'} text-weight-bold`"
+              v-html="$t('pages.landing.title').replace(/\(([^)]+)\)/i, `<em class='gradient'>$1</em>`)"
+            ></div>
+
+            <div class="text--secondary q-mt-md">
+              {{ $t('pages.landing.description') }}
+            </div>
           </div>
-          <p class="text--secondary q-my-none">
-            {{ $t('pages.landing.bf_stability_description') }}
-          </p>
-        </div>
 
-        <div class="col-12 col-sm-6 col-md-4">
-          <div class="text-h5">
-            {{ $t('pages.landing.bf_ease_title') }}
+          <div class="col-12 q-mt-lg">
+            <q-btn
+              :class="`${$q.screen.lt.sm ? 'full-width' : ''}`"
+              :label="$t('pages.landing.add_to_me')"
+              icon="discord"
+              @click="addToMe"
+              color="primary"
+              size="large"
+              unelevated
+              no-caps
+            ></q-btn>
+
+            <q-btn
+              :class="`${$q.screen.lt.sm ? 'full-width q-mt-md' : 'q-ml-md'}`"
+              :label="$t('pages.landing.learn_more')"
+              color="dark-1"
+              size="large"
+              unelevated
+              no-caps
+              @click="$refs.carousel.next()"
+            ></q-btn>
           </div>
-          <p class="text--secondary q-my-none">
-            {{ $t('pages.landing.bf_ease_description') }}
-          </p>
-        </div>
+        </q-carousel-slide>
 
-        <div class="col-12 col-md-4">
-          <div class="text-h5">
-            {{ $t('pages.landing.bf_functionality_title') }}
+        <q-carousel-slide name="custom-behavior" class="row items-center content-center q-col-gutter-md">
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
+            <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
+              {{ $t('pages.landing.ft_custom_behavior_title') }}
+            </div>
+            <div class="text--secondary">
+              {{ $t('pages.landing.ft_custom_behavior_description') }}
+            </div>
           </div>
-          <p class="text--secondary q-my-none">
-            {{ $t('pages.landing.bf_functionality_description') }}
-          </p>
-        </div>
-      </div>
-    </section>
 
-    <section class="flex flex-center features-sector">
-      <div class="row items-center q-col-gutter-md q-pa-lg" style="width: 1280px">
-        <div class="col-12 feature">
-          <q-intersection transition="slide-up" transition-duration="900" once>
-            <div class="row items-center q-col-gutter-lg">
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
-                <div class="text-h5">
-                  {{ $t('pages.landing.ft_activities_title') }}
-                </div>
-                <div class="text--secondary">
-                  {{ $t('pages.landing.ft_activities_description') }}
-                </div>
-              </div>
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
+            <q-avatar class="q-carousel-slide-icon" square>
+              <lord-icon
+                class="rotate-5"
+                src="https://cdn.lordicon.com/qbaenubu.json"
+                trigger="loop"
+                delay="2000"
+                colors="primary:#b86eab,secondary:#ebe6ef"
+                style="width: 100%; height: 100%"
+              >
+              </lord-icon>
+            </q-avatar>
+          </div>
+        </q-carousel-slide>
 
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
-                <q-avatar class="rotate-5" :size="$q.screen.lt.md ? '192px' : '384px'" square>
-                  <img src="~assets/activities.png" alt="Activities" />
-                </q-avatar>
-              </div>
+        <q-carousel-slide name="moderation" class="row items-center content-center q-col-gutter-md">
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
+            <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
+              {{ $t('pages.landing.ft_moderation_title') }}
             </div>
-          </q-intersection>
-        </div>
-
-        <div class="col-12 feature">
-          <q-intersection transition="slide-up" transition-duration="900" once>
-            <div class="row reverse items-center q-col-gutter-lg">
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
-                <div class="text-h5">
-                  {{ $t('pages.landing.ft_moderation_title') }}
-                </div>
-                <div class="text--secondary">
-                  {{ $t('pages.landing.ft_moderation_description') }}
-                </div>
-              </div>
-
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
-                <q-avatar class="rotate-5-reverse" :size="$q.screen.lt.md ? '192px' : '384px'" square>
-                  <img src="~assets/moderation.png" alt="Moderation" />
-                </q-avatar>
-              </div>
+            <div class="text--secondary">
+              {{ $t('pages.landing.ft_moderation_description') }}
             </div>
-          </q-intersection>
-        </div>
+          </div>
 
-        <div class="col-12 feature">
-          <q-intersection transition="slide-up" transition-duration="900" once>
-            <div class="row items-center q-col-gutter-lg">
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
-                <div class="text-h5">
-                  {{ $t('pages.landing.ft_subscriptions_title') }}
-                </div>
-                <div class="text--secondary">
-                  {{ $t('pages.landing.ft_subscriptions_description') }}
-                </div>
-              </div>
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
+            <q-avatar class="q-carousel-slide-icon" square>
+              <lord-icon
+                class="rotate-5"
+                src="https://cdn.lordicon.com/qgucraxs.json"
+                trigger="loop"
+                delay="2000"
+                colors="primary:#646e78,secondary:#3a3347,tertiary:#b86eab"
+                style="width: 100%; height: 100%"
+              >
+              </lord-icon>
+            </q-avatar>
+          </div>
+        </q-carousel-slide>
 
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
-                <q-avatar class="rotate-5" :size="$q.screen.lt.md ? '192px' : '384px'" square>
-                  <img src="~assets/notifications.png" alt="Subscriptions" />
-                </q-avatar>
-              </div>
+        <q-carousel-slide name="activities" class="row items-center content-center q-col-gutter-md">
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
+            <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
+              {{ $t('pages.landing.ft_activities_title') }}
             </div>
-          </q-intersection>
-        </div>
-
-        <div class="col-12 feature">
-          <q-intersection transition="slide-up" transition-duration="900" once>
-            <div class="row reverse items-center q-col-gutter-lg">
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
-                <div class="text-h5">
-                  {{ $t('pages.landing.ft_music_title') }}
-                </div>
-                <div class="text--secondary">
-                  {{ $t('pages.landing.ft_music_description') }}
-                </div>
-              </div>
-
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
-                <q-avatar class="rotate-5-reverse" :size="$q.screen.lt.md ? '192px' : '384px'" square>
-                  <img src="~assets/music.png" alt="Music" />
-                </q-avatar>
-              </div>
+            <div class="text--secondary">
+              {{ $t('pages.landing.ft_activities_description') }}
             </div>
-          </q-intersection>
-        </div>
+          </div>
 
-        <div class="col-12 feature">
-          <q-intersection transition="slide-up" transition-duration="900" once>
-            <div class="row items-center q-col-gutter-lg">
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
-                <div class="text-h5">
-                  {{ $t('pages.landing.ft_utility_title') }}
-                </div>
-                <div class="text--secondary">
-                  {{ $t('pages.landing.ft_utility_description') }}
-                </div>
-              </div>
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
+            <q-avatar class="q-carousel-slide-icon" square>
+              <lord-icon
+                class="rotate-5"
+                src="https://cdn.lordicon.com/lbultedj.json"
+                trigger="loop"
+                delay="2000"
+                colors="primary:#3a3347,secondary:#b86eab,tertiary:#4bb3fd,quaternary:#ffc738,quinary:#ebe6ef"
+                style="width: 100%; height: 100%"
+              >
+              </lord-icon>
+            </q-avatar>
+          </div>
+        </q-carousel-slide>
 
-              <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
-                <q-avatar class="rotate-5" :size="$q.screen.lt.md ? '192px' : '384px'" square>
-                  <img src="~assets/utility.png" alt="Utility" />
-                </q-avatar>
-              </div>
+        <q-carousel-slide name="social-alerts" class="row items-center content-center q-col-gutter-md">
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
+            <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
+              {{ $t('pages.landing.ft_subscriptions_title') }}
             </div>
-          </q-intersection>
-        </div>
-      </div>
-    </section>
+            <div class="text--secondary">
+              {{ $t('pages.landing.ft_subscriptions_description') }}
+            </div>
+          </div>
 
-    <section class="flex flex-center ready-sector">
-      <q-intersection transition="slide-up" transition-duration="900" once>
-        <div class="row items-center q-col-gutter-md q-pa-lg" style="max-width: 1280px; width: 100vw">
-          <div :class="`col-12 col-sm-6 ${$q.screen.lt.sm ? 'text-center' : ''}`">
-            <div class="text-h5">
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
+            <q-avatar class="q-carousel-slide-icon" square>
+              <lord-icon
+                class="rotate-5"
+                src="https://cdn.lordicon.com/vhlukkqb.json"
+                trigger="loop"
+                delay="2000"
+                colors="primary:#b86eab,secondary:#ffc738,tertiary:#ebe6ef"
+                style="width: 100%; height: 100%"
+              >
+              </lord-icon>
+            </q-avatar>
+          </div>
+        </q-carousel-slide>
+
+        <q-carousel-slide name="music" class="row items-center content-center q-col-gutter-md">
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
+            <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
+              {{ $t('pages.landing.ft_music_title') }}
+            </div>
+            <div class="text--secondary">
+              {{ $t('pages.landing.ft_music_description') }}
+            </div>
+          </div>
+
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
+            <q-avatar class="q-carousel-slide-icon" square>
+              <lord-icon
+                class="rotate-5"
+                src="https://cdn.lordicon.com/ryodbtwr.json"
+                trigger="loop"
+                delay="2000"
+                colors="primary:#646e78,secondary:#ffc738,tertiary:#b86eab,quaternary:#ebe6ef"
+                style="width: 100%; height: 100%"
+              >
+              </lord-icon>
+            </q-avatar>
+          </div>
+        </q-carousel-slide>
+
+        <q-carousel-slide name="useful-features" class="row items-center content-center q-col-gutter-md">
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
+            <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
+              {{ $t('pages.landing.ft_utility_title') }}
+            </div>
+            <div class="text--secondary">
+              {{ $t('pages.landing.ft_utility_description') }}
+            </div>
+          </div>
+
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
+            <q-avatar class="q-carousel-slide-icon" square>
+              <lord-icon
+                class="rotate-5"
+                src="https://cdn.lordicon.com/igwjbmqp.json"
+                trigger="loop"
+                delay="2000"
+                colors="primary:#ffc738,secondary:#b86eab,tertiary:#92140c,quaternary:#2ca58d,quinary:#f24c00"
+                style="width: 100%; height: 100%"
+              >
+              </lord-icon>
+            </q-avatar>
+          </div>
+        </q-carousel-slide>
+
+        <q-carousel-slide name="ready-to-start" class="row items-center content-center q-col-gutter-md">
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
+            <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
               {{ $t('pages.landing.ready_title') }}
             </div>
             <div class="text--secondary">
               {{ $t('pages.landing.ready_description') }}
             </div>
-          </div>
 
-          <div :class="`col-12 col-sm-6 ${$q.screen.lt.sm ? 'text-center' : 'text-right'}`">
             <q-btn
-              :class="`${$q.screen.lt.sm ? 'partial-full-width' : ''}`"
+              :class="`q-mt-lg ${$q.screen.lt.sm ? 'full-width' : ''}`"
               :label="$t('pages.landing.add_to_me')"
               icon="discord"
               @click="addToMe"
@@ -211,20 +219,78 @@
               no-caps
             ></q-btn>
           </div>
+
+          <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
+            <q-avatar class="q-carousel-slide-icon" square>
+              <lord-icon
+                class="rotate-5"
+                src="https://cdn.lordicon.com/gomofneh.json"
+                trigger="loop"
+                delay="2000"
+                colors="primary:#3a3347,secondary:#646e78,tertiary:#b86eab,quaternary:#ebe6ef"
+                style="width: 100%; height: 100%"
+              >
+              </lord-icon>
+            </q-avatar>
+          </div>
+        </q-carousel-slide>
+
+        <template #control>
+          <q-carousel-control position="top-right" :offset="[18, 18]" class="text-white rounded-borders">
+            <q-btn
+              v-if="user.access_token"
+              class="q-px-md"
+              flat
+              to="/@me/guilds"
+              style="background: rgba(0, 0, 0, 0.3)"
+            >
+              {{ $t('pages.dashboard.profile') }}
+              <q-avatar class="q-ml-sm" size="32px">
+                <img :src="user.avatarURL" />
+              </q-avatar>
+            </q-btn>
+            <q-btn v-else class="q-px-md" flat to="/authorize" style="background: rgba(0, 0, 0, 0.3)">
+              {{ $t('header.login') }}
+              <q-icon class="q-ml-sm" name="login" size="24px"></q-icon>
+            </q-btn>
+          </q-carousel-control>
+        </template>
+      </q-carousel>
+
+      <div v-if="wheelCounter.spins > 20" class="text-center q-mt-xl absolute-bottom">
+        <div>
+          <span v-if="wheelCounter.spins < 100000" class="q-mr-xs">
+            {{ $numbro(100000 - wheelCounter.spins).format({ thousandSeparated: true }) }}
+          </span>
+          <span v-if="wheelCounter.spins < 500">more to go</span>
+          <span v-if="wheelCounter.spins > 500 && wheelCounter.spins < 1000">wow cool</span>
+          <span v-if="wheelCounter.spins > 1000 && wheelCounter.spins < 2000">you're on fire</span>
+          <span v-if="wheelCounter.spins > 2000 && wheelCounter.spins < 5000">will you stop it?</span>
+          <span v-if="wheelCounter.spins > 5000 && wheelCounter.spins < 10000">are you crazy?</span>
+          <span v-if="wheelCounter.spins > 10000 && wheelCounter.spins < 20000"> hey bro just relax on your bed </span>
+          <span v-if="wheelCounter.spins > 20000 && wheelCounter.spins < 50000">you're stubborn</span>
+          <span v-if="wheelCounter.spins > 50000 && wheelCounter.spins < 100000">OMG LOOK AT THIS MAN</span>
+          <span v-if="wheelCounter.spins > 100000">
+            you've wasted {{ $numbro((Date.now() - wheelCounter.firstSpin) / 1000).format({ output: 'time' }) }} of your
+            life
+          </span>
         </div>
-      </q-intersection>
+      </div>
     </section>
   </q-page>
 </template>
 
 <script>
-import { scroll, useMeta } from 'quasar'
-import { defineComponent } from 'vue'
+import { useMeta } from 'quasar'
+import { useUserStore } from 'src/stores/user'
+import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'LandingPage',
 
   setup() {
+    const user = useUserStore()
+
     useMeta({
       title: 'Lacuna',
       titleTemplate: title => `${title} – Discord Bot`,
@@ -241,10 +307,26 @@ export default defineComponent({
         }
       }
     })
-  },
 
-  data() {
-    return {}
+    return {
+      user,
+      currentCarouselSlide: ref('introduction'),
+      availableCarouselSlides: [
+        'introduction',
+        'custom-behavior',
+        'moderation',
+        'activities',
+        'social-alerts',
+        'music',
+        'useful-features',
+        'ready-to-start'
+      ],
+      wheelCounter: ref({
+        spins: 0,
+        firstSpin: null,
+        timeout: null
+      })
+    }
   },
 
   methods: {
@@ -272,23 +354,65 @@ export default defineComponent({
         }
       }, 1000)
     },
-    scrollToFeatures() {
-      const element = document.querySelector('.features-sector')
-      const target = scroll.getScrollTarget(element)
-      const offset = element.offsetTop
-      scroll.setVerticalScrollPosition(target, offset, 150)
+    onWheel(event) {
+      const wheelUp = event.deltaY > 0
+
+      if (wheelUp) {
+        this.$refs.carousel.next()
+
+        clearTimeout(this.wheelCounter.timeout)
+        this.wheelCounter.spins++
+
+        if (this.wheelCounter.firstSpin === null) {
+          this.wheelCounter.firstSpin = Date.now()
+        }
+
+        this.wheelCounter.timeout = setTimeout(() => {
+          this.wheelCounter.spins = 0
+          this.wheelCounter.firstSpin = null
+
+          clearTimeout(this.wheelCounter.timeout)
+        }, 10000)
+      } else {
+        this.$refs.carousel.previous()
+      }
+    },
+    onUpdateCarouselSlide(value) {
+      const carouselSlideIndex = this.availableCarouselSlides.indexOf(value),
+        positionHorizontal = carouselSlideIndex * 10,
+        backgroundPosition = `${positionHorizontal}% 0%`
+
+      if (positionHorizontal >= 0 && positionHorizontal < this.availableCarouselSlides.length * 10) {
+        document.querySelector('.q-carousel-section > .q-carousel').style.backgroundPosition = backgroundPosition
+      }
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.about-section {
-  @media (max-width: $breakpoint-sm-max) {
-    margin-top: 2vh;
-  }
-  margin-top: 14vh;
-  margin-bottom: 14vh;
+.q-carousel-section {
+  height: 100dvh;
+}
+
+.q-carousel-section > .q-carousel {
+  height: 100% !important;
+  width: 100% !important;
+  background-image: url(../assets/endless-constellation.svg);
+  transition: 1s ease-out;
+}
+
+.q-carousel-section > .q-carousel .q-carousel__slides-container {
+  height: 90%;
+}
+
+.q-carousel-section > .q-carousel .q-carousel__slide {
+  max-width: 1280px;
+  width: 100vw;
+}
+
+.q-carousel-slide-icon {
+  font-size: calc(10vw + 10vh + 2vmin);
 }
 
 .details-sector {
