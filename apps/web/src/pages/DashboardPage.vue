@@ -38,7 +38,7 @@
       <div id="dashboard-page-container" class="row q-col-gutter-md">
         <div class="col-12">
           <div class="shadow-0 rounded-lg">
-            <q-toolbar v-if="pageLoading" class="bg-dark-1 q-py-md rounded-t-lg">
+            <q-toolbar v-if="pageLoading" class="bg-dark-1 q-pa-md rounded-t-lg">
               <q-item-section avatar>
                 <q-skeleton class="rounded-circle" type="QAvatar" />
               </q-item-section>
@@ -50,7 +50,7 @@
               </q-item-section>
             </q-toolbar>
 
-            <q-toolbar v-else class="bg-dark-1 q-py-md rounded-t-lg">
+            <q-toolbar v-else class="bg-dark-1 q-pa-md rounded-t-lg">
               <q-item-section avatar>
                 <q-avatar size="48px">
                   <img :src="user.avatarURL" alt="User Avatar" />
@@ -132,6 +132,8 @@ export default defineComponent({
     onMounted(async () => {
       await getMe()
 
+      console.log(user.guilds)
+
       pageLoading.value = false
     })
 
@@ -140,30 +142,6 @@ export default defineComponent({
       user
     }
   }
-
-  // methods: {
-  //   async getMe() {
-  //     return interfaces.users
-  //       .getMe()
-  //       .then(response => {
-  //         const { data } = response
-
-  //         //this.user.refreshCookies(data.user)
-  //         this.user.$patch({ _guilds: data.guilds, flags: data.user.flags })
-  //       })
-  //       .catch(err => {
-  //         const { status } = err.response
-
-  //         if (status === 401) this.$router.push({ path: '/authorize' })
-  //       })
-  //   }
-  // },
-
-  // async mounted() {
-  //   await this.getMe()
-
-  //   this.pageLoading = false
-  // }
 })
 </script>
 
