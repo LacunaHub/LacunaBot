@@ -11,6 +11,9 @@ import koaMorgan from 'koa-morgan'
 import { connect } from 'mongoose'
 import database from '../../database'
 import Logger from '../Logger'
+import { handleDiamondGuilds } from '../structures/DiamondGuild'
+import { handlePatrons } from '../structures/Patron'
+import { syncBills as syncQiwiBills } from '../utility/billing/providers/QIWI'
 import authorize from './routes/authorize'
 import common from './routes/common'
 import guilds from './routes/guilds'
@@ -57,6 +60,10 @@ bridgeClient.connect()
 app.listen(process.env.API_PORT, () => {
     Logger.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${app.proxy}`)
     Logger.telegram.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${app.proxy}`)
+
+    syncQiwiBills()
+    handleDiamondGuilds()
+    handlePatrons()
 })
 
 process.on('uncaughtException', Logger.error)

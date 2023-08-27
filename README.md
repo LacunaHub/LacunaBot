@@ -218,28 +218,34 @@ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
         {
             "months": 1,
             "prices": {
-                "RUB": 95
+                "RUB": 159,
+                "USD": 1.99
             },
             "discounts": {
-                "RUB": 0
+                "RUB": 0,
+                "USD": 0
             }
         },
         {
-            "months": 3,
+            "months": 2,
             "prices": {
-                "RUB": 270
+                "RUB": 299,
+                "USD": 3.79
             },
             "discounts": {
-                "RUB": 0
+                "RUB": 0,
+                "USD": 0
             }
         },
         {
-            "months": 6,
+            "months": 12,
             "prices": {
-                "RUB": 525
+                "RUB": 1699,
+                "USD": 19.99
             },
             "discounts": {
-                "RUB": 0
+                "RUB": 0,
+                "USD": 0
             }
         }
     ],
@@ -261,7 +267,6 @@ QMONGO_DB_URL=mongodb://127.0.0.1:27017/lacuna-qmongo
 DISCORD_CLIENT_ID=
 DISCORD_CLIENT_SECRET=
 DISCORD_CLIENT_TOKEN=
-DISCORD_CLIENT_MAX_SHARDS=1
 
 DISCORD_CLIENT_TOTAL_MACHINES=1
 DISCORD_CLIENT_TOTAL_SHARDS=1
@@ -281,11 +286,10 @@ PAYPAL_SECRET=
 QIWI_PUBLIC_KEY=
 QIWI_SECRET_KEY=
 
-SPOTIFY_CLIENT_ID=
-SPOTIFY_CLIENT_SECRET=
-
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_LOG_CHAT_ID=
+TELEGRAM_PUBLIC_BOT_TOKEN=
+TELEGRAM_PUBLIC_BOT_HMAC_SECRET=
 
 TWITCH_CLIENT_ID=
 TWITCH_CLIENT_SECRET=

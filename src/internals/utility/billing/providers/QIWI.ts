@@ -2,9 +2,9 @@ import moment from 'moment'
 import fetch from 'node-fetch'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 import { v4 as idv4 } from 'uuid'
-import db from '../../database'
-import logger from '../Logger'
-import { addDiamond } from './BillUtils'
+import { addDiamond } from '..'
+import db from '../../../../database'
+import logger from '../../../Logger'
 
 export class Bill {
     public bill_id: string

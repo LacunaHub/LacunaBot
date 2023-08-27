@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import { v4 as idv4 } from 'uuid'
-import database from '../../database'
+import database from '../../../../database'
 
 const PAYPAL_API = process.env.NODE_ENV === 'development' ? 'https://api-m.sandbox.paypal.com/v2' : 'https://api-m.paypal.com/v2'
 

@@ -11,12 +11,11 @@ import { createRateLimitMiddleware } from '../utility/Utils'
 const router: Router = new Router({ prefix: '/users' })
 const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
 
-router.use(createRateLimitMiddleware(10, 150000))
-
-router.get('/@me', authorize, getMe)
-router.get('/@me/bills', authorize, getBills)
-router.get('/@me/activities', authorize, getActivities)
-router.get('/patrons', getPatrons)
+router.get('/@me', createRateLimitMiddleware(5), authorize, getMe)
+router.get('/@me/bills', createRateLimitMiddleware(5), authorize, getBills)
+router.get('/@me/activities', createRateLimitMiddleware(5), authorize, getActivities)
+router.get('/@me/diamond-guilds', createRateLimitMiddleware(5), authorize, getDiamondGuilds)
+router.get('/patrons', createRateLimitMiddleware(5), getPatrons)
 
 async function getMe(ctx: Context) {
     const user_id = ctx.request.headers['user-id'] as string
@@ -81,6 +80,29 @@ async function getActivities(ctx: Context) {
     ctx.body = {
         levels: user.activities.levels
     }
+}
+
+async function getDiamondGuilds(ctx: Context) {
+    const userId = ctx.request.headers['user-id'] as string
+    if (!userId) ctx.throw(400)
+
+    const user = await db.users.findOne({ _id: userId })
+    if (!user) ctx.throw(404)
+
+    let guilds: RESTAPIPartialCurrentUserGuild[] = []
+
+    try {
+        guilds = await OAuth2.getUserGuilds(ctx.request.headers.authorization)
+    } catch (err) {}
+
+    const servers = await db.servers.find({
+        _id: { $in: guilds.map(i => i.id) },
+        'server.premium.available': true,
+        'server.premium.bill_id': { $ne: null }
+    })
+
+    ctx.status = 200
+    ctx.body = guilds.filter(i => i.owner && servers.some(ii => ii._id === i.id))
 }
 
 async function getPatrons(ctx: Context) {
