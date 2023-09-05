@@ -1,5 +1,5 @@
 import { ClusterClient } from 'discord-hybrid-sharding'
-import { Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
+import { ActivityType, Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
 import Lacuna from './Lacuna'
 
 const { version } = require('../../package.json')
@@ -10,7 +10,8 @@ const client = new Lacuna({
         status: 'online',
         activities: [
             {
-                name: `lacunabot.com (v${version.split('.').slice(0, 2).join('.')})`
+                name: `lacunabot.com (v${version.split('.').slice(0, 2).join('.')})`,
+                type: ActivityType.Custom
             }
         ]
     },
