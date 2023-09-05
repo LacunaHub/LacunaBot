@@ -757,7 +757,7 @@ export default class CustomCommand {
 
                     try {
                         let code = execute_code.code
-                            .slice(0, 4000)
+                            .slice(0, 50000)
                             // Remove unsafe regexp and RegExp class
                             .replace(/\/((.|\n)+?)\//g, value => {
                                 return safeRegex(value) === true ? value : '/unsafe/'
