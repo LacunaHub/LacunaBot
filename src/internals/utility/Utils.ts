@@ -57,7 +57,7 @@ export function truncateString(str: string, limit: number = 100, end: string = '
     if (typeof limit != 'number') throw new TypeError('LIMIT_IS_NOT_INTEGER')
     if (typeof end != 'string') throw new TypeError('END_IS_NOT_STRING')
 
-    return str.length > limit ? str.substring(0, limit) + end : str
+    return str.length > limit ? str.substring(0, limit - end.length) + end : str
 }
 
 export function splitStringCase(str: string): { upper: string[]; lower: string[]; length: number } {
