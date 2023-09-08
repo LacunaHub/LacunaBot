@@ -1,21 +1,33 @@
-import { BaseGuildVoiceChannel, CategoryChannelResolvable, ChannelType, PermissionsBitField, VoiceChannel, VoiceState } from 'discord.js'
+import {
+    BaseGuildVoiceChannel,
+    CategoryChannelResolvable,
+    ChannelType,
+    OverwriteData,
+    OverwriteType,
+    PermissionOverwrites,
+    PermissionsBitField,
+    VoiceChannel,
+    VoiceState
+} from 'discord.js'
 import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import { truncateString } from '../internals/utility/Utils'
 import Replacer from './Replacer'
 
 export async function createTemporaryVoice(self: Lacuna, server: ServerDocument, state: VoiceState) {
-    const autovoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === state.channelId)
-    const autovoiceIndex = server.modules.voice_manager.autovoices.indexOf(autovoice)
+    const autoVoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === state.channelId),
+        autoVoiceIndex = server.modules.voice_manager.autovoices.findIndex(i => i.channel_id === state.channelId)
 
-    if (autovoiceIndex >= 2 && !server.server.premium.available) {
+    if (autoVoiceIndex >= 2 && !server.server.premium.available) {
         await state.disconnect('TempVoices: No premium')
 
         return false
     }
 
-    if (autovoice && state.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)) {
-        const child = autovoice.children?.find(c => c.owner_id === state.member.id)
+    const hasPermissions = state.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)
+
+    if (autoVoice && hasPermissions) {
+        const child = autoVoice.children?.find(c => c.owner_id === state.id)
 
         if (child) {
             const channel = state.guild.channels.cache.get(child.channel_id)
@@ -32,42 +44,96 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
                 module: 'AutoVoice',
                 category: 'MoveToTemporaryChannel',
                 guild: { id: state.guild.id, name: state.guild.name },
-                target: { id: state.member.id, name: state.member.user.tag }
+                target: { id: state.id, name: state.member.user.tag }
             })
 
             return true
         }
 
         if (
-            (autovoice.allowed_roles?.length && !state.member.roles.cache.some(r => autovoice.allowed_roles?.includes(r.id))) ||
-            state.member.roles.cache.some(r => autovoice.blocked_roles?.includes(r.id))
+            (autoVoice.allowed_roles?.length && !state.member.roles.cache.some(r => autoVoice.allowed_roles?.includes(r.id))) ||
+            state.member.roles.cache.some(r => autoVoice.blocked_roles?.includes(r.id))
         ) {
             await state.disconnect('TempVoices: Denied (has restrictions for some roles)')
 
             return false
         }
 
-        const parent = autovoice.default.category_id
-            ? state.guild.channels.cache.filter(c => c.type === ChannelType.GuildCategory).get(autovoice.default.category_id)
-            : state.channel.parent
-        const replacer = new Replacer(autovoice.default.name, {
+        const replacer = new Replacer(null, {
             guild: state.guild,
             member: state.member,
-            index: (autovoice.children?.length ?? 0) + 1
+            index: (autoVoice.children?.length ?? 0) + 1
         })
-        const name = await replacer.replace()
-        const permissions = new PermissionsBitField(BigInt(autovoice.default.permissions))
-        let tempVoice: VoiceChannel
+
+        let tempVoice: VoiceChannel,
+            tempVoiceName = await replacer.replace(autoVoice.default.name || '#{index}: {member}'),
+            tempVoicePermissionOverwrites: OverwriteData[] = [],
+            tempVoiceParent = autoVoice.default.category_id
+                ? state.guild.channels.cache.filter(c => c.type === ChannelType.GuildCategory).get(autoVoice.default.category_id)
+                : state.channel.parent
+
+        tempVoicePermissionOverwrites.push(...state.channel.permissionOverwrites.cache.map(i => i.toJSON() as any))
+
+        if (autoVoice.default.permissions) {
+            const permissionsBitField = new PermissionsBitField(BigInt(autoVoice.default.permissions)),
+                permissionOverwriteOptions = permissionsBitField.toArray().reduce((obj, k) => {
+                    obj[k] = true
+                    return obj
+                }, {})
+            const initialOwnerOverwrite = tempVoicePermissionOverwrites.find(i => i.id === state.id)
+            const ownerOverwrite = PermissionOverwrites.resolveOverwriteOptions(
+                permissionOverwriteOptions,
+                initialOwnerOverwrite ? { allow: initialOwnerOverwrite.allow, deny: initialOwnerOverwrite.deny } : {}
+            )
+
+            if (initialOwnerOverwrite) {
+                const index = tempVoicePermissionOverwrites.findIndex(i => i.id === state.id)
+                tempVoicePermissionOverwrites[index].allow = ownerOverwrite.allow
+                tempVoicePermissionOverwrites[index].deny = ownerOverwrite.deny
+            } else {
+                tempVoicePermissionOverwrites.push({
+                    id: state.id,
+                    type: OverwriteType.Member,
+                    allow: ownerOverwrite.allow,
+                    deny: ownerOverwrite.deny
+                })
+            }
+
+            if (autoVoice.moderator_roles?.length) {
+                const modRoles = autoVoice.moderator_roles.filter(i => state.guild.roles.cache.some(ii => ii.id === i && ii.editable))
+
+                for (const modRole of modRoles) {
+                    const initialRoleOverwrite = tempVoicePermissionOverwrites.find(i => i.id === modRole)
+                    const roleOverwrite = PermissionOverwrites.resolveOverwriteOptions(
+                        permissionOverwriteOptions,
+                        initialRoleOverwrite ? { allow: initialRoleOverwrite.allow, deny: initialRoleOverwrite.deny } : {}
+                    )
+
+                    if (initialRoleOverwrite) {
+                        const index = tempVoicePermissionOverwrites.findIndex(i => i.id === modRole)
+                        tempVoicePermissionOverwrites[index].allow = roleOverwrite.allow
+                        tempVoicePermissionOverwrites[index].deny = roleOverwrite.deny
+                    } else {
+                        tempVoicePermissionOverwrites.push({
+                            id: modRole,
+                            type: OverwriteType.Role,
+                            allow: roleOverwrite.allow,
+                            deny: roleOverwrite.deny
+                        })
+                    }
+                }
+            }
+        }
 
         try {
             tempVoice = await state.guild.channels.create({
-                name: truncateString(name, 100, '') || 'Voice',
+                name: truncateString(tempVoiceName, 100),
                 type: ChannelType.GuildVoice,
-                permissionOverwrites: state.channel.permissionOverwrites.cache,
-                parent: parent && parent.manageable ? (parent as CategoryChannelResolvable) : null,
-                userLimit: autovoice.default.limit,
+                permissionOverwrites: tempVoicePermissionOverwrites,
+                parent: tempVoiceParent && tempVoiceParent.manageable ? (tempVoiceParent as CategoryChannelResolvable) : null,
+                userLimit: autoVoice.default.limit,
                 bitrate: state.channel.bitrate,
-                position: autovoice.default.position === 'TOP' ? 0 : null,
+                position: autoVoice.default.position === 'TOP' ? 0 : null,
                 reason: 'TempVoices: New temporary voice channel'
             })
         } catch (err) {
@@ -76,64 +142,13 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        if (autovoice.default.permissions) {
-            try {
-                await tempVoice.permissionOverwrites.create(
-                    state.member.id,
-                    permissions.toArray().reduce((obj, k) => {
-                        obj[k] = true
-                        return obj
-                    }, {}),
-                    { reason: 'TempVoices: Set default permissions for the channel owner' }
-                )
-            } catch (err) {
-                self.logger.handleError({ module: 'TempVoices', action: 'SetPermissionsForOwner', error: err, guild_id: state.guild.id })
-            }
-
-            if (autovoice?.moderator_roles?.length) {
-                const roles = autovoice.moderator_roles.filter(mr => state.guild.roles.cache.some(r => r.editable && r.id === mr))
-
-                for (const role of roles) {
-                    const overwrites = tempVoice.permissionOverwrites.cache.find(p => p.id === role)
-
-                    try {
-                        if (overwrites) {
-                            await overwrites.edit(
-                                permissions.toArray().reduce((obj, k) => {
-                                    obj[k] = true
-                                    return obj
-                                }, {}),
-                                'TempVoices: Set default permissions for moderator roles'
-                            )
-                        } else {
-                            await tempVoice.permissionOverwrites.create(
-                                role,
-                                permissions.toArray().reduce((obj, k) => {
-                                    obj[k] = true
-                                    return obj
-                                }, {}),
-                                { reason: 'TempVoices: Set default permissions for moderator roles' }
-                            )
-                        }
-                    } catch (err) {
-                        self.logger.handleError({
-                            module: 'TempVoices',
-                            action: 'SetPermissionsForModeratorRoles',
-                            error: err,
-                            guild_id: state.guild.id
-                        })
-                    }
-                }
-            }
-        }
-
         await self.db.servers.updateOne(
-            { _id: state.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id },
+            { _id: state.guild.id, 'modules.voice_manager.autovoices.id': autoVoice.id },
             {
                 $push: {
                     'modules.voice_manager.autovoices.$.children': {
                         channel_id: tempVoice.id,
-                        owner_id: state.member.id,
+                        owner_id: state.id,
                         created_at: Date.now()
                     }
                 }
@@ -154,7 +169,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             module: 'AutoVoice',
             category: 'CreateTemporaryChannel',
             guild: { id: state.guild.id, name: state.guild.name },
-            target: { id: state.member.id, name: state.member.user.tag }
+            target: { id: state.id, name: state.member.user.tag }
         })
 
         return true
@@ -164,11 +179,12 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
 }
 
 export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDocument, before: VoiceState, state: VoiceState) {
-    const autovoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === state.channelId)
-    const beforeAutovoice = server.modules.voice_manager.autovoices.find(i => i.children?.some(c => c.channel_id === before.channelId))
+    const autoVoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === state.channelId),
+        beforeAutoVoice = server.modules.voice_manager.autovoices.find(i => i.children?.some(c => c.channel_id === before.channelId))
+    const hasPermissions = state.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)
 
-    if (autovoice && state.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)) {
-        const child = autovoice.children?.find(c => c.owner_id === state.member.id)
+    if (autoVoice && hasPermissions) {
+        const child = autoVoice.children?.find(c => c.owner_id === state.id)
 
         if (child) {
             const channel = state.guild.channels.cache.get(child.channel_id)
@@ -185,7 +201,7 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
                 module: 'AutoVoice',
                 category: 'MoveToTemporaryChannel',
                 guild: { id: state.guild.id, name: state.guild.name },
-                target: { id: state.member.id, name: state.member.user.tag }
+                target: { id: state.id, name: state.member.user.tag }
             })
 
             return true
@@ -194,11 +210,11 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
         await createTemporaryVoice(self, server, state)
     }
 
-    if (beforeAutovoice && state.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)) {
-        const child = beforeAutovoice.children?.find(c => c.channel_id === before.channelId)
+    if (beforeAutoVoice && hasPermissions) {
+        const child = beforeAutoVoice.children?.find(c => c.channel_id === before.channelId)
         const channel = state.guild.channels.cache.get(child.channel_id) as BaseGuildVoiceChannel
 
-        if (channel && state.channelId === beforeAutovoice.channel_id && child.owner_id === state.member.id) {
+        if (channel && state.channelId === beforeAutoVoice.channel_id && child?.owner_id === state.id) {
             if (channel.manageable) {
                 try {
                     await state.setChannel(child.channel_id, 'TempVoices: Move to an existing temporary voice channel')
@@ -211,15 +227,15 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
                 module: 'AutoVoice',
                 category: 'MoveToTemporaryChannel',
                 guild: { id: state.guild.id, name: state.guild.name },
-                target: { id: state.member.id, name: state.member.user.tag }
+                target: { id: state.id, name: state.member.user.tag }
             })
 
             return true
         }
 
-        if (child && channel && !channel.members.size) {
+        if (child && channel?.members?.size === 0) {
             await self.db.servers.updateOne(
-                { _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutovoice.id },
+                { _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutoVoice.id },
                 {
                     $pull: {
                         'modules.voice_manager.autovoices.$.children': {
@@ -239,12 +255,12 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
                 guild: { id: channel.guild.id, name: channel.guild.name },
                 target: { id: channel.id, name: channel.name }
             })
-        } else if (child && channel && channel.members.size) {
-            const childIndex = beforeAutovoice.children?.indexOf(child)
+        } else if (channel?.members?.size > 0 && state.id === child?.owner_id) {
+            const childIndex = beforeAutoVoice.children?.indexOf(child)
             const newOwnerId = channel.members.first().id
 
             await self.db.servers.updateOne(
-                { _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutovoice.id },
+                { _id: state.guild.id, 'modules.voice_manager.autovoices.id': beforeAutoVoice.id },
                 {
                     $set: {
                         [`modules.voice_manager.autovoices.$.children.${childIndex}.owner_id`]: newOwnerId
@@ -258,16 +274,15 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
 }
 
 export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument, state: VoiceState, channel: VoiceChannel) {
-    const autovoice = server.modules.voice_manager.autovoices.find(i => i.children?.some(c => c.channel_id === channel?.id))
+    const autoVoice = server.modules.voice_manager.autovoices.find(i => i.children?.some(c => c.channel_id === channel?.id))
+    const hasPermissions = state.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)
 
-    if (autovoice && channel.guild.members.me.permissions.has(self.PermissionFlags.ManageChannels)) {
-        const child = autovoice.children?.find(c => c.channel_id === channel.id)
+    if (autoVoice && hasPermissions) {
+        const child = autoVoice.children?.find(c => c.channel_id === channel.id)
 
-        if (!child) return false
-
-        if (!channel.members.size) {
+        if (child && channel?.members?.size === 0) {
             await self.db.servers.updateOne(
-                { _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id },
+                { _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autoVoice.id },
                 {
                     $pull: {
                         'modules.voice_manager.autovoices.$.children': {
@@ -287,12 +302,12 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
                 guild: { id: channel.guild.id, name: channel.guild.name },
                 target: { id: channel.id, name: channel.name }
             })
-        } else if (channel.members.size && state.member.id === child.owner_id) {
-            const childIndex: number = autovoice.children?.indexOf(child)
+        } else if (channel?.members?.size > 0 && state.id === child?.owner_id) {
+            const childIndex = autoVoice.children?.indexOf(child)
             const newOwnerId = channel.members.first().id
 
             await self.db.servers.updateOne(
-                { _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autovoice.id },
+                { _id: channel.guild.id, 'modules.voice_manager.autovoices.id': autoVoice.id },
                 {
                     $set: {
                         [`modules.voice_manager.autovoices.$.children.${childIndex}.owner_id`]: newOwnerId
@@ -300,27 +315,35 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
                 }
             )
 
-            const overwrites = channel.permissionOverwrites.cache.find(p => p.id === child.owner_id)
+            try {
+                const ownerPermissionOverwrites = channel.permissionOverwrites.cache.get(child.owner_id)
 
-            if (overwrites) {
-                try {
-                    await overwrites.delete('TempVoices: The original channel owner disconnected from temporary voice channel')
-                } catch (err) {
-                    self.logger.handleError({ module: 'TempVoices', action: 'DeleteOwnerPermissions', error: err, guild_id: state.guild.id })
+                if (ownerPermissionOverwrites) {
+                    await ownerPermissionOverwrites.delete('TempVoices: The original channel owner disconnected from temporary voice channel')
                 }
+            } catch (err) {
+                self.logger.handleError({ module: 'TempVoices', action: 'DeleteOwnerPermissions', error: err, guild_id: state.guild.id })
             }
 
-            const permissions = new PermissionsBitField(BigInt(autovoice.default.permissions))
+            const permissionsBitField = new PermissionsBitField(BigInt(autoVoice.default.permissions)),
+                permissionOverwriteOptions = permissionsBitField.toArray().reduce((obj, k) => {
+                    obj[k] = true
+                    return obj
+                }, {})
 
             try {
-                await channel.permissionOverwrites.create(
-                    newOwnerId,
-                    permissions.toArray().reduce((obj, k) => {
-                        obj[k] = true
-                        return obj
-                    }, {}),
-                    { reason: 'TempVoices: Set default permissions for the new channel owner' }
-                )
+                const newOwnerPermissionOverwrites = channel.permissionOverwrites.cache.get(newOwnerId)
+
+                if (newOwnerPermissionOverwrites) {
+                    await newOwnerPermissionOverwrites.edit(
+                        permissionOverwriteOptions,
+                        'TempVoices: Set default permissions for the new channel owner'
+                    )
+                } else {
+                    await channel.permissionOverwrites.create(newOwnerId, permissionOverwriteOptions, {
+                        reason: 'TempVoices: Set default permissions for the new channel owner'
+                    })
+                }
             } catch (err) {
                 self.logger.handleError({ module: 'TempVoices', action: 'SetPermissionsForNewOwner', error: err, guild_id: state.guild.id })
             }
