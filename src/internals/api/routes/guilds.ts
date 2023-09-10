@@ -35,7 +35,7 @@ router.post('/:guild_id/subscriptions/telegram/:method', createRateLimitMiddlewa
 router.post('/:guild_id/subscriptions/twitch/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateTwitchSubscriptions)
 router.post('/:guild_id/subscriptions/youtube/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateYouTubeSubscriptions)
 router.post('/:guild_id/transfer-diamond/:to_guild_id', createRateLimitMiddleware(1, 1000 * 60 * 5), authorize, transferDiamond)
-router.post('/:guild_id/download-logs', createRateLimitMiddleware(5), authorize, downloadLogs)
+router.post('/:guild_id/download-logs', createRateLimitMiddleware(5), authorize, checkPermissions, downloadLogs)
 
 async function getSettings(ctx: Context) {
     const guild_id: string = ctx.params.guild_id
