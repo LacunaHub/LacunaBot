@@ -32,7 +32,7 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
                     username: server.server.premium.available ? webhook.name : self.user.username
                 })
             } catch (err) {
-                self.logger.handleError({ module: 'LogsInviteCreate', action: 'SendMessageViaWebhook', error: err, guild_id: invite.guild.id })
+                await self.logger.handleError({ module: 'LogsInviteCreate', action: 'SendMessageViaWebhook', error: err, guild_id: invite.guild.id })
 
                 return false
             }

@@ -146,7 +146,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 try {
                     await reportMessage.edit({ embeds: [embed] })
                 } catch (err) {
-                    self.logger.handleError({ module: 'ReportCommand', action: 'EditReportMessage', error: err, guild_id: interaction.guildId })
+                    await self.logger.handleError({ module: 'ReportCommand', action: 'EditReportMessage', error: err, guild_id: interaction.guildId })
                 }
             } else {
                 const embed = new EmbedBuilder()
@@ -203,7 +203,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 try {
                     await channel.send({ embeds: [embed], components: rows })
                 } catch (err) {
-                    self.logger.handleError({ module: 'ReportCommand', action: 'SendReportMessage', error: err, guild_id: interaction.guildId })
+                    await self.logger.handleError({ module: 'ReportCommand', action: 'SendReportMessage', error: err, guild_id: interaction.guildId })
                 }
             }
         }

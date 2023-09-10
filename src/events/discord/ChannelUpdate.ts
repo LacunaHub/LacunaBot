@@ -42,7 +42,7 @@ const handler = async (self: Lacuna, before: DMChannel | GuildChannel, channel: 
                         )
                     }
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'TempVoices',
                         action: 'SetPermissionsForModeratorRoles',
                         error: err,

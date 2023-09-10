@@ -35,6 +35,7 @@ router.post('/:guild_id/subscriptions/telegram/:method', createRateLimitMiddlewa
 router.post('/:guild_id/subscriptions/twitch/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateTwitchSubscriptions)
 router.post('/:guild_id/subscriptions/youtube/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateYouTubeSubscriptions)
 router.post('/:guild_id/transfer-diamond/:to_guild_id', createRateLimitMiddleware(1, 1000 * 60 * 5), authorize, transferDiamond)
+router.post('/:guild_id/download-logs', createRateLimitMiddleware(5), authorize, downloadLogs)
 
 async function getSettings(ctx: Context) {
     const guild_id: string = ctx.params.guild_id
@@ -577,6 +578,26 @@ async function transferDiamond(ctx: Context) {
     await addDiamond(bill)
 
     ctx.status = 204
+}
+
+async function downloadLogs(ctx: Context) {
+    const guildId = ctx.params.guild_id,
+        server = await db.servers.findOne({ _id: guildId })
+
+    if (!server || server.server.blocked) {
+        ctx.throw(404)
+    }
+
+    const fileName = `${guildId}-${new Date().toISOString()}.log`
+    const fileData = server.logs
+        .map(i => `[${i.level}: ${new Date(i.timestamp).toISOString()}] - [${i.module}${i.action ?? ''}] ${i.message}`)
+        .join('\n')
+
+    ctx.status = 200
+    ctx.body = {
+        file_name: fileName,
+        data: fileData
+    }
 }
 
 export default router

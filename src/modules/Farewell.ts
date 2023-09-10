@@ -23,7 +23,7 @@ export default async function farewell(self: Lacuna, server: ServerDocument, mem
                 }
             }
         } catch (err) {
-            self.logger.handleError({ module: 'Farewell', action: 'SendMessage', error: err, guild_id: member.guild.id })
+            await self.logger.handleError({ module: 'Farewell', action: 'SendMessage', error: err, guild_id: member.guild.id })
         }
 
         self.emit('moduleExecution', {

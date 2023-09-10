@@ -38,7 +38,7 @@ app.use(
         skip: req => req.method == 'OPTIONS'
     })
 )
-app.use(koaCors({ credentials: true }))
+app.use(koaCors({ credentials: true, exposeHeaders: ['Content-Disposition'] }))
 
 app.proxy = process.env.WEBSITE_DOMAIN !== 'localhost'
 app.keys = ['discord_oauth_state']

@@ -111,7 +111,7 @@ export async function createPoll(self: Lacuna, server: ServerDocument, interacti
             ephemeral: true
         })
 
-        self.logger.handleError({ module: 'Polls', action: 'SendPollMessage', error: err, guild_id: interaction.guildId })
+        await self.logger.handleError({ module: 'Polls', action: 'SendPollMessage', error: err, guild_id: interaction.guildId })
 
         return
     }
@@ -267,5 +267,12 @@ export async function onPressPollButton(self: Lacuna, server: ServerDocument, in
 
             await interaction.reply({ content: `${self._emojis.OK} | ${text}`, ephemeral: true })
         }
+
+        self.emit('moduleExecution', {
+            module: 'Polls',
+            category: 'OnClickButton',
+            guild: { id: interaction.guild.id, name: interaction.guild.name },
+            target: { id: interaction.user.id, name: interaction.user.tag }
+        })
     }
 }

@@ -81,7 +81,7 @@ export async function addWarn(
                 try {
                     await signal.guild.members.ban(target.user.id, { reason })
                 } catch (err) {
-                    self.logger.handleError({ module: 'WarningPenalty', action: 'Ban', error: err, guild_id: signal.guildId })
+                    await self.logger.handleError({ module: 'WarningPenalty', action: 'Ban', error: err, guild_id: signal.guildId })
                 }
             }
 
@@ -97,7 +97,7 @@ export async function addWarn(
             try {
                 await target.disableCommunicationUntil(Date.now() + duration, reason)
             } catch (err) {
-                self.logger.handleError({ module: 'WarningPenalty', action: 'DisableCommunication', error: err, guild_id: signal.guildId })
+                await self.logger.handleError({ module: 'WarningPenalty', action: 'DisableCommunication', error: err, guild_id: signal.guildId })
             }
 
             await caseLog.createCaseEntry(signal.guild, { type: 'MUTE_ADD', target: target.user, executor: self.user, reason })
@@ -125,7 +125,7 @@ export async function addWarn(
                 try {
                     await target.roles.set(strict_roles, reason)
                 } catch (err) {
-                    self.logger.handleError({ module: 'WarningPenalty', action: 'RemoveAllRoles', error: err, guild_id: signal.guildId })
+                    await self.logger.handleError({ module: 'WarningPenalty', action: 'RemoveAllRoles', error: err, guild_id: signal.guildId })
                 }
             }
         }
@@ -134,7 +134,7 @@ export async function addWarn(
             try {
                 await target.kick(reason)
             } catch (err) {
-                self.logger.handleError({ module: 'WarningPenalty', action: 'Kick', error: err, guild_id: signal.guildId })
+                await self.logger.handleError({ module: 'WarningPenalty', action: 'Kick', error: err, guild_id: signal.guildId })
             }
 
             await caseLog.createCaseEntry(signal.guild, { type: 'KICK', target: target.user, executor: self.user, reason })
@@ -148,7 +148,7 @@ export async function addWarn(
                     try {
                         await target.roles.add(editable, reason)
                     } catch (err) {
-                        self.logger.handleError({ module: 'WarningPenalty', action: 'ModifyRolesAdd', error: err, guild_id: signal.guildId })
+                        await self.logger.handleError({ module: 'WarningPenalty', action: 'ModifyRolesAdd', error: err, guild_id: signal.guildId })
                     }
                 }
             }
@@ -160,7 +160,7 @@ export async function addWarn(
                     try {
                         await target.roles.remove(editable, reason)
                     } catch (err) {
-                        self.logger.handleError({ module: 'WarningPenalty', action: 'ModifyRolesRemove', error: err, guild_id: signal.guildId })
+                        await self.logger.handleError({ module: 'WarningPenalty', action: 'ModifyRolesRemove', error: err, guild_id: signal.guildId })
                     }
                 }
             }
@@ -173,7 +173,7 @@ export async function addWarn(
             try {
                 await signal.channel.send(content)
             } catch (err) {
-                self.logger.handleError({ module: 'WarningPenalty', action: 'SendMessage', error: err, guild_id: signal.guildId })
+                await self.logger.handleError({ module: 'WarningPenalty', action: 'SendMessage', error: err, guild_id: signal.guildId })
             }
         }
 
@@ -211,7 +211,7 @@ export async function addWarn(
         try {
             await target.send(dm_message)
         } catch (err) {
-            self.logger.handleError({ module: 'Warnings', action: 'SendDirectMessage', error: err, guild_id: signal.guildId })
+            await self.logger.handleError({ module: 'Warnings', action: 'SendDirectMessage', error: err, guild_id: signal.guildId })
         }
 
         self.emit('moduleExecution', {

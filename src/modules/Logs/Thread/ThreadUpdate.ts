@@ -45,7 +45,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({ module: 'LogsThreadUpdateName', action: 'SendMessageViaWebhook', error: err, guild_id: thread.guildId })
+                    await self.logger.handleError({
+                        module: 'LogsThreadUpdateName',
+                        action: 'SendMessageViaWebhook',
+                        error: err,
+                        guild_id: thread.guildId
+                    })
 
                     return false
                 }
@@ -83,7 +88,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'LogsThreadUpdateAutoArchiveDuration',
                         action: 'SendMessageViaWebhook',
                         error: err,

@@ -54,7 +54,7 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
                 ]
             })
         } catch (err) {
-            Logger.handleError({ module: 'CaseLog', action: 'SendCaseMessage', error: err, guild_id: guild.id })
+            await Logger.handleError({ module: 'CaseLog', action: 'SendCaseMessage', error: err, guild_id: guild.id })
 
             return
         }

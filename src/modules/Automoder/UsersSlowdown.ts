@@ -54,7 +54,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                 try {
                     await message.guild.members.ban(message.author.id, { reason })
                 } catch (err) {
-                    self.logger.handleError({ module: 'UsersSlowdown', action: 'Ban', error: err, guild_id: message.guildId })
+                    await self.logger.handleError({ module: 'UsersSlowdown', action: 'Ban', error: err, guild_id: message.guildId })
                 }
             }
 
@@ -68,7 +68,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             try {
                 await message.member.disableCommunicationUntil(expires_timestamp, reason)
             } catch (err) {
-                self.logger.handleError({ module: 'UsersSlowdown', action: 'DisableCommunication', error: err, guild_id: message.guildId })
+                await self.logger.handleError({ module: 'UsersSlowdown', action: 'DisableCommunication', error: err, guild_id: message.guildId })
             }
 
             await caseLog.createCaseEntry(message.guild, { type: 'MUTE_ADD', target: message.author, executor: self.user, reason })
@@ -96,7 +96,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                 try {
                     await message.member.roles.set(strict_roles, reason)
                 } catch (err) {
-                    self.logger.handleError({ module: 'UsersSlowdown', action: 'RemoveAllRoles', error: err, guild_id: message.guildId })
+                    await self.logger.handleError({ module: 'UsersSlowdown', action: 'RemoveAllRoles', error: err, guild_id: message.guildId })
                 }
             }
         }
@@ -105,7 +105,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             try {
                 await message.member.kick(reason)
             } catch (err) {
-                self.logger.handleError({ module: 'UsersSlowdown', action: 'Kick', error: err, guild_id: message.guildId })
+                await self.logger.handleError({ module: 'UsersSlowdown', action: 'Kick', error: err, guild_id: message.guildId })
             }
 
             await caseLog.createCaseEntry(message.guild, { type: 'KICK', target: message.author, executor: self.user, reason })
@@ -119,7 +119,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                     try {
                         await message.member.roles.add(editable, reason)
                     } catch (err) {
-                        self.logger.handleError({ module: 'UsersSlowdown', action: 'ModifyRolesAdd', error: err, guild_id: message.guildId })
+                        await self.logger.handleError({ module: 'UsersSlowdown', action: 'ModifyRolesAdd', error: err, guild_id: message.guildId })
                     }
                 }
             }
@@ -131,7 +131,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
                     try {
                         await message.member.roles.remove(editable, reason)
                     } catch (err) {
-                        self.logger.handleError({ module: 'UsersSlowdown', action: 'ModifyRolesRemove', error: err, guild_id: message.guildId })
+                        await self.logger.handleError({ module: 'UsersSlowdown', action: 'ModifyRolesRemove', error: err, guild_id: message.guildId })
                     }
                 }
             }
@@ -148,7 +148,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             try {
                 await message.channel.send(content)
             } catch (err) {
-                self.logger.handleError({ module: 'UsersSlowdown', action: 'SendMessage', error: err, guild_id: message.guildId })
+                await self.logger.handleError({ module: 'UsersSlowdown', action: 'SendMessage', error: err, guild_id: message.guildId })
             }
         }
 
@@ -156,7 +156,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             try {
                 await (message.channel as BaseGuildTextChannel).bulkDelete(slowed.messages_id, true)
             } catch (err) {
-                self.logger.handleError({ module: 'UsersSlowdown', action: 'DeleteMessage', error: err, guild_id: message.guildId })
+                await self.logger.handleError({ module: 'UsersSlowdown', action: 'DeleteMessage', error: err, guild_id: message.guildId })
             }
         }
 

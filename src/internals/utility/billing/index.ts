@@ -82,7 +82,7 @@ export async function addPremium(bill: IBill, period: number) {
             try {
                 await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.guildMemberRole(support_server_id, bill.custom_fields.user_id, role))
             } catch (err) {
-                logger.handleError({ module: 'Billing', action: 'AddPatronRoles', error: err })
+                await logger.handleError({ module: 'Billing', action: 'AddPatronRoles', error: err })
             }
         }
     }

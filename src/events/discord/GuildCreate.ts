@@ -22,7 +22,7 @@ const handler = async (self: Lacuna, guild: Guild) => {
     try {
         await self.updateApplicationCommands(server)
     } catch (err) {
-        self.logger.handleError({ module: 'GuildCreate', action: 'UpdateApplicationCommands', error: err, guild_id: guild.id })
+        await self.logger.handleError({ module: 'GuildCreate', action: 'UpdateApplicationCommands', error: err, guild_id: guild.id })
     }
 
     return true

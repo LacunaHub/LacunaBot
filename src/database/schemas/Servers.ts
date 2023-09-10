@@ -768,7 +768,8 @@ export default model<ServerDocument>(
             },
             created_at: { type: Number, default: () => Date.now() },
             activity_ping_at: { type: Number, default: () => Date.now() },
-            change_log: { type: Array, default: [] }
+            change_log: { type: Array, default: [] },
+            logs: { type: Array, default: [] }
         },
         { versionKey: false }
     )
@@ -1376,6 +1377,7 @@ export interface ServerDocument extends Document {
     created_at: number
     activity_ping_at: number
     change_log: ChangeLog[]
+    logs: ILogEntry[]
 }
 
 export interface ISystemCommandConfig {
@@ -2150,6 +2152,14 @@ export interface ChangeLog {
     user_id: string
     changes: string[]
     timestamp: number
+}
+
+export interface ILogEntry {
+    level: 'LOG' | 'INFO' | 'WARN' | 'ERROR'
+    timestamp: number
+    module: string
+    action?: string
+    message: string
 }
 
 export interface MessageEmbed {

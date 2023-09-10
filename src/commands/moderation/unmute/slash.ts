@@ -36,7 +36,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     try {
         await mention.disableCommunicationUntil(null, reason)
     } catch (err) {
-        self.logger.handleError({ module: 'UnmuteCommand', action: 'EnableCommunication', error: err, guild_id: interaction.guildId })
+        await self.logger.handleError({ module: 'UnmuteCommand', action: 'EnableCommunication', error: err, guild_id: interaction.guildId })
     }
 
     if (server.moderation.mutes.rar) {

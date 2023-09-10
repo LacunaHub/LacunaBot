@@ -58,7 +58,7 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
                 await state.member.roles.remove(voice_roles, 'Voice roles')
             }
         } catch (err) {
-            self.logger.handleError({ module: 'VoiceRoles', action: 'RemoveRoles', error: err, guild_id: state.guild.id })
+            await self.logger.handleError({ module: 'VoiceRoles', action: 'RemoveRoles', error: err, guild_id: state.guild.id })
         }
     }
 
@@ -70,7 +70,7 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
                 await state.member.roles.add(voice_roles, 'Voice roles')
             }
         } catch (err) {
-            self.logger.handleError({ module: 'VoiceRoles', action: 'AddRoles', error: err, guild_id: state.guild.id })
+            await self.logger.handleError({ module: 'VoiceRoles', action: 'AddRoles', error: err, guild_id: state.guild.id })
         }
     }
 

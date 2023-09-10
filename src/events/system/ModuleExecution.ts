@@ -2,12 +2,12 @@ import Lacuna from '../../internals/Lacuna'
 import logger from '../../internals/Logger'
 
 const handler = async (self: Lacuna, data: ModuleExecutionData) => {
-    handleModuleExecutionData(data)
+    await handleModuleExecutionData(data)
 
     return true
 }
 
-export function handleModuleExecutionData(data: ModuleExecutionData) {
+export async function handleModuleExecutionData(data: ModuleExecutionData) {
     const { module, category, label, guild, target } = data
     // const moduleStats = qdb.get(`stats.modules.${module}`)
 
@@ -37,6 +37,15 @@ export function handleModuleExecutionData(data: ModuleExecutionData) {
     // }
 
     logger.log(`[${module}${category ?? ''}${label ?? ''}Module] Execution from (${guild.name}:${guild.id}) for (${target.name}:${target.id})`)
+
+    if (!['Levels', 'Economy'].includes(module)) {
+        await logger.appendServerLog(guild.id, {
+            level: 'LOG',
+            module: module,
+            action: `${category ?? ''}${label ?? ''}` || null,
+            message: `Executed with details ${JSON.stringify(target)}`
+        })
+    }
 }
 
 export default {

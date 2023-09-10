@@ -101,7 +101,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
         try {
             await member.kick(reason)
         } catch (err) {
-            self.logger.handleError({ module: 'Reports', action: 'KickQuickAction', error: err, guild_id: interaction.guildId })
+            await self.logger.handleError({ module: 'Reports', action: 'KickQuickAction', error: err, guild_id: interaction.guildId })
         }
 
         await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: member.user, executor: interaction.user, reason })
@@ -228,7 +228,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             try {
                 await interaction.guild.members.ban(member, { reason })
             } catch (err) {
-                self.logger.handleError({ module: 'Reports', action: 'BanQuickAction', error: err, guild_id: interaction.guildId })
+                await self.logger.handleError({ module: 'Reports', action: 'BanQuickAction', error: err, guild_id: interaction.guildId })
             }
         } else {
             new TemporaryBan(self, {
@@ -267,7 +267,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
         try {
             await member.disableCommunicationUntil(Date.now() + ms(duration), reason)
         } catch (err) {
-            self.logger.handleError({ module: 'Reports', action: 'MuteQuickAction', error: err, guild_id: interaction.guildId })
+            await self.logger.handleError({ module: 'Reports', action: 'MuteQuickAction', error: err, guild_id: interaction.guildId })
         }
 
         if (server.moderation.mutes.rar) {
@@ -293,7 +293,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             try {
                 await member.roles.set(strict_roles, reason)
             } catch (err) {
-                self.logger.handleError({ module: 'Reports', action: 'RemoveAllRoles', error: err, guild_id: interaction.guildId })
+                await self.logger.handleError({ module: 'Reports', action: 'RemoveAllRoles', error: err, guild_id: interaction.guildId })
             }
         }
 
@@ -362,7 +362,12 @@ export async function checkReportsOnGuildMemberAdd(self: Lacuna, server: ServerD
             try {
                 await channel.send({ embeds: [embed] })
             } catch (err) {
-                self.logger.handleError({ module: 'Reports', action: 'SendNotificationAboutUnwantedUser', error: err, guild_id: member.guild.id })
+                await self.logger.handleError({
+                    module: 'Reports',
+                    action: 'SendNotificationAboutUnwantedUser',
+                    error: err,
+                    guild_id: member.guild.id
+                })
             }
         }
     }

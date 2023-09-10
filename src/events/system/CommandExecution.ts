@@ -32,10 +32,22 @@ const handler = async (self: Lacuna, data: CommandExecutionData) => {
     //     })
     // }
 
-    // prettier-ignore
+    const capitalizedCommandName = capitalizeFirstLetter(command),
+        capitalizedSubcommandName = subcommand ? capitalizeFirstLetter(subcommand) : '',
+        commandOptions = options.map(i => i.options ?? i)
+
     self.logger.log(
-        `[${capitalizeFirstLetter(command)}Command] Execution from (${guild.name}:${guild.id}) and (${channel.name}:${channel.id}) for (${user.name}:${user.id})`
+        `[${capitalizedCommandName}${capitalizedSubcommandName}Command] Execution from (${guild.name}:${guild.id}) and (${channel.name}:${channel.id}) for (${user.name}:${user.id})`
     )
+
+    await self.logger.appendServerLog(guild.id, {
+        level: 'LOG',
+        module: `${capitalizedCommandName}${capitalizedSubcommandName}Command`,
+        message:
+            `Executed in channel ${channel.id} for user ${user.id} ` + commandOptions.length
+                ? `with options ${JSON.stringify(commandOptions)}`
+                : 'without options'
+    })
 }
 
 export default {

@@ -43,7 +43,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 try {
                     await member.guild.members.ban(member.id, { reason })
                 } catch (err) {
-                    self.logger.handleError({ module: 'NewbiesModeration', action: 'Ban', error: err, guild_id: member.guild.id })
+                    await self.logger.handleError({ module: 'NewbiesModeration', action: 'Ban', error: err, guild_id: member.guild.id })
                 }
             }
 
@@ -57,7 +57,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             try {
                 await member.disableCommunicationUntil(expires_timestamp, reason)
             } catch (err) {
-                self.logger.handleError({ module: 'NewbiesModeration', action: 'DisableCommunication', error: err, guild_id: member.guild.id })
+                await self.logger.handleError({ module: 'NewbiesModeration', action: 'DisableCommunication', error: err, guild_id: member.guild.id })
             }
 
             await caseLog.createCaseEntry(member.guild, { type: 'MUTE_ADD', target: member.user, executor: self.user, reason })
@@ -85,7 +85,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 try {
                     await member.roles.set(strict_roles, reason)
                 } catch (err) {
-                    self.logger.handleError({ module: 'NewbiesModeration', action: 'RemoveAllRoles', error: err, guild_id: member.guild.id })
+                    await self.logger.handleError({ module: 'NewbiesModeration', action: 'RemoveAllRoles', error: err, guild_id: member.guild.id })
                 }
             }
         }
@@ -105,7 +105,12 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                     try {
                         await member.roles.add(editable, reason)
                     } catch (err) {
-                        self.logger.handleError({ module: 'NewbiesModeration', action: 'ModifyRolesAdd', error: err, guild_id: member.guild.id })
+                        await self.logger.handleError({
+                            module: 'NewbiesModeration',
+                            action: 'ModifyRolesAdd',
+                            error: err,
+                            guild_id: member.guild.id
+                        })
                     }
                 }
             }
@@ -117,7 +122,12 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                     try {
                         await member.roles.remove(editable, reason)
                     } catch (err) {
-                        self.logger.handleError({ module: 'NewbiesModeration', action: 'ModifyRolesRemove', error: err, guild_id: member.guild.id })
+                        await self.logger.handleError({
+                            module: 'NewbiesModeration',
+                            action: 'ModifyRolesRemove',
+                            error: err,
+                            guild_id: member.guild.id
+                        })
                     }
                 }
             }

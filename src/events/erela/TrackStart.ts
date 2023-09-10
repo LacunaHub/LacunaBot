@@ -3,8 +3,9 @@ import { Player } from 'erela.js'
 import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, player: Player) {
-    const message = player.get<Message>('message')
-    const timeout = player.get<NodeJS.Timeout>('timeout')
+    const message = player.get<Message>('message'),
+        timeout = player.get<NodeJS.Timeout>('timeout'),
+        track = player.queue.current
 
     if (timeout) {
         clearTimeout(timeout)
@@ -27,6 +28,12 @@ async function handler(self: Lacuna, player: Player) {
     }
 
     self.logger.log(`[ErelaTrackStart] Player ${player.guild} playback started`)
+    await self.logger.appendServerLog(player.guild, {
+        level: 'LOG',
+        module: 'Music',
+        action: 'TrackEnd',
+        message: `Track "${track.author} - ${track.title}" is playing now`
+    })
 }
 
 export default {

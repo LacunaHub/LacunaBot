@@ -36,7 +36,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
                 try {
                     await state.setChannel(child.channel_id, 'TempVoices: Move to an existing temporary voice channel')
                 } catch (err) {
-                    self.logger.handleError({ module: 'TempVoices', action: 'SetChannelOnCreate', error: err, guild_id: state.guild.id })
+                    await self.logger.handleError({ module: 'TempVoices', action: 'SetChannelOnCreate', error: err, guild_id: state.guild.id })
                 }
             }
 
@@ -137,7 +137,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
                 reason: 'TempVoices: New temporary voice channel'
             })
         } catch (err) {
-            self.logger.handleError({ module: 'TempVoices', action: 'CreateNewVoice', error: err, guild_id: state.guild.id })
+            await self.logger.handleError({ module: 'TempVoices', action: 'CreateNewVoice', error: err, guild_id: state.guild.id })
 
             return false
         }
@@ -161,7 +161,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             try {
                 await state.setChannel(tempVoice.id, 'TempVoices: Move to the temporary voice channel')
             } catch (err) {
-                self.logger.handleError({ module: 'TempVoices', action: 'MoveToNewVoice', error: err, guild_id: state.guild.id })
+                await self.logger.handleError({ module: 'TempVoices', action: 'MoveToNewVoice', error: err, guild_id: state.guild.id })
             }
         }
 
@@ -193,7 +193,7 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
                 try {
                     await state.setChannel(child.channel_id, 'TempVoices: Move to an existing temporary voice channel')
                 } catch (err) {
-                    self.logger.handleError({ module: 'TempVoices', action: 'SetChannelOnMove', error: err, guild_id: state.guild.id })
+                    await self.logger.handleError({ module: 'TempVoices', action: 'SetChannelOnMove', error: err, guild_id: state.guild.id })
                 }
             }
 
@@ -219,7 +219,7 @@ export async function createTemporaryVoiceOnMove(self: Lacuna, server: ServerDoc
                 try {
                     await state.setChannel(child.channel_id, 'TempVoices: Move to an existing temporary voice channel')
                 } catch (err) {
-                    self.logger.handleError({ module: 'TempVoices', action: 'SetChannelOnMove', error: err, guild_id: state.guild.id })
+                    await self.logger.handleError({ module: 'TempVoices', action: 'SetChannelOnMove', error: err, guild_id: state.guild.id })
                 }
             }
 
@@ -322,7 +322,7 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
                     await ownerPermissionOverwrites.delete('TempVoices: The original channel owner disconnected from temporary voice channel')
                 }
             } catch (err) {
-                self.logger.handleError({ module: 'TempVoices', action: 'DeleteOwnerPermissions', error: err, guild_id: state.guild.id })
+                await self.logger.handleError({ module: 'TempVoices', action: 'DeleteOwnerPermissions', error: err, guild_id: state.guild.id })
             }
 
             const permissionsBitField = new PermissionsBitField(BigInt(autoVoice.default.permissions)),
@@ -345,7 +345,7 @@ export async function deleteTemporaryVoice(self: Lacuna, server: ServerDocument,
                     })
                 }
             } catch (err) {
-                self.logger.handleError({ module: 'TempVoices', action: 'SetPermissionsForNewOwner', error: err, guild_id: state.guild.id })
+                await self.logger.handleError({ module: 'TempVoices', action: 'SetPermissionsForNewOwner', error: err, guild_id: state.guild.id })
             }
 
             self.emit('moduleExecution', {

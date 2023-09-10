@@ -43,7 +43,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'LogsGuildMemberUpdateName',
                         action: 'SendMessageViaWebhook',
                         error: err,

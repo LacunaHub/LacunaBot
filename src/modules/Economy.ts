@@ -331,7 +331,7 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
                 try {
                     await channel.permissionOverwrites.create(member.id, { ViewChannel: true })
                 } catch (err) {
-                    this.self.logger.handleError({ module: 'Economy', action: 'PurchaseItemCreateOverwrites', error: err, guild_id: guild.id })
+                    await this.self.logger.handleError({ module: 'Economy', action: 'PurchaseItemCreateOverwrites', error: err, guild_id: guild.id })
                 }
             }
         }
@@ -355,7 +355,7 @@ export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: 
                 try {
                     await member.roles.add(roles)
                 } catch (err) {
-                    this.self.logger.handleError({ module: 'Economy', action: 'PurchaseItemAddRoles', error: err, guild_id: guild.id })
+                    await this.self.logger.handleError({ module: 'Economy', action: 'PurchaseItemAddRoles', error: err, guild_id: guild.id })
                 }
             }
         }

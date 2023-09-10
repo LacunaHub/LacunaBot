@@ -27,7 +27,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
         try {
             await member.setNickname(name, reason)
         } catch (err) {
-            self.logger.handleError({ module: 'NicknameModeration', action: 'SetNickname', error: err, guild_id: member.guild.id })
+            await self.logger.handleError({ module: 'NicknameModeration', action: 'SetNickname', error: err, guild_id: member.guild.id })
         }
 
         self.emit('moduleExecution', {

@@ -44,7 +44,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({ module: 'LogsRoleUpdateName', action: 'SendMessageViaWebhook', error: err, guild_id: role.guild.id })
+                    await self.logger.handleError({
+                        module: 'LogsRoleUpdateName',
+                        action: 'SendMessageViaWebhook',
+                        error: err,
+                        guild_id: role.guild.id
+                    })
 
                     return false
                 }
@@ -74,7 +79,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({ module: 'LogsRoleUpdateColor', action: 'SendMessageViaWebhook', error: err, guild_id: role.guild.id })
+                    await self.logger.handleError({
+                        module: 'LogsRoleUpdateColor',
+                        action: 'SendMessageViaWebhook',
+                        error: err,
+                        guild_id: role.guild.id
+                    })
 
                     return false
                 }
@@ -100,7 +110,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'LogsRoleUpdatePermissions',
                         action: 'SendMessageViaWebhook',
                         error: err,

@@ -78,7 +78,7 @@ export default class TemporaryBan {
                 return await guild.bans.create(this.userId, { reason: this.reason })
             }
         } catch (err) {
-            this.self.logger.handleError({ module: 'TemporaryBan', action: 'CreateBan', error: err, guild_id: this.guildId })
+            await this.self.logger.handleError({ module: 'TemporaryBan', action: 'CreateBan', error: err, guild_id: this.guildId })
         }
     }
 
@@ -90,7 +90,7 @@ export default class TemporaryBan {
                 return await guild.bans.remove(this.userId, reason)
             }
         } catch (err) {
-            this.self.logger.handleError({ module: 'TemporaryBan', action: 'RemoveBan', error: err, guild_id: this.guildId })
+            await this.self.logger.handleError({ module: 'TemporaryBan', action: 'RemoveBan', error: err, guild_id: this.guildId })
         }
     }
 }

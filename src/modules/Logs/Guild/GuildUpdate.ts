@@ -44,7 +44,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({ module: 'LogsGuildUpdateName', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+                    await self.logger.handleError({ module: 'LogsGuildUpdateName', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
 
                     return false
                 }
@@ -73,7 +73,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({ module: 'LogsGuildUpdateAfkChannel', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+                    await self.logger.handleError({
+                        module: 'LogsGuildUpdateAfkChannel',
+                        action: 'SendMessageViaWebhook',
+                        error: err,
+                        guild_id: guild.id
+                    })
 
                     return false
                 }
@@ -110,7 +115,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({ module: 'LogsGuildUpdateAfkTimeout', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+                    await self.logger.handleError({
+                        module: 'LogsGuildUpdateAfkTimeout',
+                        action: 'SendMessageViaWebhook',
+                        error: err,
+                        guild_id: guild.id
+                    })
 
                     return false
                 }
@@ -139,7 +149,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         username: server.server.premium.available ? webhook.name : self.user.username
                     })
                 } catch (err) {
-                    self.logger.handleError({ module: 'LogsGuildUpdateDescription', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+                    await self.logger.handleError({
+                        module: 'LogsGuildUpdateDescription',
+                        action: 'SendMessageViaWebhook',
+                        error: err,
+                        guild_id: guild.id
+                    })
 
                     return false
                 }
