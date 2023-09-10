@@ -536,7 +536,8 @@
         "SUBSCRIPTIONS": "Subscriptions",
         "VOICE_CHANNELS": "Voice channels",
         "UTILITY": "Utility",
-        "CHANGE_LOG": "Change log"
+        "CHANGE_LOG": "Change log",
+        "DOWNLOAD_LOGS": "Download logs"
       },
       "save_error": "Something went wrong when trying to save. Please try a little later.",
       "gs_title": "General settings",

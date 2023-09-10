@@ -104,8 +104,14 @@
                   class="rounded-lg"
                   :to="`/guilds/${gid}/settings/change-log`"
                   :label="$t('pages.guild.nav_names.CHANGE_LOG')"
-                  icon="img:/src/assets/logs.svg"
+                  :icon="`img:${imgs.editPenImg}`"
                 ></q-route-tab>
+
+                <q-tab
+                  class="rounded-lg"
+                  :label="$t('pages.guild.nav_names.DOWNLOAD_LOGS')"
+                  :icon="`img:${imgs.logsImg}`"
+                ></q-tab>
               </q-tabs>
             </div>
 
@@ -189,6 +195,18 @@
 
                     <q-item-section avatar side>
                       <q-avatar square size="24px">
+                        <img src="~assets/edit-pen.svg" />
+                      </q-avatar>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item clickable active-class="nav-item--active" v-ripple @click="downloadLogs">
+                    <q-item-section class="text-subtitle1">
+                      {{ $t('pages.guild.nav_names.DOWNLOAD_LOGS') }}
+                    </q-item-section>
+
+                    <q-item-section avatar side>
+                      <q-avatar square size="24px">
                         <img src="~assets/logs.svg" />
                       </q-avatar>
                     </q-item-section>
@@ -219,7 +237,7 @@ import { useGuildStore } from 'src/stores/guild'
 import { useUserStore } from 'src/stores/user'
 import GuildCardMini from 'src/components/GuildCardMini.vue'
 import { interfaces } from 'src/boot/axios'
-import { useMeta } from 'quasar'
+import { useMeta, useQuasar } from 'quasar'
 import { decimalToHex, objectDifferences } from 'src/utils/Utils'
 import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import controlPanelImg from 'src/assets/control-panel.svg'
@@ -229,6 +247,8 @@ import activitiesImg from 'src/assets/activities.svg'
 import bellImg from 'src/assets/bell.svg'
 import karaokeImg from 'src/assets/karaoke.svg'
 import layersImg from 'src/assets/layers.svg'
+import editPenImg from 'src/assets/edit-pen.svg'
+import logsImg from 'src/assets/logs.svg'
 import UserSurvey from 'src/components/dialogs/UserSurvey.vue'
 import { useChangeLogStore } from 'src/stores/change-log'
 import ChangeLog from 'src/components/dialogs/ChangeLog.vue'
@@ -238,6 +258,7 @@ export default defineComponent({
   name: 'GuildPageSettings',
 
   setup() {
+    const $q = useQuasar()
     const guild = useGuildStore()
     const user = useUserStore()
     const changeLog = useChangeLogStore()
@@ -260,7 +281,32 @@ export default defineComponent({
       }
     })
 
-    return { guild, user, changeLog, title }
+    const downloadLogs = async () => {
+      try {
+        const { data } = await interfaces.guilds.downloadLogs(guild._id)
+        const href = URL.createObjectURL(new Blob([data.data])),
+          link = document.createElement('a')
+
+        link.href = href
+        link.setAttribute('download', data.file_name)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(href)
+        event('guild_download_logs', { event_category: 'utility' })
+      } catch (err) {
+        $q.notify({
+          message: err.response?.data ?? err.toString(),
+          classes: 'rounded-lg q-notification-custom',
+          color: 'black',
+          icon: 'error',
+          iconColor: 'negative',
+          timeout: 5000
+        })
+      }
+    }
+
+    return { guild, user, changeLog, title, downloadLogs }
   },
 
   components: {
@@ -304,7 +350,11 @@ export default defineComponent({
       freezedGuild: {},
       guildChanged: false,
       updateSettingsLoading: false,
-      updateSettingsError: false
+      updateSettingsError: false,
+      imgs: {
+        editPenImg,
+        logsImg
+      }
     }
   },
 
