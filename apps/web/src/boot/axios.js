@@ -132,6 +132,13 @@ const interfaces = {
                     Authorization: Cookies.get('access_token')
                 }
             })
+        },
+        downloadLogs(guildId) {
+            return api.post(`/guilds/${guildId}/download-logs`, null, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
         }
     },
 
