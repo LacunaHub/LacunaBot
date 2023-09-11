@@ -540,6 +540,7 @@
         "DOWNLOAD_LOGS": "Download logs"
       },
       "save_error": "Something went wrong when trying to save. Please try a little later.",
+      "unsaved_changes": "You have unsaved changes! Do you really want to leave this page?",
       "gs_title": "General settings",
       "gs_prefix_title": "Prefix",
       "gs_locale_title": "Localization",
