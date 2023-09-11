@@ -152,7 +152,8 @@ export default class Command {
                             value: i.value ?? null,
                             options: i.options.map(ii => ({ name: ii.name, type: ii.type, value: ii.value ?? null }))
                         }
-                    else return { name: i.name, type: i.type, value: i.value ?? null }
+
+                    return { name: i.name, type: i.type, value: i.value ?? null }
                 }) ?? [],
             guild: { name: interaction.guild.name, id: interaction.guild.id },
             channel: { name: (interaction.channel as BaseGuildTextChannel)?.name, id: interaction.channelId },

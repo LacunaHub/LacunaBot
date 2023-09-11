@@ -40,7 +40,7 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
                     username: server.server.premium.available ? webhook.name : self.user.username
                 })
             } catch (err) {
-                self.logger.handleError({ module: 'LogsRoleCreate', action: 'SendMessageViaWebhook', error: err, guild_id: role.guild.id })
+                await self.logger.handleError({ module: 'LogsRoleCreate', action: 'SendMessageViaWebhook', error: err, guild_id: role.guild.id })
 
                 return false
             }

@@ -46,7 +46,7 @@ export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextCha
         try {
             webhook = await self.fetchWebhook(logWebhook.id, logWebhook.token)
         } catch (err) {
-            self.logger.handleError({ module: 'Logs', action: 'FetchWebhook', error: err, guild_id: logChannel.guildId })
+            await self.logger.handleError({ module: 'Logs', action: 'FetchWebhook', error: err, guild_id: logChannel.guildId })
         }
     }
 
@@ -71,7 +71,7 @@ export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextCha
                 reason: 'Logs: No webhook for the logs'
             })
         } catch (err) {
-            self.logger.handleError({ module: 'Logs', action: 'CreateWebhook', error: err, guild_id: logChannel.guildId })
+            await self.logger.handleError({ module: 'Logs', action: 'CreateWebhook', error: err, guild_id: logChannel.guildId })
 
             return null
         }

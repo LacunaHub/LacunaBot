@@ -23,7 +23,7 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
                 }
             }
         } catch (err) {
-            self.logger.handleError({ module: 'Greeting', action: 'SendMessage', error: err, guild_id: member.guild.id })
+            await self.logger.handleError({ module: 'Greeting', action: 'SendMessage', error: err, guild_id: member.guild.id })
         }
 
         self.emit('moduleExecution', {
@@ -40,7 +40,7 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
             try {
                 await member.roles.add(roles, 'Greeting: Add initial roles')
             } catch (err) {
-                self.logger.handleError({ module: 'Greeting', action: 'AddInitialRoles', error: err, guild_id: member.guild.id })
+                await self.logger.handleError({ module: 'Greeting', action: 'AddInitialRoles', error: err, guild_id: member.guild.id })
             }
 
             self.emit('moduleExecution', {
@@ -60,7 +60,7 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
                 try {
                     await member.setNickname(data.nickname, 'Restoring: Restore nickname')
                 } catch (err) {
-                    self.logger.handleError({ module: 'Restoring', action: 'SetNickname', error: err, guild_id: member.guild.id })
+                    await self.logger.handleError({ module: 'Restoring', action: 'SetNickname', error: err, guild_id: member.guild.id })
                 }
             }
 
@@ -72,7 +72,7 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
                     try {
                         await member.roles.add(roles, 'Restoring: Restore roles')
                     } catch (err) {
-                        self.logger.handleError({ module: 'Restoring', action: 'AddRoles', error: err, guild_id: member.guild.id })
+                        await self.logger.handleError({ module: 'Restoring', action: 'AddRoles', error: err, guild_id: member.guild.id })
                     }
                 }
             }

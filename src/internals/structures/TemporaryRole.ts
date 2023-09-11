@@ -53,7 +53,7 @@ export default class TemporaryRole {
         try {
             member = await this.guild.members.fetch({ user: this.user_id })
         } catch (err) {
-            this.self.logger.handleError({ module: 'TemporaryRole', action: 'FetchGuildMember', error: err, guild_id: this.guild_id })
+            await this.self.logger.handleError({ module: 'TemporaryRole', action: 'FetchGuildMember', error: err, guild_id: this.guild_id })
         }
 
         return member
@@ -94,7 +94,7 @@ export default class TemporaryRole {
             try {
                 await member.roles.add(this.role_id, 'Temporary Role')
             } catch (err) {
-                this.self.logger.handleError({ module: 'TemporaryRole', action: 'AddRoles', error: err, guild_id: this.guild_id })
+                await this.self.logger.handleError({ module: 'TemporaryRole', action: 'AddRoles', error: err, guild_id: this.guild_id })
             }
         }
     }
@@ -126,7 +126,7 @@ export default class TemporaryRole {
             try {
                 await member.roles.remove(this.role_id, 'Temporary Role')
             } catch (err) {
-                this.self.logger.handleError({ module: 'TemporaryRole', action: 'RemoveRoles', error: err, guild_id: this.guild_id })
+                await this.self.logger.handleError({ module: 'TemporaryRole', action: 'RemoveRoles', error: err, guild_id: this.guild_id })
             }
         } else {
             await this.deleteEntry()

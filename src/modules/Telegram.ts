@@ -78,7 +78,14 @@ export async function handleTelegramWebhook(data: ITelegramWebhookData) {
 
         try {
             webhook = await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
-        } catch (err) {}
+        } catch (err) {
+            Logger.handleError({
+                module: 'Telegram',
+                action: 'GetWebhook',
+                error: err,
+                guild_id: guild._id
+            })
+        }
 
         if (!webhook) {
             try {
@@ -87,7 +94,14 @@ export async function handleTelegramWebhook(data: ITelegramWebhookData) {
                         name: `@${data.channel_username}`
                     }
                 })
-            } catch (err) {}
+            } catch (err) {
+                Logger.handleError({
+                    module: 'Telegram',
+                    action: 'CreateWebhook',
+                    error: err,
+                    guild_id: guild._id
+                })
+            }
 
             if (webhook)
                 await database.servers.updateOne(
@@ -136,7 +150,14 @@ export async function handleTelegramWebhook(data: ITelegramWebhookData) {
             if (guildSubscription.options.includes('CROSSPOST_MESSAGE')) {
                 await restApi.post(apiRoutes.channelMessageCrosspost(message.channel_id, message.id))
             }
-        } catch (err) {}
+        } catch (err) {
+            Logger.handleError({
+                module: 'Telegram',
+                action: 'SendNotificationMessage',
+                error: err,
+                guild_id: guild._id
+            })
+        }
 
         handleModuleExecutionData({
             module: 'Telegram',

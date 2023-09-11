@@ -77,14 +77,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         try {
             await mention.send(dm_message)
         } catch (err) {
-            self.logger.handleError({ module: 'KickCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
+            await self.logger.handleError({ module: 'KickCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
         }
     }
 
     try {
         await mention.kick(reason)
     } catch (err) {
-        self.logger.handleError({ module: 'KickCommand', action: 'Kick', error: err, guild_id: interaction.guildId })
+        await self.logger.handleError({ module: 'KickCommand', action: 'Kick', error: err, guild_id: interaction.guildId })
     }
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })

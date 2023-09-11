@@ -1,7 +1,31 @@
 import moment from 'moment'
 import fetch from 'node-fetch'
+import database from '../database'
+import { ILogEntry } from '../database/schemas/Servers'
 
 const telegram_base_url: string = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`
+
+async function appendServerLog(guildId: string, data: Partial<ILogEntry>) {
+    await database.servers.updateOne(
+        { _id: guildId },
+        {
+            $push: {
+                logs: {
+                    $each: [
+                        {
+                            level: data.level,
+                            timestamp: Date.now(),
+                            module: data.module,
+                            action: data.action ?? null,
+                            message: data.message
+                        }
+                    ],
+                    $slice: -250
+                }
+            }
+        }
+    )
+}
 
 export default {
     log(...args: any[]) {
@@ -92,7 +116,7 @@ export default {
         }
     },
 
-    handleError(data: { module: string; action?: string; error: any; guild_id?: string }) {
+    async handleError(data: { module: string; action?: string; error: any; guild_id?: string }) {
         const err = data.error.toString()
 
         console.error(
@@ -101,5 +125,16 @@ export default {
             err,
             data.guild_id ? `(occurred on ${data.guild_id})` : ''
         )
-    }
+
+        if (typeof data.guild_id === 'string') {
+            await appendServerLog(data.guild_id, {
+                level: 'ERROR',
+                module: data.module,
+                action: data.action,
+                message: err
+            })
+        }
+    },
+
+    appendServerLog
 }

@@ -263,7 +263,7 @@ export default class Automation {
                 const error = err.toString().replace(/<isolated-vm>:?/, '')
                 string = string.replace(regexp, () => error)
 
-                this.self.logger.handleError({ module: 'Automation', action: 'ReplacePatterns', error: err, guild_id: this.signal.guild.id })
+                await this.self.logger.handleError({ module: 'Automation', action: 'ReplacePatterns', error: err, guild_id: this.signal.guild.id })
             }
         }
 
@@ -772,7 +772,7 @@ export default class Automation {
                             await message.reply({ embeds: [embed] })
                         }
 
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'Automation',
                             action: 'ExecuteCodeAction',
                             error: err,
@@ -799,7 +799,12 @@ export default class Automation {
                                 await this.signal.reply({ ...message, ephemeral: reply.options.includes('EPHEMERAL') })
                             }
                         } catch (err) {
-                            this.self.logger.handleError({ module: 'Automation', action: 'ReplyAction', error: err, guild_id: this.signal.guildId })
+                            await this.self.logger.handleError({
+                                module: 'Automation',
+                                action: 'ReplyAction',
+                                error: err,
+                                guild_id: this.signal.guildId
+                            })
                         }
                     }
                 }
@@ -818,7 +823,7 @@ export default class Automation {
                             await channel.send({ ...message, tts: send_message.options.includes('TTS') })
                         }
                     } catch (err) {
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'Automation',
                             action: 'SendMessageAction',
                             error: err,
@@ -847,7 +852,7 @@ export default class Automation {
                             }
                         }
                     } catch (err) {
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'Automation',
                             action: 'ModifyRolesAction',
                             error: err,
@@ -869,7 +874,7 @@ export default class Automation {
                     try {
                         member = await this.signal.guild.members.fetch({ user: user_id })
                     } catch (err) {
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'Automation',
                             action: 'ModifyRolesActionFetchMember',
                             error: err,
@@ -974,7 +979,12 @@ export default class Automation {
                             })
                         }
                     } catch (err) {
-                        this.self.logger.handleError({ module: 'Automation', action: 'ShowModalAction', error: err, guild_id: this.signal.guild.id })
+                        await this.self.logger.handleError({
+                            module: 'Automation',
+                            action: 'ShowModalAction',
+                            error: err,
+                            guild_id: this.signal.guild.id
+                        })
                     }
                 }
 
@@ -1003,7 +1013,7 @@ export default class Automation {
                                 await channel.permissionOverwrites.create(userOrRole, overwriteOptions)
                             }
                         } catch (err) {
-                            this.self.logger.handleError({
+                            await this.self.logger.handleError({
                                 module: 'Automation',
                                 action: 'OverwriteChannelPermissionsAction',
                                 error: err,

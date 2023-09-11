@@ -380,7 +380,7 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
                     await member.roles.remove(award.remove_references.slice(0, 5))
                 }
             } catch (err) {
-                self.logger.handleError({ module: 'Levels', action: 'AssignRoleAwards', error: err, guild_id: server._id })
+                await self.logger.handleError({ module: 'Levels', action: 'AssignRoleAwards', error: err, guild_id: server._id })
             }
 
             for (const prevAward of prevAwards.filter(i => i.single)) {
@@ -390,7 +390,7 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
                     try {
                         await member.roles.remove(prevRoles)
                     } catch (err) {
-                        self.logger.handleError({ module: 'Levels', action: 'RemovePreviousAwards', error: err, guild_id: server._id })
+                        await self.logger.handleError({ module: 'Levels', action: 'RemovePreviousAwards', error: err, guild_id: server._id })
                     }
                 }
             }
@@ -417,7 +417,7 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
                     await member.roles.remove(prevAward.remove_references.slice(0, 5))
                 }
             } catch (err) {
-                self.logger.handleError({ module: 'Levels', action: 'AssignRoleAwards', error: err, guild_id: server._id })
+                await self.logger.handleError({ module: 'Levels', action: 'AssignRoleAwards', error: err, guild_id: server._id })
             }
 
             for (const prevPrevAward of prevAwards.slice(1).filter(i => i.single)) {
@@ -427,7 +427,7 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, refs: {
                     try {
                         await member.roles.remove(prevRoles)
                     } catch (err) {
-                        self.logger.handleError({ module: 'Levels', action: 'RemovePreviousAwards', error: err, guild_id: server._id })
+                        await self.logger.handleError({ module: 'Levels', action: 'RemovePreviousAwards', error: err, guild_id: server._id })
                     }
                 }
             }
@@ -470,7 +470,7 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, ref
                 }
             }
         } catch (err) {
-            self.logger.handleError({ module: 'Levels', action: 'SendLevelUpMessage', error: err, guild_id: server._id })
+            await self.logger.handleError({ module: 'Levels', action: 'SendLevelUpMessage', error: err, guild_id: server._id })
         }
 
         self.emit('moduleExecution', {

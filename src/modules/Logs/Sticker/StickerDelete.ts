@@ -36,7 +36,7 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
                     username: server.server.premium.available ? webhook.name : self.user.username
                 })
             } catch (err) {
-                self.logger.handleError({ module: 'LogsStickerDelete', action: 'SendMessageViaWebhook', error: err, guild_id: sticker.guildId })
+                await self.logger.handleError({ module: 'LogsStickerDelete', action: 'SendMessageViaWebhook', error: err, guild_id: sticker.guildId })
 
                 return false
             }

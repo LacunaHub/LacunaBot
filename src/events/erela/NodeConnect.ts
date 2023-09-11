@@ -25,7 +25,7 @@ async function handler(self: Lacuna, node: Node) {
             try {
                 message = await textChannel.messages.fetch({ message: guildPlayer.messageId })
             } catch (err) {
-                self.logger.handleError({ module: 'NodeConnect', action: 'FetchPlayerMessage', error: err, guild_id: guildId })
+                await self.logger.handleError({ module: 'MusicNodeConnect', action: 'FetchPlayerMessage', error: err, guild_id: guildId })
             }
         }
 

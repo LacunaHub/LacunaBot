@@ -26,7 +26,12 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
             try {
                 await interaction.followUp({ ...content, ephemeral: true })
             } catch (err) {
-                self.logger.handleError({ module: 'InteractiveMessages', action: 'ButtonEphemeralReply', error: err, guild_id: interaction.guildId })
+                await self.logger.handleError({
+                    module: 'InteractiveMessages',
+                    action: 'ButtonEphemeralReply',
+                    error: err,
+                    guild_id: interaction.guildId
+                })
             }
         }
 
@@ -44,7 +49,7 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
                         await interaction.member.roles.add(addRoles, 'Interactive messages: Modify roles')
                     }
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'InteractiveMessages',
                         action: 'ButtonModifyRolesAdd',
                         error: err,
@@ -63,7 +68,7 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
                         await interaction.member.roles.remove(removeRoles, 'Interactive messages: Modify roles')
                     }
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'InteractiveMessages',
                         action: 'ButtonModifyRolesRemove',
                         error: err,
@@ -95,7 +100,7 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
                         })
                     }
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'InteractiveMessages',
                         action: 'OverwriteChannelPermissions',
                         error: err,
@@ -139,7 +144,7 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
             try {
                 await interaction.followUp({ ...content, ephemeral: true })
             } catch (err) {
-                self.logger.handleError({
+                await self.logger.handleError({
                     module: 'InteractiveMessages',
                     action: 'SelectMenuEphemeralReply',
                     error: err,
@@ -162,7 +167,7 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
                         await interaction.member.roles.add(addRoles, 'Interactive messages: Modify roles')
                     }
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'InteractiveMessages',
                         action: 'SelectMenuModifyRolesAdd',
                         error: err,
@@ -181,7 +186,7 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
                         await interaction.member.roles.remove(removeRoles, 'Interactive messages: Modify roles')
                     }
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'InteractiveMessages',
                         action: 'SelectMenuModifyRolesRemove',
                         error: err,
@@ -213,7 +218,7 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
                         })
                     }
                 } catch (err) {
-                    self.logger.handleError({
+                    await self.logger.handleError({
                         module: 'InteractiveMessages',
                         action: 'SelectMenuOverwriteChannelPermissions',
                         error: err,
@@ -263,7 +268,12 @@ async function handleReactionAdd(self: Lacuna, server: ServerDocument, reaction:
                     await member.roles.remove(removeRoles, 'Interactive messages: Modify roles')
                 }
             } catch (err) {
-                self.logger.handleError({ module: 'InteractiveMessages', action: 'ReactionAddModifyRoles', error: err, guild_id: message.guildId })
+                await self.logger.handleError({
+                    module: 'InteractiveMessages',
+                    action: 'ReactionAddModifyRoles',
+                    error: err,
+                    guild_id: message.guildId
+                })
             }
         }
 
@@ -286,7 +296,7 @@ async function handleReactionAdd(self: Lacuna, server: ServerDocument, reaction:
                             reason: 'Interactive messages: Overwrite channel permissions'
                         })
                     } catch (err) {
-                        self.logger.handleError({
+                        await self.logger.handleError({
                             module: 'InteractiveMessages',
                             action: 'ReactionAddOverwriteChannelPermissions',
                             error: err,
@@ -327,7 +337,7 @@ async function handleReactionRemove(self: Lacuna, server: ServerDocument, reacti
                     try {
                         await member.roles.remove(addRoles, 'Interactive messages: Modify roles')
                     } catch (err) {
-                        self.logger.handleError({
+                        await self.logger.handleError({
                             module: 'InteractiveMessages',
                             action: 'ReactionRemoveModifyRoles',
                             error: err,
@@ -344,7 +354,7 @@ async function handleReactionRemove(self: Lacuna, server: ServerDocument, reacti
                     try {
                         await member.roles.add(removeRoles, 'Interactive messages: Modify roles')
                     } catch (err) {
-                        self.logger.handleError({
+                        await self.logger.handleError({
                             module: 'InteractiveMessages',
                             action: 'ReactionRemoveModifyRoles',
                             error: err,
@@ -367,7 +377,7 @@ async function handleReactionRemove(self: Lacuna, server: ServerDocument, reacti
                     try {
                         await overwrites.delete('Interactive messages: Overwrite channel permissions')
                     } catch (err) {
-                        self.logger.handleError({
+                        await self.logger.handleError({
                             module: 'InteractiveMessages',
                             action: 'ReactionRemoveOverwriteChannelPermissions',
                             error: err,

@@ -9,7 +9,12 @@ const handler = async (self: Lacuna, player: Player) => {
         try {
             await message.edit({ components: [] })
         } catch (err) {
-            self.logger.handleError({ module: 'QueueEnd', action: 'RemoveComponentsFromPlayerMessage', error: err, guild_id: player.guild })
+            await self.logger.handleError({
+                module: 'MusicQueueEnd',
+                action: 'RemoveComponentsFromPlayerMessage',
+                error: err,
+                guild_id: player.guild
+            })
         }
     }
 
@@ -21,6 +26,12 @@ const handler = async (self: Lacuna, player: Player) => {
     await self.db.qdb.delete(`guildPlayers.${player.guild}`)
 
     self.logger.log(`[ErelaQueueEnd] Queue of player ${player.guild} ended`)
+    await self.logger.appendServerLog(player.guild, {
+        level: 'LOG',
+        module: 'Music',
+        action: 'QueueEnd',
+        message: 'The player queue has ended'
+    })
 
     return true
 }

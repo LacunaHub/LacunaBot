@@ -157,7 +157,14 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
 
             try {
                 webhook = await restApi.get(apiRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
-            } catch (err) {}
+            } catch (err) {
+                logger.handleError({
+                    module: 'Twitch',
+                    action: 'GetWebhook',
+                    error: err,
+                    guild_id: guild._id
+                })
+            }
 
             if (!webhook) {
                 try {
@@ -166,7 +173,14 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
                             name: data.event.broadcaster_user_name
                         }
                     })
-                } catch (err) {}
+                } catch (err) {
+                    logger.handleError({
+                        module: 'Twitch',
+                        action: 'CreateWebhook',
+                        error: err,
+                        guild_id: guild._id
+                    })
+                }
 
                 if (webhook)
                     await db.servers.updateOne(
@@ -209,7 +223,14 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
                         ]
                     }
                 })
-            } catch (err) {}
+            } catch (err) {
+                logger.handleError({
+                    module: 'Twitch',
+                    action: 'SendNotificationMessage',
+                    error: err,
+                    guild_id: guild._id
+                })
+            }
 
             handleModuleExecutionData({
                 module: 'Twitch',

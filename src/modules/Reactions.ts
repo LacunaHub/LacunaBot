@@ -66,7 +66,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                             target: { id: member.id, name: member.user.tag }
                         })
                     } catch (err) {
-                        self.logger.handleError({
+                        await self.logger.handleError({
                             module: 'InteractiveReactions',
                             action: 'CreatePermissionOverwrites',
                             error: err,
@@ -98,7 +98,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                                 target: { id: member.id, name: member.user.tag }
                             })
                         } catch (err) {
-                            self.logger.handleError({
+                            await self.logger.handleError({
                                 module: 'InteractiveReactions',
                                 action: 'RemoveRoles',
                                 error: err,
@@ -132,7 +132,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         try {
                             await member.roles.add(roles, t('audit_reasons.irs'))
                         } catch (err) {
-                            self.logger.handleError({
+                            await self.logger.handleError({
                                 module: 'InteractiveReactions',
                                 action: 'AddSingleRoles',
                                 error: err,
@@ -149,7 +149,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         try {
                             await member.roles.add(roles, t('audit_reasons.irs'))
                         } catch (err) {
-                            self.logger.handleError({
+                            await self.logger.handleError({
                                 module: 'InteractiveReactions',
                                 action: 'AddRoles',
                                 error: err,
@@ -215,7 +215,7 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                             }
                         }
                     } catch (err) {
-                        self.logger.handleError({
+                        await self.logger.handleError({
                             module: 'InteractiveReactions',
                             action: 'DeletePermissionOverwrites',
                             error: err,
@@ -243,7 +243,7 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                             target: { id: member.id, name: member.user.tag }
                         })
                     } catch (err) {
-                        self.logger.handleError({
+                        await self.logger.handleError({
                             module: 'InteractiveReactions',
                             action: 'RemoveRoles',
                             error: err,
@@ -302,7 +302,7 @@ export async function autoReact(self: Lacuna, server: ServerDocument, message: M
             try {
                 await message.react(emoji.id || emoji.name)
             } catch (err) {
-                self.logger.handleError({
+                await self.logger.handleError({
                     module: 'AutoReactions',
                     action: 'AddReaction',
                     error: err,

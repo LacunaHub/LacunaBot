@@ -33,7 +33,12 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
                     username: server.server.premium.available ? webhook.name : self.user.username
                 })
             } catch (err) {
-                self.logger.handleError({ module: 'LogsVoiceServerUnmute', action: 'SendMessageViaWebhook', error: err, guild_id: state.guild.id })
+                await self.logger.handleError({
+                    module: 'LogsVoiceServerUnmute',
+                    action: 'SendMessageViaWebhook',
+                    error: err,
+                    guild_id: state.guild.id
+                })
 
                 return false
             }

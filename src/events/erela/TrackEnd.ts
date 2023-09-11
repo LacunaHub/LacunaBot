@@ -5,10 +5,10 @@ import Lacuna from '../../internals/Lacuna'
 import { getTrackSourceByUrl } from '../../internals/utility/Utils'
 
 const handler = async (self: Lacuna, player: Player) => {
-    const message = player.get<Message>('message')
+    const message = player.get<Message>('message'),
+        track = player.queue.current
 
     if (message && message.embeds[0]) {
-        const track = player.queue.current
         const trackSource = getTrackSourceByUrl(track.uri)
         const embed = new EmbedBuilder(message.embeds[0]).setTitle(`${track.author} - ${track.title}`)
 
@@ -24,12 +24,18 @@ const handler = async (self: Lacuna, player: Player) => {
             player.set('message', playerMessage)
             self.db.qdb.set(`guildPlayers.${player.guild}.messageId`, message.id)
         } catch (err) {
-            self.logger.handleError({ module: 'TrackEnd', action: 'RecreatePlayerMessage', error: err, guild_id: player.guild })
+            await self.logger.handleError({ module: 'MusicTrackEnd', action: 'RecreatePlayerMessage', error: err, guild_id: player.guild })
             player.set('message', null)
         }
     }
 
     self.logger.log(`[ErelaTrackEnd] Track playing for player ${player.guild} ended`)
+    await self.logger.appendServerLog(player.guild, {
+        level: 'LOG',
+        module: 'Music',
+        action: 'TrackEnd',
+        message: `Track "${track.author} - ${track.title}" has ended`
+    })
 
     return true
 }

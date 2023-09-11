@@ -92,7 +92,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     try {
         await mention.disableCommunicationUntil(Date.now() + duration, reason)
     } catch (err) {
-        self.logger.handleError({ module: 'MuteCommand', action: 'DisableCommunication', error: err, guild_id: interaction.guildId })
+        await self.logger.handleError({ module: 'MuteCommand', action: 'DisableCommunication', error: err, guild_id: interaction.guildId })
     }
 
     if (server.moderation.mutes.rar) {
@@ -118,7 +118,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         try {
             await mention.roles.set(strict_roles, reason)
         } catch (err) {
-            self.logger.handleError({ module: 'MuteCommand', action: 'RemoveAllRoles', error: err, guild_id: interaction.guildId })
+            await self.logger.handleError({ module: 'MuteCommand', action: 'RemoveAllRoles', error: err, guild_id: interaction.guildId })
         }
     }
 
@@ -129,7 +129,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         try {
             await mention.send(dm_message)
         } catch (err) {
-            self.logger.handleError({ module: 'MuteCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
+            await self.logger.handleError({ module: 'MuteCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
         }
     }
 

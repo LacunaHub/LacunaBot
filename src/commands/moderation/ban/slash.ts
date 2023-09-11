@@ -92,7 +92,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         try {
             await mention.send(dm_message)
         } catch (err) {
-            self.logger.handleError({ module: 'BanCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
+            await self.logger.handleError({ module: 'BanCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
         }
     }
 
@@ -108,7 +108,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         try {
             await interaction.guild.bans.create(mention.id, { reason: reason })
         } catch (err) {
-            self.logger.handleError({ module: 'BanCommand', action: 'Ban', error: err, guild_id: interaction.guildId })
+            await self.logger.handleError({ module: 'BanCommand', action: 'Ban', error: err, guild_id: interaction.guildId })
         }
     }
 

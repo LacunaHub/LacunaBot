@@ -37,7 +37,12 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
                     username: server.server.premium.available ? webhook.name : self.user.username
                 })
             } catch (err) {
-                self.logger.handleError({ module: 'LogsMessageDeleteBulk', action: 'SendMessageViaWebhook', error: err, guild_id: message.guildId })
+                await self.logger.handleError({
+                    module: 'LogsMessageDeleteBulk',
+                    action: 'SendMessageViaWebhook',
+                    error: err,
+                    guild_id: message.guildId
+                })
 
                 return false
             }

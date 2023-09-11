@@ -235,7 +235,12 @@ export default class CustomCommand {
                 const error = err.toString().replace(/<isolated-vm>:?/, '')
                 string = string.replace(regexp, () => error)
 
-                this.self.logger.handleError({ module: 'CustomCommands', action: 'ReplacePatterns', error: err, guild_id: this.interaction.guildId })
+                await this.self.logger.handleError({
+                    module: 'CustomCommands',
+                    action: 'ReplacePatterns',
+                    error: err,
+                    guild_id: this.interaction.guildId
+                })
             }
         }
 
@@ -777,7 +782,7 @@ export default class CustomCommand {
                             await this.interaction.reply({ embeds: [embed], ephemeral: true })
                         }
 
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'CustomCommands',
                             action: 'ExecuteCodeAction',
                             error: err,
@@ -799,7 +804,7 @@ export default class CustomCommand {
                     try {
                         await this.interaction.reply({ ...message, ephemeral: reply.options.includes('EPHEMERAL') })
                     } catch (err) {
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'CustomCommands',
                             action: 'ReplyAction',
                             error: err,
@@ -829,7 +834,7 @@ export default class CustomCommand {
                             await this.interaction.channel.send({ ...message, tts: send_message.options.includes('TTS') })
                         }
                     } catch (err) {
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'CustomCommands',
                             action: 'SendMessageAction',
                             error: err,
@@ -858,7 +863,7 @@ export default class CustomCommand {
                             }
                         }
                     } catch (err) {
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'CustomCommands',
                             action: 'ModifyRolesAction',
                             error: err,
@@ -893,7 +898,7 @@ export default class CustomCommand {
                     try {
                         member = await this.interaction.guild.members.fetch({ user: user_id })
                     } catch (err) {
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'CustomCommands',
                             action: 'ModifyRolesActionFetchMember',
                             error: err,
@@ -996,7 +1001,7 @@ export default class CustomCommand {
                             components: transformModalComponents(show_modal.components) as any
                         })
                     } catch (err) {
-                        this.self.logger.handleError({
+                        await this.self.logger.handleError({
                             module: 'CustomCommands',
                             action: 'ShowModalAction',
                             error: err,
@@ -1030,7 +1035,7 @@ export default class CustomCommand {
                                 await channel.permissionOverwrites.create(userOrRole, overwriteOptions)
                             }
                         } catch (err) {
-                            this.self.logger.handleError({
+                            await this.self.logger.handleError({
                                 module: 'CustomCommands',
                                 action: 'OverwriteChannelPermissionsAction',
                                 error: err,
