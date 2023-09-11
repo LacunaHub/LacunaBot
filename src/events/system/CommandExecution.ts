@@ -44,9 +44,8 @@ const handler = async (self: Lacuna, data: CommandExecutionData) => {
         level: 'LOG',
         module: `${capitalizedCommandName}${capitalizedSubcommandName}Command`,
         message:
-            `Executed in channel ${channel.id} for user ${user.id} ` + commandOptions.length
-                ? `with options ${JSON.stringify(commandOptions)}`
-                : 'without options'
+            `Executed in channel ${channel.id} for user ${user.id} ` +
+            (commandOptions.length ? `with options ${JSON.stringify(commandOptions)}` : 'without options')
     })
 }
 
