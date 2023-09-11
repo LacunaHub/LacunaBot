@@ -26,7 +26,7 @@ async function getState(ctx: Context) {
             musicNodes: self.cluster.id === 0 ? self.getMusicNodes() : []
         }
     })
-    const flatStats = stats.flat()
+    const flatStats = stats.flat().sort((a, b) => a.cluster_id - b.cluster_id)
     const { data: servers } = await bridgeClient.request({ type: 'server-performance' }, { timeout: 15000, internal: false })
 
     ctx.status = 200
@@ -38,10 +38,10 @@ async function getState(ctx: Context) {
         channels: flatStats.reduce((a, b) => a + b.channels, 0),
         servers: servers.map((i: any) => {
             return {
-                hostname: i.data.hostname,
-                uptime: i.data.uptime,
-                cpu_usage: i.data.cpuUsage,
-                memory_usage: Number(((i.data.memoryUsed.usedMemMb * 100) / i.data.memoryUsed.totalMemMb).toFixed(2))
+                hostname: i.hostname,
+                uptime: i.uptime,
+                cpu_usage: i.cpuUsage,
+                memory_usage: Number(((i.memoryUsed.usedMemMb * 100) / i.memoryUsed.totalMemMb).toFixed(2))
             }
         }),
         shards: flatStats.map(i => {

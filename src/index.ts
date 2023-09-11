@@ -57,7 +57,9 @@ if (isMasterBridge) {
                 } catch (err) {}
             }
 
-            await message.reply({ data: servers })
+            await message.reply({
+                data: servers.sort((a, b) => a.clusterList[0] - b.clusterList[0])
+            })
         }
     })
 
