@@ -85,10 +85,10 @@
 </template>
 
 <script>
-import { interfaces } from 'src/boot/axios'
-import { defineComponent, onMounted, ref } from 'vue'
-import { useUserStore } from 'src/stores/user'
 import { useMeta } from 'quasar'
+import { interfaces } from 'src/boot/axios'
+import { useUserStore } from 'src/stores/user'
+import { defineComponent, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
@@ -131,8 +131,6 @@ export default defineComponent({
 
     onMounted(async () => {
       await getMe()
-
-      console.log(user.guilds)
 
       pageLoading.value = false
     })
