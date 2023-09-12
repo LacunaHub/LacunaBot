@@ -477,9 +477,9 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({
@@ -510,9 +510,6 @@ export default defineComponent({
       config,
       dialogRef,
       currentTab,
-      console(v) {
-        console.log(v)
-      },
 
       onConfirm() {
         onDialogOK({ name: props.name, config: { ...config.value } })

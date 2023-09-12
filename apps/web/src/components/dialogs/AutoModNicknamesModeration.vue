@@ -188,9 +188,9 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'AutoModNicknamesModeration',
@@ -214,9 +214,6 @@ export default defineComponent({
       guild,
       config,
       dialogRef,
-      console(v) {
-        console.log(v)
-      },
 
       onConfirm() {
         onDialogOK({ name: props.name, config: { ...config.value } })
