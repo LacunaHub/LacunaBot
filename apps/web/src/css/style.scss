@@ -40,6 +40,10 @@
 
 /* BORDER */
 
+.rounded-none {
+  border-radius: 0 !important;
+}
+
 .rounded-md {
   border-radius: $border-radius-md !important;
 }
