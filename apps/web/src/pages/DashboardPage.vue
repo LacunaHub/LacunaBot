@@ -84,64 +84,50 @@
   </q-page>
 </template>
 
-<script>
-import { interfaces } from 'src/boot/axios'
-import { defineComponent, onMounted, ref } from 'vue'
-import { useUserStore } from 'src/stores/user'
+<script setup>
 import { useMeta } from 'quasar'
+import { interfaces } from 'src/boot/axios'
+import { useUserStore } from 'src/stores/user'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-export default defineComponent({
-  name: 'DashboardPage',
+const pageLoading = ref(true)
+const user = useUserStore(),
+  router = useRouter()
 
-  setup() {
-    const pageLoading = ref(true)
-    const user = useUserStore(),
-      router = useRouter()
-
-    useMeta({
-      title: 'My Profile',
-      meta: {
-        description: {
-          name: 'description',
-          content:
-            'Access your Lacuna Dashboard to manage your profile, view a list of Discord guilds connected to Lacuna.'
-        },
-        keywords: {
-          name: 'keywords',
-          content: 'my profile, discord guilds, bills, user activities'
-        }
-      }
-    })
-
-    const getMe = async () => {
-      try {
-        const response = await interfaces.users.getMe(),
-          { data } = response
-
-        user.$patch({ _guilds: data.guilds, flags: data.user.flags })
-      } catch (err) {
-        const { status } = err.response
-
-        if (status === 401) {
-          await router.push({ path: '/authorize' })
-        }
-      }
-    }
-
-    onMounted(async () => {
-      await getMe()
-
-      console.log(user.guilds)
-
-      pageLoading.value = false
-    })
-
-    return {
-      pageLoading,
-      user
+useMeta({
+  title: 'My Profile',
+  meta: {
+    description: {
+      name: 'description',
+      content: 'Access your Lacuna Dashboard to manage your profile, view a list of Discord guilds connected to Lacuna.'
+    },
+    keywords: {
+      name: 'keywords',
+      content: 'my profile, discord guilds, bills, user activities'
     }
   }
+})
+
+const getMe = async () => {
+  try {
+    const response = await interfaces.users.getMe(),
+      { data } = response
+
+    user.$patch({ _guilds: data.guilds, flags: data.user.flags })
+  } catch (err) {
+    const { status } = err.response
+
+    if (status === 401) {
+      await router.push({ path: '/authorize' })
+    }
+  }
+}
+
+onMounted(async () => {
+  await getMe()
+
+  pageLoading.value = false
 })
 </script>
 

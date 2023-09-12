@@ -111,6 +111,7 @@
                   class="rounded-lg"
                   :label="$t('pages.guild.nav_names.DOWNLOAD_LOGS')"
                   :icon="`img:${logsImg}`"
+                  @click="downloadLogs"
                 ></q-tab>
               </q-tabs>
             </div>
@@ -258,14 +259,14 @@ import { useI18n } from 'vue-i18n'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 
 const $q = useQuasar(),
-  $route = useRoute(),
-  $router = useRouter(),
-  { t: $t } = useI18n()
+  route = useRoute(),
+  router = useRouter(),
+  { t } = useI18n()
 
 const pageLoading = ref(true)
 const guild = useGuildStore(),
   changeLog = useChangeLogStore()
-const guildId = $route.params.guild_id,
+const guildId = route.params.guild_id,
   documentTitle = ref(null)
 const freezedGuild = ref({}),
   isGuildChanged = ref(false),
@@ -289,33 +290,33 @@ const guildClone = computed(() => {
   })
 
 const navItems = [
-  { name: $t('pages.guild.nav_names.GENERAL'), path: 'settings', icon: controlPanelImg },
+  { name: t('pages.guild.nav_names.GENERAL'), path: 'settings', icon: controlPanelImg },
   {
-    name: $t('pages.guild.nav_names.COMMANDS'),
+    name: t('pages.guild.nav_names.COMMANDS'),
     path: 'settings/commands',
     icon: slashCommandImg
   },
   {
-    name: $t('pages.guild.nav_names.MODERATION'),
+    name: t('pages.guild.nav_names.MODERATION'),
     path: 'settings/moderation',
     icon: shieldImg
   },
   {
-    name: $t('pages.guild.nav_names.ACTIVITIES'),
+    name: t('pages.guild.nav_names.ACTIVITIES'),
     path: 'settings/activities',
     icon: activitiesImg
   },
   {
-    name: $t('pages.guild.nav_names.SUBSCRIPTIONS'),
+    name: t('pages.guild.nav_names.SUBSCRIPTIONS'),
     path: 'settings/subscriptions',
     icon: bellImg
   },
   {
-    name: $t('pages.guild.nav_names.VOICE_CHANNELS'),
+    name: t('pages.guild.nav_names.VOICE_CHANNELS'),
     path: 'settings/voice-channels',
     icon: karaokeImg
   },
-  { name: $t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: layersImg, new: true }
+  { name: t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: layersImg, new: true }
 ]
 
 useMeta(() => {
@@ -350,13 +351,13 @@ const getSettings = async () => {
       const { status } = err.response
 
       if (status === 401) {
-        $router.push('/authorize')
+        router.push('/authorize')
       }
       if (status === 403) {
-        $router.push('/forbidden')
+        router.push('/forbidden')
       }
       if (status === 400 || status === 404 || status === 406) {
-        $router.push('/not-found')
+        router.push('/not-found')
       }
     } else {
       console.error(err)
@@ -390,7 +391,7 @@ const updateSettings = async () => {
   } catch (err) {
     console.error(err)
     $q.notify({
-      message: $t('pages.guild.save_error'),
+      message: t('pages.guild.save_error'),
       classes: 'rounded-lg q-notification-custom',
       color: 'black',
       icon: 'error',
@@ -492,7 +493,7 @@ onMounted(async () => {
           const now = new Date()
 
           $q.notify({
-            message: $t('user_survey.survey_submitted'),
+            message: t('user_survey.survey_submitted'),
             classes: 'rounded-lg q-notification-custom',
             color: 'black',
             icon: 'done',
@@ -511,7 +512,7 @@ onMounted(async () => {
 
 onBeforeRouteLeave((to, from, next) => {
   if (isGuildChanged.value) {
-    const answer = window.confirm($t('pages.guild.unsaved_changes'))
+    const answer = window.confirm(t('pages.guild.unsaved_changes'))
 
     if (answer) {
       next()
