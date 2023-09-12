@@ -111,6 +111,7 @@
                   class="rounded-lg"
                   :label="$t('pages.guild.nav_names.DOWNLOAD_LOGS')"
                   :icon="`img:${logsImg}`"
+                  @click="downloadLogs"
                 ></q-tab>
               </q-tabs>
             </div>
