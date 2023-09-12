@@ -41,79 +41,69 @@
   </div>
 </template>
 
-<script>
-import { useUserStore } from 'src/stores/user'
-import { defineComponent, onMounted, ref, watch } from 'vue'
+<script setup>
 import GuildCardMini from 'src/components/GuildCardMini.vue'
+import { useUserStore } from 'src/stores/user'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-export default defineComponent({
-  name: 'DashboardPageGuilds',
+const props = defineProps({
+  parentLoading: {
+    type: Boolean,
+    default: true
+  }
+})
 
-  components: { GuildCardMini },
+const pageLoading = ref(true)
+const user = useUserStore(),
+  router = useRouter()
 
-  props: {
-    parentLoading: {
-      type: Boolean,
-      default: true
-    }
-  },
-
-  setup(props) {
-    const pageLoading = ref(true)
-    const user = useUserStore(),
-      router = useRouter()
-
-    const gotoGuild = async (gid, joined) => {
-      if (joined) {
-        await router.push(`/guilds/${gid}/settings`)
-      } else {
-        const route = router.resolve({
-          path: '/authorize/add',
-          query: {
-            scope: 'bot applications.commands',
-            redirect_uri: window.location.origin,
-            response_type: 'code',
-            guild_id: gid,
-            disable_guild_select: true
-          }
-        })
-        const popup = window.open(route.href, `Add to ${gid}`, 'width=400,height=620,top=5')
-        const popupOpenTimestamp = Date.now()
-
-        const listener = async event => {
-          if (event.data.guild_id) {
-            await router.push(`/guilds/${gid}/settings`)
-          }
-
-          window.onmessage = null
-          popup.close()
-        }
-
-        window.onmessage = listener
-
-        const interval = setInterval(() => {
-          if (Date.now() - popupOpenTimestamp > 300000 || popup.closed) {
-            window.onmessage = null
-            clearInterval(interval)
-          }
-        }, 1000)
-      }
-    }
-
-    onMounted(async () => {
-      const hook = async () => {
-        return (pageLoading.value = false)
-      }
-
-      if (props.parentLoading) {
-        watch(() => props.parentLoading, hook)
-      } else {
-        await hook()
+const gotoGuild = async (gid, joined) => {
+  if (joined) {
+    await router.push(`/guilds/${gid}/settings`)
+  } else {
+    const route = router.resolve({
+      path: '/authorize/add',
+      query: {
+        scope: 'bot applications.commands',
+        redirect_uri: window.location.origin,
+        response_type: 'code',
+        guild_id: gid,
+        disable_guild_select: true
       }
     })
+    const popup = window.open(route.href, `Add to ${gid}`, 'width=400,height=620,top=5')
+    const popupOpenTimestamp = Date.now()
 
-    return { pageLoading, user, gotoGuild }
+    const listener = async event => {
+      if (event.data.guild_id) {
+        await router.push(`/guilds/${gid}/settings`)
+      }
+
+      window.onmessage = null
+      popup.close()
+    }
+
+    window.onmessage = listener
+
+    const interval = setInterval(() => {
+      if (Date.now() - popupOpenTimestamp > 300000 || popup.closed) {
+        window.onmessage = null
+        clearInterval(interval)
+      }
+    }, 1000)
+  }
+}
+
+onMounted(async () => {
+  const hook = async () => {
+    return (pageLoading.value = false)
+  }
+
+  if (props.parentLoading) {
+    watch(() => props.parentLoading, hook)
+  } else {
+    await hook()
   }
 })
 </script>

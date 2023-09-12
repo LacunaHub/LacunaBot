@@ -97,70 +97,62 @@
   </q-card>
 </template>
 
-<script>
+<script setup>
 import { interfaces } from 'src/boot/axios'
 import { useUserStore } from 'src/stores/user'
-import { computed, defineComponent, onActivated, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
-export default defineComponent({
-  name: 'DashboardPageProfile',
+const props = defineProps({
+  parentLoading: {
+    type: Boolean,
+    default: true
+  }
+})
 
-  props: {
-    parentLoading: {
-      type: Boolean,
-      default: true
-    }
-  },
+const pageLoading = ref(true)
+const user = useUserStore()
 
-  setup(props) {
-    const pageLoading = ref(true)
-    const user = useUserStore()
+const activities = ref({}),
+  levels = computed(() => {
+    return (
+      activities.value.levels
+        ?.filter(i => user.guilds.some(ii => i.guild_id === ii.id))
+        ?.map(i => {
+          const guild = user.guilds.find(ii => i.guild_id === ii.id)
+          const formula = 150 + i.experience.level * i.experience.level * 8
 
-    const activities = ref({}),
-      levels = computed(() => {
-        return (
-          activities.value.levels
-            ?.filter(i => user.guilds.some(ii => i.guild_id === ii.id))
-            ?.map(i => {
-              const guild = user.guilds.find(ii => i.guild_id === ii.id)
-              const formula = 150 + i.experience.level * i.experience.level * 8
+          return {
+            ...i,
+            guild,
+            progress: {
+              next: formula,
+              value: Math.floor((i.experience.current * 100) / formula)
+            }
+          }
+        }) ?? []
+    )
+  })
 
-              return {
-                ...i,
-                guild,
-                progress: {
-                  next: formula,
-                  value: Math.floor((i.experience.current * 100) / formula)
-                }
-              }
-            }) ?? []
-        )
-      })
+const getActivities = async () => {
+  try {
+    const response = await interfaces.users.getActivities(),
+      { data } = response
 
-    const getActivities = async () => {
-      try {
-        const response = await interfaces.users.getActivities(),
-          { data } = response
+    return (activities.value = data)
+  } catch (err) {}
+}
 
-        return (activities.value = data)
-      } catch (err) {}
-    }
+onMounted(async () => {
+  const hook = async () => {
+    await getActivities()
 
-    onMounted(async () => {
-      const hook = async () => {
-        await getActivities()
+    return (pageLoading.value = false)
+  }
 
-        return (pageLoading.value = false)
-      }
-
-      if (props.parentLoading) {
-        watch(() => props.parentLoading, hook)
-      } else {
-        await hook()
-      }
-    })
-
-    return { pageLoading, user, activities, levels }
+  if (props.parentLoading) {
+    watch(() => props.parentLoading, hook)
+  } else {
+    await hook()
   }
 })
 </script>
