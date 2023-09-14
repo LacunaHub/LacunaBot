@@ -56,7 +56,7 @@
                       :label="opt"
                       size="sm"
                       removable
-                      @remove="config.blocked_registry.splice(config.blocked_registry.indexOf(opt), 1)"
+                      @remove="config.registry.splice(config.registry.indexOf(opt), 1)"
                       :ripple="false"
                     ></q-chip>
                   </template>
