@@ -518,7 +518,7 @@ import { useMeta, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { DateTime } from 'src/boot/luxon'
 import LineChart from 'src/components/LineChart.vue'
-import { hashCode, hexToRGB } from 'src/utils/Utils'
+import { handleAxiosError, hashCode, hexToRGB } from 'src/utils/Utils'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const $q = useQuasar()
@@ -630,14 +630,15 @@ const getState = async () => {
 
     state.value = data
   } catch (err) {
-    console.error(err)
+    const error = handleAxiosError(err)
+
     $q.notify({
-      message: err.response?.data || err.toString(),
+      message: error.message,
       classes: 'rounded-lg q-notification-custom',
       color: 'black',
       icon: 'close',
       iconColor: 'negative',
-      timeout: 10000
+      timeout: 5000
     })
   }
 

@@ -303,24 +303,24 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { useI18n } from 'vue-i18n'
+import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
-import { suid } from 'src/utils/Utils'
+import { customCommandComponentLimits } from 'src/utils/Constants'
+import { handleAxiosError, suid } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
+import { event } from 'vue-gtag'
+import { useI18n } from 'vue-i18n'
+import AutomationTaskImport from './AutomationTaskImport.vue'
 import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
-import ComponentActionReply from './ComponentActionReply.vue'
-import ComponentActionSendMessage from './ComponentActionSendMessage.vue'
-import ComponentActionModifyRoles from './ComponentActionModifyRoles.vue'
 import ComponentActionForwardToCommand from './ComponentActionForwardToCommand.vue'
-import ComponentConditionCompareValues from './ComponentConditionCompareValues.vue'
+import ComponentActionModifyRoles from './ComponentActionModifyRoles.vue'
 import ComponentActionModifyWallet from './ComponentActionModifyWallet.vue'
 import ComponentActionOverwriteChannelPermissions from './ComponentActionOverwriteChannelPermissions.vue'
-import { customCommandComponentLimits } from 'src/utils/Constants'
+import ComponentActionReply from './ComponentActionReply.vue'
+import ComponentActionSendMessage from './ComponentActionSendMessage.vue'
 import ComponentActionShowModal from './ComponentActionShowModal.vue'
-import AutomationTaskImport from './AutomationTaskImport.vue'
-import { event } from 'vue-gtag'
-import { interfaces } from 'src/boot/axios'
+import ComponentConditionCompareValues from './ComponentConditionCompareValues.vue'
 
 export default defineComponent({
   name: 'AutomationTask',
@@ -649,10 +649,10 @@ export default defineComponent({
           })
         })
         .catch(err => {
-          console.error(err)
+          const error = handleAxiosError(err)
 
           this.$q.notify({
-            message: err.response.data,
+            message: error.message,
             classes: 'rounded-lg q-notification-custom',
             color: 'black',
             icon: 'error',

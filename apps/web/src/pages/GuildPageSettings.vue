@@ -252,7 +252,7 @@ import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import UserSurvey from 'src/components/dialogs/UserSurvey.vue'
 import { useChangeLogStore } from 'src/stores/change-log'
 import { useGuildStore } from 'src/stores/guild'
-import { decimalToHex, objectDifferences } from 'src/utils/Utils'
+import { decimalToHex, handleAxiosError, objectDifferences } from 'src/utils/Utils'
 import { computed, onMounted, ref, watch } from 'vue'
 import { event } from 'vue-gtag'
 import { useI18n } from 'vue-i18n'
@@ -346,23 +346,24 @@ const getSettings = async () => {
     for (const role of guild.guild.roles) {
       role.color = `#${decimalToHex(role.color || 10593445)}`
     }
+
+    return true
   } catch (err) {
-    if (typeof err.response?.status === 'number') {
+    if (err.response?.status >= 400 || err.response?.status <= 499) {
       const { status } = err.response
 
       if (status === 401) {
         router.push('/authorize')
-      }
-      if (status === 403) {
+      } else if (status === 403) {
         router.push('/forbidden')
-      }
-      if (status === 400 || status === 404 || status === 406) {
+      } else {
         router.push('/not-found')
       }
     } else {
-      console.error(err)
+      const error = handleAxiosError(err)
+
       $q.notify({
-        message: err.response?.data || err.toString(),
+        message: error.message,
         classes: 'rounded-lg q-notification-custom',
         color: 'black',
         icon: 'error',
@@ -372,7 +373,7 @@ const getSettings = async () => {
     }
   }
 
-  return guild
+  return false
 }
 
 const updateSettings = async () => {
@@ -389,9 +390,10 @@ const updateSettings = async () => {
       freezedGuild.value = {}
     })
   } catch (err) {
-    console.error(err)
+    const error = handleAxiosError(err)
+
     $q.notify({
-      message: t('pages.guild.save_error'),
+      message: error.message,
       classes: 'rounded-lg q-notification-custom',
       color: 'black',
       icon: 'error',
@@ -401,8 +403,6 @@ const updateSettings = async () => {
   } finally {
     updateSettingsLoading.value = false
   }
-
-  return guild
 }
 
 const openLacunaDiamondDialog = () => {
@@ -425,8 +425,10 @@ const downloadLogs = async () => {
     URL.revokeObjectURL(href)
     event('guild_download_logs', { event_category: 'utility' })
   } catch (err) {
+    const error = handleAxiosError(err)
+
     $q.notify({
-      message: err.response?.data || err.toString(),
+      message: error.message,
       classes: 'rounded-lg q-notification-custom',
       color: 'black',
       icon: 'error',
@@ -437,7 +439,7 @@ const downloadLogs = async () => {
 }
 
 onMounted(async () => {
-  await getSettings()
+  const getSettingsSuccess = await getSettings()
 
   documentTitle.value = guild.guild.name
 
@@ -472,7 +474,7 @@ onMounted(async () => {
     { deep: true }
   )
 
-  pageLoading.value = false
+  pageLoading.value = !getSettingsSuccess
 
   const changeLogViewedVersion = $q.localStorage.getItem('change-log-viewed-version')
 

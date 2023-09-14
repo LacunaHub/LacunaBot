@@ -97,12 +97,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
+import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
 import { useUserStore } from 'src/stores/user'
-import { interfaces } from 'src/boot/axios'
-import { getGuildIconURL } from '../../utils/Utils'
+import { defineComponent, onMounted, ref } from 'vue'
+import { getGuildIconURL, handleAxiosError } from '../../utils/Utils'
 
 export default defineComponent({
   name: 'LacunaDiamondTransfer',
@@ -126,16 +126,30 @@ export default defineComponent({
         const response = await interfaces.users.getDiamondGuilds(),
           { data } = response
 
-        return (diamondGuilds.value = data)
-      } catch (err) {}
+        diamondGuilds.value = data
+
+        return true
+      } catch (err) {
+        const error = handleAxiosError(err)
+
+        $q.notify({
+          message: error.message,
+          classes: 'rounded-lg q-notification-custom',
+          color: 'black',
+          icon: 'error',
+          iconColor: 'negative',
+          timeout: 5000
+        })
+      }
+
+      return false
     }
 
     onMounted(async () => {
-      await getDiamondGuilds()
-
+      const getDiamondGuildsSuccess = await getDiamondGuilds()
       fromGuild.value = diamondGuilds.value?.[0]?.id ?? null
 
-      return (pageLoading.value = false)
+      return (pageLoading.value = !getDiamondGuildsSuccess)
     })
 
     return {
@@ -157,9 +171,10 @@ export default defineComponent({
             await interfaces.guilds.transferDiamond(fromGuild.value, guild._id)
             onDialogOK()
           } catch (err) {
-            console.error(err)
+            const error = handleAxiosError(err)
+
             $q.notify({
-              message: err.response.data,
+              message: error.message,
               classes: 'rounded-lg q-notification-custom',
               color: 'black',
               icon: 'error',
