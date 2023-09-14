@@ -775,7 +775,7 @@ export default class Automation {
                         await this.self.logger.handleError({
                             module: 'Automation',
                             action: 'ExecuteCodeAction',
-                            error: err,
+                            error: error,
                             guild_id: this.signal.guild.id
                         })
                     }

@@ -785,7 +785,7 @@ export default class CustomCommand {
                         await this.self.logger.handleError({
                             module: 'CustomCommands',
                             action: 'ExecuteCodeAction',
-                            error: err,
+                            error: error,
                             guild_id: this.interaction.guildId
                         })
                     }
