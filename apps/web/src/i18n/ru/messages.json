@@ -593,9 +593,6 @@
       "gs_farewell_title": "Прощание",
       "cm_custom_commands_title": "Пользовательские команды",
       "cm_system_commands_title": "Системные команды",
-      "cm_enable_prefix_commands_title": "Включить префиксные команды",
-      "cm_no_registered_app_commands": "На сервере нет ни одной зарегистрированной команды. Пожалуйста, убедитесь, что бот имеет возможность на их создание.",
-      "cm_app_commands_refresh": "Вы можете обновить команды. Это полезно, если на сервере отсутствуют некоторые из них или они устарели.",
       "cm_command_categories": {
         "GENERAL": "Общие",
         "MODERATION": "Модерация",
@@ -692,17 +689,14 @@
       "avg_latency": "Средняя латентность",
       "current_version": "Текущая версия",
       "clusters_title": "Кластеры",
-      "clusters_description": "Независимые системы, включающие в себя наборы фрагментов",
       "cluster_cpu_usage": "Загрузка ЦП",
       "cluster_memory_usage": "Использование ОЗУ",
       "shards_title": "Фрагменты",
-      "shards_description": "Подпроцессы, обрабатывающие наборы сообществ Discord",
       "shards_latency": "Латентность фрагментов",
       "shard_guilds": "Сообществ",
       "shard_users": "Пользователей",
       "shard_channels": "Каналов",
       "players_title": "Музыкальные плееры",
-      "players_description": "Ответственны за воспроизведение музыки в голосовых каналах",
       "player_cpu_load": "Нагрузка плеера",
       "command_uses": "Количество использований команд"
     }
@@ -724,51 +718,6 @@
       "symbols": "Символы",
       "flags": "Флаги",
       "custom": "Пользовательские"
-    }
-  },
-
-  "errors": {
-    "activate_lacuna_diamond": "Активируйте Lacuna Diamond, чтобы увеличить максимальное количество.",
-    "custom_commands": {
-      "LIMIT_REACHED": "Достигнуто ограничение на количество пользовательских команд.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.custom_commands.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "NO_COMPONENTS": "В команде отсутствуют какие-либо компоненты. Пожалуйста, добавьте их и попробуйте снова.",
-      "NAME_CONFLICT": "Название команды конфликтует с уже существующей. Выберите другое название.",
-      "NOT_FOUND": "Пользовательская команда не найдена.",
-      "CANNOT_CREATE_COMMAND": "Ошибка при создании команды.",
-      "CANNOT_UPDATE_COMMAND": "Ошибка при обновлении команды.",
-      "CANNOT_DELETE_COMMAND": "Ошибка при удалении команды."
-    },
-    "subscriptions": {
-      "LIMIT_REACHED": "Достигнуто ограничение на количество подписок.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.subscriptions.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "ALREADY_SUBSCRIBED": "Подписка уже существует.",
-      "CANNOT_SUBSCRIBE": "Произошла ошибка при создании подписки.",
-      "NOT_FOUND": "Подписка не найдена."
-    },
-    "auto_voices": {
-      "LIMIT_REACHED": "Достигнуто ограничение на количество голосовых триггеров.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.auto_voices.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "ALREADY_EXISTS": "Голосовой триггер уже существует.",
-      "NOT_FOUND": "Голосовой триггер не найден."
-    },
-    "ims": {
-      "LIMIT_REACHED": "Достигнуто ограничение на количество интерактивных сообщений.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.ims.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "CANNOT_CREATE_EMPTY_MESSAGE": "Невозможно создать пустое сообщение.",
-      "NON_INTERACTIVE": "Сообщение не интерактивно. Добавьте компоненты.",
-      "NOT_FOUND": "Интерактивное сообщение не найдено.",
-      "CANNOT_CREATE_MESSAGE": "Ошибка при создании сообщения.",
-      "CANNOT_UPDATE_MESSAGE": "Ошибка при обновлении сообщения."
-    },
-    "irs": {
-      "LIMIT_REACHED": "Достигнуто ограничение на количество интерактивных реакций.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.irs.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "EMOJI_ALREADY_USED": "Выбранный эмодзи уже используется на этом сообщении.",
-      "REFERENCE_IS_SINGLE": "Одно или несколько направлений являются одиночными.",
-      "UNKNOWN_MESSAGE": "Сообщения с таким идентификатором не найдено в выбранном канале.",
-      "NOT_FOUND": "Интерактивная реакция не найдена.",
-      "CANNOT_CREATE_REACTION": "Ошибка при добавлении реакции на сообщение."
     }
   }
 }
