@@ -43,6 +43,17 @@ app.use(koaCors({ credentials: true, exposeHeaders: ['Content-Disposition'] }))
 app.proxy = process.env.WEBSITE_DOMAIN !== 'localhost'
 app.keys = ['discord_oauth_state']
 
+app.use(async (ctx, next) => {
+    try {
+        await next()
+    } catch (err) {
+        ctx.status = err.status || 500
+        ctx.body = { code: err.code || 1, message: err.message || 'Unknown error' }
+
+        ctx.app.emit('error', err, ctx)
+    }
+})
+
 app.use(passKnownReferrers)
 
 app.use(authorize.routes()).use(authorize.allowedMethods())

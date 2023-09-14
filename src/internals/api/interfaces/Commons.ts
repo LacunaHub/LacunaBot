@@ -1074,7 +1074,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 Array.isArray(data.modules.levels.awards) &&
                 JSON.stringify(data.modules.levels.awards) !== JSON.stringify(guild.modules.levels.awards)
             ) {
-                updateData['modules.levels.awards'] = data.modules.levels.awards.slice(0, guild.server.premium.available ? 200 : 50)
+                updateData['modules.levels.awards'] = data.modules.levels.awards
             }
         }
 
@@ -1241,7 +1241,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                 Array.isArray(data.modules.activities.multipliers) &&
                 JSON.stringify(data.modules.activities.multipliers) !== JSON.stringify(guild.modules.activities.multipliers)
             ) {
-                updateData['modules.activities.multipliers'] = data.modules.activities.multipliers.slice(0, guild.server.premium.available ? 10 : 1)
+                updateData['modules.activities.multipliers'] = data.modules.activities.multipliers
             }
         }
 

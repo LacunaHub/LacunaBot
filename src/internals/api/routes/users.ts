@@ -1,10 +1,11 @@
 import Router from '@koa/router'
-import { PermissionsBitField, RESTAPIPartialCurrentUserGuild } from 'discord.js'
+import { APIUser, PermissionsBitField, RESTAPIPartialCurrentUserGuild } from 'discord.js'
 import { Context } from 'koa'
 import db from '../../../database'
 import { UserDocument } from '../../../database/schemas/Users'
 import DiscordUtils from '../../utility/DiscordUtils'
 import DiscordOAuth2 from '../discord/OAuth2'
+import APIError from '../utility/APIError'
 import { authorize } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
@@ -18,11 +19,12 @@ router.get('/@me/diamond-guilds', createRateLimitMiddleware(5), authorize, getDi
 router.get('/patrons', createRateLimitMiddleware(5), getPatrons)
 
 async function getMe(ctx: Context) {
-    const user_id = ctx.request.headers['user-id'] as string
-    if (!user_id) ctx.throw(400)
+    const currentUser: Partial<APIUser> = ctx.state.user,
+        user: UserDocument = await db.users.findOne({ _id: currentUser.id })
 
-    const user: UserDocument = await db.users.findOne({ _id: user_id })
-    if (!user) ctx.throw(404)
+    if (!user) {
+        ctx.throw(404, new APIError(1001))
+    }
 
     let guilds: RESTAPIPartialCurrentUserGuild[]
 
@@ -30,11 +32,13 @@ async function getMe(ctx: Context) {
         guilds = await OAuth2.getUserGuilds(ctx.request.headers.authorization)
     } catch (err) {}
 
-    if (!guilds) ctx.throw(400)
+    if (!guilds) {
+        ctx.throw(400, new APIError(5001))
+    }
 
     for (const guild of guilds) {
-        const permissions = new PermissionsBitField(BigInt(guild.permissions))
-        const permitted = guild.owner || permissions.has(PermissionsBitField.Flags.Administrator)
+        const permissions = new PermissionsBitField(BigInt(guild.permissions)),
+            permitted = guild.owner || permissions.has(PermissionsBitField.Flags.Administrator)
 
         if (permitted) {
             let me: any
@@ -60,21 +64,20 @@ async function getMe(ctx: Context) {
 }
 
 async function getBills(ctx: Context) {
-    const user_id = ctx.request.headers['user-id'] as string
-    if (!user_id) ctx.throw(400)
-
-    const bills = await db.bills.find({ 'custom_fields.user_id': user_id, type: { $ne: 'DISCORD_NITRO_BOOST' } })
+    const currentUser: Partial<APIUser> = ctx.state.user
+    const bills = await db.bills.find({ 'custom_fields.user_id': currentUser.id, type: { $ne: 'DISCORD_NITRO_BOOST' } })
 
     ctx.status = 200
     ctx.body = bills.reverse()
 }
 
 async function getActivities(ctx: Context) {
-    const user_id = ctx.request.headers['user-id'] as string
-    if (!user_id) ctx.throw(400)
+    const currentUser: Partial<APIUser> = ctx.state.user,
+        user = await db.users.findOne({ _id: currentUser.id })
 
-    const user = await db.users.findOne({ _id: user_id })
-    if (!user) ctx.throw(404)
+    if (!user) {
+        ctx.throw(404, new APIError(1001))
+    }
 
     ctx.status = 200
     ctx.body = {
@@ -83,11 +86,12 @@ async function getActivities(ctx: Context) {
 }
 
 async function getDiamondGuilds(ctx: Context) {
-    const userId = ctx.request.headers['user-id'] as string
-    if (!userId) ctx.throw(400)
+    const currentUser: Partial<APIUser> = ctx.state.user,
+        user = await db.users.findOne({ _id: currentUser.id })
 
-    const user = await db.users.findOne({ _id: userId })
-    if (!user) ctx.throw(404)
+    if (!user) {
+        ctx.throw(404, new APIError(1001))
+    }
 
     let guilds: RESTAPIPartialCurrentUserGuild[] = []
 

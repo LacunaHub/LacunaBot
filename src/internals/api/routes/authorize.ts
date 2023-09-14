@@ -62,8 +62,8 @@ async function callback(ctx: Context) {
 
     ctx.cookies
         .set('user_id', currentUser.id, cookieOptions)
-        .set('user_username', encodeURIComponent(currentUser.username), cookieOptions)
-        .set('user_discriminator', currentUser.discriminator, cookieOptions)
+        .set('user_username', currentUser.username, cookieOptions)
+        .set('user_global_name', encodeURIComponent(currentUser.global_name), cookieOptions)
 
     if (currentUser.avatar) ctx.cookies.set('user_avatar', currentUser.avatar, cookieOptions)
 
@@ -84,6 +84,10 @@ async function callback(ctx: Context) {
 
         if (userEntry.user.flags !== currentUser.public_flags) {
             updateData['user.flags'] = currentUser.public_flags
+        }
+
+        if (userEntry.user.global_name !== currentUser.global_name) {
+            updateData['user.global_name'] = currentUser.global_name
         }
 
         if (Object.keys(updateData).length) {
@@ -108,7 +112,8 @@ async function callback(ctx: Context) {
                 username: currentUser.username,
                 discriminator: currentUser.discriminator,
                 avatar: currentUser.avatar,
-                flags: currentUser.public_flags
+                flags: currentUser.public_flags,
+                global_name: currentUser.global_name
             }
         })
     }

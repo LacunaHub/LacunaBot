@@ -14,15 +14,17 @@ import {
     InteractiveMessageSelectMenuComponent,
     ServerDocument
 } from '../../../database/schemas/Servers'
+import Logger from '../../Logger'
 import { apiRoutes, restApi } from '../../utility/DiscordUtils'
 import { snakeToPascalCase } from '../../utility/Utils'
+import APIError from '../utility/APIError'
 
 export async function createInteractiveMessage(server: ServerDocument, data: InteractiveMessage) {
     const interactiveMessages = server.modules.interactive_messages
 
-    if (interactiveMessages.length >= 5 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
-    if (interactiveMessages.length >= 50) throw new Error('LIMIT_REACHED')
-    if (!data.message?.content && !data.message?.embed?.active) throw new Error('CANNOT_CREATE_EMPTY_MESSAGE')
+    if (interactiveMessages.length >= 5 && !server.server.premium.available) throw new APIError(3003)
+    if (interactiveMessages.length >= 50) throw new APIError(3004)
+    if (!data.message?.content && !data.message?.embed?.active) throw new APIError(4005)
 
     // prettier-ignore
     const reactions = data.reactions
@@ -36,7 +38,7 @@ export async function createInteractiveMessage(server: ServerDocument, data: Int
         })
         ?.slice(0, 10) ?? []
 
-    if (!data.components?.length && !reactions.length) throw new Error('NON_INTERACTIVE')
+    if (!data.components?.length && !reactions.length) throw new APIError(4006)
 
     const message = {
         content: data.message?.content ?? null,
@@ -66,7 +68,14 @@ export async function createInteractiveMessage(server: ServerDocument, data: Int
     try {
         apiMessage = await restApi.post(apiRoutes.channelMessages(data.channel_id), { body: message })
     } catch (err) {
-        throw new Error('CANNOT_CREATE_MESSAGE')
+        await Logger.handleError({
+            module: 'InteractiveMessages',
+            action: 'SendMessage',
+            error: err,
+            guild_id: server._id
+        })
+
+        throw new APIError(5005)
     }
 
     if (reactions.length) {
@@ -106,10 +115,9 @@ export async function createInteractiveMessage(server: ServerDocument, data: Int
 }
 
 export async function updateInteractiveMessage(server: ServerDocument, data: InteractiveMessage) {
-    const interactiveMessages = server.modules.interactive_messages
-    const im = interactiveMessages.find(i => i.id === data.id)
+    const im = server.modules.interactive_messages.find(i => i.id === data.id)
 
-    if (!im) throw new Error('NOT_FOUND')
+    if (!im) throw new APIError(1012)
 
     let hasChanges = false
     const message = {
@@ -190,7 +198,14 @@ export async function updateInteractiveMessage(server: ServerDocument, data: Int
                 }
             )
         } catch (err) {
-            throw new Error('CANNOT_UPDATE_MESSAGE')
+            await Logger.handleError({
+                module: 'InteractiveMessages',
+                action: 'UpdateMessage',
+                error: err,
+                guild_id: server._id
+            })
+
+            throw new APIError(5006)
         }
     }
 
@@ -240,10 +255,9 @@ export async function updateInteractiveMessage(server: ServerDocument, data: Int
 }
 
 export async function deleteInteractiveMessage(server: ServerDocument, data: { id: string }) {
-    const interactiveMessages = server.modules.interactive_messages
-    const im = interactiveMessages.find(i => i.id === data.id)
+    const im = server.modules.interactive_messages.find(i => i.id === data.id)
 
-    if (!im) throw new Error('NOT_FOUND')
+    if (!im) throw new APIError(1012)
 
     try {
         await restApi.delete(apiRoutes.channelMessage(im.channel_id, im.id))

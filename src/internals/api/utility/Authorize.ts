@@ -2,6 +2,7 @@ import { APIUser, PermissionsBitField, RESTAPIPartialCurrentUserGuild } from 'di
 import { Context, Next } from 'koa'
 import db from '../../../database'
 import DiscordOAuth2 from '../discord/OAuth2'
+import APIError from './APIError'
 import { isBotExpert } from './Utils'
 
 const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
@@ -9,7 +10,9 @@ const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISC
 export async function authorize(ctx: Context, next: Next) {
     const accessToken = ctx.request.headers.authorization
 
-    if (!accessToken || accessToken === 'null') ctx.throw(401)
+    if (!accessToken) {
+        ctx.throw(401, new APIError(4001))
+    }
 
     let currentUser: APIUser
 
@@ -17,53 +20,67 @@ export async function authorize(ctx: Context, next: Next) {
         currentUser = await OAuth2.getUser(accessToken)
     } catch (err) {}
 
-    if (!currentUser) ctx.throw(403)
+    if (!currentUser) {
+        ctx.throw(403, new APIError(1001))
+    }
 
-    ctx.request.headers['user-id'] = currentUser.id
+    ctx.state.user = {
+        id: currentUser.id,
+        username: currentUser.username,
+        global_name: currentUser.global_name,
+        avatar: currentUser.avatar,
+        flags: currentUser.flags
+    }
 
     await next()
 }
 
 export async function checkPermissions(ctx: Context, next: Next) {
-    const guild_id = ctx.params.guild_id
-    const user_id = ctx.request.headers['user-id'] as string
-
-    if (!guild_id) ctx.throw(400)
+    const accessToken = ctx.request.headers.authorization
+    const guildId: string = ctx.params.guild_id
+    const currentUser: Partial<APIUser> = ctx.state.user
 
     let currentUserGuilds: RESTAPIPartialCurrentUserGuild[]
 
     try {
-        currentUserGuilds = await OAuth2.getUserGuilds(ctx.request.headers.authorization)
+        currentUserGuilds = await OAuth2.getUserGuilds(accessToken)
     } catch (err) {}
 
-    if (!currentUserGuilds) ctx.throw(403)
+    if (!currentUserGuilds) {
+        ctx.throw(400, new APIError(5001))
+    }
 
-    const guild = currentUserGuilds.find(g => g.id === guild_id)
-    const isRootUser = (await db.json.get()).rootUsers.includes(user_id)
+    const guild = currentUserGuilds.find(g => g.id === guildId)
+    const isRootUser = (await db.json.get()).rootUsers.includes(currentUser.id)
 
     if (isRootUser) {
-        ctx.request.headers['partial-guild'] = JSON.stringify(guild ?? {})
+        ctx.state.guild = guild ?? {}
 
         await next()
 
         return
     }
 
-    if (!guild) ctx.throw(404)
+    if (!guild) {
+        ctx.throw(404, new APIError(1002))
+    }
 
-    const permissions = new PermissionsBitField(BigInt(guild.permissions))
-    const isExpert = await isBotExpert(guild_id, user_id)
+    const permissions = new PermissionsBitField(BigInt(guild.permissions)),
+        isAdministrator = permissions.has(PermissionsBitField.Flags.Administrator)
+    const isExpert = await isBotExpert(guildId, currentUser.id)
 
-    if (!guild.owner && !permissions.has(PermissionsBitField.Flags.Administrator) && !isExpert) ctx.throw(403)
+    if (!guild.owner && !isAdministrator && !isExpert) {
+        ctx.throw(403, new APIError(4002))
+    }
 
-    ctx.request.headers['partial-guild'] = JSON.stringify(guild)
+    ctx.state.guild = guild
 
     await next()
 }
 
 export async function passKnownReferrers(ctx: Context, next: Next) {
     const referer = ctx.request.headers.referer
-    const { allowedApiHosts: hosts, allowedApiUrls: urls } = await db.json.get()
+    const { allowedApiHosts, allowedApiUrls } = await db.json.get()
 
     if (process.env.NODE_ENV === 'development') {
         await next()
@@ -71,10 +88,12 @@ export async function passKnownReferrers(ctx: Context, next: Next) {
         return
     }
 
-    const passReferrers = referer && hosts.some(host => referer.includes(host))
-    const passUrls = urls.some(url => ctx.url.startsWith(url))
+    const isAllowedHost = referer && allowedApiHosts.some(host => referer.includes(host)),
+        isAllowedURL = allowedApiUrls.some(url => ctx.url.startsWith(url))
 
-    if (!passReferrers && !passUrls) ctx.throw(503)
+    if (!isAllowedHost && !isAllowedURL) {
+        ctx.throw(503, new APIError())
+    }
 
     await next()
 }
