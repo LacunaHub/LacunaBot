@@ -236,7 +236,7 @@ export default class Automation {
     }
 
     getPatterns(string: string) {
-        return string.match(/{{\s*((.|\n)+?)\s*}}/g)?.map(i => i.slice(2, i.length - 2).trim()) ?? []
+        return string?.match?.(/{{\s*((.|\n)+?)\s*}}/g)?.map?.(i => i.slice(2, i.length - 2).trim()) ?? []
     }
 
     async replacePatterns(string: string, ctx: Context) {
