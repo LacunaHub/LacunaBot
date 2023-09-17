@@ -26,13 +26,18 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         { name: '\u200B', value: t('commands.server.text_guild_created_at', { date: `<t:${serverCreatedAt}:R>` }) }
     ])
 
-    if (server.server.premium.available) embed.setDescription(`${self._emojis.DIAMOND} Diamond Subscription`)
-    if (interaction.guild.description)
+    if (interaction.guild.description) {
         embed.setDescription(embed.data.description ? `${embed.data.description}\n${interaction.guild.description}` : interaction.guild.description)
+    }
 
-    const imageURL = interaction.guild.bannerURL() ?? interaction.guild.discoverySplashURL() ?? interaction.guild.splashURL()
+    const imageURL =
+        interaction.guild.bannerURL({ size: 512 }) ??
+        interaction.guild.discoverySplashURL({ size: 512 }) ??
+        interaction.guild.splashURL({ size: 512 })
 
-    if (imageURL) embed.setImage(imageURL)
+    if (imageURL) {
+        embed.setImage(imageURL)
+    }
 
     await interaction.reply({ embeds: [embed] })
 

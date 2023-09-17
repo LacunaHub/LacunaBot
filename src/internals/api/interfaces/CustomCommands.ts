@@ -1,18 +1,20 @@
 import database from '../../../database'
 import { ICustomCommand, ServerDocument } from '../../../database/schemas/Servers'
+import Logger from '../../Logger'
 import DiscordUtils from '../../utility/DiscordUtils'
+import APIError from '../utility/APIError'
 
 export async function createCustomCommand(server: ServerDocument, data: ICustomCommand) {
     const customCommands = server.modules.custom_commands
 
     // if (customCommands.length >= 5 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
-    if (customCommands.length >= 25) throw new Error('LIMIT_REACHED')
-    if (!data.components.length) throw new Error('NO_COMPONENTS')
+    if (customCommands.length >= 25) throw new APIError(3001)
+    if (!data.components.length) throw new APIError(4003)
 
     const commandsCache = (await database.qdb.get('commands')) as any
     const commandNames = [...commandsCache.map(i => i.name), ...customCommands.map(i => i.command.name)]
 
-    if (commandNames.some(i => data.command.name === i)) throw new Error('NAME_CONFLICT')
+    if (commandNames.some(i => data.command.name === i)) throw new APIError(4004)
 
     let apiCommand: any
 
@@ -21,7 +23,14 @@ export async function createCustomCommand(server: ServerDocument, data: ICustomC
             body: data.command
         })
     } catch (err) {
-        throw new Error('CANNOT_CREATE_COMMAND')
+        await Logger.handleError({
+            module: 'CustomCommands',
+            action: 'Create',
+            error: err,
+            guild_id: server._id
+        })
+
+        throw new APIError(5002)
     }
 
     await database.servers.updateOne(
@@ -43,23 +52,32 @@ export async function createCustomCommand(server: ServerDocument, data: ICustomC
 }
 
 export async function updateCustomCommand(server: ServerDocument, data: ICustomCommand) {
-    const customCommands = server.modules.custom_commands
-    const cc = customCommands.find(i => i.id === data.id)
+    const customCommand = server.modules.custom_commands.find(i => i.id === data.id)
 
-    if (!cc) throw new Error('NOT_FOUND')
+    if (!customCommand) throw new APIError(1011)
 
-    if (JSON.stringify(data.command) !== JSON.stringify(cc.command)) {
+    if (JSON.stringify(data.command) !== JSON.stringify(customCommand.command)) {
         try {
-            await DiscordUtils.restApi.patch(DiscordUtils.apiRoutes.applicationGuildCommand(process.env.DISCORD_CLIENT_ID, server._id, cc.id), {
-                body: data.command
-            })
+            await DiscordUtils.restApi.patch(
+                DiscordUtils.apiRoutes.applicationGuildCommand(process.env.DISCORD_CLIENT_ID, server._id, customCommand.id),
+                {
+                    body: data.command
+                }
+            )
         } catch (err) {
-            throw new Error('CANNOT_UPDATE_COMMAND')
+            await Logger.handleError({
+                module: 'CustomCommands',
+                action: 'Update',
+                error: err,
+                guild_id: server._id
+            })
+
+            throw new APIError(5003)
         }
     }
 
     await database.servers.updateOne(
-        { _id: server._id, 'modules.custom_commands.id': cc.id },
+        { _id: server._id, 'modules.custom_commands.id': customCommand.id },
         {
             $set: {
                 'modules.custom_commands.$.command': data.command,
@@ -74,15 +92,21 @@ export async function updateCustomCommand(server: ServerDocument, data: ICustomC
 }
 
 export async function deleteCustomCommand(server: ServerDocument, data: { id: string }) {
-    const customCommands = server.modules.custom_commands
-    const cc = customCommands.find(i => i.id === data.id)
+    const customCommand = server.modules.custom_commands.find(i => i.id === data.id)
 
-    if (!cc) throw new Error('NOT_FOUND')
+    if (!customCommand) throw new APIError(1011)
 
     try {
-        await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.applicationGuildCommand(process.env.DISCORD_CLIENT_ID, server._id, cc.id))
+        await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.applicationGuildCommand(process.env.DISCORD_CLIENT_ID, server._id, customCommand.id))
     } catch (err) {
-        throw new Error('CANNOT_DELETE_COMMAND')
+        await Logger.handleError({
+            module: 'CustomCommands',
+            action: 'Delete',
+            error: err,
+            guild_id: server._id
+        })
+
+        throw new APIError(5004)
     }
 
     await database.servers.updateOne(
@@ -90,7 +114,7 @@ export async function deleteCustomCommand(server: ServerDocument, data: { id: st
         {
             $pull: {
                 'modules.custom_commands': {
-                    id: cc.id
+                    id: customCommand.id
                 }
             }
         }

@@ -18,12 +18,11 @@ bridgeClient.on('bridgeRequest', async message => {
 
     if ((message as any).type === 'server-performance') {
         await message.reply({
-            data: {
-                hostname: os.hostname(),
-                uptime: os.uptime(),
-                cpuUsage: await cpu.usage(),
-                memoryUsed: await mem.used()
-            }
+            hostname: os.hostname(),
+            uptime: os.uptime(),
+            cpuUsage: await cpu.usage(),
+            memoryUsed: await mem.used(),
+            clusterList: clusterManager.clusterList
         })
     }
 })

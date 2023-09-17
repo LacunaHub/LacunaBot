@@ -1,12 +1,13 @@
 import database from '../../../database'
 import { IAutoVoice, ServerDocument } from '../../../database/schemas/Servers'
+import APIError from '../utility/APIError'
 
 export async function createAutoVoice(server: ServerDocument, data: IAutoVoice) {
-    const autovoices = server.modules.voice_manager.autovoices
+    const autoVoices = server.modules.voice_manager.autovoices
 
-    if (autovoices.length >= 2 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
-    if (autovoices.length >= 20) throw new Error('LIMIT_REACHED')
-    if (autovoices.some(i => i.channel_id == data.channel_id)) throw new Error('ALREADY_EXISTS')
+    if (autoVoices.length >= 2 && !server.server.premium.available) throw new APIError(3013)
+    if (autoVoices.length >= 20) throw new APIError(3014)
+    if (autoVoices.some(i => i.channel_id === data.channel_id)) throw new APIError(2008)
 
     await database.servers.updateOne(
         { _id: server._id },
@@ -21,9 +22,9 @@ export async function createAutoVoice(server: ServerDocument, data: IAutoVoice) 
 }
 
 export async function updateAutoVoice(server: ServerDocument, data: Partial<IAutoVoice>) {
-    const autovoices = server.modules.voice_manager.autovoices
+    const autoVoices = server.modules.voice_manager.autovoices
 
-    if (!autovoices.some(i => i.channel_id == data.channel_id)) throw new Error('NOT_FOUND')
+    if (!autoVoices.some(i => i.channel_id === data.channel_id)) throw new APIError(1017)
 
     await database.servers.updateOne(
         { _id: server._id, 'modules.voice_manager.autovoices.channel_id': data.channel_id },
@@ -41,10 +42,9 @@ export async function updateAutoVoice(server: ServerDocument, data: Partial<IAut
 }
 
 export async function deleteAutoVoice(server: ServerDocument, data: { channel_id: string }) {
-    const autovoices = server.modules.voice_manager.autovoices
-    const autovoice = autovoices.find(i => i.channel_id == data.channel_id)
+    const autoVoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === data.channel_id)
 
-    if (!autovoice) throw new Error('NOT_FOUND')
+    if (!autoVoice) throw new APIError(1017)
 
     await database.servers.updateOne(
         { _id: server._id },

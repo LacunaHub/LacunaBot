@@ -9,7 +9,8 @@ export default model<UserDocument>(
                 username: { type: String, default: null },
                 discriminator: { type: String, default: null },
                 avatar: { type: String, default: null },
-                flags: { type: Number, default: 0 }
+                flags: { type: Number, default: 0 },
+                global_name: { type: String, default: null }
             },
             premium: {
                 available: { type: Boolean, default: false },
@@ -33,9 +34,11 @@ export interface UserDocument extends Document {
     flags: number
     user: {
         username: string
+        /** @deprecated */
         discriminator: string
         avatar: string
         flags: number
+        global_name: string
     }
     premium: {
         available: boolean

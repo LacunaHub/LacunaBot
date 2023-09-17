@@ -2,46 +2,59 @@ import { parseEmoji } from 'discord.js'
 import database from '../../../database'
 import { InteractiveReaction, ServerDocument } from '../../../database/schemas/Servers'
 import { generateId } from '../../../modules/Reactions'
+import Logger from '../../Logger'
 import DiscordUtils from '../../utility/DiscordUtils'
+import APIError from '../utility/APIError'
 
 export async function createInteractiveReaction(server: ServerDocument, data: Partial<InteractiveReaction>) {
     const element_id = data.id ?? generateId(),
         emoji = parseEmoji(data.emoji as any),
         interactiveReactions = server.modules.reactions
 
-    if (interactiveReactions.length >= 50 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
-    if (interactiveReactions.length >= 200) throw new Error('LIMIT_REACHED')
-    if (interactiveReactions.some(r => r.message.id === data.message.id && r.emoji.name === emoji.name)) throw new Error('EMOJI_ALREADY_USED')
+    if (interactiveReactions.length >= 50 && !server.server.premium.available) throw new APIError(3005)
+    if (interactiveReactions.length >= 200) throw new APIError(3006)
+    if (interactiveReactions.some(r => r.message.id === data.message.id && r.emoji.name === emoji.name)) throw new APIError(4007)
     if (
         interactiveReactions.some(
             r =>
-                r.message.id == data.message.id &&
+                r.message.id === data.message.id &&
                 (r.element.single || r.element.global_single) &&
                 r.references.some(ref => data.references.includes(ref))
         )
     )
-        throw new Error('REFERENCE_IS_SINGLE')
-
-    let message: any
-    let puttedReaction: any
+        throw new APIError(4008)
 
     try {
-        message = await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.channelMessage(data.message.channel_id, data.message.id))
-    } catch (err) {}
+        await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.channelMessage(data.message.channel_id, data.message.id))
+    } catch (err) {
+        await Logger.handleError({
+            module: 'InteractiveReactions',
+            action: 'GetMessage',
+            error: err,
+            guild_id: server._id
+        })
 
-    if (!message) throw new Error('UNKNOWN_MESSAGE')
+        throw new APIError(1004)
+    }
 
     try {
-        puttedReaction = await DiscordUtils.restApi.put(
+        await DiscordUtils.restApi.put(
             DiscordUtils.apiRoutes.channelMessageOwnReaction(
                 data.message.channel_id,
                 data.message.id,
                 encodeURIComponent(emoji.id ? `${emoji.name}:${emoji.id}` : emoji.name)
             )
         )
-    } catch (err) {}
+    } catch (err) {
+        await Logger.handleError({
+            module: 'InteractiveReactions',
+            action: 'CreateReaction',
+            error: err,
+            guild_id: server._id
+        })
 
-    if (!puttedReaction) throw new Error('CANNOT_CREATE_REACTION')
+        throw new APIError(5008)
+    }
 
     const reaction = {
         id: element_id,
@@ -72,18 +85,19 @@ export async function createInteractiveReaction(server: ServerDocument, data: Pa
 
 export async function updateInteractiveReaction(server: ServerDocument, data: InteractiveReaction) {
     const interactiveReaction = server.modules.reactions.find(r => r.id === data.id)
-    if (!interactiveReaction) throw new Error('NOT_FOUND')
+
+    if (!interactiveReaction) throw new APIError(1013)
 
     if (
         server.modules.reactions.some(
             r =>
-                r.id != data.id &&
-                r.message.id == data.message.id &&
+                r.id !== data.id &&
+                r.message.id === data.message.id &&
                 (r.element.single || r.element.global_single) &&
                 r.references.some(ref => data.references.includes(ref))
         )
     )
-        return 'reference_is_single'
+        throw new APIError(4008)
 
     await database.servers.updateOne(
         { _id: server._id, 'modules.reactions.id': interactiveReaction.id },
@@ -101,7 +115,8 @@ export async function updateInteractiveReaction(server: ServerDocument, data: In
 
 export async function deleteInteractiveReaction(server: ServerDocument, data: { id: string }) {
     const interactiveReaction = server.modules.reactions.find(r => r.id === data.id)
-    if (!interactiveReaction) throw new Error('NOT_FOUND')
+
+    if (!interactiveReaction) throw new APIError(1013)
 
     await database.servers.updateOne(
         { _id: server._id },
@@ -126,7 +141,14 @@ export async function deleteInteractiveReaction(server: ServerDocument, data: { 
                 )
             )
         )
-    } catch (err) {}
+    } catch (err) {
+        await Logger.handleError({
+            module: 'InteractiveReactions',
+            action: 'DeleteReaction',
+            error: err,
+            guild_id: server._id
+        })
+    }
 
     return data
 }

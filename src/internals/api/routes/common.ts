@@ -1,7 +1,9 @@
 import Router from '@koa/router'
+import { APIUser } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../database'
 import { IAutomation, ICustomCommand } from '../../../database/schemas/Servers'
+import APIError from '../utility/APIError'
 import { authorize } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
@@ -15,16 +17,20 @@ router.get('/custom-commands', createRateLimitMiddleware(10), authorize, getCust
 router.post('/custom-commands', createRateLimitMiddleware(5), authorize, publishCustomCommand)
 
 async function getAutomationTask(ctx: Context) {
-    const automationId = ctx.params.automation_id as string
-    const guildId = ctx.query.guild_id as string
+    const automationId: string = ctx.params.automation_id
+    const guildId: string = ctx.query.guild_id as string
 
     const automation = await database.automationTasks.findOne({ _id: automationId, published: true })
 
-    if (!automation) ctx.throw(404)
+    if (!automation) {
+        ctx.throw(404, new APIError(1010))
+    }
 
     const server = await database.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     if (!automation.uses.some(i => i.guild_id === guildId)) {
         await database.automationTasks.updateOne(
@@ -66,23 +72,28 @@ async function getAutomationTasks(ctx: Context) {
 
 async function publishAutomationTask(ctx: Context) {
     const guildId = ctx.query.guild_id as string,
-        userId = ctx.request.headers['user-id'] as string
+        currentUser: Partial<APIUser> = ctx.state.user
     const data = ctx.request.body as IAutomation
 
-    if (typeof data?.id !== 'string' || typeof data?.name !== 'string' || typeof data?.trigger !== 'string' || !data?.components?.length)
-        ctx.throw(400)
+    if (typeof data?.id !== 'string' || typeof data?.name !== 'string' || typeof data?.trigger !== 'string' || !data?.components?.length) {
+        ctx.throw(400, new APIError(4010))
+    }
 
     const server = await database.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
-    const automation = await database.automationTasks.findOne({ _id: data.id })
+    const automation = await database.automationTasks.findOne({ _id: data.id, guild_id: guildId })
 
-    if (automation) ctx.throw(409)
+    if (automation) {
+        ctx.throw(409, new APIError(2002))
+    }
 
     await database.automationTasks.create({
         _id: data.id,
-        author_id: userId,
+        author_id: currentUser.id,
         guild_id: guildId,
         name: data.name,
         data: JSON.stringify(data)
@@ -97,11 +108,15 @@ async function getCustomCommand(ctx: Context) {
 
     const command = await database.customCommands.findOne({ _id: commandId, published: true })
 
-    if (!command) ctx.throw(404)
+    if (!command) {
+        ctx.throw(404, new APIError(1011))
+    }
 
     const server = await database.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     if (!command.uses.some(i => i.guild_id === guildId)) {
         await database.customCommands.updateOne(
@@ -144,22 +159,28 @@ async function getCustomCommands(ctx: Context) {
 
 async function publishCustomCommand(ctx: Context) {
     const guildId = ctx.query.guild_id as string,
-        userId = ctx.request.headers['user-id'] as string
+        currentUser: Partial<APIUser> = ctx.state.user
     const data = ctx.request.body as ICustomCommand
 
-    if (typeof data?.id !== 'string' || typeof data?.command?.name !== 'string' || typeof data?.command?.description !== 'string') ctx.throw(400)
+    if (typeof data?.id !== 'string' || typeof data?.command?.name !== 'string' || typeof data?.command?.description !== 'string') {
+        ctx.throw(400, new APIError(4011))
+    }
 
     const server = await database.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     const command = await database.customCommands.findOne({ _id: data.id })
 
-    if (command) ctx.throw(409)
+    if (command) {
+        ctx.throw(409, new APIError(2003))
+    }
 
     await database.customCommands.create({
         _id: data.id,
-        author_id: userId,
+        author_id: currentUser.id,
         guild_id: guildId,
         name: data.command.name,
         description: data.command.description,

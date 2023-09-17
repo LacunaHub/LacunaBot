@@ -5,6 +5,7 @@ import {
     APIGuildChannel,
     APIGuildMember,
     APIRole,
+    APIUser,
     ChannelType,
     makeURLSearchParams,
     PermissionsBitField,
@@ -18,6 +19,7 @@ import { addDiamond } from '../../utility/billing'
 import DiscordUtils from '../../utility/DiscordUtils'
 import DiscordOAuth2 from '../discord/OAuth2'
 import interfaces from '../interfaces'
+import APIError from '../utility/APIError'
 import { authorize, checkPermissions } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
@@ -26,31 +28,34 @@ const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISC
 
 router.get('/:guild_id/settings', createRateLimitMiddleware(10), authorize, checkPermissions, getSettings)
 router.post('/:guild_id/settings', createRateLimitMiddleware(10), authorize, checkPermissions, updateSettings)
-router.post('/:guild_id/application-commands', createRateLimitMiddleware(5), authorize, checkPermissions, updateApplicationCommands)
-router.post('/:guild_id/autovoices/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateAutoVoices)
 router.post('/:guild_id/custom-commands/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateCustomCommand)
-router.post('/:guild_id/interactive-messages/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateInteractiveMessages)
+router.post('/:guild_id/interactive-messages/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateInteractiveMessage)
 router.post('/:guild_id/reactions/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateInteractiveReaction)
 router.post('/:guild_id/subscriptions/telegram/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateTelegramSubscription)
-router.post('/:guild_id/subscriptions/twitch/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateTwitchSubscriptions)
-router.post('/:guild_id/subscriptions/youtube/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateYouTubeSubscriptions)
+router.post('/:guild_id/subscriptions/twitch/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateTwitchSubscription)
+router.post('/:guild_id/subscriptions/youtube/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateYouTubeSubscription)
+router.post('/:guild_id/autovoices/:method', createRateLimitMiddleware(5), authorize, checkPermissions, updateAutoVoice)
 router.post('/:guild_id/transfer-diamond/:to_guild_id', createRateLimitMiddleware(1, 1000 * 60 * 5), authorize, transferDiamond)
 router.post('/:guild_id/download-logs', createRateLimitMiddleware(5), authorize, checkPermissions, downloadLogs)
 
 async function getSettings(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const partial = ctx.request.headers['partial-guild'] as any
+    const guildId: string = ctx.params.guild_id,
+        guild: RESTAPIPartialCurrentUserGuild = ctx.state.guild
+    const server = await db.servers.findOne({ _id: guildId })
 
-    const server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     let selfMember: APIGuildMember
 
     try {
-        selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.DISCORD_CLIENT_ID))) as any
+        selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guildId, process.env.DISCORD_CLIENT_ID))) as any
     } catch (err) {}
 
-    if (!selfMember) ctx.throw(406)
+    if (!selfMember) {
+        ctx.throw(406, new APIError(2004))
+    }
 
     let guildChannels: APIGuildChannel<any>[] = [],
         guildRoles: APIRole[] = [],
@@ -58,11 +63,11 @@ async function getSettings(ctx: Context) {
         selfCommands: APIApplicationCommand[] = []
 
     try {
-        guildChannels = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildChannels(guild_id))) as any
-        guildRoles = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildRoles(guild_id))) as any
-        guildEmojis = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildEmojis(guild_id))) as any
+        guildChannels = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildChannels(guildId))) as any
+        guildRoles = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildRoles(guildId))) as any
+        guildEmojis = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildEmojis(guildId))) as any
         selfCommands = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.applicationCommands(process.env.DISCORD_CLIENT_ID), {
-            query: makeURLSearchParams({ with_localizations: true })
+            query: makeURLSearchParams({ with_localizations: true }) as any
         })) as any
     } catch (err) {}
 
@@ -95,7 +100,7 @@ async function getSettings(ctx: Context) {
     })
 
     const commandsCache = (await db.qdb.get('commands')) as any
-    const { diamondPrices: prices } = await db.json.get()
+    const { diamondPrices } = await db.json.get()
 
     ctx.status = 200
     ctx.body = {
@@ -110,9 +115,9 @@ async function getSettings(ctx: Context) {
         },
         commands: server.commands,
         guild: {
-            ...JSON.parse(partial),
+            ...guild,
             channels,
-            roles: roles.filter(r => r.id != guild_id),
+            roles: roles.filter(r => r.id != guildId),
             emojis,
             app_permissions: new PermissionsBitField(selfPermissions).toArray(),
             commands: selfCommands
@@ -169,29 +174,34 @@ async function getSettings(ctx: Context) {
             custom_commands: server.modules.custom_commands,
             automation: server.modules.automation
         },
-        prices,
+        prices: diamondPrices,
         change_log: server.change_log.reverse()
     }
 }
 
 async function updateSettings(ctx: Context) {
-    const guild_id = ctx.params.guild_id
-    const user_id = ctx.headers['user-id'] as string
-    const data = ctx.request.body as Partial<ServerDocument>
+    const guildId: string = ctx.params.guild_id
+    const currentUser: Partial<APIUser> = ctx.state.user
+    const data: Partial<ServerDocument> = ctx.request.body
 
-    let server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
+    let server = await db.servers.findOne({ _id: guildId })
+
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     let selfMember: APIGuildMember
 
     try {
-        selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild_id, process.env.DISCORD_CLIENT_ID))) as any
+        selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guildId, process.env.DISCORD_CLIENT_ID))) as any
     } catch (err) {}
 
-    if (!selfMember) ctx.throw(406)
+    if (!selfMember) {
+        ctx.throw(406, new APIError(2004))
+    }
 
-    const { diamondPrices: prices } = await db.json.get()
-    server = await interfaces.updateSettings(server, data, user_id)
+    const { diamondPrices } = await db.json.get()
+    server = await interfaces.updateSettings(server, data, currentUser.id)
 
     ctx.status = 200
     ctx.body = {
@@ -247,35 +257,20 @@ async function updateSettings(ctx: Context) {
             custom_commands: server.modules.custom_commands,
             automation: server.modules.automation
         },
-        prices,
+        prices: diamondPrices,
         change_log: server.change_log.reverse()
     }
 }
 
-async function updateApplicationCommands(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-
-    const server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
-
-    try {
-        await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, guild_id), {
-            body: server.modules.custom_commands.map(i => i.command)
-        })
-    } catch (err) {
-        ctx.throw(500)
-    }
-
-    ctx.status = 204
-}
-
 async function updateCustomCommand(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const method: string = ctx.params.method
+    const guildId: string = ctx.params.guild_id,
+        method: string = ctx.params.method
     const data = ctx.request.body
+    const server = await db.servers.findOne({ _id: guildId })
 
-    const server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     let response: any
 
@@ -294,25 +289,25 @@ async function updateCustomCommand(ctx: Context) {
                 break
 
             default:
-                throw new Error('UNKNOWN_METHOD')
+                throw new APIError(4012)
         }
     } catch (err) {
-        ctx.throw(400, err.message)
+        ctx.throw(400, { code: err.code, message: err.message })
     }
 
     ctx.status = 200
     ctx.body = response
 }
 
-async function updateInteractiveMessages(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const method: string = ctx.params.method
+async function updateInteractiveMessage(ctx: Context) {
+    const guildId: string = ctx.params.guild_id,
+        method: string = ctx.params.method
     const data = ctx.request.body
+    const server = await db.servers.findOne({ _id: guildId })
 
-    if (!data) ctx.throw(400)
-
-    const server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     let response: any
 
@@ -331,10 +326,10 @@ async function updateInteractiveMessages(ctx: Context) {
                 break
 
             default:
-                throw new Error('UNKNOWN_METHOD')
+                throw new APIError(4013)
         }
     } catch (err) {
-        ctx.throw(400, err.message)
+        ctx.throw(400, { code: err.code, message: err.message })
     }
 
     ctx.status = 200
@@ -342,14 +337,14 @@ async function updateInteractiveMessages(ctx: Context) {
 }
 
 async function updateInteractiveReaction(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const method: string = ctx.params.method
+    const guildId: string = ctx.params.guild_id,
+        method: string = ctx.params.method
     const data = ctx.request.body
+    const server = await db.servers.findOne({ _id: guildId })
 
-    if (!data) ctx.throw(400)
-
-    const server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     let response: any
 
@@ -368,10 +363,10 @@ async function updateInteractiveReaction(ctx: Context) {
                 break
 
             default:
-                throw new Error('UNKNOWN_METHOD')
+                throw new APIError(4014)
         }
     } catch (err) {
-        ctx.throw(400, err.message)
+        ctx.throw(400, { code: err.code, message: err.message })
     }
 
     ctx.status = 200
@@ -379,12 +374,14 @@ async function updateInteractiveReaction(ctx: Context) {
 }
 
 async function updateTelegramSubscription(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const method: string = ctx.params.method
+    const guildId: string = ctx.params.guild_id,
+        method: string = ctx.params.method
     const data = ctx.request.body
+    const server = await db.servers.findOne({ _id: guildId })
 
-    const server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     let response: any
 
@@ -403,23 +400,25 @@ async function updateTelegramSubscription(ctx: Context) {
                 break
 
             default:
-                throw new Error('UNKNOWN_METHOD')
+                throw new APIError(4015)
         }
     } catch (err) {
-        ctx.throw(400, err.message)
+        ctx.throw(400, { code: err.code, message: err.message })
     }
 
     ctx.status = 200
     ctx.body = response
 }
 
-async function updateTwitchSubscriptions(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const method: string = ctx.params.method
+async function updateTwitchSubscription(ctx: Context) {
+    const guildId: string = ctx.params.guild_id,
+        method: string = ctx.params.method
     const data = ctx.request.body
+    const server = await db.servers.findOne({ _id: guildId })
 
-    const server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     let response: any
 
@@ -438,23 +437,26 @@ async function updateTwitchSubscriptions(ctx: Context) {
                 break
 
             default:
-                throw new Error('UNKNOWN_METHOD')
+                throw new APIError(4016)
         }
     } catch (err) {
-        ctx.throw(400, err.message)
+        ctx.throw(400, { code: err.code, message: err.message })
     }
 
     ctx.status = 200
     ctx.body = response
 }
 
-async function updateYouTubeSubscriptions(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const method: string = ctx.params.method
+async function updateYouTubeSubscription(ctx: Context) {
+    const guildId: string = ctx.params.guild_id,
+        method: string = ctx.params.method
     const data = ctx.request.body
 
-    const server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
+    const server = await db.servers.findOne({ _id: guildId })
+
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     let response: any
 
@@ -473,23 +475,26 @@ async function updateYouTubeSubscriptions(ctx: Context) {
                 break
 
             default:
-                throw new Error('UNKNOWN_METHOD')
+                throw new APIError(4017)
         }
     } catch (err) {
-        ctx.throw(400, err.message)
+        ctx.throw(400, { code: err.code, message: err.message })
     }
 
     ctx.status = 200
     ctx.body = response
 }
 
-async function updateAutoVoices(ctx: Context) {
-    const guild_id: string = ctx.params.guild_id
-    const method: string = ctx.params.method
+async function updateAutoVoice(ctx: Context) {
+    const guildId: string = ctx.params.guild_id,
+        method: string = ctx.params.method
     const data = ctx.request.body
 
-    const server = await db.servers.findOne({ _id: guild_id })
-    if (!server || server.server.blocked) ctx.throw(404)
+    const server = await db.servers.findOne({ _id: guildId })
+
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     let response: any
 
@@ -508,10 +513,10 @@ async function updateAutoVoices(ctx: Context) {
                 break
 
             default:
-                throw new Error('UNKNOWN_METHOD')
+                throw new APIError(4018)
         }
     } catch (err) {
-        ctx.throw(400, err.message)
+        ctx.throw(400, { code: err.code, message: err.message })
     }
 
     ctx.status = 200
@@ -527,26 +532,30 @@ async function transferDiamond(ctx: Context) {
     try {
         userGuilds = await OAuth2.getUserGuilds(ctx.request.headers.authorization)
     } catch (err) {
-        ctx.throw(400)
+        ctx.throw(400, new APIError(5001))
     }
 
     const isGuildOwner = userGuilds.filter(i => [guildId, toGuildId].includes(i.id)).every(i => i.owner)
 
-    if (!isGuildOwner) ctx.throw(403)
+    if (!isGuildOwner) {
+        ctx.throw(403, new APIError(4002))
+    }
 
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) ctx.throw(404)
-    if (!server.server.premium.available || !server.server.premium.bill_id) ctx.throw(400)
+    if (!server || server.server.blocked) ctx.throw(404, new APIError(1003))
+    if (!server.server.premium.available || !server.server.premium.bill_id) ctx.throw(402, new APIError(2001))
 
     const bill = await db.bills.findOne({ _id: server.server.premium.bill_id })
 
-    if (!bill) ctx.throw(400)
+    if (!bill) {
+        ctx.throw(400, new APIError(1018))
+    }
 
     const toServer = await db.servers.findOne({ _id: toGuildId })
 
-    if (!toServer || toServer.server.blocked) ctx.throw(404)
-    if (toServer.server.premium.available) ctx.throw(400)
+    if (!toServer || toServer.server.blocked) ctx.throw(404, new APIError(1003))
+    if (toServer.server.premium.available) ctx.throw(404, new APIError(2009))
 
     await db.servers.updateOne(
         { _id: guildId },
@@ -585,7 +594,7 @@ async function downloadLogs(ctx: Context) {
         server = await db.servers.findOne({ _id: guildId })
 
     if (!server || server.server.blocked) {
-        ctx.throw(404)
+        ctx.throw(404, new APIError(1003))
     }
 
     const fileName = `${guildId}-${new Date().toISOString()}.log`

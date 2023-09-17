@@ -1,15 +1,37 @@
-import { DataResolver } from 'discord.js'
+import { APIWebhook, DataResolver } from 'discord.js'
 import database from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
-import { eventSubSubscribe, eventSubUnsubscribe, getEventSubsByUserId, ITwitchIncomingWebhook } from '../../../modules/Twitch'
+import { ITwitchIncomingWebhook, eventSubSubscribe, eventSubUnsubscribe, getEventSubsByUserId } from '../../../modules/Twitch'
+import Logger from '../../Logger'
 import DiscordUtils from '../../utility/DiscordUtils'
+import APIError from '../utility/APIError'
 
 export async function createTwitchSubscription(server: ServerDocument, data: any) {
     const subscriptions = server.modules.subscriptions.twitch
 
-    if (subscriptions.length >= 1 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
-    if (subscriptions.length >= 10) throw new Error('LIMIT_REACHED')
-    if (subscriptions.some(s => s.broadcaster_id === data.broadcaster.id)) throw new Error('ALREADY_SUBSCRIBED')
+    if (subscriptions.length >= 1 && !server.server.premium.available) throw new APIError(3009)
+    if (subscriptions.length >= 10) throw new APIError(3010)
+    if (subscriptions.some(s => s.broadcaster_id === data.broadcaster.id)) throw new APIError(2006)
+
+    let webhook: APIWebhook
+
+    try {
+        webhook = (await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.channelWebhooks(data.notification_channel_id), {
+            body: {
+                name: data.broadcaster.name,
+                avatar: await DataResolver.resolveImage(data.broadcaster.thumbnail)
+            }
+        })) as any
+    } catch (err) {
+        await Logger.handleError({
+            module: 'TwitchSubs',
+            action: 'CreateWebhook',
+            error: err,
+            guild_id: server._id
+        })
+
+        throw new APIError(5009)
+    }
 
     const twitchSub = await database.twitchSubs.findOne({ broadcaster_id: data.broadcaster.id })
 
@@ -37,7 +59,7 @@ export async function createTwitchSubscription(server: ServerDocument, data: any
             eventSub = json.data[0]
         }
 
-        if (!eventSub) throw new Error('CANNOT_SUBSCRIBE')
+        if (!eventSub) throw new APIError(5015)
 
         await database.twitchSubs.create({
             _id: eventSub.id,
@@ -47,17 +69,6 @@ export async function createTwitchSubscription(server: ServerDocument, data: any
             broadcaster_thumbnail_url: data.broadcaster.thumbnail
         } as any)
     }
-
-    let webhook: any
-
-    try {
-        webhook = await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.channelWebhooks(data.notification_channel_id), {
-            body: {
-                name: data.broadcaster.name,
-                avatar: await DataResolver.resolveImage(data.broadcaster.thumbnail)
-            }
-        })
-    } catch (err) {}
 
     const subscription = {
         broadcaster_id: data.broadcaster.id,
@@ -83,10 +94,9 @@ export async function createTwitchSubscription(server: ServerDocument, data: any
 }
 
 export async function updateTwitchSubscription(server: ServerDocument, data: any) {
-    const subscriptions = server.modules.subscriptions.twitch
-    const subscription = subscriptions.find(i => i.broadcaster_id === data.broadcaster_id)
+    const subscription = server.modules.subscriptions.twitch.find(i => i.broadcaster_id === data.broadcaster_id)
 
-    if (!subscription) throw new Error('NOT_FOUND')
+    if (!subscription) throw new APIError(1015)
 
     await database.servers.updateOne(
         { _id: server._id, 'modules.subscriptions.twitch.broadcaster_id': data.broadcaster_id },
@@ -106,17 +116,23 @@ export async function updateTwitchSubscription(server: ServerDocument, data: any
                     channel_id: data.notification_channel_id
                 }
             })
-        } catch (err) {}
+        } catch (err) {
+            await Logger.handleError({
+                module: 'TwitchSubs',
+                action: 'UpdateWebhook',
+                error: err,
+                guild_id: server._id
+            })
+        }
     }
 
     return data
 }
 
 export async function deleteTwitchSubscription(server: ServerDocument, data: any) {
-    const subscriptions = server.modules.subscriptions.twitch
-    const subscription = subscriptions.find(s => s.broadcaster_id === data.broadcaster_id)
+    const subscription = server.modules.subscriptions.twitch.find(s => s.broadcaster_id === data.broadcaster_id)
 
-    if (!subscription) throw new Error('NOT_FOUND')
+    if (!subscription) throw new APIError(1015)
 
     await database.servers.updateOne(
         { _id: server._id },
@@ -137,13 +153,29 @@ export async function deleteTwitchSubscription(server: ServerDocument, data: any
         try {
             await eventSubUnsubscribe(twitchSub?._id)
             await database.twitchSubs.deleteMany({ broadcaster_id: subscription.broadcaster_id })
-        } catch (err) {}
+        } catch (err) {
+            await Logger.handleError({
+                module: 'TwitchSubs',
+                action: 'DeleteEventSub',
+                error: err,
+                guild_id: server._id
+            })
+
+            throw new APIError(5016)
+        }
     }
 
     if (subscription.webhook_id) {
         try {
             await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.webhook(subscription.webhook_id, subscription.webhook_token))
-        } catch (err) {}
+        } catch (err) {
+            await Logger.handleError({
+                module: 'TwitchSubs',
+                action: 'DeleteWebhook',
+                error: err,
+                guild_id: server._id
+            })
+        }
     }
 
     return data

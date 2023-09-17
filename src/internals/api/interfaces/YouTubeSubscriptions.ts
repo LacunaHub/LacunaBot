@@ -1,15 +1,37 @@
-import { DataResolver } from 'discord.js'
+import { APIWebhook, DataResolver } from 'discord.js'
 import database from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import { hubSubscribe } from '../../../modules/YouTube'
+import Logger from '../../Logger'
 import DiscordUtils from '../../utility/DiscordUtils'
+import APIError from '../utility/APIError'
 
 export async function createYouTubeSubscription(server: ServerDocument, data: any) {
     const subscriptions = server.modules.subscriptions.youtube
 
-    if (subscriptions.length >= 1 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
-    if (subscriptions.length >= 10) throw new Error('LIMIT_REACHED')
-    if (subscriptions.some(s => s.channel_id === data.channel.id)) throw new Error('ALREADY_SUBSCRIBED')
+    if (subscriptions.length >= 1 && !server.server.premium.available) throw new APIError(3011)
+    if (subscriptions.length >= 10) throw new APIError(3012)
+    if (subscriptions.some(s => s.channel_id === data.channel.id)) throw new APIError(2007)
+
+    let webhook: APIWebhook
+
+    try {
+        webhook = (await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.channelWebhooks(data.notification_channel_id), {
+            body: {
+                name: data.channel.name,
+                avatar: await DataResolver.resolveImage(data.channel.thumbnail)
+            }
+        })) as any
+    } catch (err) {
+        await Logger.handleError({
+            module: 'YouTubeSubs',
+            action: 'CreateWebhook',
+            error: err,
+            guild_id: server._id
+        })
+
+        throw new APIError(5009)
+    }
 
     const youtubeSub = await database.youtubeSubs.findOne({ _id: data.channel.id })
 
@@ -22,19 +44,10 @@ export async function createYouTubeSubscription(server: ServerDocument, data: an
                 channel_name: data.channel.name,
                 channel_thumbnail_url: data.channel.thumbnail
             } as any)
-        } else return 'youtube_subscribe_error'
+        } else {
+            throw new APIError(5017)
+        }
     }
-
-    let webhook: any
-
-    try {
-        webhook = await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.channelWebhooks(data.notification_channel_id), {
-            body: {
-                name: data.channel.name,
-                avatar: await DataResolver.resolveImage(data.channel.thumbnail)
-            }
-        })
-    } catch (err) {}
 
     const subscription = {
         channel_id: data.channel.id,
@@ -59,10 +72,9 @@ export async function createYouTubeSubscription(server: ServerDocument, data: an
 }
 
 export async function updateYouTubeSubscription(server: ServerDocument, data: any) {
-    const subscriptions = server.modules.subscriptions.youtube
-    const subscription = subscriptions.find(i => i.channel_id === data.channel_id)
+    const subscription = server.modules.subscriptions.youtube.find(i => i.channel_id === data.channel_id)
 
-    if (!subscription) throw new Error('NOT_FOUND')
+    if (!subscription) throw new APIError(1016)
 
     await database.servers.updateOne(
         { _id: server._id, 'modules.subscriptions.youtube.channel_id': data.channel_id },
@@ -81,17 +93,23 @@ export async function updateYouTubeSubscription(server: ServerDocument, data: an
                     channel_id: data.notification_channel_id
                 }
             })
-        } catch (err) {}
+        } catch (err) {
+            await Logger.handleError({
+                module: 'YouTubeSubs',
+                action: 'UpdateWebhook',
+                error: err,
+                guild_id: server._id
+            })
+        }
     }
 
     return data
 }
 
 export async function deleteYouTubeSubscription(server: ServerDocument, data: any) {
-    const subscriptions = server.modules.subscriptions.youtube
-    const subscription = subscriptions.find(s => s.channel_id === data.channel_id)
+    const subscription = server.modules.subscriptions.youtube.find(s => s.channel_id === data.channel_id)
 
-    if (!subscription) throw new Error('NOT_FOUND')
+    if (!subscription) throw new APIError(1016)
 
     await database.servers.updateOne(
         { _id: server._id },
@@ -110,13 +128,29 @@ export async function deleteYouTubeSubscription(server: ServerDocument, data: an
         try {
             await hubSubscribe(subscription.channel_id, 'unsubscribe')
             await database.youtubeSubs.deleteOne({ _id: subscription.channel_id })
-        } catch (err) {}
+        } catch (err) {
+            await Logger.handleError({
+                module: 'YouTubeSubs',
+                action: 'DeleteSubscription',
+                error: err,
+                guild_id: server._id
+            })
+
+            throw new APIError(5018)
+        }
     }
 
     if (subscription.webhook_id) {
         try {
             await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.webhook(subscription.webhook_id, subscription.webhook_token))
-        } catch (err) {}
+        } catch (err) {
+            await Logger.handleError({
+                module: 'YouTubeSubs',
+                action: 'DeleteWebhook',
+                error: err,
+                guild_id: server._id
+            })
+        }
     }
 
     return true

@@ -236,7 +236,7 @@ export default class Automation {
     }
 
     getPatterns(string: string) {
-        return string.match(/{{\s*((.|\n)+?)\s*}}/g)?.map(i => i.slice(2, i.length - 2).trim()) ?? []
+        return string?.match?.(/{{\s*((.|\n)+?)\s*}}/g)?.map?.(i => i.slice(2, i.length - 2).trim()) ?? []
     }
 
     async replacePatterns(string: string, ctx: Context) {
@@ -334,6 +334,7 @@ export default class Automation {
     }
 
     async execute() {
+        const t = this.self.i18n.t.bind(null, this.server.locale)
         const ctx = this.isolate.createContextSync()
         ctx.global.setSync('global', ctx.global.derefInto())
 
@@ -426,6 +427,31 @@ export default class Automation {
 
             if (component.type === 'ACTION') {
                 const { action } = component
+
+                if (action.type === 'EXECUTE_CODE' && !this.server.server.premium.available) {
+                    if (['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType)) {
+                        const interaction = this.signal as ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction
+
+                        await interaction.reply({
+                            content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', {
+                                user: `**${interaction.user.globalName}**`
+                            })}`,
+                            ephemeral: true
+                        })
+                    }
+
+                    if (this.signalType === 'Message') {
+                        const message = this.signal as Message
+
+                        await message.reply({
+                            content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', {
+                                user: `**${message.author.globalName}**`
+                            })}`
+                        })
+                    }
+
+                    break
+                }
 
                 if (action.type === 'EXECUTE_CODE' && this.server.server.premium.available) {
                     const interaction = this.signal as ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction
@@ -775,7 +801,7 @@ export default class Automation {
                         await this.self.logger.handleError({
                             module: 'Automation',
                             action: 'ExecuteCodeAction',
-                            error: err,
+                            error: error,
                             guild_id: this.signal.guild.id
                         })
                     }

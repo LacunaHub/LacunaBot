@@ -208,7 +208,7 @@ export default class CustomCommand {
     }
 
     getPatterns(string: string) {
-        return string.match(/{{\s*((.|\n)+?)\s*}}/g)?.map(i => i.slice(2, i.length - 2).trim()) ?? []
+        return string?.match?.(/{{\s*((.|\n)+?)\s*}}/g)?.map?.(i => i.slice(2, i.length - 2).trim()) ?? []
     }
 
     async replacePatterns(string: string, ctx: Context) {
@@ -479,6 +479,17 @@ export default class CustomCommand {
 
             if (component.type === 'ACTION') {
                 const { action } = component
+
+                if (action.type === 'EXECUTE_CODE' && !this.server.server.premium.available) {
+                    await this.interaction.reply({
+                        content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', {
+                            user: `**${this.interaction.user.globalName}**`
+                        })}`,
+                        ephemeral: true
+                    })
+
+                    break
+                }
 
                 if (action.type === 'EXECUTE_CODE' && this.server.server.premium.available) {
                     const functions = {
@@ -785,7 +796,7 @@ export default class CustomCommand {
                         await this.self.logger.handleError({
                             module: 'CustomCommands',
                             action: 'ExecuteCodeAction',
-                            error: err,
+                            error: error,
                             guild_id: this.interaction.guildId
                         })
                     }

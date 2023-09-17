@@ -8,6 +8,7 @@ import { handleTelegramWebhook, searchChannels as searchTelegramChannels } from 
 import { eventSubUnsubscribe, handleIncomingWebhook, searchChannels as searchTwitchChannels } from '../../../modules/Twitch'
 import { handleHubBubWebhook, searchChannels as searchYouTubeChannels } from '../../../modules/YouTube'
 import { convertXml2Json } from '../../utility/Utils'
+import APIError from '../utility/APIError'
 import { authorize } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
@@ -22,54 +23,64 @@ router.post('/youtube/hubbub-webhook', hubbubWebhook)
 router.post('/telegram/webhook', telegramWebhook)
 
 async function searchTwitch(ctx: Context) {
-    const guild_id = ctx.query.gid as string
-    const query = ctx.query.q as string
+    const guildId = ctx.query.gid as string,
+        query = ctx.query.q as string
 
-    if (!guild_id || !query) ctx.throw(400)
+    if (!guildId || !query) {
+        ctx.throw(400, new APIError())
+    }
 
-    const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
+    const server: ServerDocument = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
-    const channels = await searchTwitchChannels(query)
-
-    if (!channels?.length) ctx.throw(404)
-
+    let channels = await searchTwitchChannels(query)
     const added = server.modules.subscriptions.twitch
+
+    if (!channels?.length) {
+        channels = []
+    }
 
     ctx.status = 200
     ctx.body = channels.filter(channel => !added.some(s => s.broadcaster_id == channel.id))
 }
 
 async function searchYouTube(ctx: Context) {
-    const guild_id = ctx.query.gid as string
-    const query = ctx.query.q as string
+    const guildId = ctx.query.gid as string,
+        query = ctx.query.q as string
 
-    if (!guild_id || !query) ctx.throw(400)
+    if (!guildId || !query) ctx.throw(400, new APIError())
 
-    const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
+    const server: ServerDocument = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
-    const channels = await searchYouTubeChannels(query)
-
-    if (!channels?.length) ctx.throw(404)
-
+    let channels = await searchYouTubeChannels(query)
     const added = server.modules.subscriptions.youtube
+
+    if (!channels?.length) {
+        channels = []
+    }
 
     ctx.status = 200
     ctx.body = channels.filter(channel => !added.some(s => s.channel_id == channel.id))
 }
 
 async function searchTelegram(ctx: Context) {
-    const guild_id = ctx.query.gid as string
+    const guildId = ctx.query.gid as string
     const query = ctx.query.q as string
 
-    if (!guild_id || !query) ctx.throw(400)
+    if (!guildId || !query) ctx.throw(400, new APIError())
 
-    const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
+    const server: ServerDocument = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) ctx.throw(404)
+    if (!server || server.server.blocked) {
+        ctx.throw(404, new APIError(1003))
+    }
 
     const channel = await searchTelegramChannels(query)
     const added = server.modules.subscriptions.telegram.some(i => i.channel_id === channel.id)
@@ -79,8 +90,8 @@ async function searchTelegram(ctx: Context) {
 }
 
 async function eventSubWebhook(ctx: Context) {
-    const messageId = ctx.request.headers['twitch-eventsub-message-id'] as string
-    const messageType = ctx.request.headers['twitch-eventsub-message-type']
+    const messageId = ctx.request.headers['twitch-eventsub-message-id'] as string,
+        messageType = ctx.request.headers['twitch-eventsub-message-type']
 
     if (messageType === 'webhook_callback_verification') {
         ctx.status = 200
@@ -120,9 +131,9 @@ async function eventSubWebhook(ctx: Context) {
 }
 
 function eventSubAuthentication(ctx: Context, next: Next) {
-    const messageId = ctx.request.headers['twitch-eventsub-message-id'] as string
-    const messageTimestamp = ctx.request.headers['twitch-eventsub-message-timestamp'] as string
-    const messageSignature = ctx.request.headers['twitch-eventsub-message-signature']
+    const messageId = ctx.request.headers['twitch-eventsub-message-id'] as string,
+        messageTimestamp = ctx.request.headers['twitch-eventsub-message-timestamp'] as string,
+        messageSignature = ctx.request.headers['twitch-eventsub-message-signature']
 
     const time = (Date.now() - new Date(messageTimestamp).getTime()) / 1000
 
@@ -137,32 +148,35 @@ function eventSubAuthentication(ctx: Context, next: Next) {
         .update(messageId + messageTimestamp + JSON.stringify(ctx.request.body))
         .digest('hex')
 
-    if (messageSignature == `sha256=${signature}`) next()
-    else ctx.throw(403)
+    if (messageSignature === `sha256=${signature}`) {
+        next()
+    } else {
+        ctx.throw(403, new APIError())
+    }
 }
 
 async function hubbubWebhookChallenge(ctx: Context) {
-    const hubTopic = ctx.query['hub.topic'] as string
-    const hubChallenge = ctx.query['hub.challenge'] as string
-    const hubMode = ctx.query['hub.mode'] as string
+    const hubTopic = ctx.query['hub.topic'] as string,
+        hubChallenge = ctx.query['hub.challenge'] as string,
+        hubMode = ctx.query['hub.mode'] as string
     let hubLeaseSeconds = ctx.query['hub.lease_seconds'] as string
 
-    ctx.assert(hubTopic && hubChallenge && hubMode, 404)
+    ctx.assert(hubTopic && hubChallenge && hubMode, 404, new APIError())
 
     const [, topicQuery] = hubTopic.split('?')
     const topicParams = new URLSearchParams(topicQuery)
     const channelId = topicParams.get('channel_id')
 
-    if (hubMode == 'subscribe') {
+    if (hubMode === 'subscribe') {
         hubLeaseSeconds = isNaN(hubLeaseSeconds as any) ? null : (Number(hubLeaseSeconds) as any)
         const subscription = await db.youtubeSubs.findOne({ _id: channelId })
 
-        ctx.assert(hubLeaseSeconds && subscription, 404)
+        ctx.assert(hubLeaseSeconds && subscription, 404, new APIError())
 
         await db.youtubeSubs.updateOne({ _id: channelId }, { $set: { expiration_timestamp: Date.now() + (hubLeaseSeconds as any) * 1000 } })
     }
 
-    if (hubMode == 'unsubscribe') {
+    if (hubMode === 'unsubscribe') {
         await db.youtubeSubs.deleteOne({ _id: channelId })
     }
 
@@ -173,7 +187,7 @@ async function hubbubWebhookChallenge(ctx: Context) {
 async function hubbubWebhook(ctx: Context) {
     const hubSignature = ctx.request.headers['x-hub-signature'] as string
 
-    if (!hubSignature) ctx.throw(403)
+    if (!hubSignature) ctx.throw(403, new APIError())
 
     const data = await rawBodyParser(ctx.req).then(async str => {
         const body = (await convertXml2Json(str)) as any
@@ -194,13 +208,13 @@ async function hubbubWebhook(ctx: Context) {
 
     const [entry] = body.feed?.entry
 
-    if (!entry) ctx.throw(400)
+    if (!entry) ctx.throw(400, new APIError())
 
     const [algorithm, hmac] = hubSignature.split('=')
 
     const signature = crypto.createHmac(algorithm, process.env.YOUTUBE_HMAC_SECRET).update(rawBody).digest('hex')
 
-    if (hmac != signature) {
+    if (hmac !== signature) {
         ctx.status = 204
 
         return
@@ -235,7 +249,7 @@ async function telegramWebhook(ctx: Context) {
     const tbSignature = ctx.request.headers['x-tb-signature'] as string,
         data = ctx.request.body
 
-    if (!tbSignature) ctx.throw(403)
+    if (!tbSignature) ctx.throw(403, new APIError())
 
     const [sigAlgorithm, sigHmac] = tbSignature.split('=')
     const signature = crypto
@@ -243,7 +257,7 @@ async function telegramWebhook(ctx: Context) {
         .update(`${data.channel_id}:${data.message_id}`)
         .digest('hex')
 
-    if (sigHmac !== signature) ctx.throw(403)
+    if (sigHmac !== signature) ctx.throw(403, new APIError())
 
     handleTelegramWebhook(data)
 

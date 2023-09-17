@@ -20,7 +20,7 @@ export function createRateLimitMiddleware(max: number, duration: number = 60000)
         db: new Map(),
         duration,
         max,
-        errorMessage: 'Too Many Requests',
+        throw: true,
         id: ctx => (ctx.request.headers['x-forwarded-for'] as string) || ctx.ip
     })
 }
