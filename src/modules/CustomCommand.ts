@@ -480,6 +480,17 @@ export default class CustomCommand {
             if (component.type === 'ACTION') {
                 const { action } = component
 
+                if (action.type === 'EXECUTE_CODE' && !this.server.server.premium.available) {
+                    await this.interaction.reply({
+                        content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', {
+                            user: `**${this.interaction.user.globalName}**`
+                        })}`,
+                        ephemeral: true
+                    })
+
+                    break
+                }
+
                 if (action.type === 'EXECUTE_CODE' && this.server.server.premium.available) {
                     const functions = {
                         deferReply: async (rawOptions: InteractionDeferReplyOptions) => {

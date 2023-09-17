@@ -334,6 +334,7 @@ export default class Automation {
     }
 
     async execute() {
+        const t = this.self.i18n.t.bind(null, this.server.locale)
         const ctx = this.isolate.createContextSync()
         ctx.global.setSync('global', ctx.global.derefInto())
 
@@ -426,6 +427,31 @@ export default class Automation {
 
             if (component.type === 'ACTION') {
                 const { action } = component
+
+                if (action.type === 'EXECUTE_CODE' && !this.server.server.premium.available) {
+                    if (['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType)) {
+                        const interaction = this.signal as ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction
+
+                        await interaction.reply({
+                            content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', {
+                                user: `**${interaction.user.globalName}**`
+                            })}`,
+                            ephemeral: true
+                        })
+                    }
+
+                    if (this.signalType === 'Message') {
+                        const message = this.signal as Message
+
+                        await message.reply({
+                            content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', {
+                                user: `**${message.author.globalName}**`
+                            })}`
+                        })
+                    }
+
+                    break
+                }
 
                 if (action.type === 'EXECUTE_CODE' && this.server.server.premium.available) {
                     const interaction = this.signal as ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction
