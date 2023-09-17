@@ -1,4 +1,4 @@
-import { isEqual, isObject, isArray } from 'lodash/fp'
+import { isArray, isEqual, isObject } from 'lodash/fp'
 import reduce from 'lodash/reduce'
 
 export function hashCode(str) {
@@ -491,4 +491,24 @@ export function getGuildIconURL(guildId, icon) {
     return guildId && icon
         ? `https://cdn.discordapp.com/icons/${guildId}/${icon}.png`
         : `https://cdn.discordapp.com/embed/avatars/${'0001' % 5}.png`
+}
+
+export function handleAxiosError(error) {
+    console.error(error)
+
+    if (error.response) {
+        const { code, message } = error.response.data
+
+        return {
+            code: code ?? 0,
+            message: message ?? error.message,
+            status: error.response.status
+        }
+    }
+
+    return {
+        code: 0,
+        message: error.message,
+        status: null
+    }
 }

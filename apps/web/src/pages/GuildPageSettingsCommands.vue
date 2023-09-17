@@ -46,32 +46,6 @@
           </q-item-section>
         </q-item>
 
-        <!-- <q-card-section>
-          <q-banner class="rounded-lg bg-dark-2" dense>
-            <span>
-              {{ $t('pages.guild.cm_app_commands_refresh') }}
-            </span>
-
-            <template #avatar>
-              <q-icon name="info" color="info"></q-icon>
-            </template>
-
-            <template #action>
-              <q-btn
-                unelevated
-                color="primary"
-                :label="$t('refresh')"
-                :loading="updateCommandsLoading"
-                @click="updateAppCommands"
-              >
-                <template #loading>
-                  <q-spinner-dots color="white"></q-spinner-dots>
-                </template>
-              </q-btn>
-            </template>
-          </q-banner>
-        </q-card-section> -->
-
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="group in ['GENERAL', 'MODERATION', 'MUSIC', 'UTILITY']" :key="group" class="col-12">
@@ -105,11 +79,10 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import { useGuildStore } from 'src/stores/guild'
-import SystemCommand from 'src/components/dialogs/SystemCommand.vue'
-import { interfaces } from 'src/boot/axios'
 import CustomCommand from 'src/components/dialogs/CustomCommand.vue'
+import SystemCommand from 'src/components/dialogs/SystemCommand.vue'
+import { useGuildStore } from 'src/stores/guild'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsCommands',
@@ -127,16 +100,6 @@ export default defineComponent({
   },
 
   methods: {
-    updateAppCommands() {
-      this.updateCommandsLoading = true
-
-      interfaces.guilds
-        .updateApplicationCommands(this.guild._id)
-        .catch(err => {
-          console.error(err)
-        })
-        .finally(() => (this.updateCommandsLoading = false))
-    },
     systemCommandDialog(command) {
       this.$q
         .dialog({

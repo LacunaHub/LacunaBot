@@ -98,8 +98,10 @@
 </template>
 
 <script setup>
+import { useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { useUserStore } from 'src/stores/user'
+import { handleAxiosError } from 'src/utils/Utils'
 import { computed, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
@@ -108,6 +110,8 @@ const props = defineProps({
     default: true
   }
 })
+
+const $q = useQuasar()
 
 const pageLoading = ref(true)
 const user = useUserStore()
@@ -138,15 +142,30 @@ const getActivities = async () => {
     const response = await interfaces.users.getActivities(),
       { data } = response
 
-    return (activities.value = data)
-  } catch (err) {}
+    activities.value = data
+
+    return true
+  } catch (err) {
+    const error = handleAxiosError(err)
+
+    $q.notify({
+      message: error.message,
+      classes: 'rounded-lg q-notification-custom',
+      color: 'black',
+      icon: 'error',
+      iconColor: 'negative',
+      timeout: 5000
+    })
+  }
+
+  return false
 }
 
 onMounted(async () => {
   const hook = async () => {
-    await getActivities()
+    const getActivitiesSuccess = await getActivities()
 
-    return (pageLoading.value = false)
+    return (pageLoading.value = !getActivitiesSuccess)
   }
 
   if (props.parentLoading) {

@@ -54,9 +54,10 @@ const props = defineProps({
   }
 })
 
+const router = useRouter()
+
 const pageLoading = ref(true)
-const user = useUserStore(),
-  router = useRouter()
+const user = useUserStore()
 
 const gotoGuild = async (gid, joined) => {
   if (joined) {

@@ -313,11 +313,11 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { parseEmoji, suid } from 'src/utils/Utils'
 import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
+import { handleAxiosError, parseEmoji, suid } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
@@ -388,16 +388,16 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          interfaces.guilds
+          return interfaces.guilds
             .updateInteractiveReactions(guild._id, { method: mode.value.toLowerCase(), data: ir.value })
             .then(response => {
               onDialogOK({ mode: mode.value, ir: response.data })
             })
             .catch(err => {
-              console.error(err)
+              const error = handleAxiosError(err)
 
               $q.notify({
-                message: $t(`errors.irs.${err.response.data}`),
+                message: error.message,
                 classes: 'rounded-lg q-notification-custom',
                 color: 'black',
                 icon: 'error',
@@ -420,16 +420,16 @@ export default defineComponent({
       onDelete() {
         confirmLoading.value = true
 
-        interfaces.guilds
+        return interfaces.guilds
           .updateInteractiveReactions(guild._id, { method: 'delete', data: ir.value })
           .then(() => {
             onDialogOK({ mode: 'DELETE', ir: ir.value })
           })
           .catch(err => {
-            console.error(err)
+            const error = handleAxiosError(err)
 
             $q.notify({
-              message: $t(`errors.irs.${err.response.data}`),
+              message: error.message,
               classes: 'rounded-lg q-notification-custom',
               color: 'black',
               icon: 'error',

@@ -428,10 +428,11 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { useGuildStore } from 'src/stores/guild'
 import { interfaces } from 'src/boot/axios'
+import { useGuildStore } from 'src/stores/guild'
+import { handleAxiosError } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
@@ -497,16 +498,16 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          interfaces.guilds
+          return interfaces.guilds
             .updateAutoVoices(guild._id, { method: mode.value.toLowerCase(), data: autoVoice.value })
             .then(response => {
               onDialogOK({ mode: mode.value, autoVoice: response.data })
             })
             .catch(err => {
-              console.error(err)
+              const error = handleAxiosError(err)
 
               $q.notify({
-                message: $t(`errors.auto_voices.${err.response.data}`),
+                message: error.message,
                 classes: 'rounded-lg q-notification-custom',
                 color: 'black',
                 icon: 'error',
@@ -529,16 +530,16 @@ export default defineComponent({
       onDelete() {
         confirmLoading.value = true
 
-        interfaces.guilds
+        return interfaces.guilds
           .updateAutoVoices(guild._id, { method: 'delete', data: autoVoice.value })
           .then(() => {
             onDialogOK({ mode: 'DELETE', autoVoice: autoVoice.value })
           })
           .catch(err => {
-            console.error(err)
+            const error = handleAxiosError(err)
 
             $q.notify({
-              message: $t(`errors.auto_voices.${err.response.data}`),
+              message: error.message,
               classes: 'rounded-lg q-notification-custom',
               color: 'black',
               icon: 'error',

@@ -79,8 +79,10 @@
 </template>
 
 <script setup>
+import { useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { DateTime } from 'src/boot/luxon'
+import { handleAxiosError } from 'src/utils/Utils'
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -91,8 +93,10 @@ const props = defineProps({
   }
 })
 
+const $q = useQuasar(),
+  { t } = useI18n()
+
 const pageLoading = ref(true)
-const { t } = useI18n()
 
 const bills = ref([]),
   tableColumns = [
@@ -123,7 +127,22 @@ const getBills = async () => {
         description: `${i.custom_fields.type}:${i.custom_fields.reference_id}`
       }
     })
-  } catch (err) {}
+
+    return true
+  } catch (err) {
+    const error = handleAxiosError(err)
+
+    $q.notify({
+      message: error.message,
+      classes: 'rounded-lg q-notification-custom',
+      color: 'black',
+      icon: 'error',
+      iconColor: 'negative',
+      timeout: 5000
+    })
+  }
+
+  return false
 }
 const getStatusTextColor = status => {
   if (status === 'PAID') return 'text-positive'
@@ -134,9 +153,9 @@ const getStatusTextColor = status => {
 
 onMounted(async () => {
   const hook = async () => {
-    await getBills()
+    const getBillsSuccess = await getBills()
 
-    return (pageLoading.value = false)
+    return (pageLoading.value = !getBillsSuccess)
   }
 
   if (props.parentLoading) {

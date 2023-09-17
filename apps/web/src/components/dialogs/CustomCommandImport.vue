@@ -66,7 +66,7 @@
 import { useDialogPluginComponent } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
-import { resolveCustomCommandJSON } from 'src/utils/Utils'
+import { handleAxiosError, resolveCustomCommandJSON } from 'src/utils/Utils'
 import { defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
 
@@ -83,8 +83,7 @@ export default defineComponent({
       file = ref(null)
 
     const publicCommands = ref([]),
-      getCommandsLoading = ref(true),
-      getCommandsError = ref(null)
+      getCommandsLoading = ref(true)
 
     return {
       guild,
@@ -95,7 +94,6 @@ export default defineComponent({
 
       publicCommands,
       getCommandsLoading,
-      getCommandsError,
 
       onConfirm() {
         onDialogOK({ command: command.value })
@@ -113,15 +111,27 @@ export default defineComponent({
 
   methods: {
     async getPublicCommands() {
-      return interfaces.common
-        .getCustomCommands()
-        .then(response => {
-          this.publicCommands = response.data
+      try {
+        const response = await interfaces.common.getCustomCommands(),
+          { data } = response
+
+        this.publicCommands = data
+
+        return true
+      } catch (err) {
+        const error = handleAxiosError(err)
+
+        this.$q.notify({
+          message: error.message,
+          classes: 'rounded-lg q-notification-custom',
+          color: 'black',
+          icon: 'error',
+          iconColor: 'negative',
+          timeout: 5000
         })
-        .catch(err => {
-          this.getCommandsError = err.response.data
-          console.error(err)
-        })
+      }
+
+      return false
     },
     onSelectFile(file) {
       const reader = new FileReader()
@@ -154,8 +164,16 @@ export default defineComponent({
         this.onConfirm()
         event('import_public_custom_command', { event_category: 'utility' })
       } catch (err) {
-        this.getCommandsError = err.response.data
-        console.error(err)
+        const error = handleAxiosError(err)
+
+        this.$q.notify({
+          message: error.message,
+          classes: 'rounded-lg q-notification-custom',
+          color: 'black',
+          icon: 'error',
+          iconColor: 'negative',
+          timeout: 5000
+        })
       } finally {
         this.getCommandsLoading = false
       }
@@ -163,9 +181,9 @@ export default defineComponent({
   },
 
   async mounted() {
-    await this.getPublicCommands()
+    const getPublicCommandsSuccess = await this.getPublicCommands()
 
-    this.getCommandsLoading = false
+    this.getCommandsLoading = !getPublicCommandsSuccess
   }
 })
 </script>

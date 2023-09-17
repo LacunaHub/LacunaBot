@@ -322,16 +322,17 @@
 </template>
 
 <script>
+import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
 import { defineComponent, ref } from 'vue'
-import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { event } from 'vue-gtag'
 
-import qiwiLogo from 'src/assets/qiwi-logo.svg'
-import paypalLogo from 'src/assets/paypal-logo.svg'
 import boostyLogo from 'src/assets/boosty-logo.svg'
 import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
+import paypalLogo from 'src/assets/paypal-logo.svg'
+import qiwiLogo from 'src/assets/qiwi-logo.svg'
+import { handleAxiosError } from 'src/utils/Utils'
 import LacunaDiamondTransfer from './LacunaDiamondTransfer.vue'
 
 export default defineComponent({
@@ -393,10 +394,10 @@ export default defineComponent({
             onDialogOK()
           })
           .catch(err => {
-            console.error(err)
+            const error = handleAxiosError(err)
 
             $q.notify({
-              message: err.response.data,
+              message: error.message,
               classes: 'rounded-lg q-notification-custom',
               color: 'black',
               icon: 'error',

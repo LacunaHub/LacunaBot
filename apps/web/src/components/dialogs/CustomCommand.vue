@@ -418,24 +418,25 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { useGuildStore } from 'src/stores/guild'
 import { interfaces } from 'src/boot/axios'
-import { discordAppCommandNameRegexp, customCommandComponentLimits } from 'src/utils/Constants'
+import { useGuildStore } from 'src/stores/guild'
+import { customCommandComponentLimits, discordAppCommandNameRegexp } from 'src/utils/Constants'
+import { handleAxiosError } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
-import CustomCommandOption from './CustomCommandOption.vue'
+import { useI18n } from 'vue-i18n'
+import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
+import ComponentActionForwardToCommand from './ComponentActionForwardToCommand.vue'
+import ComponentActionModifyRoles from './ComponentActionModifyRoles.vue'
+import ComponentActionModifyWallet from './ComponentActionModifyWallet.vue'
+import ComponentActionOverwriteChannelPermissions from './ComponentActionOverwriteChannelPermissions.vue'
 import ComponentActionReply from './ComponentActionReply.vue'
 import ComponentActionSendMessage from './ComponentActionSendMessage.vue'
-import ComponentActionModifyRoles from './ComponentActionModifyRoles.vue'
-import ComponentActionForwardToCommand from './ComponentActionForwardToCommand.vue'
-import ComponentConditionCompareValues from './ComponentConditionCompareValues.vue'
-import ComponentActionModifyWallet from './ComponentActionModifyWallet.vue'
-import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
-import CustomCommandImport from './CustomCommandImport.vue'
 import ComponentActionShowModal from './ComponentActionShowModal.vue'
-import ComponentActionOverwriteChannelPermissions from './ComponentActionOverwriteChannelPermissions.vue'
-import { useI18n } from 'vue-i18n'
+import ComponentConditionCompareValues from './ComponentConditionCompareValues.vue'
+import CustomCommandImport from './CustomCommandImport.vue'
+import CustomCommandOption from './CustomCommandOption.vue'
 
 export default defineComponent({
   name: 'CustomCommand',
@@ -504,16 +505,16 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          interfaces.guilds
+          return interfaces.guilds
             .updateCustomCommands(guild._id, { method: mode.value.toLowerCase(), data: command.value })
             .then(response => {
               onDialogOK({ mode: mode.value, command: response.data })
             })
             .catch(err => {
-              console.error(err)
+              const error = handleAxiosError(err)
 
               $q.notify({
-                message: $t(`errors.custom_commands.${err.response.data}`),
+                message: error.message,
                 classes: 'rounded-lg q-notification-custom',
                 color: 'black',
                 icon: 'error',
@@ -536,16 +537,16 @@ export default defineComponent({
       onDelete() {
         confirmLoading.value = true
 
-        interfaces.guilds
+        return interfaces.guilds
           .updateCustomCommands(guild._id, { method: 'delete', data: command.value })
           .then(() => {
             onDialogOK({ mode: 'DELETE', command: command.value })
           })
           .catch(err => {
-            console.error(err)
+            const error = handleAxiosError(err)
 
             $q.notify({
-              message: $t(`errors.custom_commands.${err.response.data}`),
+              message: error.message,
               classes: 'rounded-lg q-notification-custom',
               color: 'black',
               icon: 'error',
@@ -836,10 +837,10 @@ export default defineComponent({
           })
         })
         .catch(err => {
-          console.error(err)
+          const error = handleAxiosError(err)
 
           this.$q.notify({
-            message: this.$t(`errors.custom_commands.${err.response.data}`),
+            message: error.message,
             classes: 'rounded-lg q-notification-custom',
             color: 'black',
             icon: 'error',

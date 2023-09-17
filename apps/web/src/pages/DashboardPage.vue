@@ -1,13 +1,9 @@
 <template>
   <q-page class="q-ma-md row justify-center items-start">
-    <!-- <div v-if="pageLoading" class="absolute-center">
-      <q-spinner-tail color="white" size="64px"></q-spinner-tail>
-    </div> -->
-
-    <!-- <div v-if="!pageLoading" class="row q-col-gutter-md dashboard-page-container">
+    <div id="dashboard-page-container" class="row q-col-gutter-md">
       <div class="col-12">
         <div class="shadow-0 rounded-lg">
-          <q-toolbar class="bg-dark-1 q-py-md rounded-t-lg">
+          <q-toolbar v-if="pageLoading" class="bg-dark-1 q-pa-md rounded-t-lg">
             <q-item-section avatar>
               <q-skeleton class="rounded-circle" type="QAvatar" />
             </q-item-section>
@@ -19,81 +15,52 @@
             </q-item-section>
           </q-toolbar>
 
-          <q-tabs class="bg-dark-1 rounded-b-lg" align="left" indicator-color="transparent">
-            <q-tab :ripple="false">
-              <q-skeleton type="rect" width="100%" />
-            </q-tab>
-            <q-tab :ripple="false">
-              <q-skeleton type="rect" width="100%" />
-            </q-tab>
-            <q-tab :ripple="false">
-              <q-skeleton type="rect" width="100%" />
-            </q-tab>
+          <q-toolbar v-else class="bg-dark-1 q-pa-md rounded-t-lg">
+            <q-item-section avatar>
+              <q-avatar size="48px">
+                <img :src="user.avatarURL" alt="User Avatar" />
+              </q-avatar>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>{{ user.name }}</q-item-label>
+            </q-item-section>
+          </q-toolbar>
+
+          <q-tabs class="bg-dark-1 rounded-b-lg" no-caps align="left">
+            <q-route-tab to="/@me" :label="$t('pages.dashboard.profile')"></q-route-tab>
+            <q-route-tab to="/@me/guilds" :label="$t('pages.dashboard.my_guilds')"></q-route-tab>
+            <q-route-tab to="/@me/bills" :label="$t('pages.dashboard.bills')"></q-route-tab>
           </q-tabs>
         </div>
       </div>
-    </div> -->
 
-    <transition enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown" appear>
-      <div id="dashboard-page-container" class="row q-col-gutter-md">
-        <div class="col-12">
-          <div class="shadow-0 rounded-lg">
-            <q-toolbar v-if="pageLoading" class="bg-dark-1 q-pa-md rounded-t-lg">
-              <q-item-section avatar>
-                <q-skeleton class="rounded-circle" type="QAvatar" />
-              </q-item-section>
-
-              <q-item-section>
-                <q-item-label>
-                  <q-skeleton type="text" width="100px" />
-                </q-item-label>
-              </q-item-section>
-            </q-toolbar>
-
-            <q-toolbar v-else class="bg-dark-1 q-pa-md rounded-t-lg">
-              <q-item-section avatar>
-                <q-avatar size="48px">
-                  <img :src="user.avatarURL" alt="User Avatar" />
-                </q-avatar>
-              </q-item-section>
-
-              <q-item-section>
-                <q-item-label>{{ user.name }}</q-item-label>
-              </q-item-section>
-            </q-toolbar>
-
-            <q-tabs class="bg-dark-1 rounded-b-lg" no-caps align="left">
-              <q-route-tab to="/@me" :label="$t('pages.dashboard.profile')"></q-route-tab>
-              <q-route-tab to="/@me/guilds" :label="$t('pages.dashboard.my_guilds')"></q-route-tab>
-              <q-route-tab to="/@me/bills" :label="$t('pages.dashboard.bills')"></q-route-tab>
-            </q-tabs>
-          </div>
-        </div>
-
-        <div class="col-12">
-          <router-view v-slot="{ Component }">
-            <transition enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown" mode="out-in">
-              <keep-alive>
-                <component :is="Component" :parent-loading="pageLoading"></component>
-              </keep-alive>
-            </transition>
-          </router-view>
-        </div>
+      <div class="col-12">
+        <router-view v-slot="{ Component }">
+          <transition enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown" mode="out-in">
+            <keep-alive>
+              <component :is="Component" :parent-loading="pageLoading"></component>
+            </keep-alive>
+          </transition>
+        </router-view>
       </div>
-    </transition>
+    </div>
   </q-page>
 </template>
 
 <script setup>
-import { useMeta } from 'quasar'
+import { useMeta, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { useUserStore } from 'src/stores/user'
+import { handleAxiosError } from 'src/utils/Utils'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-const pageLoading = ref(true)
-const user = useUserStore(),
+const $q = useQuasar(),
   router = useRouter()
+
+const pageLoading = ref(true)
+const user = useUserStore()
 
 useMeta({
   title: 'My Profile',
@@ -115,19 +82,32 @@ const getMe = async () => {
       { data } = response
 
     user.$patch({ _guilds: data.guilds, flags: data.user.flags })
-  } catch (err) {
-    const { status } = err.response
 
-    if (status === 401) {
+    return true
+  } catch (err) {
+    if (err.response?.status === 401) {
       await router.push({ path: '/authorize' })
+    } else {
+      const error = handleAxiosError(err)
+
+      $q.notify({
+        message: error.message,
+        classes: 'rounded-lg q-notification-custom',
+        color: 'black',
+        icon: 'error',
+        iconColor: 'negative',
+        timeout: 5000
+      })
     }
   }
+
+  return false
 }
 
 onMounted(async () => {
-  await getMe()
+  const getMeSuccess = await getMe()
 
-  pageLoading.value = false
+  pageLoading.value = !getMeSuccess
 })
 </script>
 

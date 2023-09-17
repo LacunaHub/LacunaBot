@@ -62,7 +62,7 @@
 import { useDialogPluginComponent } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
-import { resolveAutomationJSON } from 'src/utils/Utils'
+import { handleAxiosError, resolveAutomationJSON } from 'src/utils/Utils'
 import { defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
 
@@ -107,14 +107,27 @@ export default defineComponent({
 
   methods: {
     async getPublicAutomation() {
-      return interfaces.common
-        .getAutomationTasks()
-        .then(response => {
-          this.publicAutomation = response.data
+      try {
+        const response = await interfaces.common.getAutomationTasks(),
+          { data } = response
+
+        this.publicAutomation = data
+
+        return true
+      } catch (err) {
+        const error = handleAxiosError(err)
+
+        this.$q.notify({
+          message: error.message,
+          classes: 'rounded-lg q-notification-custom',
+          color: 'black',
+          icon: 'error',
+          iconColor: 'negative',
+          timeout: 5000
         })
-        .catch(err => {
-          console.error(err)
-        })
+      }
+
+      return false
     },
     onSelectFile(file) {
       const reader = new FileReader()
@@ -147,7 +160,16 @@ export default defineComponent({
         this.onConfirm()
         event('import_public_automation', { event_category: 'utility' })
       } catch (err) {
-        console.error(err)
+        const error = handleAxiosError(err)
+
+        this.$q.notify({
+          message: error.message,
+          classes: 'rounded-lg q-notification-custom',
+          color: 'black',
+          icon: 'error',
+          iconColor: 'negative',
+          timeout: 5000
+        })
       } finally {
         this.getAutomationLoading = false
       }
@@ -155,9 +177,9 @@ export default defineComponent({
   },
 
   async mounted() {
-    await this.getPublicAutomation()
+    const getPublicAutomationSuccess = await this.getPublicAutomation()
 
-    this.getAutomationLoading = false
+    this.getAutomationLoading = !getPublicAutomationSuccess
   }
 })
 </script>
