@@ -48,7 +48,7 @@ async function handler(self: Lacuna, node: Node) {
                 guildPlayer.queue.map((i: Track) => {
                     return TrackUtils.build(
                         {
-                            track: i.track,
+                            encoded: i.track,
                             info: {
                                 author: i.author,
                                 identifier: i.identifier,
