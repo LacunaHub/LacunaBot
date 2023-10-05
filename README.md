@@ -260,7 +260,7 @@ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
 
 ```make
 NODE_ENV=development
-API_PORT=3000
+API_PORT=5810
 DB_URL=mongodb://127.0.0.1:27017/lacuna
 QMONGO_DB_URL=mongodb://127.0.0.1:27017/lacuna-qmongo
 
@@ -298,7 +298,7 @@ TWITCH_SIGNING_SECRET=
 
 WEBSITE_DOMAIN=localhost
 # Only for local development
-WEBSITE_PORT=9000
+WEBSITE_PORT=5820
 
 WINTER_MUSIC_NODE=NAME:IP:PORT:PASSWORD
 
