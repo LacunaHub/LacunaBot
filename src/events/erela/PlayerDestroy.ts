@@ -13,17 +13,17 @@ const handler = async (self: Lacuna, player: Player) => {
                 module: 'MusicPlayerDestroy',
                 action: 'RemoveComponentsFromPlayerMessage',
                 error: err,
-                guild_id: player.guild
+                guild_id: player.guildId
             })
         }
     }
 
     player.set('message', null)
     player.set('collector', null)
-    await self.db.qdb.delete(`guildPlayers.${player.guild}`)
+    await self.db.qdb.delete(`guildPlayers.${player.guildId}`)
 
-    self.logger.log(`[ErelaPlayerDestroy] Player ${player.guild} destroyed`)
-    await self.logger.appendServerLog(player.guild, {
+    self.logger.log(`[ErelaPlayerDestroy] Player ${player.guildId} destroyed`)
+    await self.logger.appendServerLog(player.guildId, {
         level: 'LOG',
         module: 'Music',
         action: 'PlayerDestroy',

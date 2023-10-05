@@ -11,7 +11,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: state.guild.id })
     const player = self.player.get(state.guild.id)
 
-    if (player && state.channelId === player.voiceChannel) {
+    if (player && state.channelId === player.voiceChannelId) {
         const listeners: number = state.channel.members.filter(m => !m.user.bot).size
 
         if (listeners) {

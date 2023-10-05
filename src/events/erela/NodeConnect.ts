@@ -36,9 +36,9 @@ async function handler(self: Lacuna, node: Node) {
         }
 
         player = self.player.create({
-            guild: guild.id,
-            voiceChannel: voiceChannel.id,
-            textChannel: textChannel.id,
+            guildId: guild.id,
+            voiceChannelId: voiceChannel.id,
+            textChannelId: textChannel.id,
             selfDeafen: true,
             volume: guildPlayer.volume
         })
@@ -70,7 +70,7 @@ async function handler(self: Lacuna, node: Node) {
         if (guildPlayer.trackRepeat) player.setTrackRepeat(guildPlayer.trackRepeat)
         if (guildPlayer.queueRepeat) player.setQueueRepeat(guildPlayer.queueRepeat)
 
-        if (player.voiceChannel) player.connect()
+        if (player.voiceChannelId) player.connect()
         else player.setVoiceChannel(voiceChannel.id)
 
         await player.play()

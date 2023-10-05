@@ -75,7 +75,7 @@ const handler = async (
             const message = player?.get<Message>('message')
 
             if (message?.id === interaction.message?.id) {
-                if (interaction.member.voice.channel?.id !== player.voiceChannel) {
+                if (interaction.member.voice.channel?.id !== player.voiceChannelId) {
                     await interaction.reply({
                         content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.next.text_different_voice', {
                             user: `**${interaction.member.displayName}**`

@@ -17,6 +17,7 @@ const handler = async (self: Lacuna) => {
             }
         ],
         clientId: self.user.id,
+        clientName: `${self.user.username}#${self.cluster.id}`,
         shards: self.options.shardCount,
         send(id, payload) {
             const guild = self.guilds.cache.get(id)
