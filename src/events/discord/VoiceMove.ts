@@ -13,7 +13,7 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
     const player = self.player.get(state.guild.id)
 
     if (player) {
-        const voice = [before, state].find(c => c.channelId == player.voiceChannel)
+        const voice = [before, state].find(c => c.channelId === player.voiceChannelId)
 
         if (voice) {
             const listens = Boolean(voice.channel.members.filter(m => !m.user.bot).size)

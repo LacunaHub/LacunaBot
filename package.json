@@ -28,7 +28,7 @@
     "discord-hybrid-sharding": "2.1.x",
     "discord.js": "14.13.x",
     "dotenv": "8.2.x",
-    "erela.js": "github:daniquoll/erela.js",
+    "erela.js": "github:daniquoll/erela.js#2.4.1",
     "isolated-vm": "4.6.x",
     "koa": "2.14.x",
     "koa-body": "6.0.x",

@@ -112,9 +112,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     const player = self.player.create({
-        guild: interaction.guild.id,
-        voiceChannel: voice.id,
-        textChannel: interaction.channelId,
+        guildId: interaction.guild.id,
+        voiceChannelId: voice.id,
+        textChannelId: interaction.channelId,
         selfDeafen: true,
         volume: server.modules.music.default_volume
     })

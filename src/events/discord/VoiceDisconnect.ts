@@ -12,13 +12,13 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
 
     const player = self.player.get(state.guild.id)
 
-    if (player && !player.voiceChannel && state.member.id === self.user.id) {
+    if (player && !player.voiceChannelId && state.member.id === self.user.id) {
         player.destroy()
 
         return
     }
 
-    if (player?.voiceChannel === channel?.id) {
+    if (player?.voiceChannelId === channel?.id) {
         const listeners: number = channel.members.filter(m => !m.user.bot).size
 
         if (!listeners) {

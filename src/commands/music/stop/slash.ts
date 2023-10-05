@@ -18,7 +18,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (player.voiceChannel !== (interaction.member as any).voice.channelId) {
+    if (player.voiceChannelId !== (interaction.member as any).voice.channelId) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.next.text_different_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
             ephemeral: true

@@ -13,10 +13,10 @@ async function handler(self: Lacuna, player: Player) {
     }
 
     if (message) {
-        await self.db.qdb.set(`guildPlayers.${player.guild}`, {
-            guildId: player.guild,
-            voiceChannelId: player.voiceChannel,
-            textChannelId: player.textChannel,
+        await self.db.qdb.set(`guildPlayers.${player.guildId}`, {
+            guildId: player.guildId,
+            voiceChannelId: player.voiceChannelId,
+            textChannelId: player.textChannelId,
             messageId: message.id,
             volume: player.volume,
             trackRepeat: player.trackRepeat,
@@ -24,11 +24,11 @@ async function handler(self: Lacuna, player: Player) {
             queue: [player.queue.current, ...player.queue]
         })
     } else {
-        await self.db.qdb.delete(`guildPlayers.${player.guild}`)
+        await self.db.qdb.delete(`guildPlayers.${player.guildId}`)
     }
 
-    self.logger.log(`[ErelaTrackStart] Player ${player.guild} playback started`)
-    await self.logger.appendServerLog(player.guild, {
+    self.logger.log(`[ErelaTrackStart] Player ${player.guildId} playback started`)
+    await self.logger.appendServerLog(player.guildId, {
         level: 'LOG',
         module: 'Music',
         action: 'TrackEnd',

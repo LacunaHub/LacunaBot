@@ -13,7 +13,7 @@ const handler = async (self: Lacuna, player: Player) => {
                 module: 'MusicQueueEnd',
                 action: 'RemoveComponentsFromPlayerMessage',
                 error: err,
-                guild_id: player.guild
+                guild_id: player.guildId
             })
         }
     }
@@ -23,10 +23,10 @@ const handler = async (self: Lacuna, player: Player) => {
         'timeout',
         setTimeout(() => player.destroy(), 300000)
     )
-    await self.db.qdb.delete(`guildPlayers.${player.guild}`)
+    await self.db.qdb.delete(`guildPlayers.${player.guildId}`)
 
-    self.logger.log(`[ErelaQueueEnd] Queue of player ${player.guild} ended`)
-    await self.logger.appendServerLog(player.guild, {
+    self.logger.log(`[ErelaQueueEnd] Queue of player ${player.guildId} ended`)
+    await self.logger.appendServerLog(player.guildId, {
         level: 'LOG',
         module: 'Music',
         action: 'QueueEnd',
