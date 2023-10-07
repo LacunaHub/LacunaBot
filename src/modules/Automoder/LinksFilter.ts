@@ -181,11 +181,11 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
     }
 
     if (send_message && (config.send_message.content || config.send_message.embed.active)) {
-        const replacer = new Replacer(null, { message: message, guild: message.guild, member: message.member })
-        const content = await replacer.replaceTemplateMessage(config.send_message)
+        const replacer = new Replacer({ message: message, guild: message.guild, member: message.member }),
+            messagePayload = await replacer.replaceTemplateMessage(config.send_message)
 
         try {
-            await message.channel.send(content)
+            await message.channel.send(messagePayload)
         } catch (err) {
             await self.logger.handleError({ module: 'LinksFilter', action: 'SendMessage', error: err, guild_id: message.guildId })
         }

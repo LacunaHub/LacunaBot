@@ -2,116 +2,189 @@ import { BaseGuildTextChannel, ChannelType, EmbedBuilder, Guild, GuildMember, Me
 import moment from 'moment'
 import db from '../database'
 import { MessageEmbed as IMessageEmbed } from '../database/schemas/Servers'
-import logger from '../internals/Logger'
-import { escapeRegexp, parseCommandArguments, resolveObjectPath } from '../internals/utility/Utils'
+import { IUserLevel, IUserWallet } from '../database/schemas/Users'
+import { escapeRegexp, resolveObjectPath } from '../internals/utility/Utils'
+
+const availableCodeSnippets = {
+    CHOOSE: (...args: string[]) => {
+        if (!args.some(arg => typeof arg !== 'number' || typeof arg !== 'string')) throw new TypeError()
+        if (!args.length || args.length <= 1) throw new ReferenceError()
+
+        const random = Math.floor(Math.random() * args.length)
+        return args[random]
+    },
+    DATE: (...args: string[]) => {
+        let timestamp = Number(args[0]),
+            format = args[1],
+            utc = args[2],
+            locale = args[3]
+
+        if (typeof timestamp !== 'number' || isNaN(timestamp)) timestamp = Date.now()
+        if (typeof format !== 'string') format = 'DD MMM YYYY HH:mm'
+        if (!/\+\d{2}:\d{2}/.test(utc)) utc = '+00:00'
+        if (typeof locale !== 'string' || !['en', 'ru'].includes(locale)) locale = 'ru'
+
+        return moment(timestamp).locale(locale).utcOffset(utc).format(format)
+    },
+    DATENOW: () => {
+        return Date.now()
+    },
+    FIXNUM: (...args: string[]) => {
+        let number = Number(args[0]),
+            digits = Number(args[1])
+
+        if (isNaN(number)) return 0
+        if (isNaN(digits) || digits < 0 || digits > 20) digits = 0
+
+        return number.toFixed(digits)
+    },
+    LOWER: (...args: string[]) => {
+        let str = args[0]
+
+        if (typeof str !== 'string') throw new TypeError()
+
+        return str.toLowerCase()
+    },
+    MATH: (...args: any[]) => {
+        let expression = args[0],
+            digits = Number(args[1])
+
+        if (typeof expression !== 'string') throw new TypeError()
+        if (typeof digits !== 'number' || digits < 0 || digits > 20 || isNaN(digits)) digits = 0
+
+        expression = expression.match(/(?:[0-9\-\+\*\/\^\(\)])+/g) || []
+
+        let result = eval(expression.join(' '))
+
+        if (typeof result !== 'number') result = Number(result)
+
+        return result.toFixed(digits)
+    },
+    NUMDECL: (...args: string[]) => {
+        let number = Number(args[0]),
+            titles = args[1]?.split('|'),
+            locale = args[2]
+
+        if (typeof number !== 'number' || isNaN(number)) throw new TypeError()
+        if (!Array.isArray(titles) || titles.length <= 1) throw new TypeError()
+        if (typeof locale !== 'string' || !['ru', 'en'].includes(locale)) locale = 'ru'
+
+        if (locale == 'ru') {
+            const cases = [2, 0, 1, 1, 1, 2]
+
+            return titles[number % 100 > 4 && number % 100 < 20 ? 2 : cases[number % 10 < 5 ? number % 10 : 5]]
+        }
+
+        if (locale == 'en') {
+            return number > 1 ? titles[1] : titles[0]
+        }
+    },
+    RANDOM: (...args: string[]) => {
+        let start = Number(args[0]),
+            end = Number(args[1])
+
+        if (typeof start !== 'number' || isNaN(start) || start < -Math.pow(2, 53)) start = 0
+        if (typeof end !== 'number' || isNaN(end) || end > Math.pow(2, 53)) end = 100
+
+        return `${Math.floor(Math.random() * end) + start}`
+    },
+    REPLACE: (...args: string[]) => {
+        let str = args[0],
+            search = args[1],
+            replacement = args[2],
+            flags = args[3]
+
+        if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string') throw new TypeError()
+        if (!flags || !flags.split('').some(flag => ['g', 'i'].includes(flag))) flags = 'g'
+
+        const regex = new RegExp(`${search}`, flags)
+
+        return str.replace(regex, replacement)
+    },
+    TRUNCATE: (...args: string[]) => {
+        let str = args[0],
+            limit = Number(args[1]),
+            end = args[2]
+
+        if (typeof str !== 'string') throw new TypeError()
+        if (typeof limit !== 'number') limit = 100
+        if (typeof end !== 'string') end = '...'
+
+        if (str.length > limit) return str.substring(0, limit) + end
+        else return str
+    },
+    TRIM: (...args: string[]) => {
+        let str = args[0]
+
+        if (typeof str !== 'string') throw new TypeError()
+
+        return str.replace(/\s+/g, ' ').trim()
+    },
+    UPPER: (...args: string[]) => {
+        let str = args[0]
+
+        if (typeof str !== 'string') throw new TypeError()
+
+        return str.toUpperCase()
+    }
+}
 
 export default class Replacer {
-    public string: string
-    public shapers: ReplacerShapers
+    public shapers: IReplacerShapers
 
-    constructor(string?: string, shapers?: ReplacerShapers) {
-        this.string = string
-
+    constructor(shapers?: IReplacerShapers) {
         this.shapers = shapers
     }
 
-    replacers(string: string = this.string): string[] {
-        const replacers = string.match(/{(?!-)\s*[^{}]+\s*}/gi) || []
-        return replacers.map(replacer => replacer.replace(/{|}/g, '').trim())
+    /**
+     * Get all values enclosed in {...} from the string.
+     */
+    getReplacers(string: string): string[] {
+        return (string.match(/{(?!-)\s*[^{}]+\s*}/gi) || []).map((replacer: string) => replacer.replace(/{|}/g, '').trim())
     }
 
-    codeSnippets(string: string = this.string) {
-        const snippets: string[] = string.match(/{\-\s*[A-Z]+\([^{}]*\)\s*\-}/g) || []
-        return snippets
+    /**
+     * Get all values enclosed in {-...-} from the string.
+     */
+    getCodeSnippets(string: string) {
+        return (string.match(/{\-\s*[A-Z]+\([^{}]*\)\s*\-}/g) || [])
             .map((snippet: string) => {
                 snippet = snippet.replace(/{-|-}/g, '').trim()
+                const name = snippet.match(/^[A-Z]+/).toString(),
+                    args = snippet
+                        .match(/\([^{}]*\)$/)
+                        .toString()
+                        .replace(/^\(/, '')
+                        .replace(/\)$/, '')
 
-                const name: string = snippet.match(/^[A-Z]+/).toString()
-                const args: string = snippet
-                    .match(/\([^{}]*\)$/)
-                    .toString()
-                    .replace(/^\(/, '')
-                    .replace(/\)$/, '')
-
-                const available: string[] = [
-                    'CHOOSE',
-                    'DATE',
-                    'DATENOW',
-                    'FIXNUM',
-                    'LOWER',
-                    'MATH',
-                    'NUMDECL',
-                    'RANDOM',
-                    'REPLACE',
-                    'TRUNCATE',
-                    'TRIM',
-                    'UPPER'
-                ]
-
-                if (available.includes(name)) {
-                    let fn = null
-
-                    switch (name) {
-                        case 'CHOOSE':
-                            fn = CHOOSE
-                            break
-                        case 'DATE':
-                            fn = DATE
-                            break
-                        case 'DATENOW':
-                            fn = DATENOW
-                            break
-                        case 'FIXNUM':
-                            fn = FIXNUM
-                            break
-                        case 'LOWER':
-                            fn = LOWER
-                            break
-                        case 'MATH':
-                            fn = MATH
-                            break
-                        case 'NUMDECL':
-                            fn = NUMDECL
-                            break
-                        case 'RANDOM':
-                            fn = RANDOM
-                            break
-                        case 'REPLACE':
-                            fn = REPLACE
-                            break
-                        case 'TRUNCATE':
-                            fn = TRUNCATE
-                            break
-                        case 'TRIM':
-                            fn = TRIM
-                            break
-                        case 'UPPER':
-                            fn = UPPER
-                            break
-                    }
-
-                    return { name: name, args: args, fn }
+                if (Object.keys(availableCodeSnippets).includes(name)) {
+                    return { name: name, args: args, fn: availableCodeSnippets[name] }
                 }
             })
-            .filter(f => f)
+            .filter(i => i)
     }
 
-    async replacements() {
-        const message = this.shapers.message
-        const guild = this.shapers.guild
-        const member = this.shapers.member
+    /**
+     * Get an object with replaceable values.
+     */
+    async getReplacements() {
+        const message = this.shapers.message,
+            guild = this.shapers.guild,
+            member = this.shapers.member
 
-        const activities = (
-            await db.users.find({ $or: [{ 'activities.levels.guild_id': guild.id }, { 'activities.wallets.guild_id': guild.id }] })
-        ).map(i => ({
-            user: { id: i._id, ...i.user },
-            level: i.activities.levels.find(i => i.guild_id == guild.id),
-            wallet: i.activities.wallets.find(i => i.guild_id == guild.id)
-        }))
-        const memberActivity = activities.find(i => i.user.id == member.id)
-        const server_owner: GuildMember = await guild.members.fetch(guild.ownerId)
+        let memberActivity: { level: IUserLevel; wallet: IUserWallet }, guildOwner: GuildMember
 
-        const args: string[] = parseCommandArguments(message?.content?.split(' ')?.slice(1)?.join(' '))
+        if (member) {
+            const userDoc = await db.users.findOne({ _id: member.id })
+            memberActivity = {
+                level: userDoc.activities.levels.find(i => i.guild_id === guild.id),
+                wallet: userDoc.activities.wallets.find(i => i.guild_id === guild.id)
+            }
+        }
+
+        if (guild) {
+            guildOwner = await guild.fetchOwner()
+        }
 
         return {
             message: {
@@ -125,7 +198,6 @@ export default class Replacer {
                     topic: (message?.channel as BaseGuildTextChannel)?.topic,
                     type: message?.channel?.type
                 },
-                args: Object.assign({}, { map: args.join(' '), ...args }),
                 created_at: message?.createdTimestamp,
                 edited_at: message?.editedTimestamp,
                 id: message?.id,
@@ -136,7 +208,7 @@ export default class Replacer {
                     members: message?.mentions?.members?.size
                         ? Object.assign(
                               {},
-                              ...message?.mentions?.members?.map((m, i, col) => ({
+                              ...message.mentions.members.map((m, i, col) => ({
                                   [[...col.keys()].indexOf(i)]: {
                                       mention: `<@${m.id}>`,
                                       username: m.user.username,
@@ -176,7 +248,7 @@ export default class Replacer {
                     roles: message?.mentions?.roles?.size
                         ? Object.assign(
                               {},
-                              ...message?.mentions?.roles?.map((m, i, col) => ({
+                              ...message.mentions.roles.map((m, i, col) => ({
                                   [[...col.keys()].indexOf(i)]: {
                                       mention: `<@&${m.id}>`,
                                       name: m.name,
@@ -191,7 +263,7 @@ export default class Replacer {
                     channels: message?.mentions?.channels?.size
                         ? Object.assign(
                               {},
-                              ...message?.mentions?.channels?.map((m, i, col) => ({
+                              ...message.mentions.channels.map((m, i, col) => ({
                                   [[...col.keys()].indexOf(i)]: {
                                       mention: `<#${m.id}>`,
                                       type: m.type
@@ -202,55 +274,54 @@ export default class Replacer {
                 }
             },
             guild: {
-                name: guild.name,
-                acronym: guild.nameAcronym,
-                afk_channel_id: guild.afkChannelId,
-                system_channel_id: guild.systemChannelId,
-                public_updates_channel_id: guild.publicUpdatesChannelId,
-                rules_channel_id: guild.rulesChannelId,
-                banner: guild.bannerURL(),
+                name: guild?.name,
+                acronym: guild?.nameAcronym,
+                afk_channel_id: guild?.afkChannelId,
+                system_channel_id: guild?.systemChannelId,
+                public_updates_channel_id: guild?.publicUpdatesChannelId,
+                rules_channel_id: guild?.rulesChannelId,
+                banner: guild?.bannerURL?.(),
                 channels: {
-                    total: guild.channels.cache.size,
-                    text: guild.channels.cache.filter(channel => channel.type == ChannelType.GuildText).size,
-                    voice: guild.channels.cache.filter(channel => channel.type == ChannelType.GuildVoice).size,
-                    news: guild.channels.cache.filter(channel => channel.type == ChannelType.GuildAnnouncement).size,
-                    category: guild.channels.cache.filter(channel => channel.type == ChannelType.GuildCategory).size
+                    total: guild?.channels?.cache?.size,
+                    text: guild?.channels?.cache?.filter?.(i => i.type === ChannelType.GuildText)?.size,
+                    voice: guild?.channels?.cache?.filter?.(i => i.type === ChannelType.GuildVoice)?.size,
+                    category: guild?.channels?.cache?.filter?.(i => i.type === ChannelType.GuildCategory)?.size
                 },
-                created_at: guild.createdTimestamp,
-                description: guild.description,
-                icon: guild.iconURL(),
-                id: guild.id,
+                created_at: guild?.createdTimestamp,
+                description: guild?.description,
+                icon: guild?.iconURL?.(),
+                id: guild?.id,
                 members: {
-                    total: guild.memberCount,
-                    bots: guild.members.cache.filter(member => member.user.bot).size,
-                    users: guild.members.cache.filter(member => !member.user.bot).size
+                    total: guild?.memberCount,
+                    bots: guild?.members?.cache?.filter?.(i => i.user.bot)?.size,
+                    users: guild?.members?.cache?.filter?.(i => !i.user.bot)?.size
                 },
                 owner: {
-                    username: server_owner?.user?.username,
-                    avatar: server_owner?.user?.displayAvatarURL(),
-                    display_name: server_owner?.displayName,
-                    tag: server_owner?.user?.tag,
-                    mention: `<@${guild.ownerId}>`,
-                    nickname: server_owner?.nickname
+                    username: guildOwner?.user?.username,
+                    avatar: guildOwner?.user?.displayAvatarURL(),
+                    display_name: guildOwner?.displayName,
+                    tag: guildOwner?.user?.tag,
+                    mention: `<@${guild?.ownerId ?? '1'}>`,
+                    nickname: guildOwner?.nickname
                 },
-                boosters_count: guild.premiumSubscriptionCount || 0,
-                boost_tier: guild.premiumTier,
-                splash: guild.splashURL(),
-                vanity_url: guild.vanityURLCode ? `https://discord.gg/${guild.vanityURLCode}` : null
+                boosters_count: guild?.premiumSubscriptionCount || 0,
+                boost_tier: guild?.premiumTier,
+                splash: guild?.splashURL?.(),
+                vanity_url: guild?.vanityURLCode ? `https://discord.gg/${guild.vanityURLCode}` : null
             },
             member: {
-                username: member.user.username,
-                avatar: member.user.displayAvatarURL(),
-                discriminator: member.user.discriminator,
-                display_name: member.displayName,
-                id: member.id,
-                tag: member.user.tag,
-                bot: member.user.bot,
-                mention: `<@${member.id}>`,
-                created_at: member.user.createdTimestamp,
-                joined_at: member.joinedTimestamp,
-                nickname: member.nickname,
-                premium_since: member.premiumSinceTimestamp,
+                username: member?.user?.username,
+                avatar: member?.user?.displayAvatarURL?.(),
+                discriminator: member?.user?.discriminator,
+                display_name: member?.displayName,
+                id: member?.id,
+                tag: member?.user?.tag,
+                bot: member?.user?.bot,
+                mention: `<@${member?.id}>`,
+                created_at: member?.user?.createdTimestamp,
+                joined_at: member?.joinedTimestamp,
+                nickname: member?.nickname,
+                premium_since: member?.premiumSinceTimestamp,
                 level: {
                     rank: memberActivity?.level?.experience?.level ?? 0,
                     current_xp: memberActivity?.level?.experience?.current ?? 0,
@@ -270,63 +341,66 @@ export default class Replacer {
                     {},
                     {
                         ...(memberActivity?.wallet?.currencies
-                            ?.reduce((x, y) => {
+                            ?.reduce?.((x, y) => {
                                 return y.id === 'DEFAULT' ? [y, ...x] : [...x, y]
                             }, [])
-                            ?.map(i => i.amount) ?? [0])
+                            ?.map?.(i => i.amount) ?? [0])
                     }
                 ),
                 voice: {
-                    name: member.voice?.channel?.name,
-                    id: member.voice?.channelId,
-                    mention: member.voice?.channelId ? `<#${member.voice.channelId}>` : null,
-                    full: member.voice?.channel?.full,
-                    position: member.voice?.channel?.rawPosition?.toString()
+                    name: member?.voice?.channel?.name,
+                    id: member?.voice?.channelId,
+                    mention: member?.voice?.channelId ? `<#${member.voice.channelId}>` : null,
+                    full: member?.voice?.channel?.full,
+                    position: member?.voice?.channel?.rawPosition?.toString?.()
                 },
-                roles: Object.assign(
-                    {},
-                    ...member.roles.cache.map(r => ({
-                        [r.id]: {
-                            name: r.name,
-                            mention: `<@&${r.id}>`,
-                            id: r.id,
-                            position: r.rawPosition.toString(),
-                            color: r.hexColor,
-                            created_at: r.createdTimestamp
-                        }
-                    }))
-                )
-            },
-            index: this.shapers.index ?? 0,
-            penalty: {
-                reason: this.shapers.penalty?.reason
+                roles: member?.roles?.cache?.size
+                    ? Object.assign(
+                          {},
+                          ...member.roles.cache.map(r => ({
+                              [r.id]: {
+                                  name: r.name,
+                                  mention: `<@&${r.id}>`,
+                                  id: r.id,
+                                  position: r.rawPosition.toString(),
+                                  color: r.hexColor,
+                                  created_at: r.createdTimestamp
+                              }
+                          }))
+                      )
+                    : {}
             }
         }
     }
 
-    async replace(string: string = this.string, customReplacements?: {}) {
-        const replacements = customReplacements ?? (await this.replacements())
+    /**
+     * Replace replacers and code snippets in the string.
+     */
+    async replace(string: string, customReplacements: IReplacerCustomShapers = {}) {
+        const replacers = this.getReplacers(string),
+            codeSnippets = this.getCodeSnippets(string),
+            replacements = { ...(await this.getReplacements()), ...customReplacements }
 
-        for (const replacer of this.replacers(string)) {
-            const regex = new RegExp(`{\\s*${escapeRegexp(replacer)}\\s*}`, 'g')
+        for (const replacer of replacers) {
+            const regexp = new RegExp(`{\\s*${escapeRegexp(replacer)}\\s*}`, 'g')
             const raws = replacer.split(/\s+\|\s+/)
 
             for (const replacement of raws) {
                 const i = raws.indexOf(replacement)
                 let value = resolveObjectPath(replacement, replacements)
 
-                if (typeof value === 'object' && value != null) value = resolveObjectPath(`${replacement}.${Object.keys(value)[0]}`, replacements)
+                if (typeof value === 'object' && value != null) {
+                    value = resolveObjectPath(`${replacement}.${Object.keys(value)[0]}`, replacements)
+                }
 
                 if (/".+"/.test(replacement)) raws[i] = replacement.substring(1, replacement.length - 1)
                 else raws[i] = value
             }
 
-            string = string.replace(regex, () => {
-                return raws.find(r => r)
-            })
+            string = string.replace(regexp, () => raws.find(i => i))
         }
 
-        for (const snippet of this.codeSnippets(string)) {
+        for (const snippet of codeSnippets) {
             const regex = new RegExp(`{-\\s*${escapeRegexp(snippet.name)}\([^{}]*\)\\s*-}`, 'g')
 
             let res: string
@@ -337,48 +411,48 @@ export default class Replacer {
                 res = `\`${snippet.name}#${err.name}\``
             }
 
-            string = string.replace(regex, () => {
-                return res
-            })
-            logger.info(`(Replacer: ${snippet.name}): on ${this.shapers.guild.name}`)
+            string = string.replace(regex, () => res)
         }
 
         return string
     }
 
-    async replaceTemplateMessage(template: { content: string; embed?: IMessageEmbed }) {
-        const content = await this.replace(template.content)
+    /**
+     * Replace replacers and code snippets in the template message and return message payload with content and embeds.
+     */
+    async replaceTemplateMessage(template: { content: string; embed?: IMessageEmbed }, customReplacements: IReplacerCustomShapers = {}) {
+        const content = await this.replace(template.content, customReplacements)
         let embed = {}
 
         if (template.embed && template.embed.active) {
-            const image_url = template.embed.image.url ? await this.replace(template.embed.image.url) : null
-            const footer_icon_url = template.embed.footer.icon_url ? await this.replace(template.embed.footer.icon_url) : null
-            const thumbnail_url = template.embed.thumbnail.url ? await this.replace(template.embed.thumbnail.url) : null
-            const avatar_icon_url = template.embed.author.icon_url ? await this.replace(template.embed.author.icon_url) : null
+            const imageURL = template.embed.image.url ? await this.replace(template.embed.image.url, customReplacements) : null,
+                footerIconURL = template.embed.footer.icon_url ? await this.replace(template.embed.footer.icon_url, customReplacements) : null,
+                thumbnailURL = template.embed.thumbnail.url ? await this.replace(template.embed.thumbnail.url, customReplacements) : null,
+                avatarIconURL = template.embed.author.icon_url ? await this.replace(template.embed.author.icon_url, customReplacements) : null
 
             embed = {
-                title: template.embed.title ? await this.replace(template.embed.title) : null,
-                description: template.embed.description ? await this.replace(template.embed.description) : null,
-                url: template.embed.url ? await this.replace(template.embed.url) : null,
-                timestamp: template.embed.timestamp ? Number(await this.replace(template.embed.timestamp)) : null,
+                title: template.embed.title ? await this.replace(template.embed.title, customReplacements) : null,
+                description: template.embed.description ? await this.replace(template.embed.description, customReplacements) : null,
+                url: template.embed.url ? await this.replace(template.embed.url, customReplacements) : null,
+                timestamp: template.embed.timestamp ? Number(await this.replace(template.embed.timestamp, customReplacements)) : null,
                 color: template.embed.color ? resolveColor(template.embed.color as any) : null,
                 footer: {
-                    text: template.embed.footer.text ? await this.replace(template.embed.footer.text) : null,
-                    icon_url: footer_icon_url
+                    text: template.embed.footer.text ? await this.replace(template.embed.footer.text, customReplacements) : null,
+                    icon_url: footerIconURL
                 },
-                image: image_url ? { url: image_url } : null,
-                thumbnail: thumbnail_url ? { url: thumbnail_url } : null,
+                image: imageURL ? { url: imageURL } : null,
+                thumbnail: thumbnailURL ? { url: thumbnailURL } : null,
                 author: {
-                    name: template.embed.author.name ? await this.replace(template.embed.author.name) : null,
-                    url: template.embed.author.url ? await this.replace(template.embed.author.url) : null,
-                    icon_url: avatar_icon_url
+                    name: template.embed.author.name ? await this.replace(template.embed.author.name, customReplacements) : null,
+                    url: template.embed.author.url ? await this.replace(template.embed.author.url, customReplacements) : null,
+                    icon_url: avatarIconURL
                 },
                 fields: template.embed.fields.length
                     ? await Promise.all(
                           template.embed.fields.map(async field => {
                               return {
-                                  name: field.name ? await this.replace(field.name) : null,
-                                  value: field.value ? await this.replace(field.value) : null,
+                                  name: field.name ? await this.replace(field.name, customReplacements) : null,
+                                  value: field.value ? await this.replace(field.value, customReplacements) : null,
                                   inline: Boolean(field.inline)
                               }
                           })
@@ -396,143 +470,13 @@ export default class Replacer {
     }
 }
 
-function CHOOSE(...args: string[]) {
-    if (!args.some(arg => typeof arg !== 'number' || typeof arg !== 'string')) throw new TypeError()
-    if (!args.length || args.length <= 1) throw new ReferenceError()
-
-    const random = Math.floor(Math.random() * args.length)
-    return args[random]
-}
-
-function DATE(...args: string[]) {
-    let timestamp = Number(args[0]),
-        format = args[1],
-        utc = args[2],
-        locale = args[3]
-
-    if (typeof timestamp !== 'number' || isNaN(timestamp)) timestamp = Date.now()
-    if (typeof format !== 'string') format = 'DD MMM YYYY HH:mm'
-    if (!/\+\d{2}:\d{2}/.test(utc)) utc = '+00:00'
-    if (typeof locale !== 'string' || !['en', 'ru'].includes(locale)) locale = 'ru'
-
-    return moment(timestamp).locale(locale).utcOffset(utc).format(format)
-}
-
-function DATENOW() {
-    return Date.now()
-}
-
-function FIXNUM(...args: string[]) {
-    let number = Number(args[0]),
-        digits = Number(args[1])
-
-    if (isNaN(number)) return 0
-    if (isNaN(digits) || digits < 0 || digits > 20) digits = 0
-
-    return number.toFixed(digits)
-}
-
-function LOWER(...args: string[]) {
-    let str = args[0]
-
-    if (typeof str !== 'string') throw new TypeError()
-
-    return str.toLowerCase()
-}
-
-function MATH(...args: any[]) {
-    let expression = args[0],
-        digits = Number(args[1])
-
-    if (typeof expression !== 'string') throw new TypeError()
-    if (typeof digits !== 'number' || digits < 0 || digits > 20 || isNaN(digits)) digits = 0
-
-    expression = expression.match(/(?:[0-9\-\+\*\/\^\(\)])+/g) || []
-
-    let result = eval(expression.join(' '))
-
-    if (typeof result !== 'number') result = Number(result)
-
-    return result.toFixed(digits)
-}
-
-function NUMDECL(...args: string[]) {
-    let number = Number(args[0]),
-        titles = args[1]?.split('|'),
-        locale = args[2]
-
-    if (typeof number !== 'number' || isNaN(number)) throw new TypeError()
-    if (!Array.isArray(titles) || titles.length <= 1) throw new TypeError()
-    if (typeof locale !== 'string' || !['ru', 'en'].includes(locale)) locale = 'ru'
-
-    if (locale == 'ru') {
-        const cases = [2, 0, 1, 1, 1, 2]
-
-        return titles[number % 100 > 4 && number % 100 < 20 ? 2 : cases[number % 10 < 5 ? number % 10 : 5]]
-    }
-
-    if (locale == 'en') {
-        return number > 1 ? titles[1] : titles[0]
-    }
-}
-
-function RANDOM(...args: string[]) {
-    let start = Number(args[0]),
-        end = Number(args[1])
-
-    if (typeof start !== 'number' || isNaN(start) || start < -Math.pow(2, 53)) start = 0
-    if (typeof end !== 'number' || isNaN(end) || end > Math.pow(2, 53)) end = 100
-
-    return `${Math.floor(Math.random() * end) + start}`
-}
-
-function REPLACE(...args) {
-    let str = args[0],
-        search = args[1],
-        replacement = args[2],
-        flags = args[3]
-
-    if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string') throw new TypeError()
-    if (!flags || !flags.split('').some(flag => ['g', 'i'].includes(flag))) flags = 'g'
-
-    const regex = new RegExp(`${search}`, flags)
-
-    return str.replace(regex, replacement)
-}
-
-function TRUNCATE(...args: string[]) {
-    let str = args[0],
-        limit = Number(args[1]),
-        end = args[2]
-
-    if (typeof str !== 'string') throw new TypeError()
-    if (typeof limit !== 'number') limit = 100
-    if (typeof end !== 'string') end = '...'
-
-    if (str.length > limit) return str.substring(0, limit) + end
-    else return str
-}
-
-function TRIM(...args: string[]) {
-    let str = args[0]
-
-    if (typeof str !== 'string') throw new TypeError()
-
-    return str.replace(/\s+/g, ' ').trim()
-}
-
-function UPPER(...args: string[]) {
-    let str = args[0]
-
-    if (typeof str !== 'string') throw new TypeError()
-
-    return str.toUpperCase()
-}
-
-export interface ReplacerShapers {
+export interface IReplacerShapers {
     guild: Guild
     member: GuildMember
     message?: Message
+}
+
+export interface IReplacerCustomShapers {
     subs?: {
         name: string
         title: string

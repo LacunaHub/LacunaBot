@@ -142,11 +142,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (send_message) {
-            const replacer = new Replacer(null, { message: message, guild: message.guild, member: message.member })
-            const content = await replacer.replaceTemplateMessage(config.send_message)
+            const replacer = new Replacer({ message: message, guild: message.guild, member: message.member }),
+                messagePayload = await replacer.replaceTemplateMessage(config.send_message)
 
             try {
-                await message.channel.send(content)
+                await message.channel.send(messagePayload)
             } catch (err) {
                 await self.logger.handleError({ module: 'UsersSlowdown', action: 'SendMessage', error: err, guild_id: message.guildId })
             }

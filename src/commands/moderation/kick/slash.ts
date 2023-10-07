@@ -71,11 +71,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await interaction.deferReply({ ephemeral: true })
 
     if (server.moderation.case_log.types.KICK.active) {
-        const replacer = new Replacer(null, { guild: interaction.guild, member: mention, penalty: { reason } })
-        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.KICK.dm_message)
+        const replacer = new Replacer({ guild: interaction.guild, member: mention }),
+            messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.KICK.dm_message, { penalty: { reason } })
 
         try {
-            await mention.send(dm_message)
+            await mention.send(messagePayload)
         } catch (err) {
             await self.logger.handleError({ module: 'KickCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
         }

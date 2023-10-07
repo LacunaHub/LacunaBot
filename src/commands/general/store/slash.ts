@@ -71,11 +71,11 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (result == 'SUCCESS') {
         if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-            const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
-            const content = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
+            const replacer = new Replacer({ guild: interaction.guild, member: interaction.member as any }),
+                messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
             try {
-                await interaction.editReply({ ...content })
+                await interaction.editReply(messagePayload)
             } catch (err) {
                 await interaction.editReply({
                     content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
@@ -259,11 +259,11 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'SUCCESS') {
                 if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-                    const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
-                    const content = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
+                    const replacer = new Replacer({ guild: interaction.guild, member: interaction.member as any }),
+                        messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
                     try {
-                        await i.followUp({ ...content, ephemeral: true })
+                        await i.followUp({ ...messagePayload, ephemeral: true })
                     } catch (err) {
                         await i.followUp({
                             content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {

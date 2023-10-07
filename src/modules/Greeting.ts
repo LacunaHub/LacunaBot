@@ -7,19 +7,19 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
     if (member.user.bot) return false
 
     if (server.modules.welcome.active) {
-        const replacer = new Replacer(null, { guild: member.guild, member: member })
-        const content = await replacer.replaceTemplateMessage(server.modules.welcome.message)
+        const replacer = new Replacer({ guild: member.guild, member: member }),
+            messagePayload = await replacer.replaceTemplateMessage(server.modules.welcome.message)
 
         try {
             if (server.modules.welcome.format === 'DM') {
-                await member.send(content)
+                await member.send(messagePayload)
             }
 
             if (server.modules.welcome.format === 'CHANNEL') {
                 const channel = member.guild.channels.cache.get(server.modules.welcome.channel_id) as BaseGuildTextChannel
 
                 if (channel) {
-                    await channel.send(content)
+                    await channel.send(messagePayload)
                 }
             }
         } catch (err) {

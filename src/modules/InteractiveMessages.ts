@@ -20,11 +20,11 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
         }
 
         if (button?.options?.includes('EPHEMERAL_REPLY') && button?.ephemeral_reply) {
-            const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
-            const content = await replacer.replaceTemplateMessage(button.ephemeral_reply)
+            const replacer = new Replacer({ guild: interaction.guild, member: interaction.member as any }),
+                messagePayload = await replacer.replaceTemplateMessage(button.ephemeral_reply)
 
             try {
-                await interaction.followUp({ ...content, ephemeral: true })
+                await interaction.followUp({ ...messagePayload, ephemeral: true })
             } catch (err) {
                 await self.logger.handleError({
                     module: 'InteractiveMessages',
@@ -138,11 +138,11 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
         }
 
         if (option?.options.includes('EPHEMERAL_REPLY') && option.ephemeral_reply) {
-            const replacer = new Replacer(null, { guild: interaction.guild, member: interaction.member as any })
-            const content = await replacer.replaceTemplateMessage(option.ephemeral_reply)
+            const replacer = new Replacer({ guild: interaction.guild, member: interaction.member as any }),
+                messagePayload = await replacer.replaceTemplateMessage(option.ephemeral_reply)
 
             try {
-                await interaction.followUp({ ...content, ephemeral: true })
+                await interaction.followUp({ ...messagePayload, ephemeral: true })
             } catch (err) {
                 await self.logger.handleError({
                     module: 'InteractiveMessages',

@@ -23,12 +23,12 @@ export async function autoThread(self: Lacuna, server: ServerDocument, message: 
             if (match) return false
         }
 
-        const replacer = new Replacer(at.name, {
-            guild: message.guild,
-            member: message.member,
-            message: message
-        })
-        const name = await replacer.replace()
+        const replacer = new Replacer({
+                guild: message.guild,
+                member: message.member,
+                message: message
+            }),
+            name = await replacer.replace(at.name)
 
         try {
             await (message.channel as TextChannel).threads.create({

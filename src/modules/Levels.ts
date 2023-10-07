@@ -450,23 +450,23 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, ref
     const direction = award && award.alert && award.alert.active ? award.alert : levels.level_up_alerts
 
     if (direction.active) {
-        const replacer = new Replacer(null, { message: refs.message, guild: member.guild, member: member })
-        const congrats = await replacer.replaceTemplateMessage(direction.message)
+        const replacer = new Replacer({ message: refs.message, guild: member.guild, member: member }),
+            messagePayload = await replacer.replaceTemplateMessage(direction.message)
 
         try {
             if (direction.format === 'CURRENT_CHANNEL' && refs.message) {
-                await refs.message.channel.send(congrats)
+                await refs.message.channel.send(messagePayload)
             }
 
             if (direction.format === 'DM') {
-                await member.send(congrats)
+                await member.send(messagePayload)
             }
 
             if (direction.format === 'CHANNEL') {
                 const channel = member.guild.channels.cache.get(direction.channel_id) as BaseGuildTextChannel
 
                 if (channel) {
-                    await channel.send(congrats)
+                    await channel.send(messagePayload)
                 }
             }
         } catch (err) {
