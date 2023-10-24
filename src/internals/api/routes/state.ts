@@ -26,7 +26,7 @@ async function getState(ctx: Context) {
             musicNodes: self.cluster.id === 0 ? self.getMusicNodes() : []
         }
     })
-    const flatStats = stats.flat().sort((a, b) => a.cluster_id - b.cluster_id)
+    const flatStats = stats.flat().sort((a, b) => a.clusterId - b.clusterId)
     const { data: servers } = await bridgeClient.request({ type: 'server-performance' }, { timeout: 15000, internal: false })
 
     ctx.status = 200
