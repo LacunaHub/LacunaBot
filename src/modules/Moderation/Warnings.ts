@@ -167,11 +167,11 @@ export async function addWarn(
         }
 
         if (send_message) {
-            const replacer = new Replacer(null, { message: signal instanceof Message ? signal : undefined, guild: signal.guild, member: target })
-            const content = await replacer.replaceTemplateMessage(penalty.send_message)
+            const replacer = new Replacer({ message: signal instanceof Message ? signal : undefined, guild: signal.guild, member: target }),
+                messagePayload = await replacer.replaceTemplateMessage(penalty.send_message)
 
             try {
-                await signal.channel.send(content)
+                await signal.channel.send(messagePayload)
             } catch (err) {
                 await self.logger.handleError({ module: 'WarningPenalty', action: 'SendMessage', error: err, guild_id: signal.guildId })
             }
@@ -200,16 +200,17 @@ export async function addWarn(
     }
 
     if (server.moderation.case_log.types.WARN_ADD.active) {
-        const replacer = new Replacer(null, {
-            guild: signal.guild,
-            member: target,
-            message: signal instanceof Message ? signal : undefined,
-            penalty: { reason: reason ?? '-' }
-        })
-        const dm_message = await replacer.replaceTemplateMessage(server.moderation.case_log.types.WARN_ADD.dm_message)
+        const replacer = new Replacer({
+                guild: signal.guild,
+                member: target,
+                message: signal instanceof Message ? signal : undefined
+            }),
+            messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.WARN_ADD.dm_message, {
+                penalty: { reason: reason ?? '-' }
+            })
 
         try {
-            await target.send(dm_message)
+            await target.send(messagePayload)
         } catch (err) {
             await self.logger.handleError({ module: 'Warnings', action: 'SendDirectMessage', error: err, guild_id: signal.guildId })
         }

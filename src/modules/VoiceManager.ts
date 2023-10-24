@@ -59,14 +59,13 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        const replacer = new Replacer(null, {
+        const replacer = new Replacer({
             guild: state.guild,
-            member: state.member,
-            index: (autoVoice.children?.length ?? 0) + 1
+            member: state.member
         })
 
         let tempVoice: VoiceChannel,
-            tempVoiceName = await replacer.replace(autoVoice.default.name || '#{index}: {member}'),
+            tempVoiceName = await replacer.replace(autoVoice.default.name || '#{index}: {member}', { index: (autoVoice.children?.length ?? 0) + 1 }),
             tempVoicePermissionOverwrites: OverwriteData[] = [],
             tempVoiceParent = autoVoice.default.category_id
                 ? state.guild.channels.cache.filter(c => c.type === ChannelType.GuildCategory).get(autoVoice.default.category_id)

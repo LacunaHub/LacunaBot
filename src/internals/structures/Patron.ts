@@ -2,7 +2,7 @@ import { Job, scheduleJob } from 'node-schedule'
 import database from '../../database'
 import logger from '../Logger'
 import discord from '../utility/DiscordUtils'
-import { active_patron_role_id, support_server_id } from '../utility/billing'
+import { active_patron_role_id, former_patron_role_id, support_server_id } from '../utility/billing'
 
 export const patrons = new Map<string, Patron>()
 
@@ -36,6 +36,7 @@ export default class Patron {
         try {
             await database.users.updateOne({ _id: this.user_id }, { $set: { 'premium.available': false } })
             await discord.restApi.delete(discord.apiRoutes.guildMemberRole(support_server_id, this.user_id, active_patron_role_id))
+            await discord.restApi.put(discord.apiRoutes.guildMemberRole(support_server_id, this.user_id, former_patron_role_id))
         } catch (err) {}
     }
 

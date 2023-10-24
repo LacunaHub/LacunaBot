@@ -8,11 +8,11 @@ import Patron, { patrons } from '../../structures/Patron'
 import DiscordUtils from '../DiscordUtils'
 
 export const support_server_id = '740586549145763960'
+export const subscribed_patron_role_id = '1140832301228490872'
 export const active_patron_role_id = '968097093388468274'
 export const big_patron_role_id = '896416992079265824'
-export const patron_role_id = '746825813806284866'
+export const former_patron_role_id = '746825813806284866'
 export const server_booster_role_id = '746752483115794583'
-export const diamond_subscriber_role_id = '1140832301228490872'
 
 export async function addDiamond(bill: IBill, server?: ServerDocument) {
     if (!server) {
@@ -74,11 +74,25 @@ export async function addPremium(bill: IBill, period: number) {
     )
 
     if (['QIWI', 'PAYPAL'].includes(bill.type)) {
-        const patron_roles = [active_patron_role_id]
+        const userBills = await database.bills.find({
+                type: { $in: ['QIWI', 'PAYPAL'] },
+                'status.value': 'PAID',
+                'custom_fields.user_id': bill.custom_fields.user_id
+            }),
+            supportedAmount = userBills.reduce(
+                (x, y) => {
+                    x[y.currency] += y.amount
+                    return x
+                },
+                { RUB: 0, USD: 0 }
+            )
+        const patronRoles = [active_patron_role_id]
 
-        patron_roles.push(bill.custom_fields.tier >= 2 ? big_patron_role_id : patron_role_id)
+        if (supportedAmount.RUB >= 1000 || supportedAmount.USD >= 15) {
+            patronRoles.push(big_patron_role_id)
+        }
 
-        for (const role of patron_roles) {
+        for (const role of patronRoles) {
             try {
                 await DiscordUtils.restApi.put(DiscordUtils.apiRoutes.guildMemberRole(support_server_id, bill.custom_fields.user_id, role))
             } catch (err) {
@@ -94,6 +108,14 @@ export async function addPremium(bill: IBill, period: number) {
         patron.cancel()
     } else {
         logger.log(`[Billing] User ${bill.custom_fields.user_id} became a Patron`)
+    }
+
+    try {
+        await DiscordUtils.restApi.delete(
+            DiscordUtils.apiRoutes.guildMemberRole(support_server_id, bill.custom_fields.user_id, former_patron_role_id)
+        )
+    } catch (err) {
+        await logger.handleError({ module: 'Billing', action: 'RemoveFormerPatronRole', error: err })
     }
 
     return new Patron(bill.custom_fields.user_id, period)

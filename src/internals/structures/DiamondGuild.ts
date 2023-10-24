@@ -2,7 +2,7 @@ import { Job, scheduleJob } from 'node-schedule'
 import database from '../../database'
 import { IBill } from '../../database/schemas/Bills'
 import logger from '../Logger'
-import { addDiamond, diamond_subscriber_role_id, server_booster_role_id } from '../utility/billing'
+import { addDiamond, server_booster_role_id, subscribed_patron_role_id } from '../utility/billing'
 import { isRolesMember } from '../utility/billing/providers/DiscordRoles'
 
 export const diamondGuilds = new Map<string, DiamondGuild>()
@@ -44,7 +44,7 @@ export default class DiamondGuild {
             bill = await database.bills.findOne({ _id: this.bill_id })
 
             if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(bill?.type)) {
-                let roleIds = [diamond_subscriber_role_id]
+                let roleIds = [subscribed_patron_role_id]
 
                 if (bill.type === 'DISCORD_NITRO_BOOST') {
                     roleIds = [server_booster_role_id]

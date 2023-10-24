@@ -7,19 +7,19 @@ export default async function farewell(self: Lacuna, server: ServerDocument, mem
     if (member.user.bot) return false
 
     if (server.modules.farewell.active) {
-        const replacer = new Replacer(null, { guild: member.guild, member: member })
-        const content = await replacer.replaceTemplateMessage(server.modules.farewell.message)
+        const replacer = new Replacer({ guild: member.guild, member: member }),
+            messagePayload = await replacer.replaceTemplateMessage(server.modules.farewell.message)
 
         try {
             if (server.modules.farewell.format === 'DM') {
-                await member.send(content)
+                await member.send(messagePayload)
             }
 
             if (server.modules.farewell.format === 'CHANNEL') {
                 const channel = member.guild.channels.cache.get(server.modules.farewell.channel_id) as BaseGuildTextChannel
 
                 if (channel) {
-                    await channel.send(content)
+                    await channel.send(messagePayload)
                 }
             }
         } catch (err) {

@@ -7,7 +7,7 @@ import DiscordUtils from '../../utility/DiscordUtils'
 import APIError from '../utility/APIError'
 
 export async function createTelegramSubscription(server: ServerDocument, data: any) {
-    const subscriptions = server.modules.subscriptions.youtube
+    const subscriptions = server.modules.subscriptions.telegram
 
     if (subscriptions.length >= 1 && !server.server.premium.available) throw new APIError(3007)
     if (subscriptions.length >= 10) throw new APIError(3008)
