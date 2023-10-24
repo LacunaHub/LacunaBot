@@ -3,7 +3,7 @@ import { APIUser } from 'discord.js'
 import { Context } from 'koa'
 import db from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
-import { addDiamond, diamond_subscriber_role_id, server_booster_role_id } from '../../utility/billing'
+import { addDiamond, server_booster_role_id, subscribed_patron_role_id } from '../../utility/billing'
 import { DiscordRolesCheckout } from '../../utility/billing/providers/DiscordRoles'
 import { APIOrder, Order as PayPalOrder, captureOrder } from '../../utility/billing/providers/PayPal'
 import { Bill as QiwiBill } from '../../utility/billing/providers/QIWI'
@@ -90,12 +90,11 @@ async function createPayment(ctx: Context) {
         data.amount.currency = 'DRC'
         data.amount.value = 1
 
-        let roleIds = [diamond_subscriber_role_id],
-            maxActiveBills = 2
+        let roleIds = [subscribed_patron_role_id],
+            maxActiveBills = 1
 
         if (provider === 'DISCORD_NITRO_BOOST') {
             roleIds = [server_booster_role_id]
-            maxActiveBills = 1
         }
 
         const discordRolesCheckout = new DiscordRolesCheckout(data, provider, roleIds, maxActiveBills)
