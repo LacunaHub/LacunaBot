@@ -168,9 +168,9 @@ export default class Replacer {
      * Get an object with replaceable values.
      */
     async getReplacements() {
-        const message = this.shapers.message,
-            guild = this.shapers.guild,
-            member = this.shapers.member
+        const message = this.shapers?.message,
+            guild = this.shapers?.guild,
+            member = this.shapers?.member
 
         let memberActivity: { level: IUserLevel; wallet: IUserWallet }, guildOwner: GuildMember
 
