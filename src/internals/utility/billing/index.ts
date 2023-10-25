@@ -110,13 +110,13 @@ export async function addPremium(bill: IBill, period: number) {
         logger.log(`[Billing] User ${bill.custom_fields.user_id} became a Patron`)
     }
 
-    try {
-        await DiscordUtils.restApi.delete(
-            DiscordUtils.apiRoutes.guildMemberRole(support_server_id, bill.custom_fields.user_id, former_patron_role_id)
-        )
-    } catch (err) {
-        await logger.handleError({ module: 'Billing', action: 'RemoveFormerPatronRole', error: err })
-    }
+    // try {
+    //     await DiscordUtils.restApi.delete(
+    //         DiscordUtils.apiRoutes.guildMemberRole(support_server_id, bill.custom_fields.user_id, former_patron_role_id)
+    //     )
+    // } catch (err) {
+    //     await logger.handleError({ module: 'Billing', action: 'RemoveFormerPatronRole', error: err })
+    // }
 
     return new Patron(bill.custom_fields.user_id, period)
 }
