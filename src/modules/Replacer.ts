@@ -177,8 +177,8 @@ export default class Replacer {
         if (member) {
             const userDoc = await db.users.findOne({ _id: member.id })
             memberActivity = {
-                level: userDoc.activities.levels.find(i => i.guild_id === guild.id),
-                wallet: userDoc.activities.wallets.find(i => i.guild_id === guild.id)
+                level: userDoc?.activities?.levels?.find?.(i => i.guild_id === guild.id),
+                wallet: userDoc?.activities?.wallets?.find?.(i => i.guild_id === guild.id)
             }
         }
 

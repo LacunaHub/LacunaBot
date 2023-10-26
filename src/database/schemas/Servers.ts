@@ -1521,8 +1521,8 @@ export interface ICustomCommandComponent {
             /** @deprecated */
             operator?: 'INCREMENT' | 'DECREMENT'
             amount: string
-            user_id: string
-            currency_id: string
+            user_id?: string
+            currency_id?: string
         }
         show_modal?: {
             title: string
@@ -2096,8 +2096,8 @@ export interface IAutomationComponent {
         }
         modify_wallet?: {
             amount: string
-            user_id: string
-            currency_id: string
+            user_id?: string
+            currency_id?: string
         }
         show_modal?: {
             title: string
