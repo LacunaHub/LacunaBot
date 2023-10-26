@@ -894,7 +894,7 @@ export default class Automation {
                     if (index > 1) continue
                     if (!this.server.modules.economy.active) continue
 
-                    const user_id = await this.replacePatterns(modify_wallet.user_id, ctx)
+                    const user_id = modify_wallet.user_id ? await this.replacePatterns(modify_wallet.user_id, ctx) : globalValues.member.user.id
                     let member: GuildMember
 
                     try {
