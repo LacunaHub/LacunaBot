@@ -64,23 +64,23 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
             {
                 $inc: {
                     'moderation.case_log.case_count': 1
-                },
-                $push: {
-                    'moderation.case_log.cases': {
-                        case_id: caseId,
-                        type: options.type,
-                        timestamp: Date.now(),
-                        reason: options.reason ?? null,
-                        target: {
-                            id: options.target ? options.target.id : null,
-                            name: options.target ? options.target.tag : null
-                        },
-                        executor: {
-                            id: options.executor.id,
-                            name: options.executor.tag
-                        }
-                    }
                 }
+                // $push: {
+                //     'moderation.case_log.cases': {
+                //         case_id: caseId,
+                //         type: options.type,
+                //         timestamp: Date.now(),
+                //         reason: options.reason ?? null,
+                //         target: {
+                //             id: options.target ? options.target.id : null,
+                //             name: options.target ? options.target.tag : null
+                //         },
+                //         executor: {
+                //             id: options.executor.id,
+                //             name: options.executor.tag
+                //         }
+                //     }
+                // }
             }
         )
 
@@ -107,18 +107,18 @@ export async function onPressChangeReasonButton(self: Lacuna, server: ServerDocu
     }
 
     const [, , caseId] = interaction.customId.split('-')
-    const caseEntry = server.moderation.case_log.cases.find(i => i.case_id === Number(caseId))
+    // const caseEntry = server.moderation.case_log.cases.find(i => i.case_id === Number(caseId))
 
-    if (!caseEntry) {
-        await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.reason.text_no_case_entry', {
-                user: `**${interaction.user.username}**`
-            })}`,
-            ephemeral: true
-        })
+    // if (!caseEntry) {
+    //     await interaction.reply({
+    //         content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.reason.text_no_case_entry', {
+    //             user: `**${interaction.user.username}**`
+    //         })}`,
+    //         ephemeral: true
+    //     })
 
-        return false
-    }
+    //     return false
+    // }
 
     const modal = new ModalBuilder()
         .setCustomId(`CL-REASON-${caseId}`)
@@ -131,7 +131,7 @@ export async function onPressChangeReasonButton(self: Lacuna, server: ServerDocu
                     .setStyle(TextInputStyle.Paragraph)
                     .setMaxLength(1000)
                     .setRequired(true)
-                    .setValue(typeof caseEntry.reason === 'string' ? caseEntry.reason : '')
+                // .setValue(typeof caseEntry.reason === 'string' ? caseEntry.reason : '')
             )
         )
 
@@ -152,19 +152,19 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
         return false
     }
 
-    let [, , caseId] = interaction.customId.split('-')
+    // let [, , caseId] = interaction.customId.split('-')
     const embed = new EmbedBuilder(interaction.message.embeds[0].toJSON())
     embed.data.fields[2].value = reason
 
     await interaction.message.edit({ embeds: [embed] })
-    await self.db.servers.updateOne(
-        { _id: interaction.guild.id, 'moderation.case_log.cases.case_id': Number(caseId) },
-        {
-            $set: {
-                'moderation.case_log.cases.$.reason': reason
-            }
-        }
-    )
+    // await self.db.servers.updateOne(
+    //     { _id: interaction.guild.id, 'moderation.case_log.cases.case_id': Number(caseId) },
+    //     {
+    //         $set: {
+    //             'moderation.case_log.cases.$.reason': reason
+    //         }
+    //     }
+    // )
 
     await interaction.reply({
         content: `${self._emojis.OK} | ${self.i18n.t(server.locale, 'commands.reason.text_case_edited', {

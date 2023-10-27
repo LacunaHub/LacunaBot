@@ -51,14 +51,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    await self.db.servers.updateOne(
-        { _id: interaction.guild.id, 'moderation.case_log.cases.case_id': case_id },
-        {
-            $set: {
-                'moderation.case_log.cases.$.reason': reason
-            }
-        }
-    )
+    // await self.db.servers.updateOne(
+    //     { _id: interaction.guild.id, 'moderation.case_log.cases.case_id': case_id },
+    //     {
+    //         $set: {
+    //             'moderation.case_log.cases.$.reason': reason
+    //         }
+    //     }
+    // )
 
     const embed = new EmbedBuilder(case_message.embeds[0])
 
