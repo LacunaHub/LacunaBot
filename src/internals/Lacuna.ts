@@ -105,6 +105,8 @@ export default class Lacuna extends Client {
         this.cluster = new ClusterClient(this)
         this.machine = new BridgeShard(this.cluster)
 
+        this.rest.on('rateLimited', rateLimitData => this.logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`))
+
         await this.login(process.env.DISCORD_CLIENT_TOKEN)
         this.logger.log('[Lacuna] Connected to Discord client')
 
