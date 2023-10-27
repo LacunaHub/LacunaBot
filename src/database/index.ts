@@ -143,7 +143,7 @@ export default {
         }
     },
 
-    qdb: new QDatabase(process.env.QMONGO_DB_URL, { collectionName: 'internal-storage' })
+    qdb: new QDatabase(process.env.DB_URI, { dbName: 'lacuna-qmongo', collectionName: 'internal-storage' })
 }
 
 export interface JsonData {

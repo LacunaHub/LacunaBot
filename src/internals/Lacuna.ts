@@ -96,7 +96,7 @@ export default class Lacuna extends Client {
     }
 
     async start() {
-        await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+        await connect(process.env.DB_URI, { dbName: 'lacuna', useNewUrlParser: true, useUnifiedTopology: true })
         this.logger.log('[Lacuna] Connected to MongoDB')
 
         await this.db.qdb.connect()

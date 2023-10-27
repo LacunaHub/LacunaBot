@@ -69,7 +69,7 @@ if (isMasterBridge) {
 }
 
 async function startServices() {
-    await connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+    await connect(process.env.DB_URI, { dbName: 'lacuna', useNewUrlParser: true, useUnifiedTopology: true })
     await database.qdb.connect()
 
     await bridgeClient.connect()
