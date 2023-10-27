@@ -261,8 +261,7 @@ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
 ```make
 NODE_ENV=development
 API_PORT=5810
-DB_URL=mongodb://127.0.0.1:27017/lacuna
-QMONGO_DB_URL=mongodb://127.0.0.1:27017/lacuna-qmongo
+DB_URI=mongodb://127.0.0.1:27017/
 
 DISCORD_CLIENT_ID=
 DISCORD_CLIENT_SECRET=

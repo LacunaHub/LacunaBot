@@ -64,7 +64,7 @@ app.use(state.routes()).use(state.allowedMethods())
 app.use(subscriptions.routes()).use(subscriptions.allowedMethods())
 app.use(users.routes()).use(users.allowedMethods())
 
-connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+connect(process.env.DB_URI, { dbName: 'lacuna', useNewUrlParser: true, useUnifiedTopology: true })
 database.qdb.connect()
 
 bridgeClient.connect()

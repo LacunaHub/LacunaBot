@@ -13,7 +13,7 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
-import { truncateString } from '../../internals/utility/Utils'
+import { debounce, truncateString } from '../../internals/utility/Utils'
 import Automation from '../../modules/Automation'
 import CustomCommand from '../../modules/CustomCommand'
 import InteractiveMessages from '../../modules/InteractiveMessages'
@@ -32,6 +32,10 @@ const handler = async (
         | ModalSubmitInteraction
 ) => {
     if (!interaction.inGuild() || interaction.inRawGuild()) return false
+
+    if (interaction.isAutocomplete()) {
+        return await handlerAutocomplete(self, interaction)
+    }
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: interaction.guildId })
     interaction.member = await interaction.guild.members.fetch(interaction.user.id)
@@ -190,136 +194,6 @@ const handler = async (
         }
     }
 
-    if (interaction.isAutocomplete()) {
-        const query = interaction.options?.getFocused()
-
-        if (interaction.commandName === 'help') {
-            const commands = self.commands.filter(i => i.name.includes(query))
-
-            await interaction.respond(
-                commands
-                    .map(i => {
-                        return {
-                            name: `${i.name} - ${self.i18n.t(interaction.locale, i.description)}`,
-                            value: i.name
-                        }
-                    })
-                    .slice(0, 25)
-            )
-        }
-
-        if (interaction.commandName === 'store') {
-            const items = server.modules.economy.store.items
-                .slice(0, server.server.premium.available ? 200 : 50)
-                .filter(i => [i.id, i.name, i.description].some(ii => ii.includes(query)))
-
-            await interaction.respond(
-                items
-                    .map(i => {
-                        const currency = server.modules.economy.currencies.find(ii => ii.id === i.currency_id)
-                        const price = i.purchase_price
-                            ? `${i.purchase_price} ${currency.name}`
-                            : self.i18n.t(interaction.locale, 'commands.store.items.text_price_free')
-
-                        return {
-                            name: `${i.name} (${price})`,
-                            value: i.id
-                        }
-                    })
-                    .slice(0, 25)
-            )
-        }
-
-        if (['wallet', 'activities'].includes(interaction.commandName)) {
-            const currencies = server.modules.economy.currencies.filter(i => [i.id, i.name, i.symbol].some(ii => ii.includes(query)))
-
-            await interaction.respond(
-                currencies.map(i => {
-                    return {
-                        name: i.name,
-                        value: i.id
-                    }
-                })
-            )
-        }
-
-        if (interaction.commandName === 'unban') {
-            if (interaction.guild.bans.cache.size < 100) {
-                await interaction.guild.bans.fetch({ limit: 100, cache: true })
-            }
-
-            const bans = interaction.guild.bans.cache.filter(i => [i.user.id, i.user.tag].some(ii => ii.includes(query)))
-
-            await interaction.respond(
-                bans
-                    .map(i => {
-                        return {
-                            name: i.user.tag,
-                            value: i.user.id
-                        }
-                    })
-                    .slice(0, 25)
-            )
-        }
-
-        if (interaction.commandName === 'play') {
-            if (!query) {
-                await interaction.respond([])
-
-                return false
-            }
-
-            const is_url = new RegExp(`^https?:\/\/`).test(query)
-            const { playableMusicHosts: allowed_hosts } = await self.db.json.get()
-
-            if (is_url && !allowed_hosts.some(h => query.startsWith(h))) {
-                await interaction.respond([])
-
-                return false
-            }
-
-            let search: SearchResult
-
-            try {
-                search = await self.player.search({ query, source: lavalinkSources[server.modules.music.default_source] })
-            } catch (err) {
-                await interaction.respond([])
-
-                return false
-            }
-
-            if (['LOAD_FAILED', 'NO_MATCHES'].includes(search.loadType)) {
-                await interaction.respond([])
-
-                return false
-            }
-
-            if (search.loadType === 'PLAYLIST_LOADED') {
-                await interaction.respond([
-                    {
-                        name: truncateString(search.playlist.name, 95),
-                        value: query
-                    }
-                ])
-
-                return true
-            }
-
-            const tracks = search.tracks
-                .map(i => {
-                    const trackName = truncateString(`${i.author} - ${i.title}`, 95)
-
-                    return {
-                        name: trackName,
-                        value: i.uri
-                    }
-                })
-                .slice(0, 25)
-
-            await interaction.respond(tracks)
-        }
-    }
-
     if (interaction.isModalSubmit()) {
         if (/UD\-.*/.test(interaction.customId)) {
             await Automation.handleEvent('INTERACTION_MODAL_SUBMIT', self, server, interaction)
@@ -341,6 +215,137 @@ const handler = async (
 
     return true
 }
+
+const handlerAutocomplete = debounce(async (self: Lacuna, interaction: AutocompleteInteraction) => {
+    const server: ServerDocument = await self.db.servers.fetch({ _id: interaction.guildId })
+    const query = interaction.options?.getFocused()
+
+    if (interaction.commandName === 'help') {
+        const commands = self.commands.filter(i => i.name.includes(query))
+
+        await interaction.respond(
+            commands
+                .map(i => {
+                    return {
+                        name: `${i.name} - ${self.i18n.t(interaction.locale, i.description)}`,
+                        value: i.name
+                    }
+                })
+                .slice(0, 25)
+        )
+    }
+
+    if (interaction.commandName === 'store') {
+        const items = server.modules.economy.store.items
+            .slice(0, server.server.premium.available ? 200 : 50)
+            .filter(i => [i.id, i.name, i.description].some(ii => ii.includes(query)))
+
+        await interaction.respond(
+            items
+                .map(i => {
+                    const currency = server.modules.economy.currencies.find(ii => ii.id === i.currency_id)
+                    const price = i.purchase_price
+                        ? `${i.purchase_price} ${currency.name}`
+                        : self.i18n.t(interaction.locale, 'commands.store.items.text_price_free')
+
+                    return {
+                        name: `${i.name} (${price})`,
+                        value: i.id
+                    }
+                })
+                .slice(0, 25)
+        )
+    }
+
+    if (['wallet', 'activities'].includes(interaction.commandName)) {
+        const currencies = server.modules.economy.currencies.filter(i => [i.id, i.name, i.symbol].some(ii => ii.includes(query)))
+
+        await interaction.respond(
+            currencies.map(i => {
+                return {
+                    name: i.name,
+                    value: i.id
+                }
+            })
+        )
+    }
+
+    if (interaction.commandName === 'unban') {
+        if (interaction.guild.bans.cache.size < 100) {
+            await interaction.guild.bans.fetch({ limit: 100, cache: true })
+        }
+
+        const bans = interaction.guild.bans.cache.filter(i => [i.user.id, i.user.tag].some(ii => ii.includes(query)))
+
+        await interaction.respond(
+            bans
+                .map(i => {
+                    return {
+                        name: i.user.tag,
+                        value: i.user.id
+                    }
+                })
+                .slice(0, 25)
+        )
+    }
+
+    if (interaction.commandName === 'play') {
+        if (!query) {
+            await interaction.respond([])
+
+            return false
+        }
+
+        const is_url = new RegExp(`^https?:\/\/`).test(query)
+        const { playableMusicHosts: allowed_hosts } = await self.db.json.get()
+
+        if (is_url && !allowed_hosts.some(h => query.startsWith(h))) {
+            await interaction.respond([])
+
+            return false
+        }
+
+        let search: SearchResult
+
+        try {
+            search = await self.player.search({ query, source: lavalinkSources[server.modules.music.default_source] })
+        } catch (err) {
+            await interaction.respond([])
+
+            return false
+        }
+
+        if (['LOAD_FAILED', 'NO_MATCHES'].includes(search.loadType)) {
+            await interaction.respond([])
+
+            return false
+        }
+
+        if (search.loadType === 'PLAYLIST_LOADED') {
+            await interaction.respond([
+                {
+                    name: truncateString(search.playlist.name, 95),
+                    value: query
+                }
+            ])
+
+            return true
+        }
+
+        const tracks = search.tracks
+            .map(i => {
+                const trackName = truncateString(`${i.author} - ${i.title}`, 95)
+
+                return {
+                    name: trackName,
+                    value: i.uri
+                }
+            })
+            .slice(0, 25)
+
+        await interaction.respond(tracks)
+    }
+}, 1000)
 
 export default {
     name: Events.InteractionCreate,
