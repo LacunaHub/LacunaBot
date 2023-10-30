@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-black fixed fixed-top">
+  <q-header class="bg-dark-1 fixed fixed-top">
     <q-toolbar class="q-py-xs q-px-md">
       <q-btn
         v-if="$q.screen.lt.md"

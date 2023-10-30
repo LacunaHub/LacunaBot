@@ -7,9 +7,6 @@
             <q-item-label class="text-subtitle1">
               {{ $t('pages.guild.ut_reports_title') }}
             </q-item-label>
-            <q-item-label class="text--secondary">
-              {{ $t('pages.guild.ut_reports_description') }}
-            </q-item-label>
           </q-item-section>
 
           <q-item-section side>
@@ -96,13 +93,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ 'Автоматизация' }}
+              {{ $t('pages.guild.ut_automation_title') }}
             </q-item-label>
 
             <q-item-label class="text--secondary">
-              <q-badge class="q-mr-xs" color="primary">
-                <span>NEW</span>
-              </q-badge>
               <q-badge class="q-mr-xs" color="warning">
                 <span>BETA</span>
               </q-badge>

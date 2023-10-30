@@ -316,7 +316,7 @@ const navItems = [
     path: 'settings/voice-channels',
     icon: karaokeImg
   },
-  { name: t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: layersImg, new: true }
+  { name: t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: layersImg }
 ]
 
 useMeta(() => {

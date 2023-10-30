@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-ma-md row justify-center items-start">
+  <q-page class="q-pa-md row justify-center items-start">
     <div id="dashboard-page-container" class="row q-col-gutter-md">
       <div class="col-12">
         <div class="shadow-0 rounded-lg">

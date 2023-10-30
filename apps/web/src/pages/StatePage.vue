@@ -447,7 +447,7 @@
             <q-card class="rounded-lg bg-dark-1" flat>
               <q-card-section>
                 <LineChart
-                  :chart-data="chartData.guildCount"
+                  :chart-data="metricsData.totalGuilds"
                   :chart-options="{
                     responsive: true,
                     maintainAspectRatio: false,
@@ -469,7 +469,7 @@
             <q-card class="rounded-lg bg-dark-1" flat>
               <q-card-section>
                 <LineChart
-                  :chart-data="chartData.shardPings"
+                  :chart-data="metricsData.shardLatencies"
                   :chart-options="{
                     responsive: true,
                     maintainAspectRatio: false,
@@ -490,7 +490,7 @@
             <q-card class="rounded-lg bg-dark-1" flat>
               <q-card-section>
                 <LineChart
-                  :chart-data="chartData.commandUses"
+                  :chart-data="metricsData.commandUsageCount"
                   :chart-options="{
                     responsive: true,
                     maintainAspectRatio: false,
@@ -540,13 +540,13 @@ const averageLatency = computed(() => {
     color
   }
 })
-const chartData = ref({
-  guildCount: computed(() => {
+const metricsData = ref({
+  totalGuilds: computed(() => {
     return {
-      labels: state.value.charts.guilds.map(g => DateTime.fromMillis(g.ts).toFormat('ccc HH:mm')),
+      labels: state.value.metrics.total_guilds.map(i => DateTime.fromMillis(i.timestamp).toFormat('ccc HH:mm')),
       datasets: [
         {
-          data: state.value.charts.guilds.map(g => g.n),
+          data: state.value.metrics.total_guilds.map(i => i.data),
           backgroundColor: 'rgba(218, 112, 214, 0.1)',
           borderColor: 'rgba(218, 112, 214, 0.6)',
           borderWidth: 1,
@@ -556,18 +556,18 @@ const chartData = ref({
       ]
     }
   }),
-  shardPings: computed(() => {
-    const pings = state.value.charts.pings.map(p => p.d)
-    const shards = state.value.shards.map(s => {
-      return { cluster_id: s.cluster_id, pings: pings.map(p => p[s.cluster_id] || 0) }
-    })
+  shardLatencies: computed(() => {
+    const latencies = state.value.metrics.shard_latencies.map(i => i.data),
+      shards = state.value.shards.map(i => {
+        return { cluster_id: i.cluster_id, latencies: latencies.map(ii => ii[i.cluster_id] || 0) }
+      })
 
     return {
-      labels: state.value.charts.pings.map(p => DateTime.fromMillis(p.ts).toFormat('ccc HH:mm')),
+      labels: state.value.metrics.shard_latencies.map(i => DateTime.fromMillis(i.timestamp).toFormat('ccc HH:mm')),
       datasets: shards.map(shard => {
         return {
           label: `#${shard.cluster_id}`,
-          data: shard.pings,
+          data: shard.latencies,
           backgroundColor: `rgba(${hexToRGB(hashCode(`#${shard.cluster_id}#${shard.cluster_id}`))}, 0.1)`,
           borderColor: `rgba(${hexToRGB(hashCode(`#${shard.cluster_id}#${shard.cluster_id}`))}, 0.6)`,
           borderWidth: 1,
@@ -577,19 +577,19 @@ const chartData = ref({
       })
     }
   }),
-  commandUses: computed(() => {
-    const command_uses = state.value.charts.command_uses.map(c => c.d)
-    const commands = Object.keys(command_uses[0]).map(k => {
-      return {
-        name: k,
-        uses: command_uses.map(c => {
-          return c[k]
-        })
-      }
-    })
+  commandUsageCount: computed(() => {
+    const usageCount = state.value.metrics.command_usage_count.map(i => i.data),
+      commands = Object.keys(usageCount?.[0] ?? {}).map(k => {
+        return {
+          name: k,
+          uses: usageCount.map(c => {
+            return c[k]
+          })
+        }
+      })
 
     return {
-      labels: state.value.charts.command_uses.map(c => DateTime.fromMillis(c.ts).toFormat('ccc HH:mm')),
+      labels: state.value.metrics.command_usage_count.map(i => DateTime.fromMillis(i.timestamp).toFormat('ccc HH:mm')),
       datasets: commands.map(command => {
         return {
           label: command.name,
