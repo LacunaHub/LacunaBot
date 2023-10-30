@@ -19,8 +19,6 @@ const handler = async (self: Lacuna, message: Message) => {
         return false
     }
 
-    await message.member.fetch()
-
     await Automation.handleEvent('MESSAGE_CREATE', self, server, message)
 
     if ([MessageType.Default, MessageType.Reply].includes(message.type)) {
