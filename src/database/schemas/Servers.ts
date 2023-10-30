@@ -802,6 +802,7 @@ export interface ServerDocument extends Document {
     }
     moderation: {
         case_log: {
+            /** @deprecated */
             cases: ModerationCase[]
             case_count: number
             channel_id: string
@@ -1313,6 +1314,7 @@ export interface ServerDocument extends Document {
             restore_roles: boolean
             restore_nicknames: boolean
             strict_roles: string[]
+            /** @deprecated */
             data: RestoringData[]
         }
         music: {
@@ -1375,6 +1377,7 @@ export interface ServerDocument extends Document {
         polls: IPoll[]
     }
     created_at: number
+    /** @deprecated */
     activity_ping_at: number
     change_log: ChangeLog[]
     logs: ILogEntry[]

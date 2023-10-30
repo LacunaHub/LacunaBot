@@ -53,10 +53,12 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
     }
 
     if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
-        const data = server.modules.restoring.data.find(d => d.user_id === member.id)
+        const user = await self.db.users.findOne({ _id: member.id }),
+            data =
+                user?.restoring_data?.find?.(i => i.guild_id === member.guild.id) ?? server.modules.restoring.data.find(d => d.user_id === member.id)
 
         if (data) {
-            if (server.modules.restoring.restore_nicknames && data.nickname && member.manageable) {
+            if (server.modules.restoring.restore_nicknames && data.nickname) {
                 try {
                     await member.setNickname(data.nickname, 'Restoring: Restore nickname')
                 } catch (err) {
@@ -65,28 +67,43 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
             }
 
             if (server.modules.restoring.restore_roles && data.roles.length) {
-                const strict_roles = server.modules.restoring.strict_roles
-                const roles = member.guild.roles.cache.filter(r => r.editable && data.roles.includes(r.id) && !strict_roles.includes(r.id))
+                const strictRoles = server.modules.restoring.strict_roles,
+                    restorableRoles = member.guild.roles.cache.filter(r => r.editable && data.roles.includes(r.id) && !strictRoles.includes(r.id))
 
-                if (roles.size) {
+                if (restorableRoles.size) {
                     try {
-                        await member.roles.add(roles, 'Restoring: Restore roles')
+                        await member.roles.add(restorableRoles, 'Restoring: Restore roles')
                     } catch (err) {
                         await self.logger.handleError({ module: 'Restoring', action: 'AddRoles', error: err, guild_id: member.guild.id })
                     }
                 }
             }
 
-            await self.db.servers.updateOne(
-                { _id: member.guild.id },
+            await self.db.users.updateOne(
+                { _id: member.id },
                 {
                     $pull: {
-                        'modules.restoring.data': {
-                            user_id: member.id
+                        restoring_data: {
+                            guild_id: member.guild.id
                         }
                     }
                 }
             )
+
+            const dataInServer = server.modules.restoring.data.some(i => i.user_id === member.id)
+
+            if (dataInServer) {
+                await self.db.servers.updateOne(
+                    { _id: member.guild.id },
+                    {
+                        $pull: {
+                            'modules.restoring.data': {
+                                user_id: member.id
+                            }
+                        }
+                    }
+                )
+            }
 
             self.emit('moduleExecution', {
                 module: 'Restoring',

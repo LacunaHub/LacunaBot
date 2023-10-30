@@ -34,30 +34,44 @@ export default async function farewell(self: Lacuna, server: ServerDocument, mem
     }
 
     if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
-        const data = server.modules.restoring.data.find(i => i.user_id == member.id)
+        let user = await self.db.users.findOne({ _id: member.id })
 
-        if (!data) {
-            await self.db.servers.updateOne(
-                { _id: member.guild.id },
+        if (!user) {
+            user = await self.db.users.create({
+                _id: member.id,
+                user: {
+                    username: member.user.username,
+                    discriminator: member.user.discriminator,
+                    avatar: member.user.avatar,
+                    flags: member.user.flags
+                }
+            })
+        }
+
+        const data = user?.restoring_data?.find?.(i => i.guild_id === member.guild.id)
+
+        if (data) {
+            await self.db.users.updateOne(
+                { _id: member.id, 'restoring_data.guild_id': member.guild.id },
                 {
-                    $push: {
-                        'modules.restoring.data': {
-                            user_id: member.id,
-                            roles: member.roles.cache.filter(r => r.id != member.guild.id).map(r => r.id),
-                            nickname: member.nickname,
-                            timestamp: Date.now()
-                        }
+                    $set: {
+                        'restoring_data.$.timestamp': Date.now(),
+                        'restoring_data.$.roles': member.roles.cache.filter(i => i.id !== member.guild.id).map(i => i.id),
+                        'restoring_data.$.nickname': member.nickname
                     }
                 }
             )
         } else {
-            await self.db.servers.updateOne(
-                { _id: member.guild.id, 'modules.restoring.data.user_id': member.id },
+            await self.db.users.updateOne(
+                { _id: member.id },
                 {
-                    $set: {
-                        'modules.restoring.data.$.roles': member.roles.cache.filter(r => r.id != member.guild.id).map(r => r.id),
-                        'modules.restoring.data.$.nickname': member.nickname,
-                        'modules.restoring.data.$.timestamp': Date.now()
+                    $push: {
+                        restoring_data: {
+                            guild_id: member.guild.id,
+                            timestamp: Date.now(),
+                            roles: member.roles.cache.filter(i => i.id !== member.guild.id).map(i => i.id),
+                            nickname: member.nickname
+                        }
                     }
                 }
             )
@@ -72,15 +86,15 @@ export default async function farewell(self: Lacuna, server: ServerDocument, mem
     }
 
     if (server.modules.restoring.data.length) {
-        const outdated = server.modules.restoring.data.filter(i => Date.now() - i.timestamp > 4838400000)
+        const outdatedData = server.modules.restoring.data.filter(i => Date.now() - i.timestamp > 1000 * 60 * 60 * 24 * 7)
 
-        if (outdated.length) {
+        if (outdatedData.length) {
             await self.db.servers.updateOne(
                 { _id: member.guild.id },
                 {
                     $pull: {
                         'modules.restoring.data': {
-                            user_id: { $in: outdated.map(i => i.user_id) }
+                            user_id: { $in: outdatedData.map(i => i.user_id) }
                         }
                     }
                 }
