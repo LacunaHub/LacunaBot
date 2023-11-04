@@ -1,10 +1,12 @@
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildEmoji } from 'discord.js'
-import { fetchLogWebhook } from '..'
+import { fetchLogWebhook, isRateLimited } from '..'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, emoji: GuildEmoji): Promise<boolean> {
     if (server.moderation.logs.types.emoji_create.active) {
+        if (isRateLimited(server._id) && !server.server.premium.available) return false
+
         const t = self.i18n.t.bind(null, server.locale)
 
         const logChannel = emoji.guild.channels.cache.get(server.moderation.logs.types.emoji_create.channel_id) as BaseGuildTextChannel

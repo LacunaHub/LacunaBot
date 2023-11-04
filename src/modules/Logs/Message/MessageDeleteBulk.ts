@@ -1,11 +1,13 @@
 import { BaseGuildTextChannel, Collection, EmbedBuilder, Message } from 'discord.js'
-import { fetchLogWebhook } from '..'
+import { fetchLogWebhook, isRateLimited } from '..'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { truncateString } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, messages: Collection<string, Message>): Promise<boolean> {
     if (server.moderation.logs.types.message_delete_bulk.active) {
+        if (isRateLimited(server._id) && !server.server.premium.available) return false
+
         const t = self.i18n.t.bind(null, server.locale)
         const message = messages.first()
 

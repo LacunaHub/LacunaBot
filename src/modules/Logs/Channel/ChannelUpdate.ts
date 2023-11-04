@@ -1,11 +1,13 @@
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildChannel, TextChannel } from 'discord.js'
 import numbro from 'numbro'
-import { fetchLogWebhook } from '..'
+import { fetchLogWebhook, isRateLimited } from '..'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: GuildChannel, channel: GuildChannel): Promise<boolean> {
     if (server.moderation.logs.types.channel_update.active) {
+        if (isRateLimited(server._id) && !server.server.premium.available) return false
+
         const t = self.i18n.t.bind(null, server.locale)
 
         const logChannel = channel.guild.channels.cache.get(server.moderation.logs.types.channel_update.channel_id) as BaseGuildTextChannel

@@ -1,10 +1,12 @@
 import { BaseGuildTextChannel, EmbedBuilder, Guild, Invite } from 'discord.js'
-import { fetchLogWebhook } from '..'
+import { fetchLogWebhook, isRateLimited } from '..'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, invite: Invite): Promise<boolean> {
     if (server.moderation.logs.types.invite_delete.active) {
+        if (isRateLimited(server._id) && !server.server.premium.available) return false
+
         const t = self.i18n.t.bind(null, server.locale)
 
         const logChannel = (invite.guild as Guild).channels.cache.get(server.moderation.logs.types.invite_delete.channel_id) as BaseGuildTextChannel
