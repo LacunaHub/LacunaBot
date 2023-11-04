@@ -182,6 +182,10 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
     if (!levels.voice) return false
     if (state.guild.afkChannelId === state.channelId) return false
 
+    const activeVoiceStates = state.guild.voiceStates.cache.filter(i => !i.member.user.bot && i.channelId).size
+
+    if (activeVoiceStates >= 15 && !server.server.premium.available) return false
+
     const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
     if (members.size < 2) return false
