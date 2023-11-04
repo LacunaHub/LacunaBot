@@ -1,10 +1,12 @@
 import { AuditLogEvent, BaseGuildTextChannel, Collection, EmbedBuilder, GuildMember, Role } from 'discord.js'
-import { fetchLogWebhook } from '..'
+import { fetchLogWebhook, isRateLimited } from '..'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, member: GuildMember, roles: Collection<string, Role>): Promise<boolean> {
     if (server.moderation.logs.types.role_member_remove.active) {
+        if (isRateLimited(server._id) && !server.server.premium.available) return false
+
         const t = self.i18n.t.bind(null, server.locale)
 
         const logChannel = member.guild.channels.cache.get(server.moderation.logs.types.role_member_remove.channel_id) as BaseGuildTextChannel

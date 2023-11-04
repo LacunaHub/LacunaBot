@@ -22,6 +22,7 @@ export default model<UserDocument>(
                 wallets: { type: Array, default: [] }
             },
             reports: { type: Array, default: [] },
+            restoring_data: { type: Array, default: [] },
             created_at: { type: Number, default: () => Date.now() }
         },
         { versionKey: false }
@@ -50,6 +51,7 @@ export interface UserDocument extends Document {
         wallets: IUserWallet[]
     }
     reports: IUserReport[]
+    restoring_data: IRestoringData[]
     created_at: number
 }
 
@@ -97,4 +99,11 @@ export interface IUserReport {
     guild_id: string
     reason: string
     created_at: number
+}
+
+export interface IRestoringData {
+    guild_id: string
+    timestamp: number
+    roles: string[]
+    nickname?: string
 }

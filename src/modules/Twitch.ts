@@ -5,12 +5,42 @@ import logger from '../internals/Logger'
 import { apiRoutes, restApi } from '../internals/utility/DiscordUtils'
 import Replacer from './Replacer'
 
+async function getAppAccessToken() {
+    let token: any = await db.qdb.get('twitchAccessToken')
+
+    if (!token || Date.now() > token.expires_at) {
+        const response = await fetch('https://id.twitch.tv/oauth2/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                client_id: process.env.TWITCH_CLIENT_ID,
+                client_secret: process.env.TWITCH_CLIENT_SECRET,
+                grant_type: 'client_credentials'
+            })
+        })
+
+        if (response.ok) {
+            const data = await response.json()
+
+            await db.qdb.set('twitchAccessToken', data.access_token, data.expires_in)
+
+            token = data.access_token
+        }
+    }
+
+    return token ?? null
+}
+
 export async function searchChannels(query: string) {
     logger.log(`[Twitch] Searching channels with query "${query}"`)
+
+    const twitchToken = await getAppAccessToken()
     const response = await fetch(`https://api.twitch.tv/helix/search/channels?query=${encodeURI(query)}`, {
         method: 'GET',
         headers: {
-            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${twitchToken}`,
             'Client-Id': process.env.TWITCH_CLIENT_ID
         }
     })
@@ -32,11 +62,13 @@ export async function searchChannels(query: string) {
     return []
 }
 
-export function eventSubSubscribe(type: string, user_id: string) {
-    return fetch(`https://api.twitch.tv/helix/eventsub/subscriptions`, {
+export async function eventSubSubscribe(type: string, user_id: string) {
+    const twitchToken = await getAppAccessToken()
+
+    return await fetch(`https://api.twitch.tv/helix/eventsub/subscriptions`, {
         method: 'POST',
         headers: {
-            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${twitchToken}`,
             'Client-Id': process.env.TWITCH_CLIENT_ID,
             'Content-Type': 'application/json'
         },
@@ -53,21 +85,25 @@ export function eventSubSubscribe(type: string, user_id: string) {
     })
 }
 
-export function eventSubUnsubscribe(subscription_id: string) {
-    return fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscription_id}`, {
+export async function eventSubUnsubscribe(subscription_id: string) {
+    const twitchToken = await getAppAccessToken()
+
+    return await fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscription_id}`, {
         method: 'DELETE',
         headers: {
-            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${twitchToken}`,
             'Client-Id': process.env.TWITCH_CLIENT_ID
         }
     })
 }
 
-export function getEventSubsByUserId(userId: string) {
-    return fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?user_id=${userId}`, {
+export async function getEventSubsByUserId(userId: string) {
+    const twitchToken = await getAppAccessToken()
+
+    return await fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?user_id=${userId}`, {
         method: 'GET',
         headers: {
-            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${twitchToken}`,
             'Client-Id': process.env.TWITCH_CLIENT_ID
         }
     })
@@ -75,10 +111,12 @@ export function getEventSubsByUserId(userId: string) {
 
 export async function getStream(user_id: string) {
     logger.log(`[Twitch] Getting stream of user "${user_id}"`)
+
+    const twitchToken = await getAppAccessToken()
     const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${user_id}`, {
         method: 'GET',
         headers: {
-            Authorization: `Bearer ${process.env.TWITCH_APP_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${twitchToken}`,
             'Client-Id': process.env.TWITCH_CLIENT_ID
         }
     })

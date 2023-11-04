@@ -7,8 +7,8 @@ import APIError from '../utility/APIError'
 export async function createCustomCommand(server: ServerDocument, data: ICustomCommand) {
     const customCommands = server.modules.custom_commands
 
-    // if (customCommands.length >= 5 && !server.server.premium.available) throw new Error('LIMIT_REACHED_NO_PREMIUM')
-    if (customCommands.length >= 25) throw new APIError(3001)
+    if (customCommands.length >= 25 && !server.server.premium.available) throw new APIError(3001)
+    if (customCommands.length >= 100) throw new APIError(3002)
     if (!data.components.length) throw new APIError(4003)
 
     const commandsCache = (await database.qdb.get('commands')) as any

@@ -38,6 +38,19 @@ import VoiceServerMute from './Voice/VoiceServerMute'
 import VoiceServerUndeaf from './Voice/VoiceServerUndeaf'
 import VoiceServerUnmute from './Voice/VoiceServerUnmute'
 
+const rateLimitDatabase = new Map()
+
+export const images = {
+    BAN_ADD: 'https://i.imgur.com/qI02Ivf.png',
+    BAN_REMOVE: 'https://i.imgur.com/FVnlHqJ.png',
+    KICK: 'https://i.imgur.com/RYVLGuy.png',
+    MUTE_ADD: 'https://i.imgur.com/t5FJ6Gw.png',
+    MUTE_REMOVE: 'https://i.imgur.com/rtL11np.png',
+    PRUNE_MESSAGES: 'https://i.imgur.com/vUd9gtw.png',
+    WARN_ADD: 'https://i.imgur.com/R03G3G5.png',
+    WARN_REMOVE: 'https://i.imgur.com/AXNkdfG.png'
+}
+
 export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextChannel, webhooks: LogsWebhook[]) {
     const logWebhook = webhooks.find(i => i.channel_id === logChannel.id)
     let webhook: Webhook
@@ -93,6 +106,27 @@ export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextCha
     return webhook
 }
 
+export function isRateLimited(guildId: string) {
+    let rateLimit: { resetAfter: number; remaining: number } = rateLimitDatabase.get(guildId)
+
+    if (rateLimit && Date.now() > rateLimit.resetAfter) {
+        rateLimitDatabase.delete(guildId)
+        rateLimit = undefined
+    }
+
+    if (!rateLimit) {
+        rateLimit = rateLimitDatabase.set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: 14 }).get(guildId)
+
+        return false
+    }
+
+    if (rateLimit.remaining <= 0) return true
+
+    rateLimit.remaining--
+
+    return false
+}
+
 export default {
     ChannelCreate,
     ChannelDelete,
@@ -130,15 +164,4 @@ export default {
     VoiceServerMute,
     VoiceServerUndeaf,
     VoiceServerUnmute
-}
-
-export const images = {
-    BAN_ADD: 'https://i.imgur.com/qI02Ivf.png',
-    BAN_REMOVE: 'https://i.imgur.com/FVnlHqJ.png',
-    KICK: 'https://i.imgur.com/RYVLGuy.png',
-    MUTE_ADD: 'https://i.imgur.com/t5FJ6Gw.png',
-    MUTE_REMOVE: 'https://i.imgur.com/rtL11np.png',
-    PRUNE_MESSAGES: 'https://i.imgur.com/vUd9gtw.png',
-    WARN_ADD: 'https://i.imgur.com/R03G3G5.png',
-    WARN_REMOVE: 'https://i.imgur.com/AXNkdfG.png'
 }

@@ -3,34 +3,41 @@ import { capitalizeFirstLetter } from '../../internals/utility/Utils'
 
 const handler = async (self: Lacuna, data: CommandExecutionData) => {
     const { command, subcommand, options, guild, channel, user } = data
-    // const commandStats = self.qdb.get(`stats.commands.${command}`)
+    const commandStats: CommandStats = await self.db.qdb.get(`stats.commands.${command}`),
+        isSystemCommand = self.commands.has(command)
 
-    // if (commandStats) {
-    //     self.qdb.push(`stats.commands.${command}.data`, {
-    //         timestamp: Date.now(),
-    //         subcommand: subcommand ?? null,
-    //         options: options ?? [],
-    //         guild_id: guild.id,
-    //         channel_id: channel.id,
-    //         user_id: user.id
-    //     })
-    //     self.qdb.add(`stats.commands.${command}.total_uses`, 1)
-    // } else {
-    //     self.qdb.set(`stats.commands.${command}`, {
-    //         command,
-    //         data: [
-    //             {
-    //                 timestamp: Date.now(),
-    //                 subcommand: subcommand ?? null,
-    //                 options: options ?? [],
-    //                 guild_id: guild.id,
-    //                 channel_id: channel.id,
-    //                 user_id: user.id
-    //             }
-    //         ],
-    //         total_uses: 1
-    //     })
-    // }
+    if (isSystemCommand) {
+        if (commandStats) {
+            commandStats.usages.push({
+                timestamp: Date.now(),
+                subcommand: subcommand ?? null,
+                options: options ?? [],
+                guild_id: guild.id,
+                channel_id: channel.id,
+                user_id: user.id
+            })
+            await self.db.qdb.set(
+                `stats.commands.${command}.usages`,
+                commandStats.usages.filter(i => Date.now() - i.timestamp < 1000 * 60 * 60 * 24)
+            )
+            await self.db.qdb.add(`stats.commands.${command}.total_uses`, 1)
+        } else {
+            await self.db.qdb.set(`stats.commands.${command}`, {
+                command,
+                usages: [
+                    {
+                        timestamp: Date.now(),
+                        subcommand: subcommand ?? null,
+                        options: options ?? [],
+                        guild_id: guild.id,
+                        channel_id: channel.id,
+                        user_id: user.id
+                    }
+                ],
+                total_uses: 1
+            })
+        }
+    }
 
     const capitalizedCommandName = capitalizeFirstLetter(command),
         capitalizedSubcommandName = subcommand ? capitalizeFirstLetter(subcommand) : '',
@@ -61,4 +68,19 @@ export interface CommandExecutionData {
     guild: { name: string; id: string }
     channel: { name: string; id: string }
     user: { name: string; id: string }
+}
+
+export interface CommandStats {
+    command: string
+    usages: CommandStatsUsages[]
+    total_uses: number
+}
+
+export interface CommandStatsUsages {
+    timestamp: number
+    subcommand?: string
+    options: any[]
+    guild_id: string
+    channel_id: string
+    user_id: string
 }
