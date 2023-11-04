@@ -1074,14 +1074,17 @@ export default class Automation {
     static async handleEvent(eventName: IAutomationTrigger, self: Lacuna, server: ServerDocument, signal: IAutomationSignal) {
         const automation = server.modules.automation
             .slice(0, server.server.premium.available ? 20 : 5)
-            .find(i => i.trigger === eventName && !i.options.includes('DISABLED'))
+            .filter(i => i.trigger === eventName && !i.options.includes('DISABLED'))
+            .slice(0, server.server.premium.available ? 5 : 1)
 
-        if (automation) {
+        if (automation.length) {
             if ('customId' in signal) {
                 signal['customId' as any] = signal.customId.replace('UD-', '')
             }
+        }
 
-            const am = new Automation(self, server, automation, signal)
+        for (const task of automation) {
+            const am = new Automation(self, server, task, signal)
 
             await am.execute()
         }
