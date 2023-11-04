@@ -2,7 +2,7 @@
   <q-page class="q-pa-md row justify-center items-start">
     <div id="dashboard-page-container" class="row q-col-gutter-md">
       <div class="col-12">
-        <div class="shadow-0 rounded-lg">
+        <div class="shadow-0">
           <q-toolbar v-if="pageLoading" class="bg-dark-1 q-pa-md rounded-t-lg">
             <q-item-section avatar>
               <q-skeleton class="rounded-circle" type="QAvatar" />
@@ -92,7 +92,7 @@ const getMe = async () => {
 
       $q.notify({
         message: error.message,
-        classes: 'rounded-lg q-notification-custom',
+        classes: 'q-notification-custom',
         color: 'black',
         icon: 'error',
         iconColor: 'negative',

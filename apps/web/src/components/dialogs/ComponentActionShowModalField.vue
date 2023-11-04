@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-9">
@@ -111,19 +111,21 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md">
-        <q-item tag="label" dense v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t('custom_command.co_required_title') }}
-            </q-item-label>
-          </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-item tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="field.required" dense></q-checkbox>
+            </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox v-model="field.required" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+            <q-item-section>
+              <q-item-label>
+                {{ $t('custom_command.co_required_title') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -149,9 +151,9 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'ComponentActionShowModalField',

@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -79,12 +79,10 @@
               >
                 <template #selected-item="{ opt, index, removeAtIndex }">
                   <q-chip
-                    class="rounded-lg"
                     square
                     :label="opt.name ?? opt"
                     size="sm"
                     :style="`background: ${opt.color}`"
-                    :ripple="false"
                     removable
                     @remove="removeAtIndex(index)"
                   ></q-chip>
@@ -105,8 +103,8 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
-        <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
+      <q-card class="bg-dark-1" flat>
+        <q-item class="q-py-md rounded-t-lg" tag="label">
           <q-item-section>
             <q-item-label class="text-subtitle1">
               {{ $t('pages.guild.gs_welcome_title') }}
@@ -171,15 +169,7 @@
                 map-options
               >
                 <template #selected-item="{ opt }">
-                  <q-chip
-                    class="rounded-lg"
-                    color="dark-1"
-                    square
-                    :label="opt.name ?? opt"
-                    :icon="opt.icon"
-                    size="sm"
-                    :ripple="false"
-                  ></q-chip>
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
                 </template>
 
                 <template #option="{ opt, toggleOption, selected }">
@@ -219,8 +209,8 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
-        <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
+      <q-card class="bg-dark-1" flat>
+        <q-item class="q-py-md rounded-t-lg" tag="label">
           <q-item-section>
             <q-item-label class="text-subtitle1">
               {{ $t('pages.guild.gs_init_roles_title') }}
@@ -252,12 +242,10 @@
               >
                 <template #selected-item="{ opt, index, removeAtIndex }">
                   <q-chip
-                    class="rounded-lg"
                     square
                     :label="opt.name ?? opt"
                     size="sm"
                     :style="`background: ${opt.color}`"
-                    :ripple="false"
                     removable
                     @remove="removeAtIndex(index)"
                   ></q-chip>
@@ -284,7 +272,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -296,31 +284,33 @@
           </q-item-section>
         </q-item>
 
-        <q-list class="q-px-none" padding dense>
-          <q-item tag="label" v-ripple>
-            <q-item-section>
-              <q-item-label>
-                {{ $t('pages.guild.gs_restore_roles_title') }}
-              </q-item-label>
-            </q-item-section>
+        <div class="q-pa-md">
+          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+            <q-item tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="guild.modules.restoring.restore_roles" dense></q-checkbox>
+              </q-item-section>
 
-            <q-item-section side>
-              <q-checkbox v-model="guild.modules.restoring.restore_roles" dense></q-checkbox>
-            </q-item-section>
-          </q-item>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('pages.guild.gs_restore_roles_title') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
 
-          <q-item tag="label" v-ripple>
-            <q-item-section>
-              <q-item-label>
-                {{ $t('pages.guild.gs_restore_nicknames_title') }}
-              </q-item-label>
-            </q-item-section>
+            <q-item tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="guild.modules.restoring.restore_nicknames" dense></q-checkbox>
+              </q-item-section>
 
-            <q-item-section side>
-              <q-checkbox v-model="guild.modules.restoring.restore_nicknames" dense></q-checkbox>
-            </q-item-section>
-          </q-item>
-        </q-list>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('pages.guild.gs_restore_nicknames_title') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
 
         <q-card-section>
           <div class="row q-col-gutter-md">
@@ -349,12 +339,10 @@
               >
                 <template #selected-item="{ opt, index, removeAtIndex }">
                   <q-chip
-                    class="rounded-lg"
                     square
                     :label="opt.name ?? opt"
                     size="sm"
                     :style="`background: ${opt.color}`"
-                    :ripple="false"
                     removable
                     @remove="removeAtIndex(index)"
                   ></q-chip>
@@ -381,8 +369,8 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
-        <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
+      <q-card class="bg-dark-1" flat>
+        <q-item class="q-py-md rounded-t-lg" tag="label">
           <q-item-section>
             <q-item-label class="text-subtitle1">
               {{ $t('pages.guild.gs_farewell_title') }}
@@ -447,15 +435,7 @@
                 map-options
               >
                 <template #selected-item="{ opt }">
-                  <q-chip
-                    class="rounded-lg"
-                    color="dark-1"
-                    square
-                    :label="opt.name ?? opt"
-                    :icon="opt.icon"
-                    size="sm"
-                    :ripple="false"
-                  ></q-chip>
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
                 </template>
 
                 <template #option="{ opt, toggleOption, selected }">
@@ -497,10 +477,10 @@
 </template>
 
 <script>
-import { useGuildStore } from 'src/stores/guild'
-import { defineComponent } from 'vue'
 import MessageEditor from 'src/components/MessageEditor.vue'
+import { useGuildStore } from 'src/stores/guild'
 import { availableLocales } from 'src/utils/Constants'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsGeneral',

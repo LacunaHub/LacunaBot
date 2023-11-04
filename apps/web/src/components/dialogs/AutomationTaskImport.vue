@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -34,7 +34,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6" v-for="automation in publicAutomation" :key="automation._id">
               <q-card class="bg-dark-2" flat>
-                <q-item class="rounded-lg" clickable v-ripple @click="onSelectPublishedAutomation(automation)">
+                <q-item clickable @click="onSelectPublishedAutomation(automation)">
                   <q-item-section>
                     <q-item-label class="text-subtitle1">
                       {{ automation.name }}
@@ -119,7 +119,7 @@ export default defineComponent({
 
         this.$q.notify({
           message: error.message,
-          classes: 'rounded-lg q-notification-custom',
+          classes: 'q-notification-custom',
           color: 'black',
           icon: 'error',
           iconColor: 'negative',
@@ -164,7 +164,7 @@ export default defineComponent({
 
         this.$q.notify({
           message: error.message,
-          classes: 'rounded-lg q-notification-custom',
+          classes: 'q-notification-custom',
           color: 'black',
           icon: 'error',
           iconColor: 'negative',

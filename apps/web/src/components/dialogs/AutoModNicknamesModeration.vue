@@ -1,7 +1,7 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
+    <q-card class="bg-dark-1" flat style="width: 1000px; max-width: 90vw">
+      <q-item class="q-py-md rounded-t-lg" tag="label">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
             {{ $t(`automoder.titles.${name}`) }}
@@ -13,27 +13,24 @@
         </q-item-section>
       </q-item>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item class="q-mb-sm">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('automoder.nnm_select_what_remove_title') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+      <div class="q-pa-md">
+        <div>
+          {{ $t('automoder.nnm_select_what_remove_title') }}
+        </div>
 
-        <q-item v-for="opt in removableSymbols" :key="opt" tag="label" :disable="!config.active" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`automoder.nnm_removable_symbols.${opt}`) }}
-            </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-checkbox v-model="config.options" :val="opt" :disable="!config.active" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-item v-for="opt in removableSymbols" :key="opt" tag="label" :disable="!config.active">
+            <q-item-section side>
+              <q-checkbox v-model="config.options" :val="opt" :disable="!config.active" dense></q-checkbox>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>
+                {{ $t(`automoder.nnm_removable_symbols.${opt}`) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -60,14 +57,12 @@
             >
               <template #selected-item="{ opt }">
                 <q-chip
-                  class="rounded-lg"
                   color="dark-1"
                   square
                   :label="opt"
                   size="sm"
                   removable
                   @remove="config.contains.splice(config.contains.indexOf(opt), 1)"
-                  :ripple="false"
                 ></q-chip>
               </template>
             </q-select>
@@ -99,12 +94,10 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   square
                   :label="opt.name ?? opt"
                   size="sm"
                   :style="`background: ${opt.color}`"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -122,55 +115,53 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none" dense>
-        <q-item tag="label" :disable="!config.active" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t('automoder.ignore_bots') }}
-            </q-item-label>
-          </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-item tag="label" :disable="!config.active">
+            <q-item-section side>
+              <q-checkbox v-model="config.ignored.bots" :disable="!config.active" dense></q-checkbox>
+            </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox v-model="config.ignored.bots" :disable="!config.active" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+            <q-item-section>
+              <q-item-label>
+                {{ $t('automoder.ignore_bots') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item class="q-mb-sm">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('common.ignored_permissions') }}
-            </q-item-label>
-            <q-item-label class="text--secondary">
-              {{ $t('automoder.ignored_permissions_description') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+      <div class="q-pa-md">
+        <div>
+          {{ $t('common.ignored_permissions') }}
+        </div>
+        <div class="text--secondary">
+          {{ $t('automoder.ignored_permissions_description') }}
+        </div>
 
-        <q-item
-          v-for="permission in ignorablePermissions"
-          :key="permission.key"
-          tag="label"
-          :disable="!config.active"
-          v-ripple
-        >
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`common.permissions_keys.${permission.key}`) }}
-            </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-checkbox
-              v-model="config.ignored.permissions"
-              :val="permission.value"
-              :disable="!config.active"
-              dense
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-item
+            v-for="permission in ignorablePermissions"
+            :key="permission.key"
+            tag="label"
+            :disable="!config.active"
+          >
+            <q-item-section side>
+              <q-checkbox
+                v-model="config.ignored.permissions"
+                :val="permission.value"
+                :disable="!config.active"
+                dense
+              ></q-checkbox>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>
+                {{ $t(`common.permissions_keys.${permission.key}`) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">

@@ -1,8 +1,8 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 720px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 720px; max-width: 90vw">
       <q-card-section>
-        <q-banner class="rounded-lg bg-dark-2" dense>
+        <q-banner class="bg-dark-2 rounded-borders" dense>
           <span>
             {{ $t('user_survey.it_would_help_us') }}
           </span>
@@ -21,7 +21,7 @@
             <q-rating v-model="satisfaction" class="q-pt-sm" size="lg" :max="5" color="primary">
               <template v-slot:tip-1>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -32,7 +32,7 @@
               </template>
               <template v-slot:tip-2>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -43,7 +43,7 @@
               </template>
               <template v-slot:tip-3>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -54,7 +54,7 @@
               </template>
               <template v-slot:tip-4>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -65,7 +65,7 @@
               </template>
               <template v-slot:tip-5>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -82,7 +82,7 @@
 
             <q-tabs
               v-model="memberCount"
-              class="rounded-lg bg-dark-2 q-mt-sm"
+              class="bg-dark-2 rounded-borders q-mt-sm"
               align="justify"
               active-bg-color="secondary"
               indicator-color="transparent"
@@ -110,7 +110,7 @@
 
             <q-input
               v-model.trim="surveyDetails"
-              class="q-pt-sm rounded-lg"
+              class="rounded-borders q-pt-sm"
               type="textarea"
               :maxlength="2048"
               square
@@ -146,8 +146,8 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
+import { computed, defineComponent, ref } from 'vue'
 
 const memberCountVariants = ['1-49', '50-99', '100-499', '500-2499', '2500-9999', '10000+']
 

@@ -1,39 +1,8 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
-          <!-- <div class="col-12">
-            <div>
-              {{ $t('custom_command.cv_operator_title') }}
-            </div>
-
-            <q-select
-              v-model="component.action.modify_wallet.operator"
-              :options="['INCREMENT', 'DECREMENT']"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-            >
-              <template #selected-item="{ opt }">
-                <span class="text-uppercase">
-                  {{ $t(`custom_command.mw_operators.${opt}`) }}
-                </span>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section>
-                    <q-item-label class="text-uppercase">
-                      {{ $t(`custom_command.mw_operators.${opt}`) }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div> -->
-
           <div class="col-12">
             <div>
               {{ $t('custom_command.mw_amount_title') }}
@@ -114,9 +83,9 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'ComponentActionModifyWallet',

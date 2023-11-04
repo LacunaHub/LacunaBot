@@ -58,7 +58,7 @@
 
     <q-table
       v-else
-      class="bg-dark-1 rounded-lg"
+      class="bg-dark-1"
       flat
       :rows="bills"
       row-key="id"
@@ -134,7 +134,7 @@ const getBills = async () => {
 
     $q.notify({
       message: error.message,
-      classes: 'rounded-lg q-notification-custom',
+      classes: 'q-notification-custom',
       color: 'black',
       icon: 'error',
       iconColor: 'negative',

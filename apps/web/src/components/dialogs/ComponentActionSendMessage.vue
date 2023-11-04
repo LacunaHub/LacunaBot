@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 1000px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
@@ -53,15 +53,7 @@
               map-options
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
 
               <template #option="{ opt, toggleOption, selected }">
@@ -116,10 +108,10 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
-import MessageEditor from '../MessageEditor.vue'
 import { useGuildStore } from 'src/stores/guild'
+import { defineComponent, ref } from 'vue'
+import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({
   name: 'ComponentActionSendMessage',

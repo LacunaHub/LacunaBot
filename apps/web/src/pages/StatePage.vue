@@ -64,7 +64,7 @@
           </div>
 
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
@@ -88,7 +88,7 @@
           </div>
 
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
@@ -112,7 +112,7 @@
           </div>
 
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
@@ -174,7 +174,7 @@
       <div class="col-12 col-md-4">
         <div class="row q-col-gutter-md">
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-list>
                 <q-item>
                   <q-item-section class="text--secondary">
@@ -231,7 +231,7 @@
           </div>
 
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
@@ -252,19 +252,19 @@
                     </q-item-section>
                   </template>
 
-                  <q-card class="rounded-lg bg-dark-1" flat>
+                  <q-card class="bg-dark-1" flat>
                     <q-card-section>
                       <div class="row q-col-gutter-md">
                         <div class="col-6">
                           <q-linear-progress
-                            class="rounded-lg"
+                            class="rounded-borders"
                             track-color="dark-2"
                             :value="server.cpu_usage / 100"
                             size="xl"
                           >
                             <div class="absolute-center text-white">{{ server.cpu_usage }}%</div>
                             <q-tooltip
-                              class="bg-black rounded-lg text-body2"
+                              class="bg-black text-body2"
                               anchor="top middle"
                               self="bottom middle"
                               transition-show=""
@@ -277,14 +277,14 @@
 
                         <div class="col-6">
                           <q-linear-progress
-                            class="rounded-lg"
+                            class="rounded-borders"
                             track-color="dark-2"
                             :value="server.memory_usage / 100"
                             size="xl"
                           >
                             <div class="absolute-center text-white">{{ server.memory_usage }}%</div>
                             <q-tooltip
-                              class="bg-black rounded-lg text-body2"
+                              class="bg-black text-body2"
                               anchor="top middle"
                               self="bottom middle"
                               transition-show=""
@@ -303,7 +303,7 @@
           </div>
 
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
@@ -342,7 +342,7 @@
                             {{ shard.guilds }}
 
                             <q-tooltip
-                              class="bg-black rounded-lg text-body2"
+                              class="bg-black text-body2"
                               anchor="top middle"
                               self="bottom middle"
                               transition-show=""
@@ -359,7 +359,7 @@
                             {{ shard.cached_users }}/{{ shard.users }}
 
                             <q-tooltip
-                              class="bg-black rounded-lg text-body2"
+                              class="bg-black text-body2"
                               anchor="top middle"
                               self="bottom middle"
                               transition-show=""
@@ -376,7 +376,7 @@
                             {{ shard.channels }}
 
                             <q-tooltip
-                              class="bg-black rounded-lg text-body2"
+                              class="bg-black text-body2"
                               anchor="top middle"
                               self="bottom middle"
                               transition-show=""
@@ -395,7 +395,7 @@
           </div>
 
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
@@ -417,10 +417,10 @@
                   </q-item-section>
 
                   <q-item-section>
-                    <q-linear-progress class="rounded-lg" track-color="dark-2" :value="player.cpu_load" size="xl">
+                    <q-linear-progress class="rounded-borders" track-color="dark-2" :value="player.cpu_load" size="xl">
                       <div class="absolute-center text-white">{{ Math.round(player.cpu_load * 100) }}%</div>
                       <q-tooltip
-                        class="bg-black rounded-lg text-body2"
+                        class="bg-black text-body2"
                         anchor="top middle"
                         self="bottom middle"
                         transition-show=""
@@ -444,7 +444,7 @@
       <div class="col-12 col-md-8">
         <div class="row q-col-gutter-md">
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-card-section>
                 <LineChart
                   :chart-data="metricsData.totalGuilds"
@@ -466,7 +466,7 @@
           </div>
 
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-card-section>
                 <LineChart
                   :chart-data="metricsData.shardLatencies"
@@ -487,7 +487,7 @@
           </div>
 
           <div class="col-12">
-            <q-card class="rounded-lg bg-dark-1" flat>
+            <q-card class="bg-dark-1" flat>
               <q-card-section>
                 <LineChart
                   :chart-data="metricsData.commandUsageCount"
@@ -634,7 +634,7 @@ const getState = async () => {
 
     $q.notify({
       message: error.message,
-      classes: 'rounded-lg q-notification-custom',
+      classes: 'q-notification-custom',
       color: 'black',
       icon: 'close',
       iconColor: 'negative',

@@ -1,8 +1,8 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section v-if="guild.premium.available">
-        <q-banner class="rounded-lg bg-dark-2" dense>
+        <q-banner class="bg-dark-2 rounded-borders" dense>
           <span v-if="guild.premium.will_expire_on">
             {{
               $t('lacuna_diamond.has_subscription', {
@@ -50,8 +50,80 @@
         </div>
       </q-card-section>
 
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-expansion-item :label="$t('lacuna_diamond.plan_comparison')">
+            <q-markup-table class="no-border-top no-border-radius" flat bordered separator="vertical" wrap-cells>
+              <thead class="bg-dark-1">
+                <tr>
+                  <th style="min-width: 220px; width: 50%">
+                    <div class="text-h4"></div>
+                  </th>
+                  <th style="min-width: 100px; width: 20%">
+                    <div class="text-h5">Free</div>
+                  </th>
+                  <th style="min-width: 140px; width: 30%">
+                    <div class="text-h5 text-primary">Diamond</div>
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody v-for="(plan, i) in planComparison" :key="i" class="bg-dark-1">
+                <tr class="q-tr--no-hover">
+                  <td style="min-width: 220px; width: 50%">
+                    <div class="text-h6">
+                      {{ plan.categoryName }}
+                    </div>
+                  </td>
+                  <td class="text-center" style="min-width: 100px; width: 20%"></td>
+                  <td class="text-center" style="min-width: 140px; width: 30%"></td>
+                </tr>
+
+                <tr v-for="(feature, ii) in plan.features" :key="ii" class="q-tr--no-hover">
+                  <td class="text-almost-white-2" style="min-width: 220px; width: 50%">
+                    {{ feature.name }}
+                  </td>
+                  <td class="text-center" style="min-width: 100px; width: 20%">
+                    <div v-if="feature.free.type === 'text'" class="text-subtitle1">
+                      {{ feature.free.value }}
+                    </div>
+                    <q-icon
+                      v-if="feature.free.type === 'icon'"
+                      :name="feature.free.value"
+                      class="text-subtitle1"
+                    ></q-icon>
+                    <q-icon
+                      v-if="feature.free.type === 'boolean'"
+                      :name="feature.free.value ? 'check' : 'close'"
+                      :color="feature.free.value ? 'positive' : 'negative'"
+                      class="text-subtitle1"
+                    ></q-icon>
+                  </td>
+                  <td class="text-center text-primary" style="min-width: 140px; width: 30%">
+                    <div v-if="feature.diamond.type === 'text'" class="text-subtitle1">
+                      {{ feature.diamond.value }}
+                    </div>
+                    <q-icon
+                      v-if="feature.diamond.type === 'icon'"
+                      :name="feature.diamond.value"
+                      class="text-subtitle1"
+                    ></q-icon>
+                    <q-icon
+                      v-if="feature.diamond.type === 'boolean'"
+                      :name="feature.diamond.value ? 'check' : 'close'"
+                      :color="feature.diamond.value ? 'positive' : 'negative'"
+                      class="text-subtitle1"
+                    ></q-icon>
+                  </td>
+                </tr>
+              </tbody>
+            </q-markup-table>
+          </q-expansion-item>
+        </q-list>
+      </div>
+
       <q-card-section v-if="provider === 'DISCORD_NITRO_BOOST'">
-        <q-card class="rounded-lg bg-dark-2" flat>
+        <q-card class="bg-dark-2" flat>
           <q-card-section>
             <ol class="q-pl-md q-my-none" type="1">
               <i18n-t keypath="lacuna_diamond.dnb_step_1" tag="li">
@@ -86,7 +158,7 @@
           </q-card-section>
 
           <q-card-section class="q-pt-none">
-            <q-banner class="rounded-lg bg-dark-1" dense>
+            <q-banner class="bg-dark-1 rounded-borders" dense>
               <span>
                 {{ $t('lacuna_diamond.dnb_bonuses_info') }}
               </span>
@@ -100,7 +172,7 @@
       </q-card-section>
 
       <q-card-section v-else-if="provider === 'PATREON'">
-        <q-card class="rounded-lg bg-dark-2" flat>
+        <q-card class="bg-dark-2" flat>
           <q-card-section>
             <q-btn
               class="full-width"
@@ -117,7 +189,7 @@
           </q-card-section>
 
           <q-card-section class="q-pt-none">
-            <q-banner class="rounded-lg bg-dark-1" dense>
+            <q-banner class="bg-dark-1 rounded-borders" dense>
               <span>
                 {{ $t('lacuna_diamond.patreon_after_checkout') }}
 
@@ -135,7 +207,7 @@
       </q-card-section>
 
       <q-card-section v-else-if="provider === 'BOOSTY'">
-        <q-card class="rounded-lg bg-dark-2" flat>
+        <q-card class="bg-dark-2" flat>
           <q-card-section>
             <q-btn
               class="full-width"
@@ -154,7 +226,7 @@
           </q-card-section>
 
           <q-card-section class="q-pt-none">
-            <q-banner class="rounded-lg bg-dark-1" dense>
+            <q-banner class="bg-dark-1 rounded-borders" dense>
               <span>
                 {{ $t('lacuna_diamond.patreon_after_checkout') }}
 
@@ -178,7 +250,7 @@
 
         <q-tabs
           v-model.number="tier"
-          class="rounded-lg bg-dark-2 q-mt-sm"
+          class="bg-dark-2 rounded-borders q-mt-sm"
           align="justify"
           active-bg-color="secondary"
           indicator-color="transparent"
@@ -211,7 +283,7 @@
 
         <q-tabs
           v-model="provider"
-          class="rounded-lg bg-dark-2 q-mt-sm"
+          class="bg-dark-2 rounded-borders q-mt-sm"
           align="justify"
           active-bg-color="secondary"
           indicator-color="transparent"
@@ -333,6 +405,7 @@ import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
 import qiwiLogo from 'src/assets/qiwi-logo.svg'
 import { handleAxiosError } from 'src/utils/Utils'
+import { useI18n } from 'vue-i18n'
 import LacunaDiamondTransfer from './LacunaDiamondTransfer.vue'
 
 export default defineComponent({
@@ -341,10 +414,180 @@ export default defineComponent({
   emits: [...useDialogPluginComponent.emits],
 
   setup() {
-    const $q = useQuasar()
+    const $q = useQuasar(),
+      { t: $t } = useI18n()
 
     const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
+
+    const planComparison = [
+      {
+        categoryName: $t('pages.landing.ft_custom_behavior_title'),
+        features: [
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.execute_code_title'),
+            free: { value: false, type: 'boolean' },
+            diamond: { value: true, type: 'boolean' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.custom_commands_number_title'),
+            free: { value: '25', type: 'text' },
+            diamond: { value: '100', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.automation_number_title'),
+            free: { value: '5', type: 'text' },
+            diamond: { value: '20', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.automation_sequential_executions_with_one_trigger_title'),
+            free: { value: '1', type: 'text' },
+            diamond: { value: '5', type: 'text' }
+          }
+        ]
+      },
+      {
+        categoryName: $t('pages.landing.ft_utility_title'),
+        features: [
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.interactive_messages_number_title'),
+            free: { value: '5', type: 'text' },
+            diamond: { value: '50', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.interactive_reactions_number_title'),
+            free: { value: '50', type: 'text' },
+            diamond: { value: '200', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.temp_voice_channels_number_title'),
+            free: { value: '2', type: 'text' },
+            diamond: { value: '20', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.voice_roles_number_title'),
+            free: { value: '2', type: 'text' },
+            diamond: { value: '20', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.auto_threads_number_title'),
+            free: { value: '2', type: 'text' },
+            diamond: { value: '20', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.auto_reactions_number_title'),
+            free: { value: '2', type: 'text' },
+            diamond: { value: '20', type: 'text' }
+          }
+        ]
+      },
+      {
+        categoryName: $t('pages.landing.ft_moderation_title'),
+        features: [
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.action_log_webhook_modifying_title'),
+            free: { value: false, type: 'boolean' },
+            diamond: { value: true, type: 'boolean' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.action_log_events_processed_per_minute_number_title'),
+            free: { value: '15', type: 'text' },
+            diamond: { value: 'all_inclusive', type: 'icon' }
+          }
+        ]
+      },
+      {
+        categoryName: $t('pages.landing.ft_music_title'),
+        features: [
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.playlists_playback_title'),
+            free: { value: false, type: 'boolean' },
+            diamond: { value: true, type: 'boolean' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.audio_streaming_playback_title'),
+            free: { value: false, type: 'boolean' },
+            diamond: { value: true, type: 'boolean' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.playback_volume_changing_title'),
+            free: { value: false, type: 'boolean' },
+            diamond: { value: true, type: 'boolean' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.playback_queue_track_number_title'),
+            free: { value: '15', type: 'text' },
+            diamond: { value: 'all_inclusive', type: 'icon' }
+          }
+        ]
+      },
+      {
+        categoryName: $t('pages.landing.ft_activities_title'),
+        features: [
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.earn_currencies_in_voice_channels'),
+            free: { value: false, type: 'boolean' },
+            diamond: { value: true, type: 'boolean' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.voice_exp_members_number_title'),
+            free: { value: '15', type: 'text' },
+            diamond: { value: 'all_inclusive', type: 'icon' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.level_awards_number_title'),
+            free: { value: '50', type: 'text' },
+            diamond: { value: '200', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.store_items_number_title'),
+            free: { value: '50', type: 'text' },
+            diamond: { value: '200', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.activity_multipliers_number_title'),
+            free: { value: '1', type: 'text' },
+            diamond: { value: '10', type: 'text' }
+          }
+        ]
+      },
+      {
+        categoryName: $t('pages.landing.ft_subscriptions_title'),
+        features: [
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.social_platform_number_title', {
+              social_platform: 'Telegram'
+            }),
+            free: { value: '1', type: 'text' },
+            diamond: { value: '10', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.social_platform_number_title', {
+              social_platform: 'YouTube'
+            }),
+            free: { value: '1', type: 'text' },
+            diamond: { value: '10', type: 'text' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.social_platform_number_title', {
+              social_platform: 'Twitch'
+            }),
+            free: { value: '1', type: 'text' },
+            diamond: { value: '10', type: 'text' }
+          }
+        ]
+      },
+      {
+        categoryName: $t('other'),
+        features: [
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.priority_support_title'),
+            free: { value: false, type: 'boolean' },
+            diamond: { value: true, type: 'boolean' }
+          }
+        ]
+      }
+    ]
 
     let confirmLoading = ref(false),
       tier = ref(0),
@@ -363,6 +606,8 @@ export default defineComponent({
     return {
       guild,
       dialogRef,
+
+      planComparison,
 
       transferDialog,
 
@@ -398,7 +643,7 @@ export default defineComponent({
 
             $q.notify({
               message: error.message,
-              classes: 'rounded-lg q-notification-custom',
+              classes: 'q-notification-custom',
               color: 'black',
               icon: 'error',
               iconColor: 'negative',

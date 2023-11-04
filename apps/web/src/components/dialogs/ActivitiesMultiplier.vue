@@ -1,353 +1,359 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'activity_multipliers.add_multiplier' : 'activity_multipliers.edit_multiplier') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
+      <div class="q-pa-md">
+        <div>
+          {{ $t('activity_multipliers.level_multipliers') }}
+        </div>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item class="q-mb-sm">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('activity_multipliers.level_multipliers') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-expansion-item v-for="option in ['LEVELS_TEXT', 'LEVELS_VOICE']" :key="option" tag="label">
+            <template #header>
+              <q-item-section side>
+                <q-checkbox
+                  v-model="multiplier.options"
+                  :val="option"
+                  dense
+                  @update:model-value="onSelectOption"
+                ></q-checkbox>
+              </q-item-section>
 
-        <q-item v-for="option in ['LEVELS_TEXT', 'LEVELS_VOICE']" :key="option" tag="label" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`activity_multipliers.${option === 'LEVELS_TEXT' ? 'for_text_activity' : 'for_voice_activity'}`) }}
-            </q-item-label>
-          </q-item-section>
+              <q-item-section>
+                <q-item-label>
+                  {{
+                    $t(`activity_multipliers.${option === 'LEVELS_TEXT' ? 'for_text_activity' : 'for_voice_activity'}`)
+                  }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-          <q-item-section side>
-            <q-checkbox
-              v-model="multiplier.options"
-              :val="option"
-              dense
-              @update:model-value="onSelectOption"
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+            <q-card v-if="option === 'LEVELS_TEXT'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <q-slider
+                      v-if="multiplier.options.includes('LEVELS_TEXT')"
+                      v-model.number="multiplier.levels_text_multiplier"
+                      class="q-pt-xs q-px-sm"
+                      :min="50"
+                      :max="500"
+                      label
+                      :label-value="`${multiplier.levels_text_multiplier}%`"
+                    ></q-slider>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="multiplier.options.includes('LEVELS_TEXT')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('activity_multipliers.for_text_activity') }}
-              </div>
+                    <q-slider v-else disable class="q-pt-xs q-px-sm" :model-value="100" :min="50" :max="500"></q-slider>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
 
-              <q-slider
-                v-model.number="multiplier.levels_text_multiplier"
-                class="q-pt-sm q-px-sm"
-                :min="50"
-                :max="500"
-                label
-                :label-value="`${multiplier.levels_text_multiplier}%`"
-              ></q-slider>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+            <q-card v-if="option === 'LEVELS_VOICE'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <q-slider
+                      v-if="multiplier.options.includes('LEVELS_VOICE')"
+                      v-model.number="multiplier.levels_voice_multiplier"
+                      class="q-pt-xs q-px-sm"
+                      :min="50"
+                      :max="500"
+                      label
+                      :label-value="`${multiplier.levels_voice_multiplier}%`"
+                    ></q-slider>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="multiplier.options.includes('LEVELS_VOICE')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('activity_multipliers.for_voice_activity') }}
-              </div>
+                    <q-slider v-else disable class="q-pt-xs q-px-sm" :model-value="100" :min="50" :max="500"></q-slider>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
-              <q-slider
-                v-model.number="multiplier.levels_voice_multiplier"
-                class="q-pt-sm q-px-sm"
-                :min="50"
-                :max="500"
-                label
-                :label-value="`${multiplier.levels_voice_multiplier}%`"
-              ></q-slider>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+      <div class="q-pa-md">
+        <div>
+          {{ $t('activity_multipliers.economy_multipliers') }}
+        </div>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item class="q-mb-sm">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('activity_multipliers.economy_multipliers') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-expansion-item v-for="option in ['ECONOMY_TEXT', 'ECONOMY_VOICE']" :key="option" tag="label">
+            <template #header>
+              <q-item-section side>
+                <q-checkbox
+                  v-model="multiplier.options"
+                  :val="option"
+                  dense
+                  @update:model-value="onSelectOption"
+                ></q-checkbox>
+              </q-item-section>
 
-        <q-item v-for="option in ['ECONOMY_TEXT', 'ECONOMY_VOICE']" :key="option" tag="label" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`activity_multipliers.${option === 'ECONOMY_TEXT' ? 'for_text_activity' : 'for_voice_activity'}`) }}
-            </q-item-label>
-          </q-item-section>
+              <q-item-section>
+                <q-item-label>
+                  {{
+                    $t(`activity_multipliers.${option === 'ECONOMY_TEXT' ? 'for_text_activity' : 'for_voice_activity'}`)
+                  }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-          <q-item-section side>
-            <q-checkbox
-              v-model="multiplier.options"
-              :val="option"
-              dense
-              @update:model-value="onSelectOption"
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+            <q-card v-if="option === 'ECONOMY_TEXT'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <q-slider
+                      v-if="multiplier.options.includes('ECONOMY_TEXT')"
+                      v-model.number="multiplier.economy_text_multiplier"
+                      class="q-pt-xs q-px-sm"
+                      :min="50"
+                      :max="500"
+                      label
+                      :label-value="`${multiplier.economy_text_multiplier}%`"
+                    ></q-slider>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="multiplier.options.includes('ECONOMY_TEXT')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('activity_multipliers.for_text_activity') }}
-              </div>
+                    <q-slider v-else disable class="q-pt-xs q-px-sm" :model-value="100" :min="50" :max="500"></q-slider>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
 
-              <q-slider
-                v-model.number="multiplier.economy_text_multiplier"
-                class="q-pt-sm q-px-sm"
-                :min="50"
-                :max="500"
-                label
-                :label-value="`${multiplier.economy_text_multiplier}%`"
-              ></q-slider>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+            <q-card v-if="option === 'ECONOMY_VOICE'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <q-slider
+                      v-if="multiplier.options.includes('ECONOMY_VOICE')"
+                      v-model.number="multiplier.economy_voice_multiplier"
+                      class="q-pt-xs q-px-sm"
+                      :min="50"
+                      :max="500"
+                      label
+                      :label-value="`${multiplier.economy_voice_multiplier}%`"
+                    ></q-slider>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="multiplier.options.includes('ECONOMY_VOICE')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('activity_multipliers.for_voice_activity') }}
-              </div>
+                    <q-slider v-else disable class="q-pt-xs q-px-sm" :model-value="100" :min="50" :max="500"></q-slider>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
-              <q-slider
-                v-model.number="multiplier.economy_voice_multiplier"
-                class="q-pt-sm q-px-sm"
-                :min="50"
-                :max="500"
-                label
-                :label-value="`${multiplier.economy_voice_multiplier}%`"
-              ></q-slider>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-expansion-item expand-separator :label="$t('common.permissions')">
+            <q-card class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.allowed_channels') }}
+                    </div>
 
-      <q-list class="q-px-none" padding>
-        <q-expansion-item expand-separator :label="$t('common.permissions')">
-          <q-card class="rounded-lg bg-dark-1" flat>
-            <q-card-section>
-              <div class="row q-col-gutter-md">
-                <div class="col-12">
-                  <div>
-                    {{ $t('common.allowed_channels') }}
+                    <q-select
+                      v-model="multiplier.allowed_channels"
+                      :options="guild.channels"
+                      option-label="name"
+                      option-value="id"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      multiple
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          color="dark-1"
+                          square
+                          :label="opt.name ?? opt"
+                          :icon="opt.icon"
+                          size="sm"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
+
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section avatar>
+                            <q-icon :name="opt.icon"></q-icon>
+                          </q-item-section>
+
+                          <q-item-section>
+                            <q-item-label>
+                              {{ opt.name }}
+                            </q-item-label>
+
+                            <q-item-label class="text--secondary">
+                              {{ opt.parentName }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
                   </div>
 
-                  <q-select
-                    v-model="multiplier.allowed_channels"
-                    :options="guild.channels"
-                    option-label="name"
-                    option-value="id"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                    multiple
-                  >
-                    <template #selected-item="{ opt, index, removeAtIndex }">
-                      <q-chip
-                        class="rounded-lg"
-                        color="dark-1"
-                        square
-                        :label="opt.name ?? opt"
-                        :icon="opt.icon"
-                        size="sm"
-                        :ripple="false"
-                        removable
-                        @remove="removeAtIndex(index)"
-                      ></q-chip>
-                    </template>
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.blocked_channels') }}
+                    </div>
 
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section avatar>
-                          <q-icon :name="opt.icon"></q-icon>
-                        </q-item-section>
+                    <q-select
+                      v-model="multiplier.blocked_channels"
+                      :options="guild.channels"
+                      option-label="name"
+                      option-value="id"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      multiple
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          color="dark-1"
+                          square
+                          :label="opt.name ?? opt"
+                          :icon="opt.icon"
+                          size="sm"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
 
-                        <q-item-section>
-                          <q-item-label>
-                            {{ opt.name }}
-                          </q-item-label>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section avatar>
+                            <q-icon :name="opt.icon"></q-icon>
+                          </q-item-section>
 
-                          <q-item-label class="text--secondary">
-                            {{ opt.parentName }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
+                          <q-item-section>
+                            <q-item-label>
+                              {{ opt.name }}
+                            </q-item-label>
+
+                            <q-item-label class="text--secondary">
+                              {{ opt.parentName }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+                  </div>
                 </div>
+              </q-card-section>
 
-                <div class="col-12">
-                  <div>
-                    {{ $t('common.blocked_channels') }}
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.allowed_roles') }}
+                    </div>
+
+                    <q-select
+                      v-model="multiplier.allowed_roles"
+                      :options="guild.roles"
+                      option-label="name"
+                      option-value="id"
+                      use-chips
+                      class="q-pt-sm"
+                      multiple
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          square
+                          :label="opt.name ?? opt"
+                          size="sm"
+                          :style="`background: ${opt.color}`"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
+
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
                   </div>
 
-                  <q-select
-                    v-model="multiplier.blocked_channels"
-                    :options="guild.channels"
-                    option-label="name"
-                    option-value="id"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                    multiple
-                  >
-                    <template #selected-item="{ opt, index, removeAtIndex }">
-                      <q-chip
-                        class="rounded-lg"
-                        color="dark-1"
-                        square
-                        :label="opt.name ?? opt"
-                        :icon="opt.icon"
-                        size="sm"
-                        :ripple="false"
-                        removable
-                        @remove="removeAtIndex(index)"
-                      ></q-chip>
-                    </template>
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.blocked_roles') }}
+                    </div>
 
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section avatar>
-                          <q-icon :name="opt.icon"></q-icon>
-                        </q-item-section>
+                    <q-select
+                      v-model="multiplier.blocked_roles"
+                      :options="guild.roles"
+                      option-label="name"
+                      option-value="id"
+                      use-chips
+                      class="q-pt-sm"
+                      multiple
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          square
+                          :label="opt.name ?? opt"
+                          size="sm"
+                          :style="`background: ${opt.color}`"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
 
-                        <q-item-section>
-                          <q-item-label>
-                            {{ opt.name }}
-                          </q-item-label>
-
-                          <q-item-label class="text--secondary">
-                            {{ opt.parentName }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
-              </div>
-            </q-card-section>
-
-            <q-card-section>
-              <div class="row q-col-gutter-md">
-                <div class="col-12">
-                  <div>
-                    {{ $t('common.allowed_roles') }}
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
                   </div>
-
-                  <q-select
-                    v-model="multiplier.allowed_roles"
-                    :options="guild.roles"
-                    option-label="name"
-                    option-value="id"
-                    use-chips
-                    class="q-pt-sm"
-                    multiple
-                    filled
-                    dense
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                  >
-                    <template #selected-item="{ opt, index, removeAtIndex }">
-                      <q-chip
-                        class="rounded-lg"
-                        square
-                        :label="opt.name ?? opt"
-                        size="sm"
-                        :style="`background: ${opt.color}`"
-                        :ripple="false"
-                        removable
-                        @remove="removeAtIndex(index)"
-                      ></q-chip>
-                    </template>
-
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
                 </div>
-
-                <div class="col-12">
-                  <div>
-                    {{ $t('common.blocked_roles') }}
-                  </div>
-
-                  <q-select
-                    v-model="multiplier.blocked_roles"
-                    :options="guild.roles"
-                    option-label="name"
-                    option-value="id"
-                    use-chips
-                    class="q-pt-sm"
-                    multiple
-                    filled
-                    dense
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                  >
-                    <template #selected-item="{ opt, index, removeAtIndex }">
-                      <q-chip
-                        class="rounded-lg"
-                        square
-                        :label="opt.name ?? opt"
-                        size="sm"
-                        :style="`background: ${opt.color}`"
-                        :ripple="false"
-                        removable
-                        @remove="removeAtIndex(index)"
-                      ></q-chip>
-                    </template>
-
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-      </q-list>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -368,7 +374,7 @@
             />
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
+              class="full-width"
               :label="$t('done')"
               :disable="!isValid"
               split
@@ -395,10 +401,10 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { suid } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'ActivitiesMultiplier',

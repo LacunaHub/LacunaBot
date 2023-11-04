@@ -1,14 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'level_award.add_award' : 'level_award.edit_award') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -48,12 +40,10 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   square
                   :label="opt.name ?? opt"
                   size="sm"
                   :style="`background: ${opt.color}`"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -97,12 +87,10 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   square
                   :label="opt.name ?? opt"
                   size="sm"
                   :style="`background: ${opt.color}`"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -126,126 +114,132 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item tag="label" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t('level_award.next_remove_title') }}
-            </q-item-label>
-          </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-item tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="award.single" dense></q-checkbox>
+            </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox v-model="award.single" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
+            <q-item-section>
+              <q-item-label>
+                {{ $t('level_award.next_remove_title') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
 
-        <q-item tag="label" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t('level_award.custom_alert_title') }}
-            </q-item-label>
-          </q-item-section>
+          <q-expansion-item tag="label">
+            <template #header>
+              <q-item-section side>
+                <q-checkbox v-model="award.alert.active" dense></q-checkbox>
+              </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox v-model="award.alert.active" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('level_award.custom_alert_title') }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="award.alert.active">
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-md-6">
-              <div>
-                {{ $t('pages.guild.gs_message_format_title') }}
-              </div>
+            <q-card class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12 col-md-6">
+                    <div>
+                      {{ $t('pages.guild.gs_message_format_title') }}
+                    </div>
 
-              <q-select
-                v-model="award.alert.format"
-                :options="['DM', 'CHANNEL']"
-                class="q-pt-sm"
-                filled
-                dense
-                hide-bottom-space
-              >
-                <template #selected-item="{ opt }">
-                  <span>
-                    {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
-                  </span>
-                </template>
+                    <q-select
+                      v-model="award.alert.format"
+                      :options="['DM', 'CHANNEL']"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                    >
+                      <template #selected-item="{ opt }">
+                        <span>
+                          {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                        </span>
+                      </template>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                    <q-item-section>
-                      <q-item-label>
-                        {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label>
+                              {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+                  </div>
 
-            <div class="col-12 col-md-6">
-              <div>
-                {{ $t('pages.guild.gs_message_channel_title') }}
-              </div>
+                  <div class="col-12 col-md-6">
+                    <div>
+                      {{ $t('pages.guild.gs_message_channel_title') }}
+                    </div>
 
-              <q-select
-                v-model="award.alert.channel_id"
-                :options="guild.channelsText"
-                option-label="name"
-                option-value="id"
-                :disable="award.alert.format !== 'CHANNEL'"
-                class="q-pt-sm"
-                filled
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-              >
-                <template #selected-item="{ opt }">
-                  <q-chip
-                    class="rounded-lg"
-                    color="dark-1"
-                    square
-                    :label="opt.name ?? opt"
-                    :icon="opt.icon"
-                    size="sm"
-                    :ripple="false"
-                  ></q-chip>
-                </template>
+                    <q-select
+                      v-model="award.alert.channel_id"
+                      :options="guild.channelsText"
+                      option-label="name"
+                      option-value="id"
+                      :disable="award.alert.format !== 'CHANNEL'"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                    >
+                      <template #selected-item="{ opt }">
+                        <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                      </template>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                    <q-item-section avatar>
-                      <q-icon :name="opt.icon"></q-icon>
-                    </q-item-section>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section avatar>
+                            <q-icon :name="opt.icon"></q-icon>
+                          </q-item-section>
 
-                    <q-item-section>
-                      <q-item-label>
-                        {{ opt.name }}
-                      </q-item-label>
+                          <q-item-section>
+                            <q-item-label>
+                              {{ opt.name }}
+                            </q-item-label>
 
-                      <q-item-label class="text--secondary">
-                        {{ opt.parentName }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
+                            <q-item-label class="text--secondary">
+                              {{ opt.parentName }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+                  </div>
 
-            <div class="col-12">
-              <div>
-                {{ $t('pages.guild.gs_message_template_title') }}
-              </div>
+                  <div class="col-12">
+                    <div>
+                      {{ $t('pages.guild.gs_message_template_title') }}
+                    </div>
 
-              <MessageEditor :message="award.alert.message" avlReplacers="guild member" class="q-pt-sm" />
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                    <MessageEditor :message="award.alert.message" avlReplacers="guild member" class="q-pt-sm" />
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -266,7 +260,7 @@
             />
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
+              class="full-width"
               :label="$t('done')"
               :disable="!isValid"
               split
@@ -293,10 +287,10 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { suid } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({

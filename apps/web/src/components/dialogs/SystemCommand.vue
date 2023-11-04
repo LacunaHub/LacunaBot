@@ -1,7 +1,7 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
+      <q-item class="q-py-md rounded-t-lg" tag="label">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
             {{ command.name }}
@@ -18,7 +18,7 @@
       </q-item>
 
       <q-card-section>
-        <q-banner class="rounded-lg bg-dark-2" dense>
+        <q-banner class="bg-dark-2 rounded-borders" dense>
           <span>
             {{ $t('command.permissions_now_unavailable') }}
           </span>
@@ -29,117 +29,173 @@
         </q-banner>
       </q-card-section>
 
-      <q-item class="q-my-sm" tag="label" dense v-ripple :disable="command.config.inactive">
-        <q-item-section>
-          <q-item-label>
-            {{ $t('command.throttling_title') }}
-          </q-item-label>
-        </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-expansion-item :disable="command.config.inactive">
+            <template #header>
+              <q-item-section side>
+                <q-checkbox
+                  v-model="command.config.options"
+                  val="THROTTLING"
+                  dense
+                  :disable="command.config.inactive"
+                  @update:model-value="onSelectOption"
+                ></q-checkbox>
+              </q-item-section>
 
-        <q-item-section side>
-          <q-checkbox
-            v-model="command.config.options"
-            val="THROTTLING"
-            dense
-            @update:model-value="onSelectOption"
-          ></q-checkbox>
-        </q-item-section>
-      </q-item>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('command.throttling_title') }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="command.config.options.includes('THROTTLING')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('command.throttling_scope_title') }}
-              </div>
+            <q-card class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('command.throttling_scope_title') }}
+                    </div>
 
-              <q-select
-                v-model="command.config.throttling.type"
-                :options="['PER_USER', 'PER_CHANNEL', 'PER_GUILD']"
-                :disable="command.config.inactive"
-                class="q-pt-sm"
-                filled
-                dense
-                hide-bottom-space
-              >
-                <template #selected-item="{ opt }">
-                  <span>
-                    {{ $t(`command.throttling_scopes.${opt}`) }}
-                  </span>
-                </template>
+                    <q-select
+                      v-if="command.config.options.includes('THROTTLING')"
+                      v-model="command.config.throttling.type"
+                      :options="['PER_USER', 'PER_CHANNEL', 'PER_GUILD']"
+                      :disable="command.config.inactive"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                    >
+                      <template #selected-item="{ opt }">
+                        <span>
+                          {{ $t(`command.throttling_scopes.${opt}`) }}
+                        </span>
+                      </template>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                    <q-item-section>
-                      <q-item-label>
-                        {{ $t(`command.throttling_scopes.${opt}`) }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label>
+                              {{ $t(`command.throttling_scopes.${opt}`) }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
 
-            <div class="col-12">
-              <div>
-                {{ $t('command.throttling_max_uses_title') }}
-              </div>
+                    <q-select
+                      v-else
+                      disable
+                      :label="$t('command.throttling_scopes.PER_USER')"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                    ></q-select>
+                  </div>
 
-              <q-slider
-                v-model.number="command.config.throttling.max_uses"
-                class="q-pt-sm q-px-sm"
-                :min="1"
-                :max="10"
-                snap
-                marker-labels
-              ></q-slider>
-            </div>
+                  <div class="col-12">
+                    <div>
+                      {{ $t('command.throttling_max_uses_title') }}
+                    </div>
 
-            <div class="col-12">
-              <div>
-                {{ $t('command.throttling_timeout_title') }}
-              </div>
+                    <q-slider
+                      v-if="command.config.options.includes('THROTTLING')"
+                      v-model.number="command.config.throttling.max_uses"
+                      class="q-pt-sm q-px-sm"
+                      :min="1"
+                      :max="10"
+                      snap
+                      marker-labels
+                    ></q-slider>
 
-              <q-select
-                v-model.number="command.config.throttling.timeout"
-                :options="[60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
-                :disable="command.config.inactive"
-                class="q-pt-sm"
-                filled
-                dense
-                hide-bottom-space
-              >
-                <template #selected-item="{ opt }">
-                  <span>
-                    {{
-                      $dt
-                        .now()
-                        .plus({ seconds: opt })
-                        .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                    }}
-                  </span>
-                </template>
+                    <q-slider
+                      v-else
+                      disable
+                      :model-value="1"
+                      class="q-pt-sm q-px-sm"
+                      :min="1"
+                      :max="10"
+                      snap
+                      marker-labels
+                    ></q-slider>
+                  </div>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                    <q-item-section>
-                      <q-item-label>
-                        {{
-                          $dt
-                            .now()
-                            .plus({ seconds: opt })
-                            .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                        }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                  <div class="col-12">
+                    <div>
+                      {{ $t('command.throttling_timeout_title') }}
+                    </div>
+
+                    <q-select
+                      v-if="command.config.options.includes('THROTTLING')"
+                      v-model.number="command.config.throttling.timeout"
+                      :options="[60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
+                      :disable="command.config.inactive"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                    >
+                      <template #selected-item="{ opt }">
+                        <span>
+                          {{
+                            $dt
+                              .now()
+                              .plus({ seconds: opt })
+                              .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
+                          }}
+                        </span>
+                      </template>
+
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label>
+                              {{
+                                $dt
+                                  .now()
+                                  .plus({ seconds: opt })
+                                  .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
+                              }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+
+                    <q-select
+                      v-else
+                      disable
+                      :label="
+                        $dt
+                          .now()
+                          .plus({ seconds: 60 })
+                          .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
+                      "
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                    ></q-select>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -157,9 +213,9 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'SystemCommand',

@@ -1,8 +1,8 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
-        <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
+      <q-card class="bg-dark-1" flat>
+        <q-item class="q-py-md rounded-t-lg" tag="label">
           <q-item-section>
             <q-item-label class="text-subtitle1">
               {{ $t('pages.guild.ut_reports_title') }}
@@ -35,15 +35,7 @@
                 map-options
               >
                 <template #selected-item="{ opt }">
-                  <q-chip
-                    class="rounded-lg"
-                    color="dark-1"
-                    square
-                    :label="opt.name ?? opt"
-                    :icon="opt.icon"
-                    size="sm"
-                    :ripple="false"
-                  ></q-chip>
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
                 </template>
 
                 <template #option="{ opt, toggleOption, selected }">
@@ -68,28 +60,30 @@
           </div>
         </q-card-section>
 
-        <q-list class="q-px-none q-pb-md" dense>
-          <q-item tag="label" :disable="!guild.modules.reports.active" v-ripple="guild.modules.reports.active">
-            <q-item-section>
-              <q-item-label>
-                {{ $t('pages.guild.ut_reports_notify_about_unwanted_users_title') }}
-              </q-item-label>
-            </q-item-section>
+        <div class="q-pa-md">
+          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+            <q-item tag="label" :disable="!guild.modules.reports.active">
+              <q-item-section side>
+                <q-checkbox
+                  v-model="guild.modules.reports.notify_about_unwanted_users"
+                  :disable="!guild.modules.reports.active"
+                  dense
+                ></q-checkbox>
+              </q-item-section>
 
-            <q-item-section side>
-              <q-checkbox
-                v-model="guild.modules.reports.notify_about_unwanted_users"
-                :disable="!guild.modules.reports.active"
-                dense
-              ></q-checkbox>
-            </q-item-section>
-          </q-item>
-        </q-list>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('pages.guild.ut_reports_notify_about_unwanted_users_title') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
       </q-card>
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -111,8 +105,8 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(automation, i) in guild.modules.automation" :key="i" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item class="rounded-lg" clickable v-ripple @click="automationDialog(automation)">
+              <q-card class="bg-dark-2" flat>
+                <q-item clickable @click="automationDialog(automation)">
                   <q-item-section>
                     <q-item-label>
                       {{ automation.name }}
@@ -140,7 +134,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -159,8 +153,8 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(autoThread, i) in guild.modules.autothreads" :key="i" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item class="rounded-lg" clickable v-ripple @click="autoThreadDialog(autoThread)">
+              <q-card class="bg-dark-2" flat>
+                <q-item clickable @click="autoThreadDialog(autoThread)">
                   <q-item-section>
                     <q-item-label>
                       {{ guild.channelsText.find(i => i.id === autoThread.channel_id)?.name ?? autoThread.channel_id }}
@@ -188,7 +182,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -207,8 +201,8 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(autoReaction, i) in guild.modules.autoreactions" :key="i" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item class="rounded-lg" clickable v-ripple @click="autoReactionDialog(autoReaction)">
+              <q-card class="bg-dark-2" flat>
+                <q-item clickable @click="autoReactionDialog(autoReaction)">
                   <q-item-section>
                     <q-item-label>
                       {{
@@ -238,7 +232,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -254,8 +248,8 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(im, i) in guild.modules.interactive_messages" :key="i" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item class="rounded-lg" clickable v-ripple @click="imDialog(im)">
+              <q-card class="bg-dark-2" flat>
+                <q-item clickable @click="imDialog(im)">
                   <q-item-section>
                     <q-item-label>
                       {{ guild.channelsText.find(i => i.id === im.channel_id)?.name ?? im.channel_id }}
@@ -283,7 +277,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -302,8 +296,8 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(ir, i) in guild.modules.reactions" :key="i" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item class="rounded-lg" clickable v-ripple @click="irDialog(ir)">
+              <q-card class="bg-dark-2" flat>
+                <q-item clickable @click="irDialog(ir)">
                   <q-item-section>
                     <q-item-label>
                       {{ ir.emoji.id ? `:${ir.emoji.name}:` : ir.emoji.name }}
@@ -333,14 +327,14 @@
 </template>
 
 <script>
-import { useGuildStore } from 'src/stores/guild'
-import { defineComponent } from 'vue'
-import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import UtilityAutoThread from 'components/dialogs/UtilityAutoThread.vue'
+import AutomationTask from 'src/components/dialogs/AutomationTask.vue'
+import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import UtilityAutoReaction from 'src/components/dialogs/UtilityAutoReaction.vue'
 import UtilityInteractiveMessage from 'src/components/dialogs/UtilityInteractiveMessage.vue'
 import UtilityInteractiveReaction from 'src/components/dialogs/UtilityInteractiveReaction.vue'
-import AutomationTask from 'src/components/dialogs/AutomationTask.vue'
+import { useGuildStore } from 'src/stores/guild'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsUtility',

@@ -7,7 +7,7 @@
     no-esc-dismiss
     no-shake
   >
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1280px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 1280px; max-width: 90vw">
       <q-card-section class="q-pa-none">
         <div class="row q-col-gutter-md">
           <div class="col-12 full-height">
@@ -46,9 +46,9 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'ComponentActionExecuteCode',

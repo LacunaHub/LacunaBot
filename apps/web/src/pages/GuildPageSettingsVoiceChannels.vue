@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -24,7 +24,7 @@
                   { value: 'YandexMusic', slot: 'ym' },
                   { value: 'SoundCloud', slot: 'sc' }
                 ]"
-                class="rounded-lg bg-dark-2 q-mt-sm"
+                class="bg-dark-2 q-mt-sm"
                 toggle-color="secondary"
                 unelevated
                 no-caps
@@ -64,23 +64,25 @@
           </div>
         </q-card-section>
 
-        <q-list class="q-px-none" padding dense>
-          <q-item tag="label" :disable="!guild.premium.available" v-ripple="guild.premium.available">
-            <q-item-section>
-              <q-item-label>
-                {{ $t('pages.guild.vc_music_allow_radio_playback_title') }}
-              </q-item-label>
-            </q-item-section>
+        <div class="q-pa-md">
+          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+            <q-item tag="label" :disable="!guild.premium.available">
+              <q-item-section side>
+                <q-checkbox
+                  v-model="guild.modules.music.allow_radio_playback"
+                  :disable="!guild.premium.available"
+                  dense
+                ></q-checkbox>
+              </q-item-section>
 
-            <q-item-section side>
-              <q-checkbox
-                v-model="guild.modules.music.allow_radio_playback"
-                :disable="!guild.premium.available"
-                dense
-              ></q-checkbox>
-            </q-item-section>
-          </q-item>
-        </q-list>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('pages.guild.vc_music_allow_radio_playback_title') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
 
         <q-card-section>
           <div class="row q-col-gutter-md">
@@ -138,13 +140,11 @@
               >
                 <template #selected-item="{ opt, index, removeAtIndex }">
                   <q-chip
-                    class="rounded-lg"
                     color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"
                     size="sm"
-                    :ripple="false"
                     removable
                     @remove="removeAtIndex(index)"
                   ></q-chip>
@@ -190,13 +190,11 @@
               >
                 <template #selected-item="{ opt, index, removeAtIndex }">
                   <q-chip
-                    class="rounded-lg"
                     color="dark-1"
                     square
                     :label="opt.name ?? opt"
                     :icon="opt.icon"
                     size="sm"
-                    :ripple="false"
                     removable
                     @remove="removeAtIndex(index)"
                   ></q-chip>
@@ -227,7 +225,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -250,8 +248,8 @@
               :key="i"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item @click="voiceRoleDialog(voiceRole)" class="rounded-lg" clickable v-ripple>
+              <q-card class="bg-dark-2" flat>
+                <q-item @click="voiceRoleDialog(voiceRole)" clickable>
                   <q-item-section>
                     <q-item-label>
                       {{ guild.roles.find(i => i.id === voiceRole.role_id)?.name ?? voiceRole.role_id }}
@@ -279,7 +277,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -302,8 +300,8 @@
               :key="i"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item @click="autoVoiceDialog(autoVoice)" class="rounded-lg" clickable v-ripple>
+              <q-card class="bg-dark-2" flat>
+                <q-item @click="autoVoiceDialog(autoVoice)" clickable>
                   <q-item-section>
                     <q-item-label>
                       {{ guild.channelsVoice.find(i => i.id === autoVoice.channel_id)?.name ?? autoVoice.channel_id }}
@@ -333,11 +331,11 @@
 </template>
 
 <script>
+import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
+import VoiceChannelsAutoVoice from 'src/components/dialogs/VoiceChannelsAutoVoice.vue'
+import VoiceChannelsVoiceRole from 'src/components/dialogs/VoiceChannelsVoiceRole.vue'
 import { useGuildStore } from 'src/stores/guild'
 import { defineComponent } from 'vue'
-import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
-import VoiceChannelsVoiceRole from 'src/components/dialogs/VoiceChannelsVoiceRole.vue'
-import VoiceChannelsAutoVoice from 'src/components/dialogs/VoiceChannelsAutoVoice.vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsVoiceChannels',

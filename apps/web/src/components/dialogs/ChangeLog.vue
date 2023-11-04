@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="q-dialog-card rounded-lg bg-dark-1" flat style="width: 720px">
+    <q-card class="q-dialog-card bg-dark-1" flat style="width: 720px">
       <q-item class="q-py-md rounded-t-lg">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
@@ -36,9 +36,9 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useChangeLogStore } from 'src/stores/change-log'
+import { computed, defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
 
 export default defineComponent({

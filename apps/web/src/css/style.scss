@@ -14,6 +14,10 @@
   color: $almost-white-1;
 }
 
+.text-almost-white-2 {
+  color: $almost-white-2;
+}
+
 .text--secondary {
   color: $almost-white-3;
 }
@@ -28,6 +32,10 @@
   background: $dark-2 !important;
 }
 
+.bg-dark-3 {
+  background: $dark-3 !important;
+}
+
 /* OPACITY */
 
 .opacity-md {
@@ -39,10 +47,6 @@
 }
 
 /* BORDER */
-
-.rounded-none {
-  border-radius: 0 !important;
-}
 
 .rounded-md {
   border-radius: $border-radius-md !important;
@@ -68,6 +72,14 @@
   border-width: 2px;
   border-style: dashed;
   border-color: $secondary;
+}
+
+.no-border-top {
+  border-top-width: 0 !important;
+}
+
+.no-border-bottom {
+  border-bottom-width: 0 !important;
 }
 
 /* OTHER HELPERS */

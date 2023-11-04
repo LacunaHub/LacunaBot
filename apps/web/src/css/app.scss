@@ -50,7 +50,7 @@ em.gradient {
 
 :not(.q-textarea) > .q-field__inner > .q-field__control,
 .q-textarea--autogrow:not(.no-border-radius) > .q-field__inner > .q-field__control,
-.q-textarea:is(.rounded-lg) > .q-field__inner > .q-field__control {
+.q-textarea:is(.rounded-borders) > .q-field__inner > .q-field__control {
   border-radius: $border-radius-lg !important;
 }
 

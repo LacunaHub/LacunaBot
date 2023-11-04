@@ -1,14 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'custom_command.add_custom_command' : 'custom_command.edit_custom_command') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 1000px; max-width: 90vw">
       <q-tabs
         v-model="currentTab"
         class="bg-dark-2"
@@ -29,7 +21,7 @@
               <div class="col-12">
                 <q-btn
                   class="full-width"
-                  :label="$t('custom_command.import_command')"
+                  :label="$t('import')"
                   unelevated
                   no-caps
                   color="secondary"
@@ -79,10 +71,9 @@
                 <div class="row q-col-gutter-sm q-pt-sm">
                   <div class="col-auto" v-for="(option, i) in command.command.options" :key="i">
                     <q-chip
-                      class="rounded-lg full-width no-shadow"
+                      class="full-width no-shadow"
                       square
                       :label="option.name"
-                      :ripple="false"
                       clickable
                       removable
                       @click="optionDialog(option)"
@@ -91,13 +82,7 @@
                   </div>
 
                   <div v-if="command.command.options.length < 25" class="col-auto">
-                    <q-chip
-                      class="rounded-lg dashed-border no-shadow full-width"
-                      outline
-                      square
-                      clickable
-                      @click="optionDialog()"
-                    >
+                    <q-chip class="dashed-border no-shadow full-width" outline square clickable @click="optionDialog()">
                       <q-icon name="add" size="24px"></q-icon>
                     </q-chip>
                   </div>
@@ -106,115 +91,172 @@
             </div>
           </q-card-section>
 
-          <q-item class="q-my-sm" tag="label" dense v-ripple>
-            <q-item-section>
-              <q-item-label>
-                {{ $t('command.throttling_title') }}
-              </q-item-label>
-            </q-item-section>
+          <div class="q-pa-md">
+            <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+              <q-expansion-item>
+                <template #header>
+                  <q-item-section side>
+                    <q-checkbox
+                      v-model="command.options"
+                      val="THROTTLING"
+                      dense
+                      @update:model-value="onSelectOption"
+                    ></q-checkbox>
+                  </q-item-section>
 
-            <q-item-section side>
-              <q-checkbox
-                v-model="command.options"
-                val="THROTTLING"
-                dense
-                @update:model-value="onSelectOption"
-              ></q-checkbox>
-            </q-item-section>
-          </q-item>
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('command.throttling_title') }}
+                    </q-item-label>
+                  </q-item-section>
+                </template>
 
-          <transition enter-active-class="animated fadeInUp">
-            <q-card-section v-if="command.options.includes('THROTTLING')">
-              <div class="row q-col-gutter-md">
-                <div class="col-12">
-                  <div>
-                    {{ $t('command.throttling_scope_title') }}
-                  </div>
+                <q-card class="bg-dark-1 no-border-radius" bordered>
+                  <q-card-section>
+                    <div class="row q-col-gutter-md">
+                      <div class="col-12">
+                        <div>
+                          {{ $t('command.throttling_scope_title') }}
+                        </div>
 
-                  <q-select
-                    v-model="command.throttling.type"
-                    :options="['PER_USER', 'PER_CHANNEL', 'PER_GUILD']"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                  >
-                    <template #selected-item="{ opt }">
-                      <span>
-                        {{ $t(`command.throttling_scopes.${opt}`) }}
-                      </span>
-                    </template>
+                        <q-select
+                          v-if="command.options.includes('THROTTLING')"
+                          v-model="command.throttling.type"
+                          :options="['PER_USER', 'PER_CHANNEL', 'PER_GUILD']"
+                          :disable="command.inactive"
+                          class="q-pt-sm"
+                          filled
+                          dense
+                          hide-bottom-space
+                        >
+                          <template #selected-item="{ opt }">
+                            <span>
+                              {{ $t(`command.throttling_scopes.${opt}`) }}
+                            </span>
+                          </template>
 
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label>
-                            {{ $t(`command.throttling_scopes.${opt}`) }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
+                          <template #option="{ opt, toggleOption, selected }">
+                            <q-item
+                              clickable
+                              @click="toggleOption(opt)"
+                              :active="selected"
+                              active-class="menu-item--active"
+                            >
+                              <q-item-section>
+                                <q-item-label>
+                                  {{ $t(`command.throttling_scopes.${opt}`) }}
+                                </q-item-label>
+                              </q-item-section>
+                            </q-item>
+                          </template>
+                        </q-select>
 
-                <div class="col-12">
-                  <div>
-                    {{ $t('command.throttling_max_uses_title') }}
-                  </div>
+                        <q-select
+                          v-else
+                          disable
+                          :label="$t('command.throttling_scopes.PER_USER')"
+                          class="q-pt-sm"
+                          filled
+                          dense
+                          hide-bottom-space
+                        ></q-select>
+                      </div>
 
-                  <q-slider
-                    v-model.number="command.throttling.max_uses"
-                    class="q-pt-sm q-px-sm"
-                    :min="1"
-                    :max="10"
-                    snap
-                    marker-labels
-                  ></q-slider>
-                </div>
+                      <div class="col-12">
+                        <div>
+                          {{ $t('command.throttling_max_uses_title') }}
+                        </div>
 
-                <div class="col-12">
-                  <div>
-                    {{ $t('command.throttling_timeout_title') }}
-                  </div>
+                        <q-slider
+                          v-if="command.options.includes('THROTTLING')"
+                          v-model.number="command.throttling.max_uses"
+                          class="q-pt-sm q-px-sm"
+                          :min="1"
+                          :max="10"
+                          snap
+                          marker-labels
+                        ></q-slider>
 
-                  <q-select
-                    v-model.number="command.throttling.timeout"
-                    :options="[60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                  >
-                    <template #selected-item="{ opt }">
-                      <span>
-                        {{
-                          $dt
-                            .now()
-                            .plus({ seconds: opt })
-                            .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                        }}
-                      </span>
-                    </template>
+                        <q-slider
+                          v-else
+                          disable
+                          :model-value="1"
+                          class="q-pt-sm q-px-sm"
+                          :min="1"
+                          :max="10"
+                          snap
+                          marker-labels
+                        ></q-slider>
+                      </div>
 
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label>
-                            {{
-                              $dt
-                                .now()
-                                .plus({ seconds: opt })
-                                .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                            }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
-              </div>
-            </q-card-section>
-          </transition>
+                      <div class="col-12">
+                        <div>
+                          {{ $t('command.throttling_timeout_title') }}
+                        </div>
+
+                        <q-select
+                          v-if="command.options.includes('THROTTLING')"
+                          v-model.number="command.throttling.timeout"
+                          :options="[60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
+                          :disable="command.inactive"
+                          class="q-pt-sm"
+                          filled
+                          dense
+                          hide-bottom-space
+                        >
+                          <template #selected-item="{ opt }">
+                            <span>
+                              {{
+                                $dt
+                                  .now()
+                                  .plus({ seconds: opt })
+                                  .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
+                              }}
+                            </span>
+                          </template>
+
+                          <template #option="{ opt, toggleOption, selected }">
+                            <q-item
+                              clickable
+                              @click="toggleOption(opt)"
+                              :active="selected"
+                              active-class="menu-item--active"
+                            >
+                              <q-item-section>
+                                <q-item-label>
+                                  {{
+                                    $dt
+                                      .now()
+                                      .plus({ seconds: opt })
+                                      .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
+                                  }}
+                                </q-item-label>
+                              </q-item-section>
+                            </q-item>
+                          </template>
+                        </q-select>
+
+                        <q-select
+                          v-else
+                          disable
+                          :label="
+                            $dt
+                              .now()
+                              .plus({ seconds: 60 })
+                              .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
+                          "
+                          class="q-pt-sm"
+                          filled
+                          dense
+                          hide-bottom-space
+                        ></q-select>
+                      </div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+              </q-expansion-item>
+            </q-list>
+          </div>
         </q-tab-panel>
 
         <q-tab-panel name="components" class="q-pa-none" style="overflow-y: hidden">
@@ -275,7 +317,7 @@
                           <img src="~assets/lacuna-diamond.svg" />
 
                           <q-tooltip
-                            class="bg-black rounded-lg text-body2"
+                            class="bg-black text-body2"
                             anchor="top middle"
                             self="bottom middle"
                             transition-show=""
@@ -295,8 +337,8 @@
           <q-card-section v-if="command.components.length">
             <div class="row q-col-gutter-md">
               <div v-for="(component, i) in command.components" :key="i" class="col-12">
-                <q-card flat bordered class="bg-transparent rounded-lg">
-                  <q-item class="rounded-t-lg" clickable v-ripple @click="componentDialog(component, i)">
+                <q-card flat bordered class="bg-transparent">
+                  <q-item class="rounded-t-lg" clickable @click="componentDialog(component, i)">
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         {{
@@ -310,7 +352,7 @@
                         <img src="~assets/lacuna-diamond.svg" />
 
                         <q-tooltip
-                          class="bg-black rounded-lg text-body2"
+                          class="bg-black text-body2"
                           anchor="top middle"
                           self="bottom middle"
                           transition-show=""
@@ -370,7 +412,7 @@
 
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
+              class="full-width"
               :label="$t('done')"
               :disable="!isValid"
               :loading="confirmLoading"
@@ -392,7 +434,7 @@
                 <q-item clickable v-close-popup @click="onPublish" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('custom_command.publish_command') }}
+                      {{ $t('publish') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -400,7 +442,7 @@
                 <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('custom_command.export_command') }}
+                      {{ $t('export') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -515,7 +557,7 @@ export default defineComponent({
 
               $q.notify({
                 message: error.message,
-                classes: 'rounded-lg q-notification-custom',
+                classes: 'q-notification-custom',
                 color: 'black',
                 icon: 'error',
                 iconColor: 'negative',
@@ -547,7 +589,7 @@ export default defineComponent({
 
             $q.notify({
               message: error.message,
-              classes: 'rounded-lg q-notification-custom',
+              classes: 'q-notification-custom',
               color: 'black',
               icon: 'error',
               iconColor: 'negative',
@@ -829,7 +871,7 @@ export default defineComponent({
 
           this.$q.notify({
             message: this.$t(`custom_command.command_sent_for_review`),
-            classes: 'rounded-lg q-notification-custom',
+            classes: 'q-notification-custom',
             color: 'black',
             icon: 'done',
             iconColor: 'positive',
@@ -841,7 +883,7 @@ export default defineComponent({
 
           this.$q.notify({
             message: error.message,
-            classes: 'rounded-lg q-notification-custom',
+            classes: 'q-notification-custom',
             color: 'black',
             icon: 'error',
             iconColor: 'negative',

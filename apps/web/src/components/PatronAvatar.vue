@@ -7,7 +7,7 @@
     />
 
     <q-tooltip
-      class="bg-black rounded-lg text-body2"
+      class="bg-black text-body2"
       anchor="top middle"
       self="bottom middle"
       transition-show=""

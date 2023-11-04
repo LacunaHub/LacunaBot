@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-9">
@@ -70,19 +70,21 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item tag="label" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t('custom_command.co_required_title') }}
-            </q-item-label>
-          </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-item tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="option.required" dense></q-checkbox>
+            </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox v-model="option.required" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+            <q-item-section>
+              <q-item-label>
+                {{ $t('custom_command.co_required_title') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section v-if="[3, 4, 10].includes(option.type) && option.choices">
         <div class="row q-col-gutter-md">
@@ -94,10 +96,9 @@
             <div class="row q-col-gutter-sm q-pt-sm">
               <div class="col-auto" v-for="(choice, i) in option.choices" :key="i">
                 <q-chip
-                  class="rounded-lg full-width no-shadow"
+                  class="full-width no-shadow"
                   square
                   :label="choice.name"
-                  :ripple="false"
                   clickable
                   removable
                   @click="choiceDialog(choice)"
@@ -106,13 +107,7 @@
               </div>
 
               <div v-if="option.choices.length < 25" class="col-auto">
-                <q-chip
-                  class="rounded-lg dashed-border no-shadow full-width"
-                  outline
-                  square
-                  clickable
-                  @click="choiceDialog()"
-                >
+                <q-chip class="dashed-border no-shadow full-width" outline square clickable @click="choiceDialog()">
                   <q-icon name="add" size="24px"></q-icon>
                 </q-chip>
               </div>
@@ -145,9 +140,9 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { discordAppCommandNameRegexp } from 'src/utils/Constants'
+import { computed, defineComponent, ref } from 'vue'
 import CustomCommandOptionChoice from './CustomCommandOptionChoice.vue'
 
 export default defineComponent({

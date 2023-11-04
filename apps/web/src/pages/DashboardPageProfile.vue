@@ -69,7 +69,7 @@
             >
               {{ level.experience.level }}
               <q-tooltip
-                class="bg-black rounded-lg"
+                class="bg-black"
                 anchor="top middle"
                 self="bottom middle"
                 transition-show=""
@@ -83,7 +83,7 @@
       </q-list>
 
       <q-card-section v-else>
-        <q-banner class="rounded-lg bg-dark-2" dense>
+        <q-banner class="bg-dark-2 rounded-borders" dense>
           <span>
             {{ $t('pages.dashboard.no_activities') }}
           </span>
@@ -150,7 +150,7 @@ const getActivities = async () => {
 
     $q.notify({
       message: error.message,
-      classes: 'rounded-lg q-notification-custom',
+      classes: 'q-notification-custom',
       color: 'black',
       icon: 'error',
       iconColor: 'negative',

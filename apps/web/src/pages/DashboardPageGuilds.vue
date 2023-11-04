@@ -2,8 +2,8 @@
   <div id="dashboard-page-guilds-container">
     <div v-if="pageLoading" class="row q-col-gutter-md">
       <div class="col-12 col-sm-6 col-md-4" v-for="i in 6" :key="i">
-        <q-card class="rounded-lg bg-dark-1" flat>
-          <q-item class="rounded-lg">
+        <q-card class="bg-dark-1" flat>
+          <q-item>
             <q-item-section avatar>
               <q-skeleton class="rounded-circle" type="QAvatar" />
             </q-item-section>
@@ -27,7 +27,7 @@
       </div>
 
       <div v-if="!user.guilds.filter(i => i.permitted).length" class="col-12">
-        <q-banner class="rounded-lg bg-dark-1" dense>
+        <q-banner class="bg-dark-1 rounded-borders" dense>
           <span>
             {{ $t('pages.dashboard.no_guilds') }}
           </span>

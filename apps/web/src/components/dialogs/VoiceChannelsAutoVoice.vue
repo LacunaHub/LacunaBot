@@ -1,14 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'auto_voices.add_auto_voice' : 'auto_voices.edit_auto_voice') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -34,15 +26,7 @@
               @update:model-value="onSelectVoiceChannel"
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
 
               <template #option="{ opt, toggleOption, selected }">
@@ -80,15 +64,7 @@
               readonly
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
             </q-select>
           </div>
@@ -140,15 +116,7 @@
               map-options
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
 
               <template #option="{ opt, toggleOption, selected }">
@@ -203,36 +171,31 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item class="q-mb-sm">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('auto_voices.owner_permissions_title') }}
-            </q-item-label>
-            <q-item-label class="text--secondary">
-              {{ $t('auto_voices.owner_permissions_description') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-item
-          v-for="permission in ownerPermissions"
-          :key="permission.key"
-          @click="onChangePermissions(permission.bit)"
-          tag="label"
-          v-ripple
-        >
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`common.permissions_keys.${permission.key}`) }}
-            </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-checkbox :model-value="hasPermission(permission.bit)" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+      <div class="q-pa-md">
+        <div>
+          {{ $t('auto_voices.owner_permissions_title') }}
+        </div>
+        <div class="text--secondary">
+          {{ $t('auto_voices.owner_permissions_description') }}
+        </div>
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-item
+            v-for="permission in ownerPermissions"
+            :key="permission.key"
+            @click="onChangePermissions(permission.bit)"
+            tag="label"
+          >
+            <q-item-section side>
+              <q-checkbox :model-value="hasPermission(permission.bit)" dense></q-checkbox>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>
+                {{ $t(`common.permissions_keys.${permission.key}`) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -257,12 +220,10 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   square
                   :label="opt.name ?? opt"
                   size="sm"
                   :style="`background: ${opt.color}`"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -299,12 +260,10 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   square
                   :label="opt.name ?? opt"
                   size="sm"
                   :style="`background: ${opt.color}`"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -348,12 +307,10 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   square
                   :label="opt.name ?? opt"
                   size="sm"
                   :style="`background: ${opt.color}`"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -396,7 +353,7 @@
 
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
+              class="full-width"
               :label="$t('done')"
               :disable="!isValid"
               :loading="confirmLoading"
@@ -508,7 +465,7 @@ export default defineComponent({
 
               $q.notify({
                 message: error.message,
-                classes: 'rounded-lg q-notification-custom',
+                classes: 'q-notification-custom',
                 color: 'black',
                 icon: 'error',
                 iconColor: 'negative',
@@ -540,7 +497,7 @@ export default defineComponent({
 
             $q.notify({
               message: error.message,
-              classes: 'rounded-lg q-notification-custom',
+              classes: 'q-notification-custom',
               color: 'black',
               icon: 'error',
               iconColor: 'negative',

@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -24,13 +24,11 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   color="dark-1"
                   square
                   :label="opt.name ?? opt"
                   :icon="opt.icon"
                   size="sm"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -59,7 +57,7 @@
           <div class="col-12">
             <q-btn-dropdown class="full-width" :label="$t('common.permissions')" unelevated no-caps color="dark-2">
               <q-list>
-                <q-item v-for="(permission, i) in Object.keys(discordChannelPermissions)" :key="i" tag="label" v-ripple>
+                <q-item v-for="(permission, i) in Object.keys(discordChannelPermissions)" :key="i" tag="label">
                   <q-item-section>
                     <q-item-label>
                       {{ $t(`common.permissions_keys.${permission}`) }}
@@ -120,10 +118,10 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { discordChannelPermissions } from 'src/utils/Constants'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'ComponentActionOverwriteChannelPermissions',

@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -42,297 +42,360 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item
-          v-for="action in ['EPHEMERAL_REPLY', 'MODIFY_ROLES', 'OVERWRITE_CHANNEL_PERMISSIONS', 'RESTRICT_ROLES']"
-          :key="action"
-          tag="label"
-          v-ripple
-        >
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`common.actions_keys.${action}`) }}
-            </q-item-label>
-          </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-expansion-item
+            v-for="action in ['EPHEMERAL_REPLY', 'MODIFY_ROLES', 'OVERWRITE_CHANNEL_PERMISSIONS', 'RESTRICT_ROLES']"
+            :key="action"
+            tag="label"
+          >
+            <template #header>
+              <q-item-section side>
+                <q-checkbox
+                  v-model="option.options"
+                  :val="action"
+                  dense
+                  @update:model-value="onSelectOption"
+                ></q-checkbox>
+              </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox v-model="option.options" :val="action" dense @update:model-value="onSelectOption"></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t(`common.actions_keys.${action}`) }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="option.options.includes('EPHEMERAL_REPLY')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('pages.guild.gs_message_template_title') }}
-              </div>
+            <q-card v-if="action === 'EPHEMERAL_REPLY'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('pages.guild.gs_message_template_title') }}
+                    </div>
 
-              <MessageEditor :message="option.ephemeral_reply" avl-replacers="message guild member" class="q-pt-sm" />
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                    <MessageEditor
+                      v-if="option.options.includes('EPHEMERAL_REPLY')"
+                      :message="option.ephemeral_reply"
+                      avl-replacers="message guild member"
+                      class="q-pt-sm"
+                    />
+                    <MessageEditor v-else disable avl-replacers="message guild member" class="q-pt-sm" />
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="option.options.includes('MODIFY_ROLES')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('common.add_roles') }}
-              </div>
+            <q-card v-if="action === 'MODIFY_ROLES'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.add_roles') }}
+                    </div>
 
-              <q-select
-                v-model="option.modify_roles.add"
-                :options="guild.rolesUnmanaged"
-                option-label="name"
-                option-value="id"
-                use-chips
-                class="q-pt-sm"
-                multiple
-                filled
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-              >
-                <template #selected-item="{ opt, index, removeAtIndex }">
-                  <q-chip
-                    class="rounded-lg"
-                    square
-                    :label="opt.name ?? opt"
-                    size="sm"
-                    :style="`background: ${opt.color}`"
-                    :ripple="false"
-                    removable
-                    @remove="removeAtIndex(index)"
-                  ></q-chip>
-                </template>
-
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item
-                    clickable
-                    @click="toggleOption(opt)"
-                    :active="selected"
-                    :disable="opt.higher"
-                    active-class="menu-item--active"
-                  >
-                    <q-item-section>
-                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-
-                <template #prepend>
-                  <q-checkbox v-model="option.modify_roles.reversible_add" dense>
-                    <q-tooltip
-                      class="bg-black rounded-lg"
-                      anchor="top middle"
-                      self="bottom middle"
-                      transition-show=""
-                      transition-hide=""
+                    <q-select
+                      v-if="option.options.includes('MODIFY_ROLES')"
+                      v-model="option.modify_roles.add"
+                      :options="guild.rolesUnmanaged"
+                      option-label="name"
+                      option-value="id"
+                      use-chips
+                      class="q-pt-sm"
+                      multiple
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
                     >
-                      {{ $t('ims.mr_reversible_mode') }}
-                    </q-tooltip>
-                  </q-checkbox>
-                </template>
-              </q-select>
-            </div>
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          square
+                          :label="opt.name ?? opt"
+                          size="sm"
+                          :style="`background: ${opt.color}`"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
 
-            <div class="col-12">
-              <div>
-                {{ $t('common.remove_roles') }}
-              </div>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          :disable="opt.higher"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
 
-              <q-select
-                v-model="option.modify_roles.remove"
-                :options="guild.rolesUnmanaged"
-                option-label="name"
-                option-value="id"
-                use-chips
-                class="q-pt-sm"
-                multiple
-                filled
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-              >
-                <template #selected-item="{ opt, index, removeAtIndex }">
-                  <q-chip
-                    class="rounded-lg"
-                    square
-                    :label="opt.name ?? opt"
-                    size="sm"
-                    :style="`background: ${opt.color}`"
-                    :ripple="false"
-                    removable
-                    @remove="removeAtIndex(index)"
-                  ></q-chip>
-                </template>
+                      <template #prepend>
+                        <q-checkbox v-model="option.modify_roles.reversible_add" dense>
+                          <q-tooltip
+                            class="bg-black text-body2"
+                            anchor="top middle"
+                            self="bottom middle"
+                            transition-show=""
+                            transition-hide=""
+                          >
+                            {{ $t('ims.mr_reversible_mode') }}
+                          </q-tooltip>
+                        </q-checkbox>
+                      </template>
+                    </q-select>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item
-                    clickable
-                    @click="toggleOption(opt)"
-                    :active="selected"
-                    :disable="opt.higher"
-                    active-class="menu-item--active"
-                  >
-                    <q-item-section>
-                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
+                    <q-select v-else disable class="q-pt-sm" filled dense hide-bottom-space>
+                      <template #prepend>
+                        <q-checkbox dense>
+                          <q-tooltip
+                            class="bg-black text-body2"
+                            anchor="top middle"
+                            self="bottom middle"
+                            transition-show=""
+                            transition-hide=""
+                          >
+                            {{ $t('ims.mr_reversible_mode') }}
+                          </q-tooltip>
+                        </q-checkbox>
+                      </template>
+                    </q-select>
+                  </div>
 
-                <template #prepend>
-                  <q-checkbox v-model="option.modify_roles.reversible_remove" dense>
-                    <q-tooltip
-                      class="bg-black rounded-lg"
-                      anchor="top middle"
-                      self="bottom middle"
-                      transition-show=""
-                      transition-hide=""
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.remove_roles') }}
+                    </div>
+
+                    <q-select
+                      v-if="option.options.includes('MODIFY_ROLES')"
+                      v-model="option.modify_roles.remove"
+                      :options="guild.rolesUnmanaged"
+                      option-label="name"
+                      option-value="id"
+                      use-chips
+                      class="q-pt-sm"
+                      multiple
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
                     >
-                      {{ $t('ims.mr_reversible_mode') }}
-                    </q-tooltip>
-                  </q-checkbox>
-                </template>
-              </q-select>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          square
+                          :label="opt.name ?? opt"
+                          size="sm"
+                          :style="`background: ${opt.color}`"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="option.options.includes('OVERWRITE_CHANNEL_PERMISSIONS')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('common.channels') }}
-              </div>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          :disable="opt.higher"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
 
-              <q-select
-                v-model="option.overwrite_channel_permissions.channels"
-                :options="guild.channels"
-                :max-values="8"
-                option-label="name"
-                option-value="id"
-                class="q-pt-sm"
-                filled
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-                multiple
-              >
-                <template #selected-item="{ opt, index, removeAtIndex }">
-                  <q-chip
-                    class="rounded-lg"
-                    color="dark-1"
-                    square
-                    :label="opt.name ?? opt"
-                    :icon="opt.icon"
-                    size="sm"
-                    :ripple="false"
-                    removable
-                    @remove="removeAtIndex(index)"
-                  ></q-chip>
-                </template>
+                      <template #prepend>
+                        <q-checkbox v-model="option.modify_roles.reversible_remove" dense>
+                          <q-tooltip
+                            class="bg-black text-body2"
+                            anchor="top middle"
+                            self="bottom middle"
+                            transition-show=""
+                            transition-hide=""
+                          >
+                            {{ $t('ims.mr_reversible_mode') }}
+                          </q-tooltip>
+                        </q-checkbox>
+                      </template>
+                    </q-select>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                    <q-item-section avatar>
-                      <q-icon :name="opt.icon"></q-icon>
-                    </q-item-section>
+                    <q-select v-else disable class="q-pt-sm" filled dense hide-bottom-space>
+                      <template #prepend>
+                        <q-checkbox dense>
+                          <q-tooltip
+                            class="bg-black text-body2"
+                            anchor="top middle"
+                            self="bottom middle"
+                            transition-show=""
+                            transition-hide=""
+                          >
+                            {{ $t('ims.mr_reversible_mode') }}
+                          </q-tooltip>
+                        </q-checkbox>
+                      </template>
+                    </q-select>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
 
-                    <q-item-section>
-                      <q-item-label>
-                        {{ opt.name }}
-                      </q-item-label>
+            <q-card v-if="action === 'OVERWRITE_CHANNEL_PERMISSIONS'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.channels') }}
+                    </div>
 
-                      <q-item-label class="text--secondary">
-                        {{ opt.parentName }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
+                    <q-select
+                      v-if="option.options.includes('OVERWRITE_CHANNEL_PERMISSIONS')"
+                      v-model="option.overwrite_channel_permissions.channels"
+                      :options="guild.channels"
+                      :max-values="8"
+                      option-label="name"
+                      option-value="id"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      multiple
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          color="dark-1"
+                          square
+                          :label="opt.name ?? opt"
+                          :icon="opt.icon"
+                          size="sm"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
 
-            <div class="col-12">
-              <q-btn-dropdown class="full-width" :label="$t('common.permissions')" unelevated no-caps color="dark-2">
-                <q-list>
-                  <q-item v-for="(permission, i) in Object.keys(channelPermissions)" :key="i" tag="label" v-ripple>
-                    <q-item-section>
-                      <q-item-label>
-                        {{ $t(`common.permissions_keys.${permission}`) }}
-                      </q-item-label>
-                    </q-item-section>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section avatar>
+                            <q-icon :name="opt.icon"></q-icon>
+                          </q-item-section>
 
-                    <q-item-section side>
-                      <q-checkbox
-                        v-model="option.overwrite_channel_permissions.permissions[permission]"
-                        toggle-indeterminate
-                        dense
-                      ></q-checkbox>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-btn-dropdown>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                          <q-item-section>
+                            <q-item-label>
+                              {{ opt.name }}
+                            </q-item-label>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="option.options.includes('RESTRICT_ROLES')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('common.blocked_roles') }}
-              </div>
+                            <q-item-label class="text--secondary">
+                              {{ opt.parentName }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
 
-              <q-select
-                v-model="option.restricted_roles"
-                :options="guild.roles"
-                option-label="name"
-                option-value="id"
-                use-chips
-                class="q-pt-sm"
-                multiple
-                filled
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-              >
-                <template #selected-item="{ opt, index, removeAtIndex }">
-                  <q-chip
-                    class="rounded-lg"
-                    square
-                    :label="opt.name ?? opt"
-                    size="sm"
-                    :style="`background: ${opt.color}`"
-                    :ripple="false"
-                    removable
-                    @remove="removeAtIndex(index)"
-                  ></q-chip>
-                </template>
+                    <q-select v-else disable class="q-pt-sm" filled dense hide-bottom-space></q-select>
+                  </div>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                    <q-item-section>
-                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                  <div class="col-12">
+                    <q-btn-dropdown
+                      class="full-width"
+                      :label="$t('common.permissions')"
+                      :disable="!option.options.includes('OVERWRITE_CHANNEL_PERMISSIONS')"
+                      unelevated
+                      no-caps
+                      color="dark-2"
+                    >
+                      <q-list>
+                        <q-item v-for="(permission, i) in Object.keys(channelPermissions)" :key="i" tag="label">
+                          <q-item-section>
+                            <q-item-label>
+                              {{ $t(`common.permissions_keys.${permission}`) }}
+                            </q-item-label>
+                          </q-item-section>
+
+                          <q-item-section side>
+                            <q-checkbox
+                              v-model="option.overwrite_channel_permissions.permissions[permission]"
+                              toggle-indeterminate
+                              dense
+                            ></q-checkbox>
+                          </q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-btn-dropdown>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+
+            <q-card v-if="action === 'RESTRICT_ROLES'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.blocked_roles') }}
+                    </div>
+
+                    <q-select
+                      v-if="option.options.includes('RESTRICT_ROLES')"
+                      v-model="option.restricted_roles"
+                      :options="guild.roles"
+                      option-label="name"
+                      option-value="id"
+                      use-chips
+                      class="q-pt-sm"
+                      multiple
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          square
+                          :label="opt.name ?? opt"
+                          size="sm"
+                          :style="`background: ${opt.color}`"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
+
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+
+                    <q-select v-else disable class="q-pt-sm" filled dense hide-bottom-space></q-select>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -348,7 +411,7 @@
     </q-card>
 
     <q-dialog v-model="emojiPickerModal" transition-show="jump-down" transition-hide="jump-up">
-      <q-card class="rounded-lg" style="max-width: 380px">
+      <q-card style="max-width: 380px">
         <emoji-picker
           :data="guild.emojiIndex"
           @select="onSelectEmoji"
@@ -362,11 +425,11 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
+import { useGuildStore } from 'src/stores/guild'
 import { discordChannelPermissions } from 'src/utils/Constants'
 import { parseEmoji } from 'src/utils/Utils'
-import { useGuildStore } from 'src/stores/guild'
+import { defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({

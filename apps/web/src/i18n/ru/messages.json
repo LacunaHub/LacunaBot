@@ -25,6 +25,7 @@
   "name": "Название",
   "identifier": "Идентификатор",
   "transfer": "Перенос",
+  "other": "Другое",
 
   "common": {
     "channel": "Канал",
@@ -222,7 +223,33 @@
     "dnb_step_4": "После этого, нажмите на кнопку \"Проверить\" ниже и вам станут доступны бонусы",
     "dnb_bonuses_info": "Бонусы будут доступны до тех пор, пока вы являетесь бустером сервера поддержки. Вы можете активировать бонусы только для одного сервера.",
     "check": "Проверить",
-    "transferring_description": "Премиум возможности будут перенесены из выбранного сообщества в текущее."
+    "transferring_description": "Премиум возможности будут перенесены из выбранного сообщества в текущее.",
+    "plan_comparison": "Сравнение планов",
+    "plan_comparison_features": {
+      "execute_code_title": "Действие \"Выполнить код\"",
+      "custom_commands_number_title": "Количество пользовательских команд",
+      "automation_number_title": "Количество автоматизаций",
+      "automation_sequential_executions_with_one_trigger_title": "Количество последовательных выполнений автоматизаций с одним типом триггера",
+      "interactive_messages_number_title": "Количество интерактивных сообщений",
+      "interactive_reactions_number_title": "Количество интерактивных реакций",
+      "temp_voice_channels_number_title": "Количество временных голосовых каналов",
+      "voice_roles_number_title": "Количество голосовых ролей",
+      "auto_threads_number_title": "Количество автоветок",
+      "auto_reactions_number_title": "Количество автореакций",
+      "action_log_webhook_modifying_title": "Изменение веб-хука журнала действий",
+      "action_log_events_processed_per_minute_number_title": "Количество обрабатываемых событий журнала действий в минуту",
+      "playlists_playback_title": "Воспроизведение плейлистов",
+      "audio_streaming_playback_title": "Воспроизведение потокового аудио",
+      "playback_volume_changing_title": "Изменение громкости воспроизведения",
+      "playback_queue_track_number_title": "Количество треков в очереди",
+      "earn_currencies_in_voice_channels": "Заработок валюты в голосовых каналах",
+      "voice_exp_members_number_title": "Количество одновременно находящихся участников в голосовых каналах, которым будет начисляться опыт за голосовую активность",
+      "level_awards_number_title": "Количество наград за уровни",
+      "store_items_number_title": "Количество предметов в магазине",
+      "activity_multipliers_number_title": "Количество множителей опыта и заработка",
+      "social_platform_number_title": "Количество {social_platform} подписок",
+      "priority_support_title": "Приоритетная поддержка"
+    }
   },
 
   "user_survey": {
@@ -267,11 +294,6 @@
   },
 
   "custom_command": {
-    "add_custom_command": "@:add команду",
-    "edit_custom_command": "@:edit команду",
-    "import_command": "Импортировать команду",
-    "export_command": "Экспортировать команду",
-    "publish_command": "Опубликовать команду",
     "command_sent_for_review": "Команда отправлена на проверку",
     "command_templates": "Шаблоны",
     "command_name_title": "Название команды",
@@ -374,15 +396,11 @@
   },
 
   "mod_warning_penalty": {
-    "add_penalty": "@:add наказание",
-    "edit_penalty": "@:edit наказание",
     "warning_plural": "0 предупреждений | {n} предупреждение | {n} предупреждения | {n} предупреждений",
     "warnings_amount_title": "Количество предупреждений"
   },
 
   "level_award": {
-    "add_award": "@:add награду",
-    "edit_award": "@:edit награду",
     "level_title": "Уровень",
     "next_remove_title": "Убирать награду при получении следующей",
     "custom_alert_title": "Индивидуальное оповещение",
@@ -390,8 +408,6 @@
   },
 
   "economy_currency": {
-    "add_currency": "@:add валюту",
-    "edit_currency": "@:edit валюту",
     "currency_name_title": "Название валюты",
     "currency_symbol_title": "Символ валюты",
     "income_per_message_title": "Заработок за сообщение",
@@ -403,8 +419,6 @@
   },
 
   "economy_store_item": {
-    "add_item": "@:add предмет",
-    "edit_item": "@:edit предмет",
     "item_name_title": "Название предмета",
     "item_type_title": "Тип предмета",
     "item_description_title": "Описание предмета",
@@ -422,8 +436,6 @@
   },
 
   "activity_multipliers": {
-    "add_multiplier": "@:add множитель",
-    "edit_multiplier": "@:edit множитель",
     "level_multipliers": "Множители опыта",
     "economy_multipliers": "Множители заработка",
     "for_text_activity": "За текстовую активность",
@@ -443,8 +455,6 @@
   },
 
   "voice_roles": {
-    "add_voice_role": "@:add голосовую роль",
-    "edit_voice_role": "@:edit голосовую роль",
     "bound_channels_description": "Оставьте поле пустым, если хотите, чтобы роль выдавалась при подключении к любому каналу"
   },
 
@@ -468,8 +478,6 @@
   },
 
   "auto_voices": {
-    "add_auto_voice": "@:add голосовой триггер",
-    "edit_auto_voice": "@:edit голосовой триггер",
     "voice_channel_description": "Выбранный голосовой канал будет использован в качестве триггера",
     "default_name_title": "Стандартное название",
     "default_user_limit_title": "Ограничение пользователей",
@@ -487,14 +495,10 @@
   },
 
   "auto_threads": {
-    "add_auto_thread": "@:add автотред",
-    "edit_auto_thread": "@:edit автотред",
-    "default_name_title": "Название треда"
+    "default_name_title": "Название ветки"
   },
 
   "auto_reactions": {
-    "add_auto_reaction": "@:add автореакцию",
-    "edit_auto_reaction": "@:edit автореакцию",
     "reactions_description": "Можно выбрать 10 реакций",
     "message_types_title": "Типы сообщения",
     "message_types_description": "Оставьте поле пустым, если хотите добавлять реакции на все типы сообщений",
@@ -505,8 +509,6 @@
   },
 
   "ims": {
-    "add_im": "@:add интерактивное сообщение",
-    "edit_im": "@:edit интерактивное сообщение",
     "actions_rows_title": "Операционные ряды",
     "action_row_buttons_title": "Кнопки",
     "action_row_select_menu_title": "Выпадающий список",
@@ -520,8 +522,6 @@
   },
 
   "irs": {
-    "add_ir": "@:add интерактивную реакцию",
-    "edit_ir": "@:edit интерактивную реакцию",
     "single_element_title": "Одиночный элемент",
     "single_element_description": "Позволяет сделать элемент реакции уникальным",
     "reverse_element_title": "Реверсивный элемент",
@@ -568,7 +568,6 @@
       "save_error": "Что-то пошло не так при попытке сохранения. Пожалуйста, попробуйте немного позже.",
       "unsaved_changes": "Имеются несохраненные изменения! Вы действительно хотите покинуть эту страницу?",
       "gs_title": "Общие настройки",
-      "gs_prefix_title": "Префикс",
       "gs_locale_title": "Локализация",
       "gs_translate_title": "Перевести",
       "gs_expert_roles_title": "Роли экспертов",
@@ -642,12 +641,11 @@
       "vc_auto_voices_title": "Временные голосовые каналы",
       "vc_auto_voices_description": "Автоматическое создание и удаление голосовых каналов",
       "ut_reports_title": "Репорты",
-      "ut_reports_description": "Получение жалоб на сообщения",
       "ut_reports_notify_about_unwanted_users_title": "Уведомлять о присоединении потенциально нежелательных пользователей",
       "ut_auto_reactions_title": "Автореакции",
       "ut_auto_reactions_description": "Автоматическое добавление реакций на сообщение",
-      "ut_auto_threads_title": "Автотреды",
-      "ut_auto_threads_description": "Автоматическое создание тредов под сообщениями",
+      "ut_auto_threads_title": "Автоветки",
+      "ut_auto_threads_description": "Автоматическое создание веток под сообщениями",
       "ut_ims_title": "Интерактивные сообщения",
       "ut_irs_title": "Интерактивные реакции",
       "ut_irs_description": "Выдача ролей и доступов к каналам при нажатии на реакции",

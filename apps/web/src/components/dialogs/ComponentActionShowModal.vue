@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -41,10 +41,9 @@
             <q-item
               v-for="(field, ii) in row"
               :key="ii"
-              class="rounded-lg bg-dark-2 cursor-pointer"
+              class="bg-dark-2 cursor-pointer"
               clickable
               @click="fieldDialog(field, i)"
-              v-ripple
             >
               <q-item-section>
                 <q-item-label>
@@ -99,9 +98,9 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { computed, defineComponent, ref } from 'vue'
 import ComponentActionShowModalField from './ComponentActionShowModalField.vue'
 
 export default defineComponent({

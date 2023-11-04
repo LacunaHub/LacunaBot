@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -10,15 +10,15 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.custom_commands.length }}/25</div>
+            <div>{{ guild.modules.custom_commands.length }}/{{ guild.premium.available ? '100' : '25' }}</div>
           </q-item-section>
         </q-item>
 
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="command in guild.modules.custom_commands" :key="command.id" class="col-12 col-sm-6 col-md-4">
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item @click="customCommandDialog(command)" class="rounded-lg" clickable v-ripple>
+              <q-card class="bg-dark-2" flat>
+                <q-item @click="customCommandDialog(command)" clickable>
                   <q-item-section>
                     <q-item-label>
                       {{ command.command.name }}
@@ -29,7 +29,16 @@
             </div>
 
             <div v-if="guild.modules.custom_commands.length < 25" class="col-12">
-              <q-btn @click="customCommandDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
+              <q-btn
+                @click="
+                  !guild.premium.available && guild.modules.custom_commands.length >= 25
+                    ? lacunaDiamondDialog()
+                    : customCommandDialog()
+                "
+                class="full-width dashed-border"
+                icon="add"
+                flat
+              ></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -37,7 +46,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
@@ -59,8 +68,8 @@
                   :key="command.name"
                   class="col-12 col-sm-6 col-md-4"
                 >
-                  <q-card class="rounded-lg bg-dark-2" flat>
-                    <q-item @click="systemCommandDialog(command)" class="rounded-lg" clickable v-ripple>
+                  <q-card class="bg-dark-2" flat>
+                    <q-item @click="systemCommandDialog(command)" clickable>
                       <q-item-section>
                         <q-item-label>
                           {{ command.name }}

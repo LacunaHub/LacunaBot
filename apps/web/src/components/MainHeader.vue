@@ -138,14 +138,7 @@
 
     <transition enter-active-class="animated fadeInDown">
       <q-list v-if="displayMobileNav" class="text-uppercase">
-        <q-item
-          clickable
-          to="/guilds"
-          active-class="nav-item--active"
-          v-ripple
-          @click="toggleMobileNav"
-          style="display: none"
-        >
+        <q-item clickable to="/guilds" active-class="nav-item--active" @click="toggleMobileNav" style="display: none">
           <q-item-section>
             <q-item-label>
               {{ $t('header.guilds') }}
@@ -153,7 +146,7 @@
           </q-item-section>
         </q-item>
 
-        <q-item clickable to="/state" active-class="nav-item--active" v-ripple @click="toggleMobileNav">
+        <q-item clickable to="/state" active-class="nav-item--active" @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
               {{ $t('header.state') }}
@@ -161,7 +154,7 @@
           </q-item-section>
         </q-item>
 
-        <q-item clickable href="https://docs.lacunabot.com" target="_blank" v-ripple @click="toggleMobileNav">
+        <q-item clickable href="https://docs.lacunabot.com" target="_blank" @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
               {{ $t('header.docs') }}
@@ -169,7 +162,7 @@
           </q-item-section>
         </q-item>
 
-        <q-item clickable to="/patrons" active-class="nav-item--active" v-ripple @click="toggleMobileNav">
+        <q-item clickable to="/patrons" active-class="nav-item--active" @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
               {{ $t('header.patrons') }}
@@ -177,7 +170,7 @@
           </q-item-section>
         </q-item>
 
-        <q-item clickable href="https://discord.gg/9NeMc3J" target="_blank" v-ripple @click="toggleMobileNav">
+        <q-item clickable href="https://discord.gg/9NeMc3J" target="_blank" @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
               {{ $t('header.help') }}
@@ -191,9 +184,9 @@
 
 <script>
 import { useUserStore } from 'src/stores/user'
-import { defineComponent } from 'vue'
 import { availableLocales } from 'src/utils/Constants'
 import { getLocale } from 'src/utils/Utils'
+import { defineComponent } from 'vue'
 import ChangeLog from './dialogs/ChangeLog.vue'
 
 export default defineComponent({

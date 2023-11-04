@@ -16,7 +16,16 @@
   "copied_to_clipboard": "Скопійовано до буфера обміну",
   "none": "Відсутній",
   "try_again": "Повторити спробу",
-  "support_server": "Сервер поддержки",
+  "support_server": "Сервер підтримки",
+  "remind_later": "Нагадати пізніше",
+  "disable": "Вимкнути",
+  "import": "Імпортувати",
+  "export": "Експортувати",
+  "publish": "Опублікувати",
+  "name": "Назва",
+  "identifier": "Ідентифікатор",
+  "transfer": "Перенести",
+  "other": "Другое",
   "common": {
     "channel": "Канал",
     "channels": "Канали",
@@ -42,6 +51,7 @@
     "ignored_channels": "@:common.ignored @.lower:common.channels",
     "ignored_roles": "@:common.ignored @.lower:common.roles",
     "ignored_permissions": "@:common.ignored @.lower:common.permissions",
+    "select_file": "Виберіть файл",
     "permissions_keys": {
       "ADMINISTRATOR": "Адміністратор",
       "CREATE_INSTANT_INVITE": "Створювати запрошення",
@@ -183,30 +193,67 @@
     "guilds": "Спільноти",
     "state": "Стан",
     "docs": "Довідник",
-    "patrons": "Покровители",
-    "help": "Сообщество",
-    "login": "Войти"
+    "patrons": "Покровителі",
+    "help": "Спільнота",
+    "login": "Увійти",
+    "change_log": "Журнал змін"
   },
   "lacuna_diamond": {
     "has_subscription": "Цей сервер вже має бонуси, які закінчуються {date}, але Ви можете їх продовжити",
-    "unlimited_subscription": "Сервер имеет неограниченные по времени бонусы",
-    "bonus_music_description": "Необмежена кількість треків у черзі, прослуховування плейлистів, потокове відтворення аудіо та зміна гучності",
-    "bonus_increased_limits_description": "Більше нагород за рівні, предметів у магазині, голосових ролей, тимчасових голосових каналів, автореакцій та елементів реакцій",
-    "bonus_personalization_description": "Можливість зміни аватара та назви веб-хука до журналу дій",
-    "bonus_more_subscriptions_description": "Збільште кількість передплат Twitch і YouTube до 10",
-    "bonus_activities_description": "Можливість заробляти валюти в голосових каналах і більше множників досвіду та заробітку",
-    "bonus_respect_description": "Матеріальна допомога команді проєкт та особлива роль на офіційному сервері підтримки",
+    "unlimited_subscription": "Сервер має необмежені по часу бонуси",
+    "bonus_music_description": "Необмежена кількість треків у черзі, прослуховування плейлистів, потокове відтворення аудіо та зміна гучності.",
+    "bonus_increased_limits_description": "Більше нагород за рівні, предметів у магазині, підписок, автоматизацій, інтерактивних повідомлень, голосових ролей, тимчасових голосових каналів та інше.",
+    "bonus_personalization_description": "Можливість зміни аватара та назви веб-хука в журналі дій.",
+    "bonus_custom_behavior_with_code_description": "Можливість виконання JavaScript-коду в користувацьких командах та задачах автоматизації.",
+    "bonus_activities_description": "Можливість заробляти валюту в голосових каналах.",
+    "bonus_respect_description": "Матеріальна допомога команді проєкт та особлива роль на офіційному сервері підтримки.",
     "select_plan": "Оберіть план",
     "select_payment_method": "Спосіб оплати",
     "wait_few_minutes": "Активація бонусів займає деякий час, будь ласка, зачекайте кілька хвилин після оплати",
     "pay": "Сплатити",
-    "dnb_step_1": "Войдите на наш {server}",
-    "dnb_step_2": "Ознакомьтесь с {article}. В ней есть пошаговая инструкция о том, как забустить сервер",
-    "dnb_step_2_article": "данной статьёй",
-    "dnb_step_3": "Убедитесь, что выбрали наш {server}, затем забустите его",
-    "dnb_step_4": "После этого, нажмите на кнопку \"Проверить\" ниже и вам станут доступны бонусы",
-    "dnb_bonuses_info": "Бонусы будут доступны до тех пор, пока вы являетесь бустером сервера поддержки. Вы можете активировать бонусы только для одного сервера.",
-    "check": "Проверить"
+    "patreon_after_checkout": "Після того, як ви стали покровителем, нажміть на кнопку перевірки нижче, що б активувати свої бонуси.",
+    "patreon_after_checkout_important_info": "Для отримання доступу до бонусів необхідно під'єднати свій Discord до {platform} та залишатись на нашому сервері підтримки.",
+    "dnb_step_1": "Увійдіть на наш {server}",
+    "dnb_step_2": "Ознайомтесь з {article}. В ній є покрокова інструкція про те, як забустити сервер",
+    "dnb_step_2_article": "даною статтею",
+    "dnb_step_3": "Переконайтеся, що вибрали наш {server}, після чого забустіть його",
+    "dnb_step_4": "Після цього, натисніть на кнопку \"Перевірити\" нижче та вам стануть доступні бонуси",
+    "dnb_bonuses_info": "Бонуси будуть доступні до тих пір, поки ви є бустером сервера підтримки. Ви можете активувати бонуси тільки для одного сервера.",
+    "check": "Перевірити",
+    "transferring_description": "Преміум можливості будуть перенесені з вибраної спільноти до поточної.",
+    "plan_comparison": "Сравнение планов",
+    "plan_comparison_features": {
+      "execute_code_title": "Действие \"Выполнить код\"",
+      "custom_commands_number_title": "Количество пользовательских команд",
+      "automation_number_title": "Количество автоматизаций",
+      "automation_sequential_executions_with_one_trigger_title": "Количество последовательных выполнений автоматизаций с одним типом триггера",
+      "interactive_messages_number_title": "Количество интерактивных сообщений",
+      "interactive_reactions_number_title": "Количество интерактивных реакций",
+      "temp_voice_channels_number_title": "Количество временных голосовых каналов",
+      "voice_roles_number_title": "Количество голосовых ролей",
+      "auto_threads_number_title": "Количество автоветок",
+      "auto_reactions_number_title": "Количество автореакций",
+      "action_log_webhook_modifying_title": "Изменение веб-хука журнала действий",
+      "action_log_events_processed_per_minute_number_title": "Количество обрабатываемых событий журнала действий в минуту",
+      "playlists_playback_title": "Воспроизведение плейлистов",
+      "audio_streaming_playback_title": "Воспроизведение потокового аудио",
+      "playback_volume_changing_title": "Изменение громкости воспроизведения",
+      "playback_queue_track_number_title": "Количество треков в очереди",
+      "earn_currencies_in_voice_channels": "Заработок валюты в голосовых каналах",
+      "voice_exp_members_number_title": "Количество одновременно находящихся участников в голосовых каналах, которым будет начисляться опыт за голосовую активность",
+      "level_awards_number_title": "Количество наград за уровни",
+      "store_items_number_title": "Количество предметов в магазине",
+      "activity_multipliers_number_title": "Количество множителей опыта и заработка",
+      "social_platform_number_title": "Количество {social_platform} подписок",
+      "priority_support_title": "Приоритетная поддержка"
+    }
+  },
+  "user_survey": {
+    "it_would_help_us": "Ми будемо раді, якщо ви виділите 10 секунд свого часу для того, що б оцінити ваш досвід роботи з нами.",
+    "how_satisfied": "Наскільки ви задоволені ботом?",
+    "how_many_members": "Скільки користувачів на вашому сервері?",
+    "tell_us_more": "Розкажіть нам більше про свій досвід використання",
+    "survey_submitted": "Дякуємо! Ви допомагаєте нам стати краще."
   },
   "message_editor": {
     "message_embed": "Вбудоване повідомлення",
@@ -237,13 +284,11 @@
     },
     "throttling_max_uses_title": "Максимум користувачів",
     "throttling_timeout_title": "Повторне використання",
-    "permissions_now_unavailable": "Откройте настройки сервера Discord и перейдите во вкладку \"Интеграции\", чтобы настроить разрешения для команды."
+    "permissions_now_unavailable": "Відкрийте налаштування серверу Discord та перейдіть у категорію \"Інтеграції\", що б налаштувати дозволи для команди."
   },
   "custom_command": {
-    "add_custom_command": "@:add команду",
-    "edit_custom_command": "@:edit команду",
-    "import_command": "Імпортувати команду",
-    "export_command": "Експортувати команду",
+    "command_sent_for_review": "Команда відправлена на перевірку",
+    "command_templates": "Шаблони",
     "command_name_title": "Назва команди",
     "command_description_title": "Опис команди",
     "command_options_title": "Аргументи команди",
@@ -263,7 +308,9 @@
       "MODIFY_ROLES": "@:common.actions_keys.ACTION_MODIFY_ROLES",
       "FORWARD_TO_COMMAND": "Перенаправити на команду",
       "MODIFY_WALLET": "Змінити гаманець",
-      "EXECUTE_CODE": "Выполнить код"
+      "EXECUTE_CODE": "Виконати код",
+      "SHOW_MODAL": "Відкрити модальне вікно",
+      "OVERWRITE_CHANNEL_PERMISSIONS": "@:common.actions_keys.OVERWRITE_CHANNEL_PERMISSIONS"
     },
     "cv_operator_title": "Оператор",
     "cv_operators": {
@@ -288,7 +335,11 @@
     "mw_amount_title": "Кількість валюти",
     "mw_user_id_description": "Змінити гаманець вказаного користувача (за замовчуванням вказано автора команди)",
     "mw_currency_id_title": "Ідентифікатор валюти",
-    "mw_currency_id_description": "Вкажіть, якщо хочете видати іншу валюту, а не стандартну"
+    "mw_currency_id_description": "Вкажіть, якщо хочете видати іншу валюту, а не стандартну",
+    "sm_field_placeholder_title": "Заповнювач",
+    "sm_field_min_length_title": "Мінімум символів",
+    "sm_field_max_length_title": "Максимум символів",
+    "sm_field_default_value_title": "Значення за замовчуванням"
   },
   "automoder": {
     "titles": {
@@ -335,22 +386,16 @@
     "custom_dm_message_title": "Користувацьке особисте повідомлення"
   },
   "mod_warning_penalty": {
-    "add_penalty": "@:add покарання",
-    "edit_penalty": "@:edit покарання",
     "warning_plural": "0 попереджень | {n} попередження | {n} попередження | {n} попереджень",
     "warnings_amount_title": "Кількість попереджень"
   },
   "level_award": {
-    "add_award": "@:add нагороду",
-    "edit_award": "@:add нагороду",
     "level_title": "Рівень",
     "next_remove_title": "Прибирати нагороду при отриманні наступної",
     "custom_alert_title": "Індивідуальне сповіщення",
-    "remove_references_title": "Убрать роли при получении награды"
+    "remove_references_title": "Прибрати ролі при отриманні нагороди"
   },
   "economy_currency": {
-    "add_currency": "@:add валюту",
-    "edit_currency": "@:edit валюту",
     "currency_name_title": "Назва валюти",
     "currency_symbol_title": "Символ валюти",
     "income_per_message_title": "Заробіток за повідомлення",
@@ -361,8 +406,6 @@
     "income_to": "До"
   },
   "economy_store_item": {
-    "add_item": "@:add предмет",
-    "edit_item": "@:edit предмет",
     "item_name_title": "Назва предмету",
     "item_type_title": "Тип предмету",
     "item_description_title": "Опис предмету",
@@ -379,8 +422,6 @@
     "item_duration_title": "Тривалість предмету"
   },
   "activity_multipliers": {
-    "add_multiplier": "@:add множник",
-    "edit_multiplier": "@:edit множник",
     "level_multipliers": "Множник досвіду",
     "economy_multipliers": "Множник заробітку",
     "for_text_activity": "За текстову активність",
@@ -391,16 +432,34 @@
     "twitch_display_stream_preview": "Показувати перегляд стріму",
     "youtube_channel_name_title": "Назва чи ідентифікатор каналу",
     "notifications_channel_title": "Канал для сповіщень",
-    "notifications_text": "Текст сповіщень"
+    "notifications_text": "Текст сповіщень",
+    "telegram_help_note": "Для того, що б зв'язати Telegram та Discord, необхідно додати бота {botLink} в потрібний канал, після чого ввести його назву або ідентифікатор в поле нижче.",
+    "telegram_channel_name_subtitle": "Унікальний ідентифікатор або ім'я вибраного каналу (в форматі {'@'}channelusername)",
+    "mention_roles_title": "Згадати ролі",
+    "crosspost_message_title": "Опублікувати повідомлення"
   },
   "voice_roles": {
-    "add_voice_role": "@:add голосову роль",
-    "edit_voice_role": "@:edit голосову роль",
     "bound_channels_description": "Залишіть поле порожнім, якщо хочете, щоб роль видавалася при підключенні до будь-якого каналу"
   },
+  "automation": {
+    "trigger_title": "Тригер",
+    "trigger_names": {
+      "GUILD_MEMBER_ADD": "@:common.action_log_keys.guild_member_add",
+      "GUILD_MEMBER_REMOVE": "@:common.action_log_keys.guild_member_remove",
+      "INTERACTION_BUTTON": "Натискання на кнопку",
+      "INTERACTION_SELECT_MENU": "Вибір опції в списку",
+      "INTERACTION_MODAL_SUBMIT": "Відправлення форми модального вікна",
+      "MESSAGE_CREATE": "Надсилання повідомлення",
+      "MESSAGE_DELETE": "@:common.action_log_keys.message_delete",
+      "MESSAGE_REACTION_ADD": "Додавання реакції на повідомлення",
+      "MESSAGE_UPDATE": "@:common.action_log_keys.message_update",
+      "ROLE_MEMBER_ADD": "@:common.action_log_keys.role_member_add",
+      "ROLE_MEMBER_REMOVE": "@:common.action_log_keys.role_member_remove",
+      "VOICE_CONNECT": "@:common.action_log_keys.voice_connect",
+      "VOICE_DISCONNECT": "@:common.action_log_keys.voice_disconnect"
+    }
+  },
   "auto_voices": {
-    "add_auto_voice": "@:add голосовий трігер",
-    "edit_auto_voice": "@:add голосовий трігер",
     "voice_channel_description": "Обраний голосовий канал буде використаний як трігер",
     "default_name_title": "Стандартна назва",
     "default_user_limit_title": "Обмеження користувача",
@@ -417,13 +476,9 @@
     "moderator_roles_description": "Обрані ролі отримають ті самі права, що й власник тимчасового каналу, але їх дозволи у цьому каналі не можна буде змінити. Для коректної роботи, боту необхідно право адміністратора"
   },
   "auto_threads": {
-    "add_auto_thread": "@:add автотред",
-    "edit_auto_thread": "@:edit автотред",
-    "default_name_title": "Назва треду"
+    "default_name_title": "Название ветки"
   },
   "auto_reactions": {
-    "add_auto_reaction": "@:add автокорекцію",
-    "edit_auto_reaction": "@:edit автокорекцію",
     "reactions_description": "Можна вибрати 10 реакцій",
     "message_types_title": "Типи повідомлень",
     "message_types_description": "Залишіть поле порожнім, якщо хочете додавати реакцію на всі типи повідомлень",
@@ -433,8 +488,6 @@
     "excluded_text_matches_description": "Не реагуватиме, якщо в повідомленні міститься зазначені параметри"
   },
   "ims": {
-    "add_im": "@:add інтерактивне повідомлення",
-    "edit_im": "@:edit інтерактивне повідомлення",
     "actions_rows_title": "Операційні ряди",
     "action_row_buttons_title": "Кнопки",
     "action_row_select_menu_title": "Випадаючий список",
@@ -447,8 +500,6 @@
     "mr_reversible_mode": "Реверсний режим"
   },
   "irs": {
-    "add_ir": "@:add інтерактивну реакцію",
-    "edit_ir": "@:edit інтерактивну реакцію",
     "single_element_title": "Поодинокий елемент",
     "single_element_description": "Дозволяє зробити елемент реакції унікальним",
     "reverse_element_title": "Реверсивний елемент",
@@ -459,13 +510,14 @@
   },
   "pages": {
     "authorization": {
-      "authorization_successful": "Авторизация прошла успешно",
-      "authorization_failed": "Авторизация не удалась",
-      "close_window_and_go_back": "Вы можете закрыть это окно и вернуться в Discord.",
-      "something_went_wrong": "Что-то пошло не так. Попробуйте позже."
+      "authorization_successful": "Успішна авторизація",
+      "authorization_failed": "Авторизація не вдалася",
+      "close_window_and_go_back": "Ви можете закрити це вікно та повернутися у Discord.",
+      "something_went_wrong": "Щось пішло не так. Спробуйте пізніше."
     },
     "dashboard": {
       "profile": "Профіль",
+      "no_activities": "Здається, ви не проявляли активність",
       "my_guilds": "Мої спільноти",
       "no_guilds": "У Вас немає доступних спільнот.",
       "bills": "Виставлення рахунку",
@@ -484,11 +536,12 @@
         "SUBSCRIPTIONS": "Підписки",
         "VOICE_CHANNELS": "Голосові канали",
         "UTILITY": "Корисне",
-        "CHANGE_LOG": "Журнал змін"
+        "CHANGE_LOG": "Журнал змін",
+        "DOWNLOAD_LOGS": "Завантажити логи"
       },
       "save_error": "Щось пішло не так при спробі збереження. Будь ласка, спробуйте трішки пізніше.",
+      "unsaved_changes": "У вас є незбережені зміни! Ви впевнені, що хочете залишити цю сторінку?",
       "gs_title": "Загальні налаштування",
-      "gs_prefix_title": "Префікс",
       "gs_locale_title": "Локалізація",
       "gs_translate_title": "Перекласти",
       "gs_expert_roles_title": "Ролі експертів",
@@ -513,9 +566,6 @@
       "gs_farewell_title": "Прощання",
       "cm_custom_commands_title": "Користувацькі команди",
       "cm_system_commands_title": "Системні команди",
-      "cm_enable_prefix_commands_title": "Увімкнути префіксні команди",
-      "cm_no_registered_app_commands": "На сервері немає ні одної зареєстрованої команди. Будь ласка, переконайтесь, що бот має дозвіл на їх створення.",
-      "cm_app_commands_refresh": "Ви можете оновити команди. Це корисно, якщо на сервері відсутні команди деякі з них або вони застарілі.",
       "cm_command_categories": {
         "GENERAL": "Загальні",
         "MODERATION": "Модерація",
@@ -553,6 +603,7 @@
       "ac_economy_reset_on_leave_title": "Скидати гаманець під час виходу учасника",
       "ac_economy_currencies_title": "Валюти",
       "ac_economy_store_items_title": "Предмети магазину",
+      "ac_economy_transfer_permissions": "Дозволи команди перекладу",
       "ac_multipliers_title": "Множник досвіду та заробітку",
       "vc_music_title": "Музика",
       "vc_music_allow_radio_playback_title": "Дозволити потокове відтворення",
@@ -564,46 +615,42 @@
       "vc_auto_voices_title": "Тимчасові голосові канали",
       "vc_auto_voices_description": "Автоматичне створення та видалення голосових каналів",
       "ut_reports_title": "Репорти",
-      "ut_reports_description": "Отримання скарг на повідомлення",
-      "ut_reports_notify_about_unwanted_users_title": "Уведомлять о присоединении потенциально нежелательных пользователей",
+      "ut_reports_notify_about_unwanted_users_title": "Повідомляти про приєднання потенційно небажаних користувачів",
       "ut_auto_reactions_title": "Автореакції",
       "ut_auto_reactions_description": "Автоматичне додавання реакцій на повідомлення",
-      "ut_auto_threads_title": "Автотреди",
-      "ut_auto_threads_description": "Автоматичне створення тредів під повідомленнями",
+      "ut_auto_threads_title": "Автоветки",
+      "ut_auto_threads_description": "Автоматическое создание веток под сообщениями",
       "ut_ims_title": "Інтерактивні повідомлення",
       "ut_irs_title": "Інтерактивні реакції",
-      "ut_irs_description": "Отримання ролей та доступів до каналів при натисканні на реакції"
+      "ut_irs_description": "Отримання ролей та доступів до каналів при натисканні на реакції",
+      "ut_automation_title": "Автоматизация"
     },
     "landing": {
-      "title": "Модернізуйте свою Discord спільноту",
-      "description": "Lacuna - це потужний інструмент для покращення функціональності спільноти з інтуїтивно зрозумілим інтерфейсом",
+      "title": "Створюйте (все), що побажаєте",
+      "description": "Багатофункціональний бот для Discord, який призначений розширити можливості керування та модерування спільнот.",
       "add_to_me": "Додати себе",
       "learn_more": "Дізнатися більше",
-      "bf_stability_title": "Стабільність",
-      "bf_stability_description": "Висока стабільність, швидкість, продуктивність, а також мінімізація простоїв за рахунок потужних серверів.",
-      "bf_ease_title": "Легкість",
-      "bf_ease_description": "Зрозумілий інтерфейс, в котрому неможливо загубитись і дозволяє швидко і легко налаштувати необхідні модулі.",
-      "bf_functionality_title": "Функціональність",
-      "bf_functionality_description": "Гнучкі та різно образні можливості що дозволяють покращити та доповнити спільноту в Discord.",
+      "ft_custom_behavior_title": "Користувацька поведінка",
+      "ft_custom_behavior_description": "Налаштуйте поведінку бота за допомогою JavaScript. Створюйте користувацькі команди та задачі автоматизації, що б надати чари своїй спільноті.",
       "ft_activities_title": "Активності",
-      "ft_activities_description": "Заробляйте досвід та валюту виявляючи активність на сервері та отримуйте нагороди, а також змагайтесь з іншими користувачами в боротьбі за почесне місце у таблиці лідерів.",
+      "ft_activities_description": "Рівні та економіка. Змагайтеся з іншими користувачами у боротьбі за почесне місце у таблиці лідерів та отримуйте за це нагороди!",
       "ft_moderation_title": "Модерування",
-      "ft_moderation_description": "Прості команди та зрозумілий опис, а також автомодерування дозволить вашій спільноті захиститись від порушників порядку. Крім того, у вас буде журнал дій, що дозволяє фіксувати події, що відбуваються, і стежити за модераторами та їх покараннями, а система репортів дозволить вашим учасникам надсилати скарги на розгляд вам або вашим модераторам.",
-      "ft_subscriptions_title": "Сповіщення та підписки",
-      "ft_subscriptions_description": "Додайте канал Twitch і YouTube, щоб отримувати сповіщення про вихід нового відео або про пряму трансляцію.",
+      "ft_moderation_description": "Прості та зручні команди, журнал дій, автомодерування, повідомлення про потенційних порушників, скарги на користувачів та багато іншого. Не залишайте свою спільноту без захисту.",
+      "ft_subscriptions_title": "Соціальні оповіщення",
+      "ft_subscriptions_description": "Прив'яжіть свій Telegram, Twitch та YouTube канал, щоб підписники дізнавалися про вихід нового контенту.",
       "ft_music_title": "Музика",
-      "ft_music_description": "Слухайте свою улюблену музику в голосових каналах. Lacuna підтримує YouTube, Twitch, SoundCloud, прямі посилання на аудіозапис та радіостанції. Наповніть спільноту музичним настроєм.",
-      "ft_utility_title": "Корисне",
-      "ft_utility_description": "Інтерактивні повідомлення та реакції, створення тимчасових голосових каналів, автоматична видача ролей, користувацькі команди та багато іншого!",
+      "ft_music_description": "Слухайте свою улюблену музику в голосових каналах. Ми підтримуємо Spotify, Yandex.Music, SoundCloud, прямі посилання на аудіозапис та радіостанції.",
+      "ft_utility_title": "Корисні функції",
+      "ft_utility_description": "Інтерактивні повідомлення та реакції, тимчасові голосові канали, вітальні повідомлення та багато іншого!",
       "ready_title": "Готові розпочати?",
-      "ready_description": "Створіть свою найкращу спільноту!"
+      "ready_description": "Стабільність. Легкість. Функціональність. Lacuna – це потужний інструмент для покращення спільноти з інтуїтивно зрозумілим інтерфейсом."
     },
     "patrons": {
-      "gratitude_message_p1": "Мы хотим выразить вам нашу искреннюю благодарность за вашу финансовую поддержку нашего бота! Ваше щедрое пожертвование помогает нам дальше развивать и улучшать нашего бота, чтобы он мог продолжать предоставлять полезные услуги и быть полезным инструментом для пользователей.",
-      "gratitude_message_p2": "Ваше доброе пожертвование вносит реальную разницу в нашу работу, и мы ценим ваше доверие и поддержку. Вместе мы можем сделать Lacuna еще лучше, предлагая новые функции, улучшая интерфейс и повышая её эффективность.",
-      "gratitude_message_p3": "Мы глубоко признательны за ваше лояльное сотрудничество и доверие, которое вы проявляете к нашему проекту. Ваша поддержка вдохновляет нас и дает нам энергию для дальнейшей работы. Мы обязуемся продолжать развивать и улучшать Lacuna, чтобы она продолжала быть ценным инструментом для вас и других пользователей.",
-      "active_patrons_title": "Активные покровители",
-      "former_patrons_title": "Ранее поддерживали"
+      "gratitude_message_p1": "Ми хочемо висловити нашу щиру подяку за вашу фінансову підтримку нашого бота! Ваші щедрі пожертвування допомагають нам далі розвивати та покращувати нашого бота, щоб він міг продовжувати надавати корисні послуги та бути корисним інструментом для користувачів.",
+      "gratitude_message_p2": "Ваша добра пожертва вносить реальну різницю в нашу роботу, і ми цінуємо вашу довіру та підтримку. Разом ми можемо зробити Lacuna ще кращою, пропонуючи нові функції, покращуючи інтерфейс та підвищуючи її ефективність.",
+      "gratitude_message_p3": "Ми глибоко вдячні за вашу лояльну співпрацю та довіру, яку ви виявляєте до нашого проекту. Ваша підтримка нас надихає і дає нам енергію для подальшої роботи. Ми зобов'язуємось продовжувати розвивати та покращувати Lacuna, щоб вона продовжувала бути цінним інструментом для вас та інших користувачів.",
+      "active_patrons_title": "Активні покровителі",
+      "former_patrons_title": "Раніше підтримували"
     },
     "state": {
       "total_guilds": "Всього спільнот",
@@ -612,17 +659,14 @@
       "avg_latency": "Середня латентність",
       "current_version": "Поточна версія",
       "clusters_title": "Кластери",
-      "clusters_description": "Незалежні системи, які містять в собі набори фрагментів",
       "cluster_cpu_usage": "Використання ЦП",
       "cluster_memory_usage": "Використання оперативної пам’яті додатками",
       "shards_title": "Фрагменти",
-      "shards_description": "Підпроцесори, які оброблюють набори спільнот Discord",
       "shards_latency": "Латентність фрагментів",
       "shard_guilds": "Спільнот",
       "shard_users": "Користувачів",
       "shard_channels": "Каналів",
       "players_title": "Музичний плеєр",
-      "players_description": "Відповідні за відтворення музики в голосовому каналі",
       "player_cpu_load": "Навантаження плеєру",
       "command_uses": "Кількість використань команд"
     }
@@ -643,50 +687,6 @@
       "symbols": "Символи",
       "flags": "Прапорці",
       "custom": "Користувацьке"
-    }
-  },
-  "errors": {
-    "activate_lacuna_diamond": "Активуйте Lacuna Diamond, щоб збільшити максимальну кількість.",
-    "custom_commands": {
-      "LIMIT_REACHED": "Досягнуто обмеження на кількість користувацьких команд.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.custom_commands.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "NO_COMPONENTS": "В команді відсутні будь-які компоненти. Будь ласка, додайте їх та спробуйте знову.",
-      "NAME_CONFLICT": "Назва команди конфліктує з уже наявною. Оберіть іншу назву.",
-      "NOT_FOUND": "Користувацька команда не знайдена.",
-      "CANNOT_CREATE_COMMAND": "Помилка при створенні команди.",
-      "CANNOT_UPDATE_COMMAND": "Помилка при оновленні команди.",
-      "CANNOT_DELETE_COMMAND": "Помилка при видаленні команди."
-    },
-    "subscriptions": {
-      "LIMIT_REACHED": "Досягнуто обмеження на кількість підписок.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.subscriptions.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "ALREADY_SUBSCRIBED": "Підписка вже існує.",
-      "CANNOT_SUBSCRIBE": "Сталася помилка під час створення підписки.",
-      "NOT_FOUND": "Підписка не знайдена."
-    },
-    "auto_voices": {
-      "LIMIT_REACHED": "Досягнуто обмеження на кількість голосових трігерів.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.auto_voices.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "ALREADY_EXISTS": "Голосовий трігер вже існує.",
-      "NOT_FOUND": "Голосовий трігер не знайдено."
-    },
-    "ims": {
-      "LIMIT_REACHED": "Досягнуто ліміт на кількість інтерактивних повідомлень.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.ims.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "CANNOT_CREATE_EMPTY_MESSAGE": "Неможливо створити пусте повідомлення.",
-      "NON_INTERACTIVE": "Повідомлення не інтерактивне. Додайте компоненти.",
-      "NOT_FOUND": "Інтерактивне повідомлення не знайдено.",
-      "CANNOT_CREATE_MESSAGE": "Помилка при створенні повідомлення.",
-      "CANNOT_UPDATE_MESSAGE": "Помилка при оновленні повідомлення."
-    },
-    "irs": {
-      "LIMIT_REACHED": "Досягнуто обмеження на кількість інтерактивних реакцій.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.irs.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "EMOJI_ALREADY_USED": "Обраний емодзі вже використовується на цьому повідомленні.",
-      "REFERENCE_IS_SINGLE": "Одне або декілька напрямів є одинарним.",
-      "UNKNOWN_MESSAGE": "Повідомлення з таким ідентифікатором не знайдено в обраному калані.",
-      "NOT_FOUND": "Інтерактивна реакція не знайдена.",
-      "CANNOT_CREATE_REACTION": "Помилка при додаванні реакції на повідомлення."
     }
   }
 }

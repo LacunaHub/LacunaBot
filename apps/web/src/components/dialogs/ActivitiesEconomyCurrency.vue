@@ -1,14 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'economy_currency.add_currency' : 'economy_currency.edit_currency') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -163,207 +155,221 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none" padding>
-        <q-expansion-item expand-separator :label="$t('common.permissions')">
-          <q-card class="rounded-lg bg-dark-1" flat>
-            <q-card-section>
-              <div class="row q-col-gutter-md">
-                <div class="col-12">
-                  <div>
-                    {{ $t('common.allowed_channels') }}
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-expansion-item expand-separator :label="$t('common.permissions')">
+            <q-card class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.allowed_channels') }}
+                    </div>
+
+                    <q-select
+                      v-model="currency.income.allowed.channels"
+                      :options="guild.channels"
+                      option-label="name"
+                      option-value="id"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      multiple
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          color="dark-1"
+                          square
+                          :label="opt.name ?? opt"
+                          :icon="opt.icon"
+                          size="sm"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
+
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section avatar>
+                            <q-icon :name="opt.icon"></q-icon>
+                          </q-item-section>
+
+                          <q-item-section>
+                            <q-item-label>
+                              {{ opt.name }}
+                            </q-item-label>
+
+                            <q-item-label class="text--secondary">
+                              {{ opt.parentName }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
                   </div>
 
-                  <q-select
-                    v-model="currency.income.allowed.channels"
-                    :options="guild.channels"
-                    option-label="name"
-                    option-value="id"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                    multiple
-                  >
-                    <template #selected-item="{ opt, index, removeAtIndex }">
-                      <q-chip
-                        class="rounded-lg"
-                        color="dark-1"
-                        square
-                        :label="opt.name ?? opt"
-                        :icon="opt.icon"
-                        size="sm"
-                        :ripple="false"
-                        removable
-                        @remove="removeAtIndex(index)"
-                      ></q-chip>
-                    </template>
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.blocked_channels') }}
+                    </div>
 
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section avatar>
-                          <q-icon :name="opt.icon"></q-icon>
-                        </q-item-section>
+                    <q-select
+                      v-model="currency.income.blocked.channels"
+                      :options="guild.channels"
+                      option-label="name"
+                      option-value="id"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      multiple
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          color="dark-1"
+                          square
+                          :label="opt.name ?? opt"
+                          :icon="opt.icon"
+                          size="sm"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
 
-                        <q-item-section>
-                          <q-item-label>
-                            {{ opt.name }}
-                          </q-item-label>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section avatar>
+                            <q-icon :name="opt.icon"></q-icon>
+                          </q-item-section>
 
-                          <q-item-label class="text--secondary">
-                            {{ opt.parentName }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
+                          <q-item-section>
+                            <q-item-label>
+                              {{ opt.name }}
+                            </q-item-label>
+
+                            <q-item-label class="text--secondary">
+                              {{ opt.parentName }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+                  </div>
                 </div>
+              </q-card-section>
 
-                <div class="col-12">
-                  <div>
-                    {{ $t('common.blocked_channels') }}
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.allowed_roles') }}
+                    </div>
+
+                    <q-select
+                      v-model="currency.income.allowed.roles"
+                      :options="guild.roles"
+                      option-label="name"
+                      option-value="id"
+                      use-chips
+                      class="q-pt-sm"
+                      multiple
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          square
+                          :label="opt.name ?? opt"
+                          size="sm"
+                          :style="`background: ${opt.color}`"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
+
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
                   </div>
 
-                  <q-select
-                    v-model="currency.income.blocked.channels"
-                    :options="guild.channels"
-                    option-label="name"
-                    option-value="id"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                    multiple
-                  >
-                    <template #selected-item="{ opt, index, removeAtIndex }">
-                      <q-chip
-                        class="rounded-lg"
-                        color="dark-1"
-                        square
-                        :label="opt.name ?? opt"
-                        :icon="opt.icon"
-                        size="sm"
-                        :ripple="false"
-                        removable
-                        @remove="removeAtIndex(index)"
-                      ></q-chip>
-                    </template>
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.blocked_roles') }}
+                    </div>
 
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section avatar>
-                          <q-icon :name="opt.icon"></q-icon>
-                        </q-item-section>
+                    <q-select
+                      v-model="currency.income.blocked.roles"
+                      :options="guild.roles"
+                      option-label="name"
+                      option-value="id"
+                      use-chips
+                      class="q-pt-sm"
+                      multiple
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          square
+                          :label="opt.name ?? opt"
+                          size="sm"
+                          :style="`background: ${opt.color}`"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
 
-                        <q-item-section>
-                          <q-item-label>
-                            {{ opt.name }}
-                          </q-item-label>
-
-                          <q-item-label class="text--secondary">
-                            {{ opt.parentName }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
-              </div>
-            </q-card-section>
-
-            <q-card-section>
-              <div class="row q-col-gutter-md">
-                <div class="col-12">
-                  <div>
-                    {{ $t('common.allowed_roles') }}
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
                   </div>
-
-                  <q-select
-                    v-model="currency.income.allowed.roles"
-                    :options="guild.roles"
-                    option-label="name"
-                    option-value="id"
-                    use-chips
-                    class="q-pt-sm"
-                    multiple
-                    filled
-                    dense
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                  >
-                    <template #selected-item="{ opt, index, removeAtIndex }">
-                      <q-chip
-                        class="rounded-lg"
-                        square
-                        :label="opt.name ?? opt"
-                        size="sm"
-                        :style="`background: ${opt.color}`"
-                        :ripple="false"
-                        removable
-                        @remove="removeAtIndex(index)"
-                      ></q-chip>
-                    </template>
-
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
                 </div>
-
-                <div class="col-12">
-                  <div>
-                    {{ $t('common.blocked_roles') }}
-                  </div>
-
-                  <q-select
-                    v-model="currency.income.blocked.roles"
-                    :options="guild.roles"
-                    option-label="name"
-                    option-value="id"
-                    use-chips
-                    class="q-pt-sm"
-                    multiple
-                    filled
-                    dense
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                  >
-                    <template #selected-item="{ opt, index, removeAtIndex }">
-                      <q-chip
-                        class="rounded-lg"
-                        square
-                        :label="opt.name ?? opt"
-                        size="sm"
-                        :style="`background: ${opt.color}`"
-                        :ripple="false"
-                        removable
-                        @remove="removeAtIndex(index)"
-                      ></q-chip>
-                    </template>
-
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-      </q-list>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -384,7 +390,7 @@
             />
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
+              class="full-width"
               :label="$t('done')"
               :disable="!isValid"
               :disable-dropdown="currency.id === 'DEFAULT'"
@@ -412,10 +418,10 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { suid } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'ActivitiesEconomyCurrency',

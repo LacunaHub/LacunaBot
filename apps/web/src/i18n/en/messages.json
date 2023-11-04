@@ -25,6 +25,7 @@
   "name": "Name",
   "identifier": "Identifier",
   "transfer": "Transfer",
+  "other": "Other",
   "common": {
     "channel": "Channel",
     "channels": "Channels",
@@ -219,7 +220,33 @@
     "dnb_step_4": "After that, click on the \"Check\" button below and bonuses will be available to you",
     "dnb_bonuses_info": "Bonuses will be available as long as you are a support server booster. You can only activate bonuses for one server.",
     "check": "Check",
-    "transferring_description": "Premium features will be transferred from the chosen community to the current one."
+    "transferring_description": "Premium features will be transferred from the chosen community to the current one.",
+    "plan_comparison": "Plan comparison",
+    "plan_comparison_features": {
+      "execute_code_title": "Action \"Execute code\"",
+      "custom_commands_number_title": "Number of custom commands",
+      "automation_number_title": "Number of automations",
+      "automation_sequential_executions_with_one_trigger_title": "Number of sequential executions of automations with one type of trigger",
+      "interactive_messages_number_title": "Number of interactive messages",
+      "interactive_reactions_number_title": "Number of interactive reactions",
+      "temp_voice_channels_number_title": "Number of temporary voice channels",
+      "voice_roles_number_title": "Number of voice roles",
+      "auto_threads_number_title": "Number of auto threads",
+      "auto_reactions_number_title": "Number of auto reactions",
+      "action_log_webhook_modifying_title": "Modifying the webhook of the action log",
+      "action_log_events_processed_per_minute_number_title": "Number of action log events processed per minute",
+      "playlists_playback_title": "Playlists playback",
+      "audio_streaming_playback_title": "Audio streaming playback",
+      "playback_volume_changing_title": "Playback volume changing",
+      "playback_queue_track_number_title": "Number of tracks in the queue",
+      "earn_currencies_in_voice_channels": "Earn currency in voice channels",
+      "voice_exp_members_number_title": "Number of members in voice channels at the same time, who will receive experience for voice activity",
+      "level_awards_number_title": "Number of level awards",
+      "store_items_number_title": "Number of store items",
+      "activity_multipliers_number_title": "Number of experience and earning multipliers",
+      "social_platform_number_title": "Number of {social_platform} subscriptions",
+      "priority_support_title": "Priority support"
+    }
   },
   "user_survey": {
     "it_would_help_us": "It would help us if you could take 10 seconds of your time to rate your experience with us.",
@@ -260,11 +287,6 @@
     "permissions_now_unavailable": "Open the Discord server settings and go to the \"Integrations\" tab to set permissions for the command."
   },
   "custom_command": {
-    "add_custom_command": "@:add command",
-    "edit_custom_command": "@:edit command",
-    "import_command": "Import command",
-    "export_command": "Export command",
-    "publish_command": "Publish command",
     "command_sent_for_review": "Command has been sent for review",
     "command_templates": "Templates",
     "command_name_title": "Command name",
@@ -364,22 +386,16 @@
     "custom_dm_message_title": "Custom direct message"
   },
   "mod_warning_penalty": {
-    "add_penalty": "@:add penalty",
-    "edit_penalty": "@:edit penalty",
     "warning_plural": "no warnings | {n} warning | {n} warnings",
     "warnings_amount_title": "Warnings amount"
   },
   "level_award": {
-    "add_award": "@:add award",
-    "edit_award": "@:edit award",
     "level_title": "Level",
     "next_remove_title": "Remove an award when you receive the next one",
     "custom_alert_title": "Custom notification",
     "remove_references_title": "Remove roles when receiving awards"
   },
   "economy_currency": {
-    "add_currency": "@:add currency",
-    "edit_currency": "@:edit currency",
     "currency_name_title": "Currency name",
     "currency_symbol_title": "Currency symbol",
     "income_per_message_title": "Income per message",
@@ -390,8 +406,6 @@
     "income_to": "To"
   },
   "economy_store_item": {
-    "add_item": "@:add item",
-    "edit_item": "@:edit item",
     "item_name_title": "Item name",
     "item_type_title": "Item type",
     "item_description_title": "Item description",
@@ -408,8 +422,6 @@
     "item_duration_title": "Duration of the item"
   },
   "activity_multipliers": {
-    "add_multiplier": "@:add multiplier",
-    "edit_multiplier": "@:edit multiplier",
     "level_multipliers": "Experience multipliers",
     "economy_multipliers": "Earnings multipliers",
     "for_text_activity": "For text activity",
@@ -427,8 +439,6 @@
     "crosspost_message_title": "Crosspost message"
   },
   "voice_roles": {
-    "add_voice_role": "@:add voice role",
-    "edit_voice_role": "@:edit voice role",
     "bound_channels_description": "Leave the field empty if you want the role to be issued when connecting to any channel"
   },
   "automation": {
@@ -450,8 +460,6 @@
     }
   },
   "auto_voices": {
-    "add_auto_voice": "@:add voice trigger",
-    "edit_auto_voice": "@:edit voice trigger",
     "voice_channel_description": "The selected voice channel will be used as a trigger",
     "default_name_title": "Default name",
     "default_user_limit_title": "User limit",
@@ -468,13 +476,9 @@
     "moderator_roles_description": "Selected roles will get the same permissions as the owner of the temporary channel, but their permissions in that channel cannot be changed. The bot needs the administrator permission to work correctly"
   },
   "auto_threads": {
-    "add_auto_thread": "@:add auto-thread",
-    "edit_auto_thread": "@:edit auto-thread",
     "default_name_title": "Thread name"
   },
   "auto_reactions": {
-    "add_auto_reaction": "@:add auto reaction",
-    "edit_auto_reaction": "@:edit auto reaction",
     "reactions_description": "You can choose 10 reactions",
     "message_types_title": "Message types",
     "message_types_description": "Leave the field empty if you want to add reactions to all types of messages",
@@ -484,8 +488,6 @@
     "excluded_text_matches_description": "Will not react if the message contains the specified parameters"
   },
   "ims": {
-    "add_im": "@:add interactive message",
-    "edit_im": "@:edit interactive message",
     "actions_rows_title": "Action rows",
     "action_row_buttons_title": "Buttons",
     "action_row_select_menu_title": "Select menu",
@@ -498,8 +500,6 @@
     "mr_reversible_mode": "Reversible mode"
   },
   "irs": {
-    "add_ir": "@:add interactive reaction",
-    "edit_ir": "@:edit interactive reaction",
     "single_element_title": "Single element",
     "single_element_description": "Allows you to make the reaction element unique",
     "reverse_element_title": "Reversible element",
@@ -542,7 +542,6 @@
       "save_error": "Something went wrong when trying to save. Please try a little later.",
       "unsaved_changes": "You have unsaved changes! Do you really want to leave this page?",
       "gs_title": "General settings",
-      "gs_prefix_title": "Prefix",
       "gs_locale_title": "Localization",
       "gs_translate_title": "Translate",
       "gs_expert_roles_title": "Roles of experts",
@@ -567,9 +566,6 @@
       "gs_farewell_title": "Farewell",
       "cm_custom_commands_title": "Custom commands",
       "cm_system_commands_title": "System commands",
-      "cm_enable_prefix_commands_title": "Enable prefix commands",
-      "cm_no_registered_app_commands": "There are no registered commands on the guild. Please make sure that the bot has ability to create them.",
-      "cm_app_commands_refresh": "You can update commands. It's useful if some of them are missing or outdated on the guild.",
       "cm_command_categories": {
         "GENERAL": "General",
         "MODERATION": "Moderation",
@@ -619,15 +615,15 @@
       "vc_auto_voices_title": "Temporary voice channels",
       "vc_auto_voices_description": "Automatic creation and deletion of voice channels",
       "ut_reports_title": "Reports",
-      "ut_reports_description": "Receiving reports to messages",
       "ut_reports_notify_about_unwanted_users_title": "Notify potentially unwanted users when they join",
       "ut_auto_reactions_title": "Auto reactions",
       "ut_auto_reactions_description": "Automatically add reactions to the message",
-      "ut_auto_threads_title": "Auto-threads",
-      "ut_auto_threads_description": "Automatic thread creation for messages",
+      "ut_auto_threads_title": "Auto threads",
+      "ut_auto_threads_description": "Automatic creation of threads under messages",
       "ut_ims_title": "Interactive messages",
       "ut_irs_title": "Interactive reactions",
-      "ut_irs_description": "Adding roles and channel accesses by clicking on reactions"
+      "ut_irs_description": "Adding roles and channel accesses by clicking on reactions",
+      "ut_automation_title": "Automation"
     },
     "landing": {
       "title": "Create (everything) you want",
@@ -663,17 +659,14 @@
       "avg_latency": "Average latency",
       "current_version": "Current version",
       "clusters_title": "Clusters",
-      "clusters_description": "Independent systems that include sets of shards",
       "cluster_cpu_usage": "CPU usage",
       "cluster_memory_usage": "RAM usage",
       "shards_title": "Shards",
-      "shards_description": "Child processes that process sets of Discord communities",
       "shards_latency": "Latency of shards",
       "shard_guilds": "Guilds",
       "shard_users": "Users",
       "shard_channels": "Channels",
       "players_title": "Music players",
-      "players_description": "Responsible for music playback in voice channels",
       "player_cpu_load": "Player load",
       "command_uses": "Number of command uses"
     }
@@ -694,50 +687,6 @@
       "symbols": "Symbols",
       "flags": "Flags",
       "custom": "Custom"
-    }
-  },
-  "errors": {
-    "activate_lacuna_diamond": "Activate the Lacuna Diamond to increase the maximum amount.",
-    "custom_commands": {
-      "LIMIT_REACHED": "A limit on number of custom commands has been reached.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.custom_commands.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "NO_COMPONENTS": "Command doesn't have any component. Please add them and try again.",
-      "NAME_CONFLICT": "Command name conflicts with an existing one. Choose another name.",
-      "NOT_FOUND": "Custom command not found.",
-      "CANNOT_CREATE_COMMAND": "Error on command create.",
-      "CANNOT_UPDATE_COMMAND": "Error on command update.",
-      "CANNOT_DELETE_COMMAND": "Error on command delete."
-    },
-    "subscriptions": {
-      "LIMIT_REACHED": "A limit on number of subscriptions has been reached.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.subscriptions.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "ALREADY_SUBSCRIBED": "Subscription already exists.",
-      "CANNOT_SUBSCRIBE": "An error occurred during subscription creation.",
-      "NOT_FOUND": "Subscription not found."
-    },
-    "auto_voices": {
-      "LIMIT_REACHED": "A limit on number of voice triggers has been reached.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.auto_voices.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "ALREADY_EXISTS": "Voice trigger already exists.",
-      "NOT_FOUND": "Voice trigger not found."
-    },
-    "ims": {
-      "LIMIT_REACHED": "A limit on number of interactive messages has been reached.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.ims.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "CANNOT_CREATE_EMPTY_MESSAGE": "Can't send empty message.",
-      "NON_INTERACTIVE": "The message is not interactive. Add components.",
-      "NOT_FOUND": "Interactive message not found.",
-      "CANNOT_CREATE_MESSAGE": "Error on message create.",
-      "CANNOT_UPDATE_MESSAGE": "Error on message update."
-    },
-    "irs": {
-      "LIMIT_REACHED": "A limit on the number of interactive reactions has been reached.",
-      "LIMIT_REACHED_NO_PREMIUM": "@:errors.irs.LIMIT_REACHED @:errors.activate_lacuna_diamond",
-      "EMOJI_ALREADY_USED": "Selected emoji is already in use on this message.",
-      "REFERENCE_IS_SINGLE": "One or more references are single.",
-      "UNKNOWN_MESSAGE": "No message with this identifier is found in the selected channel.",
-      "NOT_FOUND": "Interactive reaction not found.",
-      "CANNOT_CREATE_REACTION": "Error when adding a reaction to a message."
     }
   }
 }

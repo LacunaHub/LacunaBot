@@ -1,14 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'auto_threads.add_auto_thread' : 'auto_threads.edit_auto_thread') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -30,15 +22,7 @@
               map-options
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
 
               <template #option="{ opt, toggleOption, selected }">
@@ -76,15 +60,7 @@
               readonly
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
             </q-select>
           </div>
@@ -129,16 +105,7 @@
               multiple
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt"
-                  size="sm"
-                  removable
-                  @remove="removeAtIndex(index)"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt" size="sm" removable @remove="removeAtIndex(index)"></q-chip>
               </template>
             </q-select>
           </div>
@@ -164,16 +131,7 @@
               multiple
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt"
-                  size="sm"
-                  removable
-                  @remove="removeAtIndex(index)"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt" size="sm" removable @remove="removeAtIndex(index)"></q-chip>
               </template>
             </q-select>
           </div>
@@ -199,7 +157,7 @@
             />
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
+              class="full-width"
               :label="$t('done')"
               :disable="!isValid"
               split
@@ -226,9 +184,9 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'UtilityAutoThread',

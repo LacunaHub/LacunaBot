@@ -1,6 +1,6 @@
 <template>
   <q-table
-    class="bg-dark-1 rounded-lg"
+    class="bg-dark-1"
     flat
     :rows="rows"
     row-key="timestamp"

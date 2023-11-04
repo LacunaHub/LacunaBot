@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 1000px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -77,68 +77,68 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item v-for="option in ['FALSE_REPLY']" :key="option" tag="label" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t('custom_command.cv_false_reply_title') }}
-            </q-item-label>
-          </q-item-section>
+      <div v-if="component.condition.compare_values.options !== undefined" class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-expansion-item v-for="option in ['FALSE_REPLY']" :key="option" tag="label">
+            <template #header>
+              <q-item-section side>
+                <q-checkbox
+                  v-model="component.condition.compare_values.options"
+                  :val="option"
+                  dense
+                  @update:model-value="onSelectOption"
+                ></q-checkbox>
+              </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox
-              v-model="component.condition.compare_values.options"
-              :val="option"
-              dense
-              @update:model-value="onSelectOption"
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('custom_command.cv_false_reply_title') }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="component.condition.compare_values.options.includes('FALSE_REPLY')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('common.message') }}
-              </div>
+            <q-card class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('common.message') }}
+                    </div>
 
-              <MessageEditor
-                :message="component.condition.compare_values.false_reply"
-                hide-replacers
-                hide-code-snippets
-                :disable-components="false"
-                class="q-pt-sm"
-              />
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                    <MessageEditor
+                      v-if="component.condition.compare_values.options.includes('FALSE_REPLY')"
+                      :message="component.condition.compare_values.false_reply"
+                      hide-replacers
+                      hide-code-snippets
+                      :disable-components="false"
+                      class="q-pt-sm"
+                    />
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-item
-          v-if="component.condition.compare_values.options.includes('FALSE_REPLY')"
-          class="q-my-sm"
-          tag="label"
-          dense
-          v-ripple
-        >
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`common.actions_keys.EPHEMERAL_REPLY`) }}
-            </q-item-label>
-          </q-item-section>
+                    <MessageEditor v-else hide-replacers hide-code-snippets disable class="q-pt-sm" />
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
 
-          <q-item-section side>
-            <q-checkbox
-              v-model="component.condition.compare_values.options"
-              :val="'FALSE_REPLY_EPHEMERAL'"
-              dense
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </transition>
+          <q-item :disable="!component.condition.compare_values.options.includes('FALSE_REPLY')" tag="label">
+            <q-item-section side>
+              <q-checkbox
+                v-model="component.condition.compare_values.options"
+                :val="'FALSE_REPLY_EPHEMERAL'"
+                :disable="!component.condition.compare_values.options.includes('FALSE_REPLY')"
+                dense
+              ></q-checkbox>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>
+                {{ $t(`common.actions_keys.EPHEMERAL_REPLY`) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
@@ -164,8 +164,8 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
+import { computed, defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({

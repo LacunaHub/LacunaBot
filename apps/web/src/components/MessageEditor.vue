@@ -91,7 +91,7 @@
           @click="embedColorModal = true"
         ></div>
 
-        <q-item class="q-ml-sm" tag="label" v-ripple :disable="disable" dense>
+        <q-item class="q-ml-sm" tag="label" :disable="disable" dense>
           <q-item-section>
             {{ $t('message_editor.message_embed') }}
           </q-item-section>
@@ -195,7 +195,7 @@
 
               <q-input
                 v-model.trim="messageEmbed.description"
-                class="rounded-lg q-pt-sm"
+                class="rounded-borders q-pt-sm"
                 type="textarea"
                 :disable="!messageEmbed.active || disable"
                 filled
@@ -370,15 +370,14 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(row, i) in messageComponents" :key="i" class="col-12">
-              <q-card class="bg-transparent rounded-lg" flat bordered>
+              <q-card class="bg-transparent" flat bordered>
                 <q-card-section>
                   <div class="row q-col-gutter-sm">
                     <div class="col-auto" v-for="(component, ii) in row" :key="ii">
                       <q-chip
-                        class="rounded-lg full-width no-shadow"
+                        class="full-width no-shadow"
                         square
                         :label="component.label"
-                        :ripple="false"
                         :style="{ background: imButtonStyles[component.style.toUpperCase()] }"
                         clickable
                         removable
@@ -389,7 +388,7 @@
 
                     <div v-if="row.length < 5" class="col-auto">
                       <q-chip
-                        class="rounded-lg dashed-border no-shadow full-width"
+                        class="dashed-border no-shadow full-width"
                         outline
                         square
                         clickable
@@ -572,7 +571,6 @@
                         class="full-width no-shadow"
                         style="border-radius: 4px !important"
                         square
-                        :ripple="false"
                         :label="component.label"
                         :style="{ background: imButtonStyles[component.style.toUpperCase()] }"
                       ></q-chip>
@@ -615,7 +613,6 @@
                 v-for="replacer in replacers.vars.filter(i => avlReplacers.includes(i.name.split('.')[0]))"
                 :key="replacer.name"
                 clickable
-                v-ripple
                 @click="onSelectReplacer(replacer)"
               >
                 <q-item-section>
@@ -633,13 +630,7 @@
 
           <q-tab-panel name="functions" class="q-px-none" style="overflow-y: hidden">
             <q-list>
-              <q-item
-                v-for="func in replacers.functions"
-                :key="func.name"
-                clickable
-                v-ripple
-                @click="onSelectReplacer(func)"
-              >
+              <q-item v-for="func in replacers.functions" :key="func.name" clickable @click="onSelectReplacer(func)">
                 <q-item-section>
                   <q-item-label>
                     {{ func.name }}
@@ -676,7 +667,7 @@
         <q-tab-panels v-model="mentionsModalTab" class="bg-dark-1" animated style="max-height: 50vh; overflow-y: auto">
           <q-tab-panel name="roles" class="q-px-none" style="overflow-y: hidden">
             <q-list>
-              <q-item v-for="role in guild.roles" :key="role.id" clickable v-ripple @click="onSelectMention(role)">
+              <q-item v-for="role in guild.roles" :key="role.id" clickable @click="onSelectMention(role)">
                 <q-item-section>
                   <q-item-label :style="{ color: role.color }">
                     {{ role.name }}
@@ -688,13 +679,7 @@
 
           <q-tab-panel name="channels" class="q-px-none" style="overflow-y: hidden">
             <q-list>
-              <q-item
-                v-for="channel in guild.channels"
-                :key="channel.id"
-                clickable
-                v-ripple
-                @click="onSelectMention(channel)"
-              >
+              <q-item v-for="channel in guild.channels" :key="channel.id" clickable @click="onSelectMention(channel)">
                 <q-item-section avatar>
                   <q-icon :name="channel.icon"></q-icon>
                 </q-item-section>
@@ -737,8 +722,8 @@
 import { copyToClipboard, debounce } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { resolveEmbed, suid } from 'src/utils/Utils'
-import { defineComponent } from 'vue'
 import replacers from 'src/utils/replacers.json'
+import { defineComponent } from 'vue'
 import { imButtonStyles } from '../utils/Constants'
 import MessageEditorButtonComponent from './dialogs/MessageEditorButtonComponent.vue'
 
@@ -830,7 +815,7 @@ export default defineComponent({
     showCopiedNotification() {
       this.$q.notify({
         message: this.$t('copied_to_clipboard'),
-        classes: 'rounded-lg q-notification-custom',
+        classes: 'q-notification-custom',
         color: 'black',
         icon: 'assignment',
         timeout: 1500

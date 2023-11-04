@@ -136,7 +136,7 @@ const getPatrons = async () => {
 
     $q.notify({
       message: error.message,
-      classes: 'rounded-lg q-notification-custom',
+      classes: 'q-notification-custom',
       color: 'black',
       icon: 'error',
       iconColor: 'negative',

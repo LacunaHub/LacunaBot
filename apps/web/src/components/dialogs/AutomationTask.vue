@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="q-dialog-card rounded-lg bg-dark-1" flat style="width: 1000px">
+    <q-card class="q-dialog-card bg-dark-1" flat style="width: 1000px">
       <q-tabs
         v-model="currentTab"
         class="bg-dark-2"
@@ -87,19 +87,21 @@
             </div>
           </q-card-section>
 
-          <q-list class="q-px-none q-py-md">
-            <q-item tag="label" dense v-ripple>
-              <q-item-section>
-                <q-item-label>
-                  {{ $t('disable') }}
-                </q-item-label>
-              </q-item-section>
+          <div class="q-pa-md">
+            <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+              <q-item tag="label">
+                <q-item-section side>
+                  <q-checkbox v-model="automation.options" val="DISABLED" dense></q-checkbox>
+                </q-item-section>
 
-              <q-item-section side>
-                <q-checkbox v-model="automation.options" val="DISABLED" dense></q-checkbox>
-              </q-item-section>
-            </q-item>
-          </q-list>
+                <q-item-section>
+                  <q-item-label>
+                    {{ $t('disable') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
         </q-tab-panel>
 
         <q-tab-panel name="components" class="q-pa-none">
@@ -160,7 +162,7 @@
                           <img src="~assets/lacuna-diamond.svg" />
 
                           <q-tooltip
-                            class="bg-black rounded-lg text-body2"
+                            class="bg-black text-body2"
                             anchor="top middle"
                             self="bottom middle"
                             transition-show=""
@@ -180,8 +182,8 @@
           <q-card-section v-if="automation.components.length">
             <div class="row q-col-gutter-md">
               <div v-for="(component, i) in automation.components" :key="i" class="col-12">
-                <q-card flat bordered class="bg-transparent rounded-lg">
-                  <q-item class="rounded-t-lg" clickable v-ripple @click="componentDialog(component, i)">
+                <q-card flat bordered class="bg-transparent">
+                  <q-item class="rounded-t-lg" clickable @click="componentDialog(component, i)">
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         {{
@@ -195,7 +197,7 @@
                         <img src="~assets/lacuna-diamond.svg" />
 
                         <q-tooltip
-                          class="bg-black rounded-lg text-body2"
+                          class="bg-black text-body2"
                           anchor="top middle"
                           self="bottom middle"
                           transition-show=""
@@ -255,7 +257,7 @@
 
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
+              class="full-width"
               :label="$t('done')"
               :disable="!isValid"
               :loading="confirmLoading"
@@ -641,7 +643,7 @@ export default defineComponent({
 
           this.$q.notify({
             message: this.$t(`custom_command.command_sent_for_review`),
-            classes: 'rounded-lg q-notification-custom',
+            classes: 'q-notification-custom',
             color: 'black',
             icon: 'done',
             iconColor: 'positive',
@@ -653,7 +655,7 @@ export default defineComponent({
 
           this.$q.notify({
             message: error.message,
-            classes: 'rounded-lg q-notification-custom',
+            classes: 'q-notification-custom',
             color: 'black',
             icon: 'error',
             iconColor: 'negative',

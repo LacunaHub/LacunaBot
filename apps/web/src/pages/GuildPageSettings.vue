@@ -9,7 +9,7 @@
         <div class="col-12 col-md-3">
           <div class="row q-col-gutter-md">
             <div class="col-12">
-              <q-card class="rounded-lg bg-dark-1" flat>
+              <q-card class="bg-dark-1" flat>
                 <q-item class="q-pt-md">
                   <q-item-section avatar>
                     <q-avatar size="48px">
@@ -41,9 +41,9 @@
             </div>
 
             <div class="col-12 lt-md">
-              <q-card class="rounded-lg bg-dark-1" flat>
+              <q-card class="bg-dark-1" flat>
                 <q-list padding>
-                  <q-item clickable v-ripple @click="openLacunaDiamondDialog">
+                  <q-item clickable @click="openLacunaDiamondDialog">
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         <span class="q-mr-xs">Lacuna Diamond</span>
@@ -65,7 +65,6 @@
                     clickable
                     :to="`/guilds/${guildId}/sphere`"
                     active-class="nav-item--active"
-                    v-ripple
                     style="display: none"
                   >
                     <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
@@ -82,7 +81,7 @@
 
             <div class="col-12 lt-md">
               <q-tabs
-                class="bg-dark-1 rounded-lg"
+                class="bg-dark-1 rounded-borders"
                 no-caps
                 active-class="nav-item--active"
                 indicator-color="transparent"
@@ -90,7 +89,6 @@
                 <q-route-tab
                   v-for="item in navItems"
                   :key="item.path"
-                  class="rounded-lg"
                   :to="`/guilds/${guildId}/${item.path}`"
                   :label="item.name"
                   :icon="`img:${item.icon}`"
@@ -101,14 +99,12 @@
                 </q-route-tab>
 
                 <q-route-tab
-                  class="rounded-lg"
                   :to="`/guilds/${guildId}/settings/change-log`"
                   :label="$t('pages.guild.nav_names.CHANGE_LOG')"
                   :icon="`img:${editPenImg}`"
                 ></q-route-tab>
 
                 <q-tab
-                  class="rounded-lg"
                   :label="$t('pages.guild.nav_names.DOWNLOAD_LOGS')"
                   :icon="`img:${logsImg}`"
                   @click="downloadLogs"
@@ -117,9 +113,9 @@
             </div>
 
             <div class="col-12 gt-sm">
-              <q-card class="rounded-lg bg-dark-1" flat>
+              <q-card class="bg-dark-1" flat>
                 <q-list padding>
-                  <q-item clickable v-ripple @click="openLacunaDiamondDialog">
+                  <q-item clickable @click="openLacunaDiamondDialog">
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         <span class="q-mr-xs">Lacuna Diamond</span>
@@ -141,7 +137,6 @@
                     clickable
                     :to="`/guilds/${guildId}/sphere`"
                     active-class="nav-item--active"
-                    v-ripple
                     style="display: none"
                   >
                     <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
@@ -164,7 +159,6 @@
                     :to="`/guilds/${guildId}/${item.path}`"
                     :active="$route.path.endsWith(item.path)"
                     active-class="nav-item--active"
-                    v-ripple
                   >
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
@@ -189,12 +183,7 @@
                 <q-separator inset></q-separator>
 
                 <q-list padding>
-                  <q-item
-                    clickable
-                    :to="`/guilds/${guildId}/settings/change-log`"
-                    active-class="nav-item--active"
-                    v-ripple
-                  >
+                  <q-item clickable :to="`/guilds/${guildId}/settings/change-log`" active-class="nav-item--active">
                     <q-item-section class="text-subtitle1">
                       {{ $t('pages.guild.nav_names.CHANGE_LOG') }}
                     </q-item-section>
@@ -206,7 +195,7 @@
                     </q-item-section>
                   </q-item>
 
-                  <q-item clickable active-class="nav-item--active" v-ripple @click="downloadLogs">
+                  <q-item clickable active-class="nav-item--active" @click="downloadLogs">
                     <q-item-section class="text-subtitle1">
                       {{ $t('pages.guild.nav_names.DOWNLOAD_LOGS') }}
                     </q-item-section>
@@ -364,7 +353,7 @@ const getSettings = async () => {
 
       $q.notify({
         message: error.message,
-        classes: 'rounded-lg q-notification-custom',
+        classes: 'q-notification-custom',
         color: 'black',
         icon: 'error',
         iconColor: 'negative',
@@ -394,7 +383,7 @@ const updateSettings = async () => {
 
     $q.notify({
       message: error.message,
-      classes: 'rounded-lg q-notification-custom',
+      classes: 'q-notification-custom',
       color: 'black',
       icon: 'error',
       iconColor: 'negative',
@@ -429,7 +418,7 @@ const downloadLogs = async () => {
 
     $q.notify({
       message: error.message,
-      classes: 'rounded-lg q-notification-custom',
+      classes: 'q-notification-custom',
       color: 'black',
       icon: 'error',
       iconColor: 'negative',
@@ -496,7 +485,7 @@ onMounted(async () => {
 
           $q.notify({
             message: t('user_survey.survey_submitted'),
-            classes: 'rounded-lg q-notification-custom',
+            classes: 'q-notification-custom',
             color: 'black',
             icon: 'done',
             iconColor: 'positive',
