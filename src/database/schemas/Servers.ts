@@ -20,7 +20,6 @@ export default model<ServerDocument>(
             },
             moderation: {
                 case_log: {
-                    cases: { type: Array, default: [] },
                     case_count: { type: Number, default: 0 },
                     channel_id: { type: String, default: null },
                     types: {
@@ -684,8 +683,7 @@ export default model<ServerDocument>(
                 restoring: {
                     restore_roles: { type: Boolean, default: false },
                     restore_nicknames: { type: Boolean, default: false },
-                    strict_roles: { type: Array, default: [] },
-                    data: { type: Array, default: [] }
+                    strict_roles: { type: Array, default: [] }
                 },
                 music: {
                     allowed: {
@@ -767,7 +765,6 @@ export default model<ServerDocument>(
                 polls: { type: Array, default: [] }
             },
             created_at: { type: Number, default: () => Date.now() },
-            activity_ping_at: { type: Number, default: () => Date.now() },
             change_log: { type: Array, default: [] },
             logs: { type: Array, default: [] }
         },
