@@ -54,8 +54,7 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
 
     if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
         const user = await self.db.users.findOne({ _id: member.id }),
-            data =
-                user?.restoring_data?.find?.(i => i.guild_id === member.guild.id) ?? server.modules.restoring.data.find(d => d.user_id === member.id)
+            data = user?.restoring_data?.find?.(i => i.guild_id === member.guild.id)
 
         if (data) {
             if (server.modules.restoring.restore_nicknames && data.nickname) {
@@ -89,21 +88,6 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
                     }
                 }
             )
-
-            const dataInServer = server.modules.restoring.data.some(i => i.user_id === member.id)
-
-            if (dataInServer) {
-                await self.db.servers.updateOne(
-                    { _id: member.guild.id },
-                    {
-                        $pull: {
-                            'modules.restoring.data': {
-                                user_id: member.id
-                            }
-                        }
-                    }
-                )
-            }
 
             self.emit('moduleExecution', {
                 module: 'Restoring',

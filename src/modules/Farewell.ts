@@ -84,21 +84,4 @@ export default async function farewell(self: Lacuna, server: ServerDocument, mem
             target: { id: member.id, name: member.user.tag }
         })
     }
-
-    if (server.modules.restoring.data.length) {
-        const outdatedData = server.modules.restoring.data.filter(i => Date.now() - i.timestamp > 1000 * 60 * 60 * 24 * 7)
-
-        if (outdatedData.length) {
-            await self.db.servers.updateOne(
-                { _id: member.guild.id },
-                {
-                    $pull: {
-                        'modules.restoring.data': {
-                            user_id: { $in: outdatedData.map(i => i.user_id) }
-                        }
-                    }
-                }
-            )
-        }
-    }
 }
