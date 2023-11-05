@@ -3,7 +3,7 @@ import Logger from '../Logger'
 
 export const restApi = new REST({
     version: '10',
-    rejectOnRateLimit: rateLimitData => true // rateLimitData.global || rateLimitData.timeToReset >= 1000 * 60 * 5
+    rejectOnRateLimit: rateLimitData => rateLimitData.global || rateLimitData.timeToReset >= 1000 * 60 * 5
 }).setToken(process.env.DISCORD_CLIENT_TOKEN)
 export const apiRoutes = Routes
 
