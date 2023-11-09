@@ -112,12 +112,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     const player = self.player.create({
-        guildId: interaction.guild.id,
-        voiceChannelId: voice.id,
-        textChannelId: interaction.channelId,
-        selfDeafen: true,
-        volume: server.modules.music.default_volume
-    })
+            guildId: interaction.guild.id,
+            voiceChannelId: voice.id,
+            textChannelId: interaction.channelId,
+            selfDeafen: true,
+            volume: server.modules.music.default_volume
+        }),
+        queueMaxLength = server.server.premium.available ? server.modules.music.queue_max_length : 15
 
     let message: Message
 
@@ -147,7 +148,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        if (player.queue.length >= server.modules.music.queue_max_length && server.modules.music.queue_max_length) {
+        if (player.queue.length >= queueMaxLength && queueMaxLength) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.play.text_queue_limit_reached_no_premium', {
                     user: `**${(interaction.member as any).displayName}**`
@@ -157,7 +158,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        player.queue.add(search.tracks.slice(0, server.modules.music.queue_max_length || 99))
+        player.queue.add(search.tracks.slice(0, queueMaxLength || 250))
 
         const track = search.tracks[0]
         const trackSource = getTrackSourceByUrl(track.uri)
@@ -199,7 +200,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         const track = search.tracks[0]
         const trackSource = getTrackSourceByUrl(track.uri)
 
-        if (player.queue.length >= server.modules.music.queue_max_length && server.modules.music.queue_max_length) {
+        if (player.queue.length >= queueMaxLength && queueMaxLength) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.play.text_queue_limit_reached_no_premium', {
                     user: `**${(interaction.member as any).displayName}**`
