@@ -92,14 +92,15 @@ const handler = async (
 
                 const rows = message.components
 
-                const stopButton = rows[0].components[0]
-                const previousButton = rows[0].components[1]
-                const playPauseButton = rows[0].components[2]
-                const nextButton = rows[0].components[3]
-                const repeatButton = rows[0].components[4]
-                const queueButton = rows[1].components[0]
-                const volumeDownButton = rows[1].components[1]
-                const volumeUpButton = rows[1].components[2]
+                const stopButton = rows[0].components[0],
+                    previousButton = rows[0].components[1],
+                    playPauseButton = rows[0].components[2],
+                    nextButton = rows[0].components[3],
+                    repeatButton = rows[0].components[4]
+                const queueButton = rows[1].components[0],
+                    volumeDownButton = rows[1].components[1],
+                    volumeUpButton = rows[1].components[2],
+                    ejectTrackButton = rows[1].components[3]
 
                 if (interaction.customId === stopButton.customId) {
                     await self.commands.get('stop').executeSlash(server, interaction as any)
@@ -118,7 +119,7 @@ const handler = async (
                 }
 
                 if (interaction.customId === nextButton.customId) {
-                    if (player.queueRepeat) player.queue.add(player.queue.current)
+                    if (player.queueRepeat || player.trackRepeat) player.queue.add(player.queue.current)
                     player.stop()
                 }
 
@@ -151,6 +152,10 @@ const handler = async (
                     }
 
                     await interaction.deferUpdate()
+                }
+
+                if (interaction.customId === ejectTrackButton.customId) {
+                    player.stop()
                 }
             }
 
