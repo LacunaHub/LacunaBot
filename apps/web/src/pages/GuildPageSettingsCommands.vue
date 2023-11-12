@@ -28,7 +28,7 @@
               </q-card>
             </div>
 
-            <div v-if="guild.modules.custom_commands.length < 25" class="col-12">
+            <div v-if="guild.modules.custom_commands.length < 100" class="col-12">
               <q-btn
                 @click="
                   !guild.premium.available && guild.modules.custom_commands.length >= 25
