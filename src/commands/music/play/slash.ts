@@ -131,11 +131,15 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             new ButtonBuilder().setCustomId('PLAYER-REPEAT').setStyle(ButtonStyle.Secondary).setEmoji('➡️')
         ),
         new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder().setCustomId('PLAYER-QUEUE').setStyle(ButtonStyle.Secondary).setEmoji('🎶'),
             new ButtonBuilder().setCustomId('PLAYER-VOLUME-DOWN').setStyle(ButtonStyle.Secondary).setEmoji('🔉'),
             new ButtonBuilder().setCustomId('PLAYER-SEEK-REWIND').setStyle(ButtonStyle.Secondary).setEmoji('⏪'),
             new ButtonBuilder().setCustomId('PLAYER-STOP').setStyle(ButtonStyle.Secondary).setEmoji('⏹️'),
             new ButtonBuilder().setCustomId('PLAYER-SEEK-FAST-FORWARD').setStyle(ButtonStyle.Secondary).setEmoji('⏩'),
+            new ButtonBuilder().setCustomId('PLAYER-VOLUME-UP').setStyle(ButtonStyle.Secondary).setEmoji('🔊')
+        ),
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder().setCustomId('PLAYER-QUEUE').setStyle(ButtonStyle.Secondary).setEmoji('🎶'),
+            new ButtonBuilder().setCustomId('PLAYER-FILTERS').setStyle(ButtonStyle.Secondary).setEmoji('🎛️')
         )
     ]
 

@@ -2,6 +2,7 @@ import {
     AnySelectMenuInteraction,
     AutocompleteInteraction,
     ButtonInteraction,
+    ButtonStyle,
     ChatInputCommandInteraction,
     ContextMenuCommandInteraction,
     Events,
@@ -97,9 +98,13 @@ const handler = async (
                     playPauseButton = rows[0].components[2],
                     nextButton = rows[0].components[3],
                     repeatButton = rows[0].components[4]
+                const volumeDownButton = rows[1].components[0],
                     seekBackwardButton = rows[1].components[1],
                     stopButton = rows[1].components[2],
                     seekForwardButton = rows[1].components[3],
+                    volumeUpButton = rows[1].components[4]
+                const queueButton = rows[2].components[0],
+                    filtersButton = rows[2].components[1]
 
                 if (interaction.customId === stopButton.customId) {
                     await self.commands.get('stop').executeSlash(server, interaction as any)
@@ -160,8 +165,22 @@ const handler = async (
                 if ([seekBackwardButton.customId, seekForwardButton.customId].includes(interaction.customId)) {
                     await self.commands.get('seek').executeSlash(server, interaction as any)
                 }
+
+                if (interaction.customId === filtersButton.customId) {
+                    await self.commands.get('filters').executeSlash(server, interaction as any)
+                }
+
+                if (
+                    ![
+                        stopButton.customId,
+                        queueButton.customId,
+                        volumeDownButton.customId,
+                        volumeUpButton.customId,
                         seekBackwardButton.customId,
                         seekForwardButton.customId,
+                        filtersButton.customId
+                    ].includes(interaction.customId)
+                ) {
                     if (![previousButton.customId, nextButton.customId].includes(interaction.customId)) {
                         await message.edit({ components: rows })
                     }
