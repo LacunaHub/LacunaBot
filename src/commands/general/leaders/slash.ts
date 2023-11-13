@@ -1,18 +1,9 @@
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    ChatInputCommandInteraction,
-    ComponentType,
-    EmbedBuilder,
-    GuildMember,
-    Message
-} from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message } from 'discord.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import { IUserLevel, IUserWallet } from '../../../database/schemas/Users'
 import Lacuna from '../../../internals/Lacuna'
-import { chunkArray, isSnowflake } from '../../../internals/utility/Utils'
+import { chunkArray } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -44,7 +35,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         const activities = (await self.db.users.find({ 'activities.levels.guild_id': interaction.guildId })).map(i => ({
             user: { id: i._id, ...i.user },
-            ...i.activities.levels.find(i => i.guild_id == interaction.guildId)
+            ...i.activities.levels.find(i => i.guild_id === interaction.guildId)
         }))
 
         if (!activities?.length) {
@@ -63,24 +54,22 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
             for (const level of chunk as IUserLevel[]) {
                 const index = sorted.indexOf(level as any)
-                const current_xp_format =
+
+                const currentXp =
                     level.experience.current >= 1000
                         ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 1 }).toUpperCase()
                         : level.experience.current.toFixed(1)
-                const total_xp_format =
+                const totalXp =
                     level.experience.total >= 1000
                         ? numbro(Math.floor(level.experience.total)).format({ average: true, mantissa: 1 }).toUpperCase()
                         : level.experience.total.toFixed(1)
-                const voice_time = numbro(level.activity.total_voice_time).format({ output: 'time' })
-                const username = (level as any).user?.username ?? (level as any)?.user?.id
+                const voiceTime = numbro(level.activity.total_voice_time).format({ output: 'time' })
 
                 current.push({
-                    name: `#${index + 1} ${username}`,
-                    value: `${t('commands.leaders.text_level', {
+                    name: `#${index + 1}`,
+                    value: `<@!${(level as any)?.user?.id}>\n${t('commands.leaders.text_level', {
                         level: level.experience.level
-                    })} → :sparkles: ${current_xp_format} – ${total_xp_format}\n:incoming_envelope: ${
-                        level.activity.total_messages
-                    } :microphone2: ${voice_time}`,
+                    })} → :sparkles: ${currentXp} – ${totalXp}\n:incoming_envelope: ${level.activity.total_messages} :microphone2: ${voiceTime}`,
                     inline: true
                 })
             }
@@ -130,11 +119,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                         if (currency) return `${currency.name} → ${i.amount.toFixed(2)}${currency.symbol}`
                     })
                     .join('\n')
-                const username = (wallet as any).user?.username ?? (wallet as any)?.user?.id
 
                 current.push({
-                    name: `#${index + 1} ${username}`,
-                    value: currencies,
+                    name: `#${index + 1}`,
+                    value: `<@!${(wallet as any)?.user?.id}>\n${currencies}`,
                     inline: true
                 })
             }
@@ -183,19 +171,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         await i.deferUpdate()
         const field = fields[page]
-
-        for (const chunk of field) {
-            const [index, user_id] = chunk.name.split(' ')
-            let member: GuildMember
-
-            if (isSnowflake(user_id)) {
-                try {
-                    member = await interaction.guild.members.fetch({ user: user_id })
-                } catch (err) {}
-            }
-
-            chunk.name = `${index} ${member?.displayName ?? user_id}`
-        }
 
         await i.editReply({
             embeds: [embed.setFields(field).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
