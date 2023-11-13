@@ -92,12 +92,13 @@ const handler = async (
 
                 const rows = message.components
 
-                const stopButton = rows[0].components[0],
+                const shufflePlayButton = rows[0].components[0],
                     previousButton = rows[0].components[1],
                     playPauseButton = rows[0].components[2],
                     nextButton = rows[0].components[3],
                     repeatButton = rows[0].components[4]
                     seekBackwardButton = rows[1].components[1],
+                    stopButton = rows[1].components[2],
                     seekForwardButton = rows[1].components[3],
 
                 if (interaction.customId === stopButton.customId) {
@@ -144,6 +145,16 @@ const handler = async (
 
                 if ([volumeDownButton.customId, volumeUpButton.customId].includes(interaction.customId)) {
                     await self.commands.get('volume').executeSlash(server, interaction as any)
+                }
+
+                if (interaction.customId === shufflePlayButton.customId) {
+                    if (player.shufflePlay) {
+                        ;(shufflePlayButton as any).data.style = ButtonStyle.Secondary
+                        player.setShufflePlay(false)
+                    } else {
+                        ;(shufflePlayButton as any).data.style = ButtonStyle.Success
+                        player.setShufflePlay(true)
+                    }
                 }
 
                 if ([seekBackwardButton.customId, seekForwardButton.customId].includes(interaction.customId)) {

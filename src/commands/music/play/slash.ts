@@ -124,7 +124,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     const rows = [
         new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder().setCustomId('PLAYER-STOP').setStyle(ButtonStyle.Secondary).setEmoji('⏹️'),
+            new ButtonBuilder().setCustomId('PLAYER-SHUFFLE-PLAY').setStyle(ButtonStyle.Secondary).setEmoji('🔀'),
             new ButtonBuilder().setCustomId('PLAYER-PREVIOUS').setStyle(ButtonStyle.Secondary).setEmoji('⏮️'),
             new ButtonBuilder().setCustomId('PLAYER-PAUSE-RESUME').setStyle(ButtonStyle.Secondary).setEmoji('⏸️'),
             new ButtonBuilder().setCustomId('PLAYER-SKIP').setStyle(ButtonStyle.Secondary).setEmoji('⏭️'),
@@ -134,6 +134,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             new ButtonBuilder().setCustomId('PLAYER-QUEUE').setStyle(ButtonStyle.Secondary).setEmoji('🎶'),
             new ButtonBuilder().setCustomId('PLAYER-VOLUME-DOWN').setStyle(ButtonStyle.Secondary).setEmoji('🔉'),
             new ButtonBuilder().setCustomId('PLAYER-SEEK-REWIND').setStyle(ButtonStyle.Secondary).setEmoji('⏪'),
+            new ButtonBuilder().setCustomId('PLAYER-STOP').setStyle(ButtonStyle.Secondary).setEmoji('⏹️'),
             new ButtonBuilder().setCustomId('PLAYER-SEEK-FAST-FORWARD').setStyle(ButtonStyle.Secondary).setEmoji('⏩'),
         )
     ]
