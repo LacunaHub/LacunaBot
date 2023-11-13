@@ -30,7 +30,7 @@ async function handler(self: Lacuna, node: Node) {
         }
 
         if (!voiceChannel || !message || voiceChannel.members.size < 1) {
-            if (player) player.destroy()
+            if (player) await player.destroy()
 
             continue
         }
@@ -50,13 +50,17 @@ async function handler(self: Lacuna, node: Node) {
                         {
                             encoded: i.track,
                             info: {
-                                author: i.author,
                                 identifier: i.identifier,
                                 isSeekable: i.isSeekable,
-                                isStream: i.isStream,
+                                author: i.author,
                                 length: i.duration,
+                                isStream: i.isStream,
+                                position: i.position,
                                 title: i.title,
-                                uri: i.uri
+                                uri: i.uri,
+                                artworkUrl: i.artworkUrl,
+                                isrc: i.isrc,
+                                sourceName: i.sourceName
                             }
                         },
                         i.requester
@@ -71,7 +75,7 @@ async function handler(self: Lacuna, node: Node) {
         if (guildPlayer.queueRepeat) player.setQueueRepeat(guildPlayer.queueRepeat)
 
         if (player.voiceChannelId) player.connect()
-        else player.setVoiceChannel(voiceChannel.id)
+        else player.setVoiceChannelId(voiceChannel.id)
 
         await player.play()
     }

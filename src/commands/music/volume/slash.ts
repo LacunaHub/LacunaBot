@@ -57,7 +57,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const volume_before = player.volume
 
     await interaction.deferReply({ ephemeral: interaction.isButton() })
-    player.setVolume(volume)
+    await player.setVolume(volume)
 
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.volume.text_volume_changed', {

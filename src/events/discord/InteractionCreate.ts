@@ -108,17 +108,19 @@ const handler = async (
                     if (player.queue.previous && player.position < 5000) {
                         player.queue.add(player.queue.current, 0)
                         await player.play(player.queue.previous)
-                    } else if (player.queue.current.isSeekable) player.seek(0)
+                    } else if (player.queue.current.isSeekable) {
+                        await player.seek(0)
+                    }
                 }
 
                 if (interaction.customId === playPauseButton.customId) {
-                    player.pause(!player.paused)
+                    await player.pause(!player.paused)
                     ;(playPauseButton as any).data.emoji = { name: player.paused ? '▶️' : '⏸️' }
                 }
 
                 if (interaction.customId === nextButton.customId) {
                     if (player.queueRepeat || player.trackRepeat) player.queue.add(player.queue.current)
-                    player.stop()
+                    await player.stop()
                 }
 
                 if (interaction.customId === repeatButton.customId) {

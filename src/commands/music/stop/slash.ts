@@ -27,7 +27,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    player.destroy()
+    await player.destroy()
     await interaction.reply({
         content: `${self._emojis.OK} | ${t('commands.stop.text_playback_stop', { user: `**${(interaction.member as any).displayName}**` })}`
     })

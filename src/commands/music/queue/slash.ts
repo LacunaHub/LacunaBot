@@ -95,7 +95,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
             if (trackIndex !== -1) {
                 if (player.queueRepeat) player.queue.add([player.queue.current, ...player.queue.slice(0, trackIndex)])
-                player.stop(trackIndex + 1)
+                await player.stop(trackIndex + 1)
                 await i.deleteReply()
             }
         }
