@@ -46,7 +46,8 @@
             "sponsor": "спонсор",
             "quiz_mode": "режим-викторины",
             "multiple_answers": "множественный-выбор",
-            "role": "роль"
+            "role": "роль",
+            "time": "время"
         },
         "permissions_keys": {
             "CREATE_INSTANT_INVITE": "Создавать приглашения",
@@ -537,6 +538,16 @@
 
             "text_no_track_queue": "{user}, очередь воспроизведения пуста",
             "text_select_playback_track": "Выберите трек для воспроизведения"
+        },
+        "seek": {
+            "description": "Перемотать воспроизведение текущего трека на указанную позицию",
+            "options": {
+                "time": {
+                    "description": "Время в формате чч:мм:сс"
+                }
+            },
+            "text_track_is_not_seekable": "{user}, невозможно перемотать текущий трек",
+            "text_track_rewound_to_position": "{user}, трек перемотан на {time}"
         },
         "stop": {
             "description": "Остановить воспроизведение музыки и очистить очередь",

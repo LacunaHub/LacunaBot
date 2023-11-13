@@ -97,10 +97,8 @@ const handler = async (
                     playPauseButton = rows[0].components[2],
                     nextButton = rows[0].components[3],
                     repeatButton = rows[0].components[4]
-                const queueButton = rows[1].components[0],
-                    volumeDownButton = rows[1].components[1],
-                    volumeUpButton = rows[1].components[2],
-                    ejectTrackButton = rows[1].components[3]
+                    seekBackwardButton = rows[1].components[1],
+                    seekForwardButton = rows[1].components[3],
 
                 if (interaction.customId === stopButton.customId) {
                     await self.commands.get('stop').executeSlash(server, interaction as any)
@@ -146,7 +144,11 @@ const handler = async (
                     await self.commands.get('volume').executeSlash(server, interaction as any)
                 }
 
-                if (![stopButton.customId, queueButton.customId, volumeDownButton.customId, volumeUpButton.customId].includes(interaction.customId)) {
+                if ([seekBackwardButton.customId, seekForwardButton.customId].includes(interaction.customId)) {
+                    await self.commands.get('seek').executeSlash(server, interaction as any)
+                }
+                        seekBackwardButton.customId,
+                        seekForwardButton.customId,
                     if (![previousButton.customId, nextButton.customId].includes(interaction.customId)) {
                         await message.edit({ components: rows })
                     }

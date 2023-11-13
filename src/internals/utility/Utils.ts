@@ -535,6 +535,10 @@ export function debounce(func: Function, wait: number = 0, options?: { leading: 
     return debounced
 }
 
+export function hmsToMS(hms: string) {
+    return hms.split(':').reduce((x, y) => 60 * x + +y, 0) * 1000
+}
+
 export default {
     truncateArray,
     shuffleArray,
