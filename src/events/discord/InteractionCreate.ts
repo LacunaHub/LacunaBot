@@ -187,10 +187,6 @@ const handler = async (
 
                     await interaction.deferUpdate()
                 }
-
-                if (interaction.customId === ejectTrackButton.customId) {
-                    player.stop()
-                }
             }
 
             return true
