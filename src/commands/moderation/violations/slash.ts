@@ -13,7 +13,7 @@ import { ServerDocument, WarningsViolator } from '../../../database/schemas/Serv
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
@@ -26,7 +26,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         if (!violator || !violator.violations.length) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.violations.text_no_violations', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -61,7 +61,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         if (!violators.length) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.violations.text_no_violations_on_server', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member.displayName}**`
                 })}`
             })
 

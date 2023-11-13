@@ -2,7 +2,7 @@ import { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction | ButtonInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const player = self.player.get(interaction.guild.id)
@@ -10,7 +10,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (!player) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -35,7 +35,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (!volume || isNaN(volume)) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.volume.text_invalid_volume', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -46,7 +46,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (volume < 1 || volume > 100) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.volume.text_volume_diapason', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -61,7 +61,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.volume.text_volume_changed', {
-            user: `**${(interaction.member as any).displayName}**`,
+            user: `**${interaction.member.displayName}**`,
             from: volume_before,
             to: volume
         })}`

@@ -6,7 +6,7 @@ import TemporaryBan from '../internals/structures/TemporaryBan'
 import { capitalizeFirstLetter } from '../internals/utility/Utils'
 import { caseLog, warnings } from './Moderation'
 
-export async function onPressReportButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
+export async function onPressReportButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
     const [, action, user_id] = interaction.customId.split('-')
 
@@ -39,7 +39,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
         return false
     }
 
-    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
+    if (server.moderation.respect_hierarchy && member.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.followUp({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${interaction.member['displayName']}**` })}`,
             ephemeral: true
@@ -117,7 +117,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             return false
         }
 
-        await warnings.addWarn(self, server, interaction, { target: member, executor: interaction.member as any, reason })
+        await warnings.addWarn(self, server, interaction, { target: member, executor: interaction.member, reason })
     }
 
     await removeComponentsFromMessage(interaction)
@@ -131,7 +131,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
     })
 }
 
-export async function onSelectReportOption(self: Lacuna, server: ServerDocument, interaction: StringSelectMenuInteraction) {
+export async function onSelectReportOption(self: Lacuna, server: ServerDocument, interaction: StringSelectMenuInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
     const [, action, user_id] = interaction.customId.split('-')
 
@@ -147,7 +147,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
     if (!member) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -165,9 +165,9 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
         return false
     }
 
-    if (server.moderation.respect_hierarchy && member.roles.highest.position > (interaction.member as any).roles.highest.position) {
+    if (server.moderation.respect_hierarchy && member.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -180,7 +180,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
     ) {
         await interaction.followUp({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -193,7 +193,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
     if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.followUp({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -206,7 +206,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
     if (action === 'BAN') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.BanMembers)) {
             await interaction.followUp({
-                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.member.displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -216,7 +216,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
         if (!member.bannable) {
             await interaction.followUp({
                 content: `${self._emojis.ERROR} | ${t('commands.ban.text_cant_ban_user', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
             })
@@ -246,7 +246,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
     if (action === 'MUTE') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.ModerateMembers)) {
             await interaction.followUp({
-                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${(interaction.member as any).displayName}**` })}`,
+                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.member.displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -256,7 +256,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
         if (!member.manageable) {
             await interaction.followUp({
                 content: `${self._emojis.ERROR} | ${t('commands.mute.text_cant_mute_user', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
             })

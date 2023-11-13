@@ -5,7 +5,7 @@ import { IUserLevel, IUserWallet } from '../../../database/schemas/Users'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
     const locale = self.i18n.locale(server.locale)
 
@@ -26,7 +26,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         if (!server.modules.levels.active && !server.modules.levels.voice) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.leaders.text_levels_disabled', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -40,7 +40,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!activities?.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_no_levels', { user: `**${(interaction.member as any).displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_no_levels', { user: `**${interaction.member.displayName}**` })}`
             })
 
             return false
@@ -82,7 +82,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         if (!server.modules.economy.active) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -97,7 +97,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         if (!activities?.length) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.leaders.text_no_wallets', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member.displayName}**`
                 })}`
             })
 

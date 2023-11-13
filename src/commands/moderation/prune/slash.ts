@@ -3,7 +3,7 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { caseLog } from '../../../modules/Moderation'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const amount = interaction.options?.getInteger('amount')
@@ -13,7 +13,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (!amount) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.prune.text_no_amount_argument', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -24,7 +24,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (Math.sign(amount) != 1 || amount < 2 || amount > 100) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.prune.text_invalid_amount_argument', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -41,7 +41,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         const deleted = await (interaction.channel as BaseGuildTextChannel).bulkDelete(messages, true)
         await interaction.editReply({
             content: `${self._emojis.OK} | ${t('commands.prune.text_messages_pruned', {
-                user: `**${(interaction.member as any).displayName}**`,
+                user: `**${interaction.member.displayName}**`,
                 amount: deleted.size
             })}`
         })
@@ -49,7 +49,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         const deleted = await (interaction.channel as BaseGuildTextChannel).bulkDelete(amount, true)
         await interaction.editReply({
             content: `${self._emojis.OK} | ${t('commands.prune.text_messages_pruned', {
-                user: `**${(interaction.member as any).displayName}**`,
+                user: `**${interaction.member.displayName}**`,
                 amount: deleted.size
             })}`
         })

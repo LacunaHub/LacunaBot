@@ -3,7 +3,7 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { caseLog, warnings } from '../../../modules/Moderation'
 
-export async function addSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function addSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
@@ -12,7 +12,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
     if (!mention) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.warn.add.text_user_not_found', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -22,16 +22,16 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (mention.id == interaction.user.id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.add.text_self_action', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.warn.add.text_self_action', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
         return false
     }
 
-    if (server.moderation.respect_hierarchy && mention.roles.highest.position > (interaction.member as any).roles.highest.position) {
+    if (server.moderation.respect_hierarchy && mention.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -41,7 +41,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.ManageRoles)) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -52,7 +52,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -61,11 +61,11 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
     }
 
     await interaction.deferReply({ ephemeral: true })
-    await warnings.addWarn(self, server, interaction, { target: mention, executor: interaction.member as GuildMember, reason: reason })
+    await warnings.addWarn(self, server, interaction, { target: mention, executor: interaction.member, reason: reason })
 
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.warn.add.text_user_warned', {
-            user: `**${(interaction.member as any).displayName}**`,
+            user: `**${interaction.member.displayName}**`,
             target: `**${mention.user.tag}**`
         })}`
     })
@@ -73,7 +73,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
     return true
 }
 
-export async function removeSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function removeSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
@@ -83,7 +83,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
     if (!mention) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_user_not_found', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -94,7 +94,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
     if (!warn_id) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_warn_id', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -107,7 +107,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
     if (!violator || !violator.violations.length) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_violator_or_violations', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -131,7 +131,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
         await interaction.editReply({
             content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warns_removed_all', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`
         })
     } else {
@@ -140,7 +140,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         if (!violation) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_invalid_warn_id', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -159,7 +159,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         )
 
         await interaction.editReply({
-            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warn_removed', { user: `**${(interaction.member as any).displayName}**` })}`
+            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warn_removed', { user: `**${interaction.member.displayName}**` })}`
         })
     }
 

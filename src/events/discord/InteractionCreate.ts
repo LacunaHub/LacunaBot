@@ -25,12 +25,12 @@ import { onPressReportButton, onSelectReportOption } from '../../modules/Reports
 const handler = async (
     self: Lacuna,
     interaction:
-        | ChatInputCommandInteraction
-        | ContextMenuCommandInteraction
-        | ButtonInteraction
-        | AnySelectMenuInteraction
-        | AutocompleteInteraction
-        | ModalSubmitInteraction
+        | ChatInputCommandInteraction<'cached'>
+        | ContextMenuCommandInteraction<'cached'>
+        | ButtonInteraction<'cached'>
+        | AnySelectMenuInteraction<'cached'>
+        | AutocompleteInteraction<'cached'>
+        | ModalSubmitInteraction<'cached'>
 ) => {
     if (!interaction.inGuild() || interaction.inRawGuild()) return false
 

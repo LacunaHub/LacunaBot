@@ -3,7 +3,7 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { commandOptionTypes } from '../../../internals/utility/Constants'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const commandName: string = interaction.options?.getString('command')
@@ -69,7 +69,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         if (!command && !customCommand) {
             await interaction.reply({
                 content: `${self._emojis.ERROR} | ${t('commands.help.text_command_not_found', {
-                    user: `**${(interaction.member as any).displayName}**`
+                    user: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
             })

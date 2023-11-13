@@ -2,14 +2,14 @@ import { ActionRowBuilder, ButtonInteraction, ChatInputCommandInteraction, Messa
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction | ButtonInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
     const player = self.player.get(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -17,9 +17,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (player.voiceChannelId !== (interaction.member as any).voice.channelId) {
+    if (player.voiceChannelId !== interaction.member.voice.channelId) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.next.text_different_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.next.text_different_voice', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 

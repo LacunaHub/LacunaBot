@@ -9,7 +9,7 @@ import {
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: UserContextMenuCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: UserContextMenuCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     self.cache.set(`REPORT-${interaction.targetId}-${interaction.user.id}`, {

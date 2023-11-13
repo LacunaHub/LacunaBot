@@ -4,14 +4,14 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { hmsToMS } from '../../../internals/utility/Utils'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction | ButtonInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
     const player = self.player.get(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -19,9 +19,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (player.voiceChannelId !== (interaction.member as any).voice.channelId) {
+    if (player.voiceChannelId !== interaction.member.voice.channelId) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.next.text_different_voice', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.next.text_different_voice', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -33,7 +33,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (!currentTrack.isSeekable || typeof currentTrack.duration !== 'number') {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.seek.text_track_is_not_seekable', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -60,7 +60,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await player.seek(seekPosition)
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.seek.text_track_rewound_to_position', {
-            user: `**${(interaction.member as any).displayName}**`,
+            user: `**${interaction.member.displayName}**`,
             time: numbro(seekPosition / 1000).format({ output: 'time' })
         })}`
     })

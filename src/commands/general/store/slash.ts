@@ -1,17 +1,17 @@
-import { ActionRowBuilder, ChatInputCommandInteraction, ComponentType, EmbedBuilder, GuildMember, Message, StringSelectMenuBuilder } from 'discord.js'
+import { ActionRowBuilder, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message, StringSelectMenuBuilder } from 'discord.js'
 import { EconomyStoreItem, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
 import { purchaseItem } from '../../../modules/Economy'
 import Replacer from '../../../modules/Replacer'
 
-export async function buySlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function buySlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -21,7 +21,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!server.modules.economy.store.items.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_no_store_items', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.store.text_no_store_items', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -32,7 +32,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!sku) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.buy.text_no_sku', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.store.buy.text_no_sku', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -44,7 +44,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
     if (!item) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.store.buy.text_item_not_found', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -53,25 +53,25 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
     }
 
     await interaction.deferReply({ ephemeral: true })
-    const result = await purchaseItem(item, self, interaction.guild, interaction.member as GuildMember)
+    const result = await purchaseItem(item, self, interaction.guild, interaction.member)
 
     if (result == 'INSUFFICIENT_FUNDS') {
         await interaction.editReply({
             content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`
         })
     }
 
     if (result == 'PURCHASED') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_purchased', { user: `**${(interaction.member as any).displayName}**` })}`
+            content: `${self._emojis.ERROR} | ${t('commands.store.text_purchased', { user: `**${interaction.member.displayName}**` })}`
         })
     }
 
     if (result == 'SUCCESS') {
         if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-            const replacer = new Replacer({ guild: interaction.guild, member: interaction.member as any }),
+            const replacer = new Replacer({ guild: interaction.guild, member: interaction.member }),
                 messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
             try {
@@ -79,7 +79,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
             } catch (err) {
                 await interaction.editReply({
                     content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
-                        user: `**${(interaction.member as any).displayName}**`,
+                        user: `**${interaction.member.displayName}**`,
                         item: `**${item.name}**`
                     })}`
                 })
@@ -87,7 +87,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
         } else {
             await interaction.editReply({
                 content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
-                    user: `**${(interaction.member as any).displayName}**`,
+                    user: `**${interaction.member.displayName}**`,
                     item: `**${item.name}**`
                 })}`
             })
@@ -97,13 +97,13 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
     return true
 }
 
-export async function itemsSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function itemsSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -113,7 +113,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
     if (!server.modules.economy.store.items.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_no_store_items', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.store.text_no_store_items', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -237,12 +237,12 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
             await i.deferUpdate()
 
             const item = server.modules.economy.store.items.slice(0, server.server.premium.available ? 200 : 50).find(i => i.id == value)
-            const result = await purchaseItem(item, self, interaction.guild, interaction.member as GuildMember)
+            const result = await purchaseItem(item, self, interaction.guild, interaction.member)
 
             if (result == 'INSUFFICIENT_FUNDS') {
                 await i.followUp({
                     content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', {
-                        user: `**${(interaction.member as any).displayName}**`
+                        user: `**${interaction.member.displayName}**`
                     })}`,
                     ephemeral: true
                 })
@@ -251,7 +251,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
             if (result == 'PURCHASED') {
                 await i.followUp({
                     content: `${self._emojis.ERROR} | ${t('commands.store.text_purchased', {
-                        user: `**${(interaction.member as any).displayName}**`
+                        user: `**${interaction.member.displayName}**`
                     })}`,
                     ephemeral: true
                 })
@@ -259,7 +259,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'SUCCESS') {
                 if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-                    const replacer = new Replacer({ guild: interaction.guild, member: interaction.member as any }),
+                    const replacer = new Replacer({ guild: interaction.guild, member: interaction.member }),
                         messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
                     try {
@@ -267,7 +267,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
                     } catch (err) {
                         await i.followUp({
                             content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
-                                user: `**${(interaction.member as any).displayName}**`,
+                                user: `**${interaction.member.displayName}**`,
                                 item: `**${item.name}**`
                             })}`,
                             ephemeral: true
@@ -276,7 +276,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
                 } else {
                     await i.followUp({
                         content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
-                            user: `**${(interaction.member as any).displayName}**`,
+                            user: `**${interaction.member.displayName}**`,
                             item: `**${item.name}**`
                         })}`,
                         ephemeral: true
