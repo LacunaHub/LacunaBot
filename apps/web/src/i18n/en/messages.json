@@ -239,6 +239,8 @@
       "audio_streaming_playback_title": "Audio streaming playback",
       "playback_volume_changing_title": "Playback volume changing",
       "playback_queue_track_number_title": "Number of tracks in the queue",
+      "playback_filters_title": "Playback filters",
+      "playback_seek_title": "Rewind track playback",
       "earn_currencies_in_voice_channels": "Earn currency in voice channels",
       "voice_exp_members_number_title": "Number of members in voice channels at the same time, who will receive experience for voice activity",
       "level_awards_number_title": "Number of level awards",
@@ -436,7 +438,8 @@
     "telegram_help_note": "To link Telegram and Discord, add the bot {botLink} to the desired channel and then enter its name or identifier in the field below.",
     "telegram_channel_name_subtitle": "Unique identifier or username of the target channel (in the format {'@'}channelusername)",
     "mention_roles_title": "Mention roles",
-    "crosspost_message_title": "Crosspost message"
+    "crosspost_message_title": "Crosspost message",
+    "create_thread_title": "Create thread"
   },
   "voice_roles": {
     "bound_channels_description": "Leave the field empty if you want the role to be issued when connecting to any channel"
