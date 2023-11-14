@@ -4,7 +4,7 @@ import Lacuna from '../../../internals/Lacuna'
 import { caseLog } from '../../../modules/Moderation'
 import Replacer from '../../../modules/Replacer'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
@@ -12,16 +12,16 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.kick.text_user_not_found', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.kick.text_user_not_found', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
         return false
     }
 
-    if (mention.id === (interaction.member as any).id) {
+    if (mention.id === interaction.member.id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.kick.text_self_action', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.kick.text_self_action', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -30,16 +30,16 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention.kickable) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.kick.text_cant_kick_user', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.kick.text_cant_kick_user', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
         return false
     }
 
-    if (server.moderation.respect_hierarchy && mention.roles.highest.position > (interaction.member as any).roles.highest.position) {
+    if (server.moderation.respect_hierarchy && mention.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -49,7 +49,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.KickMembers)) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -60,7 +60,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -90,7 +90,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.kick.text_user_kicked', {
-            user: `**${(interaction.member as any).displayName}**`,
+            user: `**${interaction.member.displayName}**`,
             target: `**${mention.user.tag}**`
         })}`
     })

@@ -16,7 +16,11 @@ import ms from 'ms'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction | ModalSubmitInteraction) => {
+export default async (
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'> | ModalSubmitInteraction<'cached'>
+) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     let mention: GuildMember
@@ -210,7 +214,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.report.text_user_reported', { user: `**${(interaction.member as any).displayName}**` })}`
+        content: `${self._emojis.OK} | ${t('commands.report.text_user_reported', { user: `**${interaction.member.displayName}**` })}`
     })
     self.cache.delete(`REPORT-${mention.id}-${interaction.user.id}`)
 

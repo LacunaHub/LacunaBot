@@ -3,7 +3,8 @@ import { Player } from 'erela.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, player: Player) => {
-    const message = player.get<Message>('message')
+    const message = player.get<Message>('message'),
+        timeout = player.get<NodeJS.Timeout>('timeout')
 
     if (message) {
         try {
@@ -18,8 +19,12 @@ const handler = async (self: Lacuna, player: Player) => {
         }
     }
 
+    if (timeout) {
+        clearTimeout(timeout)
+    }
+
     player.set('message', null)
-    player.set('collector', null)
+    player.set('timeout', null)
     await self.db.qdb.delete(`guildPlayers.${player.guildId}`)
 
     self.logger.log(`[ErelaPlayerDestroy] Player ${player.guildId} destroyed`)

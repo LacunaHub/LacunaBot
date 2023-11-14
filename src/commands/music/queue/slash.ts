@@ -4,7 +4,7 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray, generateSimpleId } from '../../../internals/utility/Utils'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const player = self.player.get(interaction.guild.id)
@@ -12,7 +12,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (!player) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -22,7 +22,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player.queue.size) {
         await interaction.reply({
-            content: `${self._emojis.OK} | ${t('commands.queue.text_no_track_queue', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.OK} | ${t('commands.queue.text_no_track_queue', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -95,7 +95,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
             if (trackIndex !== -1) {
                 if (player.queueRepeat) player.queue.add([player.queue.current, ...player.queue.slice(0, trackIndex)])
-                player.stop(trackIndex + 1)
+                await player.stop(trackIndex + 1)
                 await i.deleteReply()
             }
         }

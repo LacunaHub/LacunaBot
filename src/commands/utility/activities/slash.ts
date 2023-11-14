@@ -3,7 +3,7 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import Levels from '../../../modules/Levels'
 
-export async function setLevelSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function setLevelSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
@@ -12,7 +12,7 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
     if (!mention) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.activities.set-level.text_no_mention', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -23,7 +23,7 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
     if (!set_level || set_level < 1 || set_level > 2500) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.activities.set-level.text_no_level', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -90,14 +90,14 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
 
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.activities.set-level.text_set_success', {
-            user: `**${(interaction.member as any).displayName}**`
+            user: `**${interaction.member.displayName}**`
         })}`
     })
 
     return true
 }
 
-export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
@@ -107,7 +107,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     if (!mention) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.activities.set-wallet-balance.text_no_mention', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -118,7 +118,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     if (!amount && typeof amount !== 'number') {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.activities.set-wallet-balance.text_no_amount', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -196,7 +196,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
 
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.activities.set-wallet-balance.text_set_success', {
-            user: `**${(interaction.member as any).displayName}**`,
+            user: `**${interaction.member.displayName}**`,
             target: `**${mention.displayName}**`,
             amount: `**${amount}${currency_symbol}**`
         })}`
@@ -205,7 +205,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     return true
 }
 
-export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
@@ -215,7 +215,7 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
     if (!mention) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.activities.set-wallet-balance.text_no_mention', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -226,7 +226,7 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
     if (!amount && typeof amount !== 'number') {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.activities.set-wallet-balance.text_no_amount', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -304,7 +304,7 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
 
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.activities.add-wallet-balance.text_add_success', {
-            user: `**${(interaction.member as any).displayName}**`,
+            user: `**${interaction.member.displayName}**`,
             target: `**${mention.displayName}**`,
             amount: `**${amount}${currency_symbol}**`
         })}`
@@ -313,7 +313,7 @@ export async function addWalletBalanceSlash(self: Lacuna, server: ServerDocument
     return true
 }
 
-export async function resetWalletSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function resetWalletSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const activities = await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId })
@@ -321,7 +321,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
     if (!activities.length) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.activities.reset-wallet.text_nothing_to_reset', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -342,7 +342,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
 
         const message = (await interaction.editReply({
             content: `:grey_question: | ${t('commands.activities.reset-wallet.text_confirmation', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             components: [row]
         })) as Message
@@ -369,7 +369,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
 
                     await i.editReply({
                         content: `${self._emojis.OK} | ${t('commands.activities.reset-wallet.text_confirmed', {
-                            user: `**${(interaction.member as any).displayName}**`
+                            user: `**${interaction.member.displayName}**`
                         })}`,
                         components: []
                     })
@@ -378,7 +378,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
                 case 'cancel':
                     await i.editReply({
                         content: `${self._emojis.OK} | ${t('commands.activities.reset-wallet.text_canceled', {
-                            user: `**${(interaction.member as any).displayName}**`
+                            user: `**${interaction.member.displayName}**`
                         })}`,
                         components: []
                     })
@@ -397,7 +397,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
 
         await interaction.reply({
             content: `${self._emojis.OK} | ${t('commands.activities.reset-wallet.text_reset_user', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -406,7 +406,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
     return true
 }
 
-export async function resetLevelSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function resetLevelSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const member = interaction.options?.getMember('user') as GuildMember
@@ -415,7 +415,7 @@ export async function resetLevelSlash(self: Lacuna, server: ServerDocument, inte
     if (!member && !member_id) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.activities.reset-level.text_no_mention', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -445,7 +445,7 @@ export async function resetLevelSlash(self: Lacuna, server: ServerDocument, inte
 
     await interaction.reply({
         content: `${self._emojis.OK} | ${t('commands.activities.reset-level.text_reset_success', {
-            user: `**${(interaction.member as any).displayName}**`
+            user: `**${interaction.member.displayName}**`
         })}`,
         ephemeral: true
     })

@@ -3,7 +3,7 @@ import { ChatInputCommandInteraction, TextInputStyle } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export async function createSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function createSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const quizMode = Boolean(interaction.options?.getInteger('quiz-mode'))

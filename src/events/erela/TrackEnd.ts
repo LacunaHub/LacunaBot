@@ -19,10 +19,12 @@ const handler = async (self: Lacuna, player: Player) => {
         if (embed.data.footer?.text) embed.setFooter({ text: embed.data.footer.text.replace(/\s[\w\W]+/i, ` ${track.requester}`) })
 
         try {
-            await message.delete()
-            const playerMessage = await message.channel.send({ embeds: [embed], components: message.components })
-            player.set('message', playerMessage)
-            self.db.qdb.set(`guildPlayers.${player.guildId}.messageId`, message.id)
+            if (player.state === 'CONNECTED') {
+                await message.delete()
+                const playerMessage = await message.channel.send({ embeds: [embed], components: message.components })
+                player.set('message', playerMessage)
+                self.db.qdb.set(`guildPlayers.${player.guildId}.messageId`, message.id)
+            }
         } catch (err) {
             await self.logger.handleError({ module: 'MusicTrackEnd', action: 'RecreatePlayerMessage', error: err, guild_id: player.guildId })
             player.set('message', null)

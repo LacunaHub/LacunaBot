@@ -1,16 +1,20 @@
 import {
     ApplicationCommandOptionType,
     BaseGuildTextChannel,
+    ChannelType,
     ChatInputCommandInteraction,
     Collection,
     EmbedBuilder,
+    GuildChannelCreateOptions,
     GuildMember,
     GuildMemberRoleManager,
     InteractionDeferReplyOptions,
     InteractionReplyOptions,
     ModalComponentData,
     resolveColor,
+    StartThreadOptions,
     Team,
+    ThreadChannel,
     User
 } from 'discord.js'
 import IVM, { Context } from 'isolated-vm'
@@ -25,13 +29,13 @@ export default class CustomCommand {
     public command: ICustomCommand
     public self: Lacuna
     public server: ServerDocument
-    public interaction: ChatInputCommandInteraction
+    public interaction: ChatInputCommandInteraction<'cached'>
     public storage: QDatabase
     private usedPatterns: string[]
     private usedFunctions: string[]
     private isolate: IVM.Isolate
 
-    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
         this.command = command
 
         this.self = self
@@ -202,7 +206,19 @@ export default class CustomCommand {
                     }
                 }),
                 permissions: (member as GuildMember).permissions.toArray(),
-                joinedTimestamp: member['joinedTimestamp']
+                joinedTimestamp: member['joinedTimestamp'],
+                voice: {
+                    channelId: member.voice?.channelId,
+                    deaf: member.voice?.deaf,
+                    id: member.voice?.id,
+                    mute: member.voice?.mute,
+                    selfDeaf: member.voice?.selfDeaf,
+                    selfMute: member.voice?.selfMute,
+                    selfVideo: member.voice?.selfVideo,
+                    serverDeaf: member.voice?.serverDeaf,
+                    serverMute: member.voice?.serverMute,
+                    streaming: member.voice?.streaming
+                }
             }
         }
     }
@@ -493,6 +509,84 @@ export default class CustomCommand {
 
                 if (action.type === 'EXECUTE_CODE' && this.server.server.premium.available) {
                     const functions = {
+                        createChannel: async (rawOptions: Partial<GuildChannelCreateOptions>) => {
+                            const used = this.useFunction('createChannel')
+
+                            if (used > 1) throw new Error('The limit method calls has been reached')
+
+                            const options = {
+                                name: rawOptions?.name,
+                                type: rawOptions?.type,
+                                topic: rawOptions?.topic,
+                                nsfw: !!rawOptions?.nsfw,
+                                bitrate: rawOptions?.bitrate,
+                                userLimit: rawOptions?.userLimit,
+                                position: rawOptions?.position,
+                                rateLimitPerUser: rawOptions?.rateLimitPerUser,
+                                parent: rawOptions.parent
+                            }
+
+                            const channel = await this.interaction.guild.channels.create(options)
+
+                            return {
+                                createdTimestamp: channel.createdTimestamp,
+                                full: channel['full'],
+                                id: channel.id,
+                                lastMessageId: channel.lastMessageId,
+                                name: channel.name,
+                                nsfw: channel.nsfw,
+                                type: channel.type,
+                                parentId: channel.parentId,
+                                position: channel.rawPosition,
+                                rateLimitPerUser: channel.rateLimitPerUser,
+                                topic: channel['topic']
+                            }
+                        },
+                        createThread: async (channelId: string, rawOptions: Partial<StartThreadOptions>) => {
+                            const used = this.useFunction('createThread')
+
+                            if (used > 1) throw new Error('The limit method calls has been reached')
+                            if (typeof channelId !== 'string') throw new TypeError('The "channelId" argument must be a string')
+
+                            const channel = this.interaction.guild.channels.cache.get(channelId) as BaseGuildTextChannel
+
+                            if (!channel) throw new Error('Unknown channel')
+
+                            let thread: ThreadChannel
+
+                            if (channel.type === ChannelType.GuildForum) {
+                                const options = {
+                                    name: rawOptions?.name,
+                                    message: {
+                                        content: rawOptions?.['message']?.content ?? null,
+                                        embeds: rawOptions?.['message']?.embeds?.length
+                                            ? rawOptions['message'].embeds.map(i => {
+                                                  return new EmbedBuilder(i as any).toJSON()
+                                              })
+                                            : [],
+                                        components: transformMessageComponents(rawOptions?.['message']?.components as any)
+                                    }
+                                }
+
+                                thread = await channel.threads.create(options)
+                            } else {
+                                thread = await channel.threads.create({
+                                    name: rawOptions?.name,
+                                    startMessage: rawOptions?.['messageId']
+                                })
+                            }
+
+                            return {
+                                archived: thread?.archived,
+                                archivedTimestamp: thread?.archiveTimestamp,
+                                createdTimestamp: thread?.createdTimestamp,
+                                id: thread?.id,
+                                ownerId: thread?.ownerId,
+                                parentId: thread?.parentId,
+                                rateLimitPerUser: thread?.rateLimitPerUser,
+                                totalMessageSent: thread?.totalMessageSent
+                            }
+                        },
                         deferReply: async (rawOptions: InteractionDeferReplyOptions) => {
                             const used = this.useFunction('deferReply')
 
@@ -503,6 +597,37 @@ export default class CustomCommand {
                             }
 
                             await this.interaction.deferReply(options)
+                        },
+                        deleteChannel: async (channelId: string) => {
+                            const used = this.useFunction('deleteChannel')
+
+                            if (used > 2) throw new Error('The limit method calls has been reached')
+                            if (typeof channelId !== 'string') throw new TypeError('The "channelId" argument must be a string')
+
+                            const channel = this.interaction.guild.channels.cache.get(channelId)
+
+                            if (!channel) throw new Error('Unknown channel')
+
+                            await channel.delete()
+                        },
+                        deleteMessage: async (channelId: string, messageId: string) => {
+                            const used = this.useFunction('deleteMessage')
+
+                            if (used > 2) throw new Error('The limit method calls has been reached')
+                            if (typeof channelId !== 'string') throw new TypeError('The "channelId" argument must be a string')
+                            if (typeof messageId !== 'string') throw new TypeError('The "messageId" argument must be a string')
+
+                            const channel = this.interaction.guild.channels.cache.get(channelId) as BaseGuildTextChannel
+
+                            if (!channel) throw new Error('Unknown channel')
+
+                            const message = await channel.messages.fetch({ message: messageId })
+
+                            if (!message) throw new Error('Unknown message')
+
+                            if (message.deletable) {
+                                await message.delete()
+                            }
                         },
                         deleteReply: async () => {
                             const used = this.useFunction('deleteReply')
@@ -751,6 +876,33 @@ export default class CustomCommand {
                                 pinnable: message.pinnable,
                                 type: message.type,
                                 url: message.url
+                            }
+                        },
+                        overwriteChannelPermissions: async (channelIds: string[], permissions: { [key: string]: boolean }, userOrRole: string) => {
+                            const used = this.useFunction('overwriteChannelPermissions')
+
+                            if (used > 1) throw new Error('FUNCTION_CALLS_LIMIT_REACHED')
+                            if (!Array.isArray(channelIds) || !channelIds.every(i => typeof i === 'string') || typeof userOrRole !== 'string')
+                                throw new TypeError('INVALID_ARGUMENTS')
+
+                            const channels = this.interaction.guild.channels.cache.filter(
+                                i => i.manageable && channelIds.includes(i.id)
+                            ) as Collection<string, BaseGuildTextChannel>
+                            const overwriteOptions = Object.keys(permissions).reduce((obj, k) => {
+                                obj[snakeToPascalCase(k)] = permissions[k]
+                                return obj
+                            }, {})
+
+                            for (const channel of channels.first(5)) {
+                                const overwrites = channel.permissionOverwrites.cache.get(userOrRole)
+
+                                try {
+                                    if (overwrites) {
+                                        await overwrites.edit(overwriteOptions)
+                                    } else {
+                                        await channel.permissionOverwrites.create(userOrRole, overwriteOptions)
+                                    }
+                                } catch (err) {}
                             }
                         }
                     }

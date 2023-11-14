@@ -2,6 +2,7 @@ import {
     AnySelectMenuInteraction,
     AutocompleteInteraction,
     ButtonInteraction,
+    ButtonStyle,
     ChatInputCommandInteraction,
     ContextMenuCommandInteraction,
     Events,
@@ -24,12 +25,12 @@ import { onPressReportButton, onSelectReportOption } from '../../modules/Reports
 const handler = async (
     self: Lacuna,
     interaction:
-        | ChatInputCommandInteraction
-        | ContextMenuCommandInteraction
-        | ButtonInteraction
-        | AnySelectMenuInteraction
-        | AutocompleteInteraction
-        | ModalSubmitInteraction
+        | ChatInputCommandInteraction<'cached'>
+        | ContextMenuCommandInteraction<'cached'>
+        | ButtonInteraction<'cached'>
+        | AnySelectMenuInteraction<'cached'>
+        | AutocompleteInteraction<'cached'>
+        | ModalSubmitInteraction<'cached'>
 ) => {
     if (!interaction.inGuild() || interaction.inRawGuild()) return false
 
@@ -92,14 +93,18 @@ const handler = async (
 
                 const rows = message.components
 
-                const stopButton = rows[0].components[0]
-                const previousButton = rows[0].components[1]
-                const playPauseButton = rows[0].components[2]
-                const nextButton = rows[0].components[3]
-                const repeatButton = rows[0].components[4]
-                const queueButton = rows[1].components[0]
-                const volumeDownButton = rows[1].components[1]
-                const volumeUpButton = rows[1].components[2]
+                const shufflePlayButton = rows[0].components[0],
+                    previousButton = rows[0].components[1],
+                    playPauseButton = rows[0].components[2],
+                    nextButton = rows[0].components[3],
+                    repeatButton = rows[0].components[4]
+                const volumeDownButton = rows[1].components[0],
+                    seekBackwardButton = rows[1].components[1],
+                    stopButton = rows[1].components[2],
+                    seekForwardButton = rows[1].components[3],
+                    volumeUpButton = rows[1].components[4]
+                const queueButton = rows[2].components[0],
+                    filtersButton = rows[2].components[1]
 
                 if (interaction.customId === stopButton.customId) {
                     await self.commands.get('stop').executeSlash(server, interaction as any)
@@ -109,17 +114,19 @@ const handler = async (
                     if (player.queue.previous && player.position < 5000) {
                         player.queue.add(player.queue.current, 0)
                         await player.play(player.queue.previous)
-                    } else if (player.queue.current.isSeekable) player.seek(0)
+                    } else if (player.queue.current.isSeekable) {
+                        await player.seek(0)
+                    }
                 }
 
                 if (interaction.customId === playPauseButton.customId) {
-                    player.pause(!player.paused)
+                    await player.pause(!player.paused)
                     ;(playPauseButton as any).data.emoji = { name: player.paused ? '▶️' : '⏸️' }
                 }
 
                 if (interaction.customId === nextButton.customId) {
-                    if (player.queueRepeat) player.queue.add(player.queue.current)
-                    player.stop()
+                    if (player.queueRepeat || player.trackRepeat) player.queue.add(player.queue.current)
+                    await player.stop()
                 }
 
                 if (interaction.customId === repeatButton.customId) {
@@ -145,7 +152,35 @@ const handler = async (
                     await self.commands.get('volume').executeSlash(server, interaction as any)
                 }
 
-                if (![stopButton.customId, queueButton.customId, volumeDownButton.customId, volumeUpButton.customId].includes(interaction.customId)) {
+                if (interaction.customId === shufflePlayButton.customId) {
+                    if (player.shufflePlay) {
+                        ;(shufflePlayButton as any).data.style = ButtonStyle.Secondary
+                        player.setShufflePlay(false)
+                    } else {
+                        ;(shufflePlayButton as any).data.style = ButtonStyle.Success
+                        player.setShufflePlay(true)
+                    }
+                }
+
+                if ([seekBackwardButton.customId, seekForwardButton.customId].includes(interaction.customId)) {
+                    await self.commands.get('seek').executeSlash(server, interaction as any)
+                }
+
+                if (interaction.customId === filtersButton.customId) {
+                    await self.commands.get('filters').executeSlash(server, interaction as any)
+                }
+
+                if (
+                    ![
+                        stopButton.customId,
+                        queueButton.customId,
+                        volumeDownButton.customId,
+                        volumeUpButton.customId,
+                        seekBackwardButton.customId,
+                        seekForwardButton.customId,
+                        filtersButton.customId
+                    ].includes(interaction.customId)
+                ) {
                     if (![previousButton.customId, nextButton.customId].includes(interaction.customId)) {
                         await message.edit({ components: rows })
                     }

@@ -2,7 +2,7 @@ import { BaseGuildTextChannel, ChatInputCommandInteraction, EmbedBuilder } from 
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const case_id = interaction.options?.getInteger('case-number')
@@ -10,7 +10,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!case_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_id', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_id', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -19,7 +19,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!reason) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_reason', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_reason', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -30,7 +30,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!case_log) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_log', { user: `**${(interaction.member as any).displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_log', { user: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -44,7 +44,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (!case_message) {
         await interaction.editReply({
             content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_message', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`
         })
 
@@ -68,7 +68,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await case_message.edit({ embeds: [embed] })
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.reason.text_case_edited', { user: `**${(interaction.member as any).displayName}**` })}`
+        content: `${self._emojis.OK} | ${t('commands.reason.text_case_edited', { user: `**${interaction.member.displayName}**` })}`
     })
 
     return true

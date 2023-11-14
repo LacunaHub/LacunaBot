@@ -2,13 +2,13 @@ import { ChatInputCommandInteraction, EmbedBuilder, GuildMember } from 'discord.
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
-export async function balanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function balanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -51,13 +51,13 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     return true
 }
 
-export async function transferSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) {
+export async function transferSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -67,13 +67,13 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     const isNotAllowedRole =
             server.modules.economy.transfer.allowed_roles.length &&
-            !(interaction.member as any).roles.cache.some(i => server.modules.economy.transfer.allowed_roles.includes(i.id)),
-        isBlockedRole = (interaction.member as any).roles.cache.some(i => server.modules.economy.transfer.blocked_roles.includes(i.id))
+            !interaction.member.roles.cache.some(i => server.modules.economy.transfer.allowed_roles.includes(i.id)),
+        isBlockedRole = interaction.member.roles.cache.some(i => server.modules.economy.transfer.blocked_roles.includes(i.id))
 
     if (isNotAllowedRole || isBlockedRole) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('common.command_denied', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -88,7 +88,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     if (!mention) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_no_mention', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -99,7 +99,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     if (!amount) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_no_amount', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -128,7 +128,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     if (!transaction_currency || transaction_currency.amount < amount) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_insufficient_funds', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -247,7 +247,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     await interaction.reply({
         content: `${self._emojis.OK} | ${t('commands.wallet.transfer.text_transferred', {
-            user: `**${(interaction.member as any).displayName}**`,
+            user: `**${interaction.member.displayName}**`,
             amount: `**${amount}${server.modules.economy.currencies.find(c => c.id == currency_id).symbol}**`,
             target: `**${mention.displayName}**`
         })}`,

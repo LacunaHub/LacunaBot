@@ -6,7 +6,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 const { version } = require('../../../../package.json')
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const appTeam = self.application.owner as Team

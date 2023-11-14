@@ -12,7 +12,7 @@ export default {
             type: ApplicationCommandOptionType.User,
             name: 'common.command_options.user',
             description: `commands.${name}.options.user.description`,
-            required: true
+            required: false
         }
     ],
     group: 'MODERATION',

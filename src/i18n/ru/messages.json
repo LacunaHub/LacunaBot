@@ -46,7 +46,8 @@
             "sponsor": "спонсор",
             "quiz_mode": "режим-викторины",
             "multiple_answers": "множественный-выбор",
-            "role": "роль"
+            "role": "роль",
+            "time": "время"
         },
         "permissions_keys": {
             "CREATE_INSTANT_INVITE": "Создавать приглашения",
@@ -447,11 +448,13 @@
 
             "text_user_not_found": "{user}, вы указали неверного или несуществующего пользователя",
             "text_no_violations": "{user}, у этого пользователя нет нарушений",
+            "text_no_violations_on_server": "{user}, ни у кого на сервере нет нарушений",
             "text_user_violations": "Нарушения {target}",
             "text_last_24_hours": "За сутки",
             "text_last_7_days": "За 7 дней",
             "text_total_violations": "Всего нарушений",
-            "text_last_10_violations": "Последние 10 нарушений"
+            "text_last_10_violations": "Последние 10 нарушений",
+            "text_violator_list": "Список нарушителей"
         },
         "warn": {
             "description": "Выдача и снятие предупреждений",
@@ -495,6 +498,9 @@
             }
         },
 
+        "filters": {
+            "description": "Наложить фильтры для текущего воспроизведения"
+        },
         "next": {
             "text_no_track_playback": "{user}, воспроизведение треков не запущено на этом сервере",
             "text_different_voice": "{user}, вы не подключены к голосовому каналу или находитесь в другом"
@@ -537,6 +543,16 @@
 
             "text_no_track_queue": "{user}, очередь воспроизведения пуста",
             "text_select_playback_track": "Выберите трек для воспроизведения"
+        },
+        "seek": {
+            "description": "Перемотать воспроизведение текущего трека на указанную позицию",
+            "options": {
+                "time": {
+                    "description": "Время в формате чч:мм:сс"
+                }
+            },
+            "text_track_is_not_seekable": "{user}, невозможно перемотать текущий трек",
+            "text_track_rewound_to_position": "{user}, трек перемотан на {time}"
         },
         "stop": {
             "description": "Остановить воспроизведение музыки и очистить очередь",

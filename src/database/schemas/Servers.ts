@@ -1935,6 +1935,7 @@ export interface ITwitchSubscription {
     webhook_id: string
     webhook_token: string
     display_stream_preview: boolean
+    options?: ('CROSSPOST_MESSAGE' | 'CREATE_THREAD')[]
 }
 
 export interface IYouTubeSubscription {
@@ -1945,6 +1946,7 @@ export interface IYouTubeSubscription {
     notification_message: { content: string }
     webhook_id: string
     webhook_token: string
+    options?: ('CROSSPOST_MESSAGE' | 'CREATE_THREAD')[]
 }
 
 export interface ITelegramSubscription {
@@ -1954,7 +1956,7 @@ export interface ITelegramSubscription {
     notification_channel_id: string
     webhook_id: string
     webhook_token: string
-    options: ('CROSSPOST_MESSAGE' | 'MENTION_EVERYONE' | 'MENTION_ROLES')[]
+    options: ('CROSSPOST_MESSAGE' | 'MENTION_EVERYONE' | 'MENTION_ROLES' | 'CREATE_THREAD')[]
     role_mentions?: string[]
 }
 

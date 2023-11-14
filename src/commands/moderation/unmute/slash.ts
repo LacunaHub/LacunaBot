@@ -3,7 +3,7 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { caseLog } from '../../../modules/Moderation'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction) => {
+export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     const mention = interaction.options?.getMember('user') as GuildMember
@@ -12,7 +12,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (!mention) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.unmute.text_user_not_found', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -23,7 +23,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (!mention.isCommunicationDisabled()) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('commands.unmute.text_user_not_muted', {
-                user: `**${(interaction.member as any).displayName}**`
+                user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -61,7 +61,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
         content: `${self._emojis.OK} | ${t('commands.unmute.text_user_unmuted', {
-            user: `**${(interaction.member as any).displayName}**`,
+            user: `**${interaction.member.displayName}**`,
             target: `**${mention.user.tag}**`
         })}`
     })

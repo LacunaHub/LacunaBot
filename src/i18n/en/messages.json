@@ -45,7 +45,8 @@
             "sponsor": "sponsor",
             "quiz_mode": "quiz-mode",
             "multiple_answers": "multiple-answers",
-            "role": "role"
+            "role": "role",
+            "time": "time"
         },
         "permissions_keys": {
             "CREATE_INSTANT_INVITE": "Create instant invite",
@@ -425,11 +426,13 @@
             },
             "text_user_not_found": "{user}, you specified an invalid or non-existent user",
             "text_no_violations": "{user}, this user has no violations",
+            "text_no_violations_on_server": "{user}, no one on the server has a violation",
             "text_user_violations": "Violations {target}",
             "text_last_24_hours": "Per day",
             "text_last_7_days": "In 7 days",
             "text_total_violations": "Total violations",
-            "text_last_10_violations": "Last 10 violations"
+            "text_last_10_violations": "Last 10 violations",
+            "text_violator_list": "List of violators"
         },
         "warn": {
             "description": "Issuance and removal of warnings",
@@ -469,6 +472,9 @@
                 "text_warn_removed": "{user}, warning successfully removed",
                 "text_warns_removed_all": "{user}, all warnings have been successfully removed"
             }
+        },
+        "filters": {
+            "description": "Apply filters to the current playback"
         },
         "next": {
             "text_no_track_playback": "{user}, track playback is not running on this server",
@@ -510,6 +516,16 @@
             "description": "Current music playback queue",
             "text_no_track_queue": "{user}, the play queue is empty",
             "text_select_playback_track": "Select the track you want to play"
+        },
+        "seek": {
+            "description": "Rewind playback of the current track to the specified position",
+            "options": {
+                "time": {
+                    "description": "Time in format hh:mm:ss"
+                }
+            },
+            "text_track_is_not_seekable": "{user}, you can't rewind the current track",
+            "text_track_rewound_to_position": "{user}, track rewound to {time}"
         },
         "stop": {
             "description": "Stop music playback and clear the queue",

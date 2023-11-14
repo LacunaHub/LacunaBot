@@ -14,11 +14,17 @@ export async function createTelegramSubscription(server: ServerDocument, data: a
     if (subscriptions.some(s => s.channel_id === data.channel.id)) throw new APIError(2005)
 
     let webhook: APIWebhook, channelPhoto: Buffer
+    const tgChannel = {
+        id: data.channel.id,
+        title: data.channel.name ?? String(data.channel.id),
+        username: data.channel.username ?? data.channel.name ?? String(data.channel.id),
+        photo_file_id: data.channel.photo_file_id
+    }
 
     try {
-        if (data.channel.photo_file_id) {
+        if (tgChannel.photo_file_id) {
             const getFileResponse = await fetch(
-                `https://api.telegram.org/bot${process.env.TELEGRAM_PUBLIC_BOT_TOKEN}/getFile?file_id=${data.channel.photo_file_id}`
+                `https://api.telegram.org/bot${process.env.TELEGRAM_PUBLIC_BOT_TOKEN}/getFile?file_id=${tgChannel.photo_file_id}`
             )
 
             if (getFileResponse.ok) {
@@ -36,7 +42,7 @@ export async function createTelegramSubscription(server: ServerDocument, data: a
 
         webhook = (await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.channelWebhooks(data.notification_channel_id), {
             body: {
-                name: data.channel.name,
+                name: tgChannel.title,
                 avatar: await DataResolver.resolveImage(channelPhoto)
             }
         })) as any
@@ -55,16 +61,16 @@ export async function createTelegramSubscription(server: ServerDocument, data: a
 
     if (!telegramSub) {
         await database.telegramSubs.create({
-            _id: data.channel.id,
-            channel_title: data.channel.name,
-            channel_username: data.channel.username
+            _id: tgChannel.id,
+            channel_title: tgChannel.title,
+            channel_username: tgChannel.username
         })
     }
 
     const subscription = {
-        channel_id: data.channel.id,
-        channel_name: data.channel.name,
-        channel_username: data.channel.username,
+        channel_id: tgChannel.id,
+        channel_name: tgChannel.title,
+        channel_username: tgChannel.username,
         notification_channel_id: data.notification_channel_id,
         webhook_id: webhook?.id ?? null,
         webhook_token: webhook?.token ?? null,
