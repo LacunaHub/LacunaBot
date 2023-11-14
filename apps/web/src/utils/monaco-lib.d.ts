@@ -27,6 +27,18 @@ function setValue(key: string, value: any): void {}
 function getValue(key: string): Promise<any> {}
 
 /**
+ * Creates a new channel in the guild.
+ * @link https://docs.lacunabot.com/commands/custom-behavior/functions#createchannel
+ */
+function createChannel(options: CreateChannelOptions): Promise<Channel> {}
+
+/**
+ * Creates a new thread in the channel.
+ * @link https://docs.lacunabot.com/commands/custom-behavior/functions#createthread
+ */
+function createThread(channelId: string, options: CreateThreadOptions): Promise<Thread> {}
+
+/**
  * @link https://docs.lacunabot.com/commands/custom-behavior/functions#deletevalue
  */
 function deleteValue(key: string): void {}
@@ -42,6 +54,18 @@ function deferReply(options: DeferReplyOptions): Promise<void> {}
  * @link https://docs.lacunabot.com/commands/custom-behavior/functions#deferupdate
  */
 function deferUpdate(): Promise<void> {}
+
+/**
+ * Deletes channel or thread.
+ * @link https://docs.lacunabot.com/commands/custom-behavior/functions#deletechannel
+ */
+function deleteChannel(channelId: string): Promise<void> {}
+
+/**
+ * Deletes a message.
+ * @link https://docs.lacunabot.com/commands/custom-behavior/functions#deletemessage
+ */
+function deleteMessage(channelId: string, messageId: string): Promise<void> {}
 
 /**
  * Deletes a reply to this interaction.
@@ -152,6 +176,18 @@ interface Member {
     roles: GuildRole[]
     permissions: string[]
     joinedTimestamp: number
+    voice: {
+        channelId?: string
+        deaf?: boolean
+        id?: string
+        mute?: boolean
+        selfDeaf?: boolean
+        selfMute?: boolean
+        selfVideo?: boolean
+        serverDeaf?: boolean
+        serverMute?: boolean
+        streaming?: boolean
+    }
 }
 
 interface User {
@@ -174,6 +210,17 @@ interface Channel {
     position: number
     rateLimitPerUser: number
     topic?: string
+}
+
+interface Thread {
+    archived: boolean
+    archivedTimestamp: number
+    createdTimestamp: number
+    id: string
+    ownerId: string
+    parentId: string
+    rateLimitPerUser: number
+    totalMessageSent: number
 }
 
 interface Command {
@@ -324,4 +371,22 @@ interface UserActivity {
         voice_time: number
     }
     wallet: number[]
+}
+
+interface CreateChannelOptions {
+    name: string
+    type?: 0 | 2 | 4 | 5 | 13 | 15 | 16
+    topic?: string
+    nsfw?: boolean
+    bitrate?: number
+    userLimit?: number
+    position?: number
+    rateLimitPerUser?: number
+    parent?: string
+}
+
+interface CreateThreadOptions {
+    name: string
+    message?: MessageOptions
+    messageId?: string
 }
