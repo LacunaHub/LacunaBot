@@ -296,7 +296,7 @@ const navItems = [
     icon: activitiesImg
   },
   {
-    name: t('pages.guild.nav_names.SUBSCRIPTIONS'),
+    name: t('pages.landing.ft_subscriptions_title'),
     path: 'settings/subscriptions',
     icon: bellImg
   },
