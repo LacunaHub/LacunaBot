@@ -518,6 +518,16 @@ export default defineComponent({
             name: $t('lacuna_diamond.plan_comparison_features.playback_queue_track_number_title'),
             free: { value: '15', type: 'text' },
             diamond: { value: 'all_inclusive', type: 'icon' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.playback_filters_title'),
+            free: { value: false, type: 'boolean' },
+            diamond: { value: true, type: 'boolean' }
+          },
+          {
+            name: $t('lacuna_diamond.plan_comparison_features.playback_seek_title'),
+            free: { value: false, type: 'boolean' },
+            diamond: { value: true, type: 'boolean' }
           }
         ]
       },

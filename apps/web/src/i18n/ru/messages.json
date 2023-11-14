@@ -242,6 +242,8 @@
       "audio_streaming_playback_title": "Воспроизведение потокового аудио",
       "playback_volume_changing_title": "Изменение громкости воспроизведения",
       "playback_queue_track_number_title": "Количество треков в очереди",
+      "playback_filters_title": "Фильтры для воспроизведения",
+      "playback_seek_title": "Перемотка воспроизведения трека",
       "earn_currencies_in_voice_channels": "Заработок валюты в голосовых каналах",
       "voice_exp_members_number_title": "Количество одновременно находящихся участников в голосовых каналах, которым будет начисляться опыт за голосовую активность",
       "level_awards_number_title": "Количество наград за уровни",
