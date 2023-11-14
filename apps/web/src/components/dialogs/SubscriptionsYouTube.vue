@@ -112,6 +112,34 @@
         </div>
       </q-card-section>
 
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-item tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="youtube.options" val="CREATE_THREAD" dense></q-checkbox>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>
+                {{ $t('subscriptions.create_thread_title') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item v-if="guild.channelsAnnouncement.some(i => i.id === youtube.notification_channel_id)" tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="youtube.options" val="CROSSPOST_MESSAGE" dense></q-checkbox>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>
+                {{ $t('subscriptions.crosspost_message_title') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
@@ -221,9 +249,14 @@ export default defineComponent({
             notification_channel_id: null,
             notification_message: {
               content: ''
-            }
+            },
+            options: []
           }
     )
+
+    if (typeof youtube.value.options === 'undefined') {
+      youtube.value.options = []
+    }
 
     let confirmLoading = ref(false),
       foundChannels = ref([])

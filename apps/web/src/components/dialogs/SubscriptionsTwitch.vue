@@ -125,6 +125,30 @@
               </q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-item tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="twitch.options" val="CREATE_THREAD" dense></q-checkbox>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>
+                {{ $t('subscriptions.create_thread_title') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item v-if="guild.channelsAnnouncement.some(i => i.id === twitch.notification_channel_id)" tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="twitch.options" val="CROSSPOST_MESSAGE" dense></q-checkbox>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>
+                {{ $t('subscriptions.crosspost_message_title') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
         </q-list>
       </div>
 
@@ -238,9 +262,14 @@ export default defineComponent({
             notification_message: {
               content: ''
             },
-            display_stream_preview: true
+            display_stream_preview: true,
+            options: []
           }
     )
+
+    if (typeof twitch.value.options === 'undefined') {
+      twitch.value.options = []
+    }
 
     let confirmLoading = ref(false),
       foundBroadcasters = ref([])

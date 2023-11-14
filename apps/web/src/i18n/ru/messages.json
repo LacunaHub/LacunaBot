@@ -453,7 +453,8 @@
     "telegram_help_note": "Для того, чтобы связать Telegram и Discord, необходимо добавить бота {botLink} в нужный канал, затем ввести его название или идентификатор в поле ниже.",
     "telegram_channel_name_subtitle": "Уникальный идентификатор или имя выбранного канала (в формате {'@'}channelusername)",
     "mention_roles_title": "Упомянуть роли",
-    "crosspost_message_title": "Опубликовать сообщение"
+    "crosspost_message_title": "Опубликовать сообщение",
+    "create_thread_title": "Создать ветвь"
   },
 
   "voice_roles": {

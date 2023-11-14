@@ -204,6 +204,18 @@
             </q-card>
           </q-expansion-item>
 
+          <q-item tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="telegram.options" val="CREATE_THREAD" dense></q-checkbox>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>
+                {{ $t('subscriptions.create_thread_title') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item v-if="guild.channelsAnnouncement.some(i => i.id === telegram.notification_channel_id)" tag="label">
             <q-item-section side>
               <q-checkbox v-model="telegram.options" val="CROSSPOST_MESSAGE" dense></q-checkbox>
