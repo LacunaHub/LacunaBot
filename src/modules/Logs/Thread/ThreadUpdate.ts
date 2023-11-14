@@ -64,7 +64,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                     .setDescription(
                         t('logs.update_template', {
                             user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.thread_update_auto_archive_change_template', { user: `<#${thread.id}>` })
+                            change: t('logs.thread_update_auto_archive_change_template', { thread: `<#${thread.id}>` })
                         })
                     )
                     .addFields([
