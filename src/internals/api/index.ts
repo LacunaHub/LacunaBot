@@ -22,6 +22,7 @@ import state from './routes/state'
 import subscriptions from './routes/subscriptions'
 import users from './routes/users'
 import { passKnownReferrers } from './utility/Authorize'
+import ReleaseNotesLogger from './utility/ReleaseNotesLogger'
 
 const app: Koa = new Koa()
 const bridgeClient = new BridgeClient({
@@ -75,6 +76,7 @@ app.listen(process.env.API_PORT, () => {
     syncQiwiBills()
     handleDiamondGuilds()
     handlePatrons()
+    ReleaseNotesLogger.createSchedule()
 })
 
 process.on('uncaughtException', Logger.error)

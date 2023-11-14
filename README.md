@@ -301,6 +301,9 @@ WEBSITE_PORT=5820
 WINTER_MUSIC_NODE=NAME:IP:PORT:PASSWORD
 
 YOUTUBE_HMAC_SECRET=
+
+RNL_NEWS_CHANNEL_ID=
+RNL_NEWS_ROLE_ID=
 ```
 
 Генерация ранговой карточки использует шрифт [Gotham Pro](https://fonts-online.ru/fonts/gotham-pro). Желательно его установить
