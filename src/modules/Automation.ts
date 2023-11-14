@@ -238,6 +238,7 @@ export default class Automation {
                 url: message?.url
             },
             voiceState: {
+                channelId: voiceState?.channelId,
                 deaf: voiceState?.deaf,
                 id: voiceState?.id,
                 mute: voiceState?.mute,
