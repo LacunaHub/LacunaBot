@@ -144,11 +144,19 @@ export async function handleTelegramWebhook(data: ITelegramWebhookData) {
                     content
                 },
                 files,
-                query: makeURLSearchParams({ wait: true })
+                query: makeURLSearchParams({ wait: true }) as any
             })
 
             if (guildSubscription.options.includes('CROSSPOST_MESSAGE')) {
                 await restApi.post(apiRoutes.channelMessageCrosspost(message.channel_id, message.id))
+            }
+
+            if (guildSubscription.options.includes('CREATE_THREAD')) {
+                await restApi.post(apiRoutes.threads(message.channel_id, message.id), {
+                    body: {
+                        name: data.post_link
+                    }
+                })
             }
         } catch (err) {
             Logger.handleError({

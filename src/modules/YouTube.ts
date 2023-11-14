@@ -1,9 +1,11 @@
+import { makeURLSearchParams } from 'discord.js'
 import fetch from 'node-fetch'
 import { scheduleJob } from 'node-schedule'
 import db from '../database'
 import { handleModuleExecutionData } from '../events/system/ModuleExecution'
 import logger from '../internals/Logger'
 import { apiRoutes, restApi } from '../internals/utility/DiscordUtils'
+import { truncateString } from '../internals/utility/Utils'
 import Replacer from './Replacer'
 
 export async function searchChannels(term: string) {
@@ -160,11 +162,24 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
         }
 
         try {
-            await restApi.post(apiRoutes.webhook(webhook.id, webhook.token), {
+            const message: any = await restApi.post(apiRoutes.webhook(webhook.id, webhook.token), {
                 body: {
                     content: hasVideoUrl ? notificationText : notificationText ? `${notificationText}\n${videoUrl}` : videoUrl
-                }
+                },
+                query: makeURLSearchParams({ wait: true }) as any
             })
+
+            if (guildSubscription.options?.includes?.('CROSSPOST_MESSAGE')) {
+                await restApi.post(apiRoutes.channelMessageCrosspost(message.channel_id, message.id))
+            }
+
+            if (guildSubscription.options?.includes?.('CREATE_THREAD')) {
+                await restApi.post(apiRoutes.threads(message.channel_id, message.id), {
+                    body: {
+                        name: truncateString(data.videoTitle, 100)
+                    }
+                })
+            }
         } catch (err) {
             logger.handleError({
                 module: 'YouTube',

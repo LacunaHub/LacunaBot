@@ -78,7 +78,8 @@ export async function createTwitchSubscription(server: ServerDocument, data: any
         notification_message: data.notification_message,
         webhook_id: webhook?.id ?? null,
         webhook_token: webhook?.token ?? null,
-        display_stream_preview: data.display_stream_preview
+        display_stream_preview: data.display_stream_preview,
+        options: data.options ?? []
     }
 
     await database.servers.updateOne(
@@ -104,7 +105,8 @@ export async function updateTwitchSubscription(server: ServerDocument, data: any
             $set: {
                 'modules.subscriptions.twitch.$.notification_channel_id': data.notification_channel_id,
                 'modules.subscriptions.twitch.$.notification_message': data.notification_message,
-                'modules.subscriptions.twitch.$.display_stream_preview': data.display_stream_preview
+                'modules.subscriptions.twitch.$.display_stream_preview': data.display_stream_preview,
+                'modules.subscriptions.twitch.$.options': data.options ?? []
             }
         }
     )

@@ -56,7 +56,8 @@ export async function createYouTubeSubscription(server: ServerDocument, data: an
         notification_channel_id: data.notification_channel_id,
         notification_message: data.notification_message,
         webhook_id: webhook?.id ?? null,
-        webhook_token: webhook?.token ?? null
+        webhook_token: webhook?.token ?? null,
+        options: data.options ?? []
     }
 
     await database.servers.updateOne(
@@ -81,7 +82,8 @@ export async function updateYouTubeSubscription(server: ServerDocument, data: an
         {
             $set: {
                 'modules.subscriptions.youtube.$.notification_channel_id': data.notification_channel_id,
-                'modules.subscriptions.youtube.$.notification_message': data.notification_message
+                'modules.subscriptions.youtube.$.notification_message': data.notification_message,
+                'modules.subscriptions.youtube.$.options': data.options ?? []
             }
         }
     )
