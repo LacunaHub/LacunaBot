@@ -228,6 +228,7 @@
 import { useMeta, useQuasar } from 'quasar'
 import activitiesImg from 'src/assets/activities.svg'
 import bellImg from 'src/assets/bell.svg'
+import boxImg from 'src/assets/box.svg'
 import controlPanelImg from 'src/assets/control-panel.svg'
 import editPenImg from 'src/assets/edit-pen.svg'
 import karaokeImg from 'src/assets/karaoke.svg'
@@ -290,6 +291,7 @@ const navItems = [
     path: 'settings/moderation',
     icon: shieldImg
   },
+  { name: t('pages.landing.ft_custom_behavior_title'), path: 'settings/custom-behavior', icon: boxImg, new: true },
   {
     name: t('pages.guild.nav_names.ACTIVITIES'),
     path: 'settings/activities',

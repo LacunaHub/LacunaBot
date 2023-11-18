@@ -41,7 +41,7 @@
             <q-item
               v-for="(field, ii) in row"
               :key="ii"
-              class="bg-dark-2 cursor-pointer"
+              class="bg-dark-2 cursor-pointer rounded-borders"
               clickable
               @click="fieldDialog(field, i)"
             >

@@ -159,3 +159,7 @@ blockquote {
   margin-left: 0.3em;
   display: block;
 }
+
+.markdown-body > *:last-child {
+  margin-bottom: 0 !important;
+}

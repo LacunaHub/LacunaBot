@@ -276,14 +276,6 @@
                   </q-item-section>
                 </q-item>
 
-                <q-item clickable v-close-popup @click="onPublish" :disable="confirmLoading">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ $t('publish') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-
                 <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
@@ -305,14 +297,12 @@
 </template>
 
 <script>
-import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { interfaces } from 'src/boot/axios'
+import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { customCommandComponentLimits } from 'src/utils/Constants'
-import { handleAxiosError, suid } from 'src/utils/Utils'
+import { suid } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
-import { useI18n } from 'vue-i18n'
 import AutomationTaskImport from './AutomationTaskImport.vue'
 import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
 import ComponentActionForwardToCommand from './ComponentActionForwardToCommand.vue'
@@ -333,27 +323,26 @@ export default defineComponent({
     automationProp: {
       type: Object,
       default: null
+    },
+    modeProp: {
+      type: String,
+      default: null
     }
   },
 
   setup(props) {
-    const $q = useQuasar(),
-      { t: $t } = useI18n()
     const { dialogRef, onDialogOK, onDialogHide, onDialogCancel } = useDialogPluginComponent()
     const guild = useGuildStore()
 
-    const mode = ref(props.automationProp ? 'UPDATE' : 'CREATE')
-    const automation = ref(
-      mode.value === 'UPDATE'
-        ? JSON.parse(JSON.stringify(props.automationProp))
-        : {
-            id: suid(6),
-            name: null,
-            options: [],
-            trigger: null,
-            components: []
-          }
-    )
+    const mode = ref(props.modeProp ?? (props.automationProp ? 'UPDATE' : 'CREATE'))
+    const automation = ref({
+      id: suid(6),
+      name: null,
+      options: [],
+      trigger: null,
+      components: [],
+      ...JSON.parse(JSON.stringify(props.automationProp))
+    })
 
     const confirmLoading = ref(false),
       currentTab = ref('general'),
@@ -630,39 +619,6 @@ export default defineComponent({
 
       this.automation.components.splice(from, 1)
       this.automation.components.splice(position, 0, component)
-    },
-    onPublish() {
-      if (this.mode !== 'UPDATE' || !this.isValid) return
-
-      this.confirmLoading = true
-
-      return interfaces.common
-        .publishAutomationTask(this.guild._id, { data: this.automation })
-        .then(() => {
-          event('publish_automation', { event_category: 'utility' })
-
-          this.$q.notify({
-            message: this.$t(`custom_command.command_sent_for_review`),
-            classes: 'q-notification-custom',
-            color: 'black',
-            icon: 'done',
-            iconColor: 'positive',
-            timeout: 5000
-          })
-        })
-        .catch(err => {
-          const error = handleAxiosError(err)
-
-          this.$q.notify({
-            message: error.message,
-            classes: 'q-notification-custom',
-            color: 'black',
-            icon: 'error',
-            iconColor: 'negative',
-            timeout: 5000
-          })
-        })
-        .finally(() => (this.confirmLoading = false))
     },
     onExport() {
       if (this.mode !== 'UPDATE') return

@@ -595,6 +595,8 @@
       "md_automoder_description": "Automatic take actions against violators",
       "md_penalties_title": "Penalties for warnings",
       "md_penalties_description": "Penalties for reaching a certain number of warnings",
+      "cb_plugins_title": "Plugins",
+      "cb_about_custom_plugins": "Create your own plugins and share them with the community. This feature opens up unique perspectives for users to customize and optimize the bot for their individual needs.",
       "ac_levels_title": "Levels",
       "ac_levels_text_exp_title": "Text activity experience",
       "ac_levels_voice_exp_title": "Voice activity experience",

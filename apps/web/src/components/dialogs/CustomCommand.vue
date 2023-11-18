@@ -153,8 +153,8 @@
 
                         <q-select
                           v-else
+                          :model-value="$t('command.throttling_scopes.PER_USER')"
                           disable
-                          :label="$t('command.throttling_scopes.PER_USER')"
                           class="q-pt-sm"
                           filled
                           dense
@@ -238,13 +238,13 @@
 
                         <q-select
                           v-else
-                          disable
-                          :label="
+                          :model-value="
                             $dt
                               .now()
                               .plus({ seconds: 60 })
                               .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
                           "
+                          disable
                           class="q-pt-sm"
                           filled
                           dense
@@ -431,14 +431,6 @@
                   </q-item-section>
                 </q-item>
 
-                <q-item clickable v-close-popup @click="onPublish" :disable="confirmLoading">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ $t('publish') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-
                 <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
@@ -467,7 +459,6 @@ import { customCommandComponentLimits, discordAppCommandNameRegexp } from 'src/u
 import { handleAxiosError } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
-import { useI18n } from 'vue-i18n'
 import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
 import ComponentActionForwardToCommand from './ComponentActionForwardToCommand.vue'
 import ComponentActionModifyRoles from './ComponentActionModifyRoles.vue'
@@ -489,31 +480,31 @@ export default defineComponent({
     commandProp: {
       type: Object,
       default: null
+    },
+    modeProp: {
+      type: String,
+      default: null
     }
   },
 
   setup(props) {
-    const $q = useQuasar(),
-      { t: $t } = useI18n()
+    const $q = useQuasar()
 
     const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
-    const mode = ref(props.commandProp ? 'UPDATE' : 'CREATE')
-    const command = ref(
-      mode.value === 'UPDATE'
-        ? JSON.parse(JSON.stringify(props.commandProp))
-        : {
-            options: [],
-            components: [],
-            command: {
-              type: 1,
-              name: '',
-              description: null,
-              options: []
-            }
-          }
-    )
+    const mode = ref(props.modeProp ?? (props.commandProp ? 'UPDATE' : 'CREATE'))
+    const command = ref({
+      options: [],
+      components: [],
+      command: {
+        type: 1,
+        name: '',
+        description: null,
+        options: []
+      },
+      ...JSON.parse(JSON.stringify(props.commandProp))
+    })
 
     let confirmLoading = ref(false),
       currentTab = ref('general'),
@@ -858,39 +849,6 @@ export default defineComponent({
 
           this.command.components[index] = component
         })
-    },
-    onPublish() {
-      if (this.mode !== 'UPDATE' || !this.isValid) return
-
-      this.confirmLoading = true
-
-      return interfaces.common
-        .publishCustomCommand(this.guild._id, { data: this.command })
-        .then(() => {
-          event('publish_custom_command', { event_category: 'utility' })
-
-          this.$q.notify({
-            message: this.$t(`custom_command.command_sent_for_review`),
-            classes: 'q-notification-custom',
-            color: 'black',
-            icon: 'done',
-            iconColor: 'positive',
-            timeout: 5000
-          })
-        })
-        .catch(err => {
-          const error = handleAxiosError(err)
-
-          this.$q.notify({
-            message: error.message,
-            classes: 'q-notification-custom',
-            color: 'black',
-            icon: 'error',
-            iconColor: 'negative',
-            timeout: 5000
-          })
-        })
-        .finally(() => (this.confirmLoading = false))
     },
     onExport() {
       if (this.mode !== 'UPDATE') return
