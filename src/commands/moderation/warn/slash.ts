@@ -76,7 +76,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 export async function removeSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember('user') as GuildMember
+    const mention = interaction.options?.getUser('user')
     const warn_id = interaction.options?.getString('warning-number') as string | number
     const reason = interaction.options?.getString('reason') ?? '-'
 
@@ -102,7 +102,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         return false
     }
 
-    const violator = server.moderation.warnings.violators.find(v => v.user_id == mention.id)
+    const violator = server.moderation.warnings.violators.find(v => v.user_id === mention.id)
 
     if (!violator || !violator.violations.length) {
         await interaction.reply({
@@ -163,7 +163,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         })
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'WARN_REMOVE', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'WARN_REMOVE', target: mention, executor: interaction.user, reason })
 
     return true
 }
