@@ -1,193 +1,123 @@
 import Router from '@koa/router'
-import { APIUser } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../database'
-import { IAutomation, ICustomCommand } from '../../../database/schemas/Servers'
+import { CustomCommand, IAutomation } from '../../../database/schemas/Servers'
+import {
+    FileContent,
+    Repository,
+    SearchRepositoriesResponse,
+    TreeFile,
+    getFileContents,
+    getRepository,
+    getRepositoryTree,
+    searchRepositories
+} from '../../utility/GitHubAPI'
 import APIError from '../utility/APIError'
 import { authorize } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
 const router = new Router({ prefix: '/common' })
 
-router.get('/automation-tasks/:automation_id', createRateLimitMiddleware(10), authorize, getAutomationTask)
-router.get('/automation-tasks', createRateLimitMiddleware(10), authorize, getAutomationTasks)
-router.post('/automation-tasks', createRateLimitMiddleware(5), authorize, publishAutomationTask)
-router.get('/custom-commands/:command_id', createRateLimitMiddleware(10), authorize, getCustomCommand)
-router.get('/custom-commands', createRateLimitMiddleware(10), authorize, getCustomCommands)
-router.post('/custom-commands', createRateLimitMiddleware(5), authorize, publishCustomCommand)
+router.get('/plugins', createRateLimitMiddleware(10), authorize, getPlugins)
+router.get('/plugins/:repoOwner/:repoName', createRateLimitMiddleware(10), authorize, getPlugin)
 
-async function getAutomationTask(ctx: Context) {
-    const automationId: string = ctx.params.automation_id
-    const guildId: string = ctx.query.guild_id as string
+async function getPlugins(ctx: Context) {
+    let repoSearch: SearchRepositoriesResponse
 
-    const automation = await database.automationTasks.findOne({ _id: automationId, published: true })
-
-    if (!automation) {
-        ctx.throw(404, new APIError(1010))
+    try {
+        repoSearch = await searchRepositories({ q: 'topic:lacuna-bot-plugin', sort: 'updated' })
+    } catch (err) {
+        ctx.throw(500, new APIError(1, err.message))
     }
 
-    const server = await database.servers.findOne({ _id: guildId })
+    const verifiedRepos: string[] = await database.qdb.get('verifiedPluginRepositories')
 
-    if (!server || server.server.blocked) {
+    ctx.status = 200
+    ctx.body = {
+        total: repoSearch.total_count,
+        data: repoSearch.items
+            .filter(v => verifiedRepos.includes(v.full_name))
+            .map(v => {
+                return {
+                    name: v.name,
+                    full_name: v.full_name,
+                    owner_login: v.owner.login,
+                    owner_avatar_url: v.owner.avatar_url,
+                    description: v.description,
+                    created_at: new Date(v.created_at).getTime(),
+                    updated_at: new Date(v.updated_at).getTime(),
+                    pushed_at: new Date(v.pushed_at).getTime(),
+                    stargazers_count: v.stargazers_count
+                }
+            })
+    }
+}
+
+async function getPlugin(ctx: Context) {
+    const repoOwner: string = ctx.params.repoOwner,
+        repoName: string = ctx.params.repoName
+    const guildId: string = ctx.query.guildId as string
+
+    if (!guildId) {
+        ctx.throw(400, new APIError(1, 'Parameter "guildId" is required'))
+    }
+
+    const server = await database.servers.findOne({ _id: guildId, 'server.blocked': false })
+
+    if (!server) {
         ctx.throw(404, new APIError(1003))
     }
 
-    if (!automation.uses.some(i => i.guild_id === guildId)) {
-        await database.automationTasks.updateOne(
-            { _id: automationId },
-            {
-                $push: {
-                    uses: {
-                        guild_id: guildId,
-                        timestamp: Date.now()
-                    }
-                },
-                $inc: {
-                    total_uses: 1
-                }
-            }
-        )
+    const repoFullName = `${repoOwner}/${repoName}`
+    let repo: Repository,
+        repoTreeFiles: TreeFile[] = [],
+        repoFileContents: FileContent[] = []
+
+    const verifiedRepos: string[] = await database.qdb.get('verifiedPluginRepositories')
+
+    if (!verifiedRepos.includes(repoFullName)) {
+        ctx.throw(404, new APIError(1009))
+    }
+
+    try {
+        repo = await getRepository(repoFullName)
+        const repoTree = await getRepositoryTree({ fullName: repo.full_name, treeSHA: repo.default_branch, recursive: true })
+        repoTreeFiles = repoTree.tree.filter(v => v.type === 'blob' && ['.json', '.md'].some(vv => v.path.endsWith(vv)))
+        repoFileContents = await getFileContents(repoTreeFiles)
+    } catch (err) {
+        ctx.throw(500, new APIError(1, err.message))
+    }
+
+    const manifestFile = repoTreeFiles.find(v => v.path === 'manifest.json'),
+        manifestContent = repoFileContents.find(v => v.sha === manifestFile?.sha)
+
+    if (!manifestFile || !manifestContent) {
+        ctx.throw(404, new APIError(1, 'Plugin manifest not found'))
+    }
+
+    const readmeFile = repoTreeFiles.find(v => v.path === 'README.md'),
+        readmeContent = repoFileContents.find(v => v.sha === readmeFile?.sha)
+
+    if (!readmeFile || !readmeContent) {
+        ctx.throw(404, new APIError(1, 'Plugin description not found'))
     }
 
     ctx.status = 200
     ctx.body = {
-        _id: automation._id,
-        data: automation.data
-    }
-}
+        manifest: JSON.parse(manifestContent.content),
+        description: readmeContent.content,
+        puzzles: repoTreeFiles
+            .filter(v => v.path.startsWith('puzzles/') && repoFileContents.some(vv => vv.sha === v.sha))
+            .map(v => {
+                const content = repoFileContents.find(vv => vv.sha === v.sha),
+                    json: CustomCommand | IAutomation = JSON.parse(content.content)
 
-async function getAutomationTasks(ctx: Context) {
-    const automationTasks = await database.automationTasks.find({ published: true }).sort({ total_uses: -1 })
-
-    ctx.status = 200
-    ctx.body = automationTasks.map(i => {
-        return {
-            _id: i._id,
-            name: i.name,
-            total_uses: i.total_uses,
-            uses: i.uses
-        }
-    })
-}
-
-async function publishAutomationTask(ctx: Context) {
-    const guildId = ctx.query.guild_id as string,
-        currentUser: Partial<APIUser> = ctx.state.user
-    const data = ctx.request.body as IAutomation
-
-    if (typeof data?.id !== 'string' || typeof data?.name !== 'string' || typeof data?.trigger !== 'string' || !data?.components?.length) {
-        ctx.throw(400, new APIError(4010))
-    }
-
-    const server = await database.servers.findOne({ _id: guildId })
-
-    if (!server || server.server.blocked) {
-        ctx.throw(404, new APIError(1003))
-    }
-
-    const automation = await database.automationTasks.findOne({ _id: data.id, guild_id: guildId })
-
-    if (automation) {
-        ctx.throw(409, new APIError(2002))
-    }
-
-    await database.automationTasks.create({
-        _id: data.id,
-        author_id: currentUser.id,
-        guild_id: guildId,
-        name: data.name,
-        data: JSON.stringify(data)
-    })
-
-    ctx.status = 204
-}
-
-async function getCustomCommand(ctx: Context) {
-    const commandId = ctx.params.command_id as string
-    const guildId = ctx.query.guild_id as string
-
-    const command = await database.customCommands.findOne({ _id: commandId, published: true })
-
-    if (!command) {
-        ctx.throw(404, new APIError(1011))
-    }
-
-    const server = await database.servers.findOne({ _id: guildId })
-
-    if (!server || server.server.blocked) {
-        ctx.throw(404, new APIError(1003))
-    }
-
-    if (!command.uses.some(i => i.guild_id === guildId)) {
-        await database.customCommands.updateOne(
-            { _id: commandId },
-            {
-                $push: {
-                    uses: {
-                        guild_id: guildId,
-                        timestamp: Date.now()
-                    }
-                },
-                $inc: {
-                    total_uses: 1
+                return {
+                    type: 'trigger' in json ? 'AUTOMATION' : 'CUSTOM_COMMAND',
+                    data: json
                 }
-            }
-        )
+            })
     }
-
-    ctx.status = 200
-    ctx.body = {
-        _id: command._id,
-        data: command.data
-    }
-}
-
-async function getCustomCommands(ctx: Context) {
-    const commands = await database.customCommands.find({ published: true }).sort({ total_uses: -1 })
-
-    ctx.status = 200
-    ctx.body = commands.map(i => {
-        return {
-            _id: i._id,
-            name: i.name,
-            description: i.description,
-            total_uses: i.total_uses,
-            uses: i.uses
-        }
-    })
-}
-
-async function publishCustomCommand(ctx: Context) {
-    const guildId = ctx.query.guild_id as string,
-        currentUser: Partial<APIUser> = ctx.state.user
-    const data = ctx.request.body as ICustomCommand
-
-    if (typeof data?.id !== 'string' || typeof data?.command?.name !== 'string' || typeof data?.command?.description !== 'string') {
-        ctx.throw(400, new APIError(4011))
-    }
-
-    const server = await database.servers.findOne({ _id: guildId })
-
-    if (!server || server.server.blocked) {
-        ctx.throw(404, new APIError(1003))
-    }
-
-    const command = await database.customCommands.findOne({ _id: data.id })
-
-    if (command) {
-        ctx.throw(409, new APIError(2003))
-    }
-
-    await database.customCommands.create({
-        _id: data.id,
-        author_id: currentUser.id,
-        guild_id: guildId,
-        name: data.command.name,
-        description: data.command.description,
-        data: JSON.stringify(data)
-    })
-
-    ctx.status = 204
 }
 
 export default router

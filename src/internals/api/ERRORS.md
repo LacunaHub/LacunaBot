@@ -5,6 +5,7 @@
 | 1002 | Unknown guild                                                   |
 | 1003 | Unknown server                                                  |
 | 1004 | Unknown message                                                 |
+| 1009 | Unknown plugin                                                  |
 | 1010 | Unknown automation                                              |
 | 1011 | Unknown custom command                                          |
 | 1012 | Unknown interactive message                                     |
