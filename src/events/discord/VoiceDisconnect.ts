@@ -3,7 +3,7 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/Automation'
 import { voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
-import { voiceUnassign as levelsVoiceUnassign } from '../../modules/Levels'
+import Levels from '../../modules/Levels'
 import Logs from '../../modules/Logs'
 import { deleteTemporaryVoice } from '../../modules/VoiceManager'
 
@@ -32,7 +32,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
 
     await Automation.handleEvent('VOICE_DISCONNECT', self, server, state)
     await deleteTemporaryVoice(self, server, state, channel)
-    await levelsVoiceUnassign(self, server, state, channel)
+    await Levels.onVoiceDisconnect(self, server, state, channel)
     await economyVoiceUnassign(self, server, state, channel)
 
     const voiceRolesBound = server.modules.voice_manager.voice_roles

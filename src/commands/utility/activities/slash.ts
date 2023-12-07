@@ -3,15 +3,15 @@ import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import Levels from '../../../modules/Levels'
 
-export async function setLevelSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
+export async function assignLevelAward(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const mention = interaction.options?.getMember('user') as GuildMember
-    const set_level = interaction.options?.getInteger('level')
+    const mention = interaction.options?.getMember('user'),
+        awardId = interaction.options?.getString('award')
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.activities.set-level.text_no_mention', {
+            content: `${self._emojis.ERROR} | ${t('commands.activities.assign-level-award.text_no_mention', {
                 user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -20,9 +20,11 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
-    if (!set_level || set_level < 1 || set_level > 2500) {
+    const award = server.modules.levels.awards.find(v => v.id === awardId)
+
+    if (!award) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.activities.set-level.text_no_level', {
+            content: `${self._emojis.ERROR} | ${t('commands.activities.assign-level-award.text_unknown_award', {
                 user: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -32,12 +34,6 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
     }
 
     await interaction.deferReply({ ephemeral: true })
-
-    let total_xp = 0
-
-    for (let i = 0; i < set_level; i++) {
-        total_xp = total_xp + (150 + i * i * 8)
-    }
 
     let user = await self.db.users.findOne({ _id: mention.id })
 
@@ -53,43 +49,94 @@ export async function setLevelSlash(self: Lacuna, server: ServerDocument, intera
         } as any)
     }
 
-    const level = user.activities.levels.find(i => i.guild_id == interaction.guildId)
+    let userLevel = user.activities.levels.find(v => v.guild_id === interaction.guildId)
+    const awardLevel = +(award.conditions ? award.conditions.level : award.level) || 0,
+        awardSentMessages = +award.conditions?.sent_messages || 0,
+        awardVoiceTime = +award.conditions?.voice_time || 0
 
-    if (!level) {
-        await self.db.users.updateOne(
-            { _id: mention.id },
-            {
-                $push: {
-                    'activities.levels': {
-                        guild_id: interaction.guildId,
-                        experience: { total: total_xp, current: 0, level: set_level },
-                        activity: {
-                            total_messages: 0,
-                            last_message_at: null,
-                            total_voice_time: 0,
-                            voice_connected_at: null
-                        }
-                    } as never
-                }
+    if (userLevel) {
+        if (awardLevel > 0 && awardLevel > userLevel.experience.level) {
+            let totalXp = 0
+
+            for (let i = 0; i < awardLevel; i++) {
+                totalXp += 150 + i * i * 8
             }
-        )
-    } else {
+
+            userLevel.experience.current = 0
+            userLevel.experience.level = awardLevel
+            userLevel.experience.total = totalXp
+        }
+
+        if (awardSentMessages > 0 && awardSentMessages > userLevel.activity.total_messages) {
+            userLevel.activity.total_messages = awardSentMessages
+        }
+
+        if (awardVoiceTime > 0 && awardVoiceTime > userLevel.activity.total_voice_time) {
+            userLevel.activity.total_voice_time = awardVoiceTime
+        }
+
         await self.db.users.updateOne(
             { _id: mention.id, 'activities.levels.guild_id': interaction.guildId },
             {
                 $set: {
-                    'activities.levels.$.experience.level': set_level,
-                    'activities.levels.$.experience.current': 0,
-                    'activities.levels.$.experience.total': total_xp
+                    'activities.levels.$.activity.total_messages': userLevel.activity.total_messages,
+                    'activities.levels.$.activity.total_voice_time': userLevel.activity.total_voice_time,
+                    'activities.levels.$.experience.current': userLevel.experience.current,
+                    'activities.levels.$.experience.level': userLevel.experience.level,
+                    'activities.levels.$.experience.total': userLevel.experience.total
+                }
+            }
+        )
+    } else {
+        let level = 0,
+            totalXp = 0,
+            sentMessages = 0,
+            voiceTime = 0
+
+        if (awardLevel > 0) {
+            level = awardLevel
+
+            for (let i = 0; i < awardLevel; i++) {
+                totalXp += 150 + i * i * 8
+            }
+        }
+
+        if (awardSentMessages > 0) {
+            sentMessages = awardSentMessages
+        }
+
+        if (awardVoiceTime > 0) {
+            voiceTime = awardVoiceTime
+        }
+
+        userLevel = {
+            guild_id: interaction.guildId,
+            experience: {
+                current: 0,
+                level: level,
+                total: totalXp
+            },
+            activity: {
+                total_messages: sentMessages,
+                last_message_at: null,
+                total_voice_time: voiceTime,
+                voice_connected_at: null
+            }
+        }
+
+        await self.db.users.updateOne(
+            { _id: mention.id },
+            {
+                $push: {
+                    'activities.levels': userLevel
                 }
             }
         )
     }
 
-    await Levels.updateAwards(self, server, { member: mention, level: set_level })
-
+    await Levels.updateAwards(self, server, mention, userLevel, award)
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.activities.set-level.text_set_success', {
+        content: `${self._emojis.OK} | ${t('commands.activities.assign-level-award.text_award_assigned', {
             user: `**${interaction.member.displayName}**`
         })}`
     })

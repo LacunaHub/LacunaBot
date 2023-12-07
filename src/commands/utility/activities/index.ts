@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType } from 'discord.js'
-import { addWalletBalanceSlash, resetLevelSlash, resetWalletSlash, setLevelSlash, setWalletBalanceSlash } from './slash'
+import { addWalletBalanceSlash, assignLevelAward, resetLevelSlash, resetWalletSlash, setWalletBalanceSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
@@ -10,22 +10,21 @@ export default {
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
-            name: 'set-level',
-            description: `commands.${name}.set-level.description`,
+            name: 'assign-level-award',
+            description: `commands.${name}.assign-level-award.description`,
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
                     name: 'common.command_options.user',
-                    description: `commands.${name}.set-level.options.user.description`,
+                    description: `commands.${name}.assign-level-award.options.user.description`,
                     required: true
                 },
                 {
-                    type: ApplicationCommandOptionType.Integer,
-                    name: 'common.command_options.level',
-                    description: `commands.${name}.set-level.options.level.description`,
+                    type: ApplicationCommandOptionType.String,
+                    name: 'common.command_options.award',
+                    description: `commands.${name}.assign-level-award.options.award.description`,
                     required: true,
-                    min_value: 1,
-                    max_value: 2500
+                    autocomplete: true
                 }
             ]
         },
@@ -127,8 +126,8 @@ export default {
     group: 'UTILITY',
     subcommands: [
         {
-            name: 'set-level',
-            slash: setLevelSlash
+            name: 'assign-level-award',
+            slash: assignLevelAward
         },
         {
             name: 'set-wallet-balance',

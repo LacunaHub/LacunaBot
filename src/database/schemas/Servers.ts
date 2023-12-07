@@ -1876,19 +1876,25 @@ export type InteractiveMessageReactionOption = 'MODIFY_ROLES' | 'OVERWRITE_CHANN
 
 export interface LevelAward {
     id: string
-    type: 'CHANNEL' | 'ROLE'
+    type: 'ROLE'
     level: number
-    single: boolean
+    /** @deprecated */
+    single?: boolean
     references: string[]
     remove_references?: string[]
     alert: {
         active: boolean
-        format: 'DM' | 'CHANNEL' | 'CURRENT_CHANNEL'
+        format: 'DM' | 'CHANNEL'
         channel_id: string
         message: {
             content: string
             embed: MessageEmbed
         }
+    }
+    conditions?: {
+        level: number
+        voice_time: number
+        sent_messages: number
     }
 }
 

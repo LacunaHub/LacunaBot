@@ -40,14 +40,14 @@
             "query": "запрос",
             "source": "источник",
             "volume": "громкость",
-            "level": "уровень",
             "prize": "приз",
             "winners_amount": "кол-во-победителей",
             "sponsor": "спонсор",
             "quiz_mode": "режим-викторины",
             "multiple_answers": "множественный-выбор",
             "role": "роль",
-            "time": "время"
+            "time": "время",
+            "award": "награда"
         },
         "permissions_keys": {
             "CREATE_INSTANT_INVITE": "Создавать приглашения",
@@ -574,19 +574,19 @@
 
         "activities": {
             "description": "Управление активностями",
-            "set-level": {
-                "description": "Установить уровень пользователю",
+            "assign-level-award": {
+                "description": "Назначить награду пользователю",
                 "options": {
                     "user": {
-                        "description": "Кому необходимо установить уровень"
+                        "description": "Кому необходимо назначить награду"
                     },
-                    "level": {
-                        "description": "Какой уровень необходимо установить"
+                    "award": {
+                        "description": "Выберите из списка или введите идентификатор награды"
                     }
                 },
-                "text_no_mention": "{user}, пожалуйста, укажите пользователя",
-                "text_no_level": "{user}, уровень должен быть в диапазоне от 1 до 2500",
-                "text_set_success": "{user}, уровень успешно установлен"
+                "text_no_mention": "{user}, пожалуйста, укажите пользователя, которому хотите назначить награду",
+                "text_unknown_award": "{user}, не удалось найти награду",
+                "text_award_assigned": "{user}, награда успешно назначена"
             },
             "add-wallet-balance": {
                 "description": "Добавить валюту пользователю",
