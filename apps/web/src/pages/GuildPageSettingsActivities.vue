@@ -411,21 +411,13 @@
 
         <q-card-section>
           <div class="row q-col-gutter-md">
-            <div
-              v-for="award in guild.modules.levels.awards.sort((a, b) => a.level - b.level)"
-              :key="award.id"
-              class="col-12 col-sm-6 col-md-4"
-            >
+            <div v-for="award in guild.modules.levels.awards" :key="award.id" class="col-12 col-sm-6 col-md-4">
               <q-card class="bg-dark-2" flat>
                 <q-item
                   @click="awardDialog(award)"
                   :disable="!guild.modules.levels.active && !guild.modules.levels.voice"
                   clickable
                 >
-                  <q-item-section side>
-                    <q-item-label>Lv. {{ award.level }}</q-item-label>
-                  </q-item-section>
-
                   <q-item-section>
                     <q-item-label class="ellipsis">
                       {{ award.references.map(i => guild.roles.find(j => i === j.id)?.name ?? i).join(', ') }}

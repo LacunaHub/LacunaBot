@@ -512,3 +512,7 @@ export function handleAxiosError(error) {
         status: null
     }
 }
+
+export function hmsToMS(hms) {
+    return hms.split(':').reduce((x, y) => 60 * x + +y, 0) * 1000
+}

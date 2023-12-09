@@ -5,23 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('level_award.level_title') }}
-            </div>
-
-            <q-input
-              v-model.number="award.level"
-              class="q-pt-sm"
-              type="number"
-              filled
-              dense
-              hide-bottom-space
-              @update:model-value="onChangeLevel"
-            ></q-input>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('pages.guild.ac_levels_awards_title') }}
+              {{ $t('common.add_roles') }}
             </div>
 
             <q-select
@@ -67,7 +51,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('level_award.remove_references_title') }}
+              {{ $t('common.remove_roles') }}
             </div>
 
             <q-select
@@ -116,17 +100,92 @@
 
       <div class="q-pa-md">
         <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-          <q-item tag="label">
-            <q-item-section side>
-              <q-checkbox v-model="award.single" dense></q-checkbox>
-            </q-item-section>
+          <q-expansion-item :model-value="true">
+            <template #header>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('level_award.award_conditions_title') }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-            <q-item-section>
-              <q-item-label>
-                {{ $t('level_award.next_remove_title') }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+            <q-card class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('level_award.required_level_title') }}
+                    </div>
+
+                    <q-input
+                      v-model.number="award.conditions.level"
+                      class="q-pt-sm"
+                      type="number"
+                      filled
+                      dense
+                      hide-bottom-space
+                      @update:model-value="onChangeLevel"
+                    >
+                      <template #append>
+                        <q-icon
+                          :name="award.conditions.level > 0 ? 'radio_button_checked' : 'radio_button_unchecked'"
+                          :color="award.conditions.level > 0 ? 'primary' : ''"
+                        ></q-icon>
+                      </template>
+                    </q-input>
+                  </div>
+
+                  <div class="col-12">
+                    <div>
+                      {{ $t('level_award.required_voice_time_title') }}
+                    </div>
+
+                    <q-input
+                      v-model.trim="awardVoiceTime"
+                      class="q-pt-sm"
+                      mask="#:##:##"
+                      fill-mask
+                      reverse-fill-mask
+                      filled
+                      dense
+                      hide-bottom-space
+                      @update:model-value="onChangeVoiceTime"
+                    >
+                      <template #append>
+                        <q-icon
+                          :name="award.conditions.voice_time > 0 ? 'radio_button_checked' : 'radio_button_unchecked'"
+                          :color="award.conditions.voice_time > 0 ? 'primary' : ''"
+                        ></q-icon>
+                      </template>
+                    </q-input>
+                  </div>
+
+                  <div class="col-12">
+                    <div>
+                      {{ $t('level_award.required_number_of_sent_messages_title') }}
+                    </div>
+
+                    <q-input
+                      v-model.number="award.conditions.sent_messages"
+                      class="q-pt-sm"
+                      type="number"
+                      filled
+                      dense
+                      hide-bottom-space
+                      @update:model-value="onChangeSentMessages"
+                    >
+                      <template #append>
+                        <q-icon
+                          :name="award.conditions.sent_messages > 0 ? 'radio_button_checked' : 'radio_button_unchecked'"
+                          :color="award.conditions.sent_messages > 0 ? 'primary' : ''"
+                        ></q-icon>
+                      </template>
+                    </q-input>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
 
           <q-expansion-item tag="label">
             <template #header>
@@ -136,7 +195,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('level_award.custom_alert_title') }}
+                  {{ $t('level_award.award_message_title') }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -152,6 +211,7 @@
                     <q-select
                       v-model="award.alert.format"
                       :options="['DM', 'CHANNEL']"
+                      :disable="!award.alert.active"
                       class="q-pt-sm"
                       filled
                       dense
@@ -190,7 +250,7 @@
                       :options="guild.channelsText"
                       option-label="name"
                       option-value="id"
-                      :disable="award.alert.format !== 'CHANNEL'"
+                      :disable="!award.alert.active || award.alert.format !== 'CHANNEL'"
                       class="q-pt-sm"
                       filled
                       dense
@@ -232,7 +292,12 @@
                       {{ $t('pages.guild.gs_message_template_title') }}
                     </div>
 
-                    <MessageEditor :message="award.alert.message" avlReplacers="guild member" class="q-pt-sm" />
+                    <MessageEditor
+                      :message="award.alert.message"
+                      :disable="!award.alert.active"
+                      avlReplacers="guild member"
+                      class="q-pt-sm"
+                    />
                   </div>
                 </div>
               </q-card-section>
@@ -269,7 +334,7 @@
               color="primary"
               @click="onConfirm"
             >
-              <q-list dense>
+              <q-list>
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
@@ -286,114 +351,107 @@
   </q-dialog>
 </template>
 
-<script>
-import { useDialogPluginComponent } from 'quasar'
+<script setup>
+import numbro from 'numbro'
+import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
-import { suid } from 'src/utils/Utils'
-import { computed, defineComponent, ref } from 'vue'
+import { hmsToMS, suid } from 'src/utils/Utils'
+import { computed, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
-export default defineComponent({
-  name: 'ActivitiesLevelAward',
-
-  emits: [...useDialogPluginComponent.emits],
-
-  props: {
-    awardProp: {
-      type: Object,
-      default: null
-    }
-  },
-
-  components: {
-    MessageEditor
-  },
-
-  setup(props) {
-    const guild = useGuildStore()
-    const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
-
-    const mode = ref(props.awardProp ? 'UPDATE' : 'CREATE')
-    const award = ref(
-      mode.value === 'UPDATE'
-        ? JSON.parse(JSON.stringify(props.awardProp))
-        : {
-            id: suid(6),
-            type: 'ROLE',
-            level: 1,
-            single: false,
-            references: [],
-            remove_references: [],
-            alert: {
-              active: false,
-              format: 'DM',
-              channel_id: null,
-              message: {
-                content: '',
-                embed: {
-                  active: false,
-                  title: null,
-                  description: null,
-                  url: null,
-                  timestamp: null,
-                  color: null,
-                  footer: { text: null, icon_url: null },
-                  image: { url: null },
-                  thumbnail: { url: null },
-                  author: { name: null, url: null, icon_url: null },
-                  fields: []
-                }
-              }
-            }
-          }
-    )
-
-    if (typeof award.value.remove_references === 'undefined') {
-      award.value.remove_references = []
-    }
-
-    const isValid = computed(() => {
-      return (
-        award.value.references.length &&
-        award.value.level &&
-        !guild.modules.levels.awards.some(i => i.level === award.value.level && i.id !== award.value.id)
-      )
-    })
-
-    return {
-      guild,
-      dialogRef,
-      mode,
-      award,
-      isValid,
-
-      onConfirm() {
-        if (isValid.value) {
-          onDialogOK({ mode: mode.value, award: award.value })
-        }
-      },
-
-      onCancel() {
-        onDialogCancel()
-      },
-
-      onDismiss() {
-        onDialogHide()
-      },
-
-      onDelete() {
-        onDialogOK({ mode: 'DELETE', award: award.value })
-      }
-    }
-  },
-
-  methods: {
-    onChangeLevel(value) {
-      if (isNaN(value) || value < 1) value = 1
-      if (value > 2500) value = 2500
-
-      this.award.level = value
-    }
+defineEmits(useDialogPluginComponent.emits)
+const props = defineProps({
+  awardProp: {
+    type: Object,
+    default: null
   }
 })
+
+const $q = useQuasar(),
+  { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
+
+const guild = useGuildStore()
+
+const mode = ref(props.awardProp ? 'UPDATE' : 'CREATE')
+const award = ref({
+    id: suid(6),
+    type: 'ROLE',
+    level: 1,
+    references: [],
+    remove_references: [],
+    alert: {
+      active: false,
+      format: 'DM',
+      channel_id: null,
+      message: {
+        content: '',
+        embed: {
+          active: false,
+          title: null,
+          description: null,
+          url: null,
+          timestamp: null,
+          color: null,
+          footer: { text: null, icon_url: null },
+          image: { url: null },
+          thumbnail: { url: null },
+          author: { name: null, url: null, icon_url: null },
+          fields: []
+        }
+      }
+    },
+    conditions: {
+      level: 1,
+      voice_time: 0,
+      sent_messages: 0
+    },
+    ...JSON.parse(JSON.stringify(props.awardProp))
+  }),
+  awardVoiceTime = ref(numbro(award.value.conditions.voice_time).format({ output: 'time' })),
+  isValid = computed(() => {
+    return (
+      award.value.references.length &&
+      (award.value.conditions.level > 0 ||
+        award.value.conditions.voice_time > 0 ||
+        award.value.conditions.sent_messages > 0)
+    )
+  })
+
+const onChangeLevel = value => {
+  if (isNaN(value) || value <= 0) value = 0
+  if (value >= 2500) value = 2500
+
+  award.value.conditions.level = value
+}
+
+const onChangeVoiceTime = value => {
+  let ms = hmsToMS(value)
+
+  if (isNaN(ms) || ms <= 0) ms = 0
+  if (ms >= Number.MAX_SAFE_INTEGER) ms = Number.MAX_SAFE_INTEGER
+
+  award.value.conditions.voice_time = ms / 1000
+}
+
+const onChangeSentMessages = value => {
+  if (isNaN(value) || value <= 0) value = 0
+  if (value >= Math.pow(2, 31) - 1) value = Math.pow(2, 31) - 1
+
+  award.value.conditions.sent_messages = value
+}
+
+const onConfirm = () => {
+    if (isValid.value) {
+      onDialogOK({ mode: mode.value, award: award.value })
+    }
+  },
+  onCancel = () => {
+    onDialogCancel()
+  },
+  onDismiss = () => {
+    onDialogHide()
+  },
+  onDelete = () => {
+    onDialogOK({ mode: 'DELETE', award: award.value })
+  }
 </script>

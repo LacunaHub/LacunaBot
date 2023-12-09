@@ -403,10 +403,11 @@
   },
 
   "level_award": {
-    "level_title": "Уровень",
-    "next_remove_title": "Убирать награду при получении следующей",
-    "custom_alert_title": "Индивидуальное оповещение",
-    "remove_references_title": "Убрать роли при получении награды"
+    "award_conditions_title": "Условия для получения награды",
+    "required_level_title": "Необходимый уровень",
+    "required_voice_time_title": "Необходимое голосовое время",
+    "required_number_of_sent_messages_title": "Необходимое количество отправленных сообщений",
+    "award_message_title": "Сообщение при получении награды"
   },
 
   "economy_currency": {
