@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import { createSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,39 +6,39 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash: () => {},
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.PollCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'create',
-            description: `commands.${name}.create.description`,
+            description: 'Commands.PollCommand.SubCommands.CreateCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: 'common.command_options.quiz_mode',
-                    description: `commands.${name}.create.options.quiz_mode.description`,
+                    name: 'Commands.Options.QuizMode',
+                    description: 'Commands.PollCommand.SubCommands.CreateCommand.Options.QuizMode.Description',
                     choices: [
                         {
-                            name: 'yes',
+                            name: 'Common.Yes',
                             value: 1
                         },
                         {
-                            name: 'no',
+                            name: 'Common.No',
                             value: 0
                         }
                     ]
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: 'common.command_options.multiple_answers',
-                    description: `commands.${name}.create.options.multiple_answers.description`,
+                    name: 'Commands.Options.MultipleAnswers',
+                    description: 'Commands.PollCommand.SubCommands.CreateCommand.Options.MultipleAnswers.Description',
                     choices: [
                         {
-                            name: 'yes',
+                            name: 'Common.Yes',
                             value: 1
                         },
                         {
-                            name: 'no',
+                            name: 'Common.No',
                             value: 0
                         }
                     ]
@@ -54,7 +54,7 @@ export default {
         }
     ],
     permissions: {
-        self: ['EMBED_LINKS'],
-        user: ['MANAGE_MESSAGES']
+        self: new PermissionsBitField(['EmbedLinks']).toArray(),
+        user: new PermissionsBitField(['ManageMessages']).toArray()
     }
 }

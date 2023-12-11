@@ -19,11 +19,11 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
 
             if (before.username !== user.username) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.user_update_title'))
-                    .setDescription(t('logs.user_update_name_change_template', { user: `**${user.tag}**` }))
+                    .setTitle(t('Logs.UserUpdated'))
+                    .setDescription(t('Logs.UserUpdatedName', { username: `**${user.tag}**` }))
                     .addFields([
-                        { name: t('logs.before_change'), value: before.username, inline: true },
-                        { name: t('logs.after_change'), value: user.username, inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.username, inline: true },
+                        { name: t('Logs.AfterChange'), value: user.username, inline: true }
                     ])
                     .setFooter({ text: user.id })
                     .setTimestamp()
@@ -49,11 +49,11 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
 
             if (before.discriminator !== user.discriminator) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.user_update_title'))
-                    .setDescription(t('logs.user_update_discriminator_change_template', { user: `**${user.tag}**` }))
+                    .setTitle(t('Logs.UserUpdated'))
+                    .setDescription(t('Logs.UserUpdatedDiscriminator', { username: `**${user.tag}**` }))
                     .addFields([
-                        { name: t('logs.before_change'), value: before.discriminator, inline: true },
-                        { name: t('logs.after_change'), value: user.discriminator, inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.discriminator, inline: true },
+                        { name: t('Logs.AfterChange'), value: user.discriminator, inline: true }
                     ])
                     .setFooter({ text: user.id })
                     .setTimestamp()

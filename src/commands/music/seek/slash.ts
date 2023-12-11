@@ -10,8 +10,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -21,7 +21,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (player.voiceChannelId !== interaction.member.voice.channelId) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.next.text_different_voice', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -32,8 +34,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!currentTrack.isSeekable || typeof currentTrack.duration !== 'number') {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.seek.text_track_is_not_seekable', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.SeekCommand.Texts.TrackIsNotSeekable', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -44,7 +46,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     let seekPosition: number = 0
 
     if (interaction.isChatInputCommand()) {
-        const timeOption = interaction.options?.getString('время') ?? numbro((player.position + 5000) / 1000).format({ output: 'time' })
+        const timeOption = interaction.options?.getString('time') ?? numbro((player.position + 5000) / 1000).format({ output: 'time' })
         seekPosition = hmsToMS(timeOption)
 
         if (!seekPosition || isNaN(seekPosition)) seekPosition = player.position + 5000
@@ -59,8 +61,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await interaction.deferReply({ ephemeral: interaction.isButton() })
     await player.seek(seekPosition)
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.seek.text_track_rewound_to_position', {
-            user: `**${interaction.member.displayName}**`,
+        content: `${self._emojis.OK} | ${t('Commands.SeekCommand.Texts.TrackRewoundToPosition', {
+            username: `**${interaction.member.displayName}**`,
             time: numbro(seekPosition / 1000).format({ output: 'time' })
         })}`
     })

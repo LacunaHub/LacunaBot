@@ -18,10 +18,10 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             if (!webhook) return false
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.guild_member_remove_title'))
+                .setTitle(t('Logs.GuildMemberRemoved'))
                 .setDescription(`${member.user.tag} (${member.id})`)
                 .addFields([
-                    { name: t('logs.guild_member_count'), value: member.guild.memberCount.toString() },
+                    { name: t('Commands.ServerCommand.Texts.MemberCount'), value: member.guild.memberCount.toString() },
                     { name: '\u200B', value: '\u200B', inline: true }
                 ])
                 .setTimestamp()

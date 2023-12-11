@@ -18,15 +18,15 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             if (!webhook) return false
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.guild_member_add_title'))
+                .setTitle(t('Logs.GuildMemberAdded'))
                 .setDescription(`${member.user.tag} (${member.id})`)
                 .addFields([
                     {
-                        name: t('commands.user.text_registration_date'),
+                        name: t('Commands.UserCommand.Texts.AccountRegistrationDate'),
                         value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`,
                         inline: true
                     },
-                    { name: t('logs.guild_member_count'), value: member.guild.memberCount.toString(), inline: true }
+                    { name: t('Commands.ServerCommand.Texts.MemberCount'), value: member.guild.memberCount.toString(), inline: true }
                 ])
                 .setTimestamp()
                 .setColor('#2FDF84')

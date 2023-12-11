@@ -23,9 +23,9 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
             const executor = audit?.entries?.first()?.executor
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.sticker_delete_title'))
+                .setTitle(t('Logs.StickerDeleted'))
                 .setDescription(
-                    t('logs.sticker_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, sticker: `**${sticker.name}**` })
+                    t('Logs.StickerDeletedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, sticker: `**${sticker.name}**` })
                 )
                 .setFooter({ text: sticker.id })
                 .setTimestamp()

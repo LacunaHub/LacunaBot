@@ -5,6 +5,6 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.QueueCommand.Description',
     group: 'MUSIC'
 }

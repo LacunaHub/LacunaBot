@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,24 +6,24 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.KickCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.User,
-            name: 'common.command_options.user',
-            description: `commands.${name}.options.user.description`,
+            name: 'Commands.Options.User',
+            description: 'Commands.KickCommand.Options.User.Description',
             required: true
         },
         {
             type: ApplicationCommandOptionType.String,
-            name: 'common.command_options.reason',
-            description: `commands.${name}.options.reason.description`,
+            name: 'Commands.Options.Reason',
+            description: 'Commands.KickCommand.Options.Reason.Description',
             required: false
         }
     ],
     group: 'MODERATION',
     permissions: {
-        self: ['EMBED_LINKS', 'KICK_MEMBERS'],
-        user: ['KICK_MEMBERS']
+        self: new PermissionsBitField(['EmbedLinks', 'KickMembers']).toArray(),
+        user: new PermissionsBitField(['KickMembers']).toArray()
     }
 }

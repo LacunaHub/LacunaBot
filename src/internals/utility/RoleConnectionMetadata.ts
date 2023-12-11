@@ -2,8 +2,8 @@ import { ApplicationRoleConnectionMetadataType } from 'discord.js'
 
 export default [
     {
-        name: 'role_connections.registration_date.name',
-        description: 'role_connections.registration_date.description',
+        name: 'RoleConnections.RegistrationDate.Name',
+        description: 'RoleConnections.RegistrationDate.Description',
         key: 'account_created_at',
         type: ApplicationRoleConnectionMetadataType.DatetimeGreaterThanOrEqual
     }

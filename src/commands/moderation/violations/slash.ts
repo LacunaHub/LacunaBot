@@ -25,8 +25,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!violator || !violator.violations.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.violations.text_no_violations', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.ViolationsCommand.Texts.ThisUserHasNoViolations', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -39,15 +39,15 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         const embed = new EmbedBuilder()
             .setAuthor({
-                name: t('commands.violations.text_user_violations', { target: mention.user.tag }),
+                name: t('Commands.ViolationsCommand.Texts.UserViolations', { target: mention.user.tag }),
                 iconURL: mention.user.displayAvatarURL()
             })
             .addFields([
-                { name: t('commands.violations.text_last_24_hours'), value: last24Hr.length.toString(), inline: true },
-                { name: t('commands.violations.text_last_7_days'), value: last7d.length.toString(), inline: true },
-                { name: t('commands.violations.text_total_violations'), value: violator.violations.length.toString(), inline: true },
+                { name: t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours'), value: last24Hr.length.toString(), inline: true },
+                { name: t('Commands.ViolationsCommand.Texts.ViolationsIn7Days'), value: last7d.length.toString(), inline: true },
+                { name: t('Commands.ViolationsCommand.Texts.TotalViolations'), value: violator.violations.length.toString(), inline: true },
                 {
-                    name: t('commands.violations.text_last_10_violations'),
+                    name: t('Commands.ViolationsCommand.Texts.Last10Violations'),
                     value: last10Violations
                         .map((v, i) => `${i + 1}. **${v.reason || '-'}** – <t:${Math.round(v.timestamp / 1000)}:R> \`${v.id}\``)
                         .join('\n')
@@ -60,8 +60,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!violators.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.violations.text_no_violations_on_server', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.ViolationsCommand.Texts.NoOneHasAnyViolations', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -69,7 +69,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
 
         const chunks: WarningsViolator[][] = chunkArray(violators, 9)
-        const embed = new EmbedBuilder().setTitle(t('commands.violations.text_violator_list')),
+        const embed = new EmbedBuilder().setTitle(t('Commands.ViolationsCommand.Texts.ListOfViolations')),
             embedFields = []
 
         for (const chunk of chunks) {
@@ -80,7 +80,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
                 current.push({
                     name: `#${index + 1}`,
-                    value: `<@!${violator.user_id}>\n**${t('commands.violations.text_total_violations')}**: ${violator.violations.length}`,
+                    value: `<@!${violator.user_id}>\n**${t('Commands.ViolationsCommand.Texts.TotalViolations')}**: ${violator.violations.length}`,
                     inline: true
                 })
             }
@@ -93,19 +93,19 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             new ButtonBuilder()
                 .setCustomId('backward')
                 .setStyle(ButtonStyle.Secondary)
-                .setLabel(t('commands.leaders.text_previous_page'))
+                .setLabel(t('Common.PreviousPage'))
                 .setDisabled(embedFields.length == 1),
             new ButtonBuilder()
                 .setCustomId('forward')
                 .setStyle(ButtonStyle.Secondary)
-                .setLabel(t('commands.leaders.text_next_page'))
+                .setLabel(t('Common.NextPage'))
                 .setDisabled(embedFields.length == 1)
         )
 
         const field = embedFields[page]
 
         const message = (await interaction.editReply({
-            embeds: [embed.setFields(field).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
+            embeds: [embed.setFields(field).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
             components: [row]
         })) as Message
 
@@ -129,9 +129,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             const field: EmbedField[] = embedFields[page]
 
             await i.editReply({
-                embeds: [
-                    embed.setFields(field).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })
-                ],
+                embeds: [embed.setFields(field).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
                 components: [row]
             })
 

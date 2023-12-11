@@ -18,13 +18,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const embed = new EmbedBuilder()
         .setAuthor({ name, iconURL: mention.user.displayAvatarURL() })
         .addFields([
-            { name: t('commands.user.text_registration_date'), value: `<t:${created_ts}:R>`, inline: true },
-            { name: t('commands.user.text_join_date'), value: `<t:${joined_ts}:R>`, inline: true },
+            { name: t('Commands.UserCommand.Texts.AccountRegistrationDate'), value: `<t:${created_ts}:R>`, inline: true },
+            { name: t('Commands.UserCommand.Texts.DateOfJoiningServer'), value: `<t:${joined_ts}:R>`, inline: true },
             {
-                name: `${t('common.roles')} [${mention.roles.cache.filter(r => r.id != interaction.guild.id).size}]`,
+                name: `${t('Common.Roles')} [${mention.roles.cache.filter(r => r.id !== interaction.guildId).size}]`,
                 value:
                     mention.roles.cache
-                        .filter(r => r.id != interaction.guild.id)
+                        .filter(r => r.id !== interaction.guildId)
                         .map(role => `<@&${role.id}>`)
                         .join(' ') || '-'
             }
@@ -38,11 +38,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         embed.addFields([
             {
-                name: t('commands.report.text_recent_reports'),
+                name: t('Commands.ReportCommand.Texts.RecentReports'),
                 value: `
-                    **${t('commands.report.text_total_reports')}**: ${user.reports.length}
-                    **${t('commands.violations.text_last_24_hours')}**: ${last24h.length}
-                    **${t('commands.violations.text_last_7_days')}**: ${last7d.length}
+                    **${t('Commands.ReportCommand.Texts.ReportCount')}**: ${user.reports.length}
+                    **${t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours')}**: ${last24h.length}
+                    **${t('Commands.ViolationsCommand.Texts.ViolationsIn7Days')}**: ${last7d.length}
                 `
             },
             ...last5Reports.map(i => {
@@ -57,7 +57,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setStyle(ButtonStyle.Link)
-            .setLabel(t('commands.user.text_avatar_link'))
+            .setLabel(t('Commands.UserCommand.Texts.LinkToAvatar'))
             .setURL(mention.user.displayAvatarURL({ size: 512 }))
     )
 
@@ -66,7 +66,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         row.addComponents(
             new ButtonBuilder()
                 .setStyle(ButtonStyle.Link)
-                .setLabel(t('commands.user.text_banner_link'))
+                .setLabel(t('Commands.UserCommand.Texts.LinkToBanner'))
                 .setURL(mention.user.bannerURL({ size: 1024 }))
         )
     }

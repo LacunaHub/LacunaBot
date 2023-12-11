@@ -2,16 +2,17 @@ import { createEnum } from './Utils'
 
 export const commandOptionTypes = createEnum([
     null,
-    'SUB_COMMAND',
-    'SUB_COMMAND_GROUP',
-    'STRING',
-    'INTEGER',
-    'BOOLEAN',
-    'USER',
-    'CHANNEL',
-    'ROLE',
-    'MENTIONABLE',
-    'NUMBER'
+    'SubCommand',
+    'SubCommandGroup',
+    'String',
+    'Integer',
+    'Boolean',
+    'User',
+    'Channel',
+    'Role',
+    'Mentionable',
+    'Number',
+    'Attachment'
 ])
 
 export const lavalinkSources = {
@@ -49,4 +50,4 @@ export const emojiLetters = [
     '🇿'
 ]
 
-export const guildVerificationLevelNames = ['NONE', 'LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH']
+export const guildVerificationLevelNames = ['None', 'Low', 'Medium', 'High', 'VeryHigh']

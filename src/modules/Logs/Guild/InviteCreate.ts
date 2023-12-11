@@ -18,11 +18,11 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
             if (!webhook) return false
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.invite_create_title'))
+                .setTitle(t('Logs.InviteCreated'))
                 .addFields([
-                    { name: t('logs.invite_code'), value: `[${invite.code}](${invite.url})`, inline: true },
-                    { name: t('common.channel'), value: `<#${invite.channel.id}>`, inline: true },
-                    { name: t('logs.invite_inviter'), value: invite.inviter?.tag ?? '-', inline: true }
+                    { name: t('Logs.InviteCode'), value: `[${invite.code}](${invite.url})`, inline: true },
+                    { name: t('Commands.OptionTypes.Channel'), value: `<#${invite.channel.id}>`, inline: true },
+                    { name: t('Logs.InviteInviter'), value: invite.inviter?.tag ?? '-', inline: true }
                 ])
                 .setTimestamp()
                 .setColor('#2FDF84')

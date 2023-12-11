@@ -8,7 +8,7 @@ import { caseLog, warnings } from '../Moderation'
 import Replacer from '../Replacer'
 
 export default async function (self: Lacuna, server: ServerDocument, message: Message) {
-    let reason = self.i18n.t(server.locale, 'audit_reasons.automoder_swear_filter')
+    let reason = 'AutoMod: Swear filter'
     const config = server.moderation.automoder.swear_filter
 
     if (!config.active) return false

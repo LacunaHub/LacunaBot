@@ -11,8 +11,8 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.add.text_user_not_found', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.WarnCommand.SubCommands.AddCommand.Texts.InvalidUser', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -22,7 +22,9 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (mention.id == interaction.user.id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.add.text_self_action', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.WarnCommand.SubCommands.AddCommand.Texts.YouCannotWarnYourself', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -31,7 +33,9 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (server.moderation.respect_hierarchy && mention.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -40,8 +44,8 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.ManageRoles)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -51,8 +55,8 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -64,8 +68,8 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
     await warnings.addWarn(self, server, interaction, { target: mention, executor: interaction.member, reason: reason })
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.warn.add.text_user_warned', {
-            user: `**${interaction.member.displayName}**`,
+        content: `${self._emojis.OK} | ${t('Commands.WarnCommand.SubCommands.AddCommand.Texts.UserHasBeenWarned', {
+            username: `**${interaction.member.displayName}**`,
             target: `**${mention.user.tag}**`
         })}`
     })
@@ -82,8 +86,8 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_user_not_found', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.WarnCommand.SubCommands.RemoveCommand.Texts.InvalidUser', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -93,8 +97,8 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!warn_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_warn_id', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.WarnCommand.SubCommands.RemoveCommand.Texts.NoWarnId', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -106,8 +110,8 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!violator || !violator.violations.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_no_violator_or_violations', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.WarnCommand.SubCommands.RemoveCommand.Texts.ThisUserHasNoViolations', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -130,8 +134,8 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         )
 
         await interaction.editReply({
-            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warns_removed_all', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.OK} | ${t('Commands.WarnCommand.SubCommands.RemoveCommand.Texts.AllUserWarnsHaveBeenRemoved', {
+                username: `**${interaction.member.displayName}**`
             })}`
         })
     } else {
@@ -139,8 +143,8 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
 
         if (!violation) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.warn.remove.text_invalid_warn_id', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.WarnCommand.SubCommands.RemoveCommand.Texts.InvalidWarnId', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -159,7 +163,9 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         )
 
         await interaction.editReply({
-            content: `${self._emojis.OK} | ${t('commands.warn.remove.text_warn_removed', { user: `**${interaction.member.displayName}**` })}`
+            content: `${self._emojis.OK} | ${t('Commands.WarnCommand.SubCommands.RemoveCommand.Texts.UserWarnHasBeenRemoved', {
+                username: `**${interaction.member.displayName}**`
+            })}`
         })
     }
 

@@ -14,19 +14,19 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     const fields = []
     let chunks: Array<IUserLevel[] | IUserWallet[]> = []
-    const sorting_choices = Object.values(locale.commands.leaders.options.sorting.choices)
+    const sorting_choices = [locale.Commands.LeadersCommand.Options.Sorting.ChoiceLevel, locale.Commands.LeadersCommand.Options.Sorting.ChoiceBalance]
 
     if (sorting > sorting_choices.length || sorting < 1) sorting = 1
 
-    const embed = new EmbedBuilder().setTitle(t('commands.leaders.text_leaders_by', { sort: sorting_choices[sorting - 1] }))
+    const embed = new EmbedBuilder().setTitle(t('Commands.LeadersCommand.Texts.ServerLeadersBy', { sortBy: sorting_choices[sorting - 1] }))
 
     await interaction.deferReply({ ephemeral: true })
 
     if (sorting === 1) {
         if (!server.modules.levels.active && !server.modules.levels.voice) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_levels_disabled', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.LevelsIsDisabled', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -40,7 +40,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!activities?.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_no_levels', { user: `**${interaction.member.displayName}**` })}`
+                content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.NoLevelsYet', {
+                    username: `**${interaction.member.displayName}**`
+                })}`
             })
 
             return false
@@ -67,7 +69,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
                 current.push({
                     name: `#${index + 1}`,
-                    value: `<@!${(level as any)?.user?.id}>\n${t('commands.leaders.text_level', {
+                    value: `<@!${(level as any)?.user?.id}>\n${t('Commands.LeadersCommand.Texts.CurrentLevel', {
                         level: level.experience.level
                     })} → :sparkles: ${currentXp} – ${totalXp}\n:incoming_envelope: ${level.activity.total_messages} :microphone2: ${voiceTime}`,
                     inline: true
@@ -81,8 +83,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (sorting === 2) {
         if (!server.modules.economy.active) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -96,8 +98,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!activities?.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.leaders.text_no_wallets', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.NoWalletsYet', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -137,19 +139,19 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         new ButtonBuilder()
             .setCustomId('backward')
             .setStyle(ButtonStyle.Secondary)
-            .setLabel(t('commands.leaders.text_previous_page'))
+            .setLabel(t('Common.PreviousPage'))
             .setDisabled(fields.length == 1),
         new ButtonBuilder()
             .setCustomId('forward')
             .setStyle(ButtonStyle.Secondary)
-            .setLabel(t('commands.leaders.text_next_page'))
+            .setLabel(t('Common.NextPage'))
             .setDisabled(fields.length == 1)
     )
 
     const field = fields[page]
 
     const message = (await interaction.editReply({
-        embeds: [embed.setFields(field).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
+        embeds: [embed.setFields(field).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
         components: [row]
     })) as Message
 
@@ -173,7 +175,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         const field = fields[page]
 
         await i.editReply({
-            embeds: [embed.setFields(field).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })],
+            embeds: [embed.setFields(field).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
             components: [row]
         })
 

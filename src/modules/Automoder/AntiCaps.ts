@@ -8,7 +8,7 @@ import { caseLog, warnings } from '../Moderation'
 import Replacer from '../Replacer'
 
 export default async function (self: Lacuna, server: ServerDocument, message: Message) {
-    let reason = self.i18n.t(server.locale, 'audit_reasons.automoder_anti_caps')
+    let reason = 'AutoMod: Anti-CAPS'
     const config = server.moderation.automoder.anti_caps
 
     if (!config.active) return false

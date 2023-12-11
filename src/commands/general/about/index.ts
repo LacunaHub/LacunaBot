@@ -1,3 +1,4 @@
+import { PermissionsBitField } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -5,9 +6,9 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.AboutCommand.Description',
     group: 'GENERAL',
     permissions: {
-        self: ['EMBED_LINKS']
+        self: new PermissionsBitField(['EmbedLinks']).toArray()
     }
 }

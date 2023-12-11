@@ -24,16 +24,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
 
             if (before.name !== role.name) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.role_update_title'))
+                    .setTitle(t('Logs.RoleUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.role_update_name_change_template', { role: `<@&${role.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.RoleUpdatedName', { role: `<@&${role.id}>` })
                         })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: before.name, inline: true },
-                        { name: t('logs.after_change'), value: role.name, inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.name, inline: true },
+                        { name: t('Logs.AfterChange'), value: role.name, inline: true }
                     ])
                     .setFooter({ text: role.id })
                     .setTimestamp()
@@ -59,16 +59,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
 
             if (before.hexColor !== role.hexColor) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.role_update_title'))
+                    .setTitle(t('Logs.RoleUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.role_update_color_change_template', { role: `<@&${role.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.RoleUpdatedColor', { role: `<@&${role.id}>` })
                         })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: `\`${before.hexColor}\``, inline: true },
-                        { name: t('logs.after_change'), value: `\`${role.hexColor}\``, inline: true }
+                        { name: t('Logs.BeforeChange'), value: `\`${before.hexColor}\``, inline: true },
+                        { name: t('Logs.AfterChange'), value: `\`${role.hexColor}\``, inline: true }
                     ])
                     .setFooter({ text: role.id })
                     .setTimestamp()
@@ -94,11 +94,11 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
 
             if (before.permissions !== role.permissions) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.role_update_title'))
+                    .setTitle(t('Logs.RoleUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.role_update_permissions_change_template', { role: `<@&${role.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.RoleUpdatedPermissions', { role: `<@&${role.id}>` })
                         })
                     )
                     .setFooter({ text: role.id })

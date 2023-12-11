@@ -7,7 +7,7 @@ import TemporaryBan from '../../internals/structures/TemporaryBan'
 import { caseLog } from '../Moderation'
 
 export default async function (self: Lacuna, server: ServerDocument, member: GuildMember) {
-    let reason = self.i18n.t(server.locale, 'audit_reasons.automoder_newbies_moderation')
+    let reason = 'AutoMod: Newbies moderation'
     const config = server.moderation.automoder.newbies
 
     if (!config.active) return false

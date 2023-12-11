@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,18 +6,18 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.SeekCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.String,
-            name: 'common.command_options.time',
-            description: `commands.${name}.options.time.description`,
+            name: 'Commands.Options.Time',
+            description: 'Commands.SeekCommand.Options.Time.Description',
             required: true
         }
     ],
     group: 'MUSIC',
     premium_only: true,
     permissions: {
-        user: ['MANAGE_CHANNELS']
+        user: new PermissionsBitField(['ManageChannels']).toArray()
     }
 }

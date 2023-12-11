@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import { addSlash, removeSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,23 +6,23 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash: () => {},
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.WarnCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'add',
-            description: `commands.${name}.add.description`,
+            description: 'Commands.WarnCommand.SubCommands.AddCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: 'common.command_options.user',
-                    description: `commands.${name}.add.options.user.description`,
+                    name: 'Commands.Options.User',
+                    description: 'Commands.WarnCommand.SubCommands.AddCommand.Options.User.Description',
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.reason',
-                    description: `commands.${name}.add.options.reason.description`,
+                    name: 'Commands.Options.Reason',
+                    description: 'Commands.WarnCommand.SubCommands.AddCommand.Options.Reason.Description',
                     required: false
                 }
             ]
@@ -30,24 +30,24 @@ export default {
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'remove',
-            description: `commands.${name}.remove.description`,
+            description: 'Commands.WarnCommand.SubCommands.RemoveCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: 'common.command_options.user',
-                    description: `commands.${name}.remove.options.user.description`,
+                    name: 'Commands.Options.User',
+                    description: 'Commands.WarnCommand.SubCommands.RemoveCommand.Options.User.Description',
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.warn_id',
-                    description: `commands.${name}.remove.options.warn_id.description`,
+                    name: 'Commands.Options.WarnId',
+                    description: 'Commands.WarnCommand.SubCommands.RemoveCommand.Options.WarnId.Description',
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.reason',
-                    description: `commands.${name}.remove.options.reason.description`,
+                    name: 'Commands.Options.Reason',
+                    description: 'Commands.WarnCommand.SubCommands.RemoveCommand.Options.Reason.Description',
                     required: false
                 }
             ]
@@ -65,7 +65,7 @@ export default {
         }
     ],
     permissions: {
-        self: ['EMBED_LINKS'],
-        user: ['MANAGE_ROLES']
+        self: new PermissionsBitField(['EmbedLinks']).toArray(),
+        user: new PermissionsBitField(['ManageRoles']).toArray()
     }
 }

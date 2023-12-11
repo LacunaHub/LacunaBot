@@ -18,8 +18,10 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             if (!webhook) return false
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.voice_disconnect_title'))
-                .setDescription(t('logs.voice_disconnect_template', { user: `**${state.member.user.tag}**`, channel: `<#${channel?.id ?? '1'}>` }))
+                .setTitle(t('Logs.VoiceDisconnection'))
+                .setDescription(
+                    t('Logs.VoiceDisconnectionTemplate', { username: `**${state.member.user.tag}**`, channel: `<#${channel?.id ?? '1'}>` })
+                )
                 .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#EF5350')

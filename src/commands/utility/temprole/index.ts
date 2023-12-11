@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,30 +6,30 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.TemproleCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.User,
-            name: 'common.command_options.user',
-            description: `commands.${name}.options.user.description`,
+            name: 'Commands.Options.User',
+            description: 'Commands.TemproleCommand.Options.User.Description',
             required: true
         },
         {
             type: ApplicationCommandOptionType.Role,
-            name: 'common.command_options.role',
-            description: `commands.${name}.options.role.description`,
+            name: 'Commands.Options.Role',
+            description: 'Commands.TemproleCommand.Options.Role.Description',
             required: true
         },
         {
             type: ApplicationCommandOptionType.String,
-            name: 'common.command_options.duration',
-            description: `commands.${name}.options.duration.description`,
+            name: 'Commands.Options.Duration',
+            description: 'Commands.TemproleCommand.Options.Duration.Description',
             required: true
         }
     ],
     group: 'UTILITY',
     permissions: {
-        self: ['MANAGE_ROLES'],
-        user: ['MANAGE_ROLES']
+        self: new PermissionsBitField(['ManageRoles']).toArray(),
+        user: new PermissionsBitField(['ManageRoles']).toArray()
     }
 }

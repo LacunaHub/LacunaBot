@@ -118,11 +118,13 @@ export default class Giveaway {
         if (this.participants.size) {
             const winners = this.participants.randomKey(this.numberOfWinners > this.participants.size ? this.participants.size : this.numberOfWinners)
 
-            embed.setDescription(t('commands.giveaway.end.text_winners', { winners: winners.map(w => `<@${w}>`).join(', ') }))
+            embed.setDescription(
+                t('Commands.GiveawayCommand.SubCommands.EndCommand.Texts.GiveawayWinners', { winners: winners.map(w => `<@${w}>`).join(', ') })
+            )
 
             try {
                 await message.reply({
-                    content: t('commands.giveaway.end.text_congrats', {
+                    content: t('Commands.GiveawayCommand.SubCommands.EndCommand.Texts.CongratulationsYouHaveWon', {
                         winner: `${winners.map(w => `<@${w}>`)}`,
                         prize: `**${this.prize}**`
                     })
@@ -131,7 +133,7 @@ export default class Giveaway {
                 await this.self.logger.handleError({ module: 'Giveaways', action: 'SendCongrats', error: err, guild_id: this.guildId })
             }
         } else {
-            embed.setDescription(t('commands.giveaway.end.text_no_members'))
+            embed.setDescription(t('Commands.GiveawayCommand.Texts.NoGiveawayParticipants'))
         }
 
         try {
@@ -153,8 +155,8 @@ export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument
 
         if (giveaway.participants.has(interaction.user.id)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${t('commands.giveaway.create.text_already_participating', {
-                    user: `**${interaction.user.username}**`,
+                content: `${self._emojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouAreAlreadyInGiveaway', {
+                    username: `**${interaction.user.username}**`,
                     giveaway: `**${giveaway.prize}**`
                 })}`,
                 ephemeral: true
@@ -170,14 +172,15 @@ export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument
                 }
             )
 
-            const message = await giveaway.getMessage()
-            const embed = new EmbedBuilder(message.embeds[0].toJSON())
-            embed.data.fields[2].value = giveaway.participants.size.toString()
+            const message = await giveaway.getMessage(),
+                rows = message.components
+            rows[0].components[0].data['emoji'] = { name: '🎉' }
+            rows[0].components[0].data['label'] = giveaway.participants.size.toString()
 
-            await message.edit({ embeds: [embed] })
+            await message.edit({ components: rows })
             await interaction.reply({
-                content: `${self._emojis.OK} | ${t('commands.giveaway.create.text_participated', {
-                    user: `**${interaction.user.username}**`,
+                content: `${self._emojis.OK} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouHaveParticipatedInGiveaway', {
+                    username: `**${interaction.user.username}**`,
                     giveaway: `**${giveaway.prize}**`
                 })}`,
                 ephemeral: true

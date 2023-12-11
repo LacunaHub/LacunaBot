@@ -82,9 +82,13 @@ const handler = async (
             if (message?.id === interaction.message?.id) {
                 if (interaction.member.voice.channel?.id !== player.voiceChannelId) {
                     await interaction.reply({
-                        content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.next.text_different_voice', {
-                            user: `**${interaction.member.displayName}**`
-                        })}`,
+                        content: `${self._emojis.ERROR} | ${self.i18n.t(
+                            server.locale,
+                            'Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel',
+                            {
+                                username: `**${interaction.member.displayName}**`
+                            }
+                        )}`,
                         ephemeral: true
                     })
 
@@ -279,9 +283,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
             items
                 .map(i => {
                     const currency = server.modules.economy.currencies.find(ii => ii.id === i.currency_id)
-                    const price = i.purchase_price
-                        ? `${i.purchase_price} ${currency.name}`
-                        : self.i18n.t(interaction.locale, 'commands.store.items.text_price_free')
+                    const price = `${i.purchase_price} ${currency.name}`
 
                     return {
                         name: `${i.name} (${price})`,

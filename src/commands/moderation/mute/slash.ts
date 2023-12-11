@@ -17,7 +17,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.mute.text_user_not_found', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.MuteCommand.Texts.InvalidUser', { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -26,7 +26,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (mention.id == interaction.user.id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.mute.text_self_action', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.MuteCommand.Texts.YouCannotMuteYourself', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -35,7 +37,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention.manageable) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.mute.text_cant_mute_user', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.MuteCommand.Texts.CannotMuteThisUser', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -44,7 +48,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.respect_hierarchy && mention.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -53,8 +59,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.ModerateMembers)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -64,8 +70,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -135,8 +141,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_ADD', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.mute.text_user_muted', {
-            user: `**${interaction.member.displayName}**`,
+        content: `${self._emojis.OK} | ${t('Commands.MuteCommand.Texts.UserHasBeenMuted', {
+            username: `**${interaction.member.displayName}**`,
             target: `**${mention.user.tag}**`
         })}`
     })

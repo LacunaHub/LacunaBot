@@ -11,7 +11,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!userId) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.unban.text_invalid_user_id', { user: `**${interaction.member['displayName']}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.UnbanCommand.Texts.InvalidUser', { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -28,8 +28,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!userBan) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.unban.text_ban_not_found', {
-                user: `**${interaction.member['displayName']}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.UnbanCommand.Texts.BanNotFound', {
+                username: `**${interaction.member.displayName}**`
             })}`
         })
 
@@ -46,8 +46,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_REMOVE', target: userBan.user, executor: interaction.user, reason })
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.unban.text_user_unbanned', {
-            user: `**${interaction.member['displayName']}**`,
+        content: `${self._emojis.OK} | ${t('Commands.UnbanCommand.Texts.UserHasBeenUnbanned', {
+            username: `**${interaction.member.displayName}**`,
             target: `**${userBan.user.tag}**`
         })}`
     })

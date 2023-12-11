@@ -18,10 +18,10 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             if (!webhook) return false
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.voice_server_unmute'))
+                .setTitle(t('Logs.VoiceServerUnmute'))
                 .addFields([
-                    { name: t('common.command_option_types.USER'), value: `${state.member.user.tag}`, inline: true },
-                    { name: t('common.channel'), value: `<#${state.channelId}>`, inline: true },
+                    { name: t('Commands.OptionTypes.User'), value: `${state.member.user.tag}`, inline: true },
+                    { name: t('Commands.OptionTypes.Channel'), value: `<#${state.channelId}>`, inline: true },
                     { name: '\u200B', value: '\u200B', inline: true }
                 ])
                 .setFooter({ text: state.member.id })

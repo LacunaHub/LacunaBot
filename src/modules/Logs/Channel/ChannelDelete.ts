@@ -23,13 +23,13 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
             const executor = audit?.entries?.first()?.executor
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.channel_delete_title'))
+                .setTitle(t('Logs.ChannelDeleted'))
                 .setDescription(
-                    t('logs.channel_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, channel: `**${channel.name}**` })
+                    t('Logs.ChannelDeletedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, channel: `**${channel.name}**` })
                 )
                 .addFields([
-                    { name: t('logs.channel_category'), value: channel?.parent?.name ?? '-', inline: true },
-                    { name: t('logs.channel_position'), value: channel.rawPosition.toString(), inline: true }
+                    { name: t('Logs.ChannelCategory'), value: channel?.parent?.name ?? '-', inline: true },
+                    { name: t('Logs.ChannelPosition'), value: channel.rawPosition.toString(), inline: true }
                 ])
                 .setFooter({ text: channel.id })
                 .setTimestamp()

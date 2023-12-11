@@ -2,6 +2,7 @@ import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Guild, User } from '
 import { fetchLogWebhook, isRateLimited } from '..'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
+import { capitalizeFirstLetter } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, guild: Guild, user: User): Promise<boolean> {
     if (server.moderation.logs.types.guild_ban_add.active) {
@@ -24,14 +25,14 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
             const reason = audit?.entries?.first()?.reason
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.guild_ban_add_title'))
+                .setTitle(t('Logs.GuildBanAdded'))
                 .setDescription(
-                    t('logs.guild_ban_add_template', {
-                        user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                    t('Logs.GuildBanAddedTemplate', {
+                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
                         target: `**${user.tag}** (${user.id})`
                     })
                 )
-                .addFields([{ name: t('case_log.reason'), value: reason ?? '-' }])
+                .addFields([{ name: capitalizeFirstLetter(t('Commands.Options.Reason')), value: reason ?? '-' }])
                 .setTimestamp()
                 .setColor('#EF5350')
 

@@ -24,16 +24,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.displayName !== member.displayName) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.guild_member_update_title'))
+                    .setTitle(t('Logs.GuildMemberUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.guild_member_update_nick_change_template', { user: `**${member.user.tag}** (${member.id})` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.GuildMemberUpdatedNickname', { username: `**${member.user.tag}** (${member.id})` })
                         })
                     )
                     .setFields([
-                        { name: t('logs.before_change'), value: before.displayName, inline: true },
-                        { name: t('logs.after_change'), value: member.displayName, inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.displayName, inline: true },
+                        { name: t('Logs.AfterChange'), value: member.displayName, inline: true }
                     ])
                     .setTimestamp()
                     .setColor('#FFA726')

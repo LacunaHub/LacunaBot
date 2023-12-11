@@ -18,10 +18,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
             if (!webhook) return false
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.voice_move_title'))
+                .setTitle(t('Logs.VoiceMove'))
                 .setDescription(
-                    t('logs.voice_move_template', {
-                        user: `**${state.member.user.tag}**`,
+                    t('Logs.VoiceMoveTemplate', {
+                        username: `**${state.member.user.tag}**`,
                         from: `<#${before.channelId}>`,
                         to: `<#${state.channelId}>`
                     })

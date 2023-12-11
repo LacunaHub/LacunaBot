@@ -20,13 +20,13 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
             if (!webhook) return false
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.message_delete_bulk_title'))
+                .setTitle(t('Logs.MessageDeletedBulk'))
                 .addFields([
-                    { name: t('logs.message_count'), value: messages.size.toString(), inline: true },
-                    { name: t('common.channel'), value: `<#${message.channel.id}>`, inline: true },
+                    { name: t('Logs.MessageCount'), value: messages.size.toString(), inline: true },
+                    { name: t('Commands.OptionTypes.Channel'), value: `<#${message.channel.id}>`, inline: true },
                     ...messages.first(10).map(i => ({
                         name: `${i.author?.tag ?? '???'} <t:${Math.round(i.createdTimestamp / 1000)}:R>`,
-                        value: truncateString(i.content || `\`[${t('common.attachment')}]\``, 100)
+                        value: truncateString(i.content || `\`[${t('Commands.OptionTypes.Attachment')}]\``, 100)
                     }))
                 ])
                 .setTimestamp()

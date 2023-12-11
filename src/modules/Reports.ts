@@ -21,7 +21,9 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
     if (!member) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${interaction.member['displayName']}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.UnknownUser', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -32,7 +34,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
     if (member.id === interaction.user.id) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_self_quick_action', { user: `**${interaction.member['displayName']}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -41,7 +43,9 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
     if (server.moderation.respect_hierarchy && member.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${interaction.member['displayName']}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -53,8 +57,8 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
         member.permissions.has(self.PermissionFlags[action == 'KICK' ? 'KickMembers' : 'ManageRoles'])
     ) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
-                user: `**${interaction.member['displayName']}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -66,8 +70,8 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
     if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
-                user: `**${interaction.member['displayName']}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -80,7 +84,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
     if (action === 'KICK') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.KickMembers)) {
             await interaction.followUp({
-                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.member['displayName']}**` })}`,
+                content: `${self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.member.displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -89,8 +93,8 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
         if (!member.kickable) {
             await interaction.followUp({
-                content: `${self._emojis.ERROR} | ${t('commands.kick.text_cant_kick_user', {
-                    user: `**${interaction.member['displayName']}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.KickCommand.Texts.CannotKickThisUser', {
+                    username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
             })
@@ -110,7 +114,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
     if (action === 'WARN') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.ManageRoles)) {
             await interaction.followUp({
-                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.member['displayName']}**` })}`,
+                content: `${self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.member.displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -147,7 +151,9 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
     if (!member) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_invalid', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.UnknownUser', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -158,7 +164,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
     if (member.id === interaction.user.id) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_self_quick_action', { user: `**${interaction.member['displayName']}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -167,7 +173,9 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
     if (server.moderation.respect_hierarchy && member.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_higher', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -179,8 +187,8 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
         member.permissions.has(self.PermissionFlags[action == 'BAN' ? 'BanMembers' : 'ModerateMembers'])
     ) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_is_moderator', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -192,8 +200,8 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
     if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.followUp({
-            content: `${self._emojis.ERROR} | ${t('commands.ban.text_user_has_unmoderated_roles', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -206,7 +214,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
     if (action === 'BAN') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.BanMembers)) {
             await interaction.followUp({
-                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.member.displayName}**` })}`,
+                content: `${self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.member.displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -215,8 +223,8 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
         if (!member.bannable) {
             await interaction.followUp({
-                content: `${self._emojis.ERROR} | ${t('commands.ban.text_cant_ban_user', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.CannotBanThisUser', {
+                    username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
             })
@@ -246,7 +254,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
     if (action === 'MUTE') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.ModerateMembers)) {
             await interaction.followUp({
-                content: `${self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.member.displayName}**` })}`,
+                content: `${self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.member.displayName}**` })}`,
                 ephemeral: true
             })
 
@@ -255,8 +263,8 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
         if (!member.manageable) {
             await interaction.followUp({
-                content: `${self._emojis.ERROR} | ${t('commands.mute.text_cant_mute_user', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.MuteCommand.Texts.CannotMuteThisUser', {
+                    username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
             })
@@ -329,25 +337,25 @@ export async function checkReportsOnGuildMemberAdd(self: Lacuna, server: ServerD
 
             const embed = new EmbedBuilder()
                 .setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL() })
-                .setDescription(t('commands.report.text_potentially_unwanted_user'))
+                .setDescription(t('Commands.ReportCommand.Texts.PotentiallyUnwantedUser'))
                 .addFields([
                     {
-                        name: t('commands.report.text_total_reports'),
+                        name: t('Commands.ReportCommand.Texts.ReportCount'),
                         value: user.reports.length.toString(),
                         inline: true
                     },
                     {
-                        name: t('commands.violations.text_last_24_hours'),
+                        name: t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours'),
                         value: last24h.length.toString(),
                         inline: true
                     },
                     {
-                        name: t('commands.violations.text_last_7_days'),
+                        name: t('Commands.ViolationsCommand.Texts.ViolationsIn7Days'),
                         value: last7d.length.toString(),
                         inline: true
                     },
                     {
-                        name: t('commands.report.text_recent_reports'),
+                        name: t('Commands.ReportCommand.Texts.RecentReports'),
                         value: '\u200B'
                     },
                     ...last10Reports.map(i => {

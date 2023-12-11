@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,12 +6,12 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.VolumeCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.Integer,
-            name: 'common.command_options.volume',
-            description: `commands.${name}.options.volume.description`,
+            name: 'Commands.Options.Volume',
+            description: 'Commands.VolumeCommand.Options.Volume.Description',
             required: true,
             min_value: 1,
             max_value: 100
@@ -20,6 +20,6 @@ export default {
     group: 'MUSIC',
     premium_only: true,
     permissions: {
-        user: ['MANAGE_CHANNELS']
+        user: new PermissionsBitField(['ManageChannels']).toArray()
     }
 }

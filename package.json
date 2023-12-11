@@ -36,6 +36,7 @@
     "koa-json": "2.0.x",
     "koa-morgan": "1.0.x",
     "koa-ratelimit": "5.0.x",
+    "lacuna-locale": "github:LacunaHub/Locale",
     "moment": "2.29.x",
     "mongoose": "5.13.x",
     "ms": "2.1.x",

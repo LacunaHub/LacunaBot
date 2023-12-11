@@ -11,8 +11,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.unmute.text_user_not_found', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.UnmuteCommand.Texts.InvalidUser', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -22,8 +22,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention.isCommunicationDisabled()) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.unmute.text_user_not_muted', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.UnmuteCommand.Texts.UserIsNotMuted', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -60,8 +60,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_REMOVE', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.unmute.text_user_unmuted', {
-            user: `**${interaction.member.displayName}**`,
+        content: `${self._emojis.OK} | ${t('Commands.UnmuteCommand.Texts.UserHasBeenUnmuted', {
+            username: `**${interaction.member.displayName}**`,
             target: `**${mention.user.tag}**`
         })}`
     })

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,32 +6,32 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.PruneCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.Integer,
-            name: 'common.command_options.amount',
-            description: `commands.${name}.options.amount.description`,
+            name: 'Commands.Options.Amount',
+            description: 'Commands.PruneCommand.Options.Amount.Description',
             required: true,
             min_value: 1,
             max_value: 100
         },
         {
             type: ApplicationCommandOptionType.User,
-            name: 'common.command_options.user',
-            description: `commands.${name}.options.user.description`,
+            name: 'Commands.Options.User',
+            description: 'Commands.PruneCommand.Options.User.Description',
             required: false
         },
         {
             type: ApplicationCommandOptionType.String,
-            name: 'common.command_options.reason',
-            description: `commands.${name}.options.reason.description`,
+            name: 'Commands.Options.Reason',
+            description: 'Commands.PruneCommand.Options.Reason.Description',
             required: false
         }
     ],
     group: 'MODERATION',
     permissions: {
-        self: ['EMBED_LINKS', 'MANAGE_MESSAGES'],
-        user: ['MANAGE_MESSAGES']
+        self: new PermissionsBitField(['EmbedLinks', 'ManageMessages']).toArray(),
+        user: new PermissionsBitField(['ManageMessages']).toArray()
     }
 }

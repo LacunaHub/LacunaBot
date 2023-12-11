@@ -23,10 +23,10 @@ export default async function (self: Lacuna, server: ServerDocument, emoji: Guil
             const executor = audit?.entries?.first()?.executor
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.emoji_create_title'))
+                .setTitle(t('Logs.EmojiCreated'))
                 .setDescription(
-                    t('logs.emoji_create_template', {
-                        user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                    t('Logs.EmojiCreatedTemplate', {
+                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
                         emoji: `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`
                     })
                 )

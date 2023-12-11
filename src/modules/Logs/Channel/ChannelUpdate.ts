@@ -25,16 +25,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.name !== channel.name) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.channel_update_title'))
+                    .setTitle(t('Logs.ChannelUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.channel_update_name_change_template', { channel: `<#${channel.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.ChannelUpdatedName', { channel: `<#${channel.id}>` })
                         })
                     )
                     .setFields([
-                        { name: t('logs.before_change'), value: before.name, inline: true },
-                        { name: t('logs.after_change'), value: channel.name, inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.name, inline: true },
+                        { name: t('Logs.AfterChange'), value: channel.name, inline: true }
                     ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
@@ -60,16 +60,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if ((before as any).topic !== (channel as any).topic) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.channel_update_title'))
+                    .setTitle(t('Logs.ChannelUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.channel_update_topic_change_template', { channel: `<#${channel.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.ChannelUpdatedTopic', { channel: `<#${channel.id}>` })
                         })
                     )
                     .setFields([
-                        { name: t('logs.before_change'), value: (before as any).topic ?? '-', inline: true },
-                        { name: t('logs.after_change'), value: (channel as any).topic ?? '-', inline: true }
+                        { name: t('Logs.BeforeChange'), value: (before as any).topic ?? '-', inline: true },
+                        { name: t('Logs.AfterChange'), value: (channel as any).topic ?? '-', inline: true }
                     ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
@@ -95,23 +95,23 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if ((before as TextChannel).rateLimitPerUser !== (channel as TextChannel).rateLimitPerUser) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.channel_update_title'))
+                    .setTitle(t('Logs.ChannelUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.channel_update_rate_limit_change_template', { channel: `<#${channel.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.ChannelUpdatedRateLimit', { channel: `<#${channel.id}>` })
                         })
                     )
                     .setFields([
                         {
-                            name: t('logs.before_change'),
+                            name: t('Logs.BeforeChange'),
                             value: (before as TextChannel).rateLimitPerUser
                                 ? numbro((before as TextChannel).rateLimitPerUser).format({ output: 'time' })
                                 : '-',
                             inline: true
                         },
                         {
-                            name: t('logs.after_change'),
+                            name: t('Logs.AfterChange'),
                             value: (channel as TextChannel).rateLimitPerUser
                                 ? numbro((channel as TextChannel).rateLimitPerUser).format({ output: 'time' })
                                 : '-',
@@ -142,16 +142,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.parentId !== channel.parentId) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.channel_update_title'))
+                    .setTitle(t('Logs.ChannelUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.channel_update_parent_change_template', { channel: `<#${channel.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.ChannelUpdatedParent', { channel: `<#${channel.id}>` })
                         })
                     )
                     .setFields([
-                        { name: t('logs.before_change'), value: before?.parent?.name ?? '-', inline: true },
-                        { name: t('logs.after_change'), value: channel?.parent?.name ?? '-', inline: true }
+                        { name: t('Logs.BeforeChange'), value: before?.parent?.name ?? '-', inline: true },
+                        { name: t('Logs.AfterChange'), value: channel?.parent?.name ?? '-', inline: true }
                     ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
@@ -177,16 +177,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.isVoiceBased() && channel.isVoiceBased() && before.bitrate !== channel.bitrate) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.channel_update_title'))
+                    .setTitle(t('Logs.ChannelUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.channel_update_bitrate_change_template', { channel: `<#${channel.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.ChannelUpdatedBitrate', { channel: `<#${channel.id}>` })
                         })
                     )
                     .setFields([
-                        { name: t('logs.before_change'), value: `${before.bitrate / 1000}kbps`, inline: true },
-                        { name: t('logs.after_change'), value: `${channel.bitrate / 1000}kbps`, inline: true }
+                        { name: t('Logs.BeforeChange'), value: `${before.bitrate / 1000}kbps`, inline: true },
+                        { name: t('Logs.AfterChange'), value: `${channel.bitrate / 1000}kbps`, inline: true }
                     ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()
@@ -212,16 +212,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.isVoiceBased() && channel.isVoiceBased() && before.userLimit !== channel.userLimit) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.channel_update_title'))
+                    .setTitle(t('Logs.ChannelUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.channel_update_user_limit_change_template', { channel: `<#${channel.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.ChannelUpdatedUserLimit', { channel: `<#${channel.id}>` })
                         })
                     )
                     .setFields([
-                        { name: t('logs.before_change'), value: before.userLimit.toString(), inline: true },
-                        { name: t('logs.after_change'), value: channel.userLimit.toString(), inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.userLimit.toString(), inline: true },
+                        { name: t('Logs.AfterChange'), value: channel.userLimit.toString(), inline: true }
                     ])
                     .setFooter({ text: channel.id })
                     .setTimestamp()

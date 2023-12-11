@@ -10,7 +10,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!case_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_id', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.ReasonCommand.Texts.InvalidCaseId', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -19,7 +21,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!reason) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_reason', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.ReasonCommand.Texts.InvalidReason', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -30,7 +34,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!case_log) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_log', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.ReasonCommand.Texts.CaseLogIsNotSet', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -43,22 +49,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!case_message) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.reason.text_no_case_message', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.ReasonCommand.Texts.CaseMessageNotFound', {
+                username: `**${interaction.member.displayName}**`
             })}`
         })
 
         return false
     }
-
-    // await self.db.servers.updateOne(
-    //     { _id: interaction.guild.id, 'moderation.case_log.cases.case_id': case_id },
-    //     {
-    //         $set: {
-    //             'moderation.case_log.cases.$.reason': reason
-    //         }
-    //     }
-    // )
 
     const embed = new EmbedBuilder(case_message.embeds[0])
 
@@ -68,7 +65,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await case_message.edit({ embeds: [embed] })
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.reason.text_case_edited', { user: `**${interaction.member.displayName}**` })}`
+        content: `${self._emojis.OK} | ${t('Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged', {
+            username: `**${interaction.member.displayName}**`
+        })}`
     })
 
     return true

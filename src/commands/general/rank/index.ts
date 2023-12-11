@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import slash from './slash'
 import user from './user'
 
@@ -8,18 +8,18 @@ export default {
     slash,
     user,
     name,
-    pretty_name: `commands.${name}.name`,
-    description: `commands.${name}.description`,
+    pretty_name: 'Commands.RankCommand.Name',
+    description: 'Commands.RankCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.User,
-            name: 'common.command_options.user',
-            description: `commands.${name}.options.user.description`,
+            name: 'Commands.Options.User',
+            description: 'Commands.RankCommand.Options.User.Description',
             required: false
         }
     ],
     group: 'GENERAL',
     permissions: {
-        self: ['EMBED_LINKS', 'ATTACH_FILES']
+        self: new PermissionsBitField(['EmbedLinks', 'AttachFiles']).toArray()
     }
 }

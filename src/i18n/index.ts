@@ -1,10 +1,6 @@
+import { messages } from 'lacuna-locale'
 import logger from '../internals/Logger'
 import { resolveObjectPath } from '../internals/utility/Utils'
-import en from './en/messages.json'
-import ru from './ru/messages.json'
-import uk from './uk/messages.json'
-
-const messages = { en, ru, uk }
 
 export function locale(locale: string): typeof messages.ru {
     return messages[locale] ?? messages.ru

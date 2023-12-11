@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import { balanceSlash, transferSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,17 +6,17 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash: () => {},
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.WalletCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'balance',
-            description: `commands.${name}.balance.description`,
+            description: 'Commands.WalletCommand.SubCommands.BalanceCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: 'common.command_options.user',
-                    description: `commands.${name}.balance.options.user.description`,
+                    name: 'Commands.Options.User',
+                    description: 'Commands.WalletCommand.SubCommands.BalanceCommand.Options.User.Description',
                     required: false
                 }
             ]
@@ -24,25 +24,25 @@ export default {
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'transfer',
-            description: `commands.${name}.transfer.description`,
+            description: 'Commands.WalletCommand.SubCommands.TransferCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: 'common.command_options.user',
-                    description: `commands.${name}.transfer.options.user.description`,
+                    name: 'Commands.Options.User',
+                    description: 'Commands.WalletCommand.SubCommands.TransferCommand.Options.User.Description',
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: 'common.command_options.amount',
-                    description: `commands.${name}.transfer.options.amount.description`,
+                    name: 'Commands.Options.Amount',
+                    description: 'Commands.WalletCommand.SubCommands.TransferCommand.Options.Amount.Description',
                     required: true,
                     min_value: 1
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.currency',
-                    description: `commands.${name}.transfer.options.currency.description`,
+                    name: 'Commands.Options.Currency',
+                    description: 'Commands.WalletCommand.SubCommands.TransferCommand.Options.Currency.Description',
                     required: false,
                     autocomplete: true
                 }
@@ -61,6 +61,6 @@ export default {
         }
     ],
     permissions: {
-        self: ['EMBED_LINKS']
+        self: new PermissionsBitField(['EmbedLinks']).toArray()
     }
 }

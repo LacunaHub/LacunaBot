@@ -68,7 +68,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
 }
 
 async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
-    let reason = self.i18n.t(server.locale, 'audit_reasons.automoder_links_filter')
+    let reason = 'AutoMod: Links filter'
     const config = server.moderation.automoder.links_filter
 
     const ban = config.options.includes('ACTION_BAN')

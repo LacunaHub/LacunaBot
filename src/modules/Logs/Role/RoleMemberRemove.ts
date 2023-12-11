@@ -24,14 +24,14 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             const executor = audit?.entries?.first()?.executor
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.role_member_remove_title'))
+                .setTitle(t('Logs.RoleMemberRemoved'))
                 .setDescription(
-                    t('logs.role_member_remove_template', {
-                        user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                    t('Logs.RoleMemberRemovedTemplate', {
+                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
                         target: `**${member.user.tag}**`
                     })
                 )
-                .addFields([{ name: t('common.roles'), value: roles.map(role => `<@&${role.id}>`).join(', '), inline: true }])
+                .addFields([{ name: t('Common.Roles'), value: roles.map(role => `<@&${role.id}>`).join(', '), inline: true }])
                 .setFooter({ text: member.id })
                 .setTimestamp()
                 .setColor('#EF5350')

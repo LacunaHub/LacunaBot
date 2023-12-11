@@ -10,8 +10,8 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -21,7 +21,9 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!server.modules.economy.store.items.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_no_store_items', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.Texts.NoItemsForPurchaseInStore', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -32,7 +34,9 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!sku) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.buy.text_no_sku', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.SubCommands.BuyCommand.Texts.InvalidSKU', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -43,8 +47,8 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!item) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.buy.text_item_not_found', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.SubCommands.BuyCommand.Texts.ItemNotFound', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -57,37 +61,39 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (result == 'INSUFFICIENT_FUNDS') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.Texts.InsufficientFundsToPurchaseItem', {
+                username: `**${interaction.member.displayName}**`
             })}`
         })
     }
 
     if (result == 'PURCHASED') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_purchased', { user: `**${interaction.member.displayName}**` })}`
+            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.Texts.ItemPreviouslyPurchased', {
+                username: `**${interaction.member.displayName}**`
+            })}`
         })
     }
 
     if (result == 'SUCCESS') {
         if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-            const replacer = new Replacer({ guild: interaction.guild, member: interaction.member }),
-                messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
-
             try {
+                const replacer = new Replacer({ guild: interaction.guild, member: interaction.member }),
+                    messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
+
                 await interaction.editReply(messagePayload)
             } catch (err) {
                 await interaction.editReply({
-                    content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
-                        user: `**${interaction.member.displayName}**`,
+                    content: `${self._emojis.OK} | ${t('Commands.StoreCommand.Texts.UserHasPurchasedItem', {
+                        username: `**${interaction.member.displayName}**`,
                         item: `**${item.name}**`
                     })}`
                 })
             }
         } else {
             await interaction.editReply({
-                content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
-                    user: `**${interaction.member.displayName}**`,
+                content: `${self._emojis.OK} | ${t('Commands.StoreCommand.Texts.UserHasPurchasedItem', {
+                    username: `**${interaction.member.displayName}**`,
                     item: `**${item.name}**`
                 })}`
             })
@@ -102,8 +108,8 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -113,7 +119,9 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
     if (!server.modules.economy.store.items.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.store.text_no_store_items', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.Texts.NoItemsForPurchaseInStore', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -141,20 +149,19 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
         for (const item of chunk) {
             const currency = server.modules.economy.currencies.find(c => c.id == item.currency_id)
+            const purchasePrice =
+                    `**${t('Commands.StoreCommand.SubCommands.ItemsCommand.Texts.PurchasePrice')}**: ` +
+                    `${item.purchase_price}${currency.symbol} (SKU: ${item.id})`,
+                itemContains =
+                    `**${t('Commands.StoreCommand.SubCommands.ItemsCommand.Texts.ItemContains')}**: ` +
+                    item.references.map(v => `<${item.type == 'CHANNEL' ? '#' : '@&'}${v}>`).join(' '),
+                itemQuantity = item.options.includes('LIMITED_QUANTITY')
+                    ? `**${t('Commands.StoreCommand.SubCommands.ItemsCommand.Texts.ItemQuantity')}**: ${item.quantity}`
+                    : ''
 
             current_fields.push({
                 name: item.name,
-                value: `
-                    ${item.description ? `${item.description}` : ''}
-                    **${t('commands.store.items.text_purchase_price')}**: ${
-                    item.purchase_price ? `${item.purchase_price}${currency.symbol}` : t('commands.store.items.text_price_free')
-                } (SKU: ${item.id})
-                    **${t('commands.store.items.text_contains')}**: ${item.references
-                    .map(r => `<${item.type == 'CHANNEL' ? '#' : '@&'}${r}>`)
-                    .join(' ')}${
-                    item.options.includes('LIMITED_QUANTITY') ? `\n**${t('commands.store.items.text_quantity')}**: ${item.quantity}` : ''
-                }
-                `
+                value: item.description + `\n${purchasePrice}` + `\n${itemContains}` + `\n${itemQuantity}`
             })
 
             current_select_options.push({
@@ -169,26 +176,24 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
     }
 
     const embed = new EmbedBuilder()
-        .setTitle(t('commands.store.items.text_server_store'))
-        .setDescription(t('commands.store.items.text_server_store_description', { command: '`/store buy <артикул>`' }))
+        .setTitle(t('Commands.StoreCommand.SubCommands.ItemsCommand.Texts.ServerStore'))
+        .setDescription(t('Commands.StoreCommand.SubCommands.ItemsCommand.Texts.ServerStoreHowToBuyItem', { command: '`/store buy`' }))
 
     const row = new ActionRowBuilder<StringSelectMenuBuilder>()
 
     const message = (await interaction.editReply({
-        embeds: [
-            embed.setFields(fields[page]).setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })
-        ],
+        embeds: [embed.setFields(fields[page]).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
         components: [
             row.setComponents(
                 new StringSelectMenuBuilder({
                     customId: interaction.id,
-                    placeholder: t('commands.store.items.text_select_item'),
+                    placeholder: t('Commands.StoreCommand.SubCommands.ItemsCommand.Texts.SelectItemToPurchase'),
                     options:
                         chunks.length > 1
                             ? [
                                   ...select_options[page],
-                                  { label: t('commands.leaders.text_previous_page'), value: 'previous-page' },
-                                  { label: t('commands.leaders.text_next_page'), value: 'next-page' }
+                                  { label: t('Common.PreviousPage'), value: 'previous-page' },
+                                  { label: t('Common.NextPage'), value: 'next-page' }
                               ]
                             : select_options[page]
                 })
@@ -211,22 +216,18 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
             await i.deferUpdate()
 
             await i.editReply({
-                embeds: [
-                    embed
-                        .setFields(fields[page])
-                        .setFooter({ text: t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }) })
-                ],
+                embeds: [embed.setFields(fields[page]).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
                 components: [
                     row.setComponents(
                         new StringSelectMenuBuilder({
                             customId: i.id,
-                            placeholder: t('commands.store.items.text_select_item'),
+                            placeholder: t('Commands.StoreCommand.SubCommands.ItemsCommand.Texts.SelectItemToPurchase'),
                             options:
                                 chunks.length > 1
                                     ? [
                                           ...select_options[page],
-                                          { label: t('commands.leaders.text_previous_page'), value: 'previous-page' },
-                                          { label: t('commands.leaders.text_next_page'), value: 'next-page' }
+                                          { label: t('Common.PreviousPage'), value: 'previous-page' },
+                                          { label: t('Common.NextPage'), value: 'next-page' }
                                       ]
                                     : select_options[page]
                         })
@@ -241,8 +242,8 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'INSUFFICIENT_FUNDS') {
                 await i.followUp({
-                    content: `${self._emojis.ERROR} | ${t('commands.store.text_insufficient_funds', {
-                        user: `**${interaction.member.displayName}**`
+                    content: `${self._emojis.ERROR} | ${t('Command.StoreCommand.Texts.InsufficientFundsToPurchaseItem', {
+                        username: `**${interaction.member.displayName}**`
                     })}`,
                     ephemeral: true
                 })
@@ -250,8 +251,8 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'PURCHASED') {
                 await i.followUp({
-                    content: `${self._emojis.ERROR} | ${t('commands.store.text_purchased', {
-                        user: `**${interaction.member.displayName}**`
+                    content: `${self._emojis.ERROR} | ${t('Command.StoreCommand.Texts.ItemPreviouslyPurchased', {
+                        username: `**${interaction.member.displayName}**`
                     })}`,
                     ephemeral: true
                 })
@@ -266,8 +267,8 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
                         await i.followUp({ ...messagePayload, ephemeral: true })
                     } catch (err) {
                         await i.followUp({
-                            content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
-                                user: `**${interaction.member.displayName}**`,
+                            content: `${self._emojis.OK} | ${t('Command.StoreCommand.Texts.UserHasPurchasedItem', {
+                                username: `**${interaction.member.displayName}**`,
                                 item: `**${item.name}**`
                             })}`,
                             ephemeral: true
@@ -275,8 +276,8 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
                     }
                 } else {
                     await i.followUp({
-                        content: `${self._emojis.OK} | ${t('commands.store.text_purchase_success', {
-                            user: `**${interaction.member.displayName}**`,
+                        content: `${self._emojis.OK} | ${t('Command.StoreCommand.Texts.UserHasPurchasedItem', {
+                            username: `**${interaction.member.displayName}**`,
                             item: `**${item.name}**`
                         })}`,
                         ephemeral: true
