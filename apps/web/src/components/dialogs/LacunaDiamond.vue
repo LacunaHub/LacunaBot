@@ -5,14 +5,14 @@
         <q-banner class="bg-dark-2 rounded-borders" dense>
           <span v-if="guild.premium.will_expire_on">
             {{
-              $t('lacuna_diamond.has_subscription', {
+              $t('Components.LacunaDiamond.HasSubscription', {
                 date: $dt.fromMillis(guild.premium.will_expire_on).toFormat('ff')
               })
             }}
           </span>
 
           <span v-else>
-            {{ $t('lacuna_diamond.unlimited_subscription') }}
+            {{ $t('Components.LacunaDiamond.UnlimitedSubscription') }}
           </span>
 
           <template #avatar>
@@ -52,7 +52,7 @@
 
       <div class="q-pa-md">
         <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-          <q-expansion-item :label="$t('lacuna_diamond.plan_comparison')">
+          <q-expansion-item :label="$t('Components.LacunaDiamond.PlanComparison')">
             <q-markup-table class="no-border-top no-border-radius" flat bordered separator="vertical" wrap-cells>
               <thead class="bg-dark-1">
                 <tr>
@@ -126,33 +126,33 @@
         <q-card class="bg-dark-2" flat>
           <q-card-section>
             <ol class="q-pl-md q-my-none" type="1">
-              <i18n-t keypath="lacuna_diamond.dnb_step_1" tag="li">
+              <i18n-t keypath="Components.LacunaDiamond.DNBStep1" tag="li">
                 <template #server>
                   <a class="origin" href="https://discord.gg/srfhGjbKce" target="_blank">
-                    {{ $t('support_server').toLowerCase() }}
+                    {{ $t('Common.SupportServer').toLowerCase() }}
                   </a>
                 </template>
               </i18n-t>
-              <i18n-t keypath="lacuna_diamond.dnb_step_2" tag="li">
+              <i18n-t keypath="Components.LacunaDiamond.DNBStep2" tag="li">
                 <template #article>
                   <a
                     class="origin"
                     href="https://support.discord.com/hc/articles/360028038352-Server-Boosting-FAQ-#h_9dfb44db-c394-4339-863b-e6d1e3fb0469"
                     target="_blank"
                   >
-                    {{ $t('lacuna_diamond.dnb_step_2_article') }}
+                    {{ $t('Components.LacunaDiamond.DNBStep2Article') }}
                   </a>
                 </template>
               </i18n-t>
-              <i18n-t keypath="lacuna_diamond.dnb_step_3" tag="li">
+              <i18n-t keypath="Components.LacunaDiamond.DNBStep3" tag="li">
                 <template #server>
                   <a class="origin" href="https://discord.gg/srfhGjbKce" target="_blank">
-                    {{ $t('support_server').toLowerCase() }}
+                    {{ $t('Common.SupportServer').toLowerCase() }}
                   </a>
                 </template>
               </i18n-t>
               <li>
-                {{ $t('lacuna_diamond.dnb_step_4') }}
+                {{ $t('Components.LacunaDiamond.DNBStep4') }}
               </li>
             </ol>
           </q-card-section>
@@ -160,7 +160,7 @@
           <q-card-section class="q-pt-none">
             <q-banner class="bg-dark-1 rounded-borders" dense>
               <span>
-                {{ $t('lacuna_diamond.dnb_bonuses_info') }}
+                {{ $t('Components.LacunaDiamond.DNBBonusesInfo') }}
               </span>
 
               <template #avatar>
@@ -191,10 +191,10 @@
           <q-card-section class="q-pt-none">
             <q-banner class="bg-dark-1 rounded-borders" dense>
               <span>
-                {{ $t('lacuna_diamond.patreon_after_checkout') }}
+                {{ $t('Components.LacunaDiamond.PatreonAfterCheckout') }}
 
                 <b>
-                  {{ $t('lacuna_diamond.patreon_after_checkout_important_info', { platform: 'Patreon' }) }}
+                  {{ $t('Components.LacunaDiamond.PatreonAfterCheckoutImportantInfo', { platform: 'Patreon' }) }}
                 </b>
               </span>
 
@@ -228,10 +228,10 @@
           <q-card-section class="q-pt-none">
             <q-banner class="bg-dark-1 rounded-borders" dense>
               <span>
-                {{ $t('lacuna_diamond.patreon_after_checkout') }}
+                {{ $t('Components.LacunaDiamond.PatreonAfterCheckout') }}
 
                 <b>
-                  {{ $t('lacuna_diamond.patreon_after_checkout_important_info', { platform: 'Boosty' }) }}
+                  {{ $t('Components.LacunaDiamond.PatreonAfterCheckoutImportantInfo', { platform: 'Boosty' }) }}
                 </b>
               </span>
 
@@ -245,7 +245,7 @@
 
       <q-card-section v-else>
         <div>
-          {{ $t('lacuna_diamond.select_plan') }}
+          {{ $t('Components.LacunaDiamond.SelectPlan') }}
         </div>
 
         <q-tabs
@@ -278,7 +278,7 @@
 
       <q-card-section>
         <div>
-          {{ $t('lacuna_diamond.select_payment_method') }}
+          {{ $t('Components.LacunaDiamond.SelectPaymentMethod') }}
         </div>
 
         <q-tabs
@@ -348,7 +348,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
@@ -356,7 +356,9 @@
               class="full-width"
               :label="
                 $t(
-                  `lacuna_diamond.${['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider) ? 'check' : 'pay'}`
+                  `Components.LacunaDiamond.${
+                    ['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider) ? 'Check' : 'Pay'
+                  }`
                 )
               "
               unelevated
@@ -376,7 +378,7 @@
                 >
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('transfer') }}
+                      {{ $t('Common.Transfer') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -422,164 +424,164 @@ export default defineComponent({
 
     const planComparison = [
       {
-        categoryName: $t('pages.landing.ft_custom_behavior_title'),
+        categoryName: $t('Pages.GuildPage.NavNames.CustomBehavior'),
         features: [
           {
-            name: $t('lacuna_diamond.plan_comparison_features.execute_code_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ExecuteCode'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.custom_commands_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.CustomCommandsNumber'),
             free: { value: '25', type: 'text' },
             diamond: { value: '100', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.automation_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutomationNumber'),
             free: { value: '5', type: 'text' },
             diamond: { value: '20', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.automation_sequential_executions_with_one_trigger_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutomationSequentialExecutionsWithOneTrigger'),
             free: { value: '1', type: 'text' },
             diamond: { value: '5', type: 'text' }
           }
         ]
       },
       {
-        categoryName: $t('pages.landing.ft_utility_title'),
+        categoryName: $t('Pages.LandingPage.FeatureUtility'),
         features: [
           {
-            name: $t('lacuna_diamond.plan_comparison_features.interactive_messages_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.InteractiveMessagesNumber'),
             free: { value: '5', type: 'text' },
             diamond: { value: '50', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.interactive_reactions_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.InteractiveReactionsNumber'),
             free: { value: '50', type: 'text' },
             diamond: { value: '200', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.temp_voice_channels_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.TempVoiceChannelsNumber'),
             free: { value: '2', type: 'text' },
             diamond: { value: '20', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.voice_roles_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.VoiceRolesNumber'),
             free: { value: '2', type: 'text' },
             diamond: { value: '20', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.auto_threads_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutoThreadsNumber'),
             free: { value: '2', type: 'text' },
             diamond: { value: '20', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.auto_reactions_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutoReactionsNumber'),
             free: { value: '2', type: 'text' },
             diamond: { value: '20', type: 'text' }
           }
         ]
       },
       {
-        categoryName: $t('pages.landing.ft_moderation_title'),
+        categoryName: $t('Pages.GuildPage.NavNames.Moderation'),
         features: [
           {
-            name: $t('lacuna_diamond.plan_comparison_features.action_log_webhook_modifying_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActionLogWebhookModifying'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.action_log_events_processed_per_minute_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActionLogEventsProcessedPerMinuteNumber'),
             free: { value: '15', type: 'text' },
             diamond: { value: 'all_inclusive', type: 'icon' }
           }
         ]
       },
       {
-        categoryName: $t('pages.landing.ft_music_title'),
+        categoryName: $t('Pages.GuildPage.VoiceChannels.Music'),
         features: [
           {
-            name: $t('lacuna_diamond.plan_comparison_features.playlists_playback_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaylistsPlayback'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.audio_streaming_playback_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AudioStreamingPlayback'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.playback_volume_changing_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackVolumeChanging'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.playback_queue_track_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackQueueTrackNumber'),
             free: { value: '15', type: 'text' },
             diamond: { value: 'all_inclusive', type: 'icon' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.playback_filters_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackFilters'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.playback_seek_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackSeek'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
           }
         ]
       },
       {
-        categoryName: $t('pages.landing.ft_activities_title'),
+        categoryName: $t('Pages.GuildPage.NavNames.Activities'),
         features: [
           {
-            name: $t('lacuna_diamond.plan_comparison_features.earn_currencies_in_voice_channels'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.EarnCurrenciesInVoiceChannels'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.voice_exp_members_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.VoiceExpMembersNumber'),
             free: { value: '15', type: 'text' },
             diamond: { value: 'all_inclusive', type: 'icon' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.level_awards_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.LevelAwardsNumber'),
             free: { value: '50', type: 'text' },
             diamond: { value: '200', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.store_items_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.StoreItemsNumber'),
             free: { value: '50', type: 'text' },
             diamond: { value: '200', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.activity_multipliers_number_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActivityMultipliersNumber'),
             free: { value: '1', type: 'text' },
             diamond: { value: '10', type: 'text' }
           }
         ]
       },
       {
-        categoryName: $t('pages.landing.ft_subscriptions_title'),
+        categoryName: $t('Pages.GuildPage.NavNames.Subscriptions'),
         features: [
           {
-            name: $t('lacuna_diamond.plan_comparison_features.social_platform_number_title', {
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
               social_platform: 'Telegram'
             }),
             free: { value: '1', type: 'text' },
             diamond: { value: '10', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.social_platform_number_title', {
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
               social_platform: 'YouTube'
             }),
             free: { value: '1', type: 'text' },
             diamond: { value: '10', type: 'text' }
           },
           {
-            name: $t('lacuna_diamond.plan_comparison_features.social_platform_number_title', {
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
               social_platform: 'Twitch'
             }),
             free: { value: '1', type: 'text' },
@@ -588,10 +590,10 @@ export default defineComponent({
         ]
       },
       {
-        categoryName: $t('other'),
+        categoryName: $t('Common.Other'),
         features: [
           {
-            name: $t('lacuna_diamond.plan_comparison_features.priority_support_title'),
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PrioritySupport'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
           }
@@ -682,37 +684,37 @@ export default defineComponent({
       bonuses: [
         {
           name: 'music',
-          description: this.$t('lacuna_diamond.bonus_music_description'),
+          description: this.$t('Components.LacunaDiamond.BonusMusicDescription'),
           icon: 'https://cdn.lordicon.com/pmkcstki.json',
           iconColors: 'primary:#00bcd4'
         },
         {
           name: 'limits',
-          description: this.$t('lacuna_diamond.bonus_increased_limits_description'),
+          description: this.$t('Components.LacunaDiamond.BonusIncreasedLimitsDescription'),
           icon: 'https://cdn.lordicon.com/orshjpvs.json',
           iconColors: 'primary:#3a3347,secondary:#ebe6ef'
         },
         {
           name: 'personalization',
-          description: this.$t('lacuna_diamond.bonus_personalization_description'),
+          description: this.$t('Components.LacunaDiamond.BonusPersonalizationDescription'),
           icon: 'https://cdn.lordicon.com/pjlunxyy.json',
           iconColors: 'primary:#3a3347,secondary:#646e78,tertiary:#ab6836,quaternary:#51acf7'
         },
         {
           name: 'subscriptions',
-          description: this.$t('lacuna_diamond.bonus_custom_behavior_with_code_description'),
+          description: this.$t('Components.LacunaDiamond.BonusCustomBehaviorWithCodeDescription'),
           icon: 'https://cdn.lordicon.com/qatykyxz.json',
           iconColors: 'primary:#121331,secondary:#00bcd4'
         },
         {
           name: 'activities',
-          description: this.$t('lacuna_diamond.bonus_activities_description'),
+          description: this.$t('Components.LacunaDiamond.BonusActivitiesDescription'),
           icon: 'https://cdn.lordicon.com/qmcsqnle.json',
           iconColors: 'primary:#ffc738,secondary:#b26836'
         },
         {
           name: 'respect',
-          description: this.$t('lacuna_diamond.bonus_respect_description'),
+          description: this.$t('Components.LacunaDiamond.BonusRespectDescription'),
           icon: 'https://cdn.lordicon.com/cmfqmqbx.json',
           iconColors: 'primary:#f9c9c0,secondary:#4bb3fd,tertiary:#f28ba8'
         }

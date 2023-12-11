@@ -7,8 +7,8 @@
             <q-btn-toggle
               v-model="ir.type"
               :options="[
-                { label: $t('common.role'), value: 'ROLE' },
-                { label: $t('common.channel'), value: 'CHANNEL' }
+                { label: $t('Commands.OptionTypes.Role'), value: 'ROLE' },
+                { label: $t('Commands.OptionTypes.Channel'), value: 'CHANNEL' }
               ]"
               class="bg-dark-2"
               toggle-color="secondary"
@@ -31,10 +31,10 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('irs.single_element_title') }}
+                {{ $t('Components.InteractiveReaction.SingleElement') }}
               </q-item-label>
               <q-item-label class="text--secondary">
-                {{ $t('irs.single_element_description') }}
+                {{ $t('Components.InteractiveReaction.SingleElementDescription') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -46,7 +46,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('irs.reverse_element_title') }}
+                {{ $t('Components.InteractiveReaction.ReverseElement') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -57,7 +57,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.channel') }}
+              {{ $t('Commands.OptionTypes.Channel') }}
             </div>
 
             <q-select
@@ -98,10 +98,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('irs.message_id_title') }}
+              {{ $t('Components.InteractiveReaction.MessageId') }}
             </div>
             <div class="text--secondary">
-              {{ $t('irs.message_id_description') }}
+              {{ $t('Components.InteractiveReaction.MessageIdDescription') }}
             </div>
 
             <q-input v-model="ir.message.id" class="q-pt-sm" :maxlength="64" filled dense hide-bottom-space></q-input>
@@ -113,7 +113,7 @@
         <div class="row q-col-gutter-md">
           <div v-if="mode === 'CREATE'" class="col-12">
             <div>
-              {{ $t('automoder.nnm_removable_symbols.EMOJIS') }}
+              {{ $t('Components.AutoMod.NicknamesModerationRemovableSymbols.Emojis') }}
             </div>
 
             <q-input :model-value="emoji" class="q-pt-sm" readonly filled dense hide-bottom-space>
@@ -129,10 +129,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('irs.references_title') }}
+              {{ $t('Components.InteractiveReaction.References') }}
             </div>
             <div class="text--secondary">
-              {{ $t('irs.references_description') }}
+              {{ $t('Components.InteractiveReaction.ReferencesDescription') }}
             </div>
 
             <q-select
@@ -229,14 +229,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -252,7 +252,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -265,7 +265,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>

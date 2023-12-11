@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('custom_command.mw_amount_title') }}
+              {{ $t('Components.CustomCommand.ModifyWalletAmount') }}
             </div>
 
             <q-input
@@ -21,10 +21,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('custom_command.mr_user_id_title') }}
+              {{ $t('Components.CustomCommand.ModifyRolesUserId') }}
             </div>
             <div class="text--secondary">
-              {{ $t('custom_command.mw_user_id_description') }}
+              {{ $t('Components.CustomCommand.ModifyWalletUserIdDescription') }}
             </div>
 
             <q-input
@@ -40,10 +40,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('custom_command.mw_currency_id_title') }}
+              {{ $t('Components.CustomCommand.ModifyWalletCurrencyId') }}
             </div>
             <div class="text--secondary">
-              {{ $t('custom_command.mw_currency_id_description') }}
+              {{ $t('Components.CustomCommand.ModifyWalletCurrencyIdDescription') }}
             </div>
 
             <q-input
@@ -62,13 +62,13 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               unelevated
               no-caps
               color="primary"

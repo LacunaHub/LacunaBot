@@ -3,7 +3,7 @@
     <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <div class="q-pa-md">
         <div>
-          {{ $t('activity_multipliers.level_multipliers') }}
+          {{ $t('Components.ActivityMultipliers.LevelMultipliers') }}
         </div>
 
         <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
@@ -21,7 +21,11 @@
               <q-item-section>
                 <q-item-label>
                   {{
-                    $t(`activity_multipliers.${option === 'LEVELS_TEXT' ? 'for_text_activity' : 'for_voice_activity'}`)
+                    $t(
+                      `Components.ActivityMultipliers.${
+                        option === 'LEVELS_TEXT' ? 'ForTextActivity' : 'ForVoiceActivity'
+                      }`
+                    )
                   }}
                 </q-item-label>
               </q-item-section>
@@ -72,7 +76,7 @@
 
       <div class="q-pa-md">
         <div>
-          {{ $t('activity_multipliers.economy_multipliers') }}
+          {{ $t('Components.ActivityMultipliers.EconomyMultipliers') }}
         </div>
 
         <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
@@ -90,7 +94,11 @@
               <q-item-section>
                 <q-item-label>
                   {{
-                    $t(`activity_multipliers.${option === 'ECONOMY_TEXT' ? 'for_text_activity' : 'for_voice_activity'}`)
+                    $t(
+                      `Components.ActivityMultipliers.${
+                        option === 'ECONOMY_TEXT' ? 'ForTextActivity' : 'ForVoiceActivity'
+                      }`
+                    )
                   }}
                 </q-item-label>
               </q-item-section>
@@ -141,13 +149,13 @@
 
       <div class="q-pa-md">
         <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
-          <q-expansion-item expand-separator :label="$t('common.permissions')">
+          <q-expansion-item expand-separator :label="$t('Common.Permissions')">
             <q-card class="bg-dark-1 no-border-radius" bordered>
               <q-card-section>
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('common.allowed_channels') }}
+                      {{ $t('Common.AllowedChannels') }}
                     </div>
 
                     <q-select
@@ -202,7 +210,7 @@
 
                   <div class="col-12">
                     <div>
-                      {{ $t('common.blocked_channels') }}
+                      {{ $t('Common.BlockedChannels') }}
                     </div>
 
                     <q-select
@@ -261,7 +269,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('common.allowed_roles') }}
+                      {{ $t('Common.AllowedRoles') }}
                     </div>
 
                     <q-select
@@ -306,7 +314,7 @@
 
                   <div class="col-12">
                     <div>
-                      {{ $t('common.blocked_roles') }}
+                      {{ $t('Common.BlockedRoles') }}
                     </div>
 
                     <q-select
@@ -358,14 +366,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -375,7 +383,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               split
               unelevated
@@ -387,7 +395,7 @@
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>

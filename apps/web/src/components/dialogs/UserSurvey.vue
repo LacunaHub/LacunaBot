@@ -4,7 +4,7 @@
       <q-card-section>
         <q-banner class="bg-dark-2 rounded-borders" dense>
           <span>
-            {{ $t('user_survey.it_would_help_us') }}
+            {{ $t('Components.UserSurvey.ItWouldHelpUs') }}
           </span>
 
           <template #avatar>
@@ -16,7 +16,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12 text-center">
-            <div>{{ $t('user_survey.how_satisfied') }} *</div>
+            <div>{{ $t('Components.UserSurvey.HowSatisfied') }} *</div>
 
             <q-rating v-model="satisfaction" class="q-pt-sm" size="lg" :max="5" color="primary">
               <template v-slot:tip-1>
@@ -78,7 +78,7 @@
           </div>
 
           <div class="col-12 text-center">
-            <div>{{ $t('user_survey.how_many_members') }} *</div>
+            <div>{{ $t('Components.UserSurvey.HowManyMembers') }} *</div>
 
             <q-tabs
               v-model="memberCount"
@@ -105,7 +105,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12 text-center">
             <div>
-              {{ $t('user_survey.tell_us_more') }}
+              {{ $t('Components.UserSurvey.TellUsMore') }}
             </div>
 
             <q-input
@@ -125,13 +125,20 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('remind_later')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.RemindLater')"
+              unelevated
+              no-caps
+              color="dark-2"
+              @click="onCancel"
+            />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               unelevated
               no-caps

@@ -2,11 +2,11 @@
   <q-page class="q-pa-md row justify-center items-start">
     <div class="row q-col-gutter-md" style="max-width: 960px">
       <div class="col-12 text-body1">
-        {{ $t('pages.patrons.gratitude_message_p1') }}
+        {{ $t('Pages.PatronsPage.GratitudeMessageP1') }}
         <br /><br />
-        {{ $t('pages.patrons.gratitude_message_p2') }}
+        {{ $t('Pages.PatronsPage.GratitudeMessageP2') }}
         <br /><br />
-        {{ $t('pages.patrons.gratitude_message_p3') }}
+        {{ $t('Pages.PatronsPage.GratitudeMessageP3') }}
       </div>
 
       <div class="col-12">
@@ -51,7 +51,7 @@
 
       <div class="col-12">
         <div class="text-h5 text-center q-pb-md">
-          {{ $t('pages.patrons.active_patrons_title') }}
+          {{ $t('Pages.PatronsPage.ActivePatrons') }}
         </div>
 
         <div v-if="pageLoading" class="row q-col-gutter-md justify-center items-start">
@@ -69,7 +69,7 @@
 
       <div class="col-12">
         <div class="text-h5 text-center q-pb-md">
-          {{ $t('pages.patrons.former_patrons_title') }}
+          {{ $t('Pages.PatronsPage.FormerPatrons') }}
         </div>
 
         <div v-if="pageLoading" class="row q-col-gutter-md justify-center items-start">

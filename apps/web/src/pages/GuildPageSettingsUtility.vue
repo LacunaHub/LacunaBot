@@ -5,7 +5,7 @@
         <q-item class="q-py-md rounded-t-lg" tag="label">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ut_reports_title') }}
+              {{ $t('Pages.GuildPage.Useful.Reports') }}
             </q-item-label>
           </q-item-section>
 
@@ -18,7 +18,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12">
               <div>
-                {{ $t('common.channel') }}
+                {{ $t('Commands.OptionTypes.Channel') }}
               </div>
 
               <q-select
@@ -73,7 +73,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.ut_reports_notify_about_unwanted_users_title') }}
+                  {{ $t('Pages.GuildPage.Useful.ReportsNotifyAboutUnwantedUsers') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -87,10 +87,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ut_auto_threads_title') }}
+              {{ $t('Pages.GuildPage.Useful.AutoThreads') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.ut_auto_threads_description') }}
+              {{ $t('Pages.GuildPage.Useful.AutoThreadsDescription') }}
             </q-item-label>
           </q-item-section>
 
@@ -135,10 +135,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ut_auto_reactions_title') }}
+              {{ $t('Pages.GuildPage.Useful.AutoReactions') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.ut_auto_reactions_description') }}
+              {{ $t('Pages.GuildPage.Useful.AutoReactionsDescription') }}
             </q-item-label>
           </q-item-section>
 
@@ -185,7 +185,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ut_ims_title') }}
+              {{ $t('Pages.GuildPage.Useful.InteractiveMessages') }}
             </q-item-label>
           </q-item-section>
 
@@ -230,10 +230,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ut_irs_title') }}
+              {{ $t('Pages.GuildPage.Useful.InteractiveReactions') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.ut_irs_description') }}
+              {{ $t('Pages.GuildPage.Useful.InteractiveReactionsDescription') }}
             </q-item-label>
           </q-item-section>
 

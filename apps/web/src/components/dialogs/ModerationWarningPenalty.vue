@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('mod_warning_penalty.warnings_amount_title') }}
+              {{ $t('Components.WarningPenalty.WarningCount') }}
             </div>
 
             <q-slider v-model.number="penalty.penalties" class="q-pt-sm q-px-sm" :min="1" :max="100" label></q-slider>
@@ -33,7 +33,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t(`common.actions_keys.${action.name}`) }}
+                {{ $t(localeStringsMap.actions[action.name]) }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -56,7 +56,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t(`common.actions_keys.${action.name}`) }}
+                  {{ $t(localeStringsMap.actions[action.name]) }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -66,7 +66,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('automoder.penalty_timeout') }}
+                      {{ $t('Components.AutoMod.PenaltyTimeout') }}
                     </div>
 
                     <q-select
@@ -82,7 +82,7 @@
                     >
                       <template #selected-item="{ opt }">
                         <span v-if="opt === 0" class="text-lowercase">
-                          {{ $t('automoder.indefinitely') }}
+                          {{ $t('Common.Indefinitely') }}
                         </span>
                         <span v-else>
                           {{
@@ -103,7 +103,7 @@
                         >
                           <q-item-section>
                             <q-item-label v-if="opt === 0" class="text-lowercase">
-                              {{ $t('automoder.indefinitely') }}
+                              {{ $t('Common.Indefinitely') }}
                             </q-item-label>
                             <q-item-label v-else>
                               {{
@@ -142,7 +142,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('automoder.penalty_timeout') }}
+                      {{ $t('Components.AutoMod.PenaltyTimeout') }}
                     </div>
 
                     <q-select
@@ -213,7 +213,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('common.add_roles') }}
+                      {{ $t('Common.AddRoles') }}
                     </div>
 
                     <q-select
@@ -262,7 +262,7 @@
 
                   <div class="col-12">
                     <div>
-                      {{ $t('common.remove_roles') }}
+                      {{ $t('Common.RemoveRoles') }}
                     </div>
 
                     <q-select
@@ -317,7 +317,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('pages.guild.gs_message_template_title') }}
+                      {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
                     </div>
 
                     <MessageEditor
@@ -337,14 +337,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -354,7 +354,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               split
               unelevated
@@ -366,7 +366,7 @@
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -382,6 +382,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { suid } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
@@ -431,6 +432,7 @@ export default defineComponent({
       mode,
       penalty,
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {

@@ -8,7 +8,7 @@
               <q-list>
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.total_guilds') }}
+                    {{ $t('Commands.AboutCommand.Texts.TotalGuilds') }}
                   </q-item-section>
 
                   <q-item-section class="text-subtitle1" side>
@@ -18,7 +18,7 @@
 
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.total_users') }}
+                    {{ $t('Commands.AboutCommand.Texts.TotalUsers') }}
                   </q-item-section>
 
                   <q-item-section class="text-subtitle1" side>
@@ -28,7 +28,7 @@
 
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.total_channels') }}
+                    {{ $t('Pages.StatePage.TotalChannels') }}
                   </q-item-section>
 
                   <q-item-section class="text-subtitle1" side>
@@ -42,7 +42,7 @@
               <q-list>
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.avg_latency') }}
+                    {{ $t('Pages.StatePage.AvgLatency') }}
                   </q-item-section>
 
                   <q-item-section class="text-subtitle1" side>
@@ -52,7 +52,7 @@
 
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.current_version') }}
+                    {{ $t('Commands.AboutCommand.Texts.CurrentVersion') }}
                   </q-item-section>
 
                   <q-item-section class="text-subtitle1" side>
@@ -68,7 +68,7 @@
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
-                    {{ $t('pages.state.clusters_title') }}
+                    {{ $t('Pages.StatePage.Clusters') }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -92,7 +92,7 @@
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
-                    {{ $t('pages.state.shards_title') }}
+                    {{ $t('Pages.StatePage.Shards') }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -116,7 +116,7 @@
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
-                    {{ $t('pages.state.players_title') }}
+                    {{ $t('Pages.StatePage.MusicPlayers') }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -178,7 +178,7 @@
               <q-list>
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.total_guilds') }}
+                    {{ $t('Commands.AboutCommand.Texts.TotalGuilds') }}
                   </q-item-section>
 
                   <q-item-section class="text-white text-subtitle1" side>{{ state.guilds }}</q-item-section>
@@ -186,7 +186,7 @@
 
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.total_users') }}
+                    {{ $t('Commands.AboutCommand.Texts.TotalUsers') }}
                   </q-item-section>
 
                   <q-item-section class="text-subtitle1" side>
@@ -199,7 +199,7 @@
 
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.total_channels') }}
+                    {{ $t('Pages.StatePage.TotalChannels') }}
                   </q-item-section>
 
                   <q-item-section class="text-white text-subtitle1" side>{{ state.channels }}</q-item-section>
@@ -211,7 +211,7 @@
               <q-list>
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.avg_latency') }}
+                    {{ $t('Pages.StatePage.AvgLatency') }}
                   </q-item-section>
 
                   <q-item-section :class="`${averageLatency.color} text-subtitle1`" side>
@@ -221,7 +221,7 @@
 
                 <q-item>
                   <q-item-section class="text--secondary">
-                    {{ $t('pages.state.current_version') }}
+                    {{ $t('Commands.AboutCommand.Texts.CurrentVersion') }}
                   </q-item-section>
 
                   <q-item-section class="text-white text-subtitle1" side>v{{ state.version }}</q-item-section>
@@ -235,7 +235,7 @@
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
-                    {{ $t('pages.state.clusters_title') }}
+                    {{ $t('Pages.StatePage.Clusters') }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -270,7 +270,7 @@
                               transition-show=""
                               transition-hide=""
                             >
-                              {{ $t('pages.state.cluster_cpu_usage') }}
+                              {{ $t('Pages.StatePage.ClusterCPUUsage') }}
                             </q-tooltip>
                           </q-linear-progress>
                         </div>
@@ -290,7 +290,7 @@
                               transition-show=""
                               transition-hide=""
                             >
-                              {{ $t('pages.state.cluster_memory_usage') }}
+                              {{ $t('Pages.StatePage.ClusterMemoryUsage') }}
                             </q-tooltip>
                           </q-linear-progress>
                         </div>
@@ -307,7 +307,7 @@
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
-                    {{ $t('pages.state.shards_title') }}
+                    {{ $t('Pages.StatePage.Shards') }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -348,7 +348,7 @@
                               transition-show=""
                               transition-hide=""
                             >
-                              {{ $t('pages.state.shard_guilds') }}
+                              {{ $t('Commands.AboutCommand.Texts.TotalGuilds') }}
                             </q-tooltip>
                           </span>
                         </div>
@@ -365,7 +365,7 @@
                               transition-show=""
                               transition-hide=""
                             >
-                              {{ $t('pages.state.shard_users') }}
+                              {{ $t('Commands.AboutCommand.Texts.TotalGuilds') }}
                             </q-tooltip>
                           </span>
                         </div>
@@ -382,7 +382,7 @@
                               transition-show=""
                               transition-hide=""
                             >
-                              {{ $t('pages.state.shard_channels') }}
+                              {{ $t('Pages.StatePage.TotalChannels') }}
                             </q-tooltip>
                           </span>
                         </div>
@@ -399,7 +399,7 @@
               <q-item class="q-pt-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
-                    {{ $t('pages.state.players_title') }}
+                    {{ $t('Pages.StatePage.MusicPlayers') }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -426,7 +426,7 @@
                         transition-show=""
                         transition-hide=""
                       >
-                        {{ $t('pages.state.player_cpu_load') }}
+                        {{ $t('Pages.StatePage.PlayerCPULoad') }}
                       </q-tooltip>
                     </q-linear-progress>
                   </q-item-section>
@@ -452,7 +452,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      title: { display: true, text: $t('pages.state.total_guilds') },
+                      title: { display: true, text: $t('Commands.AboutCommand.Texts.TotalGuilds') },
                       legend: { display: false },
                       tooltip: { mode: 'index', intersect: false }
                     },
@@ -474,7 +474,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      title: { display: true, text: $t('pages.state.shards_latency') },
+                      title: { display: true, text: $t('Pages.StatePage.ShardLatencies') },
                       tooltip: { mode: 'index', intersect: false }
                     },
                     scales: {
@@ -495,7 +495,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      title: { display: true, text: $t('pages.state.command_uses') },
+                      title: { display: true, text: $t('Pages.StatePage.CommandUses') },
                       legend: { reverse: true },
                       tooltip: { mode: 'nearest', intersect: false }
                     },

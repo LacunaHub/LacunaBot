@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-9">
             <div>
-              {{ $t('name') }}
+              {{ $t('Common.Name') }}
             </div>
 
             <q-input v-model="field.label" class="q-pt-sm" :maxlength="100" filled dense hide-bottom-space></q-input>
@@ -13,7 +13,7 @@
 
           <div class="col-3">
             <div>
-              {{ $t('custom_command.co_type_title') }}
+              {{ $t('Components.CustomCommand.CommandArgumentType') }}
             </div>
 
             <q-select
@@ -46,7 +46,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('identifier') }}
+              {{ $t('Common.Identifier') }}
             </div>
 
             <q-input v-model="field.customId" class="q-pt-sm" :maxlength="100" filled dense hide-bottom-space></q-input>
@@ -54,7 +54,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('custom_command.sm_field_placeholder_title') }}
+              {{ $t('Components.CustomCommand.ShowModalFieldPlaceholder') }}
             </div>
 
             <q-input
@@ -69,7 +69,7 @@
 
           <div class="col-6">
             <div>
-              {{ $t('custom_command.sm_field_min_length_title') }}
+              {{ $t('Components.CustomCommand.ShowModalFieldMinLength') }}
             </div>
 
             <q-input
@@ -86,7 +86,7 @@
 
           <div class="col-6">
             <div>
-              {{ $t('custom_command.sm_field_max_length_title') }}
+              {{ $t('Components.CustomCommand.ShowModalFieldMaxLength') }}
             </div>
 
             <q-input
@@ -103,7 +103,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('custom_command.sm_field_default_value_title') }}
+              {{ $t('Components.CustomCommand.ShowModalFieldDefaultValue') }}
             </div>
 
             <q-input v-model="field.value" class="q-pt-sm" filled dense hide-bottom-space></q-input>
@@ -120,7 +120,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('custom_command.co_required_title') }}
+                {{ $t('Commands.HelpCommand.Texts.CommandArgumentRequired') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -130,13 +130,13 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               unelevated
               no-caps
               color="primary"

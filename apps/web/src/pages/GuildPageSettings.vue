@@ -27,7 +27,7 @@
                     class="full-width"
                     color="primary"
                     push
-                    :label="$t('save')"
+                    :label="$t('Common.Save')"
                     @click="updateSettings"
                     :loading="updateSettingsLoading"
                     :disable="!isGuildChanged"
@@ -100,12 +100,12 @@
 
                 <q-route-tab
                   :to="`/guilds/${guildId}/settings/change-log`"
-                  :label="$t('pages.guild.nav_names.CHANGE_LOG')"
+                  :label="$t('Pages.GuildPage.NavNames.ChangeLog')"
                   :icon="`img:${editPenImg}`"
                 ></q-route-tab>
 
                 <q-tab
-                  :label="$t('pages.guild.nav_names.DOWNLOAD_LOGS')"
+                  :label="$t('Pages.GuildPage.NavNames.DownloadLogs')"
                   :icon="`img:${logsImg}`"
                   @click="downloadLogs"
                 ></q-tab>
@@ -185,7 +185,7 @@
                 <q-list padding>
                   <q-item clickable :to="`/guilds/${guildId}/settings/change-log`" active-class="nav-item--active">
                     <q-item-section class="text-subtitle1">
-                      {{ $t('pages.guild.nav_names.CHANGE_LOG') }}
+                      {{ $t('Pages.GuildPage.NavNames.ChangeLog') }}
                     </q-item-section>
 
                     <q-item-section avatar side>
@@ -197,7 +197,7 @@
 
                   <q-item clickable active-class="nav-item--active" @click="downloadLogs">
                     <q-item-section class="text-subtitle1">
-                      {{ $t('pages.guild.nav_names.DOWNLOAD_LOGS') }}
+                      {{ $t('Pages.GuildPage.NavNames.DownloadLogs') }}
                     </q-item-section>
 
                     <q-item-section avatar side>
@@ -280,34 +280,34 @@ const guildClone = computed(() => {
   })
 
 const navItems = [
-  { name: t('pages.guild.nav_names.GENERAL'), path: 'settings', icon: controlPanelImg },
+  { name: t('Pages.GuildPage.NavNames.General'), path: 'settings', icon: controlPanelImg },
   {
-    name: t('pages.guild.nav_names.COMMANDS'),
+    name: t('Pages.GuildPage.NavNames.Commands'),
     path: 'settings/commands',
     icon: slashCommandImg
   },
   {
-    name: t('pages.guild.nav_names.MODERATION'),
+    name: t('Pages.GuildPage.NavNames.Moderation'),
     path: 'settings/moderation',
     icon: shieldImg
   },
-  { name: t('pages.landing.ft_custom_behavior_title'), path: 'settings/custom-behavior', icon: boxImg, new: true },
+  { name: t('Pages.GuildPage.NavNames.CustomBehavior'), path: 'settings/custom-behavior', icon: boxImg, new: true },
   {
-    name: t('pages.guild.nav_names.ACTIVITIES'),
+    name: t('Pages.GuildPage.NavNames.Activities'),
     path: 'settings/activities',
     icon: activitiesImg
   },
   {
-    name: t('pages.landing.ft_subscriptions_title'),
+    name: t('Pages.GuildPage.NavNames.Subscriptions'),
     path: 'settings/subscriptions',
     icon: bellImg
   },
   {
-    name: t('pages.guild.nav_names.VOICE_CHANNELS'),
+    name: t('Pages.GuildPage.NavNames.VoiceChannels'),
     path: 'settings/voice-channels',
     icon: karaokeImg
   },
-  { name: t('pages.guild.nav_names.UTILITY'), path: 'settings/utility', icon: layersImg }
+  { name: t('Pages.GuildPage.NavNames.Utility'), path: 'settings/utility', icon: layersImg }
 ]
 
 useMeta(() => {
@@ -486,7 +486,7 @@ onMounted(async () => {
           const now = new Date()
 
           $q.notify({
-            message: t('user_survey.survey_submitted'),
+            message: t('Components.UserSurvey.SurveySubmitted'),
             classes: 'q-notification-custom',
             color: 'black',
             icon: 'done',
@@ -505,7 +505,7 @@ onMounted(async () => {
 
 onBeforeRouteLeave((to, from, next) => {
   if (isGuildChanged.value) {
-    const answer = window.confirm(t('pages.guild.unsaved_changes'))
+    const answer = window.confirm(t('Pages.GuildPage.UnsavedChangesArePresent'))
 
     if (answer) {
       next()

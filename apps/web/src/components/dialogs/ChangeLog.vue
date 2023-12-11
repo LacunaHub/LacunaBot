@@ -4,7 +4,7 @@
       <q-item class="q-py-md rounded-t-lg">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t('header.change_log') }}
+            {{ $t('Components.Header.ReleaseNotes') }}
           </q-item-label>
 
           <q-item-label class="text--secondary">v{{ changes.version }}</q-item-label>
@@ -27,7 +27,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
         </div>
       </q-card-section>

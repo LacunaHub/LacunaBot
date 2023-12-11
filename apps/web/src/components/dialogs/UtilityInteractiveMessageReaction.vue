@@ -20,7 +20,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t(`common.actions_keys.${action}`) }}
+                  {{ $t(localeStringsMap.actions[action]) }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -30,7 +30,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('common.add_roles') }}
+                      {{ $t('Common.AddRoles') }}
                     </div>
 
                     <q-select
@@ -82,7 +82,7 @@
                             transition-show=""
                             transition-hide=""
                           >
-                            {{ $t('ims.mr_reversible_mode') }}
+                            {{ $t('Components.InteractiveMessage.ModifyRolesReversibleMode') }}
                           </q-tooltip>
                         </q-checkbox>
                       </template>
@@ -98,7 +98,7 @@
                             transition-show=""
                             transition-hide=""
                           >
-                            {{ $t('ims.mr_reversible_mode') }}
+                            {{ $t('Components.InteractiveMessage.ModifyRolesReversibleMode') }}
                           </q-tooltip>
                         </q-checkbox>
                       </template>
@@ -107,7 +107,7 @@
 
                   <div class="col-12">
                     <div>
-                      {{ $t('common.remove_roles') }}
+                      {{ $t('Common.RemoveRoles') }}
                     </div>
 
                     <q-select
@@ -159,7 +159,7 @@
                             transition-show=""
                             transition-hide=""
                           >
-                            {{ $t('ims.mr_reversible_mode') }}
+                            {{ $t('Components.InteractiveMessage.ModifyRolesReversibleMode') }}
                           </q-tooltip>
                         </q-checkbox>
                       </template>
@@ -175,7 +175,7 @@
                             transition-show=""
                             transition-hide=""
                           >
-                            {{ $t('ims.mr_reversible_mode') }}
+                            {{ $t('Components.InteractiveMessage.ModifyRolesReversibleMode') }}
                           </q-tooltip>
                         </q-checkbox>
                       </template>
@@ -190,7 +190,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('common.channels') }}
+                      {{ $t('Common.Channels') }}
                     </div>
 
                     <q-select
@@ -250,7 +250,7 @@
                   <div class="col-12">
                     <q-btn-dropdown
                       class="full-width"
-                      :label="$t('common.permissions')"
+                      :label="$t('Common.Permissions')"
                       :disable="!reaction.options.includes('OVERWRITE_CHANNEL_PERMISSIONS')"
                       unelevated
                       no-caps
@@ -260,7 +260,7 @@
                         <q-item v-for="(permission, i) in Object.keys(channelPermissions)" :key="i" tag="label">
                           <q-item-section>
                             <q-item-label>
-                              {{ $t(`common.permissions_keys.${permission}`) }}
+                              {{ $t(localeStringsMap.discordPermissions[permission]) }}
                             </q-item-label>
                           </q-item-section>
 
@@ -284,7 +284,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('common.blocked_roles') }}
+                      {{ $t('Common.BlockedRoles') }}
                     </div>
 
                     <q-select
@@ -339,11 +339,18 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -354,7 +361,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
-import { discordChannelPermissions } from 'src/utils/Constants'
+import { discordChannelPermissions, localeStringsMap } from 'src/utils/Constants'
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
@@ -381,6 +388,7 @@ export default defineComponent({
       dialogRef,
       reaction,
       channelPermissions,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK({ reaction: reaction.value })

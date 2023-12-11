@@ -5,7 +5,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.vc_music_title') }}
+              {{ $t('Pages.GuildPage.VoiceChannels.Music') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -14,7 +14,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.vc_music_default_source_title') }}
+                {{ $t('Pages.GuildPage.VoiceChannels.MusicDefaultSource') }}
               </div>
 
               <q-btn-toggle
@@ -77,7 +77,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.vc_music_allow_radio_playback_title') }}
+                  {{ $t('Pages.GuildPage.VoiceChannels.MusicAllowRadioPlayback') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -88,7 +88,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('pages.guild.vc_music_queue_max_length_title') }}
+                {{ $t('Pages.GuildPage.VoiceChannels.MusicQueueMaxLength') }}
               </div>
 
               <q-slider
@@ -103,7 +103,7 @@
 
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('pages.guild.vc_music_default_volume_title') }}
+                {{ $t('Pages.GuildPage.VoiceChannels.MusicDefaultVolume') }}
               </div>
 
               <q-slider
@@ -122,7 +122,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('common.allowed_channels') }}
+                {{ $t('Common.AllowedChannels') }}
               </div>
 
               <q-select
@@ -172,7 +172,7 @@
 
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('common.blocked_channels') }}
+                {{ $t('Common.BlockedChannels') }}
               </div>
 
               <q-select
@@ -229,10 +229,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.vc_voice_roles_title') }}
+              {{ $t('Pages.GuildPage.VoiceChannels.VoiceRoles') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.vc_voice_roles_description') }}
+              {{ $t('Pages.GuildPage.VoiceChannels.VoiceRolesDescription') }}
             </q-item-label>
           </q-item-section>
 
@@ -281,10 +281,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.vc_auto_voices_title') }}
+              {{ $t('Pages.GuildPage.VoiceChannels.AutoVoices') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.vc_auto_voices_description') }}
+              {{ $t('Pages.GuildPage.VoiceChannels.AutoVoicesDescription') }}
             </q-item-label>
           </q-item-section>
 

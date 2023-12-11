@@ -3,7 +3,7 @@
     <q-item class="q-py-md">
       <q-item-section>
         <q-item-label class="text-subtitle1">
-          {{ $t('pages.landing.ft_activities_title') }}
+          {{ $t('Pages.GuildPage.NavNames.Activities') }}
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -85,7 +85,7 @@
       <q-card-section v-else>
         <q-banner class="bg-dark-2 rounded-borders" dense>
           <span>
-            {{ $t('pages.dashboard.no_activities') }}
+            {{ $t('Pages.DashboardPage.NoActivities') }}
           </span>
 
           <template #avatar>

@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-9">
             <div>
-              {{ $t('economy_store_item.item_name_title') }}
+              {{ $t('Components.EconomyStoreItem.ItemName') }}
             </div>
 
             <q-input v-model="item.name" class="q-pt-sm" :maxlength="32" filled dense hide-bottom-space></q-input>
@@ -13,7 +13,7 @@
 
           <div class="col-3">
             <div>
-              {{ $t('economy_store_item.item_type_title') }}
+              {{ $t('Components.EconomyStoreItem.ItemType') }}
             </div>
 
             <q-select
@@ -27,7 +27,7 @@
             >
               <template #selected-item="{ opt }">
                 <span>
-                  {{ $t(`common.${opt.toLowerCase()}`) }}
+                  {{ $t(opt === 'ROLE' ? 'Commands.OptionTypes.Role' : 'Commands.OptionTypes.Channel') }}
                 </span>
               </template>
 
@@ -35,7 +35,7 @@
                 <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t(`common.${opt.toLowerCase()}`) }}
+                      {{ $t(opt === 'ROLE' ? 'Commands.OptionTypes.Role' : 'Commands.OptionTypes.Channel') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -45,7 +45,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('economy_store_item.item_description_title') }}
+              {{ $t('Components.EconomyStoreItem.ItemDescription') }}
             </div>
 
             <q-input
@@ -64,10 +64,10 @@
         <div class="row q-col-gutter-md">
           <div class="col-9">
             <div>
-              {{ $t('economy_store_item.item_purchase_price_title') }}
+              {{ $t('Commands.StoreCommand.SubCommands.ItemsCommand.Texts.PurchasePrice') }}
             </div>
             <div class="text--secondary">
-              {{ $t('economy_store_item.item_purchase_price_description') }}
+              {{ $t('Components.EconomyStoreItem.ItemPurchasePriceDescription') }}
             </div>
 
             <q-input
@@ -118,10 +118,10 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('economy_store_item.item_products_title') }}
+              {{ $t('Components.EconomyStoreItem.ItemProducts') }}
             </div>
             <div class="text--secondary">
-              {{ $t('economy_store_item.item_products_description') }}
+              {{ $t('Components.EconomyStoreItem.ItemProductsDescription') }}
             </div>
 
             <q-select
@@ -236,7 +236,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t(`economy_store_item.item_options.${option}`) }}
+                  {{ $t(localeStringsMap.storeItemOptions[option]) }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -246,7 +246,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('economy_store_item.item_quantity_title') }}
+                      {{ $t('Components.EconomyStoreItem.ItemQuantity') }}
                     </div>
 
                     <q-input
@@ -280,7 +280,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('economy_store_item.item_duration_title') }}
+                      {{ $t('Components.EconomyStoreItem.ItemDuration') }}
                     </div>
 
                     <q-input
@@ -305,7 +305,7 @@
                         >
                           <template #selected-item="{ opt }">
                             <span>
-                              {{ $t(`automoder.nm_age_measures.${opt}`) }}
+                              {{ $t(localeStringsMap.dateUnits[opt]) }}
                             </span>
                           </template>
 
@@ -318,7 +318,7 @@
                             >
                               <q-item-section>
                                 <q-item-label>
-                                  {{ $t(`automoder.nm_age_measures.${opt}`) }}
+                                  {{ $t(localeStringsMap.dateUnits[opt]) }}
                                 </q-item-label>
                               </q-item-section>
                             </q-item>
@@ -338,13 +338,7 @@
                       hide-bottom-space
                     >
                       <template #after>
-                        <q-select
-                          disable
-                          :model-value="$t(`automoder.nm_age_measures.DAYS`)"
-                          filled
-                          dense
-                          hide-bottom-space
-                        >
+                        <q-select disable :model-value="$t('Common.DateUnits.Days')" filled dense hide-bottom-space>
                         </q-select>
                       </template>
                     </q-input>
@@ -358,7 +352,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('pages.guild.gs_message_template_title') }}
+                      {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
                     </div>
 
                     <MessageEditor
@@ -379,14 +373,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -396,7 +390,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               split
               unelevated
@@ -408,7 +402,7 @@
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -424,6 +418,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { suid } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
@@ -474,6 +469,7 @@ export default defineComponent({
       mode,
       item,
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {

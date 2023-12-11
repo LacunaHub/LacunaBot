@@ -93,7 +93,7 @@
 
         <q-item class="q-ml-sm" tag="label" :disable="disable" dense>
           <q-item-section>
-            {{ $t('message_editor.message_embed') }}
+            {{ $t('Components.MessageEditor.EmbedMessage') }}
           </q-item-section>
           <q-item-section side>
             <q-checkbox v-model="messageEmbed.active" dense></q-checkbox>
@@ -106,7 +106,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.author_name') }}
+                {{ $t('Components.MessageEditor.AuthorName') }}
               </div>
 
               <q-input
@@ -122,7 +122,7 @@
 
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.author_icon_url') }}
+                {{ $t('Components.MessageEditor.AuthorIconURL') }}
               </div>
 
               <q-input
@@ -138,7 +138,7 @@
 
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.author_url') }}
+                {{ $t('Components.MessageEditor.AuthorURL') }}
               </div>
 
               <q-input
@@ -158,7 +158,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('message_editor.title') }}
+                {{ $t('Components.MessageEditor.Title') }}
               </div>
 
               <q-input
@@ -174,7 +174,7 @@
 
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('message_editor.title_url') }}
+                {{ $t('Components.MessageEditor.TitleURL') }}
               </div>
 
               <q-input
@@ -190,7 +190,7 @@
 
             <div class="col-12">
               <div>
-                {{ $t('description') }}
+                {{ $t('Common.Description') }}
               </div>
 
               <q-input
@@ -220,7 +220,7 @@
                       filled
                       dense
                       hide-bottom-space
-                      :placeholder="$t('message_editor.field_name')"
+                      :placeholder="$t('Components.MessageEditor.FieldName')"
                     ></q-input>
 
                     <q-separator></q-separator>
@@ -235,7 +235,7 @@
                       filled
                       dense
                       hide-bottom-space
-                      :placeholder="$t('message_editor.field_value')"
+                      :placeholder="$t('Components.MessageEditor.FieldValue')"
                     ></q-input>
 
                     <q-separator></q-separator>
@@ -244,7 +244,7 @@
                       <q-checkbox
                         v-model="field.inline"
                         dense
-                        :label="$t('message_editor.field_inline')"
+                        :label="$t('Components.MessageEditor.FieldInline')"
                         :disable="!messageEmbed.active || disable"
                       ></q-checkbox>
 
@@ -252,7 +252,7 @@
 
                       <q-btn
                         @click="messageEmbed.fields.splice(i, 1)"
-                        :label="$t('remove')"
+                        :label="$t('Common.Remove')"
                         :disable="!messageEmbed.active || disable"
                         color="negative"
                         flat
@@ -268,7 +268,7 @@
             <div class="col-12">
               <q-btn
                 class="full-width dashed-border"
-                :label="$t('message_editor.add_embed_field')"
+                :label="$t('Components.MessageEditor.AddEmbedField')"
                 @click="addEmbedField"
                 :disable="messageEmbed.fields.length >= 25 || !messageEmbed.active || disable"
                 unelevated
@@ -282,7 +282,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('message_editor.image_url') }}
+                {{ $t('Components.MessageEditor.ImageURL') }}
               </div>
 
               <q-input
@@ -298,7 +298,7 @@
 
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('message_editor.thumbnail_url') }}
+                {{ $t('Components.MessageEditor.ThumbnailURL') }}
               </div>
 
               <q-input
@@ -318,7 +318,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.footer_text') }}
+                {{ $t('Components.MessageEditor.FooterText') }}
               </div>
 
               <q-input
@@ -334,7 +334,7 @@
 
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.footer_icon_url') }}
+                {{ $t('Components.MessageEditor.FooterIconURL') }}
               </div>
 
               <q-input
@@ -350,7 +350,7 @@
 
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.footer_timestamp') }}
+                {{ $t('Components.MessageEditor.FooterTimestamp') }}
               </div>
 
               <q-input
@@ -403,7 +403,7 @@
                 <q-card-actions align="right">
                   <q-btn
                     @click="messageComponents.splice(i, 1)"
-                    :label="$t('remove')"
+                    :label="$t('Common.Remove')"
                     color="negative"
                     flat
                     no-caps
@@ -594,12 +594,12 @@
           indicator-color="transparent"
           no-caps
         >
-          <q-tab name="replacers" :label="$t('message_editor.replacers')" style="width: 50%"></q-tab>
+          <q-tab name="replacers" :label="$t('Components.MessageEditor.Replacers')" style="width: 50%"></q-tab>
 
           <q-tab
             v-if="!hideCodeSnippets"
             name="functions"
-            :label="$t('message_editor.functions')"
+            :label="$t('Components.MessageEditor.Functions')"
             style="width: 50%"
           ></q-tab>
         </q-tabs>
@@ -657,9 +657,9 @@
           indicator-color="transparent"
           no-caps
         >
-          <q-tab name="roles" :label="$t('common.roles')" style="width: 50%"></q-tab>
+          <q-tab name="roles" :label="$t('Common.Roles')" style="width: 50%"></q-tab>
 
-          <q-tab name="channels" :label="$t('common.channels')" style="width: 50%"></q-tab>
+          <q-tab name="channels" :label="$t('Common.Channels')" style="width: 50%"></q-tab>
         </q-tabs>
 
         <q-separator></q-separator>
@@ -814,7 +814,7 @@ export default defineComponent({
     },
     showCopiedNotification() {
       this.$q.notify({
-        message: this.$t('copied_to_clipboard'),
+        message: this.$t('Common.CopiedToClipboard'),
         classes: 'q-notification-custom',
         color: 'black',
         icon: 'assignment',

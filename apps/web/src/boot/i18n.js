@@ -1,7 +1,7 @@
+import { messages } from 'lacuna-locale'
 import { boot } from 'quasar/wrappers'
-import { createI18n } from 'vue-i18n'
-import messages from 'src/i18n'
 import { getLocale } from 'src/utils/Utils'
+import { createI18n } from 'vue-i18n'
 
 export default boot(({ app }) => {
     const i18n = createI18n({

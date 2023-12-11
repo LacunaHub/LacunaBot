@@ -5,7 +5,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.cm_custom_commands_title') }}
+              {{ $t('Commands.Categories.Custom') }}
             </q-item-label>
           </q-item-section>
 
@@ -50,7 +50,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ut_automation_title') }}
+              {{ $t('Pages.GuildPage.CustomBehavior.Automation') }}
             </q-item-label>
 
             <q-item-label class="text--secondary">
@@ -101,7 +101,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.cb_plugins_title') }}
+              {{ $t('Pages.GuildPage.CustomBehavior.Plugins') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -112,7 +112,7 @@
               <q-input
                 v-model.trim="searchText"
                 :disable="pageLoading"
-                placeholder="Поиск"
+                :placeholder="$t('Components.EmojiPicker.Search')"
                 filled
                 dense
                 hide-bottom-space
@@ -150,7 +150,7 @@
                 <div v-if="!filteredPlugins.length" class="col-12">
                   <q-banner class="bg-dark-2 rounded-borders q-pa-md" dense>
                     <span>
-                      {{ $t('emoji_picker.notfound') }}
+                      {{ $t('Components.EmojiPicker.NotFound') }}
                     </span>
 
                     <template #avatar>
@@ -186,9 +186,9 @@
             <div class="col-12">
               <q-banner class="bg-secondary rounded-borders q-pa-md" dense>
                 <span>
-                  {{ $t('pages.guild.cb_about_custom_plugins') }}
+                  {{ $t('Pages.GuildPage.CustomBehavior.AboutCustomPlugins') }}
                   <a class="origin" href="https://github.com/LacunaHub/LacunaPluginTemplate" target="_blank">
-                    {{ $t('pages.landing.learn_more') }}
+                    {{ $t('Pages.LandingPage.LearnMore') }}
                   </a>
                 </span>
 

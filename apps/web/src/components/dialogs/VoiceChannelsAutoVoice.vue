@@ -5,10 +5,10 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.channel') }}
+              {{ $t('Commands.OptionTypes.Channel') }}
             </div>
             <div class="text--secondary">
-              {{ $t('auto_voices.voice_channel_description') }}
+              {{ $t('Components.AutoVoice.VoiceChannelDescription') }}
             </div>
 
             <q-select
@@ -71,7 +71,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('auto_voices.default_name_title') }}
+              {{ $t('Components.AutoVoice.DefaultName') }}
             </div>
 
             <q-input
@@ -86,7 +86,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('auto_voices.default_user_limit_title') }}
+              {{ $t('Components.AutoVoice.DefaultUserLimit') }}
             </div>
 
             <q-slider
@@ -100,7 +100,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('auto_voices.default_category_title') }}
+              {{ $t('Components.AutoVoice.DefaultCategory') }}
             </div>
 
             <q-select
@@ -137,10 +137,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('auto_voices.default_position_title') }}
+              {{ $t('Components.AutoVoice.DefaultPosition') }}
             </div>
             <div class="text--secondary">
-              {{ $t('auto_voices.default_position_description') }}
+              {{ $t('Components.AutoVoice.DefaultPositionDescription') }}
             </div>
 
             <q-select
@@ -153,7 +153,7 @@
             >
               <template #selected-item="{ opt }">
                 <span>
-                  {{ $t(`auto_voices.default_positions.${opt}`) }}
+                  {{ $t(localeStringsMap.autoVoicePositions[opt]) }}
                 </span>
               </template>
 
@@ -161,7 +161,7 @@
                 <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t(`auto_voices.default_positions.${opt}`) }}
+                      {{ $t(localeStringsMap.autoVoicePositions[opt]) }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -173,10 +173,10 @@
 
       <div class="q-pa-md">
         <div>
-          {{ $t('auto_voices.owner_permissions_title') }}
+          {{ $t('Components.AutoVoice.OwnerPermissions') }}
         </div>
         <div class="text--secondary">
-          {{ $t('auto_voices.owner_permissions_description') }}
+          {{ $t('Components.AutoVoice.OwnerPermissionsDescription') }}
         </div>
         <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
           <q-item
@@ -190,7 +190,7 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>
-                {{ $t(`common.permissions_keys.${permission.key}`) }}
+                {{ $t(localeStringsMap.discordPermissions[permission.key]) }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -201,7 +201,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.allowed_roles') }}
+              {{ $t('Common.AllowedRoles') }}
             </div>
 
             <q-select
@@ -241,7 +241,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('common.blocked_roles') }}
+              {{ $t('Common.BlockedRoles') }}
             </div>
 
             <q-select
@@ -285,10 +285,10 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('auto_voices.moderator_roles_title') }}
+              {{ $t('Components.AutoVoice.ModeratorRoles') }}
             </div>
             <div class="text--secondary">
-              {{ $t('auto_voices.moderator_roles_description') }}
+              {{ $t('Components.AutoVoice.ModeratorRolesDescription') }}
             </div>
 
             <q-select
@@ -331,14 +331,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -354,7 +354,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -367,7 +367,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -388,6 +388,7 @@
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { handleAxiosError } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -450,6 +451,7 @@ export default defineComponent({
 
       isValid,
       unusedVoiceChannels,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {

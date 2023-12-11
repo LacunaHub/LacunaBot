@@ -5,7 +5,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.md_hierarchy_title') }}
+              {{ $t('Pages.GuildPage.Moderation.Hierarchy') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -19,7 +19,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.md_respect_hierarchy_title') }}
+                  {{ $t('Pages.GuildPage.Moderation.RespectHierarchy') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -31,7 +31,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.md_deny_moderate_users_with_mp_title') }}
+                  {{ $t('Pages.GuildPage.Moderation.DenyModerateUsersWithModeratorPermissions') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -42,10 +42,10 @@
           <div class="row q-col-gutter-md">
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.md_unmoderated_roles_title') }}
+                {{ $t('Pages.GuildPage.Moderation.UnmoderatedRoles') }}
               </div>
               <div class="text--secondary">
-                {{ $t('pages.guild.md_unmoderated_roles_description') }}
+                {{ $t('Pages.GuildPage.Moderation.UnmoderatedRolesDescription') }}
               </div>
 
               <q-select
@@ -92,10 +92,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.md_log_title') }}
+              {{ $t('Pages.GuildPage.Moderation.Log') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.md_log_description') }}
+              {{ $t('Pages.GuildPage.Moderation.LogDescription') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -104,11 +104,11 @@
           <div class="row q-col-gutter-md">
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.md_case_log_channel_title') }}
+                {{ $t('Pages.GuildPage.Moderation.CaseLogChannel') }}
               </div>
 
               <div class="text--secondary">
-                {{ $t('pages.guild.md_case_log_channel_description') }}
+                {{ $t('Pages.GuildPage.Moderation.CaseLogChannelDescription') }}
               </div>
 
               <q-select
@@ -154,8 +154,8 @@
           <q-list class="bg-dark-2 overflow-hidden rounded-borders">
             <q-expansion-item
               expand-separator
-              :label="$t('pages.guild.md_case_log_types_title')"
-              :caption="$t('pages.guild.md_case_log_types_description')"
+              :label="$t('Pages.GuildPage.Moderation.CaseLogTypes')"
+              :caption="$t('Pages.GuildPage.Moderation.CaseLogTypesDescription')"
             >
               <q-card class="bg-dark-1 no-border-radius" bordered>
                 <q-card-section>
@@ -167,7 +167,7 @@
                     >
                       <q-btn
                         class="full-width"
-                        :label="$t(`common.case_log_keys.${caseType}`)"
+                        :label="$t(localeStringsMap.caseLogTypes[caseType])"
                         color="dark-2"
                         align="left"
                         unelevated
@@ -182,8 +182,8 @@
 
             <q-expansion-item
               expand-separator
-              :label="$t('pages.guild.md_action_log_title')"
-              :caption="$t('pages.guild.md_action_log_description')"
+              :label="$t('Pages.GuildPage.Moderation.ActionLog')"
+              :caption="$t('Pages.GuildPage.Moderation.ActionLogDescription')"
             >
               <q-card class="bg-dark-1 no-border-radius" bordered>
                 <q-card-section>
@@ -197,7 +197,7 @@
                         <q-item class="rounded-t-lg" tag="label">
                           <q-item-section>
                             <q-item-label>
-                              {{ $t(`common.action_log_keys.${log}`) }}
+                              {{ $t(localeStringsMap.actionLogEvents[log]) }}
                             </q-item-label>
                           </q-item-section>
 
@@ -269,7 +269,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.md_mutes_title') }}
+              {{ $t('Pages.GuildPage.Moderation.Mutes') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -283,7 +283,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.md_mutes_rar_title') }}
+                  {{ $t('Pages.GuildPage.Moderation.MutesRAR') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -294,7 +294,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.md_mutes_rar_strict_title') }}
+                {{ $t('Pages.GuildPage.Moderation.MutesRARStrict') }}
               </div>
 
               <q-select
@@ -348,10 +348,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.md_automoder_title') }}
+              {{ $t('Pages.GuildPage.Moderation.AutoMod') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.md_automoder_description') }}
+              {{ $t('Pages.GuildPage.Moderation.AutoModDescription') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -363,7 +363,7 @@
                 <q-item clickable @click="autoModDialog(autoMod.name)">
                   <q-item-section>
                     <q-item-label :class="guild.moderation.automoder[autoMod.name].active ? '' : 'text--secondary'">
-                      {{ $t(`automoder.titles.${autoMod.name}`) }}
+                      {{ $t(localeStringsMap.autoModTypes[autoMod.name]) }}
                     </q-item-label>
                   </q-item-section>
 
@@ -385,10 +385,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.md_penalties_title') }}
+              {{ $t('Pages.GuildPage.Moderation.Penalties') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.md_penalties_description') }}
+              {{ $t('Pages.GuildPage.Moderation.PenaltiesDescription') }}
             </q-item-label>
           </q-item-section>
 
@@ -408,7 +408,7 @@
                 <q-item @click="penaltyDialog(penalty)" clickable>
                   <q-item-section>
                     <q-item-label class="ellipsis">
-                      {{ $t('mod_warning_penalty.warning_plural', penalty.penalties) }}
+                      {{ $t('Components.WarningPenalty.WarningsPlural', penalty.penalties) }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -441,6 +441,7 @@ import AutoModUsersSlowdown from 'src/components/dialogs/AutoModUsersSlowdown.vu
 import ModerationCaseType from 'src/components/dialogs/ModerationCaseType.vue'
 import ModerationWarningPenalty from 'src/components/dialogs/ModerationWarningPenalty.vue'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent } from 'vue'
 
 import lowerCaseImg from 'src/assets/lower-case.svg'
@@ -456,7 +457,7 @@ export default defineComponent({
   setup() {
     const guild = useGuildStore()
 
-    return { guild }
+    return { guild, localeStringsMap }
   },
 
   data() {

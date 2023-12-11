@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.role') }}
+              {{ $t('Commands.OptionTypes.Role') }}
             </div>
 
             <q-select
@@ -46,10 +46,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('common.channels') }}
+              {{ $t('Common.Channels') }}
             </div>
             <div class="text--secondary">
-              {{ $t('voice_roles.bound_channels_description') }}
+              {{ $t('Components.VoiceRole.BoundChannelsDescription') }}
             </div>
 
             <q-select
@@ -102,14 +102,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -119,7 +119,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               split
               unelevated
@@ -131,7 +131,7 @@
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>

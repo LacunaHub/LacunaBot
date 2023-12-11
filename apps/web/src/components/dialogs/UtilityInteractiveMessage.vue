@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div v-if="mode === 'CREATE'" class="col-12">
             <div>
-              {{ $t('common.channel') }}
+              {{ $t('Commands.OptionTypes.Channel') }}
             </div>
 
             <q-select
@@ -46,7 +46,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('common.message') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
             </div>
 
             <MessageEditor :message="im.message" hide-replacers hide-code-snippets class="q-pt-sm" />
@@ -58,7 +58,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('ims.actions_rows_title') }}
+              {{ $t('Components.InteractiveMessage.ActionRows') }}
             </div>
           </div>
 
@@ -97,7 +97,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('ims.select_menu_placeholder_title') }}
+                      {{ $t('Components.InteractiveMessage.SelectMenuPlaceholder') }}
                     </div>
 
                     <q-input
@@ -145,7 +145,7 @@
               <q-card-actions align="right">
                 <q-btn
                   @click="im.components.splice(i, 1)"
-                  :label="$t('remove')"
+                  :label="$t('Common.Remove')"
                   color="negative"
                   flat
                   no-caps
@@ -161,7 +161,7 @@
                 <q-item clickable v-close-popup @click="addActionRow('BUTTON')">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('ims.action_row_buttons_title') }}
+                      {{ $t('Components.InteractiveMessage.ActionRowButtons') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -169,7 +169,7 @@
                 <q-item clickable v-close-popup @click="addActionRow('SELECT_MENU')">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('ims.action_row_select_menu_title') }}
+                      {{ $t('Components.InteractiveMessage.ActionRowSelectMenu') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -183,7 +183,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.reactions') }}
+              {{ $t('Common.Reactions') }}
             </div>
 
             <div class="row q-col-gutter-sm q-pt-sm">
@@ -218,14 +218,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -241,7 +241,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -254,7 +254,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>

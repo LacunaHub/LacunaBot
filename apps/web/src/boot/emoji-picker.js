@@ -1,7 +1,7 @@
-import { boot } from 'quasar/wrappers'
 import { Picker } from 'emoji-mart-vue-fast/src'
-import '../css/emoji-picker.scss'
+import { boot } from 'quasar/wrappers'
 import { useI18n } from 'vue-i18n'
+import '../css/emoji-picker.scss'
 
 export default boot(({ app }) => {
     app.component('emoji-picker', Picker)
@@ -9,21 +9,21 @@ export default boot(({ app }) => {
         const { t } = useI18n()
 
         return {
-            search: t('emoji_picker.search'),
-            notfound: t('emoji_picker.notfound'),
+            search: t('Components.EmojiPicker.Search'),
+            notfound: t('Components.EmojiPicker.NotFound'),
             categories: {
-                search: t('emoji_picker.categories.search'),
-                recent: t('emoji_picker.categories.recent'),
-                smileys: t('emoji_picker.categories.smileys'),
-                people: t('emoji_picker.categories.people'),
-                nature: t('emoji_picker.categories.nature'),
-                foods: t('emoji_picker.categories.foods'),
-                activity: t('emoji_picker.categories.activity'),
-                places: t('emoji_picker.categories.places'),
-                objects: t('emoji_picker.categories.objects'),
-                symbols: t('emoji_picker.categories.symbols'),
-                flags: t('emoji_picker.categories.flags'),
-                custom: t('emoji_picker.categories.custom')
+                search: t('Components.EmojiPicker.Categories.Search'),
+                recent: t('Components.EmojiPicker.Categories.Recent'),
+                smileys: t('Components.EmojiPicker.Categories.Smileys'),
+                people: t('Components.EmojiPicker.Categories.People'),
+                nature: t('Components.EmojiPicker.Categories.Nature'),
+                foods: t('Components.EmojiPicker.Categories.Foods'),
+                activity: t('Components.EmojiPicker.Categories.Activity'),
+                places: t('Components.EmojiPicker.Categories.Places'),
+                objects: t('Components.EmojiPicker.Categories.Objects'),
+                symbols: t('Components.EmojiPicker.Categories.Symbols'),
+                flags: t('Components.EmojiPicker.Categories.Flags'),
+                custom: t('Components.EmojiPicker.Categories.Custom')
             }
         }
     }

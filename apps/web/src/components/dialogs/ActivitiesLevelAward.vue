@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.add_roles') }}
+              {{ $t('Common.AddRoles') }}
             </div>
 
             <q-select
@@ -51,7 +51,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('common.remove_roles') }}
+              {{ $t('Common.RemoveRoles') }}
             </div>
 
             <q-select
@@ -104,7 +104,7 @@
             <template #header>
               <q-item-section>
                 <q-item-label>
-                  {{ $t('level_award.award_conditions_title') }}
+                  {{ $t('Components.LevelAward.AwardConditions') }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -114,7 +114,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('level_award.required_level_title') }}
+                      {{ $t('Components.LevelAward.RequiredLevel') }}
                     </div>
 
                     <q-input
@@ -137,7 +137,7 @@
 
                   <div class="col-12">
                     <div>
-                      {{ $t('level_award.required_voice_time_title') }}
+                      {{ $t('Components.LevelAward.RequiredVoiceTime') }}
                     </div>
 
                     <q-input
@@ -162,7 +162,7 @@
 
                   <div class="col-12">
                     <div>
-                      {{ $t('level_award.required_number_of_sent_messages_title') }}
+                      {{ $t('Components.LevelAward.RequiredNumberOfSentMessages') }}
                     </div>
 
                     <q-input
@@ -195,7 +195,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('level_award.award_message_title') }}
+                  {{ $t('Components.LevelAward.AwardMessage') }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -205,7 +205,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12 col-md-6">
                     <div>
-                      {{ $t('pages.guild.gs_message_format_title') }}
+                      {{ $t('Pages.GuildPage.GeneralSettings.MessageFormat') }}
                     </div>
 
                     <q-select
@@ -219,7 +219,7 @@
                     >
                       <template #selected-item="{ opt }">
                         <span>
-                          {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                          {{ $t(localeStringsMap.messageFormats[opt]) }}
                         </span>
                       </template>
 
@@ -232,7 +232,7 @@
                         >
                           <q-item-section>
                             <q-item-label>
-                              {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                              {{ $t(localeStringsMap.messageFormats[opt]) }}
                             </q-item-label>
                           </q-item-section>
                         </q-item>
@@ -242,7 +242,7 @@
 
                   <div class="col-12 col-md-6">
                     <div>
-                      {{ $t('pages.guild.gs_message_channel_title') }}
+                      {{ $t('Pages.GuildPage.GeneralSettings.ChannelForMessages') }}
                     </div>
 
                     <q-select
@@ -289,7 +289,7 @@
 
                   <div class="col-12">
                     <div>
-                      {{ $t('pages.guild.gs_message_template_title') }}
+                      {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
                     </div>
 
                     <MessageEditor
@@ -309,14 +309,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -326,7 +326,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               split
               unelevated
@@ -338,7 +338,7 @@
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -355,6 +355,7 @@
 import numbro from 'numbro'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { hmsToMS, suid } from 'src/utils/Utils'
 import { computed, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'

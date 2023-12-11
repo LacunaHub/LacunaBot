@@ -4,7 +4,7 @@
       <q-item class="q-py-md rounded-t-lg" tag="label">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(`automoder.titles.${name}`) }}
+            {{ $t(localeStringsMap.autoModTypes[name]) }}
           </q-item-label>
         </q-item-section>
 
@@ -21,9 +21,9 @@
         indicator-color="transparent"
         no-caps
       >
-        <q-tab name="general" :label="$t('pages.guild.nav_names.GENERAL')" style="width: 50%"></q-tab>
+        <q-tab name="general" :label="$t('Pages.GuildPage.NavNames.General')" style="width: 50%"></q-tab>
 
-        <q-tab name="actions" :label="$t('common.actions')" style="width: 50%"></q-tab>
+        <q-tab name="actions" :label="$t('CaseLog.Actions.Title')" style="width: 50%"></q-tab>
       </q-tabs>
 
       <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
@@ -32,7 +32,7 @@
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <div>
-                  {{ $t('automoder.lf_blocked_registry') }}
+                  {{ $t('Components.AutoMod.LinksFilterBlockedRegistry') }}
                 </div>
 
                 <q-select
@@ -63,7 +63,7 @@
 
               <div class="col-12">
                 <div>
-                  {{ $t('automoder.lf_allowed_registry') }}
+                  {{ $t('Components.AutoMod.LinksFilterAllowedRegistry') }}
                 </div>
 
                 <q-select
@@ -98,7 +98,7 @@
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <div>
-                  {{ $t('common.ignored_channels') }}
+                  {{ $t('Common.IgnoredChannels') }}
                 </div>
 
                 <q-select
@@ -149,7 +149,7 @@
 
               <div class="col-12">
                 <div>
-                  {{ $t('common.ignored_roles') }}
+                  {{ $t('Common.IgnoredRoles') }}
                 </div>
 
                 <q-select
@@ -204,7 +204,13 @@
 
                 <q-item-section>
                   <q-item-label>
-                    {{ $t(`automoder.lf_options.${option}`) }}
+                    {{
+                      $t(
+                        option === 'DELETE_ALL_LINKS'
+                          ? 'Components.AutoMod.LinksFilterOptions.DeleteAllLinks'
+                          : 'Components.AutoMod.LinksFilterOptions.DeleteReferralInvites'
+                      )
+                    }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -213,10 +219,10 @@
 
           <div class="q-pa-md">
             <div>
-              {{ $t('common.ignored_permissions') }}
+              {{ $t('Common.IgnoredPermissions') }}
             </div>
             <div class="text--secondary">
-              {{ $t('automoder.ignored_permissions_description') }}
+              {{ $t('Components.AutoMod.IgnoredPermissionsDescription') }}
             </div>
 
             <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
@@ -236,7 +242,7 @@
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>
-                    {{ $t(`common.permissions_keys.${permission.key}`) }}
+                    {{ $t(localeStringsMap.discordPermissions[permission.key]) }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -264,7 +270,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t(`common.actions_keys.${action.name}`) }}
+                  {{ $t(localeStringsMap.actions[action.name]) }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -287,7 +293,7 @@
 
                 <q-item-section>
                   <q-item-label>
-                    {{ $t(`common.actions_keys.${action.name}`) }}
+                    {{ $t(localeStringsMap.actions[action.name]) }}
                   </q-item-label>
                 </q-item-section>
               </template>
@@ -297,7 +303,7 @@
                   <div class="row q-col-gutter-md">
                     <div class="col-12">
                       <div>
-                        {{ $t('automoder.penalty_timeout') }}
+                        {{ $t('Components.AutoMod.PenaltyTimeout') }}
                       </div>
 
                       <q-select
@@ -315,7 +321,7 @@
                       >
                         <template #selected-item="{ opt }">
                           <span v-if="opt === 0" class="text-lowercase">
-                            {{ $t('automoder.indefinitely') }}
+                            {{ $t('Common.Indefinitely') }}
                           </span>
                           <span v-else>
                             {{
@@ -336,7 +342,7 @@
                           >
                             <q-item-section>
                               <q-item-label v-if="opt === 0" class="text-lowercase">
-                                {{ $t('automoder.indefinitely') }}
+                                {{ $t('Common.Indefinitely') }}
                               </q-item-label>
                               <q-item-label v-else>
                                 {{
@@ -375,7 +381,7 @@
                   <div class="row q-col-gutter-md">
                     <div class="col-12">
                       <div>
-                        {{ $t('automoder.penalty_timeout') }}
+                        {{ $t('Components.AutoMod.PenaltyTimeout') }}
                       </div>
 
                       <q-select
@@ -447,7 +453,7 @@
                   <div class="row q-col-gutter-md">
                     <div class="col-12">
                       <div>
-                        {{ $t('common.add_roles') }}
+                        {{ $t('Common.AddRoles') }}
                       </div>
 
                       <q-select
@@ -494,7 +500,7 @@
 
                     <div class="col-12">
                       <div>
-                        {{ $t('common.remove_roles') }}
+                        {{ $t('Common.RemoveRoles') }}
                       </div>
 
                       <q-select
@@ -547,7 +553,7 @@
                   <div class="row q-col-gutter-md">
                     <div class="col-12">
                       <div>
-                        {{ $t('pages.guild.gs_message_template_title') }}
+                        {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
                       </div>
 
                       <MessageEditor
@@ -568,11 +574,18 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -583,6 +596,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
@@ -614,6 +628,7 @@ export default defineComponent({
       config,
       dialogRef,
       currentTab,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK({ name: props.name, config: { ...config.value } })

@@ -29,7 +29,7 @@
       <div v-if="!user.guilds.filter(i => i.permitted).length" class="col-12">
         <q-banner class="bg-dark-1 rounded-borders" dense>
           <span>
-            {{ $t('pages.dashboard.no_guilds') }}
+            {{ $t('Pages.DashboardPage.NoGuilds') }}
           </span>
 
           <template #avatar>

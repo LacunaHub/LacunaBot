@@ -4,7 +4,7 @@
       <q-item class="q-py-md rounded-t-lg" tag="label">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(`common.case_log_keys.${caseType.name}`) }}
+            {{ $t(localeStringsMap.caseLogTypes[caseType.name]) }}
           </q-item-label>
         </q-item-section>
 
@@ -17,7 +17,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('pages.guild.md_case_log_channel_title') }}
+              {{ $t('Pages.GuildPage.Moderation.CaseLogChannel') }}
             </div>
 
             <q-select
@@ -74,7 +74,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('mod_case_type.custom_dm_message_title') }}
+                  {{ $t('Components.CaseType.CustomDMMessage') }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -94,11 +94,18 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -109,6 +116,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
@@ -138,6 +146,7 @@ export default defineComponent({
       guild,
 
       dialogRef,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK(caseType.value)

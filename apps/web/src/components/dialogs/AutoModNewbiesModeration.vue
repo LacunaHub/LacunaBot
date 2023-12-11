@@ -4,7 +4,7 @@
       <q-item class="q-py-md rounded-t-lg" tag="label">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(`automoder.titles.${name}`) }}
+            {{ $t(localeStringsMap.autoModTypes[name]) }}
           </q-item-label>
         </q-item-section>
 
@@ -21,9 +21,9 @@
         indicator-color="transparent"
         no-caps
       >
-        <q-tab name="general" :label="$t('pages.guild.nav_names.GENERAL')" style="width: 50%"></q-tab>
+        <q-tab name="general" :label="$t('Pages.GuildPage.NavNames.General')" style="width: 50%"></q-tab>
 
-        <q-tab name="actions" :label="$t('common.actions')" style="width: 50%"></q-tab>
+        <q-tab name="actions" :label="$t('CaseLog.Actions.Title')" style="width: 50%"></q-tab>
       </q-tabs>
 
       <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
@@ -32,10 +32,10 @@
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <div>
-                  {{ $t('automoder.nm_minimum_account_age_title') }}
+                  {{ $t('Components.AutoMod.NewbiesModerationMinimumAccountAge') }}
                 </div>
                 <div class="text--secondary">
-                  {{ $t('automoder.nm_minimum_account_age_description') }}
+                  {{ $t('Components.AutoMod.NewbiesModerationMinimumAccountAgeDescription') }}
                 </div>
 
                 <q-input
@@ -60,7 +60,7 @@
                     >
                       <template #selected-item="{ opt }">
                         <span>
-                          {{ $t(`automoder.nm_age_measures.${opt}`) }}
+                          {{ $t(localeStringsMap.dateUnits[opt]) }}
                         </span>
                       </template>
 
@@ -73,7 +73,7 @@
                         >
                           <q-item-section>
                             <q-item-label>
-                              {{ $t(`automoder.nm_age_measures.${opt}`) }}
+                              {{ $t(localeStringsMap.dateUnits[opt]) }}
                             </q-item-label>
                           </q-item-section>
                         </q-item>
@@ -106,7 +106,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t(`common.actions_keys.${action.name}`) }}
+                  {{ $t(localeStringsMap.actions[action.name]) }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -129,7 +129,7 @@
 
                 <q-item-section>
                   <q-item-label>
-                    {{ $t(`common.actions_keys.${action.name}`) }}
+                    {{ $t(localeStringsMap.actions[action.name]) }}
                   </q-item-label>
                 </q-item-section>
               </template>
@@ -139,7 +139,7 @@
                   <div class="row q-col-gutter-md">
                     <div class="col-12">
                       <div>
-                        {{ $t('automoder.penalty_timeout') }}
+                        {{ $t('Components.AutoMod.PenaltyTimeout') }}
                       </div>
 
                       <q-select
@@ -157,7 +157,7 @@
                       >
                         <template #selected-item="{ opt }">
                           <span v-if="opt === 0" class="text-lowercase">
-                            {{ $t('automoder.indefinitely') }}
+                            {{ $t('Common.Indefinitely') }}
                           </span>
                           <span v-else>
                             {{
@@ -178,7 +178,7 @@
                           >
                             <q-item-section>
                               <q-item-label v-if="opt === 0" class="text-lowercase">
-                                {{ $t('automoder.indefinitely') }}
+                                {{ $t('Common.Indefinitely') }}
                               </q-item-label>
                               <q-item-label v-else>
                                 {{
@@ -217,7 +217,7 @@
                   <div class="row q-col-gutter-md">
                     <div class="col-12">
                       <div>
-                        {{ $t('automoder.penalty_timeout') }}
+                        {{ $t('Components.AutoMod.PenaltyTimeout') }}
                       </div>
 
                       <q-select
@@ -289,7 +289,7 @@
                   <div class="row q-col-gutter-md">
                     <div class="col-12">
                       <div>
-                        {{ $t('common.add_roles') }}
+                        {{ $t('Common.AddRoles') }}
                       </div>
 
                       <q-select
@@ -336,7 +336,7 @@
 
                     <div class="col-12">
                       <div>
-                        {{ $t('common.remove_roles') }}
+                        {{ $t('Common.RemoveRoles') }}
                       </div>
 
                       <q-select
@@ -391,11 +391,18 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -406,6 +413,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
@@ -432,6 +440,7 @@ export default defineComponent({
       config,
       dialogRef,
       currentTab,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK({ name: props.name, config: { ...config.value } })

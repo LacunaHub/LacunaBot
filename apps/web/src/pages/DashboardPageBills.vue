@@ -100,17 +100,17 @@ const pageLoading = ref(true)
 
 const bills = ref([]),
   tableColumns = [
-    { name: 'date', align: 'left', label: t('date'), field: 'date', sortable: true },
-    { name: 'id', align: 'left', label: t('pages.dashboard.bill_id'), field: 'id' },
-    { name: 'amount', align: 'left', label: t('amount'), field: 'amount', sortable: true },
+    { name: 'date', align: 'left', label: t('Common.Date'), field: 'date', sortable: true },
+    { name: 'id', align: 'left', label: t('Pages.DashboardPage.BillId'), field: 'id' },
+    { name: 'amount', align: 'left', label: t('Pages.DashboardPage.BillAmount'), field: 'amount', sortable: true },
     {
       name: 'status',
       align: 'left',
-      label: t('pages.dashboard.bill_status'),
+      label: t('Pages.DashboardPage.BillStatus'),
       field: 'status',
       sortable: true
     },
-    { name: 'description', align: 'left', label: t('description'), field: 'description', sortable: true }
+    { name: 'description', align: 'left', label: t('Common.Description'), field: 'description', sortable: true }
   ]
 
 const getBills = async () => {

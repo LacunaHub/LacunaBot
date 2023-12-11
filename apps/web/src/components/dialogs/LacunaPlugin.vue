@@ -96,13 +96,13 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               unelevated
               @click="onConfirm"
               :disable="pageLoading"
@@ -126,6 +126,7 @@ import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { usePluginCacheStore } from 'src/stores/PluginCache'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { parseMarkdown } from 'src/utils/Markdown'
 import { handleAxiosError } from 'src/utils/Utils'
 import { computed, onMounted, ref } from 'vue'
@@ -152,11 +153,11 @@ const pluginCache = usePluginCacheStore(),
         label: 'trigger' in v.data ? v.data.name : v.data.command.name,
         icon: v.type === 'AUTOMATION' ? 'bolt' : 'reply',
         description:
-          'trigger' in v.data ? $t(`automation.trigger_names.${v.data.trigger}`) : v.data.command.description,
+          'trigger' in v.data ? $t(localeStringsMap.automationTriggers[v.data.trigger]) : v.data.command.description,
         children: v.data.components.map(vv => {
           return {
             icon: vv.type === 'ACTION' ? 'donut_large' : 'filter_alt',
-            label: $t(`custom_command.component_names.${'action' in vv ? vv.action.type : vv.condition.type}`)
+            label: $t(localeStringsMap.customBehaviorComponents['action' in vv ? vv.action.type : vv.condition.type])
           }
         })
       }

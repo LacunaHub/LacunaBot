@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-9">
             <div>
-              {{ $t('custom_command.co_name_title') }}
+              {{ $t('Components.CustomCommand.CommandArgumentName') }}
             </div>
 
             <q-input
@@ -20,7 +20,7 @@
 
           <div class="col-3">
             <div>
-              {{ $t('custom_command.co_type_title') }}
+              {{ $t('Components.CustomCommand.CommandArgumentType') }}
             </div>
 
             <q-select
@@ -37,7 +37,7 @@
             >
               <template #selected-item="{ opt }">
                 <span class="text-uppercase">
-                  {{ $t(`common.discord_command_option_types.${opt.name}`) }}
+                  {{ $t(localeStringsMap.commandOptionTypes[opt.name]) }}
                 </span>
               </template>
 
@@ -45,7 +45,7 @@
                 <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                   <q-item-section>
                     <q-item-label class="text-uppercase">
-                      {{ $t(`common.discord_command_option_types.${opt.name}`) }}
+                      {{ $t(localeStringsMap.commandOptionTypes[opt.name]) }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -55,7 +55,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('custom_command.co_description_title') }}
+              {{ $t('Components.CustomCommand.CommandArgumentDescription') }}
             </div>
 
             <q-input
@@ -79,7 +79,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('custom_command.co_required_title') }}
+                {{ $t('Commands.HelpCommand.Texts.CommandArgumentRequired') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -90,7 +90,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('custom_command.co_choices_title') }}
+              {{ $t('Components.CustomCommand.CommandArgumentChoices') }}
             </div>
 
             <div class="row q-col-gutter-sm q-pt-sm">
@@ -119,13 +119,13 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               unelevated
               no-caps
               color="primary"
@@ -141,7 +141,7 @@
 
 <script>
 import { useDialogPluginComponent } from 'quasar'
-import { discordAppCommandNameRegexp } from 'src/utils/Constants'
+import { discordAppCommandNameRegexp, localeStringsMap } from 'src/utils/Constants'
 import { computed, defineComponent, ref } from 'vue'
 import CustomCommandOptionChoice from './CustomCommandOptionChoice.vue'
 
@@ -200,6 +200,7 @@ export default defineComponent({
       optionTypes,
 
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {

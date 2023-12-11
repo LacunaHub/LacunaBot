@@ -4,7 +4,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md text-center">
           <div class="col-12 text--secondary">
-            {{ $t('lacuna_diamond.transferring_description') }}
+            {{ $t('Components.LacunaDiamond.TransferringDescription') }}
           </div>
         </div>
       </q-card-section>
@@ -71,13 +71,13 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('confirm')"
+              :label="$t('Common.Confirm')"
               unelevated
               @click="onConfirm"
               :loading="confirmLoading"

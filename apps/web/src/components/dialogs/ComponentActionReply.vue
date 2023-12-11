@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.message') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
             </div>
 
             <MessageEditor
@@ -28,7 +28,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t(`common.actions_keys.EPHEMERAL_REPLY`) }}
+                {{ $t('CaseLog.Actions.EphemeralReply') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -38,11 +38,18 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>

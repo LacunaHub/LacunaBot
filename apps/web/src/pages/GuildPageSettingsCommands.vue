@@ -5,7 +5,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.cm_system_commands_title') }}
+              {{ $t('Pages.GuildPage.Commands.SystemCommands') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -15,7 +15,7 @@
             <div v-for="group in ['GENERAL', 'MODERATION', 'MUSIC', 'UTILITY']" :key="group" class="col-12">
               <div class="row q-col-gutter-md">
                 <div class="col-12">
-                  {{ $t(`pages.guild.cm_command_categories.${group}`) }}
+                  {{ $t(localeStringsMap.commandCategories[group]) }}
                 </div>
 
                 <div
@@ -45,6 +45,7 @@
 <script>
 import SystemCommand from 'src/components/dialogs/SystemCommand.vue'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -53,7 +54,7 @@ export default defineComponent({
   setup() {
     const guild = useGuildStore()
 
-    return { guild }
+    return { guild, localeStringsMap }
   },
 
   data() {

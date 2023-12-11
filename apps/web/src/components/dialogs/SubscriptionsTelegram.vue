@@ -3,7 +3,7 @@
     <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section v-if="mode === 'CREATE'">
         <q-banner class="bg-dark-2" dense>
-          <i18n-t keypath="subscriptions.telegram_help_note" tag="span">
+          <i18n-t keypath="Components.Subscriptions.TelegramHelpNote" tag="span">
             <template #botLink>
               <a class="origin" href="https://t.me/VoidLacunaBot" target="_blank">@VoidLacunaBot</a>
             </template>
@@ -19,11 +19,11 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('subscriptions.twitch_channel_name_title') }}
+              {{ $t('Components.Subscriptions.ChannelName') }}
             </div>
 
             <div v-if="mode === 'CREATE'" class="text--secondary">
-              {{ $t('subscriptions.telegram_channel_name_subtitle') }}
+              {{ $t('Components.Subscriptions.TelegramChannelNameDescription') }}
             </div>
 
             <q-select
@@ -80,7 +80,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('subscriptions.notifications_channel_title') }}
+              {{ $t('Components.Subscriptions.NotificationsChannel') }}
             </div>
 
             <q-select
@@ -130,7 +130,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('common.permissions_keys.MENTION_EVERYONE') }}
+                {{ $t('Common.DiscordPermissions.MentionEveryone') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -148,7 +148,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('subscriptions.mention_roles_title') }}
+                  {{ $t('Components.Subscriptions.MentionRoles') }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -211,7 +211,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('subscriptions.create_thread_title') }}
+                {{ $t('Components.Subscriptions.CreateThread') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -223,7 +223,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('subscriptions.crosspost_message_title') }}
+                {{ $t('Components.Subscriptions.CrosspostMessage') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -233,14 +233,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -256,7 +256,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -269,7 +269,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>

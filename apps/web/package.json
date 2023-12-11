@@ -17,6 +17,7 @@
     "chart.js": "3.8.0",
     "discord-markdown": "^2.5.1",
     "emoji-mart-vue-fast": "10.2.2",
+    "lacuna-locale": "github:LacunaHub/Locale",
     "lodash": "^4.17.21",
     "lord-icon-element": "^4.1.1",
     "lottie-web": "^5.12.2",

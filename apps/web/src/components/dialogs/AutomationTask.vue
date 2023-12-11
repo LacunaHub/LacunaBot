@@ -9,9 +9,9 @@
         indicator-color="transparent"
         no-caps
       >
-        <q-tab name="general" :label="$t('pages.guild.nav_names.GENERAL')" style="width: 50%"></q-tab>
+        <q-tab name="general" :label="$t('Pages.GuildPage.NavNames.General')" style="width: 50%"></q-tab>
 
-        <q-tab name="components" :label="$t('common.actions')" style="width: 50%"></q-tab>
+        <q-tab name="components" :label="$t('Common.Components')" style="width: 50%"></q-tab>
       </q-tabs>
 
       <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
@@ -21,7 +21,7 @@
               <div class="col-12">
                 <q-btn
                   class="full-width"
-                  :label="$t('import')"
+                  :label="$t('Common.Import')"
                   unelevated
                   no-caps
                   color="secondary"
@@ -35,7 +35,7 @@
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <div>
-                  {{ $t('name') }}
+                  {{ $t('Common.Name') }}
                 </div>
 
                 <q-input
@@ -50,7 +50,7 @@
 
               <div class="col-12">
                 <div>
-                  {{ $t('automation.trigger_title') }}
+                  {{ $t('Components.Automation.Trigger') }}
                 </div>
 
                 <q-select
@@ -67,7 +67,7 @@
                     <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`automation.trigger_names.${opt}`) }}
+                          {{ $t(localeStringsMap.automationTriggers[opt]) }}
                         </q-item-label>
 
                         <q-item-label class="text--secondary" caption>
@@ -79,7 +79,7 @@
 
                   <template #selected-item="{ opt }">
                     <span>
-                      {{ $t(`automation.trigger_names.${opt}`) }}
+                      {{ $t(localeStringsMap.automationTriggers[opt]) }}
                     </span>
                   </template>
                 </q-select>
@@ -96,7 +96,7 @@
 
                 <q-item-section>
                   <q-item-label>
-                    {{ $t('disable') }}
+                    {{ $t('Common.Disable') }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -110,7 +110,7 @@
               <div class="col-12 col-md-6">
                 <q-btn-dropdown
                   class="full-width"
-                  :label="$t('custom_command.add_condition')"
+                  :label="$t('Components.CustomCommand.AddCondition')"
                   color="dark-2"
                   no-caps
                   unelevated
@@ -126,7 +126,7 @@
                     >
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`custom_command.component_names.${condition}`) }}
+                          {{ $t(localeStringsMap.customBehaviorComponents[condition]) }}
                         </q-item-label>
                       </q-item-section>
                     </q-item>
@@ -137,7 +137,7 @@
               <div class="col-12 col-md-6">
                 <q-btn-dropdown
                   class="full-width"
-                  :label="$t('custom_command.add_action')"
+                  :label="$t('Components.CustomCommand.AddAction')"
                   color="dark-2"
                   no-caps
                   unelevated
@@ -153,7 +153,7 @@
                     >
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`custom_command.component_names.${action}`) }}
+                          {{ $t(localeStringsMap.customBehaviorComponents[action]) }}
                         </q-item-label>
                       </q-item-section>
 
@@ -187,7 +187,11 @@
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         {{
-                          $t(`custom_command.component_names.${component.condition?.type ?? component.action?.type}`)
+                          $t(
+                            localeStringsMap.customBehaviorComponents[
+                              component.condition?.type ?? component.action?.type
+                            ]
+                          )
                         }}
                       </q-item-label>
                     </q-item-section>
@@ -235,14 +239,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -258,7 +262,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -271,7 +275,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -279,7 +283,7 @@
                 <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('export') }}
+                      {{ $t('Common.Export') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -299,7 +303,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
-import { customCommandComponentLimits } from 'src/utils/Constants'
+import { customCommandComponentLimits, localeStringsMap } from 'src/utils/Constants'
 import { suid } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
@@ -364,6 +368,7 @@ export default defineComponent({
       automationFile,
 
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {

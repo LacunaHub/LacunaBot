@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
             <div>
-              {{ $t('pages.guild.gs_message_format_title') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.MessageFormat') }}
             </div>
 
             <q-select
@@ -18,7 +18,7 @@
             >
               <template #selected-item="{ opt }">
                 <span>
-                  {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                  {{ $t(localeStringsMap.messageFormats[opt]) }}
                 </span>
               </template>
 
@@ -26,7 +26,7 @@
                 <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                      {{ $t(localeStringsMap.messageFormats[opt]) }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -36,7 +36,7 @@
 
           <div class="col-12 col-md-6">
             <div>
-              {{ $t('pages.guild.gs_message_channel_title') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.ChannelForMessages') }}
             </div>
 
             <q-select
@@ -78,7 +78,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('common.message') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
             </div>
 
             <MessageEditor
@@ -95,11 +95,18 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -110,6 +117,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
@@ -139,6 +147,7 @@ export default defineComponent({
       guild,
       dialogRef,
       component,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK({ component: component.value })

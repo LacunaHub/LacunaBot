@@ -5,7 +5,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.gs_title') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.Title') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -14,12 +14,14 @@
           <div class="row q-col-gutter-md">
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.gs_locale_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.Locale') }}
               </div>
 
               <q-select
                 v-model="guild.locale"
-                :options="locales"
+                :options="languages"
+                option-label="name"
+                option-value="code"
                 class="q-pt-sm"
                 filled
                 dense
@@ -31,7 +33,7 @@
                   <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                     <q-item-section>
                       <q-item-label>
-                        {{ opt.label }}
+                        {{ opt.name }}
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -43,7 +45,7 @@
                   <q-item clickable href="https://crowdin.com/project/lacuna" target="_blank">
                     <q-item-section>
                       <q-item-label>
-                        {{ $t('pages.guild.gs_translate_title') }}
+                        {{ $t('Pages.GuildPage.GeneralSettings.Translate') }}
                       </q-item-label>
                     </q-item-section>
 
@@ -57,10 +59,10 @@
 
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.gs_expert_roles_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.ExpertRoles') }}
               </div>
               <div class="text--secondary">
-                {{ $t('pages.guild.gs_expert_roles_description') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.ExpertRolesDescription') }}
               </div>
 
               <q-select
@@ -107,7 +109,7 @@
         <q-item class="q-py-md rounded-t-lg" tag="label">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.gs_welcome_title') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.Greeting') }}
             </q-item-label>
           </q-item-section>
 
@@ -120,7 +122,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('pages.guild.gs_message_format_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.MessageFormat') }}
               </div>
 
               <q-select
@@ -134,7 +136,7 @@
               >
                 <template #selected-item="{ opt }">
                   <span>
-                    {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                    {{ $t(localeStringsMap.messageFormats[opt]) }}
                   </span>
                 </template>
 
@@ -142,7 +144,7 @@
                   <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                     <q-item-section>
                       <q-item-label>
-                        {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                        {{ $t(localeStringsMap.messageFormats[opt]) }}
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -152,7 +154,7 @@
 
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('pages.guild.gs_message_channel_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.ChannelForMessages') }}
               </div>
 
               <q-select
@@ -194,7 +196,7 @@
 
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.gs_message_template_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
               </div>
 
               <MessageEditor
@@ -213,7 +215,7 @@
         <q-item class="q-py-md rounded-t-lg" tag="label">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.gs_init_roles_title') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.InitialRoles') }}
             </q-item-label>
           </q-item-section>
 
@@ -276,10 +278,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.gs_restore_title') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.Restoring') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.gs_restore_description') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.RestoringDescription') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -293,7 +295,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.gs_restore_roles_title') }}
+                  {{ $t('Pages.GuildPage.GeneralSettings.RestoreRoles') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -305,7 +307,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.gs_restore_nicknames_title') }}
+                  {{ $t('Pages.GuildPage.GeneralSettings.RestoreNickname') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -316,10 +318,10 @@
           <div class="row q-col-gutter-md">
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.gs_restore_strict_roles_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.RestoreStrictRoles') }}
               </div>
               <div class="text--secondary">
-                {{ $t('pages.guild.gs_restore_strict_roles_description') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.RestoreStrictRolesDescription') }}
               </div>
 
               <q-select
@@ -373,7 +375,7 @@
         <q-item class="q-py-md rounded-t-lg" tag="label">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.gs_farewell_title') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.Farewell') }}
             </q-item-label>
           </q-item-section>
 
@@ -386,7 +388,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('pages.guild.gs_message_format_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.MessageFormat') }}
               </div>
 
               <q-select
@@ -400,7 +402,7 @@
               >
                 <template #selected-item="{ opt }">
                   <span>
-                    {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                    {{ $t(localeStringsMap.messageFormats[opt]) }}
                   </span>
                 </template>
 
@@ -408,7 +410,7 @@
                   <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                     <q-item-section>
                       <q-item-label>
-                        {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                        {{ $t(localeStringsMap.messageFormats[opt]) }}
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -418,7 +420,7 @@
 
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('pages.guild.gs_message_channel_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.ChannelForMessages') }}
               </div>
 
               <q-select
@@ -460,7 +462,7 @@
 
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.gs_message_template_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
               </div>
 
               <MessageEditor
@@ -477,9 +479,10 @@
 </template>
 
 <script>
+import { languages } from 'lacuna-locale'
 import MessageEditor from 'src/components/MessageEditor.vue'
 import { useGuildStore } from 'src/stores/guild'
-import { availableLocales } from 'src/utils/Constants'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -488,7 +491,7 @@ export default defineComponent({
   setup() {
     const guild = useGuildStore()
 
-    return { guild }
+    return { guild, languages, localeStringsMap }
   },
 
   components: { MessageEditor },
@@ -496,8 +499,7 @@ export default defineComponent({
   data() {
     return {
       input: null,
-      toggle: false,
-      locales: availableLocales
+      toggle: false
     }
   }
 })

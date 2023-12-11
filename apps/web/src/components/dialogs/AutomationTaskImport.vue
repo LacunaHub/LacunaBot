@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.select_file') }}
+              {{ $t('Common.SelectFile') }}
             </div>
 
             <q-file
@@ -24,7 +24,7 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
         </div>
       </q-card-section>

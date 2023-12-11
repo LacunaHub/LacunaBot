@@ -5,7 +5,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ac_levels_title') }}
+              {{ $t('Pages.GuildPage.Activities.Levels') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -19,7 +19,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.ac_levels_text_exp_title') }}
+                  {{ $t('Pages.GuildPage.Activities.LevelsTextExp') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -31,7 +31,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.ac_levels_voice_exp_title') }}
+                  {{ $t('Pages.GuildPage.Activities.LevelsVoiceExp') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -51,7 +51,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.ac_levels_reset_on_leave_title') }}
+                  {{ $t('Pages.GuildPage.Activities.LevelsResetOnLeave') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -60,13 +60,13 @@
 
         <div class="q-pa-md">
           <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-            <q-expansion-item expand-separator :label="$t('common.permissions')">
+            <q-expansion-item expand-separator :label="$t('Common.Permissions')">
               <q-card class="bg-dark-1 no-border-radius" bordered>
                 <q-card-section>
                   <div class="row q-col-gutter-md">
                     <div class="col-12">
                       <div>
-                        {{ $t('common.allowed_channels') }}
+                        {{ $t('Common.AllowedChannels') }}
                       </div>
 
                       <q-select
@@ -122,7 +122,7 @@
 
                     <div class="col-12">
                       <div>
-                        {{ $t('common.blocked_channels') }}
+                        {{ $t('Common.BlockedChannels') }}
                       </div>
 
                       <q-select
@@ -182,7 +182,7 @@
                   <div class="row q-col-gutter-md">
                     <div class="col-12">
                       <div>
-                        {{ $t('common.allowed_roles') }}
+                        {{ $t('Common.AllowedRoles') }}
                       </div>
 
                       <q-select
@@ -228,7 +228,7 @@
 
                     <div class="col-12">
                       <div>
-                        {{ $t('common.blocked_roles') }}
+                        {{ $t('Common.BlockedRoles') }}
                       </div>
 
                       <q-select
@@ -281,7 +281,7 @@
         <q-item class="q-py-md" tag="label" :disable="!guild.modules.levels.active && !guild.modules.levels.voice">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ac_levels_alerts_title') }}
+              {{ $t('Pages.GuildPage.Activities.LevelsAlerts') }}
             </q-item-label>
           </q-item-section>
 
@@ -298,7 +298,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('pages.guild.gs_message_format_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.MessageFormat') }}
               </div>
 
               <q-select
@@ -315,7 +315,7 @@
               >
                 <template #selected-item="{ opt }">
                   <span>
-                    {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                    {{ $t(localeStringsMap.messageFormats[opt]) }}
                   </span>
                 </template>
 
@@ -323,7 +323,7 @@
                   <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                     <q-item-section>
                       <q-item-label>
-                        {{ $t(`pages.guild.gs_message_formats.${opt}`) }}
+                        {{ $t(localeStringsMap.messageFormats[opt]) }}
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -333,7 +333,7 @@
 
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('pages.guild.gs_message_channel_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.ChannelForMessages') }}
               </div>
 
               <q-select
@@ -379,7 +379,7 @@
 
             <div class="col-12">
               <div>
-                {{ $t('pages.guild.gs_message_template_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
               </div>
 
               <MessageEditor
@@ -397,10 +397,10 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ac_levels_awards_title') }}
+              {{ $t('Pages.GuildPage.Activities.LevelsAwards') }}
             </q-item-label>
             <q-item-label class="text--secondary">
-              {{ $t('pages.guild.ac_levels_awards_description') }}
+              {{ $t('Pages.GuildPage.Activities.LevelsAwardsDescription') }}
             </q-item-label>
           </q-item-section>
 
@@ -450,7 +450,7 @@
         <q-item class="q-py-md rounded-t-lg" tag="label">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ac_economy_title') }}
+              {{ $t('Pages.GuildPage.Activities.Economy') }}
             </q-item-label>
           </q-item-section>
 
@@ -472,7 +472,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('pages.guild.ac_economy_reset_on_leave_title') }}
+                  {{ $t('Pages.GuildPage.Activities.EconomyResetOnLeave') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -482,7 +482,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ac_economy_currencies_title') }}
+              {{ $t('Pages.GuildPage.Activities.EconomyCurrencies') }}
             </q-item-label>
           </q-item-section>
 
@@ -522,7 +522,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ac_economy_store_items_title') }}
+              {{ $t('Pages.GuildPage.Activities.EconomyStoreItems') }}
             </q-item-label>
           </q-item-section>
 
@@ -562,7 +562,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ac_economy_transfer_permissions') }}
+              {{ $t('Pages.GuildPage.Activities.EconomyTransferPermissions') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -571,7 +571,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-6">
               <div>
-                {{ $t('common.allowed_roles') }}
+                {{ $t('Common.AllowedRoles') }}
               </div>
 
               <q-select
@@ -612,7 +612,7 @@
 
             <div class="col-6">
               <div>
-                {{ $t('common.blocked_roles') }}
+                {{ $t('Common.BlockedRoles') }}
               </div>
 
               <q-select
@@ -660,7 +660,7 @@
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('pages.guild.ac_multipliers_title') }}
+              {{ $t('Pages.GuildPage.Activities.Multipliers') }}
             </q-item-label>
           </q-item-section>
 
@@ -712,6 +712,7 @@ import ActivitiesLevelAward from 'src/components/dialogs/ActivitiesLevelAward.vu
 import ActivitiesMultiplier from 'src/components/dialogs/ActivitiesMultiplier.vue'
 import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -724,7 +725,7 @@ export default defineComponent({
   setup() {
     const guild = useGuildStore()
 
-    return { guild }
+    return { guild, localeStringsMap }
   },
 
   methods: {

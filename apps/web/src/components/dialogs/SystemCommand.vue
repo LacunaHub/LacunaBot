@@ -17,18 +17,6 @@
         </q-item-section>
       </q-item>
 
-      <q-card-section>
-        <q-banner class="bg-dark-2 rounded-borders" dense>
-          <span>
-            {{ $t('command.permissions_now_unavailable') }}
-          </span>
-
-          <template #avatar>
-            <q-icon name="info" color="info"></q-icon>
-          </template>
-        </q-banner>
-      </q-card-section>
-
       <div class="q-pa-md">
         <q-list class="bg-dark-2 overflow-hidden rounded-borders">
           <q-expansion-item :disable="command.config.inactive">
@@ -45,7 +33,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('command.throttling_title') }}
+                  {{ $t('Components.SystemCommand.Throttling') }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -55,7 +43,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('command.throttling_scope_title') }}
+                      {{ $t('Components.SystemCommand.ThrottlingScope') }}
                     </div>
 
                     <q-select
@@ -70,7 +58,7 @@
                     >
                       <template #selected-item="{ opt }">
                         <span>
-                          {{ $t(`command.throttling_scopes.${opt}`) }}
+                          {{ $t(localeStringsMap.commandThrottlingScopes[opt]) }}
                         </span>
                       </template>
 
@@ -83,7 +71,7 @@
                         >
                           <q-item-section>
                             <q-item-label>
-                              {{ $t(`command.throttling_scopes.${opt}`) }}
+                              {{ $t(localeStringsMap.commandThrottlingScopes[opt]) }}
                             </q-item-label>
                           </q-item-section>
                         </q-item>
@@ -93,7 +81,7 @@
                     <q-select
                       v-else
                       disable
-                      :label="$t('command.throttling_scopes.PER_USER')"
+                      :label="$t('Components.SystemCommand.ThrottlingScopes.PerUser')"
                       class="q-pt-sm"
                       filled
                       dense
@@ -103,7 +91,7 @@
 
                   <div class="col-12">
                     <div>
-                      {{ $t('command.throttling_max_uses_title') }}
+                      {{ $t('Components.SystemCommand.ThrottlingMaxUses') }}
                     </div>
 
                     <q-slider
@@ -130,7 +118,7 @@
 
                   <div class="col-12">
                     <div>
-                      {{ $t('command.throttling_timeout_title') }}
+                      {{ $t('Components.SystemCommand.ThrottlingTimeout') }}
                     </div>
 
                     <q-select
@@ -200,11 +188,18 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -215,6 +210,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
@@ -251,6 +247,7 @@ export default defineComponent({
       guild,
 
       dialogRef,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK(command.value)

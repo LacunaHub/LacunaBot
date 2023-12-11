@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('subscriptions.youtube_channel_name_title') }}
+              {{ $t('Components.Subscriptions.ChannelName') }}
             </div>
 
             <q-select
@@ -71,7 +71,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('subscriptions.notifications_channel_title') }}
+              {{ $t('Components.Subscriptions.NotificationsChannel') }}
             </div>
 
             <q-select
@@ -121,7 +121,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('subscriptions.create_thread_title') }}
+                {{ $t('Components.Subscriptions.CreateThread') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -133,7 +133,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('subscriptions.crosspost_message_title') }}
+                {{ $t('Components.Subscriptions.CrosspostMessage') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -144,7 +144,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('subscriptions.notifications_text') }}
+              {{ $t('Components.Subscriptions.NotificationsText') }}
             </div>
 
             <MessageEditor :message="youtube.notification_message" avl-replacers="subs" disable-embed class="q-pt-sm" />
@@ -155,14 +155,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -178,7 +178,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -191,7 +191,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>

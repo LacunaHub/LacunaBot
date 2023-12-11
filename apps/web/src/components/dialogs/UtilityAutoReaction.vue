@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.channel') }}
+              {{ $t('Commands.OptionTypes.Channel') }}
             </div>
 
             <q-select
@@ -67,10 +67,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('common.reactions') }}
+              {{ $t('Common.Reactions') }}
             </div>
             <div class="text--secondary">
-              {{ $t('auto_reactions.reactions_description') }}
+              {{ $t('Components.AutoReaction.ReactionsDescription') }}
             </div>
 
             <div class="row q-col-gutter-sm q-pt-sm">
@@ -105,10 +105,10 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('auto_reactions.message_types_title') }}
+              {{ $t('Components.AutoReaction.MessageTypes') }}
             </div>
             <div class="text--secondary">
-              {{ $t('auto_reactions.message_types_description') }}
+              {{ $t('Components.AutoReaction.MessageTypesDescription') }}
             </div>
 
             <q-select
@@ -134,7 +134,7 @@
             >
               <template #selected>
                 <span>{{
-                  autoReaction.message_types.map(i => $t(`common.discord_message_types.${i}`)).join(', ')
+                  autoReaction.message_types.map(i => $t(localeStringsMap.discordMessageTypes[i])).join(', ')
                 }}</span>
               </template>
 
@@ -142,7 +142,7 @@
                 <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t(`common.discord_message_types.${opt}`) }}
+                      {{ $t(localeStringsMap.discordMessageTypes[opt]) }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -152,10 +152,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('auto_reactions.text_matches_title') }}
+              {{ $t('Components.AutoReaction.TextMatches') }}
             </div>
             <div class="text--secondary">
-              {{ $t('auto_reactions.text_matches_description') }}
+              {{ $t('Components.AutoReaction.TextMatchesDescription') }}
             </div>
 
             <q-select
@@ -178,10 +178,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('auto_reactions.excluded_text_matches_title') }}
+              {{ $t('Components.AutoReaction.ExcludedTextMatches') }}
             </div>
             <div class="text--secondary">
-              {{ $t('auto_reactions.excluded_text_matches_description') }}
+              {{ $t('Components.AutoReaction.ExcludedTextMatchesDescription') }}
             </div>
 
             <q-select
@@ -207,14 +207,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -224,7 +224,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               split
               unelevated
@@ -236,7 +236,7 @@
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -264,6 +264,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { parseEmoji } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 
@@ -315,6 +316,7 @@ export default defineComponent({
       emojiPickerModal,
       isValid,
       unusedTextChannels,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {

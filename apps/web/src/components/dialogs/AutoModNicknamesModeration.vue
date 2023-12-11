@@ -4,7 +4,7 @@
       <q-item class="q-py-md rounded-t-lg" tag="label">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(`automoder.titles.${name}`) }}
+            {{ $t(localeStringsMap.autoModTypes[name]) }}
           </q-item-label>
         </q-item-section>
 
@@ -15,7 +15,7 @@
 
       <div class="q-pa-md">
         <div>
-          {{ $t('automoder.nnm_select_what_remove_title') }}
+          {{ $t('Components.AutoMod.NicknamesModerationSelectWhatRemove') }}
         </div>
 
         <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
@@ -25,7 +25,7 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>
-                {{ $t(`automoder.nnm_removable_symbols.${opt}`) }}
+                {{ $t(localeStringsMap.nicknamesModerationRemovableSymbols[opt]) }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -36,10 +36,10 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('automoder.nnm_contains_title') }}
+              {{ $t('Components.AutoMod.NicknamesModerationContains') }}
             </div>
             <div class="text--secondary">
-              {{ $t('automoder.nnm_contains_description') }}
+              {{ $t('Components.AutoMod.NicknamesModerationContainsDescription') }}
             </div>
 
             <q-select
@@ -74,7 +74,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.ignored_roles') }}
+              {{ $t('Common.IgnoredRoles') }}
             </div>
 
             <q-select
@@ -124,7 +124,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t('automoder.ignore_bots') }}
+                {{ $t('Common.IgnoreBots') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -133,10 +133,10 @@
 
       <div class="q-pa-md">
         <div>
-          {{ $t('common.ignored_permissions') }}
+          {{ $t('Common.IgnoredPermissions') }}
         </div>
         <div class="text--secondary">
-          {{ $t('automoder.ignored_permissions_description') }}
+          {{ $t('Components.AutoMod.IgnoredPermissionsDescription') }}
         </div>
 
         <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
@@ -156,7 +156,7 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>
-                {{ $t(`common.permissions_keys.${permission.key}`) }}
+                {{ $t(localeStringsMap.discordPermissions[permission.key]) }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -166,11 +166,18 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -181,6 +188,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
@@ -205,6 +213,7 @@ export default defineComponent({
       guild,
       config,
       dialogRef,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK({ name: props.name, config: { ...config.value } })

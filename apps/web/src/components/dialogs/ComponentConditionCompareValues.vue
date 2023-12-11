@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('custom_command.cv_operator_title') }}
+              {{ $t('Components.CustomCommand.CompareValuesOperator') }}
             </div>
 
             <q-select
@@ -27,7 +27,7 @@
             >
               <template #selected-item="{ opt }">
                 <span class="text-uppercase">
-                  {{ $t(`custom_command.cv_operators.${opt}`) }}
+                  {{ $t(localeStringsMap.compareValuesOperators[opt]) }}
                 </span>
               </template>
 
@@ -35,7 +35,7 @@
                 <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                   <q-item-section>
                     <q-item-label class="text-uppercase">
-                      {{ $t(`custom_command.cv_operators.${opt}`) }}
+                      {{ $t(localeStringsMap.compareValuesOperators[opt]) }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -45,7 +45,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('custom_command.cv_left_part_title') }}
+              {{ $t('Components.CustomCommand.CompareValuesLeftPart') }}
             </div>
 
             <q-input
@@ -61,7 +61,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('custom_command.cv_right_part_title') }}
+              {{ $t('Components.CustomCommand.CompareValuesRightPart') }}
             </div>
 
             <q-input
@@ -92,7 +92,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('custom_command.cv_false_reply_title') }}
+                  {{ $t('Components.CustomCommand.CompareValuesFalseReply') }}
                 </q-item-label>
               </q-item-section>
             </template>
@@ -102,7 +102,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('common.message') }}
+                      {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
                     </div>
 
                     <MessageEditor
@@ -133,7 +133,7 @@
 
             <q-item-section>
               <q-item-label>
-                {{ $t(`common.actions_keys.EPHEMERAL_REPLY`) }}
+                {{ $t('CaseLog.Actions.EphemeralReply') }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -143,13 +143,13 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               unelevated
               no-caps
               color="primary"
@@ -165,6 +165,7 @@
 
 <script>
 import { useDialogPluginComponent } from 'quasar'
+import { localeStringsMap } from 'src/utils/Constants'
 import { computed, defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
@@ -202,6 +203,7 @@ export default defineComponent({
       component,
 
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK({ component: component.value })

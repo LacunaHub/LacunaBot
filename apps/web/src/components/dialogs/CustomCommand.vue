@@ -9,9 +9,9 @@
         indicator-color="transparent"
         no-caps
       >
-        <q-tab name="general" :label="$t('pages.guild.nav_names.GENERAL')" style="width: 50%"></q-tab>
+        <q-tab name="general" :label="$t('Pages.GuildPage.NavNames.General')" style="width: 50%"></q-tab>
 
-        <q-tab name="components" :label="$t('common.actions')" style="width: 50%"></q-tab>
+        <q-tab name="components" :label="$t('CaseLog.Actions.Title')" style="width: 50%"></q-tab>
       </q-tabs>
 
       <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
@@ -21,7 +21,7 @@
               <div class="col-12">
                 <q-btn
                   class="full-width"
-                  :label="$t('import')"
+                  :label="$t('Common.Import')"
                   unelevated
                   no-caps
                   color="secondary"
@@ -35,7 +35,7 @@
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <div>
-                  {{ $t('custom_command.command_name_title') }}
+                  {{ $t('Components.CustomCommand.CommandName') }}
                 </div>
 
                 <q-input
@@ -50,7 +50,7 @@
 
               <div class="col-12">
                 <div>
-                  {{ $t('custom_command.command_description_title') }}
+                  {{ $t('Components.CustomCommand.CommandDescription') }}
                 </div>
 
                 <q-input
@@ -65,7 +65,7 @@
 
               <div class="col-12">
                 <div>
-                  {{ $t('custom_command.command_options_title') }}
+                  {{ $t('Commands.HelpCommand.Texts.CommandArguments') }}
                 </div>
 
                 <div class="row q-col-gutter-sm q-pt-sm">
@@ -106,7 +106,7 @@
 
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('command.throttling_title') }}
+                      {{ $t('Components.SystemCommand.Throttling') }}
                     </q-item-label>
                   </q-item-section>
                 </template>
@@ -116,7 +116,7 @@
                     <div class="row q-col-gutter-md">
                       <div class="col-12">
                         <div>
-                          {{ $t('command.throttling_scope_title') }}
+                          {{ $t('Components.SystemCommand.ThrottlingScope') }}
                         </div>
 
                         <q-select
@@ -131,7 +131,7 @@
                         >
                           <template #selected-item="{ opt }">
                             <span>
-                              {{ $t(`command.throttling_scopes.${opt}`) }}
+                              {{ $t(localeStringsMap.commandThrottlingScopes[opt]) }}
                             </span>
                           </template>
 
@@ -144,7 +144,7 @@
                             >
                               <q-item-section>
                                 <q-item-label>
-                                  {{ $t(`command.throttling_scopes.${opt}`) }}
+                                  {{ $t(localeStringsMap.commandThrottlingScopes[opt]) }}
                                 </q-item-label>
                               </q-item-section>
                             </q-item>
@@ -153,7 +153,7 @@
 
                         <q-select
                           v-else
-                          :model-value="$t('command.throttling_scopes.PER_USER')"
+                          :model-value="$t('Components.SystemCommand.ThrottlingScopes.PerUser')"
                           disable
                           class="q-pt-sm"
                           filled
@@ -164,7 +164,7 @@
 
                       <div class="col-12">
                         <div>
-                          {{ $t('command.throttling_max_uses_title') }}
+                          {{ $t('Components.SystemCommand.ThrottlingMaxUses') }}
                         </div>
 
                         <q-slider
@@ -191,7 +191,7 @@
 
                       <div class="col-12">
                         <div>
-                          {{ $t('command.throttling_timeout_title') }}
+                          {{ $t('Components.SystemCommand.ThrottlingTimeout') }}
                         </div>
 
                         <q-select
@@ -265,7 +265,7 @@
               <div class="col-12 col-md-6">
                 <q-btn-dropdown
                   class="full-width"
-                  :label="$t('custom_command.add_condition')"
+                  :label="$t('Components.CustomCommand.AddCondition')"
                   color="dark-2"
                   no-caps
                   unelevated
@@ -281,7 +281,7 @@
                     >
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`custom_command.component_names.${condition}`) }}
+                          {{ $t(localeStringsMap.customBehaviorComponents[condition]) }}
                         </q-item-label>
                       </q-item-section>
                     </q-item>
@@ -292,7 +292,7 @@
               <div class="col-12 col-md-6">
                 <q-btn-dropdown
                   class="full-width"
-                  :label="$t('custom_command.add_action')"
+                  :label="$t('Components.CustomCommand.AddAction')"
                   color="dark-2"
                   no-caps
                   unelevated
@@ -308,7 +308,7 @@
                     >
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`custom_command.component_names.${action}`) }}
+                          {{ $t(localeStringsMap.customBehaviorComponents[action]) }}
                         </q-item-label>
                       </q-item-section>
 
@@ -342,7 +342,11 @@
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         {{
-                          $t(`custom_command.component_names.${component.condition?.type ?? component.action?.type}`)
+                          $t(
+                            localeStringsMap.customBehaviorComponents[
+                              component.condition?.type ?? component.action?.type
+                            ]
+                          )
                         }}
                       </q-item-label>
                     </q-item-section>
@@ -390,14 +394,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -413,7 +417,7 @@
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -426,7 +430,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -434,7 +438,7 @@
                 <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('export') }}
+                      {{ $t('Common.Export') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -455,7 +459,7 @@
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
-import { customCommandComponentLimits, discordAppCommandNameRegexp } from 'src/utils/Constants'
+import { customCommandComponentLimits, discordAppCommandNameRegexp, localeStringsMap } from 'src/utils/Constants'
 import { handleAxiosError } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
@@ -533,6 +537,7 @@ export default defineComponent({
       commandFile,
 
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {
