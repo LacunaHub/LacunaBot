@@ -246,7 +246,7 @@ export async function onVoiceConnect(self: Lacuna, server: ServerDocument, state
             )
         }
 
-        if (!userLevel.activity.voice_connected_at || Date.now() - userLevel.activity.voice_connected_at > 36_000_000) {
+        if (!userLevel.activity.voice_connected_at || Date.now() - userLevel.activity.voice_connected_at > 1000 * 60 * 60 * 10) {
             await self.db.users.updateOne(
                 { _id: member.id, 'activities.levels.guild_id': server._id },
                 {
@@ -280,7 +280,7 @@ export async function onVoiceDisconnect(self: Lacuna, server: ServerDocument, st
             const user = await self.db.users.findOne({ _id: member.user.id }),
                 userLevel = user?.activities?.levels?.find(i => i.guild_id === server._id)
 
-            if (!userLevel?.activity?.voice_connected_at) continue
+            if (!userLevel?.activity?.voice_connected_at || Date.now() - userLevel.activity.voice_connected_at > 1000 * 60 * 60 * 10) continue
 
             const currentXp: number = userLevel.experience.current
             const currentLevel: number = userLevel.experience.level,
