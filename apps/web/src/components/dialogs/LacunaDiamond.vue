@@ -568,21 +568,21 @@ export default defineComponent({
         features: [
           {
             name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
-              social_platform: 'Telegram'
+              socialPlatform: 'Telegram'
             }),
             free: { value: '1', type: 'text' },
             diamond: { value: '10', type: 'text' }
           },
           {
             name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
-              social_platform: 'YouTube'
+              socialPlatform: 'YouTube'
             }),
             free: { value: '1', type: 'text' },
             diamond: { value: '10', type: 'text' }
           },
           {
             name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
-              social_platform: 'Twitch'
+              socialPlatform: 'Twitch'
             }),
             free: { value: '1', type: 'text' },
             diamond: { value: '10', type: 'text' }
