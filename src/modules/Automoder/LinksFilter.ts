@@ -16,17 +16,18 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
     if (config.ignored.channels.includes(message.channel.id)) return false
     if (message.member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
 
-    const content: string = message.content.toLowerCase()
-    const split: string[] = content.split(/\s{1,}/)
-    const links = message.content.match(/(https?:\/\/[^\s]+)/gi)
+    const content: string = message.content.toLowerCase(),
+        messageSplit: string[] = content.split(/\s{1,}/),
+        messageLinks = message.content.match(/(https?:\/\/[^\s]+)/gi),
+        discordInviteRegexp = /discord\.(gg|com\/invite)\/(\w+)/g
 
-    if (links && links.length) {
-        const delete_referral_invites = config.options.includes('DELETE_REFERRAL_INVITES') && links.some(link => link.includes('discord.gg'))
+    if (messageLinks && messageLinks.length) {
+        const deleteReferralInvites = config.options.includes('DELETE_REFERRAL_INVITES') && messageLinks.some(v => discordInviteRegexp.test(v))
 
         if (
             config.options.includes('DELETE_ALL_LINKS') &&
-            !delete_referral_invites &&
-            !config.allowed_registry.some(reg => links.some(link => link.includes(reg)))
+            !deleteReferralInvites &&
+            !config.allowed_registry.some(reg => messageLinks.some(link => link.includes(reg)))
         ) {
             if (message.deletable) {
                 try {
@@ -41,11 +42,15 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
     }
 
     if (config.options.includes('DELETE_REFERRAL_INVITES') && message.guild.members.me.permissions.has('ManageGuild')) {
-        const guild_invites = await message.guild.invites.fetch()
-        const invites = message.content.match(/discord.gg\/\w+/gi)
-        const is_referral = invites ? invites.some(i => !guild_invites.some(k => k.url == `https://${i}`)) : false
+        const guildInvites = await message.guild.invites.fetch()
+        const messageInvites = message.content.match(discordInviteRegexp)
+        const isReferral = messageInvites?.some?.(v => {
+            const code = v.split('/').at(-1)
 
-        if (is_referral) {
+            return guildInvites.some(vv => vv.code !== code)
+        })
+
+        if (isReferral) {
             if (message.deletable) {
                 try {
                     await message.delete()
@@ -58,7 +63,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
     }
 
-    if (config.blocked_registry.some(reg => split.some(s => s.includes(reg)))) {
+    if (config.blocked_registry.some(reg => messageSplit.some(s => s.includes(reg)))) {
         await penalty(self, server, message)
 
         return true
