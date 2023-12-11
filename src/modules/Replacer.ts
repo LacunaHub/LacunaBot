@@ -378,7 +378,6 @@ export default class Replacer {
      */
     async replace(string: string, customReplacements: IReplacerCustomShapers = {}) {
         const replacers = this.getReplacers(string),
-            codeSnippets = this.getCodeSnippets(string),
             replacements = { ...(await this.getReplacements()), ...customReplacements }
 
         for (const replacer of replacers) {
@@ -399,6 +398,8 @@ export default class Replacer {
 
             string = string.replace(regexp, () => raws.find(i => i))
         }
+
+        const codeSnippets = this.getCodeSnippets(string)
 
         for (const snippet of codeSnippets) {
             const regex = new RegExp(`{-\\s*${escapeRegexp(snippet.name)}\([^{}]*\)\\s*-}`, 'g')
