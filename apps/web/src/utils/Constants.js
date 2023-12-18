@@ -323,5 +323,42 @@ export const localeStringsMap = {
     autoVoicePositions: {
         TOP: 'Components.AutoVoice.DefaultPositions.Top',
         BOTTOM: 'Components.AutoVoice.DefaultPositions.Bottom'
+    },
+    textSizes: {
+        h4: 'Components.ImageEditor.TextSizes.Header',
+        h5: 'Components.ImageEditor.TextSizes.Header',
+        h6: 'Components.ImageEditor.TextSizes.Header',
+        subtitle1: 'Components.ImageEditor.TextSizes.Subtitle',
+        body2: 'Components.ImageEditor.TextSizes.Body',
+        caption: 'Components.ImageEditor.TextSizes.Caption'
+    },
+    textStyles: {
+        normal: 'Components.ImageEditor.TextSizes.Body',
+        italic: 'Components.ImageEditor.TextStyles.Italic'
+    },
+    textTransforms: {
+        none: 'Common.No',
+        capitalize: 'Components.ImageEditor.TextTransforms.Capitalize',
+        uppercase: 'Components.ImageEditor.TextTransforms.Uppercase',
+        lowercase: 'Components.ImageEditor.TextTransforms.Lowercase'
+    },
+    textDecorations: {
+        none: 'Common.No',
+        underline: 'Components.ImageEditor.TextDecorations.Underline',
+        'line-through': 'Components.ImageEditor.TextDecorations.LineThrough'
+    },
+    textAligns: {
+        center: 'Components.ImageEditor.TextAligns.Center',
+        end: 'Components.ImageEditor.TextAligns.End',
+        start: 'Components.ImageEditor.TextAligns.Start'
+    },
+    borderRadiuses: {
+        none: 'Common.None',
+        xs: 'Components.ImageEditor.BorderRadiuses.XS',
+        sm: 'Components.ImageEditor.BorderRadiuses.SM',
+        md: 'Components.ImageEditor.BorderRadiuses.MD',
+        lg: 'Components.ImageEditor.BorderRadiuses.LG',
+        xl: 'Components.ImageEditor.BorderRadiuses.XL',
+        circle: 'Components.ImageEditor.BorderRadiuses.Circle'
     }
 }

@@ -203,6 +203,7 @@
                 class="q-pt-sm"
                 :message="guild.modules.welcome.message"
                 :disable="!guild.modules.welcome.active"
+                :disable-image="false"
               />
             </div>
           </div>
@@ -469,6 +470,7 @@
                 class="q-pt-sm"
                 :message="guild.modules.farewell.message"
                 :disable="!guild.modules.farewell.active"
+                :disable-image="false"
               />
             </div>
           </div>

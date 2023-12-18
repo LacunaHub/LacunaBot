@@ -389,6 +389,7 @@
                   (!guild.modules.levels.active && !guild.modules.levels.voice) ||
                   !guild.modules.levels.level_up_alerts.active
                 "
+                :disable-image="false"
               />
             </div>
           </div>

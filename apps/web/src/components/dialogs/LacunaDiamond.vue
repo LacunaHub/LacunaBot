@@ -596,6 +596,11 @@ export default defineComponent({
             name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PrioritySupport'),
             free: { value: false, type: 'boolean' },
             diamond: { value: true, type: 'boolean' }
+          },
+          {
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ImageEditorElementsNumber'),
+            free: { value: '5', type: 'text' },
+            diamond: { value: '50', type: 'text' }
           }
         ]
       }
