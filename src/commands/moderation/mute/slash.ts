@@ -129,7 +129,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     if (server.moderation.case_log.types.MUTE_ADD.active) {
-        const replacer = new Replacer({ guild: interaction.guild, member: mention }),
+        const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: mention }),
             messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.MUTE_ADD.dm_message, { penalty: { reason } })
 
         try {

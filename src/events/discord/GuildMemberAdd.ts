@@ -17,8 +17,11 @@ const handler = async (self: Lacuna, member: GuildMember) => {
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
 
+    await Greeting.sendMessage(self, server, member)
+
     if (!member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED')) {
-        await Greeting(self, server, member)
+        await Greeting.addInitialRoles(self, server, member)
+        await Greeting.restoreNicknameAndRoles(self, server, member)
     }
 
     await Automation.handleEvent('GUILD_MEMBER_ADD', self, server, member)

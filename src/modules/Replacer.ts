@@ -1,9 +1,10 @@
-import { BaseGuildTextChannel, ChannelType, EmbedBuilder, Guild, GuildMember, Message, resolveColor } from 'discord.js'
+import { AttachmentBuilder, BaseGuildTextChannel, ChannelType, EmbedBuilder, Guild, GuildMember, Message, resolveColor } from 'discord.js'
 import moment from 'moment'
 import db from '../database'
-import { MessageEmbed as IMessageEmbed } from '../database/schemas/Servers'
+import { MessageEmbed as IMessageEmbed, MessageImage } from '../database/schemas/Servers'
 import { IUserLevel, IUserWallet } from '../database/schemas/Users'
 import { escapeRegexp, resolveObjectPath } from '../internals/utility/Utils'
+import { borderRadiuses, generateImage, textAligns, textDecorations, textSizes, textStyles, textTransforms } from './ImageGenerator'
 
 const availableCodeSnippets = {
     CHOOSE: (...args: string[]) => {
@@ -130,9 +131,11 @@ const availableCodeSnippets = {
 }
 
 export default class Replacer {
+    public premium: boolean
     public shapers: IReplacerShapers
 
-    constructor(shapers?: IReplacerShapers) {
+    constructor(premium: boolean, shapers?: IReplacerShapers) {
+        this.premium = premium
         this.shapers = shapers
     }
 
@@ -280,7 +283,7 @@ export default class Replacer {
                 system_channel_id: guild?.systemChannelId,
                 public_updates_channel_id: guild?.publicUpdatesChannelId,
                 rules_channel_id: guild?.rulesChannelId,
-                banner: guild?.bannerURL?.(),
+                banner: guild?.bannerURL?.({ size: 1024, extension: 'png' }),
                 channels: {
                     total: guild?.channels?.cache?.size,
                     text: guild?.channels?.cache?.filter?.(i => i.type === ChannelType.GuildText)?.size,
@@ -289,7 +292,7 @@ export default class Replacer {
                 },
                 created_at: guild?.createdTimestamp,
                 description: guild?.description,
-                icon: guild?.iconURL?.(),
+                icon: guild?.iconURL?.({ size: 512, extension: 'png' }),
                 id: guild?.id,
                 members: {
                     total: guild?.memberCount,
@@ -298,7 +301,7 @@ export default class Replacer {
                 },
                 owner: {
                     username: guildOwner?.user?.username,
-                    avatar: guildOwner?.user?.displayAvatarURL(),
+                    avatar: guildOwner?.user?.displayAvatarURL({ size: 512, extension: 'png' }),
                     display_name: guildOwner?.displayName,
                     tag: guildOwner?.user?.tag,
                     mention: `<@${guild?.ownerId ?? '1'}>`,
@@ -306,12 +309,12 @@ export default class Replacer {
                 },
                 boosters_count: guild?.premiumSubscriptionCount || 0,
                 boost_tier: guild?.premiumTier,
-                splash: guild?.splashURL?.(),
+                splash: guild?.splashURL?.({ size: 1024, extension: 'png' }),
                 vanity_url: guild?.vanityURLCode ? `https://discord.gg/${guild.vanityURLCode}` : null
             },
             member: {
                 username: member?.user?.username,
-                avatar: member?.user?.displayAvatarURL?.(),
+                avatar: member?.user?.displayAvatarURL?.({ size: 512, extension: 'png' }),
                 discriminator: member?.user?.discriminator,
                 display_name: member?.displayName,
                 id: member?.id,
@@ -421,9 +424,13 @@ export default class Replacer {
     /**
      * Replace replacers and code snippets in the template message and return message payload with content and embeds.
      */
-    async replaceTemplateMessage(template: { content: string; embed?: IMessageEmbed }, customReplacements: IReplacerCustomShapers = {}) {
+    async replaceTemplateMessage(
+        template: { content: string; embed?: IMessageEmbed; image?: MessageImage },
+        customReplacements: IReplacerCustomShapers = {}
+    ) {
         const content = await this.replace(template.content, customReplacements)
-        let embed = {}
+        let embed = {},
+            attachment: { buffer: Buffer; name: string }
 
         if (template.embed && template.embed.active) {
             const imageURL = template.embed.image.url ? await this.replace(template.embed.image.url, customReplacements) : null,
@@ -462,10 +469,53 @@ export default class Replacer {
             }
         }
 
-        const returning = {} as { content: string; embeds: EmbedBuilder[] }
+        if (template.image && template.image.active) {
+            const tImage = template.image
+            const image = {
+                height: typeof tImage.height === 'number' && tImage.height <= 1920 && tImage.height >= 256 ? tImage.height : 256,
+                width: typeof tImage.width === 'number' && tImage.width <= 1920 && tImage.width >= 256 ? tImage.width : 720,
+                background: {
+                    color: tImage.background.color,
+                    url: tImage.background.url ? await this.replace(tImage.background.url, customReplacements) : null
+                },
+                elements: tImage.elements.length
+                    ? await Promise.all(
+                          tImage.elements.slice(0, this.premium ? 50 : 5).map(async v => {
+                              const element = {
+                                  type: v.type,
+                                  posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
+                                  posY: typeof v.posY === 'number' && v.posY <= 9999 && v.posY >= -9999 ? v.posY : 0,
+                                  height: typeof v.height === 'number' && v.height <= 9999 && v.height >= -9999 ? v.height : 50,
+                                  width: typeof v.width === 'number' && v.width <= 9999 && v.width >= -9999 ? v.width : 50
+                              }
+
+                              if (v.type === 'IMAGE') {
+                                  element['url'] = v.url ? await this.replace(v.url, customReplacements) : null
+                                  element['border_radius'] = Object.keys(borderRadiuses).includes(v.border_radius) ? v.border_radius : 'none'
+                              } else if (v.type === 'TEXT') {
+                                  element['value'] = typeof v.value === 'string' ? await this.replace(v.value, customReplacements) : 'Text'
+                                  element['color'] = v.color ?? 'rgba(255,255,255,1)'
+                                  element['size'] = Object.keys(textSizes).includes(v.size) ? v.size : 'body2'
+                                  element['style'] = textStyles.includes(v.style) ? v.style : 'normal'
+                                  element['transform'] = textTransforms.includes(v.transform) ? v.transform : 'none'
+                                  element['decoration'] = textDecorations.includes(v.decoration) ? v.decoration : 'none'
+                                  element['align'] = textAligns.includes(v.align) ? v.align : 'center'
+                              }
+
+                              return element
+                          })
+                      )
+                    : []
+            } as MessageImage
+
+            attachment = await generateImage(image)
+        }
+
+        const returning = {} as { content: string; embeds?: EmbedBuilder[]; files?: AttachmentBuilder[] }
 
         if (content) returning['content'] = content
         if (template.embed && template.embed.active) returning['embeds'] = [new EmbedBuilder(embed)]
+        if (attachment) returning['files'] = [new AttachmentBuilder(attachment.buffer, { name: attachment.name })]
 
         return returning
     }

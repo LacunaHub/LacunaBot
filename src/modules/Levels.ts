@@ -1,4 +1,4 @@
-import Canvas, { CanvasRenderingContext2D, Image } from 'canvas'
+import Canvas, { Image } from 'canvas'
 import {
     AttachmentBuilder,
     BaseGuildTextChannel,
@@ -15,6 +15,7 @@ import numbro from 'numbro'
 import { LevelAward, ServerDocument } from '../database/schemas/Servers'
 import { IUserLevel } from '../database/schemas/Users'
 import Lacuna from '../internals/Lacuna'
+import { borderRadiuses, roundImage } from './ImageGenerator'
 import Replacer from './Replacer'
 
 export function hasRestrictedPermissions(options: IHasRestrictedPermissionsOptions) {
@@ -398,7 +399,7 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, member:
         })
 
         conditionsMet = !!award
-        isAwardReceived = userLevel.received_awards?.includes?.(award.id)
+        isAwardReceived = award && userLevel.received_awards?.includes?.(award.id)
     }
 
     if (conditionsMet) {
@@ -429,7 +430,7 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, member:
 
             if (award.alert.active) {
                 try {
-                    const replacer = new Replacer({ guild: member.guild, member: member }),
+                    const replacer = new Replacer(server.server.premium.available, { guild: member.guild, member: member }),
                         messagePayload = await replacer.replaceTemplateMessage(award.alert.message)
 
                     if (award.alert.format === 'DM') {
@@ -466,7 +467,7 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, sig
     const alert = server.modules.levels.level_up_alerts
 
     if (alert.active) {
-        const replacer = new Replacer({ guild: signal.guild, member: member }),
+        const replacer = new Replacer(server.server.premium.available, { guild: signal.guild, member: member }),
             messagePayload = await replacer.replaceTemplateMessage(alert.message)
 
         try {
@@ -544,18 +545,18 @@ export async function generateRankCard(
         banner = null
     }
 
-    const rect_x = canvas.width,
-        rect_y = canvas.height,
-        border_radius = 40
+    const rectX = canvas.width,
+        rectY = canvas.height,
+        borderRadius = borderRadiuses.lg
 
     ctx.fillStyle = '#16151A'
     ctx.strokeStyle = '#16151A'
-    ctx.fillRect(rect_x, rect_y, rect_x, rect_y)
+    ctx.fillRect(rectX, rectY, rectX, rectY)
     ctx.lineJoin = 'round'
-    ctx.lineWidth = border_radius
+    ctx.lineWidth = borderRadius
 
-    ctx.strokeRect(border_radius / 2, border_radius / 2, rect_x - border_radius, rect_y - border_radius)
-    ctx.fillRect(border_radius / 2, border_radius / 2, rect_x - border_radius, rect_y - border_radius)
+    ctx.strokeRect(borderRadius / 2, borderRadius / 2, rectX - borderRadius, rectY - borderRadius)
+    ctx.fillRect(borderRadius / 2, borderRadius / 2, rectX - borderRadius, rectY - borderRadius)
 
     if (banner) {
         const width_ratio = 720 / banner.width,
@@ -563,13 +564,13 @@ export async function generateRankCard(
         const ratio = width_ratio > height_ratio ? width_ratio : height_ratio
 
         ctx.save()
-        roundImage(ctx, 0, 0, 720, 256, border_radius / 2)
+        roundImage(ctx, 0, 0, 720, 256, borderRadius / 2)
         ctx.clip()
         ctx.globalAlpha = 0.2
         ctx.drawImage(
             banner,
-            rect_x / 2 - (banner.width * ratio) / 2,
-            rect_y / 2 - (banner.height * ratio) / 2,
+            rectX / 2 - (banner.width * ratio) / 2,
+            rectY / 2 - (banner.height * ratio) / 2,
             banner.width * ratio,
             banner.height * ratio
         )
@@ -693,20 +694,6 @@ function neededTotalXp(level: number): number {
     }
 
     return total
-}
-
-function roundImage(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
-    ctx.beginPath()
-    ctx.moveTo(x + radius, y)
-    ctx.lineTo(x + width - radius, y)
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
-    ctx.lineTo(x + width, y + height - radius)
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
-    ctx.lineTo(x + radius, y + height)
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
-    ctx.lineTo(x, y + radius)
-    ctx.quadraticCurveTo(x, y, x + radius, y)
-    ctx.closePath()
 }
 
 export default {

@@ -78,7 +78,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
     if (result == 'SUCCESS') {
         if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
             try {
-                const replacer = new Replacer({ guild: interaction.guild, member: interaction.member }),
+                const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: interaction.member }),
                     messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
                 await interaction.editReply(messagePayload)
@@ -260,7 +260,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'SUCCESS') {
                 if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-                    const replacer = new Replacer({ guild: interaction.guild, member: interaction.member }),
+                    const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: interaction.member }),
                         messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
                     try {

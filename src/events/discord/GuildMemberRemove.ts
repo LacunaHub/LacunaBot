@@ -17,7 +17,8 @@ const handler = async (self: Lacuna, member: GuildMember) => {
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
 
-    await Farewell(self, server, member)
+    await Farewell.sendMessage(self, server, member)
+    await Farewell.saveNicknameAndRoles(self, server, member)
     await Automation.handleEvent('GUILD_MEMBER_REMOVE', self, server, member)
 
     const caseLogChannel = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel

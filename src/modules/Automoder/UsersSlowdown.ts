@@ -142,7 +142,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (send_message) {
-            const replacer = new Replacer({ message: message, guild: message.guild, member: message.member }),
+            const replacer = new Replacer(server.server.premium.available, { message: message, guild: message.guild, member: message.member }),
                 messagePayload = await replacer.replaceTemplateMessage(config.send_message)
 
             try {

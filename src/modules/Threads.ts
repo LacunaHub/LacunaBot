@@ -23,7 +23,7 @@ export async function autoThread(self: Lacuna, server: ServerDocument, message: 
             if (match) return false
         }
 
-        const replacer = new Replacer({
+        const replacer = new Replacer(server.server.premium.available, {
                 guild: message.guild,
                 member: message.member,
                 message: message

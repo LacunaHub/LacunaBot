@@ -1,6 +1,7 @@
 import { parseEmoji } from 'discord.js'
 import database from '../../../database'
 import { ServerDocument } from '../../../database/schemas/Servers'
+import { borderRadiuses, textAligns, textDecorations, textSizes, textStyles, textTransforms } from '../../../modules/ImageGenerator'
 import { lavalinkSources } from '../../utility/Constants'
 import { dotNotateObject } from '../../utility/Utils'
 
@@ -880,6 +881,51 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                         }
                     }
                 }
+
+                if (data.modules.welcome.message.image) {
+                    const newImage = data.modules.welcome.message.image,
+                        oldImage = guild.modules.welcome.message.image
+
+                    if (JSON.stringify(newImage) !== JSON.stringify(oldImage)) {
+                        const height = newImage.height ?? oldImage.height,
+                            width = newImage.width ?? oldImage.width,
+                            elements = newImage.elements ?? oldImage.elements
+
+                        updateData['modules.welcome.message.image'] = {
+                            active: newImage.active ?? oldImage.active,
+                            height: typeof height === 'number' && height <= 1920 && height >= 256 ? height : 256,
+                            width: typeof width === 'number' && width <= 1920 && width >= 256 ? width : 256,
+                            background: {
+                                color: newImage.background?.color ?? oldImage.background?.color,
+                                url: newImage.background?.url ?? oldImage.background?.url
+                            },
+                            elements: elements.slice(0, guild.server.premium.available ? 50 : 5).map(v => {
+                                const element = {
+                                    type: v.type,
+                                    posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
+                                    posY: typeof v.posY === 'number' && v.posY <= 9999 && v.posY >= -9999 ? v.posY : 0,
+                                    height: typeof v.height === 'number' && v.height <= 9999 && v.height >= -9999 ? v.height : 50,
+                                    width: typeof v.width === 'number' && v.width <= 9999 && v.width >= -9999 ? v.width : 50
+                                }
+
+                                if (v.type === 'IMAGE') {
+                                    element['url'] = v.url ? v.url : null
+                                    element['border_radius'] = Object.keys(borderRadiuses).includes(v.border_radius) ? v.border_radius : 'none'
+                                } else if (v.type === 'TEXT') {
+                                    element['value'] = typeof v.value === 'string' ? v.value : 'Text'
+                                    element['color'] = v.color ?? 'rgba(255,255,255,1)'
+                                    element['size'] = Object.keys(textSizes).includes(v.size) ? v.size : 'body2'
+                                    element['style'] = textStyles.includes(v.style) ? v.style : 'normal'
+                                    element['transform'] = textTransforms.includes(v.transform) ? v.transform : 'none'
+                                    element['decoration'] = textDecorations.includes(v.decoration) ? v.decoration : 'none'
+                                    element['align'] = textAligns.includes(v.align) ? v.align : 'center'
+                                }
+
+                                return element
+                            })
+                        }
+                    }
+                }
             }
 
             if (data.modules.welcome.initial_roles) {
@@ -952,6 +998,51 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                                 icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                             },
                             fields: newEmbed.fields ?? oldEmbed.fields
+                        }
+                    }
+                }
+
+                if (data.modules.farewell.message.image) {
+                    const newImage = data.modules.farewell.message.image,
+                        oldImage = guild.modules.farewell.message.image
+
+                    if (JSON.stringify(newImage) !== JSON.stringify(oldImage)) {
+                        const height = newImage.height ?? oldImage.height,
+                            width = newImage.width ?? oldImage.width,
+                            elements = newImage.elements ?? oldImage.elements
+
+                        updateData['modules.farewell.message.image'] = {
+                            active: newImage.active ?? oldImage.active,
+                            height: typeof height === 'number' && height <= 1920 && height >= 256 ? height : 256,
+                            width: typeof width === 'number' && width <= 1920 && width >= 256 ? width : 256,
+                            background: {
+                                color: newImage.background?.color ?? oldImage.background?.color,
+                                url: newImage.background?.url ?? oldImage.background?.url
+                            },
+                            elements: elements.slice(0, guild.server.premium.available ? 50 : 5).map(v => {
+                                const element = {
+                                    type: v.type,
+                                    posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
+                                    posY: typeof v.posY === 'number' && v.posY <= 9999 && v.posY >= -9999 ? v.posY : 0,
+                                    height: typeof v.height === 'number' && v.height <= 9999 && v.height >= -9999 ? v.height : 50,
+                                    width: typeof v.width === 'number' && v.width <= 9999 && v.width >= -9999 ? v.width : 50
+                                }
+
+                                if (v.type === 'IMAGE') {
+                                    element['url'] = v.url ? v.url : null
+                                    element['border_radius'] = Object.keys(borderRadiuses).includes(v.border_radius) ? v.border_radius : 'none'
+                                } else if (v.type === 'TEXT') {
+                                    element['value'] = typeof v.value === 'string' ? v.value : 'Text'
+                                    element['color'] = v.color ?? 'rgba(255,255,255,1)'
+                                    element['size'] = Object.keys(textSizes).includes(v.size) ? v.size : 'body2'
+                                    element['style'] = textStyles.includes(v.style) ? v.style : 'normal'
+                                    element['transform'] = textTransforms.includes(v.transform) ? v.transform : 'none'
+                                    element['decoration'] = textDecorations.includes(v.decoration) ? v.decoration : 'none'
+                                    element['align'] = textAligns.includes(v.align) ? v.align : 'center'
+                                }
+
+                                return element
+                            })
                         }
                     }
                 }
@@ -1064,6 +1155,51 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                                     icon_url: typeof newEmbed.author?.icon_url == 'undefined' ? oldEmbed.author.icon_url : newEmbed.author.icon_url
                                 },
                                 fields: newEmbed.fields ?? oldEmbed.fields
+                            }
+                        }
+                    }
+
+                    if (data.modules.levels.level_up_alerts.message.image) {
+                        const newImage = data.modules.levels.level_up_alerts.message.image,
+                            oldImage = guild.modules.levels.level_up_alerts.message.image
+
+                        if (JSON.stringify(newImage) !== JSON.stringify(oldImage)) {
+                            const height = newImage.height ?? oldImage.height,
+                                width = newImage.width ?? oldImage.width,
+                                elements = newImage.elements ?? oldImage.elements
+
+                            updateData['modules.levels.level_up_alerts.message.image'] = {
+                                active: newImage.active ?? oldImage.active,
+                                height: typeof height === 'number' && height <= 1920 && height >= 256 ? height : 256,
+                                width: typeof width === 'number' && width <= 1920 && width >= 256 ? width : 256,
+                                background: {
+                                    color: newImage.background?.color ?? oldImage.background?.color,
+                                    url: newImage.background?.url ?? oldImage.background?.url
+                                },
+                                elements: elements.slice(0, guild.server.premium.available ? 50 : 5).map(v => {
+                                    const element = {
+                                        type: v.type,
+                                        posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
+                                        posY: typeof v.posY === 'number' && v.posY <= 9999 && v.posY >= -9999 ? v.posY : 0,
+                                        height: typeof v.height === 'number' && v.height <= 9999 && v.height >= -9999 ? v.height : 50,
+                                        width: typeof v.width === 'number' && v.width <= 9999 && v.width >= -9999 ? v.width : 50
+                                    }
+
+                                    if (v.type === 'IMAGE') {
+                                        element['url'] = v.url ? v.url : null
+                                        element['border_radius'] = Object.keys(borderRadiuses).includes(v.border_radius) ? v.border_radius : 'none'
+                                    } else if (v.type === 'TEXT') {
+                                        element['value'] = typeof v.value === 'string' ? v.value : 'Text'
+                                        element['color'] = v.color ?? 'rgba(255,255,255,1)'
+                                        element['size'] = Object.keys(textSizes).includes(v.size) ? v.size : 'body2'
+                                        element['style'] = textStyles.includes(v.style) ? v.style : 'normal'
+                                        element['transform'] = textTransforms.includes(v.transform) ? v.transform : 'none'
+                                        element['decoration'] = textDecorations.includes(v.decoration) ? v.decoration : 'none'
+                                        element['align'] = textAligns.includes(v.align) ? v.align : 'center'
+                                    }
+
+                                    return element
+                                })
                             }
                         }
                     }

@@ -77,7 +77,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await interaction.deferReply({ ephemeral: true })
 
     if (server.moderation.case_log.types.KICK.active) {
-        const replacer = new Replacer({ guild: interaction.guild, member: mention }),
+        const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: mention }),
             messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.KICK.dm_message, { penalty: { reason } })
 
         try {

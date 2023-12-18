@@ -167,7 +167,11 @@ export async function addWarn(
         }
 
         if (send_message) {
-            const replacer = new Replacer({ message: signal instanceof Message ? signal : undefined, guild: signal.guild, member: target }),
+            const replacer = new Replacer(server.server.premium.available, {
+                    message: signal instanceof Message ? signal : undefined,
+                    guild: signal.guild,
+                    member: target
+                }),
                 messagePayload = await replacer.replaceTemplateMessage(penalty.send_message)
 
             try {
@@ -200,7 +204,7 @@ export async function addWarn(
     }
 
     if (server.moderation.case_log.types.WARN_ADD.active) {
-        const replacer = new Replacer({
+        const replacer = new Replacer(server.server.premium.available, {
                 guild: signal.guild,
                 member: target,
                 message: signal instanceof Message ? signal : undefined

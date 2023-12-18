@@ -186,7 +186,7 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
     }
 
     if (send_message && (config.send_message.content || config.send_message.embed.active)) {
-        const replacer = new Replacer({ message: message, guild: message.guild, member: message.member }),
+        const replacer = new Replacer(server.server.premium.available, { message: message, guild: message.guild, member: message.member }),
             messagePayload = await replacer.replaceTemplateMessage(config.send_message)
 
         try {
