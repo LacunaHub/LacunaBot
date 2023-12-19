@@ -130,6 +130,7 @@ import { localeStringsMap } from 'src/utils/Constants'
 import { parseMarkdown } from 'src/utils/Markdown'
 import { handleAxiosError } from 'src/utils/Utils'
 import { computed, onMounted, ref } from 'vue'
+import { event } from 'vue-gtag'
 import { useI18n } from 'vue-i18n'
 
 defineEmits(useDialogPluginComponent.emits)
@@ -167,6 +168,7 @@ const pluginCache = usePluginCacheStore(),
 const confirmLoading = ref(false)
 
 const onConfirm = async () => {
+    event('add_plugin', { event_category: 'custom_behavior', event_label: props.plugin.full_name })
     onDialogOK(plugin)
   },
   onCancel = () => {
