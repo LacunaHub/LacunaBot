@@ -1,5 +1,7 @@
 import { CanvasRenderingContext2D, Image, createCanvas, loadImage } from 'canvas'
+import database from '../database'
 import { MessageImage } from '../database/schemas/Servers'
+import Logger from '../internals/Logger'
 import { capitalizeFirstLetter } from '../internals/utility/Utils'
 
 export const borderRadiuses = {
@@ -13,6 +15,9 @@ export const borderRadiuses = {
 }
 
 export const textSizes = {
+    h1: 96,
+    h2: 60,
+    h3: 40,
     h4: 36,
     h5: 24,
     h6: 22,
@@ -40,8 +45,16 @@ export async function generateImage(image: MessageImage) {
     ctx.strokeRect(borderRadiuses.lg / 2, borderRadiuses.lg / 2, image.width - borderRadiuses.lg, image.height - borderRadiuses.lg)
     ctx.fillRect(borderRadiuses.lg / 2, borderRadiuses.lg / 2, image.width - borderRadiuses.lg, image.height - borderRadiuses.lg)
 
+    const { allowedImageHosts } = await database.json.get()
+
     if (image.background.url) {
         try {
+            const url = new URL(image.background.url)
+
+            if (!allowedImageHosts.includes(url.host)) {
+                throw new Error(`Host ${url.host} is not in the list of allowed hosts`)
+            }
+
             const backgroundImage = await loadImage(image.background.url)
             const widthRation = image.width / backgroundImage.width,
                 heightRation = image.height / backgroundImage.height,
@@ -58,7 +71,9 @@ export async function generateImage(image: MessageImage) {
                 backgroundImage.height * ratio
             )
             ctx.restore()
-        } catch (err) {}
+        } catch (err) {
+            Logger.error('[ImageGenerator]', err)
+        }
     }
 
     for (const element of image.elements.reverse()) {
@@ -66,8 +81,15 @@ export async function generateImage(image: MessageImage) {
             let elementImage: Image
 
             try {
+                const url = new URL(element.url)
+
+                if (!allowedImageHosts.includes(url.host)) {
+                    throw new Error(`Host ${url.host} is not in the list of allowed hosts`)
+                }
+
                 elementImage = await loadImage(element.url)
             } catch (err) {
+                Logger.error('[ImageGenerator]', err)
                 continue
             }
 

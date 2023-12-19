@@ -251,6 +251,7 @@ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
     ],
     "allowedApiHosts": [],
     "allowedApiUrls": [],
+    "allowedImageHosts": [],
     "rootUsers": [],
     "blockedUsers": []
 }

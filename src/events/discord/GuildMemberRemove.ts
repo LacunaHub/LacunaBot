@@ -3,6 +3,7 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/Automation'
 import Farewell from '../../modules/Farewell'
+import GuildImageRotation from '../../modules/GuildImageRotation'
 import Logs from '../../modules/Logs'
 import { caseLog } from '../../modules/Moderation'
 
@@ -66,6 +67,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
         }
     }
 
+    await GuildImageRotation.rotateBanner(self, server, member.guild, member)
     await Logs.GuildMemberRemove(self, server, member)
 
     return true

@@ -472,13 +472,13 @@ export default class Replacer {
         if (template.image && template.image.active) {
             const tImage = template.image
             const image = {
-                height: typeof tImage.height === 'number' && tImage.height <= 1920 && tImage.height >= 256 ? tImage.height : 256,
-                width: typeof tImage.width === 'number' && tImage.width <= 1920 && tImage.width >= 256 ? tImage.width : 720,
+                height: typeof tImage?.height === 'number' && tImage.height <= 1920 && tImage.height >= 256 ? tImage.height : 256,
+                width: typeof tImage?.width === 'number' && tImage.width <= 1920 && tImage.width >= 256 ? tImage.width : 720,
                 background: {
-                    color: tImage.background.color,
-                    url: tImage.background.url ? await this.replace(tImage.background.url, customReplacements) : null
+                    color: tImage?.background?.color ?? '#16151a',
+                    url: tImage?.background?.url ? await this.replace(tImage.background.url, customReplacements) : null
                 },
-                elements: tImage.elements.length
+                elements: tImage?.elements?.length
                     ? await Promise.all(
                           tImage.elements.slice(0, this.premium ? 50 : 5).map(async v => {
                               const element = {
@@ -523,7 +523,7 @@ export default class Replacer {
 
 export interface IReplacerShapers {
     guild: Guild
-    member: GuildMember
+    member?: GuildMember
     message?: Message
 }
 

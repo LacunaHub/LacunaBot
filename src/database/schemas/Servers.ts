@@ -788,7 +788,23 @@ export default model<ServerDocument>(
                 activities: {
                     multipliers: { type: Array, default: [] }
                 },
-                automation: { type: Array, default: [] }
+                automation: { type: Array, default: [] },
+                guild_image_rotation: {
+                    banner: {
+                        active: { type: Boolean, default: false },
+                        last_updated_timestamp: { type: Number, default: null },
+                        image: {
+                            active: { type: Boolean, default: true },
+                            height: { type: Number, default: 540 },
+                            width: { type: Number, default: 960 },
+                            background: {
+                                color: { type: String, default: null },
+                                url: { type: String, default: '{guild.banner}' }
+                            },
+                            elements: { type: Array, default: [] }
+                        }
+                    }
+                }
             },
             utility: {
                 giveaways: { type: Array, default: [] },
@@ -1401,6 +1417,13 @@ export interface ServerDocument extends Document {
             multipliers: ActivityMultiplier[]
         }
         automation: IAutomation[]
+        guild_image_rotation: {
+            banner: {
+                active: boolean
+                last_updated_timestamp: number | null
+                image: MessageImage
+            }
+        }
     }
     utility: {
         giveaways: Giveaway[]
