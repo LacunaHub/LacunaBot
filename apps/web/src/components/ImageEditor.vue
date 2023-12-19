@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md">
+  <div v-if="showToggle" class="q-pa-md">
     <q-list class="bg-dark-2 overflow-hidden rounded-borders">
       <q-item tag="label">
         <q-item-section side>
@@ -21,7 +21,7 @@
         <q-card class="bg-dark-2" flat>
           <q-card-section class="flex flex-center">
             <div
-              :class="`rounded-borders relative-position image-canvas ${image.active ? '' : 'disabled'}`"
+              :class="`rounded-borders relative-position image-canvas ${disable ? 'disabled' : ''}`"
               :style="{
                 height: `${image.height}px`,
                 width: `${image.width}px`,
@@ -52,8 +52,8 @@
               <VueDragResize
                 v-for="(element, i) in image.elements"
                 :key="element.id"
-                :isDraggable="image.active"
-                :isResizable="image.active"
+                :isDraggable="!disable"
+                :isResizable="!disable"
                 :x="element.posX"
                 :y="element.posY"
                 :h="element.height"
@@ -119,7 +119,7 @@
 
       <div class="col-12">
         <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-6">
+          <div v-if="canvasResizable" class="col-12 col-md-6">
             <div>
               {{ $t('Components.ImageEditor.ImageHeight') }}
             </div>
@@ -127,7 +127,7 @@
             <q-select
               v-model.number="image.height"
               :options="[256, 512, 720, 1080, 1920]"
-              :disable="!image.active"
+              :disable="disable"
               class="q-pt-sm"
               filled
               dense
@@ -135,7 +135,7 @@
             ></q-select>
           </div>
 
-          <div class="col-12 col-md-6">
+          <div v-if="canvasResizable" class="col-12 col-md-6">
             <div>
               {{ $t('Components.ImageEditor.ImageWidth') }}
             </div>
@@ -143,7 +143,7 @@
             <q-select
               v-model.number="image.width"
               :options="[256, 512, 720, 1080, 1920]"
-              :disable="!image.active"
+              :disable="disable"
               class="q-pt-sm"
               filled
               dense
@@ -158,7 +158,7 @@
 
             <q-input
               :model-value="image.background.color"
-              :disable="!image.active"
+              :disable="disable"
               class="q-pt-sm"
               readonly
               filled
@@ -181,11 +181,29 @@
           <div class="col-12 col-md-6">
             <div>
               {{ $t('Components.ImageEditor.ImageBackgroundURL') }}
+
+              <q-icon name="info" class="text--secondary cursor-pointer">
+                <q-tooltip
+                  class="bg-black text-body2"
+                  anchor="top middle"
+                  self="bottom middle"
+                  transition-show=""
+                  transition-hide=""
+                >
+                  {{ $t('Components.AutoMod.LinksFilterAllowedRegistry') }}
+
+                  <ul class="q-mb-none">
+                    <li v-for="host in allowedImageHosts" :key="host">
+                      {{ host }}
+                    </li>
+                  </ul>
+                </q-tooltip>
+              </q-icon>
             </div>
 
             <q-input
               v-model.trim="image.background.url"
-              :disable="!image.active"
+              :disable="disable"
               type="url"
               class="q-pt-sm"
               filled
@@ -214,7 +232,7 @@
                     <div class="row q-col-gutter-md">
                       <div :class="`col-12 col-md-shrink flex ${$q.screen.gt.sm ? 'column' : ''} justify-between`">
                         <q-btn
-                          :disable="!image.active"
+                          :disable="disable"
                           icon="arrow_upward"
                           flat
                           no-caps
@@ -223,7 +241,7 @@
                         ></q-btn>
 
                         <q-btn
-                          :disable="!image.active"
+                          :disable="disable"
                           icon="close"
                           color="negative"
                           flat
@@ -233,7 +251,7 @@
                         ></q-btn>
 
                         <q-btn
-                          :disable="!image.active"
+                          :disable="disable"
                           icon="arrow_downward"
                           flat
                           no-caps
@@ -251,7 +269,7 @@
 
                             <q-input
                               v-model.number="element.posX"
-                              :disable="!image.active"
+                              :disable="disable"
                               class="q-pt-sm"
                               type="number"
                               filled
@@ -267,7 +285,7 @@
 
                             <q-input
                               v-model.number="element.posY"
-                              :disable="!image.active"
+                              :disable="disable"
                               class="q-pt-sm"
                               type="number"
                               filled
@@ -283,7 +301,7 @@
 
                             <q-input
                               v-model.number="element.height"
-                              :disable="!image.active"
+                              :disable="disable"
                               class="q-pt-sm"
                               type="number"
                               filled
@@ -299,7 +317,7 @@
 
                             <q-input
                               v-model.number="element.width"
-                              :disable="!image.active"
+                              :disable="disable"
                               class="q-pt-sm"
                               type="number"
                               filled
@@ -317,7 +335,7 @@
 
                                 <q-input
                                   v-model.trim="element.value"
-                                  :disable="!image.active"
+                                  :disable="disable"
                                   class="q-pt-sm"
                                   :maxlength="1024"
                                   filled
@@ -333,7 +351,7 @@
 
                                 <q-input
                                   :model-value="element.color"
-                                  :disable="!image.active"
+                                  :disable="disable"
                                   class="q-pt-sm"
                                   readonly
                                   filled
@@ -360,8 +378,8 @@
 
                                 <q-select
                                   v-model="element.size"
-                                  :options="['h4', 'h5', 'h6', 'subtitle1', 'body2', 'caption']"
-                                  :disable="!image.active"
+                                  :options="Object.keys(localeStringsMap.textSizes)"
+                                  :disable="disable"
                                   class="q-pt-sm"
                                   filled
                                   dense
@@ -396,7 +414,7 @@
                                 <q-select
                                   v-model="element.style"
                                   :options="['normal', 'italic']"
-                                  :disable="!image.active"
+                                  :disable="disable"
                                   class="q-pt-sm"
                                   filled
                                   dense
@@ -433,7 +451,7 @@
                                 <q-select
                                   v-model="element.transform"
                                   :options="['none', 'capitalize', 'uppercase', 'lowercase']"
-                                  :disable="!image.active"
+                                  :disable="disable"
                                   class="q-pt-sm"
                                   filled
                                   dense
@@ -470,7 +488,7 @@
                                 <q-select
                                   v-model="element.decoration"
                                   :options="['none', 'underline', 'line-through']"
-                                  :disable="!image.active"
+                                  :disable="disable"
                                   class="q-pt-sm"
                                   filled
                                   dense
@@ -507,7 +525,7 @@
                                 <q-select
                                   v-model="element.align"
                                   :options="['center', 'start', 'end']"
-                                  :disable="!image.active"
+                                  :disable="disable"
                                   class="q-pt-sm"
                                   filled
                                   dense
@@ -543,11 +561,29 @@
                               <div class="col-12 col-md-6">
                                 <div>
                                   {{ $t('Components.ImageEditor.ImageURL') }}
+
+                                  <q-icon name="info" class="text--secondary cursor-pointer">
+                                    <q-tooltip
+                                      class="bg-black text-body2"
+                                      anchor="top middle"
+                                      self="bottom middle"
+                                      transition-show=""
+                                      transition-hide=""
+                                    >
+                                      {{ $t('Components.AutoMod.LinksFilterAllowedRegistry') }}
+
+                                      <ul class="q-mb-none">
+                                        <li v-for="host in allowedImageHosts" :key="host">
+                                          {{ host }}
+                                        </li>
+                                      </ul>
+                                    </q-tooltip>
+                                  </q-icon>
                                 </div>
 
                                 <q-input
                                   v-model.trim="element.url"
-                                  :disable="!image.active"
+                                  :disable="disable"
                                   type="url"
                                   class="q-pt-sm"
                                   filled
@@ -564,7 +600,7 @@
                                 <q-select
                                   v-model="element.border_radius"
                                   :options="Object.keys(imageBorders)"
-                                  :disable="!image.active"
+                                  :disable="disable"
                                   class="q-pt-sm"
                                   filled
                                   dense
@@ -606,7 +642,7 @@
           <q-card-section v-if="image.elements.length <= 50">
             <div class="row q-col-gutter-md">
               <div class="col-12">
-                <q-btn-dropdown class="full-width dashed-border" icon="add" flat :disable="!image.active">
+                <q-btn-dropdown class="full-width dashed-border" icon="add" flat :disable="disable">
                   <q-list>
                     <q-item
                       clickable
@@ -661,9 +697,9 @@
 <script setup>
 import { useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
-import { localeStringsMap } from 'src/utils/Constants'
+import { allowedImageHosts, localeStringsMap } from 'src/utils/Constants'
 import { suid } from 'src/utils/Utils'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import VueDragResize from 'vue-drag-resize/src/components/vue-drag-resize.vue'
 import LacunaDiamond from './dialogs/LacunaDiamond.vue'
 
@@ -671,6 +707,26 @@ const props = defineProps({
   image: {
     type: Object,
     required: true
+  },
+  disable: {
+    type: Boolean,
+    default: false
+  },
+  showToggle: {
+    type: Boolean,
+    default: true
+  },
+  canvasResizable: {
+    type: Boolean,
+    default: true
+  },
+  canvasHeight: {
+    type: Number,
+    default: 256
+  },
+  canvasWidth: {
+    type: Number,
+    default: 720
   }
 })
 const emit = defineEmits(['change'])
@@ -680,14 +736,18 @@ const guild = useGuildStore()
 
 const image = ref({
   active: false,
-  height: 256,
-  width: 720,
+  height: props.canvasHeight,
+  width: props.canvasWidth,
   background: {
     color: 'rgba(15,15,18,1)',
     url: null
   },
   elements: [],
   ...JSON.parse(JSON.stringify(props.image))
+})
+
+const disable = computed(() => {
+  return props.disable || !image.value.active
 })
 
 const imageBorders = {
@@ -777,8 +837,8 @@ const addElement = type => {
   addSampleImageElements = () => {
     if (image.value.elements.length > 0) return null
 
-    image.value.height = 256
-    image.value.width = 720
+    image.value.height = props.canvasHeight
+    image.value.width = props.canvasWidth
 
     image.value.elements.push(
       {

@@ -397,16 +397,15 @@
 
 <script>
 import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { interfaces } from 'src/boot/axios'
-import { useGuildStore } from 'src/stores/guild'
-import { defineComponent, ref } from 'vue'
-import { event } from 'vue-gtag'
-
 import boostyLogo from 'src/assets/boosty-logo.svg'
 import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
 import qiwiLogo from 'src/assets/qiwi-logo.svg'
-import { handleAxiosError } from 'src/utils/Utils'
+import { interfaces } from 'src/boot/axios'
+import { useGuildStore } from 'src/stores/guild'
+import { handleAxiosError, splitRelativeTime } from 'src/utils/Utils'
+import { defineComponent, ref } from 'vue'
+import { event } from 'vue-gtag'
 import { useI18n } from 'vue-i18n'
 import LacunaDiamondTransfer from './LacunaDiamondTransfer.vue'
 
@@ -480,6 +479,11 @@ export default defineComponent({
             name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutoReactionsNumber'),
             free: { value: '2', type: 'text' },
             diamond: { value: '20', type: 'text' }
+          },
+          {
+            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ImageRotationInterval'),
+            free: { value: splitRelativeTime(guild.locale, 1, 'hours'), type: 'text' },
+            diamond: { value: splitRelativeTime(guild.locale, 2, 'minutes'), type: 'text' }
           }
         ]
       },

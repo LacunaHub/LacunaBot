@@ -95,12 +95,6 @@ export const customCommandComponentLimits = {
     OVERWRITE_CHANNEL_PERMISSIONS: 1
 }
 
-export const availableLocales = [
-    { label: 'English', value: 'en' },
-    { label: 'Русский', value: 'ru' },
-    { label: 'Українська', value: 'uk' }
-]
-
 export const localeStringsMap = {
     messageFormats: {
         DM: 'Pages.GuildPage.GeneralSettings.MessageFormats.DM',
@@ -128,6 +122,7 @@ export const localeStringsMap = {
         guild_update: 'Logs.GuildUpdated',
         invite_create: 'Logs.InviteCreated',
         invite_delete: 'Logs.InvitedDeleted',
+        message_create: 'Logs.MessageCreated',
         message_delete: 'Logs.MessageDeleted',
         message_delete_bulk: 'Logs.MessageDeletedBulk',
         message_update: 'Logs.MessageUpdated',
@@ -325,6 +320,9 @@ export const localeStringsMap = {
         BOTTOM: 'Components.AutoVoice.DefaultPositions.Bottom'
     },
     textSizes: {
+        h1: 'Components.ImageEditor.TextSizes.Header',
+        h2: 'Components.ImageEditor.TextSizes.Header',
+        h3: 'Components.ImageEditor.TextSizes.Header',
         h4: 'Components.ImageEditor.TextSizes.Header',
         h5: 'Components.ImageEditor.TextSizes.Header',
         h6: 'Components.ImageEditor.TextSizes.Header',
@@ -362,3 +360,5 @@ export const localeStringsMap = {
         circle: 'Components.ImageEditor.BorderRadiuses.Circle'
     }
 }
+
+export const allowedImageHosts = ['cdn.discordapp.com', 'i.imgur.com']

@@ -516,3 +516,13 @@ export function handleAxiosError(error) {
 export function hmsToMS(hms) {
     return hms.split(':').reduce((x, y) => 60 * x + +y, 0) * 1000
 }
+
+export function splitRelativeTime(locale, value, unit) {
+    const relativeTime = new Intl.RelativeTimeFormat(locale, { numeric: 'always' }),
+        parts = relativeTime.formatToParts(value, unit)
+
+    return parts
+        .slice(1)
+        .map(v => v.value)
+        .join('')
+}

@@ -91,16 +91,16 @@
               <q-menu class="bg-dark-2" anchor="top left" self="top right">
                 <q-list>
                   <q-item
-                    v-for="locale in availableLocales"
-                    :key="locale.value"
+                    v-for="locale in languages"
+                    :key="locale.code"
                     clickable
-                    @click="setLocale(locale.value)"
-                    :active="currentLocale === locale.value"
+                    @click="setLocale(locale.code)"
+                    :active="currentLocale === locale.code"
                     active-class="menu-item--active"
                   >
                     <q-item-section>
                       <q-item-label>
-                        {{ locale.label }}
+                        {{ locale.name }}
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -183,8 +183,8 @@
 </template>
 
 <script>
+import { languages } from 'lacuna-locale'
 import { useUserStore } from 'src/stores/user'
-import { availableLocales } from 'src/utils/Constants'
 import { getLocale } from 'src/utils/Utils'
 import { defineComponent } from 'vue'
 import ChangeLog from './dialogs/ChangeLog.vue'
@@ -197,7 +197,7 @@ export default defineComponent({
 
     return {
       user,
-      availableLocales,
+      languages,
       currentLocale: getLocale()
     }
   },
