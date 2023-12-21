@@ -243,6 +243,8 @@
         </q-card>
       </q-card-section>
 
+      <div v-else-if="provider === 'PROJECT_TEAM'"></div>
+
       <q-card-section v-else>
         <div>
           {{ $t('Components.LacunaDiamond.SelectPlan') }}
@@ -357,7 +359,7 @@
               :label="
                 $t(
                   `Components.LacunaDiamond.${
-                    ['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider) ? 'Check' : 'Pay'
+                    ['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY', 'PROJECT_TEAM'].includes(provider) ? 'Check' : 'Pay'
                   }`
                 )
               "
@@ -395,364 +397,371 @@
   </q-dialog>
 </template>
 
-<script>
+<script setup>
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import boostyLogo from 'src/assets/boosty-logo.svg'
 import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
+import lacunaLogo from 'src/assets/lacuna-logo.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
 import qiwiLogo from 'src/assets/qiwi-logo.svg'
 import { interfaces } from 'src/boot/axios'
+import { DateTime } from 'src/boot/luxon'
 import { useGuildStore } from 'src/stores/guild'
 import { handleAxiosError, splitRelativeTime } from 'src/utils/Utils'
-import { defineComponent, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { event } from 'vue-gtag'
 import { useI18n } from 'vue-i18n'
 import LacunaDiamondTransfer from './LacunaDiamondTransfer.vue'
 
-export default defineComponent({
-  name: 'LacunaDiamond',
+defineEmits(useDialogPluginComponent.emits)
 
-  emits: [...useDialogPluginComponent.emits],
+const $q = useQuasar(),
+  { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
+const { t: $t } = useI18n()
 
-  setup() {
-    const $q = useQuasar(),
-      { t: $t } = useI18n()
+const guild = useGuildStore()
 
-    const guild = useGuildStore()
-    const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
+const confirmLoading = ref(false)
+const tier = ref(0),
+  provider = ref('QIWI'),
+  paymentProviders = ref([
+    { name: 'QIWI', value: 'QIWI', icon: qiwiLogo },
+    { name: 'PayPal', value: 'PAYPAL', icon: paypalLogo },
+    { name: 'Patreon', value: 'PATREON' },
+    { name: 'Boosty', value: 'BOOSTY', icon: boostyLogo },
+    { name: 'Discord Nitro Boost', value: 'DISCORD_NITRO_BOOST', icon: discordNitroBoost }
+  ])
 
-    const planComparison = [
-      {
-        categoryName: $t('Pages.GuildPage.NavNames.CustomBehavior'),
-        features: [
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ExecuteCode'),
-            free: { value: false, type: 'boolean' },
-            diamond: { value: true, type: 'boolean' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.CustomCommandsNumber'),
-            free: { value: '25', type: 'text' },
-            diamond: { value: '100', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutomationNumber'),
-            free: { value: '5', type: 'text' },
-            diamond: { value: '20', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutomationSequentialExecutionsWithOneTrigger'),
-            free: { value: '1', type: 'text' },
-            diamond: { value: '5', type: 'text' }
-          }
-        ]
-      },
-      {
-        categoryName: $t('Pages.LandingPage.FeatureUtility'),
-        features: [
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.InteractiveMessagesNumber'),
-            free: { value: '5', type: 'text' },
-            diamond: { value: '50', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.InteractiveReactionsNumber'),
-            free: { value: '50', type: 'text' },
-            diamond: { value: '200', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.TempVoiceChannelsNumber'),
-            free: { value: '2', type: 'text' },
-            diamond: { value: '20', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.VoiceRolesNumber'),
-            free: { value: '2', type: 'text' },
-            diamond: { value: '20', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutoThreadsNumber'),
-            free: { value: '2', type: 'text' },
-            diamond: { value: '20', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutoReactionsNumber'),
-            free: { value: '2', type: 'text' },
-            diamond: { value: '20', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ImageRotationInterval'),
-            free: { value: splitRelativeTime(guild.locale, 1, 'hours'), type: 'text' },
-            diamond: { value: splitRelativeTime(guild.locale, 2, 'minutes'), type: 'text' }
-          }
-        ]
-      },
-      {
-        categoryName: $t('Pages.GuildPage.NavNames.Moderation'),
-        features: [
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActionLogWebhookModifying'),
-            free: { value: false, type: 'boolean' },
-            diamond: { value: true, type: 'boolean' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActionLogEventsProcessedPerMinuteNumber'),
-            free: { value: '15', type: 'text' },
-            diamond: { value: 'all_inclusive', type: 'icon' }
-          }
-        ]
-      },
-      {
-        categoryName: $t('Pages.GuildPage.VoiceChannels.Music'),
-        features: [
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaylistsPlayback'),
-            free: { value: false, type: 'boolean' },
-            diamond: { value: true, type: 'boolean' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AudioStreamingPlayback'),
-            free: { value: false, type: 'boolean' },
-            diamond: { value: true, type: 'boolean' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackVolumeChanging'),
-            free: { value: false, type: 'boolean' },
-            diamond: { value: true, type: 'boolean' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackQueueTrackNumber'),
-            free: { value: '15', type: 'text' },
-            diamond: { value: 'all_inclusive', type: 'icon' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackFilters'),
-            free: { value: false, type: 'boolean' },
-            diamond: { value: true, type: 'boolean' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackSeek'),
-            free: { value: false, type: 'boolean' },
-            diamond: { value: true, type: 'boolean' }
-          }
-        ]
-      },
-      {
-        categoryName: $t('Pages.GuildPage.NavNames.Activities'),
-        features: [
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.EarnCurrenciesInVoiceChannels'),
-            free: { value: false, type: 'boolean' },
-            diamond: { value: true, type: 'boolean' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.VoiceExpMembersNumber'),
-            free: { value: '15', type: 'text' },
-            diamond: { value: 'all_inclusive', type: 'icon' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.LevelAwardsNumber'),
-            free: { value: '50', type: 'text' },
-            diamond: { value: '200', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.StoreItemsNumber'),
-            free: { value: '50', type: 'text' },
-            diamond: { value: '200', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActivityMultipliersNumber'),
-            free: { value: '1', type: 'text' },
-            diamond: { value: '10', type: 'text' }
-          }
-        ]
-      },
-      {
-        categoryName: $t('Pages.GuildPage.NavNames.Subscriptions'),
-        features: [
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
-              socialPlatform: 'Telegram'
-            }),
-            free: { value: '1', type: 'text' },
-            diamond: { value: '10', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
-              socialPlatform: 'YouTube'
-            }),
-            free: { value: '1', type: 'text' },
-            diamond: { value: '10', type: 'text' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
-              socialPlatform: 'Twitch'
-            }),
-            free: { value: '1', type: 'text' },
-            diamond: { value: '10', type: 'text' }
-          }
-        ]
-      },
-      {
-        categoryName: $t('Common.Other'),
-        features: [
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PrioritySupport'),
-            free: { value: false, type: 'boolean' },
-            diamond: { value: true, type: 'boolean' }
-          },
-          {
-            name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ImageEditorElementsNumber'),
-            free: { value: '5', type: 'text' },
-            diamond: { value: '50', type: 'text' }
-          }
-        ]
-      }
-    ]
-
-    let confirmLoading = ref(false),
-      tier = ref(0),
-      provider = ref('QIWI')
-
-    const transferDialog = () => {
-      return $q
-        .dialog({
-          component: LacunaDiamondTransfer
-        })
-        .onOk(() => {
-          window.location.reload()
-        })
-    }
-
+const currency = computed(() => {
+  return provider.value === 'QIWI' ? { name: 'RUB', symbol: '₽' } : { name: 'USD', symbol: '$' }
+})
+const periods = computed(() => {
+  return guild.prices.map(i => {
     return {
-      guild,
-      dialogRef,
-
-      planComparison,
-
-      transferDialog,
-
-      onConfirm() {
-        confirmLoading.value = true
-
-        return interfaces.payments
-          .create({
-            data: {
-              tier: tier.value,
-              provider: provider.value,
-              guild_id: guild._id,
-              guild_name: guild.guild.name
-            }
-          })
-          .then(response => {
-            event('checkout_progress', { event_label: provider.value })
-
-            if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider.value)) {
-              window.location.reload()
-            } else {
-              const payUrl = response.data
-
-              if (payUrl) {
-                window.open(payUrl, '_blank')
-              }
-            }
-
-            onDialogOK()
-          })
-          .catch(err => {
-            const error = handleAxiosError(err)
-
-            $q.notify({
-              message: error.message,
-              classes: 'q-notification-custom',
-              color: 'black',
-              icon: 'error',
-              iconColor: 'negative',
-              timeout: 5000
-            })
-          })
-          .finally(() => (confirmLoading.value = false))
-      },
-
-      onCancel() {
-        onDialogCancel()
-      },
-
-      onDismiss() {
-        onDialogHide()
-      },
-
-      confirmLoading,
-      tier,
-      provider
+      name: DateTime.fromMillis(Date.now() + i.months * 2592000 * 1000)
+        .diff(DateTime.now(), 'months')
+        .toHuman({ maximumFractionDigits: 0 }),
+      ...i
     }
-  },
+  })
+})
 
-  data() {
-    return {
-      bonuses: [
+const bonuses = [
+    {
+      name: 'music',
+      description: $t('Components.LacunaDiamond.BonusMusicDescription'),
+      icon: 'https://cdn.lordicon.com/pmkcstki.json',
+      iconColors: 'primary:#00bcd4'
+    },
+    {
+      name: 'limits',
+      description: $t('Components.LacunaDiamond.BonusIncreasedLimitsDescription'),
+      icon: 'https://cdn.lordicon.com/orshjpvs.json',
+      iconColors: 'primary:#3a3347,secondary:#ebe6ef'
+    },
+    {
+      name: 'personalization',
+      description: $t('Components.LacunaDiamond.BonusPersonalizationDescription'),
+      icon: 'https://cdn.lordicon.com/pjlunxyy.json',
+      iconColors: 'primary:#3a3347,secondary:#646e78,tertiary:#ab6836,quaternary:#51acf7'
+    },
+    {
+      name: 'subscriptions',
+      description: $t('Components.LacunaDiamond.BonusCustomBehaviorWithCodeDescription'),
+      icon: 'https://cdn.lordicon.com/qatykyxz.json',
+      iconColors: 'primary:#121331,secondary:#00bcd4'
+    },
+    {
+      name: 'activities',
+      description: $t('Components.LacunaDiamond.BonusActivitiesDescription'),
+      icon: 'https://cdn.lordicon.com/qmcsqnle.json',
+      iconColors: 'primary:#ffc738,secondary:#b26836'
+    },
+    {
+      name: 'respect',
+      description: $t('Components.LacunaDiamond.BonusRespectDescription'),
+      icon: 'https://cdn.lordicon.com/cmfqmqbx.json',
+      iconColors: 'primary:#f9c9c0,secondary:#4bb3fd,tertiary:#f28ba8'
+    }
+  ],
+  planComparison = [
+    {
+      categoryName: $t('Pages.GuildPage.NavNames.CustomBehavior'),
+      features: [
         {
-          name: 'music',
-          description: this.$t('Components.LacunaDiamond.BonusMusicDescription'),
-          icon: 'https://cdn.lordicon.com/pmkcstki.json',
-          iconColors: 'primary:#00bcd4'
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ExecuteCode'),
+          free: { value: false, type: 'boolean' },
+          diamond: { value: true, type: 'boolean' }
         },
         {
-          name: 'limits',
-          description: this.$t('Components.LacunaDiamond.BonusIncreasedLimitsDescription'),
-          icon: 'https://cdn.lordicon.com/orshjpvs.json',
-          iconColors: 'primary:#3a3347,secondary:#ebe6ef'
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.CustomCommandsNumber'),
+          free: { value: '25', type: 'text' },
+          diamond: { value: '100', type: 'text' }
         },
         {
-          name: 'personalization',
-          description: this.$t('Components.LacunaDiamond.BonusPersonalizationDescription'),
-          icon: 'https://cdn.lordicon.com/pjlunxyy.json',
-          iconColors: 'primary:#3a3347,secondary:#646e78,tertiary:#ab6836,quaternary:#51acf7'
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutomationNumber'),
+          free: { value: '5', type: 'text' },
+          diamond: { value: '20', type: 'text' }
         },
         {
-          name: 'subscriptions',
-          description: this.$t('Components.LacunaDiamond.BonusCustomBehaviorWithCodeDescription'),
-          icon: 'https://cdn.lordicon.com/qatykyxz.json',
-          iconColors: 'primary:#121331,secondary:#00bcd4'
-        },
-        {
-          name: 'activities',
-          description: this.$t('Components.LacunaDiamond.BonusActivitiesDescription'),
-          icon: 'https://cdn.lordicon.com/qmcsqnle.json',
-          iconColors: 'primary:#ffc738,secondary:#b26836'
-        },
-        {
-          name: 'respect',
-          description: this.$t('Components.LacunaDiamond.BonusRespectDescription'),
-          icon: 'https://cdn.lordicon.com/cmfqmqbx.json',
-          iconColors: 'primary:#f9c9c0,secondary:#4bb3fd,tertiary:#f28ba8'
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutomationSequentialExecutionsWithOneTrigger'),
+          free: { value: '1', type: 'text' },
+          diamond: { value: '5', type: 'text' }
         }
-      ],
-      paymentProviders: [
-        { name: 'QIWI', value: 'QIWI', icon: qiwiLogo },
-        { name: 'PayPal', value: 'PAYPAL', icon: paypalLogo },
-        { name: 'Patreon', value: 'PATREON' },
-        { name: 'Boosty', value: 'BOOSTY', icon: boostyLogo },
-        { name: 'Discord Nitro Boost', value: 'DISCORD_NITRO_BOOST', icon: discordNitroBoost }
+      ]
+    },
+    {
+      categoryName: $t('Pages.LandingPage.FeatureUtility'),
+      features: [
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.InteractiveMessagesNumber'),
+          free: { value: '5', type: 'text' },
+          diamond: { value: '50', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.InteractiveReactionsNumber'),
+          free: { value: '50', type: 'text' },
+          diamond: { value: '200', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.TempVoiceChannelsNumber'),
+          free: { value: '2', type: 'text' },
+          diamond: { value: '20', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.VoiceRolesNumber'),
+          free: { value: '2', type: 'text' },
+          diamond: { value: '20', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutoThreadsNumber'),
+          free: { value: '2', type: 'text' },
+          diamond: { value: '20', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutoReactionsNumber'),
+          free: { value: '2', type: 'text' },
+          diamond: { value: '20', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ImageRotationInterval'),
+          free: { value: splitRelativeTime(guild.locale, 1, 'hours'), type: 'text' },
+          diamond: { value: splitRelativeTime(guild.locale, 2, 'minutes'), type: 'text' }
+        }
+      ]
+    },
+    {
+      categoryName: $t('Pages.GuildPage.NavNames.Moderation'),
+      features: [
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActionLogWebhookModifying'),
+          free: { value: false, type: 'boolean' },
+          diamond: { value: true, type: 'boolean' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActionLogEventsProcessedPerMinuteNumber'),
+          free: { value: '15', type: 'text' },
+          diamond: { value: 'all_inclusive', type: 'icon' }
+        }
+      ]
+    },
+    {
+      categoryName: $t('Pages.GuildPage.VoiceChannels.Music'),
+      features: [
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaylistsPlayback'),
+          free: { value: false, type: 'boolean' },
+          diamond: { value: true, type: 'boolean' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AudioStreamingPlayback'),
+          free: { value: false, type: 'boolean' },
+          diamond: { value: true, type: 'boolean' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackVolumeChanging'),
+          free: { value: false, type: 'boolean' },
+          diamond: { value: true, type: 'boolean' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackQueueTrackNumber'),
+          free: { value: '15', type: 'text' },
+          diamond: { value: 'all_inclusive', type: 'icon' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackFilters'),
+          free: { value: false, type: 'boolean' },
+          diamond: { value: true, type: 'boolean' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackSeek'),
+          free: { value: false, type: 'boolean' },
+          diamond: { value: true, type: 'boolean' }
+        }
+      ]
+    },
+    {
+      categoryName: $t('Pages.GuildPage.NavNames.Activities'),
+      features: [
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.EarnCurrenciesInVoiceChannels'),
+          free: { value: false, type: 'boolean' },
+          diamond: { value: true, type: 'boolean' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.VoiceExpMembersNumber'),
+          free: { value: '15', type: 'text' },
+          diamond: { value: 'all_inclusive', type: 'icon' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.LevelAwardsNumber'),
+          free: { value: '50', type: 'text' },
+          diamond: { value: '200', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.StoreItemsNumber'),
+          free: { value: '50', type: 'text' },
+          diamond: { value: '200', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActivityMultipliersNumber'),
+          free: { value: '1', type: 'text' },
+          diamond: { value: '10', type: 'text' }
+        }
+      ]
+    },
+    {
+      categoryName: $t('Pages.GuildPage.NavNames.Subscriptions'),
+      features: [
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
+            socialPlatform: 'Telegram'
+          }),
+          free: { value: '1', type: 'text' },
+          diamond: { value: '10', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
+            socialPlatform: 'YouTube'
+          }),
+          free: { value: '1', type: 'text' },
+          diamond: { value: '10', type: 'text' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
+            socialPlatform: 'Twitch'
+          }),
+          free: { value: '1', type: 'text' },
+          diamond: { value: '10', type: 'text' }
+        }
+      ]
+    },
+    {
+      categoryName: $t('Common.Other'),
+      features: [
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PrioritySupport'),
+          free: { value: false, type: 'boolean' },
+          diamond: { value: true, type: 'boolean' }
+        },
+        {
+          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ImageEditorElementsNumber'),
+          free: { value: '5', type: 'text' },
+          diamond: { value: '50', type: 'text' }
+        }
       ]
     }
-  },
+  ]
 
-  computed: {
-    periods() {
-      return this.guild.prices.map(i => {
-        return {
-          name: this.$dt
-            .fromMillis(Date.now() + i.months * 2592000 * 1000)
-            .diff(this.$dt.now(), 'months')
-            .toHuman({ maximumFractionDigits: 0 }),
-          ...i
+const transferDialog = () => {
+  return $q
+    .dialog({
+      component: LacunaDiamondTransfer
+    })
+    .onOk(() => {
+      window.location.reload()
+    })
+}
+
+const iddqd = ref({
+  keys: [],
+  timeout: null
+})
+const onKeyUp = keyboardEvent => {
+  clearTimeout(iddqd.value.timeout)
+  iddqd.value.keys.push(keyboardEvent.key)
+
+  const correct = iddqd.value.keys.join('').toLowerCase() === 'iddqd'
+
+  if (correct) {
+    paymentProviders.value.pop()
+    paymentProviders.value.push({ name: 'Team', value: 'PROJECT_TEAM', icon: lacunaLogo })
+    provider.value = 'PROJECT_TEAM'
+    iddqd.value.keys = []
+
+    return
+  }
+
+  iddqd.value.timeout = setTimeout(() => {
+    iddqd.value.keys = []
+
+    clearTimeout(iddqd.value.timeout)
+  }, 5000)
+}
+
+const onConfirm = () => {
+    confirmLoading.value = true
+
+    return interfaces.payments
+      .create({
+        data: {
+          tier: tier.value,
+          provider: provider.value,
+          guild_id: guild._id,
+          guild_name: guild.guild.name
         }
       })
-    },
-    currency() {
-      return this.provider === 'QIWI' ? { name: 'RUB', symbol: '₽' } : { name: 'USD', symbol: '$' }
-    }
+      .then(response => {
+        event('checkout_progress', { event_label: provider.value })
+
+        if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider.value)) {
+          window.location.reload()
+        } else {
+          const payUrl = response.data
+
+          if (payUrl) {
+            window.open(payUrl, '_blank')
+          }
+        }
+
+        onDialogOK()
+      })
+      .catch(err => {
+        const error = handleAxiosError(err)
+
+        $q.notify({
+          message: error.message,
+          classes: 'q-notification-custom',
+          color: 'black',
+          icon: 'error',
+          iconColor: 'negative',
+          timeout: 5000
+        })
+      })
+      .finally(() => (confirmLoading.value = false))
+  },
+  onCancel = () => {
+    onDialogCancel()
+  },
+  onDismiss = () => {
+    onDialogHide()
   }
+
+onMounted(() => {
+  window.addEventListener('keyup', onKeyUp)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keyup', onKeyUp)
 })
 </script>
