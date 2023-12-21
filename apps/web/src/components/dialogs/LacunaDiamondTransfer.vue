@@ -96,39 +96,56 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
+<script setup>
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
-import { useUserStore } from 'src/stores/user'
-import { defineComponent, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { getGuildIconURL, handleAxiosError } from '../../utils/Utils'
 
-export default defineComponent({
-  name: 'LacunaDiamondTransfer',
+defineEmits(useDialogPluginComponent.emits)
 
-  emits: [...useDialogPluginComponent.emits],
+const $q = useQuasar(),
+  { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
-  setup() {
-    const $q = useQuasar(),
-      { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
+const pageLoading = ref(true)
+const guild = useGuildStore()
 
-    const pageLoading = ref(true)
-    const guild = useGuildStore(),
-      user = useUserStore()
+const confirmLoading = ref(false)
+const fromGuild = ref(null),
+  diamondGuilds = ref([])
 
-    const confirmLoading = ref(false)
-    const fromGuild = ref(null),
-      diamondGuilds = ref([])
+const getDiamondGuilds = async () => {
+  try {
+    const response = await interfaces.users.getDiamondGuilds(),
+      { data } = response
 
-    const getDiamondGuilds = async () => {
+    diamondGuilds.value = data
+
+    return true
+  } catch (err) {
+    const error = handleAxiosError(err)
+
+    $q.notify({
+      message: error.message,
+      classes: 'q-notification-custom',
+      color: 'black',
+      icon: 'error',
+      iconColor: 'negative',
+      timeout: 5000
+    })
+  }
+
+  return false
+}
+
+const onConfirm = async () => {
+    if (fromGuild.value) {
       try {
-        const response = await interfaces.users.getDiamondGuilds(),
-          { data } = response
+        confirmLoading.value = true
 
-        diamondGuilds.value = data
-
-        return true
+        await interfaces.guilds.transferDiamond(fromGuild.value, guild._id)
+        onDialogOK()
       } catch (err) {
         const error = handleAxiosError(err)
 
@@ -140,61 +157,22 @@ export default defineComponent({
           iconColor: 'negative',
           timeout: 5000
         })
-      }
-
-      return false
-    }
-
-    onMounted(async () => {
-      const getDiamondGuildsSuccess = await getDiamondGuilds()
-      fromGuild.value = diamondGuilds.value?.[0]?.id ?? null
-
-      return (pageLoading.value = !getDiamondGuildsSuccess)
-    })
-
-    return {
-      dialogRef,
-      pageLoading,
-      guild,
-      user,
-      confirmLoading,
-      fromGuild,
-      diamondGuilds,
-
-      getGuildIconURL,
-
-      async onConfirm() {
-        if (fromGuild.value) {
-          try {
-            confirmLoading.value = true
-
-            await interfaces.guilds.transferDiamond(fromGuild.value, guild._id)
-            onDialogOK()
-          } catch (err) {
-            const error = handleAxiosError(err)
-
-            $q.notify({
-              message: error.message,
-              classes: 'q-notification-custom',
-              color: 'black',
-              icon: 'error',
-              iconColor: 'negative',
-              timeout: 5000
-            })
-          } finally {
-            confirmLoading.value = false
-          }
-        }
-      },
-
-      onCancel() {
-        onDialogCancel()
-      },
-
-      onDismiss() {
-        onDialogHide()
+      } finally {
+        confirmLoading.value = false
       }
     }
+  },
+  onCancel = () => {
+    onDialogCancel()
+  },
+  onDismiss = () => {
+    onDialogHide()
   }
+
+onMounted(async () => {
+  const getDiamondGuildsSuccess = await getDiamondGuilds()
+  fromGuild.value = diamondGuilds.value?.[0]?.id ?? null
+
+  return (pageLoading.value = !getDiamondGuildsSuccess)
 })
 </script>
