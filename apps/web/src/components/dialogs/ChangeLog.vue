@@ -1,27 +1,21 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="q-dialog-card bg-dark-1" flat style="width: 720px">
+    <q-card class="q-dialog-card bg-dark-1 overflow-hidden" flat style="width: 720px">
       <q-item class="q-py-md rounded-t-lg">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
             {{ $t('Components.Header.ReleaseNotes') }}
           </q-item-label>
-
-          <q-item-label class="text--secondary">v{{ changes.version }}</q-item-label>
-        </q-item-section>
-
-        <q-item-section side>
-          <div class="flex items-center">
-            <q-icon class="cursor-pointer" name="chevron_left" size="xs" @click="decreasePage"></q-icon>
-            <span style="font-size: x-small">{{ currentPage + 1 }}/{{ changeLog.list.length }}</span>
-            <q-icon class="cursor-pointer" name="chevron_right" size="xs" @click="increasePage"></q-icon>
-          </div>
         </q-item-section>
       </q-item>
 
+      <q-card-section>
+        <q-select v-model="selectedVersion" :options="versionList" filled dense hide-bottom-space></q-select>
+      </q-card-section>
+
       <q-card-section
-        v-html="changeLog.parseContent(changes.content)"
-        class="q-dialog-card-body q-py-none"
+        v-html="changeLogStore.parseContent(versionChanges.content)"
+        class="q-dialog-card-body"
       ></q-card-section>
 
       <q-card-section>
@@ -35,57 +29,34 @@
   </q-dialog>
 </template>
 
-<script>
-import { useDialogPluginComponent } from 'quasar'
+<script setup>
+import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useChangeLogStore } from 'src/stores/change-log'
-import { computed, defineComponent, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { event } from 'vue-gtag'
 
-export default defineComponent({
-  name: 'ChangeLog',
+defineEmits(useDialogPluginComponent.emits)
 
-  emits: [...useDialogPluginComponent.emits],
+const $q = useQuasar(),
+  { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent()
 
-  setup() {
-    const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent()
-    const changeLog = useChangeLogStore()
-    const currentPage = ref(0)
-    const changes = computed(() => {
-      return changeLog.list[currentPage.value]
-    })
+const changeLogStore = useChangeLogStore()
 
-    const increasePage = () => {
-        if (currentPage.value + 1 >= changeLog.list.length) currentPage.value = 0
-        else currentPage.value++
-      },
-      decreasePage = () => {
-        if (currentPage.value <= 0) currentPage.value = changeLog.list.length - 1
-        else currentPage.value--
-      }
+const versionList = changeLogStore.list.map(v => v.version),
+  selectedVersion = ref(versionList.at(0)),
+  versionChanges = computed(() => {
+    return changeLogStore.list.find(v => v.version === selectedVersion.value)
+  })
 
-    return {
-      dialogRef,
-
-      changeLog,
-      currentPage,
-      changes,
-
-      increasePage,
-      decreasePage,
-
-      onCancel() {
-        onDialogCancel()
-      },
-
-      onDismiss() {
-        onDialogHide()
-      }
-    }
+const onCancel = () => {
+    onDialogCancel()
   },
-
-  mounted() {
-    event('view_change_log', { event_category: 'utility' })
-    this.$q.localStorage.set('change-log-viewed-version', this.changeLog.current.version)
+  onDismiss = () => {
+    onDialogHide()
   }
+
+onMounted(() => {
+  event('view_change_log', { event_category: 'utility' })
+  $q.localStorage.set('change-log-viewed-version', changeLogStore.current.version)
 })
 </script>
