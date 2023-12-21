@@ -648,38 +648,49 @@
         <q-separator></q-separator>
 
         <q-tab-panels v-model="modalReplacersTab" class="bg-dark-1" animated style="max-height: 50vh; overflow-y: auto">
-          <q-tab-panel name="replacers" class="q-px-none" style="overflow-y: hidden">
+          <q-tab-panel name="replacers" class="q-pa-none" style="overflow-y: hidden">
             <q-list>
               <q-item
-                v-for="replacer in replacers.vars.filter(i => avlReplacers.includes(i.name.split('.')[0]))"
-                :key="replacer.name"
+                v-for="replacer in replacers.variables.filter(i => avlReplacers.includes(i.split('.')[0])).sort()"
+                :key="replacer"
                 clickable
-                @click="onSelectReplacer(replacer)"
               >
-                <q-item-section>
+                <q-item-section @click="onSelectReplacer(replacer)">
                   <q-item-label>
-                    {{ replacer.name }}
+                    {{ replacer }}
                   </q-item-label>
+                </q-item-section>
 
-                  <q-item-label class="text--secondary">
-                    {{ replacer.description }}
-                  </q-item-label>
+                <q-item-section side>
+                  <q-btn
+                    icon="link"
+                    round
+                    flat
+                    :href="`https://docs.lacunabot.com/useful/replacers/data-types/${getReplacerPath(replacer)}`"
+                    target="_blank"
+                  ></q-btn>
                 </q-item-section>
               </q-item>
             </q-list>
           </q-tab-panel>
 
-          <q-tab-panel name="functions" class="q-px-none" style="overflow-y: hidden">
+          <q-tab-panel name="functions" class="q-pa-none" style="overflow-y: hidden">
             <q-list>
-              <q-item v-for="func in replacers.functions" :key="func.name" clickable @click="onSelectReplacer(func)">
-                <q-item-section>
+              <q-item v-for="func in replacers.functions" :key="func.name" clickable>
+                <q-item-section @click="onSelectReplacer(func)">
                   <q-item-label>
                     {{ func.name }}
                   </q-item-label>
+                </q-item-section>
 
-                  <q-item-label class="text--secondary">
-                    {{ func.description }}
-                  </q-item-label>
+                <q-item-section side>
+                  <q-btn
+                    icon="link"
+                    round
+                    flat
+                    :href="`https://docs.lacunabot.com/useful/replacers/functions#${getReplacerPath(func)}`"
+                    target="_blank"
+                  ></q-btn>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -904,12 +915,23 @@ const showCopyNotification = () => {
 }
 
 const onSelectReplacer = replacer => {
-    const isFunc = 'snippet' in replacer
-    replacer = isFunc ? `{- ${replacer.snippet} -}` : `{ ${replacer.name} }`
+    const isFunc = typeof replacer !== 'string'
+    replacer = isFunc ? `{- ${replacer.snippet} -}` : `{ ${replacer} }`
 
     copyToClipboard(replacer)
     showCopyNotification()
     modalReplacers.value = false
+  },
+  getReplacerPath = replacer => {
+    const isFunc = typeof replacer !== 'string'
+
+    if (isFunc) {
+      return replacer.name.toLowerCase()
+    } else {
+      const [dataType, property] = replacer.split('.')
+
+      return `${dataType}#.${property}`
+    }
   },
   onSelectMention = mention => {
     const isRole = 'color' in mention
