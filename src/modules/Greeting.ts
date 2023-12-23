@@ -3,54 +3,66 @@ import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
 
-export default async function greet(self: Lacuna, server: ServerDocument, member: GuildMember) {
+async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMember) {
     if (member.user.bot) return false
 
     if (server.modules.welcome.active) {
-        const replacer = new Replacer({ guild: member.guild, member: member }),
-            messagePayload = await replacer.replaceTemplateMessage(server.modules.welcome.message)
-
         try {
-            if (server.modules.welcome.format === 'DM') {
-                await member.send(messagePayload)
-            }
+            const replacer = new Replacer(server.server.premium.available, { guild: member.guild, member: member }),
+                messagePayload = await replacer.replaceTemplateMessage(server.modules.welcome.message)
 
             if (server.modules.welcome.format === 'CHANNEL') {
                 const channel = member.guild.channels.cache.get(server.modules.welcome.channel_id) as BaseGuildTextChannel
 
-                if (channel) {
-                    await channel.send(messagePayload)
-                }
-            }
-        } catch (err) {
-            await self.logger.handleError({ module: 'Greeting', action: 'SendMessage', error: err, guild_id: member.guild.id })
-        }
-
-        self.emit('moduleExecution', {
-            module: 'Greeting',
-            guild: { id: member.guild.id, name: member.guild.name },
-            target: { id: member.id, name: member.user.tag }
-        })
-    }
-
-    if (server.modules.welcome.initial_roles.active) {
-        const roles = member.guild.roles.cache.filter(r => r.editable && server.modules.welcome.initial_roles.roles.includes(r.id))
-
-        if (roles.size) {
-            try {
-                await member.roles.add(roles, 'Greeting: Add initial roles')
-            } catch (err) {
-                await self.logger.handleError({ module: 'Greeting', action: 'AddInitialRoles', error: err, guild_id: member.guild.id })
+                channel && (await channel.send(messagePayload))
+            } else if (server.modules.welcome.format === 'DM') {
+                await member.send(messagePayload)
             }
 
             self.emit('moduleExecution', {
                 module: 'Greeting',
-                category: 'InitialRoles',
                 guild: { id: member.guild.id, name: member.guild.name },
                 target: { id: member.id, name: member.user.tag }
             })
+
+            return true
+        } catch (err) {
+            await self.logger.handleError({ module: 'Greeting', action: 'SendMessage', error: err, guild_id: member.guild.id })
         }
     }
+
+    return false
+}
+
+async function addInitialRoles(self: Lacuna, server: ServerDocument, member: GuildMember) {
+    if (member.user.bot) return false
+
+    if (server.modules.welcome.initial_roles.active) {
+        const initialRoles = member.guild.roles.cache.filter(v => v.editable && server.modules.welcome.initial_roles.roles.includes(v.id))
+
+        if (initialRoles.size) {
+            try {
+                await member.roles.add(initialRoles, 'Greeting: Add initial roles')
+
+                self.emit('moduleExecution', {
+                    module: 'Greeting',
+                    category: 'InitialRoles',
+                    guild: { id: member.guild.id, name: member.guild.name },
+                    target: { id: member.id, name: member.user.tag }
+                })
+
+                return true
+            } catch (err) {
+                await self.logger.handleError({ module: 'Greeting', action: 'AddInitialRoles', error: err, guild_id: member.guild.id })
+            }
+        }
+    }
+
+    return false
+}
+
+async function restoreNicknameAndRoles(self: Lacuna, server: ServerDocument, member: GuildMember) {
+    if (member.user.bot) return false
 
     if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
         const user = await self.db.users.findOne({ _id: member.id }),
@@ -95,8 +107,16 @@ export default async function greet(self: Lacuna, server: ServerDocument, member
                 guild: { id: member.guild.id, name: member.guild.name },
                 target: { id: member.id, name: member.user.tag }
             })
+
+            return true
         }
     }
 
-    return true
+    return false
+}
+
+export default {
+    sendMessage,
+    addInitialRoles,
+    restoreNicknameAndRoles
 }

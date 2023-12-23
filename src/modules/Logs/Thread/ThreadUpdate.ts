@@ -6,7 +6,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: ThreadChannel, thread: ThreadChannel): Promise<boolean> {
     if (server.moderation.logs.types.thread_update.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -25,16 +25,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
 
             if (before.name !== thread.name) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.thread_update_title'))
+                    .setTitle(t('Logs.ThreadUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.thread_update_name_change_template', { thread: `<#${thread.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.ThreadUpdatedName', { thread: `<#${thread.id}>` })
                         })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: before.name, inline: true },
-                        { name: t('logs.after_change'), value: thread.name, inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.name, inline: true },
+                        { name: t('Logs.AfterChange'), value: thread.name, inline: true }
                     ])
                     .setFooter({ text: thread.id })
                     .setTimestamp()
@@ -60,21 +60,21 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
 
             if (before.autoArchiveDuration !== thread.autoArchiveDuration) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.thread_update_title'))
+                    .setTitle(t('Logs.ThreadUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.thread_update_auto_archive_change_template', { thread: `<#${thread.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.ThreadUpdatedAutoArchive', { thread: `<#${thread.id}>` })
                         })
                     )
                     .addFields([
                         {
-                            name: t('logs.before_change'),
+                            name: t('Logs.BeforeChange'),
                             value: numbro((before.autoArchiveDuration as number) * 60).format({ output: 'time' }),
                             inline: true
                         },
                         {
-                            name: t('logs.after_change'),
+                            name: t('Logs.AfterChange'),
                             value: numbro((thread.autoArchiveDuration as number) * 60).format({ output: 'time' }),
                             inline: true
                         }

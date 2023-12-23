@@ -332,8 +332,8 @@ export default class CustomCommand {
 
         if (throttled.status) {
             await this.interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_throttled', {
-                    user: `**${this.interaction.user.username}**`,
+                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandThrottling', {
+                    username: `**${this.interaction.user.username}**`,
                     time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
                 })}`,
                 ephemeral: true
@@ -498,8 +498,8 @@ export default class CustomCommand {
 
                 if (action.type === 'EXECUTE_CODE' && !this.server.server.premium.available) {
                     await this.interaction.reply({
-                        content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', {
-                            user: `**${this.interaction.user.globalName}**`
+                        content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
+                            username: `**${this.interaction.user.globalName}**`
                         })}`,
                         ephemeral: true
                     })

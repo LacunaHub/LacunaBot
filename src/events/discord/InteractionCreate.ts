@@ -82,9 +82,13 @@ const handler = async (
             if (message?.id === interaction.message?.id) {
                 if (interaction.member.voice.channel?.id !== player.voiceChannelId) {
                     await interaction.reply({
-                        content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.next.text_different_voice', {
-                            user: `**${interaction.member.displayName}**`
-                        })}`,
+                        content: `${self._emojis.ERROR} | ${self.i18n.t(
+                            server.locale,
+                            'Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel',
+                            {
+                                username: `**${interaction.member.displayName}**`
+                            }
+                        )}`,
                         ephemeral: true
                     })
 
@@ -253,10 +257,10 @@ const handler = async (
 
 const handlerAutocomplete = debounce(async (self: Lacuna, interaction: AutocompleteInteraction) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: interaction.guildId })
-    const query = interaction.options?.getFocused()
+    const option = interaction.options?.getFocused?.(true)
 
     if (interaction.commandName === 'help') {
-        const commands = self.commands.filter(i => i.name.includes(query))
+        const commands = self.commands.filter(i => i.name.includes(option?.value))
 
         await interaction.respond(
             commands
@@ -273,15 +277,13 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
     if (interaction.commandName === 'store') {
         const items = server.modules.economy.store.items
             .slice(0, server.server.premium.available ? 200 : 50)
-            .filter(i => [i.id, i.name, i.description].some(ii => ii.includes(query)))
+            .filter(i => [i.id, i.name, i.description].some(ii => ii.includes(option?.value)))
 
         await interaction.respond(
             items
                 .map(i => {
                     const currency = server.modules.economy.currencies.find(ii => ii.id === i.currency_id)
-                    const price = i.purchase_price
-                        ? `${i.purchase_price} ${currency.name}`
-                        : self.i18n.t(interaction.locale, 'commands.store.items.text_price_free')
+                    const price = `${i.purchase_price} ${currency.name}`
 
                     return {
                         name: `${i.name} (${price})`,
@@ -293,16 +295,33 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
     }
 
     if (['wallet', 'activities'].includes(interaction.commandName)) {
-        const currencies = server.modules.economy.currencies.filter(i => [i.id, i.name, i.symbol].some(ii => ii.includes(query)))
+        if (option?.name === 'currency') {
+            const currencies = server.modules.economy.currencies.filter(i => [i.id, i.name, i.symbol].some(ii => ii.includes(option?.value)))
 
-        await interaction.respond(
-            currencies.map(i => {
-                return {
-                    name: i.name,
-                    value: i.id
-                }
-            })
-        )
+            await interaction.respond(
+                currencies.map(i => {
+                    return {
+                        name: i.name,
+                        value: i.id
+                    }
+                })
+            )
+        }
+
+        if (option?.name === 'award') {
+            const awards = server.modules.levels.awards.filter(v => [v.id, v.references.join()].some(vv => vv.includes(option?.value)))
+
+            await interaction.respond(
+                awards
+                    .map(v => {
+                        return {
+                            name: truncateString(v.references.map(vv => interaction.guild.roles.cache.get(vv)?.name ?? vv).join(', ')),
+                            value: v.id
+                        }
+                    })
+                    .slice(0, 25)
+            )
+        }
     }
 
     if (interaction.commandName === 'unban') {
@@ -310,7 +329,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
             await interaction.guild.bans.fetch({ limit: 100, cache: true })
         }
 
-        const bans = interaction.guild.bans.cache.filter(i => [i.user.id, i.user.tag].some(ii => ii.includes(query)))
+        const bans = interaction.guild.bans.cache.filter(i => [i.user.id, i.user.tag].some(ii => ii.includes(option?.value)))
 
         await interaction.respond(
             bans
@@ -325,16 +344,16 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
     }
 
     if (interaction.commandName === 'play') {
-        if (!query) {
+        if (!option?.value) {
             await interaction.respond([])
 
             return false
         }
 
-        const is_url = new RegExp(`^https?:\/\/`).test(query)
+        const is_url = new RegExp(`^https?:\/\/`).test(option?.value)
         const { playableMusicHosts: allowed_hosts } = await self.db.json.get()
 
-        if (is_url && !allowed_hosts.some(h => query.startsWith(h))) {
+        if (is_url && !allowed_hosts.some(h => option?.value?.startsWith?.(h))) {
             await interaction.respond([])
 
             return false
@@ -343,7 +362,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
         let search: SearchResult
 
         try {
-            search = await self.player.search({ query, source: lavalinkSources[server.modules.music.default_source] })
+            search = await self.player.search({ query: option?.value, source: lavalinkSources[server.modules.music.default_source] })
         } catch (err) {
             await interaction.respond([])
 
@@ -360,7 +379,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
             await interaction.respond([
                 {
                     name: truncateString(search.playlist.name, 95),
-                    value: query
+                    value: option?.value
                 }
             ])
 

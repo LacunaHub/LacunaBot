@@ -6,7 +6,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: Guild, guild: Guild): Promise<boolean> {
     if (server.moderation.logs.types.guild_update.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -25,16 +25,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.name !== guild.name) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.guild_update_title'))
+                    .setTitle(t('Logs.GuildUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.guild_update_name_change')
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.GuildUpdatedName')
                         })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: before.name, inline: true },
-                        { name: t('logs.after_change'), value: guild.name, inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.name, inline: true },
+                        { name: t('Logs.AfterChange'), value: guild.name, inline: true }
                     ])
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -54,16 +54,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.afkChannelId !== guild.afkChannelId) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.guild_update_title'))
+                    .setTitle(t('Logs.GuildUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.guild_update_afk_channel_change')
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.GuildUpdatedAFKChannel')
                         })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: before.afkChannel?.name ?? '-', inline: true },
-                        { name: t('logs.after_change'), value: guild.afkChannel?.name ?? '-', inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.afkChannel?.name ?? '-', inline: true },
+                        { name: t('Logs.AfterChange'), value: guild.afkChannel?.name ?? '-', inline: true }
                     ])
                     .setTimestamp()
                     .setColor('#FFA726')
@@ -88,21 +88,21 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.afkTimeout !== guild.afkTimeout) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.guild_update_title'))
+                    .setTitle(t('Logs.GuildUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.guild_update_afk_timeout_change')
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.GuildUpdatedAFKTimeout')
                         })
                     )
                     .addFields([
                         {
-                            name: t('logs.before_change'),
+                            name: t('Logs.BeforeChange'),
                             value: before.afkTimeout ? numbro(before.afkTimeout).format({ output: 'time' }) : '-',
                             inline: true
                         },
                         {
-                            name: t('logs.after_change'),
+                            name: t('Logs.AfterChange'),
                             value: guild.afkTimeout ? numbro(guild.afkTimeout).format({ output: 'time' }) : '-',
                             inline: true
                         }
@@ -130,16 +130,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.description !== guild.description) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.guild_update_title'))
+                    .setTitle(t('Logs.GuildUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.guild_update_description_change')
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.GuildUpdatedDescription')
                         })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: before.description ?? '-', inline: true },
-                        { name: t('logs.after_change'), value: guild.description ?? '-', inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.description ?? '-', inline: true },
+                        { name: t('Logs.AfterChange'), value: guild.description ?? '-', inline: true }
                     ])
                     .setTimestamp()
                     .setColor('#FFA726')

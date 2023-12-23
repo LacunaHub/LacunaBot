@@ -3,7 +3,7 @@
     "editor.formatOnSave": true,
     "cSpell.language": "en,ru",
     "editor.codeActionsOnSave": {
-        "source.organizeImports": true
+        "source.organizeImports": "explicit"
     },
     "cSpell.words": ["bannable", "Erela", "kickable", "lavalink", "moderatable", "tempbans", "temprole", "temproles", "unban", "unmoderated"]
 }

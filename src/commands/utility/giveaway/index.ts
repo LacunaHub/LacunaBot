@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import { createSlash, endSlash, rerollSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,37 +6,37 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash: () => {},
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.GiveawayCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'create',
-            description: `commands.${name}.create.description`,
+            description: 'Commands.GiveawayCommand.SubCommands.CreateCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.prize',
-                    description: `commands.${name}.create.options.prize.description`,
+                    name: 'Commands.Options.Prize',
+                    description: 'Commands.GiveawayCommand.SubCommands.CreateCommand.Options.Prize.Description',
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.duration',
-                    description: `commands.${name}.create.options.duration.description`,
+                    name: 'Commands.Options.Duration',
+                    description: 'Commands.GiveawayCommand.SubCommands.CreateCommand.Options.Duration.Description',
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: 'common.command_options.winners_amount',
-                    description: `commands.${name}.create.options.winners_amount.description`,
+                    name: 'Commands.Options.WinnerCount',
+                    description: 'Commands.GiveawayCommand.SubCommands.CreateCommand.Options.WinnerCount.Description',
                     required: false,
                     min_value: 1,
                     max_value: 50
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.sponsor',
-                    description: `commands.${name}.create.options.sponsor.description`,
+                    name: 'Commands.Options.Sponsor',
+                    description: 'Commands.GiveawayCommand.SubCommands.CreateCommand.Options.Sponsor.Description',
                     required: false
                 }
             ]
@@ -44,12 +44,12 @@ export default {
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'end',
-            description: `commands.${name}.end.description`,
+            description: 'Commands.GiveawayCommand.SubCommands.EndCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.message_id',
-                    description: `commands.${name}.end.options.message_id.description`,
+                    name: 'Commands.Options.MessageId',
+                    description: 'Commands.GiveawayCommand.SubCommands.EndCommand.Options.MessageId.Description',
                     required: true
                 }
             ]
@@ -57,12 +57,12 @@ export default {
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'reroll',
-            description: `commands.${name}.reroll.description`,
+            description: 'Commands.GiveawayCommand.SubCommands.RerollCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.message_id',
-                    description: `commands.${name}.end.options.message_id.description`,
+                    name: 'Commands.Options.MessageId',
+                    description: 'Commands.GiveawayCommand.SubCommands.EndCommand.Options.MessageId.Description',
                     required: true
                 }
             ]
@@ -84,7 +84,7 @@ export default {
         }
     ],
     permissions: {
-        self: ['EMBED_LINKS'],
-        user: ['MANAGE_MESSAGES']
+        self: new PermissionsBitField(['EmbedLinks']).toArray(),
+        user: new PermissionsBitField(['ManageMessages']).toArray()
     }
 }

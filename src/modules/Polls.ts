@@ -16,8 +16,8 @@ export async function createPoll(self: Lacuna, server: ServerDocument, interacti
 
     if (!pollQuestion) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.poll.create.text_no_question', {
-                user: `**${interaction.user.username}**`
+            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.PollCommand.SubCommands.CreateCommand.Texts.NoQuestion', {
+                username: `**${interaction.user.username}**`
             })}`,
             ephemeral: true
         })
@@ -31,9 +31,13 @@ export async function createPoll(self: Lacuna, server: ServerDocument, interacti
 
     if (answerOptions.length < (isQuizMode ? 1 : 2)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.poll.create.text_invalid_answer_options', {
-                user: `**${interaction.user.username}**`
-            })}`,
+            content: `${self._emojis.ERROR} | ${self.i18n.t(
+                server.locale,
+                'Commands.PollCommand.SubCommands.CreateCommand.Texts.InvalidAnswerOptions',
+                {
+                    username: `**${interaction.user.username}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -46,9 +50,13 @@ export async function createPoll(self: Lacuna, server: ServerDocument, interacti
 
         if (!correctAnswer) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.poll.create.text_no_correct_answer', {
-                    user: `**${interaction.user.username}**`
-                })}`,
+                content: `${self._emojis.ERROR} | ${self.i18n.t(
+                    server.locale,
+                    'Commands.PollCommand.SubCommands.CreateCommand.Texts.NoCorrectAnswer',
+                    {
+                        username: `**${interaction.user.username}**`
+                    }
+                )}`,
                 ephemeral: true
             })
 
@@ -65,7 +73,7 @@ export async function createPoll(self: Lacuna, server: ServerDocument, interacti
 
     const embed = new EmbedBuilder().setTitle(pollQuestion).addFields(
         ...answerOptions.map((i, idx) => {
-            let fieldValue = `0% - ${self.i18n.pluralize(server.locale, 'commands.poll.text_plural_votes', 0)}`
+            let fieldValue = `0% - ${self.i18n.pluralize(server.locale, 'Commands.PollCommand.Texts.VotesPlural', 0)}`
 
             if (isQuizMode) {
                 fieldValue = '||' + fieldValue + '||'
@@ -79,11 +87,11 @@ export async function createPoll(self: Lacuna, server: ServerDocument, interacti
     )
 
     if (isQuizMode) {
-        embed.setFooter({ text: self.i18n.t(server.locale, 'commands.poll.create.text_quiz_mode') })
+        embed.setFooter({ text: self.i18n.t(server.locale, 'Commands.PollCommand.SubCommands.CreateCommand.Texts.QuizMode') })
     }
 
     if (isMultipleAnswers) {
-        embed.setFooter({ text: self.i18n.t(server.locale, 'commands.poll.create.text_multiple_answers') })
+        embed.setFooter({ text: self.i18n.t(server.locale, 'Commands.PollCommand.SubCommands.CreateCommand.Texts.MultipleAnswers') })
     }
 
     const rows = answerOptionsChunks.map((i: string[]) => {
@@ -105,9 +113,13 @@ export async function createPoll(self: Lacuna, server: ServerDocument, interacti
         message = await interaction.channel.send({ embeds: [embed], components: rows })
     } catch (err) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.poll.create.text_poll_failed_to_create', {
-                user: `**${interaction.user.username}**`
-            })}`,
+            content: `${self._emojis.ERROR} | ${self.i18n.t(
+                server.locale,
+                'Commands.PollCommand.SubCommands.CreateCommand.Texts.FailedToCreatePoll',
+                {
+                    username: `**${interaction.user.username}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -150,8 +162,8 @@ export async function createPoll(self: Lacuna, server: ServerDocument, interacti
     )
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.i18n.t(server.locale, 'commands.poll.create.text_poll_successfully_created', {
-            user: `**${interaction.user.username}**`
+        content: `${self._emojis.OK} | ${self.i18n.t(server.locale, 'Commands.PollCommand.SubCommands.CreateCommand.Texts.PollHasBeenCreated', {
+            username: `**${interaction.user.username}**`
         })}`,
         ephemeral: true
     })
@@ -168,8 +180,8 @@ export async function onPressPollButton(self: Lacuna, server: ServerDocument, in
 
         if (alreadyVoted && !poll.multiple_answers) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.poll.text_option_already_chosen', {
-                    user: `**${interaction.user.username}**`
+                content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.PollCommand.Texts.YouHaveAlreadyChosenThisOption', {
+                    username: `**${interaction.user.username}**`
                 })}`,
                 ephemeral: true
             })
@@ -186,8 +198,8 @@ export async function onPressPollButton(self: Lacuna, server: ServerDocument, in
         if (otherVotedOption) {
             if (poll.quiz) {
                 await interaction.reply({
-                    content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.poll.text_option_chosen_quiz_mode', {
-                        user: `**${interaction.user.username}**`,
+                    content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.PollCommand.Texts.YouHaveAlreadyChosenQuizOption', {
+                        username: `**${interaction.user.username}**`,
                         answer: `**${otherVotedOption.title}**`
                     })}`,
                     ephemeral: true
@@ -225,7 +237,7 @@ export async function onPressPollButton(self: Lacuna, server: ServerDocument, in
                 }
 
                 const optVotesPercent = Math.round((optVotes * 100) / totalVotes) || 0
-                let fieldValue = `${optVotesPercent}% - ${self.i18n.pluralize(server.locale, 'commands.poll.text_plural_votes', optVotes)}`
+                let fieldValue = `${optVotesPercent}% - ${self.i18n.pluralize(server.locale, 'Commands.PollCommand.Texts.VotesPlural', optVotes)}`
 
                 if (poll.quiz) {
                     fieldValue = '||' + fieldValue + '||'
@@ -242,25 +254,27 @@ export async function onPressPollButton(self: Lacuna, server: ServerDocument, in
         await interaction.message.edit({ embeds: [embed] })
 
         if (poll.quiz) {
-            let text = self.i18n.t(server.locale, 'commands.poll.text_incorrect_answer', { user: `**${interaction.user.username}**` })
+            let text = self.i18n.t(server.locale, 'Commands.PollCommand.Texts.YouHaveChosenIncorrectOption', {
+                username: `**${interaction.user.username}**`
+            })
 
             if (option.correct) {
-                text = self.i18n.t(server.locale, 'commands.poll.text_answer_is_correct', {
-                    user: `**${interaction.user.username}**`,
+                text = self.i18n.t(server.locale, 'Commands.PollCommand.Texts.YouHaveChosenCorrectOption', {
+                    username: `**${interaction.user.username}**`,
                     answer: `**${option.title}**`
                 })
             }
 
             await interaction.reply({ content: `${option.correct ? self._emojis.OK : self._emojis.ERROR} | ${text}`, ephemeral: true })
         } else {
-            let text = self.i18n.t(server.locale, 'commands.poll.text_you_have_chosen', {
-                user: `**${interaction.user.username}**`,
+            let text = self.i18n.t(server.locale, 'Commands.PollCommand.Texts.YouHaveChosenOption', {
+                username: `**${interaction.user.username}**`,
                 answer: `**${option.title}**`
             })
 
             if (alreadyVoted) {
-                text = self.i18n.t(server.locale, 'commands.poll.text_you_removed_your_vote', {
-                    user: `**${interaction.user.username}**`,
+                text = self.i18n.t(server.locale, 'Commands.PollCommand.Texts.YouHaveRemovedYourVote', {
+                    username: `**${interaction.user.username}**`,
                     answer: `**${option.title}**`
                 })
             }

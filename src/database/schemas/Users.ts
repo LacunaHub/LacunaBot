@@ -68,6 +68,7 @@ export interface IUserLevel {
         total_voice_time: number
         voice_connected_at: number
     }
+    received_awards?: string[]
 }
 
 export interface IUserWallet {

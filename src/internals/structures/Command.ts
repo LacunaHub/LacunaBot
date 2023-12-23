@@ -5,6 +5,7 @@ import {
     ContextMenuCommandInteraction,
     GuildMember,
     Message,
+    PermissionsString,
     Team
 } from 'discord.js'
 import { ServerDocument } from '../../database/schemas/Servers'
@@ -100,7 +101,7 @@ export default class Command {
 
         if (!executable) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.user.username}**` })}`,
+                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.user.username}**` })}`,
                 ephemeral: true
             })
 
@@ -109,7 +110,9 @@ export default class Command {
 
         if (this.premium_only && !server.server.premium.available) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', { user: `**${interaction.user.username}**` })}`,
+                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
+                    username: `**${interaction.user.username}**`
+                })}`,
                 ephemeral: true
             })
 
@@ -120,8 +123,8 @@ export default class Command {
 
         if (throttled.status) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_throttled', {
-                    user: `**${interaction.user.username}**`,
+                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandThrottling', {
+                    username: `**${interaction.user.username}**`,
                     time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
                 })}`,
                 ephemeral: true
@@ -169,7 +172,7 @@ export default class Command {
 
         if (!executable) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_denied', { user: `**${interaction.user.tag}**` })}`,
+                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.user.tag}**` })}`,
                 ephemeral: true
             })
 
@@ -178,7 +181,7 @@ export default class Command {
 
         if (this.premium_only && !server.server.premium.available) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_premium_only', { user: `**${interaction.user.tag}**` })}`,
+                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', { username: `**${interaction.user.tag}**` })}`,
                 ephemeral: true
             })
 
@@ -189,8 +192,8 @@ export default class Command {
 
         if (throttled.status) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('common.command_throttled', {
-                    user: `**${interaction.user.username}**`,
+                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandThrottling', {
+                    username: `**${interaction.user.username}**`,
                     time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
                 })}`,
                 ephemeral: true
@@ -313,8 +316,8 @@ export interface CommandOptions {
     premium_only: boolean
     private: boolean
     permissions: {
-        self: string[]
-        user: string[]
+        self: PermissionsString[]
+        user: PermissionsString[]
     }
 }
 

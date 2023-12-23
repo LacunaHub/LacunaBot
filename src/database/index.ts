@@ -155,5 +155,6 @@ export interface JsonData {
     }>
     allowedApiHosts: string[]
     allowedApiUrls: string[]
+    allowedImageHosts: string[]
     rootUsers: string[]
 }

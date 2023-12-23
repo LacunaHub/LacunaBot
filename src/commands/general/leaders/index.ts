@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,34 +6,34 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.LeadersCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.Integer,
-            name: 'common.command_options.sorting',
-            description: `commands.${name}.options.sorting.description`,
+            name: 'Commands.Options.Sorting',
+            description: 'Commands.LeadersCommand.Options.Sorting.Description',
             required: false,
             choices: [
                 {
-                    name: `commands.${name}.options.sorting.choices.level`,
+                    name: 'Commands.LeadersCommand.Options.Sorting.ChoiceLevel',
                     value: 1
                 },
                 {
-                    name: `commands.${name}.options.sorting.choices.balance`,
+                    name: 'Commands.LeadersCommand.Options.Sorting.ChoiceBalance',
                     value: 2
                 }
             ]
         },
         {
             type: ApplicationCommandOptionType.Integer,
-            name: 'common.command_options.page',
-            description: `commands.${name}.options.page.description`,
+            name: 'Commands.Options.Page',
+            description: 'Commands.LeadersCommand.Options.Page.Description',
             required: false,
             min_value: 1
         }
     ],
     group: 'GENERAL',
     permissions: {
-        self: ['EMBED_LINKS']
+        self: new PermissionsBitField(['EmbedLinks']).toArray()
     }
 }

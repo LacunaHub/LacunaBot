@@ -5,6 +5,7 @@ import { active_patron_role_id, former_patron_role_id, support_server_id } from 
 import Automation from '../../modules/Automation'
 import Automoder from '../../modules/Automoder'
 import Greeting from '../../modules/Greeting'
+import GuildImageRotation from '../../modules/GuildImageRotation'
 import Logs from '../../modules/Logs'
 import { checkReportsOnGuildMemberAdd } from '../../modules/Reports'
 
@@ -17,14 +18,18 @@ const handler = async (self: Lacuna, member: GuildMember) => {
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
 
+    await Greeting.sendMessage(self, server, member)
+
     if (!member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED')) {
-        await Greeting(self, server, member)
+        await Greeting.addInitialRoles(self, server, member)
+        await Greeting.restoreNicknameAndRoles(self, server, member)
     }
 
     await Automation.handleEvent('GUILD_MEMBER_ADD', self, server, member)
     await checkReportsOnGuildMemberAdd(self, server, member)
     await Automoder.nicknamesModeration(self, server, member)
     await Automoder.newbiesModeration(self, server, member)
+    await GuildImageRotation.rotateBanner(self, server, member.guild, member)
     await Logs.GuildMemberAdd(self, server, member)
 
     if (member.guild.id === support_server_id) {

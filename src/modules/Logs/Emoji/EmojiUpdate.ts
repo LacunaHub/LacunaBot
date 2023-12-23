@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: GuildEmoji, emoji: GuildEmoji): Promise<boolean> {
     if (server.moderation.logs.types.emoji_update.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -24,16 +24,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
 
             if (before.name !== emoji.name) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.emoji_update_title'))
+                    .setTitle(t('Logs.EmojiUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.emoji_update_name_change_template', { emoji: `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.EmojiUpdatedName', { emoji: `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>` })
                         })
                     )
                     .setFields([
-                        { name: t('logs.before_change'), value: before.name },
-                        { name: t('logs.after_change'), value: emoji.name }
+                        { name: t('Logs.BeforeChange'), value: before.name },
+                        { name: t('Logs.AfterChange'), value: emoji.name }
                     ])
                     .setFooter({ text: emoji.id })
                     .setTimestamp()

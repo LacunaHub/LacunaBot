@@ -5,7 +5,11 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, state: VoiceState): Promise<boolean> {
     if (server.moderation.logs.types.voice_connect.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        const rateLimited = isRateLimited(server._id, server.server.premium.available)
+
+        console.log(rateLimited)
+
+        if (rateLimited) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -18,8 +22,10 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             if (!webhook) return false
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.voice_connect_title'))
-                .setDescription(t('logs.voice_connect_template', { user: `**${state.member.user.tag}**`, channel: `<#${state?.channelId ?? '1'}>` }))
+                .setTitle(t('Logs.VoiceConnection'))
+                .setDescription(
+                    t('Logs.VoiceConnectionTemplate', { username: `**${state.member.user.tag}**`, channel: `<#${state?.channelId ?? '1'}>` })
+                )
                 .setFooter({ text: state.member.id })
                 .setTimestamp()
                 .setColor('#2FDF84')

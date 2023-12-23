@@ -55,7 +55,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                             await channel.permissionOverwrites.create(
                                 user.id,
                                 { ViewChannel: element.element.reverse ? true : false },
-                                { reason: t('audit_reasons.irs') }
+                                { reason: 'Interactive Reactions' }
                             )
 
                         self.emit('moduleExecution', {
@@ -88,7 +88,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                 if (roles.size) {
                     if (element.element.reverse && roles.some(r => member.roles.cache.has(r.id))) {
                         try {
-                            await member.roles.remove(roles, t('audit_reasons.irs'))
+                            await member.roles.remove(roles, 'Interactive Reactions')
 
                             self.emit('moduleExecution', {
                                 module: 'InteractiveReactions',
@@ -130,7 +130,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         }
 
                         try {
-                            await member.roles.add(roles, t('audit_reasons.irs'))
+                            await member.roles.add(roles, 'Interactive Reactions')
                         } catch (err) {
                             await self.logger.handleError({
                                 module: 'InteractiveReactions',
@@ -147,7 +147,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
                         }
                     } else {
                         try {
-                            await member.roles.add(roles, t('audit_reasons.irs'))
+                            await member.roles.add(roles, 'Interactive Reactions')
                         } catch (err) {
                             await self.logger.handleError({
                                 module: 'InteractiveReactions',
@@ -203,7 +203,7 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
                             const overwrites = channel.permissionOverwrites.cache.find(p => p.id == user.id)
 
                             if (overwrites) {
-                                await overwrites.delete(t('audit_reasons.irs'))
+                                await overwrites.delete('Interactive Reactions')
 
                                 self.emit('moduleExecution', {
                                     module: 'InteractiveReactions',
@@ -232,8 +232,8 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
 
                 if (roles.size) {
                     try {
-                        if (element.element.reverse) await member.roles.add(roles, t('audit_reasons.irs'))
-                        else await member.roles.remove(roles, t('audit_reasons.irs'))
+                        if (element.element.reverse) await member.roles.add(roles, 'Interactive Reactions')
+                        else await member.roles.remove(roles, 'Interactive Reactions')
 
                         self.emit('moduleExecution', {
                             module: `InteractiveReactions`,

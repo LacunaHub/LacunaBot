@@ -7,8 +7,8 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -33,15 +33,15 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     }
 
     const embed = new EmbedBuilder().setAuthor({
-        name: t('commands.wallet.balance.text_user_balance', { user: mention.displayName }),
+        name: t('Commands.WalletCommand.SubCommands.BalanceCommand.Texts.WalletBalanceOfUser', { username: mention.displayName }),
         iconURL: mention.displayAvatarURL()
     })
 
     if (!wallet.currencies.filter(i => server.modules.economy.currencies.some(ii => i.id == ii.id)).length)
-        embed.setDescription(t('commands.wallet.balance.text_empty_wallet'))
+        embed.setDescription(t('Commands.WalletCommand.SubCommands.BalanceCommand.Texts.WalletIsEmpty'))
 
     for (const c of wallet.currencies) {
-        const currency = server.modules.economy.currencies.find(i => i.id == c.id)
+        const currency = server.modules.economy.currencies.find(i => i.id === c.id)
 
         if (currency) embed.addFields([{ name: currency.name, value: `${c.amount.toFixed(2)}${currency.symbol}`, inline: true }])
     }
@@ -56,8 +56,8 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.leaders.text_economy_disabled', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.LeaderCommand.Texts.EconomyIsDisabled', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -72,8 +72,8 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (isNotAllowedRole || isBlockedRole) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('common.command_denied', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -87,8 +87,8 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_no_mention', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidUser', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -98,8 +98,8 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!amount) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_no_amount', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidAmount', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -127,8 +127,8 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!transaction_currency || transaction_currency.amount < amount) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.wallet.transfer.text_insufficient_funds', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.NoSuchAmountOfFunds', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -246,8 +246,8 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     }
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${t('commands.wallet.transfer.text_transferred', {
-            user: `**${interaction.member.displayName}**`,
+        content: `${self._emojis.OK} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.SuccessfulFundsTransfer', {
+            username: `**${interaction.member.displayName}**`,
             amount: `**${amount}${server.modules.economy.currencies.find(c => c.id == currency_id).symbol}**`,
             target: `**${mention.displayName}**`
         })}`,

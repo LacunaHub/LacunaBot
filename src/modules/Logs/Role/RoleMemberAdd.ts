@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, member: GuildMember, roles: Collection<string, Role>): Promise<boolean> {
     if (server.moderation.logs.types.role_member_add.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -24,14 +24,14 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             const executor = audit?.entries?.first()?.executor
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.role_member_add_title'))
+                .setTitle(t('Logs.RoleMemberAdded'))
                 .setDescription(
-                    t('logs.role_member_add_template', {
-                        user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                    t('Logs.RoleMemberAddedTemplate', {
+                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
                         target: `**${member.user.tag}**`
                     })
                 )
-                .addFields([{ name: t('common.roles'), value: roles.map(role => `<@&${role.id}>`).join(', '), inline: true }])
+                .addFields([{ name: t('Common.Roles'), value: roles.map(role => `<@&${role.id}>`).join(', '), inline: true }])
                 .setFooter({ text: member.id })
                 .setTimestamp()
                 .setColor('#2FDF84')

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,24 +6,24 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.UnmuteCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.User,
-            name: 'common.command_options.user',
-            description: `commands.${name}.options.user.description`,
+            name: 'Commands.Options.User',
+            description: 'Commands.UnmuteCommand.Options.User.Description',
             required: true
         },
         {
             type: ApplicationCommandOptionType.String,
-            name: 'common.command_options.reason',
-            description: `commands.${name}.options.reason.description`,
+            name: 'Commands.Options.Reason',
+            description: 'Commands.UnmuteCommand.Options.Reason.Description',
             required: false
         }
     ],
     group: 'MODERATION',
     permissions: {
-        self: ['EMBED_LINKS', 'MANAGE_ROLES', 'MODERATE_MEMBERS'],
-        user: ['MODERATE_MEMBERS']
+        self: new PermissionsBitField(['EmbedLinks', 'ManageRoles', 'ModerateMembers']).toArray(),
+        user: new PermissionsBitField(['ModerateMembers']).toArray()
     }
 }

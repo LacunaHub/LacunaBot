@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, thread: ThreadChannel): Promise<boolean> {
     if (server.moderation.logs.types.thread_delete.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -23,11 +23,11 @@ export default async function (self: Lacuna, server: ServerDocument, thread: Thr
             const executor = audit?.entries?.first()?.executor
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.thread_delete_title'))
+                .setTitle(t('Logs.ThreadDeleted'))
                 .setDescription(
-                    t('logs.thread_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, thread: `<#${thread.id}>` })
+                    t('Logs.ThreadDeletedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, thread: `<#${thread.id}>` })
                 )
-                .addFields([{ name: t('common.channel'), value: thread.parent?.id ? `<#${thread.parentId}>` : '-', inline: true }])
+                .addFields([{ name: t('Commands.OptionTypes.Channel'), value: thread.parent?.id ? `<#${thread.parentId}>` : '-', inline: true }])
                 .setFooter({ text: thread.id })
                 .setTimestamp()
                 .setColor('#EF5350')

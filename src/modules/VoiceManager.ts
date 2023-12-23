@@ -59,7 +59,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        const replacer = new Replacer({
+        const replacer = new Replacer(server.server.premium.available, {
             guild: state.guild,
             member: state.member
         })

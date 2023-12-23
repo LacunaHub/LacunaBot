@@ -3,7 +3,8 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/Automation'
 import { voiceAssign as economyVoiceAssign } from '../../modules/Economy'
-import { voiceAssign as levelsVoiceAssign } from '../../modules/Levels'
+import GuildImageRotation from '../../modules/GuildImageRotation'
+import Levels from '../../modules/Levels'
 import Logs from '../../modules/Logs'
 import { createTemporaryVoice } from '../../modules/VoiceManager'
 
@@ -28,7 +29,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
 
     await Automation.handleEvent('VOICE_CONNECT', self, server, state)
     await createTemporaryVoice(self, server, state)
-    await levelsVoiceAssign(self, server, state)
+    await Levels.onVoiceConnect(self, server, state)
     await economyVoiceAssign(self, server, state)
 
     const voiceRolesBound = server.modules.voice_manager.voice_roles
@@ -46,7 +47,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
             await self.logger.handleError({ module: 'VoiceRoles', action: 'AddRoles', error: err, guild_id: state.guild.id })
         }
     }
-
+    await GuildImageRotation.rotateBanner(self, server, state.guild, state.member)
     await Logs.VoiceConnect(self, server, state)
 
     return true

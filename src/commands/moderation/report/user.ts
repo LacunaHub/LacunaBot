@@ -8,6 +8,7 @@ import {
 } from 'discord.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
+import { capitalizeFirstLetter } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: UserContextMenuCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -19,12 +20,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: UserCon
 
     const modal = new ModalBuilder()
         .setCustomId(`REPORT-${interaction.targetId}`)
-        .setTitle(t('commands.report.description'))
+        .setTitle(t('Commands.ReportCommand.Description'))
         .addComponents([
             new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
                 new TextInputBuilder()
                     .setCustomId('REPORT-REASON')
-                    .setLabel(t('case_log.reason'))
+                    .setLabel(capitalizeFirstLetter(t('Commands.Options.Reason')))
                     .setStyle(TextInputStyle.Paragraph)
                     .setMinLength(20)
                     .setMaxLength(1000)

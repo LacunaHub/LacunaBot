@@ -8,8 +8,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -19,7 +19,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (player.voiceChannelId !== interaction.member.voice.channelId) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.next.text_different_voice', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -29,7 +31,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const filters = {
         slowed: {
             label: 'Slowed',
-            description: 'Reduce the tempo',
+            description: t('Commands.FilterCommand.Texts.FilterSlowed'),
             filter: {
                 timescale: {
                     speed: 0.8,
@@ -40,7 +42,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         },
         nightcore: {
             label: 'Nightcore',
-            description: 'Increase the pitch and speed up',
+            description: t('Commands.FilterCommand.Texts.FilterNightcore'),
             filter: {
                 timescale: {
                     speed: 1.2,
@@ -51,7 +53,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         },
         karaoke: {
             label: 'Karaoke',
-            description: 'Eliminate vocals',
+            description: t('Commands.FilterCommand.Texts.FilterKaraoke'),
             filter: {
                 karaoke: {
                     level: 1.0,
@@ -63,7 +65,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         },
         eightD: {
             label: '8D',
-            description: 'Rotate the sound around the stereo channels',
+            description: t('Commands.FilterCommand.Texts.FilterEightD'),
             filter: {
                 rotation: {
                     rotationHz: 0.3
@@ -79,12 +81,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                 new StringSelectMenuBuilder()
                     .setCustomId('FILTERS-SELECT')
-                    .setPlaceholder('Выберите фильтр')
+                    .setPlaceholder(t('Commands.FilterCommand.Texts.SelectFilter'))
                     .setMaxValues(Object.keys(filters).length)
                     .addOptions([
                         {
                             label: 'Off',
-                            description: 'Turn off all filters',
+                            description: t('Commands.FilterCommand.Texts.TurnOffAllFilters'),
                             value: 'off'
                         },
                         ...Object.keys(filters).map(v => ({ label: filters[v].label, description: filters[v].description, value: v }))

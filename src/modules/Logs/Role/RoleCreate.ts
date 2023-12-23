@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, role: Role): Promise<boolean> {
     if (server.moderation.logs.types.role_create.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -23,13 +23,11 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
             const executor = audit?.entries?.first()?.executor
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.role_create_title'))
-                .setDescription(
-                    t('logs.role_create_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, role: `<@&${role.id}>` })
-                )
+                .setTitle(t('Logs.RoleCreated'))
+                .setDescription(t('Logs.RoleCreatedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, role: `<@&${role.id}>` }))
                 .addFields([
-                    { name: t('logs.role_color'), value: `\`${role.hexColor}\``, inline: true },
-                    { name: t('logs.role_position'), value: role.rawPosition.toString(), inline: true }
+                    { name: t('Logs.RoleColor'), value: `\`${role.hexColor}\``, inline: true },
+                    { name: t('Logs.RolePosition'), value: role.rawPosition.toString(), inline: true }
                 ])
                 .setFooter({ text: role.id })
                 .setTimestamp()

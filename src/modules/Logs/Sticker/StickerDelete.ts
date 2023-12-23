@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, sticker: Sticker): Promise<boolean> {
     if (server.moderation.logs.types.sticker_delete.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -23,9 +23,9 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
             const executor = audit?.entries?.first()?.executor
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.sticker_delete_title'))
+                .setTitle(t('Logs.StickerDeleted'))
                 .setDescription(
-                    t('logs.sticker_delete_template', { user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`, sticker: `**${sticker.name}**` })
+                    t('Logs.StickerDeletedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, sticker: `**${sticker.name}**` })
                 )
                 .setFooter({ text: sticker.id })
                 .setTimestamp()

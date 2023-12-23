@@ -20,7 +20,7 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
         }
 
         if (button?.options?.includes('EPHEMERAL_REPLY') && button?.ephemeral_reply) {
-            const replacer = new Replacer({ guild: interaction.guild, member: interaction.member }),
+            const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: interaction.member }),
                 messagePayload = await replacer.replaceTemplateMessage(button.ephemeral_reply)
 
             try {
@@ -138,7 +138,7 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
         }
 
         if (option?.options.includes('EPHEMERAL_REPLY') && option.ephemeral_reply) {
-            const replacer = new Replacer({ guild: interaction.guild, member: interaction.member }),
+            const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: interaction.member }),
                 messagePayload = await replacer.replaceTemplateMessage(option.ephemeral_reply)
 
             try {

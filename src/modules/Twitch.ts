@@ -238,7 +238,7 @@ export async function handleIncomingWebhook(messageId: string, data: ITwitchInco
             let notificationText = guildSubscription.notification_message.content || null
 
             if (notificationText) {
-                const replacer = new Replacer()
+                const replacer = new Replacer(guild.server.premium.available)
                 notificationText = await replacer.replace(notificationText, {
                     subs: { name: stream.user_name, title: stream.title, link: stream.url }
                 })

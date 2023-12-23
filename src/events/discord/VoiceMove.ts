@@ -3,7 +3,7 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/Automation'
 import { voiceAssign as economyVoiceAssign, voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
-import { voiceAssign as levelsVoiceAssign, voiceUnassign as levelsVoiceUnassign } from '../../modules/Levels'
+import Levels from '../../modules/Levels'
 import Logs from '../../modules/Logs'
 import { createTemporaryVoiceOnMove } from '../../modules/VoiceManager'
 
@@ -38,8 +38,8 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
 
     await Automation.handleEvent('VOICE_CONNECT', self, server, state)
     await createTemporaryVoiceOnMove(self, server, before, state)
-    await levelsVoiceUnassign(self, server, before, before.channel)
-    await levelsVoiceAssign(self, server, state)
+    await Levels.onVoiceDisconnect(self, server, before, before.channel)
+    await Levels.onVoiceConnect(self, server, state)
     await economyVoiceUnassign(self, server, before, before.channel)
     await economyVoiceAssign(self, server, state)
 

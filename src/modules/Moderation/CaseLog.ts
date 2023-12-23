@@ -18,7 +18,7 @@ import { ServerDocument } from '../../database/schemas/Servers'
 import i18n from '../../i18n'
 import Lacuna from '../../internals/Lacuna'
 import Logger from '../../internals/Logger'
-import { snakeToPascalCase } from '../../internals/utility/Utils'
+import { capitalizeFirstLetter, snakeToPascalCase } from '../../internals/utility/Utils'
 import { images } from '../Logs'
 
 export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageOptions) {
@@ -33,23 +33,23 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
             await caseLog.send({
                 embeds: [
                     new EmbedBuilder()
-                        .setAuthor({ name: t(`case_log.cases.${options.type}`), iconURL: images[options.type] })
+                        .setAuthor({ name: t(`CaseLog.CaseTypes.${snakeToPascalCase(options.type)}`), iconURL: images[options.type] })
                         .addFields([
                             {
-                                name: t('common.command_option_types.USER'),
+                                name: t('Commands.OptionTypes.User'),
                                 value: options.target ? `${options.target.tag}\n(${options.target.id})` : '-',
                                 inline: true
                             },
-                            { name: t('case_log.moderator'), value: options.executor.tag, inline: true },
-                            { name: t('case_log.reason'), value: options.reason ?? '-' }
+                            { name: t('CaseLog.Moderator'), value: options.executor.tag, inline: true },
+                            { name: capitalizeFirstLetter(t('Commands.Options.Reason')), value: options.reason ?? '-' }
                         ])
-                        .setFooter({ text: t('case_log.case_number', { case_number: caseId }) })
+                        .setFooter({ text: t('CaseLog.CaseNumber', { caseNumber: caseId }) })
                         .setTimestamp()
                         .setColor(options.type.endsWith('REMOVE') ? '#2FDF84' : '#EF5350')
                 ],
                 components: [
                     new ActionRowBuilder<ButtonBuilder>().addComponents(
-                        new ButtonBuilder().setCustomId(`CL-REASON-${caseId}`).setLabel(t('case_log.change_reason')).setStyle(ButtonStyle.Secondary)
+                        new ButtonBuilder().setCustomId(`CL-REASON-${caseId}`).setLabel(t('CaseLog.ChangeReason')).setStyle(ButtonStyle.Secondary)
                     )
                 ]
             })
@@ -65,22 +65,6 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
                 $inc: {
                     'moderation.case_log.case_count': 1
                 }
-                // $push: {
-                //     'moderation.case_log.cases': {
-                //         case_id: caseId,
-                //         type: options.type,
-                //         timestamp: Date.now(),
-                //         reason: options.reason ?? null,
-                //         target: {
-                //             id: options.target ? options.target.id : null,
-                //             name: options.target ? options.target.tag : null
-                //         },
-                //         executor: {
-                //             id: options.executor.id,
-                //             name: options.executor.tag
-                //         }
-                //     }
-                // }
             }
         )
 
@@ -97,8 +81,8 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
 export async function onPressChangeReasonButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
     if (!interaction.memberPermissions.has(self.PermissionFlags.ManageMessages)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'common.command_denied', {
-                user: `**${interaction.user.username}**`
+            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.CommandExecutionDenied', {
+                username: `**${interaction.user.username}**`
             })}`,
             ephemeral: true
         })
@@ -107,31 +91,18 @@ export async function onPressChangeReasonButton(self: Lacuna, server: ServerDocu
     }
 
     const [, , caseId] = interaction.customId.split('-')
-    // const caseEntry = server.moderation.case_log.cases.find(i => i.case_id === Number(caseId))
-
-    // if (!caseEntry) {
-    //     await interaction.reply({
-    //         content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.reason.text_no_case_entry', {
-    //             user: `**${interaction.user.username}**`
-    //         })}`,
-    //         ephemeral: true
-    //     })
-
-    //     return false
-    // }
 
     const modal = new ModalBuilder()
         .setCustomId(`CL-REASON-${caseId}`)
-        .setTitle(self.i18n.t(server.locale, 'case_log.case_number', { case_number: caseId }))
+        .setTitle(self.i18n.t(server.locale, 'CaseLog.CaseNumber', { caseNumber: caseId }))
         .addComponents(
             new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
                 new TextInputBuilder()
                     .setCustomId('CL-REASON')
-                    .setLabel(self.i18n.t(server.locale, 'case_log.reason'))
+                    .setLabel(capitalizeFirstLetter(self.i18n.t(server.locale, 'Commands.Options.Reason')))
                     .setStyle(TextInputStyle.Paragraph)
                     .setMaxLength(1000)
                     .setRequired(true)
-                // .setValue(typeof caseEntry.reason === 'string' ? caseEntry.reason : '')
             )
         )
 
@@ -143,8 +114,8 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
 
     if (!reason) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'commands.reason.text_no_reason', {
-                user: `**${interaction.user.username}**`
+            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.InvalidReason', {
+                username: `**${interaction.user.username}**`
             })}`,
             ephemeral: true
         })
@@ -152,23 +123,14 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
         return false
     }
 
-    // let [, , caseId] = interaction.customId.split('-')
     const embed = new EmbedBuilder(interaction.message.embeds[0].toJSON())
     embed.data.fields[2].value = reason
 
     await interaction.message.edit({ embeds: [embed] })
-    // await self.db.servers.updateOne(
-    //     { _id: interaction.guild.id, 'moderation.case_log.cases.case_id': Number(caseId) },
-    //     {
-    //         $set: {
-    //             'moderation.case_log.cases.$.reason': reason
-    //         }
-    //     }
-    // )
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.i18n.t(server.locale, 'commands.reason.text_case_edited', {
-            user: `**${interaction.user.username}**`
+        content: `${self._emojis.OK} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged', {
+            username: `**${interaction.user.username}**`
         })}`,
         ephemeral: true
     })

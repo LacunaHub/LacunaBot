@@ -6,7 +6,7 @@ import Lacuna from '../../internals/Lacuna'
 const adjectives = ['Foggy', 'Magnanimous', 'Taboo', 'Compulsive', 'Busy', 'Angry', 'Responsive', 'Amiable', 'Nice', 'Unexpected']
 
 export default async function (self: Lacuna, server: ServerDocument, member: GuildMember) {
-    const reason = self.i18n.t(server.locale, 'audit_reasons.automoder_nicknames_moderation')
+    const reason = 'AutoMod: Nicknames moderation'
     const config = server.moderation.automoder.nicknames
 
     if (!config.active) return false

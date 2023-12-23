@@ -6,7 +6,7 @@ import { truncateString } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, before: Message, message: Message): Promise<boolean> {
     if (server.moderation.logs.types.message_update.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -23,12 +23,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
             const attachment = message.attachments.first()
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.message_update_title'))
+                .setTitle(t('Logs.MessageUpdated'))
                 .addFields([
-                    { name: t('logs.message_author'), value: `${message.author.tag}\n(${message.author.id})`, inline: true },
-                    { name: t('common.channel'), value: `<#${message.channel.id}>`, inline: true },
-                    { name: t('logs.before_change'), value: before_content || `\`[${t('common.attachment')}]\`` },
-                    { name: t('logs.after_change'), value: content || `\`[${t('common.attachment')}]\`` }
+                    { name: t('Logs.MessageAuthor'), value: `${message.author.tag}\n(${message.author.id})`, inline: true },
+                    { name: t('Commands.OptionTypes.Channel'), value: `<#${message.channel.id}>`, inline: true },
+                    { name: t('Logs.BeforeChange'), value: before_content || `\`[${t('Commands.OptionTypes.Attachment')}]\`` },
+                    { name: t('Logs.AfterChange'), value: content || `\`[${t('Commands.OptionTypes.Attachment')}]\`` }
                 ])
                 .setFooter({ text: message.id })
                 .setTimestamp()

@@ -4,7 +4,8 @@ import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/Automation'
 import Automoder from '../../modules/Automoder'
 import { messageCreate as addWalletCash } from '../../modules/Economy'
-import { messageCreate as addLevelPoints } from '../../modules/Levels'
+import GuildImageRotation from '../../modules/GuildImageRotation'
+import Levels from '../../modules/Levels'
 import { autoReact } from '../../modules/Reactions'
 import { autoThread } from '../../modules/Threads'
 
@@ -22,7 +23,7 @@ const handler = async (self: Lacuna, message: Message) => {
     await Automation.handleEvent('MESSAGE_CREATE', self, server, message)
 
     if ([MessageType.Default, MessageType.Reply].includes(message.type)) {
-        await addLevelPoints(self, server, message)
+        await Levels.onMessageCreate(self, server, message)
         await addWalletCash(self, server, message)
     }
 
@@ -33,6 +34,7 @@ const handler = async (self: Lacuna, message: Message) => {
     await Automoder.usersSlowdown(self, server, message)
     await autoThread(self, server, message)
     await autoReact(self, server, message)
+    await GuildImageRotation.rotateBanner(self, server, message.guild, message.member)
 
     return true
 }

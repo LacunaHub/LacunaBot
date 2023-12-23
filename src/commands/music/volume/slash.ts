@@ -9,8 +9,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -34,8 +34,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!volume || isNaN(volume)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.volume.text_invalid_volume', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.VolumeCommand.Texts.InvalidVolume', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -45,8 +45,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (volume < 1 || volume > 100) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.volume.text_volume_diapason', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.VolumeCommand.Texts.InvalidVolumeDiapason', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -60,8 +60,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await player.setVolume(volume)
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.volume.text_volume_changed', {
-            user: `**${interaction.member.displayName}**`,
+        content: `${self._emojis.OK} | ${t('Commands.VolumeCommand.Texts.VolumeHasBeenChanged', {
+            username: `**${interaction.member.displayName}**`,
             from: volume_before,
             to: volume
         })}`

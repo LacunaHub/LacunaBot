@@ -2,10 +2,11 @@ import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Guild, User } from '
 import { fetchLogWebhook, isRateLimited } from '..'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
+import { capitalizeFirstLetter } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, guild: Guild, user: User): Promise<boolean> {
     if (server.moderation.logs.types.guild_ban_remove.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -24,14 +25,14 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
             const reason = audit?.entries?.first()?.reason
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.guild_ban_remove_title'))
+                .setTitle(t('Logs.GuildBanRemoved'))
                 .setDescription(
-                    t('logs.guild_ban_remove_template', {
-                        user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                    t('Logs.GuildBanRemovedTemplate', {
+                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
                         target: `**${user.tag}** (${user.id})`
                     })
                 )
-                .addFields([{ name: t('case_log.reason'), value: reason ?? '-' }])
+                .addFields([{ name: capitalizeFirstLetter(t('Commands.Options.Reason')), value: reason ?? '-' }])
                 .setTimestamp()
                 .setColor('#2FDF84')
 

@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, invite: Invite): Promise<boolean> {
     if (server.moderation.logs.types.invite_delete.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -18,11 +18,11 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
             if (!webhook) return false
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.invite_delete_title'))
+                .setTitle(t('Logs.InviteDeleted'))
                 .addFields([
-                    { name: t('logs.invite_code'), value: invite.code, inline: true },
-                    { name: t('common.channel'), value: `<#${invite.channel.id}>`, inline: true },
-                    { name: t('logs.invite_inviter'), value: invite.inviter?.tag ?? '-', inline: true }
+                    { name: t('Logs.InviteCode'), value: invite.code, inline: true },
+                    { name: t('Commands.OptionTypes.Channel'), value: `<#${invite.channel.id}>`, inline: true },
+                    { name: t('Logs.InviteInviter'), value: invite.inviter?.tag ?? '-', inline: true }
                 ])
                 .setTimestamp()
                 .setColor('#EF5350')

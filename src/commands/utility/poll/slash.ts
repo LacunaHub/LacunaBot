@@ -11,12 +11,12 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 
     const modal = new ModalBuilder()
         .setCustomId(`POLL-${interaction.id}-${quizMode}-${multipleAnswers}`)
-        .setTitle(t('commands.poll.create.text_create_new_poll'))
+        .setTitle(t('Commands.PollCommand.SubCommands.CreateCommand.Texts.NewPoll'))
         .addComponents(
             new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
                 new TextInputBuilder()
                     .setCustomId('POLL-QUESTION')
-                    .setLabel(t('commands.poll.create.text_poll_question'))
+                    .setLabel(t('Commands.PollCommand.SubCommands.CreateCommand.Texts.PollQuestion'))
                     .setStyle(TextInputStyle.Short)
                     .setMaxLength(200)
                     .setRequired(true)
@@ -28,7 +28,7 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
             new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
                 new TextInputBuilder()
                     .setCustomId('CORRECT-ANSWER')
-                    .setLabel(t('commands.poll.create.text_correct_answer'))
+                    .setLabel(t('Commands.PollCommand.SubCommands.CreateCommand.Texts.CorrectAnswer'))
                     .setStyle(TextInputStyle.Short)
                     .setMaxLength(200)
                     .setRequired(true)
@@ -40,9 +40,9 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
         new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
             new TextInputBuilder()
                 .setCustomId('ANSWER-OPTIONS')
-                .setLabel(t('commands.poll.create.text_answer_options'))
+                .setLabel(t('Commands.PollCommand.SubCommands.CreateCommand.Texts.AnswerOptions'))
                 .setStyle(TextInputStyle.Paragraph)
-                .setPlaceholder(t('commands.poll.create.text_answer_options_placeholder'))
+                .setPlaceholder(t('Commands.PollCommand.SubCommands.CreateCommand.Texts.AnswerOptionsPlaceholder'))
                 .setRequired(true)
         )
     )

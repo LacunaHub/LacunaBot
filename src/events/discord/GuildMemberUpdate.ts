@@ -36,7 +36,8 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
     }
 
     if (member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED') && before.pending && !member.pending) {
-        await Greeting(self, server, member)
+        await Greeting.addInitialRoles(self, server, member)
+        await Greeting.restoreNicknameAndRoles(self, server, member)
     }
 
     await Automoder.nicknamesModeration(self, server, member)

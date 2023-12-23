@@ -155,7 +155,7 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
         const hasVideoUrl = /{\s*(subs.link)\s*}/g.test(notificationText ?? '')
 
         if (notificationText) {
-            const replacer = new Replacer()
+            const replacer = new Replacer(guild.server.premium.available)
             notificationText = await replacer.replace(notificationText, {
                 subs: { name: data.channelName, title: data.videoTitle, link: videoUrl }
             })

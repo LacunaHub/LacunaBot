@@ -10,7 +10,7 @@ import Replacer from '../Replacer'
 const slowedUsers = new Map()
 
 export default async function (self: Lacuna, server: ServerDocument, message: Message) {
-    let reason = self.i18n.t(server.locale, 'audit_reasons.automoder_users_slowdown')
+    let reason = 'AutoMod: Users slowdown'
     const config = server.moderation.automoder.users_slowdown
 
     if (!config.active) return false
@@ -142,7 +142,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (send_message) {
-            const replacer = new Replacer({ message: message, guild: message.guild, member: message.member }),
+            const replacer = new Replacer(server.server.premium.available, { message: message, guild: message.guild, member: message.member }),
                 messagePayload = await replacer.replaceTemplateMessage(config.send_message)
 
             try {

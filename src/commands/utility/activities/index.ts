@@ -1,58 +1,29 @@
-import { ApplicationCommandOptionType } from 'discord.js'
-import { addWalletBalanceSlash, resetLevelSlash, resetWalletSlash, setLevelSlash, setWalletBalanceSlash } from './slash'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
+import { assignLevelAward, resetLevelSlash, resetWalletSlash, setWalletBalanceSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
 
 export default {
     slash: () => {},
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.ActivitiesCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
-            name: 'set-level',
-            description: `commands.${name}.set-level.description`,
+            name: 'assign-level-award',
+            description: 'Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: 'common.command_options.user',
-                    description: `commands.${name}.set-level.options.user.description`,
+                    name: 'Commands.Options.User',
+                    description: 'Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Options.User.Description',
                     required: true
-                },
-                {
-                    type: ApplicationCommandOptionType.Integer,
-                    name: 'common.command_options.level',
-                    description: `commands.${name}.set-level.options.level.description`,
-                    required: true,
-                    min_value: 1,
-                    max_value: 2500
-                }
-            ]
-        },
-        {
-            type: ApplicationCommandOptionType.Subcommand,
-            name: 'add-wallet-balance',
-            description: `commands.${name}.add-wallet-balance.description`,
-            options: [
-                {
-                    type: ApplicationCommandOptionType.User,
-                    name: 'common.command_options.user',
-                    description: `commands.${name}.add-wallet-balance.options.user.description`,
-                    required: true
-                },
-                {
-                    type: ApplicationCommandOptionType.Integer,
-                    name: 'common.command_options.amount',
-                    description: `commands.${name}.add-wallet-balance.options.amount.description`,
-                    required: true,
-                    min_value: 1,
-                    max_value: Math.pow(2, 31) - 1
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.currency',
-                    description: `commands.${name}.add-wallet-balance.options.currency.description`,
-                    required: false,
+                    name: 'Commands.Options.Award',
+                    description: 'Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Options.Award.Description',
+                    required: true,
                     autocomplete: true
                 }
             ]
@@ -60,66 +31,112 @@ export default {
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'set-wallet-balance',
-            description: `commands.${name}.set-wallet-balance.description`,
+            description: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: 'common.command_options.user',
-                    description: `commands.${name}.set-wallet-balance.options.user.description`,
+                    name: 'Commands.Options.User',
+                    description: `Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.User.Description`,
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: 'common.command_options.amount',
-                    description: `commands.${name}.set-wallet-balance.options.amount.description`,
+                    name: 'Commands.Options.Amount',
+                    description: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Amount.Description',
                     required: true,
                     min_value: -(Math.pow(2, 31) - 1),
                     max_value: Math.pow(2, 31) - 1
                 },
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.currency',
-                    description: `commands.${name}.set-wallet-balance.options.currency.description`,
+                    name: 'Commands.Options.Currency',
+                    description: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Currency.Description',
                     required: false,
                     autocomplete: true
+                },
+                {
+                    type: ApplicationCommandOptionType.Integer,
+                    name: 'Commands.Options.Operation',
+                    description: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Operation.Description',
+                    required: false,
+                    min_value: 1,
+                    max_value: 3,
+                    choices: [
+                        {
+                            name: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Operation.ChoiceSet',
+                            value: 1
+                        },
+                        {
+                            name: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Operation.ChoiceInc',
+                            value: 2
+                        },
+                        {
+                            name: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Operation.ChoiceSub',
+                            value: 3
+                        }
+                    ]
                 }
             ]
         },
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'reset-wallet',
-            description: `commands.${name}.reset-wallet.description`,
+            description: 'Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: 'common.command_options.user',
-                    description: `commands.${name}.reset-wallet.options.user.description`,
+                    name: 'Commands.Options.User',
+                    description: 'Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Options.User.Description',
                     required: false
                 },
                 {
-                    type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.user_id',
-                    description: `commands.${name}.reset-wallet.options.user_id.description`,
-                    required: false
+                    type: ApplicationCommandOptionType.Integer,
+                    name: 'Commands.Options.ResetAll',
+                    description: 'Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Options.ResetAll.Description',
+                    required: false,
+                    min_value: 1,
+                    max_value: 2,
+                    choices: [
+                        {
+                            name: 'Common.No',
+                            value: 1
+                        },
+                        {
+                            name: 'Common.Yes',
+                            value: 2
+                        }
+                    ]
                 }
             ]
         },
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'reset-level',
-            description: `commands.${name}.reset-level.description`,
+            description: 'Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.User,
-                    name: 'common.command_options.user',
-                    description: `commands.${name}.reset-level.options.user.description`,
+                    name: 'Commands.Options.User',
+                    description: 'Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Options.User.Description',
                     required: false
                 },
                 {
-                    type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.user_id',
-                    description: `commands.${name}.reset-level.options.user_id.description`,
-                    required: false
+                    type: ApplicationCommandOptionType.Integer,
+                    name: 'Commands.Options.ResetAll',
+                    description: 'Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Options.ResetAll.Description',
+                    required: false,
+                    min_value: 1,
+                    max_value: 2,
+                    choices: [
+                        {
+                            name: 'Common.No',
+                            value: 1
+                        },
+                        {
+                            name: 'Common.Yes',
+                            value: 2
+                        }
+                    ]
                 }
             ]
         }
@@ -127,16 +144,12 @@ export default {
     group: 'UTILITY',
     subcommands: [
         {
-            name: 'set-level',
-            slash: setLevelSlash
+            name: 'assign-level-award',
+            slash: assignLevelAward
         },
         {
             name: 'set-wallet-balance',
             slash: setWalletBalanceSlash
-        },
-        {
-            name: 'add-wallet-balance',
-            slash: addWalletBalanceSlash
         },
         {
             name: 'reset-wallet',
@@ -148,6 +161,6 @@ export default {
         }
     ],
     permissions: {
-        user: ['ADMINISTRATOR']
+        user: new PermissionsBitField(['Administrator']).toArray()
     }
 }

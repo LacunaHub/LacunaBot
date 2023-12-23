@@ -589,6 +589,16 @@ export default model<ServerDocument>(
                                 icon_url: { type: String, default: null }
                             },
                             fields: { type: Array, default: [] }
+                        },
+                        image: {
+                            active: { type: Boolean, default: false },
+                            height: { type: Number, default: 256 },
+                            width: { type: Number, default: 720 },
+                            background: {
+                                color: { type: String, default: null },
+                                url: { type: String, default: null }
+                            },
+                            elements: { type: Array, default: [] }
                         }
                     },
                     initial_roles: {
@@ -625,6 +635,16 @@ export default model<ServerDocument>(
                                 icon_url: { type: String, default: null }
                             },
                             fields: { type: Array, default: [] }
+                        },
+                        image: {
+                            active: { type: Boolean, default: false },
+                            height: { type: Number, default: 256 },
+                            width: { type: Number, default: 720 },
+                            background: {
+                                color: { type: String, default: null },
+                                url: { type: String, default: null }
+                            },
+                            elements: { type: Array, default: [] }
                         }
                     }
                 },
@@ -671,6 +691,16 @@ export default model<ServerDocument>(
                                     icon_url: { type: String, default: null }
                                 },
                                 fields: { type: Array, default: [] }
+                            },
+                            image: {
+                                active: { type: Boolean, default: false },
+                                height: { type: Number, default: 256 },
+                                width: { type: Number, default: 720 },
+                                background: {
+                                    color: { type: String, default: null },
+                                    url: { type: String, default: null }
+                                },
+                                elements: { type: Array, default: [] }
                             }
                         }
                     },
@@ -758,7 +788,23 @@ export default model<ServerDocument>(
                 activities: {
                     multipliers: { type: Array, default: [] }
                 },
-                automation: { type: Array, default: [] }
+                automation: { type: Array, default: [] },
+                guild_image_rotation: {
+                    banner: {
+                        active: { type: Boolean, default: false },
+                        last_updated_timestamp: { type: Number, default: null },
+                        image: {
+                            active: { type: Boolean, default: true },
+                            height: { type: Number, default: 540 },
+                            width: { type: Number, default: 960 },
+                            background: {
+                                color: { type: String, default: null },
+                                url: { type: String, default: '{guild.banner}' }
+                            },
+                            elements: { type: Array, default: [] }
+                        }
+                    }
+                }
             },
             utility: {
                 giveaways: { type: Array, default: [] },
@@ -1263,6 +1309,7 @@ export interface ServerDocument extends Document {
             message: {
                 content: string
                 embed: MessageEmbed
+                image: MessageImage
             }
             initial_roles: {
                 active: boolean
@@ -1276,6 +1323,7 @@ export interface ServerDocument extends Document {
             message: {
                 content: string
                 embed: MessageEmbed
+                image: MessageImage
             }
         }
         reactions: InteractiveReaction[]
@@ -1299,6 +1347,7 @@ export interface ServerDocument extends Document {
                 message: {
                     content: string
                     embed: MessageEmbed
+                    image: MessageImage
                 }
             }
             awards: LevelAward[]
@@ -1368,6 +1417,13 @@ export interface ServerDocument extends Document {
             multipliers: ActivityMultiplier[]
         }
         automation: IAutomation[]
+        guild_image_rotation: {
+            banner: {
+                active: boolean
+                last_updated_timestamp: number | null
+                image: MessageImage
+            }
+        }
     }
     utility: {
         giveaways: Giveaway[]
@@ -1876,19 +1932,25 @@ export type InteractiveMessageReactionOption = 'MODIFY_ROLES' | 'OVERWRITE_CHANN
 
 export interface LevelAward {
     id: string
-    type: 'CHANNEL' | 'ROLE'
+    type: 'ROLE'
     level: number
-    single: boolean
+    /** @deprecated */
+    single?: boolean
     references: string[]
     remove_references?: string[]
     alert: {
         active: boolean
-        format: 'DM' | 'CHANNEL' | 'CURRENT_CHANNEL'
+        format: 'DM' | 'CHANNEL'
         channel_id: string
         message: {
             content: string
             embed: MessageEmbed
         }
+    }
+    conditions?: {
+        level: number
+        voice_time: number
+        sent_messages: number
     }
 }
 
@@ -2193,4 +2255,51 @@ export interface MessageEmbedFields {
     name: string
     value: string
     inline?: boolean
+}
+
+export interface MessageImage {
+    active: boolean
+    height: number
+    width: number
+    background: MessageImageBackground
+    elements: (MessageImageElementText | MessageImageElementImage)[]
+}
+
+export interface MessageImageBackground {
+    color: string | null
+    url: string | null
+}
+
+export interface MessageImageElement {
+    id: string
+    type: MessageImageElementType
+    posX: number
+    posY: number
+    height: number
+    width: number
+}
+
+export type MessageImageElementType = 'TEXT' | 'IMAGE'
+
+export interface MessageImageElementText extends MessageImageElement {
+    type: 'TEXT'
+    value: string
+    color: string
+    size: MessageImageElementTextSize
+    style: MessageImageElementTextStyle
+    transform: MessageImageElementTextTransform
+    decoration: MessageImageElementTextDecoration
+    align: MessageImageElementTextAlign
+}
+
+export type MessageImageElementTextSize = 'h4' | 'h5' | 'h6' | 'subtitle1' | 'body2' | 'caption'
+export type MessageImageElementTextStyle = 'normal' | 'italic'
+export type MessageImageElementTextTransform = 'none' | 'capitalize' | 'uppercase' | 'lowercase'
+export type MessageImageElementTextDecoration = 'none' | 'underline' | 'line-through'
+export type MessageImageElementTextAlign = 'center' | 'start' | 'end'
+
+export interface MessageImageElementImage extends MessageImageElement {
+    type: 'IMAGE'
+    url: string
+    border_radius: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'circle'
 }

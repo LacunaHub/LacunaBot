@@ -16,7 +16,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_no_mention', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.TemproleCommand.Texts.InvalidUser', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -25,7 +27,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!role) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_no_role', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.TemproleCommand.Texts.NoRole', { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -34,8 +36,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!duration) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_invalid_duration', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.TemproleCommand.Texts.InvalidDuration', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -45,8 +47,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!role.editable) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_role_not_editable', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.TemproleCommand.Texts.RoleIsNotEditable', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -58,7 +60,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (has_role) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.temprole.text_has_role', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.TemproleCommand.Texts.UserAlreadyHasThisRole', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -83,8 +87,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     })
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.temprole.text_success', {
-            user: `**${interaction.member.displayName}**`,
+        content: `${self._emojis.OK} | ${t('Commands.TemproleCommand.Texts.RoleAssignedToUser', {
+            username: `**${interaction.member.displayName}**`,
             role: `**${role.name}**`,
             target: `**${mention.user.tag}**`,
             date: `<t:${Math.round(ts / 1000)}:D>`

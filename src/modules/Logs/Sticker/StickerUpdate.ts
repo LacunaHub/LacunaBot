@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: Sticker, sticker: Sticker): Promise<boolean> {
     if (server.moderation.logs.types.sticker_update.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -24,16 +24,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
 
             if (before.name !== sticker.name) {
                 const embed = new EmbedBuilder()
-                    .setTitle(t('logs.sticker_update_title'))
+                    .setTitle(t('Logs.StickerUpdated'))
                     .setDescription(
-                        t('logs.update_template', {
-                            user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
-                            change: t('logs.sticker_update_name_change_template', { sticker: `**${sticker.name}**` })
+                        t('Logs.UserChangesSomething', {
+                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            change: t('Logs.StickerUpdatedName', { sticker: `**${sticker.name}**` })
                         })
                     )
                     .addFields([
-                        { name: t('logs.before_change'), value: before.name, inline: true },
-                        { name: t('logs.after_change'), value: sticker.name, inline: true }
+                        { name: t('Logs.BeforeChange'), value: before.name, inline: true },
+                        { name: t('Logs.AfterChange'), value: sticker.name, inline: true }
                     ])
                     .setFooter({ text: sticker.id })
                     .setTimestamp()

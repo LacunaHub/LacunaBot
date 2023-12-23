@@ -140,6 +140,10 @@ export function parseCommandArguments(string: string): string[] {
     return args
 }
 
+export function normalizeCommandOption(option: string) {
+    return option.replace(/[^-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]/gu, '-')
+}
+
 export function resolveObjectPath(path: string, object: {}): any {
     if (typeof path != 'string') throw new TypeError('PATH_IS_NOT_STRING')
     if (object === null || typeof object != 'object') throw new TypeError('OBJECT_IS_NOT_OBJECT')

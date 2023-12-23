@@ -44,7 +44,9 @@ export default async (
 
     if (!mention || mention.user.bot) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_no_mention', { user: `**${interaction.member['displayName']}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidUser', {
+                username: `**${interaction.member['displayName']}**`
+            })}`,
             ephemeral: true
         })
 
@@ -53,7 +55,9 @@ export default async (
 
     if (!reason || reason.length < 20) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_invalid_reason', { user: `**${interaction.member['displayName']}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidReason', {
+                username: `**${interaction.member['displayName']}**`
+            })}`,
             ephemeral: true
         })
 
@@ -80,8 +84,8 @@ export default async (
 
     if (report && Date.now() - report.created_at < ms('24h')) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_user_recently_reported', {
-                user: `**${interaction.member['displayName']}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouRecentlyReportedThisUser', {
+                username: `**${interaction.member['displayName']}**`
             })}`
         })
 
@@ -95,8 +99,8 @@ export default async (
 
     if (reportCount >= 3) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.report.text_to_many_recent_reports', {
-                user: `**${interaction.member['displayName']}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouHaveToManySubmittedReports', {
+                username: `**${interaction.member['displayName']}**`
             })}`
         })
 
@@ -167,7 +171,7 @@ export default async (
                     return {
                         label:
                             i === 'indefinitely'
-                                ? t('indefinitely').toLowerCase()
+                                ? t('Indefinitely').toLowerCase()
                                 : moment(Date.now() + ms(i))
                                       .locale(server.locale)
                                       .fromNow(true),
@@ -177,29 +181,20 @@ export default async (
 
                 const rows = [
                     new ActionRowBuilder<ButtonBuilder>().addComponents(
-                        new ButtonBuilder()
-                            .setCustomId(`R-KICK-${mention.id}`)
-                            .setLabel(t('commands.report.quick_actions.KICK'))
-                            .setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder()
-                            .setCustomId(`R-WARN-${mention.id}`)
-                            .setLabel(t('commands.report.quick_actions.WARN'))
-                            .setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder()
-                            .setCustomId(`R-SKIP-${mention.id}`)
-                            .setLabel(t('commands.report.quick_actions.IGNORE'))
-                            .setStyle(ButtonStyle.Secondary)
+                        new ButtonBuilder().setCustomId(`R-KICK-${mention.id}`).setLabel(t('CaseLog.Actions.Kick')).setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder().setCustomId(`R-WARN-${mention.id}`).setLabel(t('CaseLog.Actions.Warn')).setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder().setCustomId(`R-SKIP-${mention.id}`).setEmoji(self._emojis.details.ERROR).setStyle(ButtonStyle.Secondary)
                     ),
                     new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                         new StringSelectMenuBuilder()
                             .setCustomId(`R-BAN-${mention.id}`)
-                            .setPlaceholder(t('commands.report.quick_actions.BAN'))
+                            .setPlaceholder(t('CaseLog.Actions.Ban'))
                             .setOptions(selectMenuOptions)
                     ),
                     new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                         new StringSelectMenuBuilder()
                             .setCustomId(`R-MUTE-${mention.id}`)
-                            .setPlaceholder(t('commands.report.quick_actions.MUTE'))
+                            .setPlaceholder(t('CaseLog.Actions.Mute'))
                             .setOptions(selectMenuOptions.slice(1))
                     )
                 ]
@@ -214,7 +209,7 @@ export default async (
     }
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('commands.report.text_user_reported', { user: `**${interaction.member.displayName}**` })}`
+        content: `${self._emojis.OK} | ${t('Commands.ReportCommand.Texts.ReportSubmitted', { username: `**${interaction.member.displayName}**` })}`
     })
     self.cache.delete(`REPORT-${mention.id}-${interaction.user.id}`)
 

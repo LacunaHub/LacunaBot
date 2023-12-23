@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import { buySlash, itemsSlash } from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,17 +6,17 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash: () => {},
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.StoreCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'buy',
-            description: `commands.${name}.buy.description`,
+            description: 'Commands.StoreCommand.SubCommands.BuyCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
-                    name: 'common.command_options.sku',
-                    description: `commands.${name}.buy.options.sku.description`,
+                    name: 'Commands.Options.SKU',
+                    description: 'Commands.StoreCommand.SubCommands.BuyCommand.Options.SKU.Description',
                     required: true,
                     autocomplete: true
                 }
@@ -25,12 +25,12 @@ export default {
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: 'items',
-            description: `commands.${name}.items.description`,
+            description: 'Commands.StoreCommand.SubCommands.ItemsCommand.Description',
             options: [
                 {
                     type: ApplicationCommandOptionType.Integer,
-                    name: 'common.command_options.page',
-                    description: `commands.${name}.items.options.page.description`,
+                    name: 'Commands.Options.Page',
+                    description: 'Commands.StoreCommand.SubCommands.ItemsCommand.Options.Page.Description',
                     required: false,
                     min_value: 1
                 }
@@ -49,6 +49,6 @@ export default {
         }
     ],
     permissions: {
-        self: ['EMBED_LINKS']
+        self: new PermissionsBitField(['EmbedLinks']).toArray()
     }
 }

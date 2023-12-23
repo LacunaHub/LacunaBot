@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, emoji: GuildEmoji): Promise<boolean> {
     if (server.moderation.logs.types.emoji_delete.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -23,10 +23,10 @@ export default async function (self: Lacuna, server: ServerDocument, emoji: Guil
             const executor = audit?.entries?.first()?.executor
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.emoji_delete_title'))
+                .setTitle(t('Logs.EmojiDeleted'))
                 .setDescription(
-                    t('logs.emoji_delete_template', {
-                        user: `**${executor?.tag ?? t('logs.unknown_initiator')}**`,
+                    t('Logs.EmojiDeletedTemplate', {
+                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
                         emoji: `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`
                     })
                 )

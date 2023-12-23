@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js'
+import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
 import slash from './slash'
 
 const name = __dirname.split(/\\/).pop().split('/').pop()
@@ -6,18 +6,18 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.ViolationsCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.User,
-            name: 'common.command_options.user',
-            description: `commands.${name}.options.user.description`,
+            name: 'Commands.Options.User',
+            description: 'Commands.ViolationsCommand.Options.User.Description',
             required: false
         }
     ],
     group: 'MODERATION',
     permissions: {
-        self: ['EMBED_LINKS', 'MANAGE_ROLES'],
-        user: ['MANAGE_ROLES']
+        self: new PermissionsBitField(['EmbedLinks', 'ManageRoles']).toArray(),
+        user: new PermissionsBitField(['ManageRoles']).toArray()
     }
 }

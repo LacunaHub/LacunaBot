@@ -6,7 +6,7 @@ import { truncateString } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, message: Message): Promise<boolean> {
     if (server.moderation.logs.types.message_delete.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -22,11 +22,11 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
             const attachment = message.attachments.first()
 
             const embed = new EmbedBuilder()
-                .setTitle(t('logs.message_delete_title'))
+                .setTitle(t('Logs.MessageDeleted'))
                 .addFields([
-                    { name: t('logs.message_author'), value: `${message.author.tag}\n(${message.author.id})`, inline: true },
-                    { name: t('common.channel'), value: `<#${message.channel.id}>`, inline: true },
-                    { name: t('logs.message_content'), value: content || `\`[${t('common.attachment')}]\``, inline: true }
+                    { name: t('Logs.MessageAuthor'), value: `${message.author.tag}\n(${message.author.id})`, inline: true },
+                    { name: t('Commands.OptionTypes.Channel'), value: `<#${message.channel.id}>`, inline: true },
+                    { name: t('Logs.MessageContent'), value: content || `\`[${t('Commands.OptionTypes.Attachment')}]\``, inline: true }
                 ])
                 .setFooter({ text: message.id })
                 .setTimestamp()

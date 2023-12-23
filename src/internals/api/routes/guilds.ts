@@ -172,7 +172,8 @@ async function getSettings(ctx: Context) {
             interactive_messages: server.modules.interactive_messages,
             activities: server.modules.activities,
             custom_commands: server.modules.custom_commands,
-            automation: server.modules.automation
+            automation: server.modules.automation,
+            guild_image_rotation: server.modules.guild_image_rotation
         },
         prices: diamondPrices,
         change_log: server.change_log.reverse()
@@ -255,7 +256,8 @@ async function updateSettings(ctx: Context) {
             interactive_messages: server.modules.interactive_messages,
             activities: server.modules.activities,
             custom_commands: server.modules.custom_commands,
-            automation: server.modules.automation
+            automation: server.modules.automation,
+            guild_image_rotation: server.modules.guild_image_rotation
         },
         prices: diamondPrices,
         change_log: server.change_log.reverse()

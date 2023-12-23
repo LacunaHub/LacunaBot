@@ -6,12 +6,12 @@ const name = __dirname.split(/\\/).pop().split('/').pop()
 export default {
     slash,
     name,
-    description: `commands.${name}.description`,
+    description: 'Commands.PlayCommand.Description',
     options: [
         {
             type: ApplicationCommandOptionType.String,
-            name: 'common.command_options.query',
-            description: `commands.${name}.options.query.description`,
+            name: 'Commands.Options.Query',
+            description: 'Commands.PlayCommand.Options.Query.Description',
             required: true,
             autocomplete: true
         }

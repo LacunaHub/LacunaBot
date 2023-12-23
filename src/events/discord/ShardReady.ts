@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, Events, PermissionsBitField } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import RoleConnectionMetadata from '../../internals/utility/RoleConnectionMetadata'
-import { snakeToPascalCase } from '../../internals/utility/Utils'
+import { normalizeCommandOption } from '../../internals/utility/Utils'
 
 const { version } = require('../../../package.json')
 
@@ -12,17 +12,20 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
         if (storedVersion !== version) {
             await self.db.qdb.set('version', version)
 
-            const t = self.i18n.t
+            const tEn = self.i18n.t.bind(null, 'en'),
+                tRu = self.i18n.t.bind(null, 'ru'),
+                tUk = self.i18n.t.bind(null, 'uk')
+
             const commands = [
                 ...self.commands
                     .filter(c => c.is_slash_command)
                     .map(command => {
                         return {
                             name: command.name,
-                            description: self.i18n.t('en', command.description),
+                            description: tEn(command.description),
                             description_localizations: {
-                                ru: self.i18n.t('ru', command.description),
-                                uk: self.i18n.t('uk', command.description)
+                                ru: tRu(command.description),
+                                uk: tUk(command.description)
                             },
                             type: command.type,
                             options:
@@ -31,34 +34,34 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
                                         return {
                                             ...option,
                                             type: ApplicationCommandOptionType.Subcommand,
-                                            description: t('en', option.description),
+                                            description: tEn(option.description),
                                             description_localizations: {
-                                                ru: t('ru', option.description),
-                                                uk: t('uk', option.description)
+                                                ru: tRu(option.description),
+                                                uk: tUk(option.description)
                                             },
                                             options:
                                                 option.options?.map(opt => {
                                                     return {
                                                         ...opt,
                                                         type: opt.type,
-                                                        name: t('en', opt.name),
+                                                        name: normalizeCommandOption(tEn(opt.name)),
                                                         name_localizations: {
-                                                            ru: t('ru', opt.name),
-                                                            uk: t('uk', opt.name)
+                                                            ru: normalizeCommandOption(tRu(opt.name)),
+                                                            uk: normalizeCommandOption(tUk(opt.name))
                                                         },
-                                                        description: t('en', opt.description),
+                                                        description: tEn(opt.description),
                                                         description_localizations: {
-                                                            ru: t('ru', opt.description),
-                                                            uk: t('uk', opt.description)
+                                                            ru: tRu(opt.description),
+                                                            uk: tUk(opt.description)
                                                         },
                                                         choices:
                                                             opt.choices?.map(choice => {
                                                                 return {
                                                                     ...choice,
-                                                                    name: t('en', choice.name),
+                                                                    name: tEn(choice.name),
                                                                     name_localizations: {
-                                                                        ru: t('ru', choice.name),
-                                                                        uk: t('uk', choice.name)
+                                                                        ru: tRu(choice.name),
+                                                                        uk: tUk(choice.name)
                                                                     }
                                                                 }
                                                             }) ?? null
@@ -69,31 +72,31 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
                                     return {
                                         ...option,
                                         type: option.type,
-                                        name: t('en', option.name),
+                                        name: normalizeCommandOption(tEn(option.name)),
                                         name_localizations: {
-                                            ru: t('ru', option.name),
-                                            uk: t('uk', option.name)
+                                            ru: normalizeCommandOption(tRu(option.name)),
+                                            uk: normalizeCommandOption(tUk(option.name))
                                         },
-                                        description: t('en', option.description),
+                                        description: tEn(option.description),
                                         description_localizations: {
-                                            ru: t('ru', option.description),
-                                            uk: t('uk', option.description)
+                                            ru: tRu(option.description),
+                                            uk: tUk(option.description)
                                         },
                                         choices:
                                             option.choices?.map(choice => {
                                                 return {
                                                     ...choice,
-                                                    name: t('en', choice.name),
+                                                    name: tEn(choice.name),
                                                     name_localizations: {
-                                                        ru: t('ru', choice.name),
-                                                        uk: t('uk', choice.name)
+                                                        ru: tRu(choice.name),
+                                                        uk: tUk(choice.name)
                                                     }
                                                 }
                                             }) ?? null
                                     }
                                 }) ?? [],
                             default_member_permissions: command.permissions.user.length
-                                ? new PermissionsBitField(command.permissions.user.map(i => snakeToPascalCase(i)) as any)
+                                ? new PermissionsBitField(command.permissions.user)
                                 : undefined,
                             dm_permission: false
                         }
@@ -102,14 +105,14 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
                     .filter(i => i.is_user_command || i.is_message_command)
                     .map(command => {
                         return {
-                            name: t('en', command.pretty_name),
+                            name: tEn(command.pretty_name),
                             name_localizations: {
-                                ru: t('ru', command.pretty_name),
-                                uk: t('uk', command.pretty_name)
+                                ru: tRu(command.pretty_name),
+                                uk: tUk(command.pretty_name)
                             },
                             type: command.is_user_command ? ApplicationCommandType.User : ApplicationCommandType.Message,
                             default_member_permissions: command.permissions.user.length
-                                ? new PermissionsBitField(command.permissions.user.map(i => snakeToPascalCase(i)) as any)
+                                ? new PermissionsBitField(command.permissions.user)
                                 : undefined,
                             dm_permission: false
                         }
@@ -142,15 +145,15 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
                     return {
                         key: i.key,
                         type: i.type,
-                        name: t('en', i.name),
+                        name: tEn(i.name),
                         nameLocalizations: {
-                            ru: t('ru', i.name),
-                            uk: t('uk', i.name)
+                            ru: tRu(i.name),
+                            uk: tUk(i.name)
                         },
-                        description: t('en', i.description),
+                        description: tEn(i.description),
                         descriptionLocalizations: {
-                            ru: t('ru', i.description),
-                            uk: t('uk', i.description)
+                            ru: tRu(i.description),
+                            uk: tUk(i.description)
                         }
                     }
                 })

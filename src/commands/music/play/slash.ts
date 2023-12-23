@@ -14,8 +14,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!voice) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_connect_to_voice', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.YouNeedToConnectToVoiceChannel', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -28,8 +28,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         server.modules.music.blocked.channels.includes(voice.id)
     ) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_disallowed_voice', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsDisallowedInVoiceChannel', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -41,8 +41,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!has_permissions) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_no_required_permissions_in_voice', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.MissingRequiredPermissionsInVoiceChannel', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -52,7 +52,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (voice.full && !voice.permissionsFor(interaction.guild.members.me).has('MoveMembers') && !voice.members.has(self.user.id)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_voice_is_full', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.VoiceChannelIsFull', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -61,7 +63,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!query) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_no_search_track', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.NoQuery', { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -73,8 +75,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (is_url && !allowed_hosts.some(h => query.startsWith(h))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_not_allowed_host', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.HostIsNotAllowedToBePlayed', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -89,7 +91,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         search = await self.player.search({ query, source: lavalinkSources[server.modules.music.default_source] }, interaction.user.tag)
     } catch (err) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_load_failed', { user: `**${interaction.member.displayName}**` })}`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.TrackLoadFailed', {
+                username: `**${interaction.member.displayName}**`
+            })}`
         })
 
         return false
@@ -97,7 +101,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (search.loadType === 'LOAD_FAILED') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_load_failed', { user: `**${interaction.member.displayName}**` })}`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.TrackLoadFailed', {
+                username: `**${interaction.member.displayName}**`
+            })}`
         })
 
         return false
@@ -105,7 +111,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (search.loadType === 'NO_MATCHES') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('commands.play.text_no_matches', { user: `**${interaction.member.displayName}**` })}`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.NoMatches', { username: `**${interaction.member.displayName}**` })}`
         })
 
         return false
@@ -146,8 +152,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (search.loadType === 'PLAYLIST_LOADED') {
         if (!server.server.premium.available) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.play.text_playlist_loaded_no_premium', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaylistsAvailableOnlyForPremium', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -156,8 +162,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (player.queue.length >= queueMaxLength && queueMaxLength) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.play.text_queue_limit_reached_no_premium', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.QueueLimitReached', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -173,7 +179,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             .setTitle(`${track.author} - ${track.title}`)
             .addFields([
                 {
-                    name: capitalizeFirstLetter(t('common.command_options.duration')),
+                    name: capitalizeFirstLetter(t('Commands.Options.Duration')),
                     value: track.isStream ? '♾️' : `\`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``,
                     inline: true
                 },
@@ -183,17 +189,17 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     inline: true
                 },
                 {
-                    name: t('commands.play.text_source'),
+                    name: capitalizeFirstLetter(t('Commands.Options.Source')),
                     value: `[${self._emojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.uri})`,
                     inline: true
                 }
             ])
-            .setFooter({ text: t('commands.play.text_added_by', { requester: track.requester }) })
+            .setFooter({ text: t('Commands.PlayCommand.Texts.AddedBy', { requester: track.requester }) })
 
         if (player.playing || player.paused)
             await interaction.editReply({
-                content: `${self._emojis.OK} | ${t('commands.play.text_playlist_added_to_queue', {
-                    user: `**${interaction.member.displayName}**`,
+                content: `${self._emojis.OK} | ${t('Commands.PlayCommand.Texts.PlaylistHasBeenAddedToQueue', {
+                    username: `**${interaction.member.displayName}**`,
                     playlist: `**${search.playlist.name}**`
                 })}`
             })
@@ -208,8 +214,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (player.queue.length >= queueMaxLength && queueMaxLength) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.play.text_queue_limit_reached_no_premium', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.QueueLimitReached', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -218,8 +224,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (track.isStream && !server.server.premium.available) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.play.text_track_stream_only_for_premium', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.StreamPlaybackAvailableOnlyForPremium', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -228,8 +234,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (track.isStream && !server.modules.music.allow_radio_playback) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('commands.play.text_track_stream_disabled', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.StreamPlaybackIsDisabled', {
+                    username: `**${interaction.member.displayName}**`
                 })}`
             })
 
@@ -242,7 +248,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             .setTitle(`${track.author} - ${track.title}`)
             .addFields([
                 {
-                    name: capitalizeFirstLetter(t('common.command_options.duration')),
+                    name: capitalizeFirstLetter(t('Commands.Options.Duration')),
                     value: track.isStream ? '♾️' : `\`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``,
                     inline: true
                 },
@@ -252,17 +258,17 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     inline: true
                 },
                 {
-                    name: t('commands.play.text_source'),
+                    name: capitalizeFirstLetter(t('Commands.Options.Source')),
                     value: `[${self._emojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.uri})`,
                     inline: true
                 }
             ])
-            .setFooter({ text: t('commands.play.text_added_by', { requester: track.requester }) })
+            .setFooter({ text: t('Commands.PlayCommand.Texts.AddedBy', { requester: track.requester }) })
 
         if (player.playing || player.paused)
             await interaction.editReply({
-                content: `${self._emojis.OK} | ${t('commands.play.text_track_added_to_queue', {
-                    user: `**${interaction.member.displayName}**`,
+                content: `${self._emojis.OK} | ${t('Commands.PlayCommand.Texts.TrackHasBeenAddedToQueue', {
+                    username: `**${interaction.member.displayName}**`,
                     track: `**${track.author} - ${track.title}**`
                 })}`
             })

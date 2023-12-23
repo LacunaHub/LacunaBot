@@ -8,6 +8,7 @@ import Patron, { patrons } from '../../structures/Patron'
 import DiscordUtils from '../DiscordUtils'
 
 export const support_server_id = '740586549145763960'
+export const project_team_role_id = '746825558205136926'
 export const subscribed_patron_role_id = '1140832301228490872'
 export const active_patron_role_id = '968097093388468274'
 export const big_patron_role_id = '896416992079265824'

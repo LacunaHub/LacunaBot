@@ -31,33 +31,27 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             })
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle(t('commands.help.text_commands_list'))
-            .setDescription(t('commands.help.text_use_prefix', { prefix: `\`/\`` }))
-            .setFooter({ text: t('commands.help.text_use_help_for_more_details', { prefix: '/' }) })
+        const embed = new EmbedBuilder().setTitle(t('Commands.HelpCommand.Texts.ListOfCommands'))
         const embedFields = []
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setStyle(ButtonStyle.Link)
-                .setLabel(t('commands.help.text_dashboard_link'))
+                .setLabel(t('Commands.HelpCommand.Texts.ControlPanel'))
                 .setURL(`${process.env.WEBSITE_URL}/guilds/${interaction.guildId}/settings`),
-            new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setLabel(t('commands.help.text_docs_link'))
-                .setURL(`https://docs.${process.env.WEBSITE_DOMAIN}`)
+            new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('Components.Header.Docs')).setURL(`https://docs.${process.env.WEBSITE_DOMAIN}`)
         )
 
         if (categories.general.size)
-            embedFields.push({ name: t('common.command_categories.GENERAL'), value: categories.general.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.General'), value: categories.general.map(c => `\`${c.name}\``).join(', ') })
         if (categories.moderation.size)
-            embedFields.push({ name: t('common.command_categories.MODERATION'), value: categories.moderation.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.Moderation'), value: categories.moderation.map(c => `\`${c.name}\``).join(', ') })
         if (categories.music.size)
-            embedFields.push({ name: t('common.command_categories.MUSIC'), value: categories.music.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.Music'), value: categories.music.map(c => `\`${c.name}\``).join(', ') })
         if (categories.utility.size)
-            embedFields.push({ name: t('common.command_categories.UTILITY'), value: categories.utility.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.Useful'), value: categories.utility.map(c => `\`${c.name}\``).join(', ') })
         if (customCommand.length)
-            embedFields.push({ name: t('common.command_categories.CUSTOM'), value: customCommand.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.Custom'), value: customCommand.map(c => `\`${c.name}\``).join(', ') })
 
         embed.addFields(embedFields)
 
@@ -68,8 +62,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!command && !customCommand) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${t('commands.help.text_command_not_found', {
-                    user: `**${interaction.member.displayName}**`
+                content: `${self._emojis.ERROR} | ${t('Commands.HelpCommand.Texts.UnknownCommand', {
+                    username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
             })
@@ -79,22 +73,24 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (command) {
             const embed = new EmbedBuilder()
-                .setTitle(t('commands.help.text_command_help', { command: command.name }))
+                .setTitle(t('Commands.HelpCommand.Texts.HelpForCommand', { command: command.name }))
                 .setDescription(t(command.description))
 
             if (command.permissions.self.length || command.permissions.user.length) {
                 const self_permissions = command.permissions.self.length
-                    ? `${t('commands.help.text_required_permissions_bot')}\n- ${command.permissions.self
-                          .map(p => t(`common.permissions_keys.${p}`))
+                    ? `${t('Commands.HelpCommand.Texts.CommandPermissionsForBot')}\n- ${command.permissions.self
+                          .map(p => t(`Common.DiscordPermissions.${p}`))
                           .join('\n- ')}`
-                    : `~~${t('commands.help.text_required_permissions_bot')}~~`
+                    : `~~${t('Commands.HelpCommand.Texts.CommandPermissionsForBot')}~~`
                 const user_permissions = command.permissions.user.length
-                    ? `${t('commands.help.text_required_permissions_author')}\n- ${command.permissions.user
-                          .map(p => t(`common.permissions_keys.${p}`))
+                    ? `${t('Commands.HelpCommand.Texts.CommandPermissionsForAuthor')}\n- ${command.permissions.user
+                          .map(p => t(`Common.DiscordPermissions.${p}`))
                           .join('\n- ')}`
-                    : `~~${t('commands.help.text_required_permissions_author')}~~`
+                    : `~~${t('Commands.HelpCommand.Texts.CommandPermissionsForAuthor')}~~`
 
-                embed.addFields([{ name: t('commands.help.text_required_permissions'), value: `${self_permissions}\n${user_permissions}` }])
+                embed.addFields([
+                    { name: t('Commands.HelpCommand.Texts.CommandRequiredPermissions'), value: `${self_permissions}\n${user_permissions}` }
+                ])
             }
 
             if (
@@ -114,17 +110,21 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     .map(opt => {
                         return (
                             `\`${opt.required ? '<' : '['}${t(opt.name)}${opt.required ? '>' : ']'}\`: ${t(opt.description)}` +
-                            `\n- ${opt.required ? t('commands.help.text_command_arg_required') : t('commands.help.text_command_arg_optional')}` +
-                            `\n- ${t('commands.help.text_command_arg_type', {
-                                type: t(`common.command_option_types.${commandOptionTypes[opt.type]}`)?.toLowerCase()
+                            `\n- ${
+                                opt.required
+                                    ? t('Commands.HelpCommand.Texts.CommandArgumentRequired')
+                                    : t('Commands.HelpCommand.Texts.CommandArgumentOptional')
+                            }` +
+                            `\n- ${t('Commands.HelpCommand.Texts.CommandArgumentType', {
+                                type: t(`Commands.OptionTypes.${commandOptionTypes[opt.type]}`)?.toLowerCase()
                             })}`
                         )
                     })
                     .join('\n')
 
                 embed.addFields([
-                    { name: t('commands.help.text_command_usage'), value: `\`${usage}\`` },
-                    { name: t('commands.help.text_command_args'), value: args }
+                    { name: t('Commands.HelpCommand.Texts.CommandUsage'), value: `\`${usage}\`` },
+                    { name: t('Commands.HelpCommand.Texts.CommandArguments'), value: args }
                 ])
             }
 
@@ -150,9 +150,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                         ?.map(o => {
                             return (
                                 `\`${o.required ? '<' : '['}${t(o.name)}${o.required ? '>' : ']'}\`: ${t(o.description)}` +
-                                `\n- ${o.required ? t('commands.help.text_command_arg_required') : t('commands.help.text_command_arg_optional')}` +
-                                `\n- ${t('commands.help.text_command_arg_type', {
-                                    type: t(`common.command_option_types.${commandOptionTypes[o.type]}`)?.toLowerCase()
+                                `\n- ${
+                                    o.required
+                                        ? t('Commands.HelpCommand.Texts.CommandArgumentRequired')
+                                        : t('Commands.HelpCommand.Texts.CommandArgumentOptional')
+                                }` +
+                                `\n- ${t('Commands.HelpCommand.Texts.CommandArgumentType', {
+                                    type: t(`Commands.OptionTypes.${commandOptionTypes[o.type]}`)?.toLowerCase()
                                 })}`
                             )
                         })
@@ -161,7 +165,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     return { name: opt.name, value: args }
                 })
 
-                embed.addFields([{ name: t('commands.help.text_command_usage'), value: usage }])
+                embed.addFields([{ name: t('Commands.HelpCommand.Texts.CommandUsage'), value: usage }])
                 for (const sc of subcommands) embed.addFields([{ name: `${command.name} ${sc.name}`, value: sc.value }])
             }
 
@@ -170,7 +174,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (customCommand && !command) {
             const embed = new EmbedBuilder()
-                .setTitle(t('commands.help.text_command_help', { command: customCommand.name }))
+                .setTitle(t('Commands.HelpCommand.Texts.HelpForCommand', { command: customCommand.name }))
                 .setDescription(customCommand.description)
 
             if (customCommand.options.length) {
@@ -186,17 +190,21 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     .map(opt => {
                         return (
                             `\`${opt.required ? '<' : '['}${opt.name}${opt.required ? '>' : ']'}\`: ${opt.description}` +
-                            `\n- ${opt.required ? t('commands.help.text_command_arg_required') : t('commands.help.text_command_arg_optional')}` +
-                            `\n- ${t('commands.help.text_command_arg_type', {
-                                type: t(`common.command_option_types.${commandOptionTypes[opt.type]}`)?.toLowerCase()
+                            `\n- ${
+                                opt.required
+                                    ? t('Commands.HelpCommand.Texts.CommandArgumentRequired')
+                                    : t('Commands.HelpCommand.Texts.CommandArgumentOptional')
+                            }` +
+                            `\n- ${t('Commands.HelpCommand.Texts.CommandArgumentType', {
+                                type: t(`Commands.OptionTypes.${commandOptionTypes[opt.type]}`)?.toLowerCase()
                             })}`
                         )
                     })
                     .join('\n')
 
                 embed.addFields([
-                    { name: t('commands.help.text_command_usage'), value: `\`${usage}\`` },
-                    { name: t('commands.help.text_command_args'), value: args }
+                    { name: t('Commands.HelpCommand.Texts.CommandUsage'), value: `\`${usage}\`` },
+                    { name: t('Commands.HelpCommand.Texts.CommandArguments'), value: args }
                 ])
             }
 

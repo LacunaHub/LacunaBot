@@ -11,8 +11,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('commands.next.text_no_track_playback', {
-                user: `**${interaction.member.displayName}**`
+            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -22,7 +22,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player.queue.size) {
         await interaction.reply({
-            content: `${self._emojis.OK} | ${t('commands.queue.text_no_track_queue', { user: `**${interaction.member.displayName}**` })}`,
+            content: `${self._emojis.ERROR} | ${t('Commands.QueueCommand.Texts.PlaybackQueueIsEmpty', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -59,7 +61,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             new ButtonBuilder()
                 .setCustomId('QUEUE-PAGINATION')
                 .setStyle(ButtonStyle.Secondary)
-                .setLabel(t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }))
+                .setLabel(t('Common.Pagination', { current: page + 1, total: chunks.length }))
                 .setDisabled(true),
             new ButtonBuilder()
                 .setCustomId('QUEUE-NEXT-PAGE')
@@ -74,7 +76,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                 new StringSelectMenuBuilder()
                     .setCustomId('QUEUE-SELECT-TRACK')
-                    .setPlaceholder(t('commands.queue.text_select_playback_track'))
+                    .setPlaceholder(t('Commands.QueueCommand.Texts.SelectTrackToPlay'))
                     .addOptions(selectMenuOptions[page])
             ),
             ...rows
@@ -111,7 +113,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     break
             }
 
-            rows[0].components[1].setLabel(t('commands.leaders.text_pagination', { current: page + 1, total: chunks.length }))
+            rows[0].components[1].setLabel(t('Common.Pagination', { current: page + 1, total: chunks.length }))
 
             await i.deferUpdate()
             await i.editReply({
@@ -119,7 +121,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                         new StringSelectMenuBuilder()
                             .setCustomId('QUEUE-SELECT-TRACK')
-                            .setPlaceholder(t('commands.queue.text_select_playback_track'))
+                            .setPlaceholder(t('Commands.QueueCommand.Texts.SelectTrackToPlay'))
                             .addOptions(selectMenuOptions[page])
                     ),
                     ...rows

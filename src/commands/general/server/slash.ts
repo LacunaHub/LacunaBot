@@ -10,20 +10,20 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const serverCreatedAt = Math.round(interaction.guild.createdTimestamp / 1000)
 
     const embed = new EmbedBuilder().setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL() }).addFields([
-        { name: t('commands.server.text_owner'), value: guildOwner.user.tag, inline: true },
-        { name: t('commands.server.text_guild_id'), value: interaction.guild.id, inline: true },
-        { name: t('commands.server.text_total_members'), value: `${interaction.guild.memberCount}`, inline: true },
-        { name: t('commands.server.text_total_channels'), value: `${interaction.guild.channels.cache.size}`, inline: true },
+        { name: t('Commands.ServerCommand.Texts.GuildOwner'), value: guildOwner.user.tag, inline: true },
+        { name: t('Commands.ServerCommand.Texts.GuildId'), value: interaction.guild.id, inline: true },
+        { name: t('Commands.ServerCommand.Texts.MemberCount'), value: `${interaction.guild.memberCount}`, inline: true },
+        { name: t('Commands.ServerCommand.Texts.ChannelCount'), value: `${interaction.guild.channels.cache.size}`, inline: true },
         {
-            name: t('commands.server.text_verification_level'),
-            value: t(`common.guild_verification_levels.${guildVerificationLevelNames[interaction.guild.verificationLevel]}`),
+            name: t('Commands.ServerCommand.Texts.GuildVerificationLevel'),
+            value: t(`Commands.ServerCommand.Texts.GuildVerificationLevels.${guildVerificationLevelNames[interaction.guild.verificationLevel]}`),
             inline: true
         },
-        { name: t('commands.server.text_afk_channel'), value: interaction.guild?.afkChannel?.name ?? '-', inline: true },
-        { name: t('commands.server.text_roles'), value: `${interaction.guild.roles.cache.size}`, inline: true },
-        { name: t('commands.server.text_emojis'), value: `${interaction.guild.emojis.cache.size}`, inline: true },
+        { name: t('Commands.ServerCommand.Texts.GuildAFKChannel'), value: interaction.guild?.afkChannel?.name ?? '-', inline: true },
+        { name: t('Commands.ServerCommand.Texts.RoleCount'), value: `${interaction.guild.roles.cache.size}`, inline: true },
+        { name: t('Commands.ServerCommand.Texts.EmojiCount'), value: `${interaction.guild.emojis.cache.size}`, inline: true },
         { name: '\u200B', value: '\u200B', inline: true },
-        { name: '\u200B', value: t('commands.server.text_guild_created_at', { date: `<t:${serverCreatedAt}:R>` }) }
+        { name: '\u200B', value: t('Commands.ServerCommand.Texts.GuildDateOfCreation', { relativeTime: `<t:${serverCreatedAt}:R>` }) }
     ])
 
     if (interaction.guild.description) {

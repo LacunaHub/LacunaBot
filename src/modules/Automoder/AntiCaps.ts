@@ -8,7 +8,7 @@ import { caseLog, warnings } from '../Moderation'
 import Replacer from '../Replacer'
 
 export default async function (self: Lacuna, server: ServerDocument, message: Message) {
-    let reason = self.i18n.t(server.locale, 'audit_reasons.automoder_anti_caps')
+    let reason = 'AutoMod: Anti-CAPS'
     const config = server.moderation.automoder.anti_caps
 
     if (!config.active) return false
@@ -133,7 +133,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (send_message && (config.send_message.content || config.send_message.embed.active)) {
-            const replacer = new Replacer({ message: message, guild: message.guild, member: message.member }),
+            const replacer = new Replacer(server.server.premium.available, { message: message, guild: message.guild, member: message.member }),
                 messagePayload = await replacer.replaceTemplateMessage(config.send_message)
 
             try {
