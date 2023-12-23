@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, member: GuildMember, roles: Collection<string, Role>): Promise<boolean> {
     if (server.moderation.logs.types.role_member_add.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 

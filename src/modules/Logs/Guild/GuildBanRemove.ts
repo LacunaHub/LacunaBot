@@ -6,7 +6,7 @@ import { capitalizeFirstLetter } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, guild: Guild, user: User): Promise<boolean> {
     if (server.moderation.logs.types.guild_ban_remove.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 

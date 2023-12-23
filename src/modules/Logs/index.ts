@@ -38,7 +38,7 @@ import VoiceServerMute from './Voice/VoiceServerMute'
 import VoiceServerUndeaf from './Voice/VoiceServerUndeaf'
 import VoiceServerUnmute from './Voice/VoiceServerUnmute'
 
-const rateLimitDatabase = new Map()
+const rateLimitCache = new Map()
 
 export const images = {
     BAN_ADD: 'https://i.imgur.com/qI02Ivf.png',
@@ -106,16 +106,16 @@ export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextCha
     return webhook
 }
 
-export function isRateLimited(guildId: string) {
-    let rateLimit: { resetAfter: number; remaining: number } = rateLimitDatabase.get(guildId)
+export function isRateLimited(guildId: string, premium: boolean) {
+    let rateLimit: { resetAfter: number; remaining: number } = rateLimitCache.get(guildId)
 
     if (rateLimit && Date.now() > rateLimit.resetAfter) {
-        rateLimitDatabase.delete(guildId)
+        rateLimitCache.delete(guildId)
         rateLimit = undefined
     }
 
     if (!rateLimit) {
-        rateLimit = rateLimitDatabase.set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: 14 }).get(guildId)
+        rateLimit = rateLimitCache.set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: premium ? 49 : 4 }).get(guildId)
 
         return false
     }

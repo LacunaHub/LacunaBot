@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: VoiceState, state: VoiceState): Promise<boolean> {
     if (server.moderation.logs.types.voice_disconnect.active) {
-        if (isRateLimited(server._id) && !server.server.premium.available) return false
+        if (isRateLimited(server._id, server.server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
