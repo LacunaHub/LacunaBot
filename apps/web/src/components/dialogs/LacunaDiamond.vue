@@ -560,8 +560,8 @@ const bonuses = [
         },
         {
           name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActionLogEventsProcessedPerMinuteNumber'),
-          free: { value: '15', type: 'text' },
-          diamond: { value: 'all_inclusive', type: 'icon' }
+          free: { value: '5', type: 'text' },
+          diamond: { value: '50', type: 'text' }
         }
       ]
     },

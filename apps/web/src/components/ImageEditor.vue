@@ -19,6 +19,19 @@
     <div class="row q-col-gutter-md">
       <div class="col-12">
         <q-card class="bg-dark-2" flat>
+          <q-card-section v-if="!$q.screen.gt.sm">
+            <q-banner class="bg-dark-1 rounded-borders" dense>
+              <span>
+                На маленьких экранах положение элементов на холсте может сильно отличаться, поэтому рекомендуется
+                активировать режим "Версия для ПК" в настройках или увеличить масштаб страницы.
+              </span>
+
+              <template #avatar>
+                <q-icon name="info" color="info"></q-icon>
+              </template>
+            </q-banner>
+          </q-card-section>
+
           <q-card-section class="flex flex-center">
             <div
               :class="`rounded-borders relative-position image-canvas ${disable ? 'disabled' : ''}`"
