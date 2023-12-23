@@ -52,7 +52,7 @@ const client = new Lacuna({
         return new Collection()
     },
     rest: {
-        rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 60 * 2.5
+        rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5
     },
     sweepers: {
         ...Options.DefaultSweeperSettings,
