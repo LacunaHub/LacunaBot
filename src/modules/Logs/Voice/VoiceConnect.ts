@@ -7,8 +7,6 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
     if (server.moderation.logs.types.voice_connect.active) {
         const rateLimited = isRateLimited(server._id, server.server.premium.available)
 
-        console.log(rateLimited)
-
         if (rateLimited) return false
 
         const t = self.i18n.t.bind(null, server.locale)
