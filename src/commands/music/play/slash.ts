@@ -99,7 +99,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (search.loadType === 'LOAD_FAILED') {
+    if (search.loadType === 'error') {
         await interaction.editReply({
             content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.TrackLoadFailed', {
                 username: `**${interaction.member.displayName}**`
@@ -109,7 +109,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (search.loadType === 'NO_MATCHES') {
+    if (search.loadType === 'empty') {
         await interaction.editReply({
             content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.NoMatches', { username: `**${interaction.member.displayName}**` })}`
         })
@@ -149,7 +149,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         )
     ]
 
-    if (search.loadType === 'PLAYLIST_LOADED') {
+    if (search.loadType === 'playlist') {
         if (!server.server.premium.available) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaylistsAvailableOnlyForPremium', {
@@ -208,7 +208,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
     }
 
-    if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
+    if (search.loadType === 'track' || search.loadType === 'search') {
         const track = search.tracks[0]
         const trackSource = getTrackSourceByUrl(track.uri)
 

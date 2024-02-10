@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, BaseGuildVoiceChannel, Message } from 'discord.js'
-import { Node, Track, TrackUtils } from 'erela.js'
+import { Node, PlayerTrack, TrackUtils } from 'erela.js'
 import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, node: Node) {
@@ -45,7 +45,7 @@ async function handler(self: Lacuna, node: Node) {
 
         if (player.queue.totalSize === 0) {
             player.queue.add(
-                guildPlayer.queue.map((i: Track) => {
+                guildPlayer.queue.map((i: PlayerTrack) => {
                     return TrackUtils.build(
                         {
                             encoded: i.track,
@@ -61,7 +61,9 @@ async function handler(self: Lacuna, node: Node) {
                                 artworkUrl: i.artworkUrl,
                                 isrc: i.isrc,
                                 sourceName: i.sourceName
-                            }
+                            },
+                            pluginInfo: {},
+                            userData: {}
                         },
                         i.requester
                     )

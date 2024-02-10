@@ -369,13 +369,13 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
             return false
         }
 
-        if (['LOAD_FAILED', 'NO_MATCHES'].includes(search.loadType)) {
+        if (['error', 'empty'].includes(search.loadType)) {
             await interaction.respond([])
 
             return false
         }
 
-        if (search.loadType === 'PLAYLIST_LOADED') {
+        if (search.loadType === 'playlist') {
             await interaction.respond([
                 {
                     name: truncateString(search.playlist.name, 95),
