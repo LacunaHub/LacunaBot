@@ -69,7 +69,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
 
         const chunks: WarningsViolator[][] = chunkArray(violators, 9)
-        const embed = new EmbedBuilder().setTitle(t('Commands.ViolationsCommand.Texts.ListOfViolations')),
+        const embed = new EmbedBuilder().setTitle(t('Commands.ViolationsCommand.Texts.ListOfViolators')),
             embedFields = []
 
         for (const chunk of chunks) {
