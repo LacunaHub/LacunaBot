@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, BaseGuildVoiceChannel, Message } from 'discord.js'
-import { Node, PlayerTrack, TrackUtils } from 'erela.js'
+import { Node } from 'lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, node: Node) {
@@ -7,7 +7,7 @@ async function handler(self: Lacuna, node: Node) {
     const guildIds = Object.keys(guildPlayers ?? {})
 
     for (const guildId of guildIds) {
-        let player = self.player.players.get(guildId)
+        let player = self.lava.nodes.getPlayer(guildId)
         const guild = self.guilds.cache.get(guildId)
 
         if (!guild) {
@@ -35,7 +35,7 @@ async function handler(self: Lacuna, node: Node) {
             continue
         }
 
-        player = self.player.create({
+        player = self.lava.nodes.createPlayer({
             guildId: guild.id,
             voiceChannelId: voiceChannel.id,
             textChannelId: textChannel.id,
@@ -43,32 +43,8 @@ async function handler(self: Lacuna, node: Node) {
             volume: guildPlayer.volume
         })
 
-        if (player.queue.totalSize === 0) {
-            player.queue.add(
-                guildPlayer.queue.map((i: PlayerTrack) => {
-                    return TrackUtils.build(
-                        {
-                            encoded: i.track,
-                            info: {
-                                identifier: i.identifier,
-                                isSeekable: i.isSeekable,
-                                author: i.author,
-                                length: i.duration,
-                                isStream: i.isStream,
-                                position: i.position,
-                                title: i.title,
-                                uri: i.uri,
-                                artworkUrl: i.artworkUrl,
-                                isrc: i.isrc,
-                                sourceName: i.sourceName
-                            },
-                            pluginInfo: {},
-                            userData: {}
-                        },
-                        i.requester
-                    )
-                })
-            )
+        if (player.queue.length + 1 === 0) {
+            player.queue.add(guildPlayer.queue)
         }
 
         player.set('message', message)
@@ -82,7 +58,7 @@ async function handler(self: Lacuna, node: Node) {
         await player.play()
     }
 
-    self.logger.log(`[ErelaNodeConnect] Successfully connected to ${node.options.identifier} node`)
+    self.logger.log(`[LavaNodeConnect] Successfully connected to ${node.options.name} node`)
 
     return true
 }

@@ -1,5 +1,14 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, Message, StringSelectMenuBuilder } from 'discord.js'
-import { Queue } from 'erela.js'
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonInteraction,
+    ButtonStyle,
+    ChatInputCommandInteraction,
+    Message,
+    StringSelectMenuBuilder,
+    StringSelectMenuInteraction
+} from 'discord.js'
+import { Queue } from 'lavaluna.js'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray, generateSimpleId } from '../../../internals/utility/Utils'
@@ -7,7 +16,7 @@ import { chunkArray, generateSimpleId } from '../../../internals/utility/Utils'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const player = self.player.get(interaction.guild.id)
+    const player = self.lava.nodes.getPlayer(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({
@@ -20,7 +29,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (!player.queue.size) {
+    if (!player.queue.length) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('Commands.QueueCommand.Texts.PlaybackQueueIsEmpty', {
                 username: `**${interaction.member.displayName}**`
@@ -41,10 +50,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         const currentSelectMenuOptions = []
 
         for (const track of chunk) {
+            const isCurrent = player.queue.current.encoded === track.encoded
+
             currentSelectMenuOptions.push({
-                label: track.title,
-                value: `${track.identifier}:${generateSimpleId(6)}`,
-                description: track.author
+                label: track.info.title,
+                value: `${track.info.identifier}:${generateSimpleId(6)}`,
+                description: track.info.author,
+                default: isCurrent
             })
         }
 
@@ -88,22 +100,23 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         time: 60000
     })
 
-    collector.on('collect', async i => {
-        if (i.isStringSelectMenu() && i.customId === 'QUEUE-SELECT-TRACK') {
-            await i.deferUpdate()
+    collector.on('collect', async (v: StringSelectMenuInteraction<'cached'> | ButtonInteraction<'cached'>) => {
+        if (v.isStringSelectMenu() && v.customId === 'QUEUE-SELECT-TRACK') {
+            await v.deferUpdate()
 
-            const trackId = i.values[0]
-            const trackIndex = player.queue.findIndex(j => j.identifier === trackId.split(':')[0])
+            const trackId = v.values[0],
+                trackIndex = player.queue.findIndex(vv => vv.info.identifier === trackId.split(':')[0])
 
             if (trackIndex !== -1) {
-                if (player.queueRepeat) player.queue.add([player.queue.current, ...player.queue.slice(0, trackIndex)])
-                await player.stop(trackIndex + 1)
-                await i.deleteReply()
+                player.queue.position = trackIndex
+
+                await player.play()
+                await v.deleteReply()
             }
         }
 
-        if (i.isButton()) {
-            switch (i.customId) {
+        if (v.isButton()) {
+            switch (v.customId) {
                 case 'QUEUE-PREVIOUS-PAGE':
                     page = page <= 0 ? selectMenuOptions.length - 1 : page - 1
                     break
@@ -115,8 +128,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
             rows[0].components[1].setLabel(t('Common.Pagination', { current: page + 1, total: chunks.length }))
 
-            await i.deferUpdate()
-            await i.editReply({
+            await v.deferUpdate()
+            await v.editReply({
                 components: [
                     new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                         new StringSelectMenuBuilder()

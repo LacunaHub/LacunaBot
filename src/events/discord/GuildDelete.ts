@@ -5,12 +5,9 @@ const handler = async (self: Lacuna, guild: Guild) => {
     self.logger.info(`${self.user.username} removed from guild ${guild.name} (${guild.id}) with ${guild.memberCount} members`)
     await self.logger.telegram.info(`${self.user.username} removed from guild ${guild.name} (${guild.id}) with ${guild.memberCount} members`)
 
-    const player = self.player.get(guild.id)
+    const player = self.lava.nodes.getPlayer(guild.id)
 
-    if (player) {
-        player.destroy()
-    }
-
+    player && (await player.destroy())
     self.guilds.cache.delete(guild.id)
 
     return true

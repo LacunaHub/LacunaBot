@@ -1,5 +1,5 @@
 import { Message } from 'discord.js'
-import { Player } from 'erela.js'
+import { Player } from 'lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, player: Player) {
@@ -27,12 +27,12 @@ async function handler(self: Lacuna, player: Player) {
         await self.db.qdb.delete(`guildPlayers.${player.guildId}`)
     }
 
-    self.logger.log(`[ErelaTrackStart] Player ${player.guildId} playback started`)
+    self.logger.log(`[LavaTrackStart] Player ${player.guildId} playback started`)
     await self.logger.appendServerLog(player.guildId, {
         level: 'LOG',
         module: 'Music',
         action: 'TrackEnd',
-        message: `Track "${track.author} - ${track.title}" is playing now`
+        message: `Track "${track.info.author} - ${track.info.title}" is playing now`
     })
 }
 

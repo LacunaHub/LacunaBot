@@ -1,8 +1,8 @@
 import { Shard as BridgeShard } from 'discord-cross-hosting'
 import { ClusterClient } from 'discord-hybrid-sharding'
 import { Client, ClientOptions, Collection, LimitedCollection, parseEmoji, PermissionsBitField } from 'discord.js'
-import { Manager } from 'erela.js'
 import { readdirSync } from 'fs'
+import { LavalunaManager } from 'lavaluna.js'
 import { connect } from 'mongoose'
 import { os } from 'node-os-utils'
 import db from '../database'
@@ -25,7 +25,7 @@ export default class Lacuna extends Client {
     public cache: LimitedCollection<string, any>
     public commands: Collection<string, Command>
     public events: Collection<string, Event>
-    public player: Manager
+    public lava: LavalunaManager | null = null
     public giveaways: Collection<string, Giveaway>
     public tempbans: Collection<string, TemporaryBan>
     public temproles: Collection<string, TemporaryRole>
@@ -51,8 +51,6 @@ export default class Lacuna extends Client {
         this.commands = new Collection()
 
         this.events = new Collection()
-
-        this.player = null
 
         this.giveaways = new Collection()
 
@@ -161,12 +159,12 @@ export default class Lacuna extends Client {
     }
 
     getMusicNodes() {
-        const nodes = this.player?.nodes
+        const nodes = [...this.lava?.nodes.cache.values()]
 
         return (
             nodes?.map(node => {
                 return {
-                    id: node.options.identifier,
+                    id: node.options.name,
                     connected: node.connected,
                     cpu_load: Number(node.stats.cpu.lavalinkLoad.toFixed(2)),
                     memory_usage: Math.round((node.stats.memory.used * 100) / node.stats.memory.reservable),
