@@ -5,7 +5,7 @@ import Lacuna from '../../../internals/Lacuna'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const player = self.player.get(interaction.guild.id)
+    const player = self.lava.nodes.getPlayer(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({

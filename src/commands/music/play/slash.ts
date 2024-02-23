@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, Message } from 'discord.js'
-import { SearchResult } from 'erela.js'
+import { SearchResult } from 'lavaluna.js'
 import numbro from 'numbro'
 import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
@@ -88,7 +88,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     let search: SearchResult
 
     try {
-        search = await self.player.search({ query, source: lavalinkSources[server.modules.music.default_source] }, interaction.user.tag)
+        search = await self.lava.search({ query, source: lavalinkSources[server.modules.music.default_source] }, { requester: interaction.user.tag })
     } catch (err) {
         await interaction.editReply({
             content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.TrackLoadFailed', {
@@ -99,7 +99,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (search.loadType === 'LOAD_FAILED') {
+    if (search.loadType === 'error') {
         await interaction.editReply({
             content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.TrackLoadFailed', {
                 username: `**${interaction.member.displayName}**`
@@ -109,7 +109,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (search.loadType === 'NO_MATCHES') {
+    if (search.loadType === 'empty') {
         await interaction.editReply({
             content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.NoMatches', { username: `**${interaction.member.displayName}**` })}`
         })
@@ -117,7 +117,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    const player = self.player.create({
+    const player = self.lava.nodes.createPlayer({
             guildId: interaction.guild.id,
             voiceChannelId: voice.id,
             textChannelId: interaction.channelId,
@@ -149,7 +149,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         )
     ]
 
-    if (search.loadType === 'PLAYLIST_LOADED') {
+    if (search.loadType === 'playlist') {
         if (!server.server.premium.available) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaylistsAvailableOnlyForPremium', {
@@ -173,24 +173,24 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         player.queue.add(search.tracks.slice(0, queueMaxLength || 250))
 
         const track = search.tracks[0]
-        const trackSource = getTrackSourceByUrl(track.uri)
+        const trackSource = getTrackSourceByUrl(track.info.uri)
 
         const embed = new EmbedBuilder()
-            .setTitle(`${track.author} - ${track.title}`)
+            .setTitle(`${track.info.author} - ${track.info.title}`)
             .addFields([
                 {
                     name: capitalizeFirstLetter(t('Commands.Options.Duration')),
-                    value: track.isStream ? '♾️' : `\`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``,
+                    value: track.info.isStream ? '♾️' : `\`[${numbro(track.info.length / 1000).format({ output: 'time' })}]\``,
                     inline: true
                 },
                 {
                     name: '\u200B',
-                    value: `⏭️ ${track.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.duration) / 1000)}:R>`}`,
+                    value: `⏭️ ${track.info.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.info.length) / 1000)}:R>`}`,
                     inline: true
                 },
                 {
                     name: capitalizeFirstLetter(t('Commands.Options.Source')),
-                    value: `[${self._emojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.uri})`,
+                    value: `[${self._emojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.info.uri})`,
                     inline: true
                 }
             ])
@@ -208,9 +208,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
     }
 
-    if (search.loadType === 'TRACK_LOADED' || search.loadType === 'SEARCH_RESULT') {
+    if (search.loadType === 'track' || search.loadType === 'search') {
         const track = search.tracks[0]
-        const trackSource = getTrackSourceByUrl(track.uri)
+        const trackSource = getTrackSourceByUrl(track.info.uri)
 
         if (player.queue.length >= queueMaxLength && queueMaxLength) {
             await interaction.editReply({
@@ -222,7 +222,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        if (track.isStream && !server.server.premium.available) {
+        if (track.info.isStream && !server.server.premium.available) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.StreamPlaybackAvailableOnlyForPremium', {
                     username: `**${interaction.member.displayName}**`
@@ -232,7 +232,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        if (track.isStream && !server.modules.music.allow_radio_playback) {
+        if (track.info.isStream && !server.modules.music.allow_radio_playback) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.StreamPlaybackIsDisabled', {
                     username: `**${interaction.member.displayName}**`
@@ -245,21 +245,21 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         player.queue.add(track)
 
         const embed = new EmbedBuilder()
-            .setTitle(`${track.author} - ${track.title}`)
+            .setTitle(`${track.info.author} - ${track.info.title}`)
             .addFields([
                 {
                     name: capitalizeFirstLetter(t('Commands.Options.Duration')),
-                    value: track.isStream ? '♾️' : `\`[${numbro(track.duration / 1000).format({ output: 'time' })}]\``,
+                    value: track.info.isStream ? '♾️' : `\`[${numbro(track.info.length / 1000).format({ output: 'time' })}]\``,
                     inline: true
                 },
                 {
                     name: '\u200B',
-                    value: `⏭️ ${track.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.duration) / 1000)}:R>`}`,
+                    value: `⏭️ ${track.info.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.info.length) / 1000)}:R>`}`,
                     inline: true
                 },
                 {
                     name: capitalizeFirstLetter(t('Commands.Options.Source')),
-                    value: `[${self._emojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.uri})`,
+                    value: `[${self._emojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.info.uri})`,
                     inline: true
                 }
             ])
@@ -269,7 +269,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             await interaction.editReply({
                 content: `${self._emojis.OK} | ${t('Commands.PlayCommand.Texts.TrackHasBeenAddedToQueue', {
                     username: `**${interaction.member.displayName}**`,
-                    track: `**${track.author} - ${track.title}**`
+                    track: `**${track.info.author} - ${track.info.title}**`
                 })}`
             })
         else {

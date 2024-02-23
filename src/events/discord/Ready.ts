@@ -1,28 +1,26 @@
 import { Events } from 'discord.js'
-import { Manager } from 'erela.js'
+import { LavalunaManager } from 'lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna) => {
-    const [identifier, host, port, password] = process.env.WINTER_MUSIC_NODE.split(':')
+    const [name, hostname, port, password] = process.env.WINTER_MUSIC_NODE.split(':')
 
-    self.player = new Manager({
+    self.lava = new LavalunaManager({
         nodes: [
             {
-                identifier,
-                host,
+                name,
+                hostname,
                 port: Number(port),
                 password,
-                retryAmount: 50,
-                retryDelay: 60000
+                reconnectRetryAmount: 100,
+                reconnectRetryDelay: 60000
             }
         ],
         clientId: self.user.id,
         clientName: `${self.user.username}#${self.cluster.id}`,
-        shards: self.options.shardCount,
         send(id, payload) {
             const guild = self.guilds.cache.get(id)
-
-            if (guild) guild.shard.send(payload)
+            guild && guild.shard.send(payload)
         }
     })
         .on('nodeConnect', node => self.emit('nodeConnect', node))
@@ -30,13 +28,12 @@ const handler = async (self: Lacuna) => {
         .on('nodeError', (node, error) => self.emit('nodeError', node, error))
         .on('nodeReconnect', node => self.emit('nodeReconnect', node))
         .on('playerDestroy', player => self.emit('playerDestroy', player))
-        .on('queueEnd', player => self.emit('queueEnd', player))
-        .on('trackEnd', player => self.emit('trackEnd', player))
-        .on('trackStart', player => self.emit('trackStart', player))
+        .on('playerQueueEnd', player => self.emit('queueEnd', player))
+        .on('playerTrackEnd', player => self.emit('trackEnd', player))
+        .on('playerTrackStart', player => self.emit('trackStart', player))
 
     self.loadEvents()
-
-    self.player.init(self.user.id)
+    self.lava.initialize()
 
     self.logger.info(`[DiscordReady] ${self.user.username} is ready`)
     await self.logger.telegram.info(`\`[DiscordReady]\` ${self.user.username} is ready`)

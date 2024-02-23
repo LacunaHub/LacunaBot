@@ -6,7 +6,7 @@ import { hmsToMS } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
-    const player = self.player.get(interaction.guild.id)
+    const player = self.lava.nodes.getPlayer(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({
@@ -32,7 +32,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     const currentTrack = player.queue.current
 
-    if (!currentTrack.isSeekable || typeof currentTrack.duration !== 'number') {
+    if (!currentTrack.info.isSeekable || typeof currentTrack.info.length !== 'number') {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('Commands.SeekCommand.Texts.TrackIsNotSeekable', {
                 username: `**${interaction.member.displayName}**`
@@ -56,7 +56,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     if (seekPosition < 0) seekPosition = 0
-    if (seekPosition > currentTrack.duration) seekPosition = currentTrack.duration
+    if (seekPosition > currentTrack.info.length) seekPosition = currentTrack.info.length
 
     await interaction.deferReply({ ephemeral: interaction.isButton() })
     await player.seek(seekPosition)

@@ -11,7 +11,7 @@ import { deleteTemporaryVoice } from '../../modules/VoiceManager'
 const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: state.guild.id })
 
-    const player = self.player.get(state.guild.id)
+    const player = self.lava.nodes.getPlayer(state.guild.id)
 
     if (player && !player.voiceChannelId && state.member.id === self.user.id) {
         player.destroy()

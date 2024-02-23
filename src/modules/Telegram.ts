@@ -154,7 +154,7 @@ export async function handleTelegramWebhook(data: ITelegramWebhookData) {
             if (guildSubscription.options.includes('CREATE_THREAD')) {
                 await restApi.post(apiRoutes.threads(message.channel_id, message.id), {
                     body: {
-                        name: data.post_link
+                        name: `${data.channel_title} #${data.message_id}`
                     }
                 })
             }

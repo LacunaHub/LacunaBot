@@ -1,16 +1,17 @@
 import { Message } from 'discord.js'
-import { Player } from 'erela.js'
+import { Player } from 'lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, player: Player) => {
-    const message = player.get<Message>('message')
+    const message = player.get<Message>('message'),
+        timeout = player.get<NodeJS.Timeout>('timeout')
 
     if (message) {
         try {
             await message.edit({ components: [] })
         } catch (err) {
             await self.logger.handleError({
-                module: 'MusicQueueEnd',
+                module: 'MusicPlayerDestroy',
                 action: 'RemoveComponentsFromPlayerMessage',
                 error: err,
                 guild_id: player.guildId
@@ -18,25 +19,26 @@ const handler = async (self: Lacuna, player: Player) => {
         }
     }
 
+    if (timeout) {
+        clearTimeout(timeout)
+    }
+
     player.set('message', null)
-    player.set(
-        'timeout',
-        setTimeout(() => player.destroy(), 300000)
-    )
+    player.set('timeout', null)
     await self.db.qdb.delete(`guildPlayers.${player.guildId}`)
 
-    self.logger.log(`[ErelaQueueEnd] Queue of player ${player.guildId} ended`)
+    self.logger.log(`[LavaPlayerDestroy] Player ${player.guildId} destroyed`)
     await self.logger.appendServerLog(player.guildId, {
         level: 'LOG',
         module: 'Music',
-        action: 'QueueEnd',
-        message: 'The player queue has ended'
+        action: 'PlayerDestroy',
+        message: 'Player destroyed'
     })
 
     return true
 }
 
 export default {
-    name: 'queueEnd',
+    name: 'playerDestroy',
     handler
 }

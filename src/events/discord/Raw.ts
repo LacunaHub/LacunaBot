@@ -2,7 +2,7 @@ import { Events } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, packet: any) => {
-    await self.player?.updateVoiceState(packet)
+    await self.lava?.updateVoiceState?.(packet)
 
     return true
 }

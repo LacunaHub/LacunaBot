@@ -9,7 +9,7 @@ import {
     Message,
     ModalSubmitInteraction
 } from 'discord.js'
-import { SearchResult } from 'erela.js'
+import { SearchResult } from 'lavaluna.js'
 import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
@@ -76,7 +76,7 @@ const handler = async (
         }
 
         if (interaction.customId.startsWith('PLAYER')) {
-            const player = self.player.get(interaction.guild.id)
+            const player = self.lava.nodes.getPlayer(interaction.guild.id)
             const message = player?.get<Message>('message')
 
             if (message?.id === interaction.message?.id) {
@@ -116,9 +116,9 @@ const handler = async (
 
                 if (interaction.customId === previousButton.customId) {
                     if (player.queue.previous && player.position < 5000) {
-                        player.queue.add(player.queue.current, 0)
-                        await player.play(player.queue.previous)
-                    } else if (player.queue.current.isSeekable) {
+                        player.queue.position--
+                        await player.play()
+                    } else if (player.queue.current.info.isSeekable) {
                         await player.seek(0)
                     }
                 }
@@ -129,22 +129,19 @@ const handler = async (
                 }
 
                 if (interaction.customId === nextButton.customId) {
-                    if (player.queueRepeat || player.trackRepeat) player.queue.add(player.queue.current)
                     await player.stop()
                 }
 
                 if (interaction.customId === repeatButton.customId) {
                     if (player.queueRepeat) {
                         ;(repeatButton as any).data.emoji = { name: '🔂' }
-                        player.setQueueRepeat(false)
-                        player.setTrackRepeat(true)
+                        player.setRepeatMode('TRACK')
                     } else if (player.trackRepeat) {
                         ;(repeatButton as any).data.emoji = { name: '➡️' }
-                        player.setTrackRepeat(false)
-                        player.setQueueRepeat(false)
+                        player.setRepeatMode('OFF')
                     } else {
                         ;(repeatButton as any).data.emoji = { name: '🔁' }
-                        player.setQueueRepeat(true)
+                        player.setRepeatMode('QUEUE')
                     }
                 }
 
@@ -362,20 +359,23 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
         let search: SearchResult
 
         try {
-            search = await self.player.search({ query: option?.value, source: lavalinkSources[server.modules.music.default_source] })
+            search = await self.lava.search(
+                { query: option?.value, source: lavalinkSources[server.modules.music.default_source] },
+                { maxResults: 25 }
+            )
         } catch (err) {
             await interaction.respond([])
 
             return false
         }
 
-        if (['LOAD_FAILED', 'NO_MATCHES'].includes(search.loadType)) {
+        if (['error', 'empty'].includes(search.loadType)) {
             await interaction.respond([])
 
             return false
         }
 
-        if (search.loadType === 'PLAYLIST_LOADED') {
+        if (search.loadType === 'playlist') {
             await interaction.respond([
                 {
                     name: truncateString(search.playlist.name, 95),
@@ -386,16 +386,14 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
             return true
         }
 
-        const tracks = search.tracks
-            .map(i => {
-                const trackName = truncateString(`${i.author} - ${i.title}`, 95)
+        const tracks = search.tracks.map(i => {
+            const trackName = truncateString(`${i.info.author} - ${i.info.title}`, 95)
 
-                return {
-                    name: trackName,
-                    value: i.uri
-                }
-            })
-            .slice(0, 25)
+            return {
+                name: trackName,
+                value: i.info.uri
+            }
+        })
 
         await interaction.respond(tracks)
     }
