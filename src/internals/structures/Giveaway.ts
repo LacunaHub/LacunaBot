@@ -1,6 +1,6 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, ButtonInteraction, Collection, EmbedBuilder } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 
 export default class Giveaway {
@@ -195,14 +195,14 @@ export async function handleEntries(self: Lacuna) {
     let handledEntries = 0
 
     for (const server of servers) {
-        const giveaways = server.utility.giveaways.filter(i => Date.now() < (i.expires_at ?? i.expiration_date))
+        const giveaways = server.utility.giveaways.filter(i => Date.now() < i.expires_at)
 
         for (const giveaway of giveaways) {
             new Giveaway(self, {
                 ...giveaway,
-                expires_at: giveaway.expires_at ?? giveaway.expiration_date,
-                number_of_winners: giveaway.number_of_winners ?? giveaway.winners_amount,
-                participants: giveaway.participants ?? giveaway.members,
+                expires_at: giveaway.expires_at,
+                number_of_winners: giveaway.number_of_winners,
+                participants: giveaway.participants,
                 locale: server.locale
             })
         }

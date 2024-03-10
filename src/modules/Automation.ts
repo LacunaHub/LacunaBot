@@ -1,4 +1,10 @@
 import {
+    ServerDocument,
+    ServerMessageTemplateEmbed,
+    ServerModulesAutomation,
+    ServerModulesAutomationTrigger
+} from '@lacunahub/lacuna-database-driver'
+import {
     AnySelectMenuInteraction,
     BaseGuildTextChannel,
     ButtonInteraction,
@@ -23,7 +29,6 @@ import {
 import IVM, { Context } from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'
 import safeRegex from 'safe-regex'
-import { IAutomation, IAutomationTrigger, MessageEmbed as IMessageEmbed, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import Logger from '../internals/Logger'
 import {
@@ -38,14 +43,14 @@ import {
 export default class Automation {
     public self: Lacuna
     public server: ServerDocument
-    public automation: IAutomation
-    public signal: IAutomationSignal
+    public automation: ServerModulesAutomation
+    public signal: AutomationSignal
     private storage: QDatabase
     private isolate: IVM.Isolate
     private usedPatterns: string[]
     private usedFunctions: string[]
 
-    constructor(self: Lacuna, server: ServerDocument, automation: IAutomation, signal: IAutomationSignal) {
+    constructor(self: Lacuna, server: ServerDocument, automation: ServerModulesAutomation, signal: AutomationSignal) {
         this.self = self
 
         this.server = server
@@ -289,7 +294,7 @@ export default class Automation {
         return string
     }
 
-    async transformTemplateMessage(message: { content: string; embed: IMessageEmbed; components?: any[][] }, ctx: Context) {
+    async transformTemplateMessage(message: { content: string; embed: ServerMessageTemplateEmbed; components?: any[][] }, ctx: Context) {
         const content = await this.replacePatterns(message.content, ctx)
         let embed = {}
 
@@ -445,7 +450,7 @@ export default class Automation {
             if (component.type === 'ACTION') {
                 const { action } = component
 
-                if (action.type === 'EXECUTE_CODE' && !this.server.server.premium.available) {
+                if (action.type === 'EXECUTE_CODE' && !this.server.premium.available) {
                     if (['ButtonInteraction', 'StringSelectMenuInteraction', 'ModalSubmitInteraction'].includes(this.signalType)) {
                         const interaction = this.signal as ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction
 
@@ -470,7 +475,7 @@ export default class Automation {
                     break
                 }
 
-                if (action.type === 'EXECUTE_CODE' && this.server.server.premium.available) {
+                if (action.type === 'EXECUTE_CODE' && this.server.premium.available) {
                     const interaction = this.signal as ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction
 
                     const functions = {
@@ -1197,11 +1202,11 @@ export default class Automation {
         return this.usedFunctions.filter(i => i === name).length
     }
 
-    static async handleEvent(eventName: IAutomationTrigger, self: Lacuna, server: ServerDocument, signal: IAutomationSignal) {
+    static async handleEvent(eventName: ServerModulesAutomationTrigger, self: Lacuna, server: ServerDocument, signal: AutomationSignal) {
         const automation = server.modules.automation
-            .slice(0, server.server.premium.available ? 20 : 5)
+            .slice(0, server.premium.available ? 20 : 5)
             .filter(i => i.trigger === eventName && !i.options.includes('DISABLED'))
-            .slice(0, server.server.premium.available ? 5 : 1)
+            .slice(0, server.premium.available ? 5 : 1)
 
         if (automation.length) {
             if ('customId' in signal) {
@@ -1217,4 +1222,4 @@ export default class Automation {
     }
 }
 
-export type IAutomationSignal = GuildMember | ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction | Message | VoiceState
+export type AutomationSignal = GuildMember | ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction | Message | VoiceState

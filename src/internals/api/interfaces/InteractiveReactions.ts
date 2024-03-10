@@ -1,17 +1,17 @@
+import { ServerDocument, ServerModulesInteractiveReaction } from '@lacunahub/lacuna-database-driver'
 import { parseEmoji } from 'discord.js'
 import database from '../../../database'
-import { InteractiveReaction, ServerDocument } from '../../../database/schemas/Servers'
 import { generateId } from '../../../modules/Reactions'
 import Logger from '../../Logger'
 import DiscordUtils from '../../utility/DiscordUtils'
 import APIError from '../utility/APIError'
 
-export async function createInteractiveReaction(server: ServerDocument, data: Partial<InteractiveReaction>) {
+export async function createInteractiveReaction(server: ServerDocument, data: Partial<ServerModulesInteractiveReaction>) {
     const element_id = data.id ?? generateId(),
         emoji = parseEmoji(data.emoji as any),
         interactiveReactions = server.modules.reactions
 
-    if (interactiveReactions.length >= 50 && !server.server.premium.available) throw new APIError(3005)
+    if (interactiveReactions.length >= 50 && !server.premium.available) throw new APIError(3005)
     if (interactiveReactions.length >= 200) throw new APIError(3006)
     if (interactiveReactions.some(r => r.message.id === data.message.id && r.emoji.name === emoji.name)) throw new APIError(4007)
     if (
@@ -83,7 +83,7 @@ export async function createInteractiveReaction(server: ServerDocument, data: Pa
     return reaction
 }
 
-export async function updateInteractiveReaction(server: ServerDocument, data: InteractiveReaction) {
+export async function updateInteractiveReaction(server: ServerDocument, data: ServerModulesInteractiveReaction) {
     const interactiveReaction = server.modules.reactions.find(r => r.id === data.id)
 
     if (!interactiveReaction) throw new APIError(1013)

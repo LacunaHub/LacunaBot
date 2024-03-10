@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     ActionRowBuilder,
     BaseGuildTextChannel,
@@ -14,7 +15,6 @@ import {
     User
 } from 'discord.js'
 import db from '../../database'
-import { ServerDocument } from '../../database/schemas/Servers'
 import i18n from '../../i18n'
 import Lacuna from '../../internals/Lacuna'
 import Logger from '../../internals/Logger'

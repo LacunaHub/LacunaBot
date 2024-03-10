@@ -1,6 +1,6 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { APIWebhook, DataResolver } from 'discord.js'
 import database from '../../../database'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import { hubSubscribe } from '../../../modules/YouTube'
 import Logger from '../../Logger'
 import DiscordUtils from '../../utility/DiscordUtils'
@@ -9,7 +9,7 @@ import APIError from '../utility/APIError'
 export async function createYouTubeSubscription(server: ServerDocument, data: any) {
     const subscriptions = server.modules.subscriptions.youtube
 
-    if (subscriptions.length >= 1 && !server.server.premium.available) throw new APIError(3011)
+    if (subscriptions.length >= 1 && !server.premium.available) throw new APIError(3011)
     if (subscriptions.length >= 10) throw new APIError(3012)
     if (subscriptions.some(s => s.channel_id === data.channel.id)) throw new APIError(2007)
 

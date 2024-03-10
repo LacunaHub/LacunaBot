@@ -1,7 +1,7 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, Message } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
 import { caseLog, warnings } from '../Moderation'
@@ -142,7 +142,7 @@ export default async function (self: Lacuna, server: ServerDocument, message: Me
         }
 
         if (send_message) {
-            const replacer = new Replacer(server.server.premium.available, { message: message, guild: message.guild, member: message.member }),
+            const replacer = new Replacer(server.premium.available, { message: message, guild: message.guild, member: message.member }),
                 messagePayload = await replacer.replaceTemplateMessage(config.send_message)
 
             try {

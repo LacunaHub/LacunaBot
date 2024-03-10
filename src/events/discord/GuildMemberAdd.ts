@@ -1,5 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Events, GuildMember } from 'discord.js'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { active_patron_role_id, former_patron_role_id, support_server_id } from '../../internals/utility/billing'
 import Automation from '../../modules/Automation'

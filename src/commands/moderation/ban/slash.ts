@@ -1,7 +1,7 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import TemporaryBan from '../../../internals/structures/TemporaryBan'
 import { caseLog } from '../../../modules/Moderation'
@@ -92,7 +92,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     if (server.moderation.case_log.types.BAN_ADD.active) {
-        const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: mention }),
+        const replacer = new Replacer(server.premium.available, { guild: interaction.guild, member: mention }),
             messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.BAN_ADD.dm_message, { penalty: { reason } })
 
         try {

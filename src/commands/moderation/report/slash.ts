@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     ActionRowBuilder,
     BaseGuildTextChannel,
@@ -13,7 +14,6 @@ import {
 } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async (

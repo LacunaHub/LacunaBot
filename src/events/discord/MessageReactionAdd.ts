@@ -1,5 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChannelType, Events, MessageReaction, User } from 'discord.js'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import InteractiveMessages from '../../modules/InteractiveMessages'
 import { reactionAdd } from '../../modules/Reactions'

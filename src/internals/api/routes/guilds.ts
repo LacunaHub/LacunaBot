@@ -1,4 +1,5 @@
 import Router from '@koa/router'
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     APIApplicationCommand,
     APIEmoji,
@@ -13,7 +14,6 @@ import {
 } from 'discord.js'
 import { Context } from 'koa'
 import db from '../../../database'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import { diamondGuilds } from '../../structures/DiamondGuild'
 import { addDiamond } from '../../utility/billing'
 import DiscordUtils from '../../utility/DiscordUtils'
@@ -43,7 +43,7 @@ async function getSettings(ctx: Context) {
         guild: RESTAPIPartialCurrentUserGuild = ctx.state.guild
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -100,18 +100,18 @@ async function getSettings(ctx: Context) {
     })
 
     const commandsCache = (await db.qdb.get('commands')) as any
-    const { diamondPrices } = await db.json.get()
+    const { diamondPrices } = await db.getInternalData()
 
     ctx.status = 200
     ctx.body = {
         _id: server._id,
         locale: server.locale,
         premium: {
-            available: server.server.premium.available,
-            will_expire_on: server.server.premium.will_expire_on
+            available: server.premium.available,
+            will_expire_on: server.premium.expires_at
         },
         server: {
-            bot_expert_roles: server.server.bot_expert_roles
+            bot_expert_roles: server.bot_experts
         },
         commands: server.commands,
         guild: {
@@ -187,7 +187,7 @@ async function updateSettings(ctx: Context) {
 
     let server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -201,7 +201,7 @@ async function updateSettings(ctx: Context) {
         ctx.throw(406, new APIError(2004))
     }
 
-    const { diamondPrices } = await db.json.get()
+    const { diamondPrices } = await db.getInternalData()
     server = await interfaces.updateSettings(server, data, currentUser.id)
 
     ctx.status = 200
@@ -209,11 +209,11 @@ async function updateSettings(ctx: Context) {
         _id: server._id,
         locale: server.locale,
         premium: {
-            available: server.server.premium.available,
-            will_expire_on: server.server.premium.will_expire_on
+            available: server.premium.available,
+            will_expire_on: server.premium.expires_at
         },
         server: {
-            bot_expert_roles: server.server.bot_expert_roles
+            bot_expert_roles: server.bot_experts
         },
         commands: server.commands,
         moderation: {
@@ -270,7 +270,7 @@ async function updateCustomCommand(ctx: Context) {
     const data = ctx.request.body
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -307,7 +307,7 @@ async function updateInteractiveMessage(ctx: Context) {
     const data = ctx.request.body
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -344,7 +344,7 @@ async function updateInteractiveReaction(ctx: Context) {
     const data = ctx.request.body
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -381,7 +381,7 @@ async function updateTelegramSubscription(ctx: Context) {
     const data = ctx.request.body
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -418,7 +418,7 @@ async function updateTwitchSubscription(ctx: Context) {
     const data = ctx.request.body
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -456,7 +456,7 @@ async function updateYouTubeSubscription(ctx: Context) {
 
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -494,7 +494,7 @@ async function updateAutoVoice(ctx: Context) {
 
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -545,10 +545,10 @@ async function transferDiamond(ctx: Context) {
 
     const server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) ctx.throw(404, new APIError(1003))
-    if (!server.server.premium.available || !server.server.premium.bill_id) ctx.throw(402, new APIError(2001))
+    if (!server || server.blocked) ctx.throw(404, new APIError(1003))
+    if (!server.premium.available || !server.premium.bill_id) ctx.throw(402, new APIError(2001))
 
-    const bill = await db.bills.findOne({ _id: server.server.premium.bill_id })
+    const bill = await db.bills.findOne({ _id: server.premium.bill_id })
 
     if (!bill) {
         ctx.throw(400, new APIError(1018))
@@ -556,8 +556,8 @@ async function transferDiamond(ctx: Context) {
 
     const toServer = await db.servers.findOne({ _id: toGuildId })
 
-    if (!toServer || toServer.server.blocked) ctx.throw(404, new APIError(1003))
-    if (toServer.server.premium.available) ctx.throw(404, new APIError(2009))
+    if (!toServer || toServer.blocked) ctx.throw(404, new APIError(1003))
+    if (toServer.premium.available) ctx.throw(404, new APIError(2009))
 
     await db.servers.updateOne(
         { _id: guildId },
@@ -571,7 +571,7 @@ async function transferDiamond(ctx: Context) {
     )
 
     await db.bills.updateOne(
-        { _id: server.server.premium.bill_id },
+        { _id: server.premium.bill_id },
         {
             $set: {
                 'custom_fields.reference_id': toGuildId
@@ -595,7 +595,7 @@ async function downloadLogs(ctx: Context) {
     const guildId = ctx.params.guild_id,
         server = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 

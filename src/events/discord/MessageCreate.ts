@@ -1,5 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChannelType, Events, Message, MessageType } from 'discord.js'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/Automation'
 import Automoder from '../../modules/Automoder'
@@ -14,7 +14,7 @@ const handler = async (self: Lacuna, message: Message) => {
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
 
-    if (server.server.blocked) {
+    if (server.blocked) {
         await message.guild.leave()
 
         return false

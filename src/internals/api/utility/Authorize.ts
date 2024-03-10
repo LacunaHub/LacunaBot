@@ -51,7 +51,7 @@ export async function checkPermissions(ctx: Context, next: Next) {
     }
 
     const guild = currentUserGuilds.find(g => g.id === guildId)
-    const isRootUser = (await db.json.get()).rootUsers.includes(currentUser.id)
+    const isRootUser = (await db.getInternalData()).rootUsers.includes(currentUser.id)
 
     if (isRootUser) {
         ctx.state.guild = guild ?? {}
@@ -80,7 +80,7 @@ export async function checkPermissions(ctx: Context, next: Next) {
 
 export async function passKnownReferrers(ctx: Context, next: Next) {
     const referer = ctx.request.headers.referer
-    const { allowedApiHosts, allowedApiUrls } = await db.json.get()
+    const { allowedAPIReferrers, publicAPIPaths } = await db.getInternalData()
 
     if (process.env.NODE_ENV === 'development') {
         await next()
@@ -88,8 +88,8 @@ export async function passKnownReferrers(ctx: Context, next: Next) {
         return
     }
 
-    const isAllowedHost = referer && allowedApiHosts.some(host => referer.includes(host)),
-        isAllowedURL = allowedApiUrls.some(url => ctx.url.startsWith(url))
+    const isAllowedHost = referer && allowedAPIReferrers.some(host => referer.includes(host)),
+        isAllowedURL = publicAPIPaths.some(url => ctx.url.startsWith(url))
 
     if (!isAllowedHost && !isAllowedURL) {
         ctx.throw(503, new APIError())

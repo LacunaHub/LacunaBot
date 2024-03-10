@@ -1,11 +1,13 @@
+import { ServerDocument, ServerModulesAutoThread } from '@lacunahub/lacuna-database-driver'
 import { Message, TextChannel } from 'discord.js'
 import { split } from 'unicode-default-word-boundary'
-import { AutoThread, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
 
 export async function autoThread(self: Lacuna, server: ServerDocument, message: Message) {
-    const at: AutoThread = server.modules.autothreads.slice(0, server.server.premium.available ? 20 : 2).find(i => i.channel_id == message.channel.id)
+    const at: ServerModulesAutoThread = server.modules.autothreads
+        .slice(0, server.premium.available ? 20 : 2)
+        .find(i => i.channel_id == message.channel.id)
 
     if (at) {
         const content: string = message.content.toLowerCase()
@@ -23,7 +25,7 @@ export async function autoThread(self: Lacuna, server: ServerDocument, message: 
             if (match) return false
         }
 
-        const replacer = new Replacer(server.server.premium.available, {
+        const replacer = new Replacer(server.premium.available, {
                 guild: message.guild,
                 member: message.member,
                 message: message

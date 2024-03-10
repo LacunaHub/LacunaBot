@@ -1,9 +1,9 @@
 import Router from '@koa/router'
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import crypto from 'crypto'
 import { Context, Next } from 'koa'
 import rawBodyParser from 'raw-body'
 import db from '../../../database'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import { handleTelegramWebhook, searchChannels as searchTelegramChannels } from '../../../modules/Telegram'
 import { eventSubUnsubscribe, handleIncomingWebhook, searchChannels as searchTwitchChannels } from '../../../modules/Twitch'
 import { handleHubBubWebhook, searchChannels as searchYouTubeChannels } from '../../../modules/YouTube'
@@ -32,7 +32,7 @@ async function searchTwitch(ctx: Context) {
 
     const server: ServerDocument = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -55,7 +55,7 @@ async function searchYouTube(ctx: Context) {
 
     const server: ServerDocument = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -78,7 +78,7 @@ async function searchTelegram(ctx: Context) {
 
     const server: ServerDocument = await db.servers.findOne({ _id: guildId })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 

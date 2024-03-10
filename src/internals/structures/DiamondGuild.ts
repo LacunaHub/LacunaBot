@@ -1,6 +1,6 @@
+import { BillDocument } from '@lacunahub/lacuna-database-driver'
 import { Job, scheduleJob } from 'node-schedule'
 import database from '../../database'
-import { IBill } from '../../database/schemas/Bills'
 import logger from '../Logger'
 import { addDiamond, server_booster_role_id, subscribed_patron_role_id } from '../utility/billing'
 import { isRolesMember } from '../utility/billing/providers/DiscordRoles'
@@ -37,7 +37,7 @@ export default class DiamondGuild {
     }
 
     async expire() {
-        let bill: IBill,
+        let bill: BillDocument,
             rolesMember: boolean = false
 
         if (this.bill_id) {
@@ -86,12 +86,12 @@ export async function handleDiamondGuilds() {
     const servers = await database.servers.find({ 'server.premium.available': true, 'server.premium.will_expire_on': { $gt: 0 } })
 
     for (const server of servers) {
-        const { will_expire_on, bill_id } = server.server.premium
+        const { expires_at, bill_id } = server.premium
         const diamondGuild = diamondGuilds.get(server._id)
 
         if (diamondGuild) continue
 
-        new DiamondGuild(server._id, will_expire_on, bill_id)
+        new DiamondGuild(server._id, expires_at, bill_id)
     }
 
     logger.log(`[DiamondGuild] Found ${servers.length} guilds with Lacuna Diamond`)

@@ -1,7 +1,6 @@
+import { ServerDocument, UserLevel, UserWallet } from '@lacunahub/lacuna-database-driver'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message } from 'discord.js'
 import numbro from 'numbro'
-import { ServerDocument } from '../../../database/schemas/Servers'
-import { IUserLevel, IUserWallet } from '../../../database/schemas/Users'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
 
@@ -13,7 +12,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     let page: number = interaction.options?.getInteger('page') ? interaction.options.getInteger('page') - 1 : 0
 
     const fields = []
-    let chunks: Array<IUserLevel[] | IUserWallet[]> = []
+    let chunks: Array<UserLevel[] | UserWallet[]> = []
     const sorting_choices = [locale.Commands.LeadersCommand.Options.Sorting.ChoiceLevel, locale.Commands.LeadersCommand.Options.Sorting.ChoiceBalance]
 
     if (sorting > sorting_choices.length || sorting < 1) sorting = 1
@@ -54,7 +53,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         for (const chunk of chunks) {
             const current = []
 
-            for (const level of chunk as IUserLevel[]) {
+            for (const level of chunk as UserLevel[]) {
                 const index = sorted.indexOf(level as any)
 
                 const currentXp =
@@ -112,7 +111,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         for (const chunk of chunks) {
             const current = []
 
-            for (const wallet of chunk as IUserWallet[]) {
+            for (const wallet of chunk as UserWallet[]) {
                 const index = sorted.indexOf(wallet as any)
                 const currencies = wallet.currencies
                     .map(i => {

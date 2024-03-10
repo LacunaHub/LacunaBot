@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     ApplicationCommandOptionType,
     BaseGuildTextChannel,
@@ -8,7 +9,6 @@ import {
     PermissionsString,
     Team
 } from 'discord.js'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 
 export default class Command {
@@ -108,7 +108,7 @@ export default class Command {
             return false
         }
 
-        if (this.premium_only && !server.server.premium.available) {
+        if (this.premium_only && !server.premium.available) {
             await interaction.reply({
                 content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
                     username: `**${interaction.user.username}**`
@@ -179,7 +179,7 @@ export default class Command {
             return false
         }
 
-        if (this.premium_only && !server.server.premium.available) {
+        if (this.premium_only && !server.premium.available) {
             await interaction.reply({
                 content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', { username: `**${interaction.user.tag}**` })}`,
                 ephemeral: true

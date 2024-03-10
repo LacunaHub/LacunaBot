@@ -1,5 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { VoiceState } from 'discord.js'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { voiceAssign as economyVoiceAssign } from '../../modules/Economy'
 import Levels from '../../modules/Levels'

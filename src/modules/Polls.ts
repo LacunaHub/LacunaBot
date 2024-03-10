@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder } from '@discordjs/builders'
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ButtonInteraction, ButtonStyle, Message, ModalSubmitInteraction } from 'discord.js'
-import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import { emojiLetters } from '../internals/utility/Constants'
 import { chunkArray } from '../internals/utility/Utils'

@@ -8,7 +8,6 @@ import Koa from 'koa'
 import koaBody from 'koa-body'
 import koaJson from 'koa-json'
 import koaMorgan from 'koa-morgan'
-import { connect } from 'mongoose'
 import database from '../../database'
 import Logger from '../Logger'
 import { handleDiamondGuilds } from '../structures/DiamondGuild'
@@ -65,10 +64,9 @@ app.use(state.routes()).use(state.allowedMethods())
 app.use(subscriptions.routes()).use(subscriptions.allowedMethods())
 app.use(users.routes()).use(users.allowedMethods())
 
-connect(process.env.DB_URI, { dbName: 'lacuna', useNewUrlParser: true, useUnifiedTopology: true })
-database.qdb.connect()
-
+database.connect()
 bridgeClient.connect()
+
 app.listen(process.env.API_PORT, () => {
     Logger.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${app.proxy}`)
     Logger.telegram.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${app.proxy}`)

@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     AnySelectMenuInteraction,
     AutocompleteInteraction,
@@ -10,7 +11,6 @@ import {
     ModalSubmitInteraction
 } from 'discord.js'
 import { SearchResult } from 'lavaluna.js'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
@@ -273,7 +273,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
 
     if (interaction.commandName === 'store') {
         const items = server.modules.economy.store.items
-            .slice(0, server.server.premium.available ? 200 : 50)
+            .slice(0, server.premium.available ? 200 : 50)
             .filter(i => [i.id, i.name, i.description].some(ii => ii.includes(option?.value)))
 
         await interaction.respond(
@@ -348,9 +348,9 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
         }
 
         const is_url = new RegExp(`^https?:\/\/`).test(option?.value)
-        const { playableMusicHosts: allowed_hosts } = await self.db.json.get()
+        const { allowedMusicHosts } = await self.db.getInternalData()
 
-        if (is_url && !allowed_hosts.some(h => option?.value?.startsWith?.(h))) {
+        if (is_url && !allowedMusicHosts.some(h => option?.value?.startsWith?.(h))) {
             await interaction.respond([])
 
             return false

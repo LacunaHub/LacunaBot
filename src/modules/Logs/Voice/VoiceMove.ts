@@ -1,11 +1,11 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, EmbedBuilder, VoiceState } from 'discord.js'
 import { fetchLogWebhook, isRateLimited } from '..'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: VoiceState, state: VoiceState): Promise<boolean> {
     if (server.moderation.logs.types.voice_disconnect.active) {
-        if (isRateLimited(server._id, server.server.premium.available)) return false
+        if (isRateLimited(server._id, server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -33,8 +33,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
             try {
                 await webhook.send({
                     embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
+                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    username: server.premium.available ? webhook.name : self.user.username
                 })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsVoiceMove', action: 'SendMessageViaWebhook', error: err, guild_id: state.guild.id })

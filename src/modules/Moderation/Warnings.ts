@@ -1,6 +1,6 @@
+import { ServerDocument, ServerModerationWarningsPenalty, ServerModerationWarningsViolator } from '@lacunahub/lacuna-database-driver'
 import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, Message } from 'discord.js'
 import ms from 'ms'
-import { ServerDocument, WarningsPenalty, WarningsViolator } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
 import { generateSimpleId } from '../../internals/utility/Utils'
@@ -18,8 +18,8 @@ export async function addWarn(
         reason = options.reason
     const timestamp: number = Date.now()
 
-    const violator: WarningsViolator = server.moderation.warnings.violators.find(v => v.user_id == target.id)
-    const penalty: WarningsPenalty = server.moderation.warnings.penalties.find(p =>
+    const violator: ServerModerationWarningsViolator = server.moderation.warnings.violators.find(v => v.user_id == target.id)
+    const penalty: ServerModerationWarningsPenalty = server.moderation.warnings.penalties.find(p =>
         violator ? p.penalties == violator.violations.length + 1 : p.penalties == 1
     )
 
@@ -167,7 +167,7 @@ export async function addWarn(
         }
 
         if (send_message) {
-            const replacer = new Replacer(server.server.premium.available, {
+            const replacer = new Replacer(server.premium.available, {
                     message: signal instanceof Message ? signal : undefined,
                     guild: signal.guild,
                     member: target
@@ -204,7 +204,7 @@ export async function addWarn(
     }
 
     if (server.moderation.case_log.types.WARN_ADD.active) {
-        const replacer = new Replacer(server.server.premium.available, {
+        const replacer = new Replacer(server.premium.available, {
                 guild: signal.guild,
                 member: target,
                 message: signal instanceof Message ? signal : undefined

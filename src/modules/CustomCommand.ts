@@ -1,3 +1,4 @@
+import { ServerDocument, ServerMessageTemplateEmbed, ServerModulesCustomCommand } from '@lacunahub/lacuna-database-driver'
 import {
     ApplicationCommandOptionType,
     BaseGuildTextChannel,
@@ -20,13 +21,12 @@ import {
 import IVM, { Context } from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'
 import safeRegex from 'safe-regex'
-import { ICustomCommand, MessageEmbed as IMessageEmbed, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import logger from '../internals/Logger'
 import { escapeRegexp, isValidHttpUrl, snakeToPascalCase, transformMessageComponents, transformModalComponents } from '../internals/utility/Utils'
 
 export default class CustomCommand {
-    public command: ICustomCommand
+    public command: ServerModulesCustomCommand
     public self: Lacuna
     public server: ServerDocument
     public interaction: ChatInputCommandInteraction<'cached'>
@@ -35,7 +35,7 @@ export default class CustomCommand {
     private usedFunctions: string[]
     private isolate: IVM.Isolate
 
-    constructor(command: ICustomCommand, self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
+    constructor(command: ServerModulesCustomCommand, self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
         this.command = command
 
         this.self = self
@@ -265,7 +265,7 @@ export default class CustomCommand {
         return string
     }
 
-    async handleTemplateMessage(message: { content: string; embed: IMessageEmbed; components?: any[][] }, ctx: Context) {
+    async handleTemplateMessage(message: { content: string; embed: ServerMessageTemplateEmbed; components?: any[][] }, ctx: Context) {
         const content = await this.replacePatterns(message.content, ctx)
         let embed = {}
 
@@ -496,7 +496,7 @@ export default class CustomCommand {
             if (component.type === 'ACTION') {
                 const { action } = component
 
-                if (action.type === 'EXECUTE_CODE' && !this.server.server.premium.available) {
+                if (action.type === 'EXECUTE_CODE' && !this.server.premium.available) {
                     await this.interaction.reply({
                         content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
                             username: `**${this.interaction.user.globalName}**`
@@ -507,7 +507,7 @@ export default class CustomCommand {
                     break
                 }
 
-                if (action.type === 'EXECUTE_CODE' && this.server.server.premium.available) {
+                if (action.type === 'EXECUTE_CODE' && this.server.premium.available) {
                     const functions = {
                         createChannel: async (rawOptions: Partial<GuildChannelCreateOptions>) => {
                             const used = this.useFunction('createChannel')

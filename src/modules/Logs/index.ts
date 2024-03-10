@@ -1,5 +1,5 @@
+import { ServerModerationLogsWebhook } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, Webhook } from 'discord.js'
-import { LogsWebhook } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import ChannelCreate from './Channel/ChannelCreate'
 import ChannelDelete from './Channel/ChannelDelete'
@@ -51,7 +51,7 @@ export const images = {
     WARN_REMOVE: 'https://i.imgur.com/AXNkdfG.png'
 }
 
-export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextChannel, webhooks: LogsWebhook[]) {
+export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextChannel, webhooks: ServerModerationLogsWebhook[]) {
     const logWebhook = webhooks.find(i => i.channel_id === logChannel.id)
     let webhook: Webhook
 

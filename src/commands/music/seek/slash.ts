@@ -1,6 +1,6 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js'
 import numbro from 'numbro'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { hmsToMS } from '../../../internals/utility/Utils'
 

@@ -7,11 +7,13 @@ export async function isBotExpert(guild_id: string, user_id: string): Promise<bo
     const server = await database.servers.findOne({ _id: guild_id })
     let member: APIGuildMember
 
+    return server.bot_experts.includes(user_id)
+
     try {
         member = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild_id, user_id))) as any
     } catch (err) {}
 
-    return server && member ? member.roles.some(r => server.server.bot_expert_roles.includes(r)) : false
+    return server && member ? member.roles.some(r => server.bot_experts.includes(r)) : false
 }
 
 export function createRateLimitMiddleware(max: number, duration: number = 60000) {

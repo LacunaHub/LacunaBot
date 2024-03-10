@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -9,7 +10,6 @@ import {
     StringSelectMenuInteraction
 } from 'discord.js'
 import { Queue } from 'lavaluna.js'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray, generateSimpleId } from '../../../internals/utility/Utils'
 

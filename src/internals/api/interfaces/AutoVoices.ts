@@ -1,11 +1,11 @@
+import { ServerDocument, ServerModulesVoiceManagerAutoVoice } from '@lacunahub/lacuna-database-driver'
 import database from '../../../database'
-import { IAutoVoice, ServerDocument } from '../../../database/schemas/Servers'
 import APIError from '../utility/APIError'
 
-export async function createAutoVoice(server: ServerDocument, data: IAutoVoice) {
+export async function createAutoVoice(server: ServerDocument, data: ServerModulesVoiceManagerAutoVoice) {
     const autoVoices = server.modules.voice_manager.autovoices
 
-    if (autoVoices.length >= 2 && !server.server.premium.available) throw new APIError(3013)
+    if (autoVoices.length >= 2 && !server.premium.available) throw new APIError(3013)
     if (autoVoices.length >= 20) throw new APIError(3014)
     if (autoVoices.some(i => i.channel_id === data.channel_id)) throw new APIError(2008)
 
@@ -21,7 +21,7 @@ export async function createAutoVoice(server: ServerDocument, data: IAutoVoice) 
     return data
 }
 
-export async function updateAutoVoice(server: ServerDocument, data: Partial<IAutoVoice>) {
+export async function updateAutoVoice(server: ServerDocument, data: Partial<ServerModulesVoiceManagerAutoVoice>) {
     const autoVoices = server.modules.voice_manager.autovoices
 
     if (!autoVoices.some(i => i.channel_id === data.channel_id)) throw new APIError(1017)

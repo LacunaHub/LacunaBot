@@ -1,6 +1,6 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { APIWebhook, DataResolver } from 'discord.js'
 import database from '../../../database'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import { IFile } from '../../../modules/Telegram'
 import Logger from '../../Logger'
 import DiscordUtils from '../../utility/DiscordUtils'
@@ -9,7 +9,7 @@ import APIError from '../utility/APIError'
 export async function createTelegramSubscription(server: ServerDocument, data: any) {
     const subscriptions = server.modules.subscriptions.telegram
 
-    if (subscriptions.length >= 1 && !server.server.premium.available) throw new APIError(3007)
+    if (subscriptions.length >= 1 && !server.premium.available) throw new APIError(3007)
     if (subscriptions.length >= 10) throw new APIError(3008)
     if (subscriptions.some(s => s.channel_id === data.channel.id)) throw new APIError(2005)
 

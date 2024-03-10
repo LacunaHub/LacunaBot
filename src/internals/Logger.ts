@@ -1,11 +1,11 @@
+import { ServerLogEntry } from '@lacunahub/lacuna-database-driver'
 import moment from 'moment'
 import fetch from 'node-fetch'
 import database from '../database'
-import { ILogEntry } from '../database/schemas/Servers'
 
 const telegram_base_url: string = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`
 
-async function appendServerLog(guildId: string, data: Partial<ILogEntry>) {
+async function appendServerLog(guildId: string, data: Partial<ServerLogEntry>) {
     await database.servers.updateOne(
         { _id: guildId },
         {

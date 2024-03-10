@@ -1,8 +1,8 @@
+import { BillDocument } from '@lacunahub/lacuna-database-driver'
 import { APIGuildMember } from 'discord.js'
 import { v4 as idv4 } from 'uuid'
 import { addDiamond, support_server_id } from '..'
 import database from '../../../../database'
-import { IBill } from '../../../../database/schemas/Bills'
 import { apiRoutes, restApi } from '../../DiscordUtils'
 import { OrderData } from './PayPal'
 
@@ -11,10 +11,10 @@ export class DiscordRolesCheckout {
     public amount: OrderData['amount']
     public custom_fields: OrderData['custom_fields']
     public roleIds: string[]
-    public billType: IBill['type']
+    public billType: BillDocument['type']
     public maxActiveBills: number
 
-    constructor(data: OrderData, billType: IBill['type'], roleIds: string[], maxActiveBills?: number) {
+    constructor(data: OrderData, billType: BillDocument['type'], roleIds: string[], maxActiveBills?: number) {
         this.billId = idv4()
 
         this.billType = billType

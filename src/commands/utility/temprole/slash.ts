@@ -1,6 +1,6 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChatInputCommandInteraction, GuildMember, Role } from 'discord.js'
 import ms from 'ms'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import TemporaryRole from '../../../internals/structures/TemporaryRole'
 import { generateSimpleId } from '../../../internals/utility/Utils'

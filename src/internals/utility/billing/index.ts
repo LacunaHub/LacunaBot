@@ -1,7 +1,6 @@
+import { BillDocument, ServerDocument } from '@lacunahub/lacuna-database-driver'
 import moment from 'moment'
 import database from '../../../database'
-import { IBill } from '../../../database/schemas/Bills'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import logger from '../../Logger'
 import DiamondGuild, { diamondGuilds } from '../../structures/DiamondGuild'
 import Patron, { patrons } from '../../structures/Patron'
@@ -15,25 +14,25 @@ export const big_patron_role_id = '896416992079265824'
 export const former_patron_role_id = '746825813806284866'
 export const server_booster_role_id = '746752483115794583'
 
-export async function addDiamond(bill: IBill, server?: ServerDocument) {
+export async function addDiamond(bill: BillDocument, server?: ServerDocument) {
     if (!server) {
         server = await database.servers.findOne({ _id: bill.custom_fields.reference_id })
     }
 
-    const { diamondPrices } = await database.json.get()
+    const { diamondPrices } = await database.getInternalData()
     const months = diamondPrices[bill.custom_fields.tier]?.months ?? 0
 
     if (months > 0) {
-        const date = server.server.premium.will_expire_on ? moment(server.server.premium.will_expire_on) : moment()
+        const date = server.premium.expires_at ? moment(server.premium.expires_at) : moment()
         let period = (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(bill.type) ? date.add(6, 'hours') : date.add(months, 'M')).valueOf()
 
         await database.servers.updateOne(
             { _id: server._id },
             {
                 $set: {
-                    'server.premium.available': true,
-                    'server.premium.will_expire_on': period,
-                    'server.premium.bill_id': bill._id
+                    'premium.available': true,
+                    'premium.expires_at': period,
+                    'premium.bill_id': bill._id
                 }
             }
         )
@@ -60,7 +59,7 @@ export async function addDiamond(bill: IBill, server?: ServerDocument) {
     }
 }
 
-export async function addPremium(bill: IBill, period: number) {
+export async function addPremium(bill: BillDocument, period: number) {
     if (bill.type === 'DISCORD_NITRO_BOOST') return null
 
     await database.users.updateOne(

@@ -1,17 +1,17 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Guild, GuildMember } from 'discord.js'
-import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
 
 async function rotateBanner(self: Lacuna, server: ServerDocument, guild: Guild, member?: GuildMember) {
     if (!server.modules.guild_image_rotation.banner.active) return false
 
-    const rotationThrottle = server.server.premium.available ? 1000 * 60 * 2 : 1000 * 60 * 60
+    const rotationThrottle = server.premium.available ? 1000 * 60 * 2 : 1000 * 60 * 60
 
     if (rotationThrottle > Date.now() - server.modules.guild_image_rotation.banner.last_updated_timestamp) return false
 
     try {
-        const replacer = new Replacer(server.server.premium.available, { guild, member }),
+        const replacer = new Replacer(server.premium.available, { guild, member }),
             { files } = await replacer.replaceTemplateMessage({ content: '', image: server.modules.guild_image_rotation.banner.image })
 
         await guild.setBanner(files[0].attachment as Buffer, 'Banner Rotation')

@@ -1,13 +1,13 @@
+import { ServerDocument, ServerModulesCustomCommand } from '@lacunahub/lacuna-database-driver'
 import database from '../../../database'
-import { ICustomCommand, ServerDocument } from '../../../database/schemas/Servers'
 import Logger from '../../Logger'
 import DiscordUtils from '../../utility/DiscordUtils'
 import APIError from '../utility/APIError'
 
-export async function createCustomCommand(server: ServerDocument, data: ICustomCommand) {
+export async function createCustomCommand(server: ServerDocument, data: ServerModulesCustomCommand) {
     const customCommands = server.modules.custom_commands
 
-    if (customCommands.length >= 25 && !server.server.premium.available) throw new APIError(3001)
+    if (customCommands.length >= 25 && !server.premium.available) throw new APIError(3001)
     if (customCommands.length >= 100) throw new APIError(3002)
     if (!data.components.length) throw new APIError(4003)
 
@@ -51,7 +51,7 @@ export async function createCustomCommand(server: ServerDocument, data: ICustomC
     }
 }
 
-export async function updateCustomCommand(server: ServerDocument, data: ICustomCommand) {
+export async function updateCustomCommand(server: ServerDocument, data: ServerModulesCustomCommand) {
     const customCommand = server.modules.custom_commands.find(i => i.id === data.id)
 
     if (!customCommand) throw new APIError(1011)

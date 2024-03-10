@@ -22,6 +22,7 @@
   "dependencies": {
     "@koa/cors": "4.0.x",
     "@koa/router": "12.0.x",
+    "@lacunahub/lacuna-database-driver": "1.0.x",
     "bufferutil": "4.0.x",
     "canvas": "2.11.x",
     "discord-cross-hosting": "2.3.x",

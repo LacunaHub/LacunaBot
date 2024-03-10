@@ -104,7 +104,7 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
 
     for (const guild of subscribedGuilds) {
         const guildSubscription = guild.modules.subscriptions.youtube
-            .slice(0, guild.server.premium.available ? 10 : 1)
+            .slice(0, guild.premium.available ? 10 : 1)
             .find(i => i.channel_id == data.channelId)
 
         if (!guildSubscription) continue
@@ -155,7 +155,7 @@ export async function handleHubBubWebhook(data: IHubBubWebhookData) {
         const hasVideoUrl = /{\s*(subs.link)\s*}/g.test(notificationText ?? '')
 
         if (notificationText) {
-            const replacer = new Replacer(guild.server.premium.available)
+            const replacer = new Replacer(guild.premium.available)
             notificationText = await replacer.replace(notificationText, {
                 subs: { name: data.channelName, title: data.videoTitle, link: videoUrl }
             })

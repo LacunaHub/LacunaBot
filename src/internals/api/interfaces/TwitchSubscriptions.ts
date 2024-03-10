@@ -1,6 +1,6 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { APIWebhook, DataResolver } from 'discord.js'
 import database from '../../../database'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import { ITwitchIncomingWebhook, eventSubSubscribe, eventSubUnsubscribe, getEventSubsByUserId } from '../../../modules/Twitch'
 import Logger from '../../Logger'
 import DiscordUtils from '../../utility/DiscordUtils'
@@ -9,7 +9,7 @@ import APIError from '../utility/APIError'
 export async function createTwitchSubscription(server: ServerDocument, data: any) {
     const subscriptions = server.modules.subscriptions.twitch
 
-    if (subscriptions.length >= 1 && !server.server.premium.available) throw new APIError(3009)
+    if (subscriptions.length >= 1 && !server.premium.available) throw new APIError(3009)
     if (subscriptions.length >= 10) throw new APIError(3010)
     if (subscriptions.some(s => s.broadcaster_id === data.broadcaster.id)) throw new APIError(2006)
 

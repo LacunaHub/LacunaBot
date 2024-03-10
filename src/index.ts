@@ -4,7 +4,6 @@ configureEnvironments()
 
 import { Bridge } from 'discord-cross-hosting'
 import { Server } from 'http'
-import { connect } from 'mongoose'
 import pm2 from 'pm2'
 import database from './database'
 import { bridgeClient, clusterManager } from './internals/Cluster'
@@ -69,9 +68,7 @@ if (isMasterBridge) {
 }
 
 async function startServices() {
-    await connect(process.env.DB_URI, { dbName: 'lacuna', useNewUrlParser: true, useUnifiedTopology: true })
-    await database.qdb.connect()
-
+    await database.connect()
     await bridgeClient.connect()
     bridgeClient.listen(clusterManager)
 

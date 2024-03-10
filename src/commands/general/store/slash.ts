@@ -1,5 +1,5 @@
+import { ServerDocument, ServerModulesEconomyStoreItem } from '@lacunahub/lacuna-database-driver'
 import { ActionRowBuilder, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message, StringSelectMenuBuilder } from 'discord.js'
-import { EconomyStoreItem, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
 import { purchaseItem } from '../../../modules/Economy'
@@ -43,7 +43,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
-    const item = server.modules.economy.store.items.slice(0, server.server.premium.available ? 200 : 50).find(i => i.id == sku)
+    const item = server.modules.economy.store.items.slice(0, server.premium.available ? 200 : 50).find(i => i.id == sku)
 
     if (!item) {
         await interaction.reply({
@@ -78,7 +78,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
     if (result == 'SUCCESS') {
         if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
             try {
-                const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: interaction.member }),
+                const replacer = new Replacer(server.premium.available, { guild: interaction.guild, member: interaction.member }),
                     messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
                 await interaction.editReply(messagePayload)
@@ -131,9 +131,9 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
     await interaction.deferReply({ ephemeral: true })
 
     let page: number = interaction.options?.getInteger('page') ? interaction.options.getInteger('page') - 1 : 0
-    const chunks: Array<EconomyStoreItem[]> = chunkArray(
+    const chunks: Array<ServerModulesEconomyStoreItem[]> = chunkArray(
         server.modules.economy.store.items
-            .slice(0, server.server.premium.available ? 200 : 50)
+            .slice(0, server.premium.available ? 200 : 50)
             .filter(i => !i.options.includes('LIMITED_QUANTITY') || i.quantity > 0),
         8
     )
@@ -237,7 +237,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
         } else {
             await i.deferUpdate()
 
-            const item = server.modules.economy.store.items.slice(0, server.server.premium.available ? 200 : 50).find(i => i.id == value)
+            const item = server.modules.economy.store.items.slice(0, server.premium.available ? 200 : 50).find(i => i.id == value)
             const result = await purchaseItem(item, self, interaction.guild, interaction.member)
 
             if (result == 'INSUFFICIENT_FUNDS') {
@@ -260,7 +260,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'SUCCESS') {
                 if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-                    const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: interaction.member }),
+                    const replacer = new Replacer(server.premium.available, { guild: interaction.guild, member: interaction.member }),
                         messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
                     try {

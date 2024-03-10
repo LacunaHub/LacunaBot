@@ -1,3 +1,4 @@
+import { ServerDocument, ServerModulesLevelsAward, UserLevel } from '@lacunahub/lacuna-database-driver'
 import Canvas, { Image } from 'canvas'
 import {
     AttachmentBuilder,
@@ -12,8 +13,6 @@ import {
     VoiceState
 } from 'discord.js'
 import numbro from 'numbro'
-import { LevelAward, ServerDocument } from '../database/schemas/Servers'
-import { IUserLevel } from '../database/schemas/Users'
 import Lacuna from '../internals/Lacuna'
 import { borderRadiuses, roundImage } from './ImageGenerator'
 import Replacer from './Replacer'
@@ -126,7 +125,7 @@ export async function onMessageCreate(self: Lacuna, server: ServerDocument, mess
 
             return i.options.includes('LEVELS_TEXT')
         })
-        .slice(0, server.server.premium.available ? 10 : 1)
+        .slice(0, server.premium.available ? 10 : 1)
 
     const multiplier = multipliers.reduce((x, y) => x * (y.levels_text_multiplier / 100), 100) / 100
     let points: number = Math.floor(Math.random() * 11) + 15 + currentLevel
@@ -193,7 +192,7 @@ export async function onVoiceConnect(self: Lacuna, server: ServerDocument, state
 
     const activeVoiceStates = state.guild.voiceStates.cache.filter(i => !i.member.user.bot && i.channelId).size
 
-    if (activeVoiceStates >= 15 && !server.server.premium.available) return false
+    if (activeVoiceStates >= 15 && !server.premium.available) return false
 
     const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
@@ -302,7 +301,7 @@ export async function onVoiceDisconnect(self: Lacuna, server: ServerDocument, st
 
                     return i.options.includes('LEVELS_VOICE')
                 })
-                .slice(0, server.server.premium.available ? 10 : 1)
+                .slice(0, server.premium.available ? 10 : 1)
 
             const multiplier = multipliers.reduce((x, y) => x * (y.levels_voice_multiplier / 100), 100) / 100
             const time: number = (Date.now() - userLevel.activity.voice_connected_at) / 1000
@@ -372,11 +371,17 @@ export async function onVoiceDisconnect(self: Lacuna, server: ServerDocument, st
     }
 }
 
-export async function updateAwards(self: Lacuna, server: ServerDocument, member: GuildMember, userLevel: IUserLevel, award?: LevelAward) {
+export async function updateAwards(
+    self: Lacuna,
+    server: ServerDocument,
+    member: GuildMember,
+    userLevel: UserLevel,
+    award?: ServerModulesLevelsAward
+) {
     let conditionsMet = false,
         isAwardReceived = false
 
-    const awards = server.modules.levels.awards.slice(0, server.server.premium.available ? 200 : 50).sort((a, b) => {
+    const awards = server.modules.levels.awards.slice(0, server.premium.available ? 200 : 50).sort((a, b) => {
         const aValues = a.conditions ? Object.values(a.conditions) : [a.level, 0, 0],
             bValues = b.conditions ? Object.values(b.conditions) : [b.level, 0, 0]
 
@@ -430,7 +435,7 @@ export async function updateAwards(self: Lacuna, server: ServerDocument, member:
 
             if (award.alert.active) {
                 try {
-                    const replacer = new Replacer(server.server.premium.available, { guild: member.guild, member: member }),
+                    const replacer = new Replacer(server.premium.available, { guild: member.guild, member: member }),
                         messagePayload = await replacer.replaceTemplateMessage(award.alert.message)
 
                     if (award.alert.format === 'DM') {
@@ -467,7 +472,7 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, sig
     const alert = server.modules.levels.level_up_alerts
 
     if (alert.active) {
-        const replacer = new Replacer(server.server.premium.available, { guild: signal.guild, member: member }),
+        const replacer = new Replacer(server.premium.available, { guild: signal.guild, member: member }),
             messagePayload = await replacer.replaceTemplateMessage(alert.message)
 
         try {

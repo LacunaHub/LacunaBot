@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     BaseGuildVoiceChannel,
     CategoryChannelResolvable,
@@ -9,7 +10,6 @@ import {
     VoiceChannel,
     VoiceState
 } from 'discord.js'
-import { ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import { truncateString } from '../internals/utility/Utils'
 import Replacer from './Replacer'
@@ -18,7 +18,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
     const autoVoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === state.channelId),
         autoVoiceIndex = server.modules.voice_manager.autovoices.findIndex(i => i.channel_id === state.channelId)
 
-    if (autoVoiceIndex >= 2 && !server.server.premium.available) {
+    if (autoVoiceIndex >= 2 && !server.premium.available) {
         await state.disconnect('TempVoices: No premium')
 
         return false
@@ -59,7 +59,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        const replacer = new Replacer(server.server.premium.available, {
+        const replacer = new Replacer(server.premium.available, {
             guild: state.guild,
             member: state.member
         })

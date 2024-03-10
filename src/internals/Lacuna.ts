@@ -1,12 +1,11 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Shard as BridgeShard } from 'discord-cross-hosting'
 import { ClusterClient } from 'discord-hybrid-sharding'
 import { Client, ClientOptions, Collection, LimitedCollection, parseEmoji, PermissionsBitField } from 'discord.js'
 import { readdirSync } from 'fs'
 import { LavalunaManager } from 'lavaluna.js'
-import { connect } from 'mongoose'
 import { os } from 'node-os-utils'
 import db from '../database'
-import { ServerDocument } from '../database/schemas/Servers'
 import i18n from '../i18n'
 import Utils from '../internals/utility/Utils'
 import logger from './Logger'
@@ -94,11 +93,8 @@ export default class Lacuna extends Client {
     }
 
     async start() {
-        await connect(process.env.DB_URI, { dbName: 'lacuna', useNewUrlParser: true, useUnifiedTopology: true })
-        this.logger.log('[Lacuna] Connected to MongoDB')
-
-        await this.db.qdb.connect()
-        this.logger.log('[Lacuna] QuickMongo initialized')
+        await this.db.connect()
+        this.logger.log('[Lacuna] Connected to database')
 
         this.cluster = new ClusterClient(this)
         this.machine = new BridgeShard(this.cluster)

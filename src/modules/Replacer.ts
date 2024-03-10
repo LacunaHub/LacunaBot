@@ -1,8 +1,7 @@
+import { ServerMessageTemplateEmbed, ServerMessageTemplateImage, UserLevel, UserWallet } from '@lacunahub/lacuna-database-driver'
 import { AttachmentBuilder, BaseGuildTextChannel, EmbedBuilder, Guild, GuildMember, Message, resolveColor } from 'discord.js'
 import moment from 'moment'
 import db from '../database'
-import { MessageEmbed as IMessageEmbed, MessageImage } from '../database/schemas/Servers'
-import { IUserLevel, IUserWallet } from '../database/schemas/Users'
 import { escapeRegexp, resolveObjectPath } from '../internals/utility/Utils'
 import { borderRadiuses, generateImage, textAligns, textDecorations, textSizes, textStyles, textTransforms } from './ImageGenerator'
 
@@ -175,7 +174,7 @@ export default class Replacer {
             guild = this.shapers?.guild,
             member = this.shapers?.member
 
-        let memberActivity: { level: IUserLevel; wallet: IUserWallet }, guildOwner: GuildMember
+        let memberActivity: { level: UserLevel; wallet: UserWallet }, guildOwner: GuildMember
 
         if (member) {
             const userDoc = await db.users.findOne({ _id: member.id })
@@ -434,7 +433,7 @@ export default class Replacer {
      * Replace replacers and code snippets in the template message and return message payload with content and embeds.
      */
     async replaceTemplateMessage(
-        template: { content: string; embed?: IMessageEmbed; image?: MessageImage },
+        template: { content: string; embed?: ServerMessageTemplateEmbed; image?: ServerMessageTemplateImage },
         customReplacements: IReplacerCustomShapers = {}
     ) {
         const content = await this.replace(template.content, customReplacements)
@@ -515,7 +514,7 @@ export default class Replacer {
                           })
                       )
                     : []
-            } as MessageImage
+            } as ServerMessageTemplateImage
 
             attachment = await generateImage(image)
         }

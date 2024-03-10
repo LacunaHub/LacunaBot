@@ -1,7 +1,7 @@
 import Router from '@koa/router'
+import { ServerModulesAutomation, ServerModulesCustomCommand } from '@lacunahub/lacuna-database-driver'
 import { Context } from 'koa'
 import database from '../../../database'
-import { CustomCommand, IAutomation } from '../../../database/schemas/Servers'
 import {
     FileContent,
     Repository,
@@ -110,7 +110,7 @@ async function getPlugin(ctx: Context) {
             .filter(v => v.path.startsWith('puzzles/') && repoFileContents.some(vv => vv.sha === v.sha))
             .map(v => {
                 const content = repoFileContents.find(vv => vv.sha === v.sha),
-                    json: CustomCommand | IAutomation = JSON.parse(content.content)
+                    json: ServerModulesCustomCommand | ServerModulesAutomation = JSON.parse(content.content)
 
                 return {
                     type: 'trigger' in json ? 'AUTOMATION' : 'CUSTOM_COMMAND',

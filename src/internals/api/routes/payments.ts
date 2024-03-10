@@ -1,8 +1,8 @@
 import Router from '@koa/router'
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { APIUser } from 'discord.js'
 import { Context } from 'koa'
 import db from '../../../database'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import { addDiamond, project_team_role_id, server_booster_role_id, subscribed_patron_role_id } from '../../utility/billing'
 import { DiscordRolesCheckout } from '../../utility/billing/providers/DiscordRoles'
 import { APIOrder, Order as PayPalOrder, captureOrder } from '../../utility/billing/providers/PayPal'
@@ -24,7 +24,7 @@ async function createPayment(ctx: Context) {
 
     const server: ServerDocument = await db.servers.findOne({ _id: guild_id })
 
-    if (!server || server.server.blocked) {
+    if (!server || server.blocked) {
         ctx.throw(404, new APIError(1003))
     }
 
@@ -34,7 +34,7 @@ async function createPayment(ctx: Context) {
         ctx.throw(425, new APIError(4009))
     }
 
-    const { diamondPrices, rootUsers } = await db.json.get()
+    const { diamondPrices, rootUsers } = await db.getInternalData()
     const data = {
         amount: {
             currency: 'RUB',
@@ -80,7 +80,7 @@ async function createPayment(ctx: Context) {
         ctx.status = 200
         ctx.body = approveLink.href
     } else if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY', 'PROJECT_TEAM'].includes(provider)) {
-        if (server.server.premium.available) ctx.throw(400, new APIError(2009))
+        if (server.premium.available) ctx.throw(400, new APIError(2009))
 
         data.amount.currency = 'DRC'
         data.amount.value = 1

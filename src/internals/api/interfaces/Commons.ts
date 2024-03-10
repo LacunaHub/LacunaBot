@@ -1,6 +1,6 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { parseEmoji } from 'discord.js'
 import database from '../../../database'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import { borderRadiuses, textAligns, textDecorations, textSizes, textStyles, textTransforms } from '../../../modules/ImageGenerator'
 import { lavalinkSources } from '../../utility/Constants'
 import { dotNotateObject } from '../../utility/Utils'
@@ -14,11 +14,8 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
         }
     }
 
-    if (
-        Array.isArray(data.server?.bot_expert_roles) &&
-        JSON.stringify(data.server.bot_expert_roles) !== JSON.stringify(guild.server.bot_expert_roles)
-    ) {
-        updateData['server.bot_expert_roles'] = data.server.bot_expert_roles
+    if (Array.isArray(data.bot_experts) && JSON.stringify(data.bot_experts) !== JSON.stringify(guild.bot_experts)) {
+        updateData['bot_experts'] = data.bot_experts
     }
 
     if (data.commands) {
@@ -899,7 +896,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                                 color: newImage.background?.color ?? oldImage.background?.color,
                                 url: newImage.background?.url ?? oldImage.background?.url
                             },
-                            elements: elements.slice(0, guild.server.premium.available ? 50 : 5).map(v => {
+                            elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
                                 const element = {
                                     type: v.type,
                                     posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
@@ -1019,7 +1016,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                                 color: newImage.background?.color ?? oldImage.background?.color,
                                 url: newImage.background?.url ?? oldImage.background?.url
                             },
-                            elements: elements.slice(0, guild.server.premium.available ? 50 : 5).map(v => {
+                            elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
                                 const element = {
                                     type: v.type,
                                     posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
@@ -1176,7 +1173,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                                     color: newImage.background?.color ?? oldImage.background?.color,
                                     url: newImage.background?.url ?? oldImage.background?.url
                                 },
-                                elements: elements.slice(0, guild.server.premium.available ? 50 : 5).map(v => {
+                                elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
                                     const element = {
                                         type: v.type,
                                         posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
@@ -1255,7 +1252,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             if (
                 typeof data.modules.music.allow_radio_playback === 'boolean' &&
                 data.modules.music.allow_radio_playback !== guild.modules.music.allow_radio_playback &&
-                guild.server.premium.available
+                guild.premium.available
             ) {
                 updateData['modules.music.allow_radio_playback'] = data.modules.music.allow_radio_playback
             }
@@ -1263,7 +1260,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             if (
                 typeof data.modules.music.queue_max_length === 'number' &&
                 data.modules.music.queue_max_length !== guild.modules.music.queue_max_length &&
-                guild.server.premium.available
+                guild.premium.available
             ) {
                 updateData['modules.music.queue_max_length'] = data.modules.music.queue_max_length
             }
@@ -1271,7 +1268,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
             if (
                 typeof data.modules.music.default_volume === 'number' &&
                 data.modules.music.default_volume !== guild.modules.music.default_volume &&
-                guild.server.premium.available
+                guild.premium.available
             ) {
                 updateData['modules.music.default_volume'] = data.modules.music.default_volume
             }
@@ -1316,7 +1313,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
         }
 
         if (Array.isArray(data.modules.autoreactions) && JSON.stringify(data.modules.autoreactions) !== JSON.stringify(guild.modules.autoreactions)) {
-            for (const reaction of data.modules.autoreactions.slice(0, guild.server.premium.available ? 20 : 2)) {
+            for (const reaction of data.modules.autoreactions.slice(0, guild.premium.available ? 20 : 2)) {
                 reaction.reactions
                     .filter(emoji => !emoji.name)
                     .forEach(emoji => {
@@ -1413,7 +1410,7 @@ export async function updateSettings(guild: ServerDocument, data: Partial<Server
                                 color: newImage.background?.color ?? oldImage.background?.color,
                                 url: newImage.background?.url ?? oldImage.background?.url
                             },
-                            elements: elements.slice(0, guild.server.premium.available ? 50 : 5).map(v => {
+                            elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
                                 const element = {
                                     type: v.type,
                                     posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,

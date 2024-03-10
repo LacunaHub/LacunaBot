@@ -1,7 +1,7 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, Message } from 'discord.js'
 import { SearchResult } from 'lavaluna.js'
 import numbro from 'numbro'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { lavalinkSources } from '../../../internals/utility/Constants'
 import { capitalizeFirstLetter, getTrackSourceByUrl } from '../../../internals/utility/Utils'
@@ -71,9 +71,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     }
 
     const is_url = new RegExp(`^https?:\/\/`).test(query)
-    const { playableMusicHosts: allowed_hosts } = await self.db.json.get()
+    const { allowedMusicHosts } = await self.db.getInternalData()
 
-    if (is_url && !allowed_hosts.some(h => query.startsWith(h))) {
+    if (is_url && !allowedMusicHosts.some(h => query.startsWith(h))) {
         await interaction.reply({
             content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.HostIsNotAllowedToBePlayed', {
                 username: `**${interaction.member.displayName}**`
@@ -124,7 +124,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             selfDeafen: true,
             volume: server.modules.music.default_volume
         }),
-        queueMaxLength = server.server.premium.available ? server.modules.music.queue_max_length : 15
+        queueMaxLength = server.premium.available ? server.modules.music.queue_max_length : 15
 
     let message: Message
 
@@ -150,7 +150,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     ]
 
     if (search.loadType === 'playlist') {
-        if (!server.server.premium.available) {
+        if (!server.premium.available) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaylistsAvailableOnlyForPremium', {
                     username: `**${interaction.member.displayName}**`
@@ -222,7 +222,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        if (track.info.isStream && !server.server.premium.available) {
+        if (track.info.isStream && !server.premium.available) {
             await interaction.editReply({
                 content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.StreamPlaybackAvailableOnlyForPremium', {
                     username: `**${interaction.member.displayName}**`
