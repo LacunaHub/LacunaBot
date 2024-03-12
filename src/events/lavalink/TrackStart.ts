@@ -1,5 +1,5 @@
+import { Player } from '@lacunahub/lavaluna.js'
 import { Message } from 'discord.js'
-import { Player } from 'lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, player: Player) {

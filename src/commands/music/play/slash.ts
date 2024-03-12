@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { SearchResult } from '@lacunahub/lavaluna.js'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, Message } from 'discord.js'
-import { SearchResult } from 'lavaluna.js'
 import numbro from 'numbro'
 import Lacuna from '../../../internals/Lacuna'
 import { lavalinkSources } from '../../../internals/utility/Constants'

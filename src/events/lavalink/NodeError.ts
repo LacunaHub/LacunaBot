@@ -1,4 +1,4 @@
-import { Node } from 'lavaluna.js'
+import { Node } from '@lacunahub/lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, node: Node, error: Error) => {

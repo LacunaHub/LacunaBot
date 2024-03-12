@@ -1,4 +1,5 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { SearchResult } from '@lacunahub/lavaluna.js'
 import {
     AnySelectMenuInteraction,
     AutocompleteInteraction,
@@ -10,7 +11,6 @@ import {
     Message,
     ModalSubmitInteraction
 } from 'discord.js'
-import { SearchResult } from 'lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'

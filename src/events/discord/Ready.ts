@@ -1,5 +1,5 @@
+import { LavalunaManager } from '@lacunahub/lavaluna.js'
 import { Events } from 'discord.js'
-import { LavalunaManager } from 'lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna) => {

@@ -1,5 +1,5 @@
+import { Player } from '@lacunahub/lavaluna.js'
 import { EmbedBuilder, Message } from 'discord.js'
-import { Player } from 'lavaluna.js'
 import numbro from 'numbro'
 import Lacuna from '../../internals/Lacuna'
 import { getTrackSourceByUrl } from '../../internals/utility/Utils'
