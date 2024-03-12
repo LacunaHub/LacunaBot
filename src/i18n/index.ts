@@ -1,4 +1,4 @@
-import { messages } from 'lacuna-locale'
+import { messages } from '@lacunahub/lacuna-locale'
 import logger from '../internals/Logger'
 import { resolveObjectPath } from '../internals/utility/Utils'
 

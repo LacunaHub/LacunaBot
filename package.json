@@ -1,7 +1,7 @@
 {
-  "name": "lacuna",
+  "name": "lacuna-bot",
   "version": "4.11.1",
-  "description": "A Discord bot",
+  "description": "Feature-rich Discord bot",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc --build tsconfig.json",
@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/LacunaHub/Discord.git"
   },
-  "author": "Daniyar Kurmangaliiev",
+  "author": "Lacuna (https://github.com/LacunaHub)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/LacunaHub/Discord/issues"
@@ -23,6 +23,7 @@
     "@koa/cors": "4.0.x",
     "@koa/router": "12.0.x",
     "@lacunahub/lacuna-database-driver": "1.0.x",
+    "@lacunahub/lacuna-locale": "1.0.0",
     "@lacunahub/logger": "1.0.x",
     "bufferutil": "4.0.x",
     "canvas": "2.11.x",
@@ -37,7 +38,6 @@
     "koa-json": "2.0.x",
     "koa-morgan": "1.0.x",
     "koa-ratelimit": "5.0.x",
-    "lacuna-locale": "github:LacunaHub/Locale",
     "lavaluna.js": "1.0.x",
     "moment": "2.29.x",
     "mongoose": "5.13.x",
