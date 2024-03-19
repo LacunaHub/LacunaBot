@@ -1,9 +1,9 @@
 name: Deploy (Prod)
 
 on:
-  release:
-      types: [published]
-  workflow_dispatch:
+    release:
+        types: [published]
+    workflow_dispatch:
 
 permissions:
     contents: read
@@ -21,7 +21,7 @@ jobs:
             - uses: actions/checkout@v3
             - uses: actions/setup-node@v3
               with:
-                node-version: 18
+                  node-version: 18
             - name: Install Quasar CLI and Surge
               run: npm i -g @quasar/cli surge
             - name: Install dependencies
@@ -29,4 +29,6 @@ jobs:
             - name: Build
               run: quasar build
             - name: Deploy SPA
-              run: surge ./dist/spa/ ${{ env.SURGE_DOMAIN }} --token ${{ env.SURGE_TOKEN }}
+              run: |
+                  mv ./dist/spa/index.html ./dist/spa/200.html
+                  surge ./dist/spa/ ${{ env.SURGE_DOMAIN }} --token ${{ env.SURGE_TOKEN }}
