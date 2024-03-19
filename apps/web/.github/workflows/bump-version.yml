@@ -1,0 +1,43 @@
+name: Bump version
+
+on:
+    pull_request:
+        branches: [master]
+        types: [labeled]
+    workflow_dispatch:
+
+jobs:
+    commit:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+            - name: Get semver
+              id: semver
+              run: |
+                  semver="patch"
+
+                  if [[ "${{ github.event.label.name }}" == *"minor"* ]]
+                  then
+                      semver='minor'
+                  elif [[ "${{ github.event.label.name }}" == *"major"* ]]
+                  then
+                      semver='major'
+                  fi
+
+                  echo semver=$semver >> $GITHUB_OUTPUT
+            - name: Setup Git
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git remote set-url --push origin https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+            - name: Bump version
+              run: |
+                  git checkout -b $GITHUB_HEAD_REF
+                  npm version ${{ steps.semver.outputs.semver }} -m "chore: bump version to %s"
+            - name: Push
+              run: |
+                  git pull --rebase origin $GITHUB_HEAD_REF
+                  git push origin $GITHUB_HEAD_REF --follow-tags
