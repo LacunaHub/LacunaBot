@@ -1,10 +1,10 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 720px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 720px; max-width: 90vw">
       <q-card-section>
-        <q-banner class="rounded-lg bg-dark-2" dense>
+        <q-banner class="bg-dark-2 rounded-borders" dense>
           <span>
-            {{ $t('user_survey.it_would_help_us') }}
+            {{ $t('Components.UserSurvey.ItWouldHelpUs') }}
           </span>
 
           <template #avatar>
@@ -16,12 +16,12 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12 text-center">
-            <div>{{ $t('user_survey.how_satisfied') }} *</div>
+            <div>{{ $t('Components.UserSurvey.HowSatisfied') }} *</div>
 
             <q-rating v-model="satisfaction" class="q-pt-sm" size="lg" :max="5" color="primary">
               <template v-slot:tip-1>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -32,7 +32,7 @@
               </template>
               <template v-slot:tip-2>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -43,7 +43,7 @@
               </template>
               <template v-slot:tip-3>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -54,7 +54,7 @@
               </template>
               <template v-slot:tip-4>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -65,7 +65,7 @@
               </template>
               <template v-slot:tip-5>
                 <q-tooltip
-                  class="bg-black rounded-lg text-body2"
+                  class="bg-black text-body2"
                   anchor="top middle"
                   self="bottom middle"
                   transition-show=""
@@ -78,11 +78,11 @@
           </div>
 
           <div class="col-12 text-center">
-            <div>{{ $t('user_survey.how_many_members') }} *</div>
+            <div>{{ $t('Components.UserSurvey.HowManyMembers') }} *</div>
 
             <q-tabs
               v-model="memberCount"
-              class="rounded-lg bg-dark-2 q-mt-sm"
+              class="bg-dark-2 rounded-borders q-mt-sm"
               align="justify"
               active-bg-color="secondary"
               indicator-color="transparent"
@@ -105,12 +105,12 @@
         <div class="row q-col-gutter-md">
           <div class="col-12 text-center">
             <div>
-              {{ $t('user_survey.tell_us_more') }}
+              {{ $t('Components.UserSurvey.TellUsMore') }}
             </div>
 
             <q-input
               v-model.trim="surveyDetails"
-              class="q-pt-sm rounded-lg"
+              class="rounded-borders q-pt-sm"
               type="textarea"
               :maxlength="2048"
               square
@@ -125,13 +125,20 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('remind_later')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.RemindLater')"
+              unelevated
+              no-caps
+              color="dark-2"
+              @click="onCancel"
+            />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -146,8 +153,8 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
+import { computed, defineComponent, ref } from 'vue'
 
 const memberCountVariants = ['1-49', '50-99', '100-499', '500-2499', '2500-9999', '10000+']
 

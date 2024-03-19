@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="q-dialog-card rounded-lg bg-dark-1" flat style="width: 1000px">
+    <q-card class="q-dialog-card bg-dark-1" flat style="width: 1000px">
       <q-tabs
         v-model="currentTab"
         class="bg-dark-2"
@@ -9,9 +9,9 @@
         indicator-color="transparent"
         no-caps
       >
-        <q-tab name="general" :label="$t('pages.guild.nav_names.GENERAL')" style="width: 50%"></q-tab>
+        <q-tab name="general" :label="$t('Pages.GuildPage.NavNames.General')" style="width: 50%"></q-tab>
 
-        <q-tab name="components" :label="$t('common.actions')" style="width: 50%"></q-tab>
+        <q-tab name="components" :label="$t('Common.Components')" style="width: 50%"></q-tab>
       </q-tabs>
 
       <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
@@ -21,7 +21,7 @@
               <div class="col-12">
                 <q-btn
                   class="full-width"
-                  :label="$t('import')"
+                  :label="$t('Common.Import')"
                   unelevated
                   no-caps
                   color="secondary"
@@ -35,7 +35,7 @@
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <div>
-                  {{ $t('name') }}
+                  {{ $t('Common.Name') }}
                 </div>
 
                 <q-input
@@ -50,7 +50,7 @@
 
               <div class="col-12">
                 <div>
-                  {{ $t('automation.trigger_title') }}
+                  {{ $t('Components.Automation.Trigger') }}
                 </div>
 
                 <q-select
@@ -67,7 +67,7 @@
                     <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`automation.trigger_names.${opt}`) }}
+                          {{ $t(localeStringsMap.automationTriggers[opt]) }}
                         </q-item-label>
 
                         <q-item-label class="text--secondary" caption>
@@ -79,7 +79,7 @@
 
                   <template #selected-item="{ opt }">
                     <span>
-                      {{ $t(`automation.trigger_names.${opt}`) }}
+                      {{ $t(localeStringsMap.automationTriggers[opt]) }}
                     </span>
                   </template>
                 </q-select>
@@ -87,19 +87,21 @@
             </div>
           </q-card-section>
 
-          <q-list class="q-px-none q-py-md">
-            <q-item tag="label" dense v-ripple>
-              <q-item-section>
-                <q-item-label>
-                  {{ $t('disable') }}
-                </q-item-label>
-              </q-item-section>
+          <div class="q-pa-md">
+            <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+              <q-item tag="label">
+                <q-item-section side>
+                  <q-checkbox v-model="automation.options" val="DISABLED" dense></q-checkbox>
+                </q-item-section>
 
-              <q-item-section side>
-                <q-checkbox v-model="automation.options" val="DISABLED" dense></q-checkbox>
-              </q-item-section>
-            </q-item>
-          </q-list>
+                <q-item-section>
+                  <q-item-label>
+                    {{ $t('Common.Disable') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
         </q-tab-panel>
 
         <q-tab-panel name="components" class="q-pa-none">
@@ -108,7 +110,7 @@
               <div class="col-12 col-md-6">
                 <q-btn-dropdown
                   class="full-width"
-                  :label="$t('custom_command.add_condition')"
+                  :label="$t('Components.CustomCommand.AddCondition')"
                   color="dark-2"
                   no-caps
                   unelevated
@@ -124,7 +126,7 @@
                     >
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`custom_command.component_names.${condition}`) }}
+                          {{ $t(localeStringsMap.customBehaviorComponents[condition]) }}
                         </q-item-label>
                       </q-item-section>
                     </q-item>
@@ -135,7 +137,7 @@
               <div class="col-12 col-md-6">
                 <q-btn-dropdown
                   class="full-width"
-                  :label="$t('custom_command.add_action')"
+                  :label="$t('Components.CustomCommand.AddAction')"
                   color="dark-2"
                   no-caps
                   unelevated
@@ -151,7 +153,7 @@
                     >
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`custom_command.component_names.${action}`) }}
+                          {{ $t(localeStringsMap.customBehaviorComponents[action]) }}
                         </q-item-label>
                       </q-item-section>
 
@@ -160,7 +162,7 @@
                           <img src="~assets/lacuna-diamond.svg" />
 
                           <q-tooltip
-                            class="bg-black rounded-lg text-body2"
+                            class="bg-black text-body2"
                             anchor="top middle"
                             self="bottom middle"
                             transition-show=""
@@ -180,12 +182,16 @@
           <q-card-section v-if="automation.components.length">
             <div class="row q-col-gutter-md">
               <div v-for="(component, i) in automation.components" :key="i" class="col-12">
-                <q-card flat bordered class="bg-transparent rounded-lg">
-                  <q-item class="rounded-t-lg" clickable v-ripple @click="componentDialog(component, i)">
+                <q-card flat bordered class="bg-transparent">
+                  <q-item class="rounded-t-lg" clickable @click="componentDialog(component, i)">
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         {{
-                          $t(`custom_command.component_names.${component.condition?.type ?? component.action?.type}`)
+                          $t(
+                            localeStringsMap.customBehaviorComponents[
+                              component.condition?.type ?? component.action?.type
+                            ]
+                          )
                         }}
                       </q-item-label>
                     </q-item-section>
@@ -195,7 +201,7 @@
                         <img src="~assets/lacuna-diamond.svg" />
 
                         <q-tooltip
-                          class="bg-black rounded-lg text-body2"
+                          class="bg-black text-body2"
                           anchor="top middle"
                           self="bottom middle"
                           transition-show=""
@@ -233,14 +239,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -255,8 +261,8 @@
 
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
-              :label="$t('done')"
+              class="full-width"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -269,15 +275,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-
-                <q-item clickable v-close-popup @click="onPublish" :disable="confirmLoading">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ $t('publish') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -285,7 +283,7 @@
                 <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('export') }}
+                      {{ $t('Common.Export') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -303,14 +301,12 @@
 </template>
 
 <script>
-import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { interfaces } from 'src/boot/axios'
+import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
-import { customCommandComponentLimits } from 'src/utils/Constants'
-import { handleAxiosError, suid } from 'src/utils/Utils'
+import { customCommandComponentLimits, localeStringsMap } from 'src/utils/Constants'
+import { suid } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
-import { useI18n } from 'vue-i18n'
 import AutomationTaskImport from './AutomationTaskImport.vue'
 import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
 import ComponentActionForwardToCommand from './ComponentActionForwardToCommand.vue'
@@ -331,27 +327,26 @@ export default defineComponent({
     automationProp: {
       type: Object,
       default: null
+    },
+    modeProp: {
+      type: String,
+      default: null
     }
   },
 
   setup(props) {
-    const $q = useQuasar(),
-      { t: $t } = useI18n()
     const { dialogRef, onDialogOK, onDialogHide, onDialogCancel } = useDialogPluginComponent()
     const guild = useGuildStore()
 
-    const mode = ref(props.automationProp ? 'UPDATE' : 'CREATE')
-    const automation = ref(
-      mode.value === 'UPDATE'
-        ? JSON.parse(JSON.stringify(props.automationProp))
-        : {
-            id: suid(6),
-            name: null,
-            options: [],
-            trigger: null,
-            components: []
-          }
-    )
+    const mode = ref(props.modeProp ?? (props.automationProp ? 'UPDATE' : 'CREATE'))
+    const automation = ref({
+      id: suid(6),
+      name: null,
+      options: [],
+      trigger: null,
+      components: [],
+      ...JSON.parse(JSON.stringify(props.automationProp))
+    })
 
     const confirmLoading = ref(false),
       currentTab = ref('general'),
@@ -373,6 +368,7 @@ export default defineComponent({
       automationFile,
 
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {
@@ -628,39 +624,6 @@ export default defineComponent({
 
       this.automation.components.splice(from, 1)
       this.automation.components.splice(position, 0, component)
-    },
-    onPublish() {
-      if (this.mode !== 'UPDATE' || !this.isValid) return
-
-      this.confirmLoading = true
-
-      return interfaces.common
-        .publishAutomationTask(this.guild._id, { data: this.automation })
-        .then(() => {
-          event('publish_automation', { event_category: 'utility' })
-
-          this.$q.notify({
-            message: this.$t(`custom_command.command_sent_for_review`),
-            classes: 'rounded-lg q-notification-custom',
-            color: 'black',
-            icon: 'done',
-            iconColor: 'positive',
-            timeout: 5000
-          })
-        })
-        .catch(err => {
-          const error = handleAxiosError(err)
-
-          this.$q.notify({
-            message: error.message,
-            classes: 'rounded-lg q-notification-custom',
-            color: 'black',
-            icon: 'error',
-            iconColor: 'negative',
-            timeout: 5000
-          })
-        })
-        .finally(() => (this.confirmLoading = false))
     },
     onExport() {
       if (this.mode !== 'UPDATE') return

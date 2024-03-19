@@ -1,11 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.channels') }}
+              {{ $t('Common.Channels') }}
             </div>
 
             <q-select
@@ -24,13 +24,11 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   color="dark-1"
                   square
                   :label="opt.name ?? opt"
                   :icon="opt.icon"
                   size="sm"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -57,12 +55,12 @@
           </div>
 
           <div class="col-12">
-            <q-btn-dropdown class="full-width" :label="$t('common.permissions')" unelevated no-caps color="dark-2">
+            <q-btn-dropdown class="full-width" :label="$t('Common.Permissions')" unelevated no-caps color="dark-2">
               <q-list>
-                <q-item v-for="(permission, i) in Object.keys(discordChannelPermissions)" :key="i" tag="label" v-ripple>
+                <q-item v-for="(permission, i) in Object.keys(discordChannelPermissions)" :key="i" tag="label">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t(`common.permissions_keys.${permission}`) }}
+                      {{ $t(localeStringsMap.discordPermissions[permission]) }}
                     </q-item-label>
                   </q-item-section>
 
@@ -80,7 +78,7 @@
 
           <div class="col-12">
             <div>
-              {{ 'Идентификатор пользователя или роли' }}
+              {{ $t('Components.CustomCommand.OverwriteChannelPermissionsUserOrRoleId') }}
             </div>
 
             <q-input
@@ -99,13 +97,13 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               unelevated
               no-caps
               color="primary"
@@ -120,10 +118,10 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
-import { discordChannelPermissions } from 'src/utils/Constants'
+import { discordChannelPermissions, localeStringsMap } from 'src/utils/Constants'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'ComponentActionOverwriteChannelPermissions',
@@ -156,6 +154,7 @@ export default defineComponent({
       component,
 
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK({ component: component.value })

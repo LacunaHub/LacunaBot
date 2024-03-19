@@ -1,19 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'economy_store_item.add_item' : 'economy_store_item.edit_item') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-9">
             <div>
-              {{ $t('economy_store_item.item_name_title') }}
+              {{ $t('Components.EconomyStoreItem.ItemName') }}
             </div>
 
             <q-input v-model="item.name" class="q-pt-sm" :maxlength="32" filled dense hide-bottom-space></q-input>
@@ -21,7 +13,7 @@
 
           <div class="col-3">
             <div>
-              {{ $t('economy_store_item.item_type_title') }}
+              {{ $t('Components.EconomyStoreItem.ItemType') }}
             </div>
 
             <q-select
@@ -35,7 +27,7 @@
             >
               <template #selected-item="{ opt }">
                 <span>
-                  {{ $t(`common.${opt.toLowerCase()}`) }}
+                  {{ $t(opt === 'ROLE' ? 'Commands.OptionTypes.Role' : 'Commands.OptionTypes.Channel') }}
                 </span>
               </template>
 
@@ -43,7 +35,7 @@
                 <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t(`common.${opt.toLowerCase()}`) }}
+                      {{ $t(opt === 'ROLE' ? 'Commands.OptionTypes.Role' : 'Commands.OptionTypes.Channel') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -53,7 +45,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('economy_store_item.item_description_title') }}
+              {{ $t('Components.EconomyStoreItem.ItemDescription') }}
             </div>
 
             <q-input
@@ -72,10 +64,10 @@
         <div class="row q-col-gutter-md">
           <div class="col-9">
             <div>
-              {{ $t('economy_store_item.item_purchase_price_title') }}
+              {{ $t('Commands.StoreCommand.SubCommands.ItemsCommand.Texts.PurchasePrice') }}
             </div>
             <div class="text--secondary">
-              {{ $t('economy_store_item.item_purchase_price_description') }}
+              {{ $t('Components.EconomyStoreItem.ItemPurchasePriceDescription') }}
             </div>
 
             <q-input
@@ -126,10 +118,10 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('economy_store_item.item_products_title') }}
+              {{ $t('Components.EconomyStoreItem.ItemProducts') }}
             </div>
             <div class="text--secondary">
-              {{ $t('economy_store_item.item_products_description') }}
+              {{ $t('Components.EconomyStoreItem.ItemProductsDescription') }}
             </div>
 
             <q-select
@@ -150,12 +142,10 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   square
                   :label="opt.name ?? opt"
                   size="sm"
                   :style="`background: ${opt.color}`"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -193,13 +183,11 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   color="dark-1"
                   square
                   :label="opt.name ?? opt"
                   :icon="opt.icon"
                   size="sm"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -227,129 +215,172 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item
-          v-for="option in itemOptions"
-          :key="option"
-          :disable="option === 'TEMPORARY_REFERENCES' && item.type !== 'ROLE'"
-          tag="label"
-          v-ripple
-        >
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`economy_store_item.item_options.${option}`) }}
-            </q-item-label>
-          </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-expansion-item
+            v-for="option in itemOptions"
+            :key="option"
+            :disable="option === 'TEMPORARY_REFERENCES' && item.type !== 'ROLE'"
+            tag="label"
+          >
+            <template #header>
+              <q-item-section side>
+                <q-checkbox
+                  v-model="item.options"
+                  :val="option"
+                  :disable="option === 'TEMPORARY_REFERENCES' && item.type !== 'ROLE'"
+                  dense
+                  @update:model-value="onSelectOption"
+                ></q-checkbox>
+              </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox
-              v-model="item.options"
-              :val="option"
-              :disable="option === 'TEMPORARY_REFERENCES' && item.type !== 'ROLE'"
-              dense
-              @update:model-value="onSelectOption"
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t(localeStringsMap.storeItemOptions[option]) }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="item.options.includes('LIMITED_QUANTITY')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('economy_store_item.item_quantity_title') }}
-              </div>
+            <q-card v-if="option === 'LIMITED_QUANTITY'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('Components.EconomyStoreItem.ItemQuantity') }}
+                    </div>
 
-              <q-input
-                v-model.number="item.quantity"
-                class="q-pt-sm"
-                type="number"
-                filled
-                dense
-                hide-bottom-space
-                @update:model-value="onChangeQuantity"
-              ></q-input>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                    <q-input
+                      v-if="item.options.includes('LIMITED_QUANTITY')"
+                      v-model.number="item.quantity"
+                      class="q-pt-sm"
+                      type="number"
+                      filled
+                      dense
+                      hide-bottom-space
+                      @update:model-value="onChangeQuantity"
+                    ></q-input>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="item.options.includes('TEMPORARY_REFERENCES')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('economy_store_item.item_duration_title') }}
-              </div>
+                    <q-input
+                      v-else
+                      disable
+                      label="100"
+                      class="q-pt-sm"
+                      type="number"
+                      filled
+                      dense
+                      hide-bottom-space
+                    ></q-input>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
 
-              <q-input
-                v-model.number="item.references_duration.value"
-                class="q-pt-sm"
-                type="number"
-                filled
-                dense
-                hide-bottom-space
-                @update:model-value="onChangeDuration"
-              >
-                <template #after>
-                  <q-select
-                    v-model="item.references_duration.measure"
-                    :options="['MINUTES', 'HOURS', 'DAYS']"
-                    filled
-                    dense
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                  >
-                    <template #selected-item="{ opt }">
-                      <span>
-                        {{ $t(`automoder.nm_age_measures.${opt}`) }}
-                      </span>
-                    </template>
+            <q-card v-if="option === 'TEMPORARY_REFERENCES'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('Components.EconomyStoreItem.ItemDuration') }}
+                    </div>
 
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label>
-                            {{ $t(`automoder.nm_age_measures.${opt}`) }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </template>
-              </q-input>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                    <q-input
+                      v-if="item.options.includes('TEMPORARY_REFERENCES')"
+                      v-model.number="item.references_duration.value"
+                      class="q-pt-sm"
+                      type="number"
+                      filled
+                      dense
+                      hide-bottom-space
+                      @update:model-value="onChangeDuration"
+                    >
+                      <template #after>
+                        <q-select
+                          v-model="item.references_duration.measure"
+                          :options="['MINUTES', 'HOURS', 'DAYS']"
+                          filled
+                          dense
+                          hide-bottom-space
+                          emit-value
+                          map-options
+                        >
+                          <template #selected-item="{ opt }">
+                            <span>
+                              {{ $t(localeStringsMap.dateUnits[opt]) }}
+                            </span>
+                          </template>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="item.options.includes('CUSTOM_PURCHASE_REPLY')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('pages.guild.gs_message_template_title') }}
-              </div>
+                          <template #option="{ opt, toggleOption, selected }">
+                            <q-item
+                              clickable
+                              @click="toggleOption(opt)"
+                              :active="selected"
+                              active-class="menu-item--active"
+                            >
+                              <q-item-section>
+                                <q-item-label>
+                                  {{ $t(localeStringsMap.dateUnits[opt]) }}
+                                </q-item-label>
+                              </q-item-section>
+                            </q-item>
+                          </template>
+                        </q-select>
+                      </template>
+                    </q-input>
 
-              <MessageEditor :message="item.custom_purchase_reply" avlReplacers="guild member" class="q-pt-sm" />
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                    <q-input
+                      v-else
+                      disable
+                      model-value="1"
+                      class="q-pt-sm"
+                      type="number"
+                      filled
+                      dense
+                      hide-bottom-space
+                    >
+                      <template #after>
+                        <q-select disable :model-value="$t('Common.DateUnits.Days')" filled dense hide-bottom-space>
+                        </q-select>
+                      </template>
+                    </q-input>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+
+            <q-card v-if="option === 'CUSTOM_PURCHASE_REPLY'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
+                    </div>
+
+                    <MessageEditor
+                      v-if="item.options.includes('CUSTOM_PURCHASE_REPLY')"
+                      :message="item.custom_purchase_reply"
+                      avlReplacers="guild member"
+                      class="q-pt-sm"
+                    />
+                    <MessageEditor v-else disable avlReplacers="guild member" class="q-pt-sm" />
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -358,8 +389,8 @@
             />
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
-              :label="$t('done')"
+              class="full-width"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               split
               unelevated
@@ -371,7 +402,7 @@
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -385,10 +416,11 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { suid } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({
@@ -437,6 +469,7 @@ export default defineComponent({
       mode,
       item,
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {

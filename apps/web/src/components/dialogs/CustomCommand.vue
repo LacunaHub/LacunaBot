@@ -1,14 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'custom_command.add_custom_command' : 'custom_command.edit_custom_command') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 1000px; max-width: 90vw">
       <q-tabs
         v-model="currentTab"
         class="bg-dark-2"
@@ -17,9 +9,9 @@
         indicator-color="transparent"
         no-caps
       >
-        <q-tab name="general" :label="$t('pages.guild.nav_names.GENERAL')" style="width: 50%"></q-tab>
+        <q-tab name="general" :label="$t('Pages.GuildPage.NavNames.General')" style="width: 50%"></q-tab>
 
-        <q-tab name="components" :label="$t('common.actions')" style="width: 50%"></q-tab>
+        <q-tab name="components" :label="$t('CaseLog.Actions.Title')" style="width: 50%"></q-tab>
       </q-tabs>
 
       <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
@@ -29,7 +21,7 @@
               <div class="col-12">
                 <q-btn
                   class="full-width"
-                  :label="$t('custom_command.import_command')"
+                  :label="$t('Common.Import')"
                   unelevated
                   no-caps
                   color="secondary"
@@ -43,7 +35,7 @@
             <div class="row q-col-gutter-md">
               <div class="col-12">
                 <div>
-                  {{ $t('custom_command.command_name_title') }}
+                  {{ $t('Components.CustomCommand.CommandName') }}
                 </div>
 
                 <q-input
@@ -58,7 +50,7 @@
 
               <div class="col-12">
                 <div>
-                  {{ $t('custom_command.command_description_title') }}
+                  {{ $t('Components.CustomCommand.CommandDescription') }}
                 </div>
 
                 <q-input
@@ -73,16 +65,15 @@
 
               <div class="col-12">
                 <div>
-                  {{ $t('custom_command.command_options_title') }}
+                  {{ $t('Commands.HelpCommand.Texts.CommandArguments') }}
                 </div>
 
                 <div class="row q-col-gutter-sm q-pt-sm">
                   <div class="col-auto" v-for="(option, i) in command.command.options" :key="i">
                     <q-chip
-                      class="rounded-lg full-width no-shadow"
+                      class="full-width no-shadow"
                       square
                       :label="option.name"
-                      :ripple="false"
                       clickable
                       removable
                       @click="optionDialog(option)"
@@ -91,13 +82,7 @@
                   </div>
 
                   <div v-if="command.command.options.length < 25" class="col-auto">
-                    <q-chip
-                      class="rounded-lg dashed-border no-shadow full-width"
-                      outline
-                      square
-                      clickable
-                      @click="optionDialog()"
-                    >
+                    <q-chip class="dashed-border no-shadow full-width" outline square clickable @click="optionDialog()">
                       <q-icon name="add" size="24px"></q-icon>
                     </q-chip>
                   </div>
@@ -106,115 +91,172 @@
             </div>
           </q-card-section>
 
-          <q-item class="q-my-sm" tag="label" dense v-ripple>
-            <q-item-section>
-              <q-item-label>
-                {{ $t('command.throttling_title') }}
-              </q-item-label>
-            </q-item-section>
+          <div class="q-pa-md">
+            <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+              <q-expansion-item>
+                <template #header>
+                  <q-item-section side>
+                    <q-checkbox
+                      v-model="command.options"
+                      val="THROTTLING"
+                      dense
+                      @update:model-value="onSelectOption"
+                    ></q-checkbox>
+                  </q-item-section>
 
-            <q-item-section side>
-              <q-checkbox
-                v-model="command.options"
-                val="THROTTLING"
-                dense
-                @update:model-value="onSelectOption"
-              ></q-checkbox>
-            </q-item-section>
-          </q-item>
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('Components.SystemCommand.Throttling') }}
+                    </q-item-label>
+                  </q-item-section>
+                </template>
 
-          <transition enter-active-class="animated fadeInUp">
-            <q-card-section v-if="command.options.includes('THROTTLING')">
-              <div class="row q-col-gutter-md">
-                <div class="col-12">
-                  <div>
-                    {{ $t('command.throttling_scope_title') }}
-                  </div>
+                <q-card class="bg-dark-1 no-border-radius" bordered>
+                  <q-card-section>
+                    <div class="row q-col-gutter-md">
+                      <div class="col-12">
+                        <div>
+                          {{ $t('Components.SystemCommand.ThrottlingScope') }}
+                        </div>
 
-                  <q-select
-                    v-model="command.throttling.type"
-                    :options="['PER_USER', 'PER_CHANNEL', 'PER_GUILD']"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                  >
-                    <template #selected-item="{ opt }">
-                      <span>
-                        {{ $t(`command.throttling_scopes.${opt}`) }}
-                      </span>
-                    </template>
+                        <q-select
+                          v-if="command.options.includes('THROTTLING')"
+                          v-model="command.throttling.type"
+                          :options="['PER_USER', 'PER_CHANNEL', 'PER_GUILD']"
+                          :disable="command.inactive"
+                          class="q-pt-sm"
+                          filled
+                          dense
+                          hide-bottom-space
+                        >
+                          <template #selected-item="{ opt }">
+                            <span>
+                              {{ $t(localeStringsMap.commandThrottlingScopes[opt]) }}
+                            </span>
+                          </template>
 
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label>
-                            {{ $t(`command.throttling_scopes.${opt}`) }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
+                          <template #option="{ opt, toggleOption, selected }">
+                            <q-item
+                              clickable
+                              @click="toggleOption(opt)"
+                              :active="selected"
+                              active-class="menu-item--active"
+                            >
+                              <q-item-section>
+                                <q-item-label>
+                                  {{ $t(localeStringsMap.commandThrottlingScopes[opt]) }}
+                                </q-item-label>
+                              </q-item-section>
+                            </q-item>
+                          </template>
+                        </q-select>
 
-                <div class="col-12">
-                  <div>
-                    {{ $t('command.throttling_max_uses_title') }}
-                  </div>
+                        <q-select
+                          v-else
+                          :model-value="$t('Components.SystemCommand.ThrottlingScopes.PerUser')"
+                          disable
+                          class="q-pt-sm"
+                          filled
+                          dense
+                          hide-bottom-space
+                        ></q-select>
+                      </div>
 
-                  <q-slider
-                    v-model.number="command.throttling.max_uses"
-                    class="q-pt-sm q-px-sm"
-                    :min="1"
-                    :max="10"
-                    snap
-                    marker-labels
-                  ></q-slider>
-                </div>
+                      <div class="col-12">
+                        <div>
+                          {{ $t('Components.SystemCommand.ThrottlingMaxUses') }}
+                        </div>
 
-                <div class="col-12">
-                  <div>
-                    {{ $t('command.throttling_timeout_title') }}
-                  </div>
+                        <q-slider
+                          v-if="command.options.includes('THROTTLING')"
+                          v-model.number="command.throttling.max_uses"
+                          class="q-pt-sm q-px-sm"
+                          :min="1"
+                          :max="10"
+                          snap
+                          marker-labels
+                        ></q-slider>
 
-                  <q-select
-                    v-model.number="command.throttling.timeout"
-                    :options="[60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
-                    class="q-pt-sm"
-                    filled
-                    dense
-                    hide-bottom-space
-                  >
-                    <template #selected-item="{ opt }">
-                      <span>
-                        {{
-                          $dt
-                            .now()
-                            .plus({ seconds: opt })
-                            .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                        }}
-                      </span>
-                    </template>
+                        <q-slider
+                          v-else
+                          disable
+                          :model-value="1"
+                          class="q-pt-sm q-px-sm"
+                          :min="1"
+                          :max="10"
+                          snap
+                          marker-labels
+                        ></q-slider>
+                      </div>
 
-                    <template #option="{ opt, toggleOption, selected }">
-                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                        <q-item-section>
-                          <q-item-label>
-                            {{
-                              $dt
-                                .now()
-                                .plus({ seconds: opt })
-                                .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
-                            }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </div>
-              </div>
-            </q-card-section>
-          </transition>
+                      <div class="col-12">
+                        <div>
+                          {{ $t('Components.SystemCommand.ThrottlingTimeout') }}
+                        </div>
+
+                        <q-select
+                          v-if="command.options.includes('THROTTLING')"
+                          v-model.number="command.throttling.timeout"
+                          :options="[60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
+                          :disable="command.inactive"
+                          class="q-pt-sm"
+                          filled
+                          dense
+                          hide-bottom-space
+                        >
+                          <template #selected-item="{ opt }">
+                            <span>
+                              {{
+                                $dt
+                                  .now()
+                                  .plus({ seconds: opt })
+                                  .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
+                              }}
+                            </span>
+                          </template>
+
+                          <template #option="{ opt, toggleOption, selected }">
+                            <q-item
+                              clickable
+                              @click="toggleOption(opt)"
+                              :active="selected"
+                              active-class="menu-item--active"
+                            >
+                              <q-item-section>
+                                <q-item-label>
+                                  {{
+                                    $dt
+                                      .now()
+                                      .plus({ seconds: opt })
+                                      .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
+                                  }}
+                                </q-item-label>
+                              </q-item-section>
+                            </q-item>
+                          </template>
+                        </q-select>
+
+                        <q-select
+                          v-else
+                          :model-value="
+                            $dt
+                              .now()
+                              .plus({ seconds: 60 })
+                              .toRelative({ unit: ['hours', 'minutes'], padding: 30000 })
+                          "
+                          disable
+                          class="q-pt-sm"
+                          filled
+                          dense
+                          hide-bottom-space
+                        ></q-select>
+                      </div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+              </q-expansion-item>
+            </q-list>
+          </div>
         </q-tab-panel>
 
         <q-tab-panel name="components" class="q-pa-none" style="overflow-y: hidden">
@@ -223,7 +265,7 @@
               <div class="col-12 col-md-6">
                 <q-btn-dropdown
                   class="full-width"
-                  :label="$t('custom_command.add_condition')"
+                  :label="$t('Components.CustomCommand.AddCondition')"
                   color="dark-2"
                   no-caps
                   unelevated
@@ -239,7 +281,7 @@
                     >
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`custom_command.component_names.${condition}`) }}
+                          {{ $t(localeStringsMap.customBehaviorComponents[condition]) }}
                         </q-item-label>
                       </q-item-section>
                     </q-item>
@@ -250,7 +292,7 @@
               <div class="col-12 col-md-6">
                 <q-btn-dropdown
                   class="full-width"
-                  :label="$t('custom_command.add_action')"
+                  :label="$t('Components.CustomCommand.AddAction')"
                   color="dark-2"
                   no-caps
                   unelevated
@@ -266,7 +308,7 @@
                     >
                       <q-item-section>
                         <q-item-label>
-                          {{ $t(`custom_command.component_names.${action}`) }}
+                          {{ $t(localeStringsMap.customBehaviorComponents[action]) }}
                         </q-item-label>
                       </q-item-section>
 
@@ -275,7 +317,7 @@
                           <img src="~assets/lacuna-diamond.svg" />
 
                           <q-tooltip
-                            class="bg-black rounded-lg text-body2"
+                            class="bg-black text-body2"
                             anchor="top middle"
                             self="bottom middle"
                             transition-show=""
@@ -295,12 +337,16 @@
           <q-card-section v-if="command.components.length">
             <div class="row q-col-gutter-md">
               <div v-for="(component, i) in command.components" :key="i" class="col-12">
-                <q-card flat bordered class="bg-transparent rounded-lg">
-                  <q-item class="rounded-t-lg" clickable v-ripple @click="componentDialog(component, i)">
+                <q-card flat bordered class="bg-transparent">
+                  <q-item class="rounded-t-lg" clickable @click="componentDialog(component, i)">
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         {{
-                          $t(`custom_command.component_names.${component.condition?.type ?? component.action?.type}`)
+                          $t(
+                            localeStringsMap.customBehaviorComponents[
+                              component.condition?.type ?? component.action?.type
+                            ]
+                          )
                         }}
                       </q-item-label>
                     </q-item-section>
@@ -310,7 +356,7 @@
                         <img src="~assets/lacuna-diamond.svg" />
 
                         <q-tooltip
-                          class="bg-black rounded-lg text-body2"
+                          class="bg-black text-body2"
                           anchor="top middle"
                           self="bottom middle"
                           transition-show=""
@@ -348,14 +394,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -370,8 +416,8 @@
 
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
-              :label="$t('done')"
+              class="full-width"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -384,15 +430,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-
-                <q-item clickable v-close-popup @click="onPublish" :disable="confirmLoading">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ $t('custom_command.publish_command') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -400,7 +438,7 @@
                 <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('custom_command.export_command') }}
+                      {{ $t('Common.Export') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -421,11 +459,10 @@
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { useGuildStore } from 'src/stores/guild'
-import { customCommandComponentLimits, discordAppCommandNameRegexp } from 'src/utils/Constants'
+import { customCommandComponentLimits, discordAppCommandNameRegexp, localeStringsMap } from 'src/utils/Constants'
 import { handleAxiosError } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
-import { useI18n } from 'vue-i18n'
 import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
 import ComponentActionForwardToCommand from './ComponentActionForwardToCommand.vue'
 import ComponentActionModifyRoles from './ComponentActionModifyRoles.vue'
@@ -447,31 +484,31 @@ export default defineComponent({
     commandProp: {
       type: Object,
       default: null
+    },
+    modeProp: {
+      type: String,
+      default: null
     }
   },
 
   setup(props) {
-    const $q = useQuasar(),
-      { t: $t } = useI18n()
+    const $q = useQuasar()
 
     const guild = useGuildStore()
     const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 
-    const mode = ref(props.commandProp ? 'UPDATE' : 'CREATE')
-    const command = ref(
-      mode.value === 'UPDATE'
-        ? JSON.parse(JSON.stringify(props.commandProp))
-        : {
-            options: [],
-            components: [],
-            command: {
-              type: 1,
-              name: '',
-              description: null,
-              options: []
-            }
-          }
-    )
+    const mode = ref(props.modeProp ?? (props.commandProp ? 'UPDATE' : 'CREATE'))
+    const command = ref({
+      options: [],
+      components: [],
+      command: {
+        type: 1,
+        name: '',
+        description: null,
+        options: []
+      },
+      ...JSON.parse(JSON.stringify(props.commandProp))
+    })
 
     let confirmLoading = ref(false),
       currentTab = ref('general'),
@@ -500,6 +537,7 @@ export default defineComponent({
       commandFile,
 
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {
@@ -515,7 +553,7 @@ export default defineComponent({
 
               $q.notify({
                 message: error.message,
-                classes: 'rounded-lg q-notification-custom',
+                classes: 'q-notification-custom',
                 color: 'black',
                 icon: 'error',
                 iconColor: 'negative',
@@ -547,7 +585,7 @@ export default defineComponent({
 
             $q.notify({
               message: error.message,
-              classes: 'rounded-lg q-notification-custom',
+              classes: 'q-notification-custom',
               color: 'black',
               icon: 'error',
               iconColor: 'negative',
@@ -816,39 +854,6 @@ export default defineComponent({
 
           this.command.components[index] = component
         })
-    },
-    onPublish() {
-      if (this.mode !== 'UPDATE' || !this.isValid) return
-
-      this.confirmLoading = true
-
-      return interfaces.common
-        .publishCustomCommand(this.guild._id, { data: this.command })
-        .then(() => {
-          event('publish_custom_command', { event_category: 'utility' })
-
-          this.$q.notify({
-            message: this.$t(`custom_command.command_sent_for_review`),
-            classes: 'rounded-lg q-notification-custom',
-            color: 'black',
-            icon: 'done',
-            iconColor: 'positive',
-            timeout: 5000
-          })
-        })
-        .catch(err => {
-          const error = handleAxiosError(err)
-
-          this.$q.notify({
-            message: error.message,
-            classes: 'rounded-lg q-notification-custom',
-            color: 'black',
-            icon: 'error',
-            iconColor: 'negative',
-            timeout: 5000
-          })
-        })
-        .finally(() => (this.confirmLoading = false))
     },
     onExport() {
       if (this.mode !== 'UPDATE') return

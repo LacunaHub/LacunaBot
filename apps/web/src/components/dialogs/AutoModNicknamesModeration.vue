@@ -1,10 +1,10 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
+    <q-card class="bg-dark-1" flat style="width: 1000px; max-width: 90vw">
+      <q-item class="q-py-md rounded-t-lg" tag="label">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(`automoder.titles.${name}`) }}
+            {{ $t(localeStringsMap.autoModTypes[name]) }}
           </q-item-label>
         </q-item-section>
 
@@ -13,36 +13,33 @@
         </q-item-section>
       </q-item>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item class="q-mb-sm">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('automoder.nnm_select_what_remove_title') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+      <div class="q-pa-md">
+        <div>
+          {{ $t('Components.AutoMod.NicknamesModerationSelectWhatRemove') }}
+        </div>
 
-        <q-item v-for="opt in removableSymbols" :key="opt" tag="label" :disable="!config.active" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`automoder.nnm_removable_symbols.${opt}`) }}
-            </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-checkbox v-model="config.options" :val="opt" :disable="!config.active" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-item v-for="opt in removableSymbols" :key="opt" tag="label" :disable="!config.active">
+            <q-item-section side>
+              <q-checkbox v-model="config.options" :val="opt" :disable="!config.active" dense></q-checkbox>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>
+                {{ $t(localeStringsMap.nicknamesModerationRemovableSymbols[opt]) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('automoder.nnm_contains_title') }}
+              {{ $t('Components.AutoMod.NicknamesModerationContains') }}
             </div>
             <div class="text--secondary">
-              {{ $t('automoder.nnm_contains_description') }}
+              {{ $t('Components.AutoMod.NicknamesModerationContainsDescription') }}
             </div>
 
             <q-select
@@ -60,14 +57,12 @@
             >
               <template #selected-item="{ opt }">
                 <q-chip
-                  class="rounded-lg"
                   color="dark-1"
                   square
                   :label="opt"
                   size="sm"
                   removable
                   @remove="config.contains.splice(config.contains.indexOf(opt), 1)"
-                  :ripple="false"
                 ></q-chip>
               </template>
             </q-select>
@@ -79,7 +74,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.ignored_roles') }}
+              {{ $t('Common.IgnoredRoles') }}
             </div>
 
             <q-select
@@ -99,12 +94,10 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   square
                   :label="opt.name ?? opt"
                   size="sm"
                   :style="`background: ${opt.color}`"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -122,64 +115,69 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none" dense>
-        <q-item tag="label" :disable="!config.active" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t('automoder.ignore_bots') }}
-            </q-item-label>
-          </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-item tag="label" :disable="!config.active">
+            <q-item-section side>
+              <q-checkbox v-model="config.ignored.bots" :disable="!config.active" dense></q-checkbox>
+            </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox v-model="config.ignored.bots" :disable="!config.active" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+            <q-item-section>
+              <q-item-label>
+                {{ $t('Common.IgnoreBots') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item class="q-mb-sm">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('common.ignored_permissions') }}
-            </q-item-label>
-            <q-item-label class="text--secondary">
-              {{ $t('automoder.ignored_permissions_description') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+      <div class="q-pa-md">
+        <div>
+          {{ $t('Common.IgnoredPermissions') }}
+        </div>
+        <div class="text--secondary">
+          {{ $t('Components.AutoMod.IgnoredPermissionsDescription') }}
+        </div>
 
-        <q-item
-          v-for="permission in ignorablePermissions"
-          :key="permission.key"
-          tag="label"
-          :disable="!config.active"
-          v-ripple
-        >
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`common.permissions_keys.${permission.key}`) }}
-            </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-checkbox
-              v-model="config.ignored.permissions"
-              :val="permission.value"
-              :disable="!config.active"
-              dense
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+          <q-item
+            v-for="permission in ignorablePermissions"
+            :key="permission.key"
+            tag="label"
+            :disable="!config.active"
+          >
+            <q-item-section side>
+              <q-checkbox
+                v-model="config.ignored.permissions"
+                :val="permission.value"
+                :disable="!config.active"
+                dense
+              ></q-checkbox>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>
+                {{ $t(localeStringsMap.discordPermissions[permission.key]) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -190,6 +188,7 @@
 <script>
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
@@ -214,6 +213,7 @@ export default defineComponent({
       guild,
       config,
       dialogRef,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK({ name: props.name, config: { ...config.value } })

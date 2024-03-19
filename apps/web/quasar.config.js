@@ -66,7 +66,7 @@ module.exports = configure(function (ctx) {
             // publicPath: '/',
             // analyze: true,
             env: {
-                API: ctx.dev ? 'http://localhost:3000' : 'https://api.lacunabot.com',
+                API: ctx.dev ? 'http://localhost:5810' : 'https://api.lacunabot.com',
                 GTAG: 'G-881ZHWECYQ',
                 MONACO_LIB: readFileSync(__dirname + '\\src\\utils\\monaco-lib.d.ts', 'utf-8')
             },
@@ -105,13 +105,15 @@ module.exports = configure(function (ctx) {
         // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
         devServer: {
             // https: true
-            open: false // opens browser window automatically
+            open: false, // opens browser window automatically
+            port: 5820
         },
 
         // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
         framework: {
             config: {
-                dark: true
+                dark: true,
+                ripple: false
             },
 
             lang: 'ru',
@@ -132,7 +134,18 @@ module.exports = configure(function (ctx) {
 
         // animations: 'all', // --- includes all animations
         // https://v2.quasar.dev/options/animations
-        animations: 'all',
+        animations: [
+            'fadeIn',
+            'fadeInUp',
+            'fadeInDown',
+            'fadeOut',
+            'fadeOutUp',
+            'fadeOutDown',
+            'slideInUp',
+            'slideInDown',
+            'slideOutUp',
+            'slideOutDown'
+        ],
 
         // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#property-sourcefiles
         // sourceFiles: {
@@ -159,7 +172,7 @@ module.exports = configure(function (ctx) {
             // manualStoreHydration: true,
             // manualPostHydrationTrigger: true,
 
-            prodPort: 3000, // The default port that the production server should use
+            prodPort: 5820, // The default port that the production server should use
             // (gets superseded if process.env.PORT is specified at runtime)
 
             middlewares: [

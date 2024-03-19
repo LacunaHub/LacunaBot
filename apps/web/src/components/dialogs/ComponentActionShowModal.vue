@@ -1,11 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('name') }}
+              {{ $t('Common.Name') }}
             </div>
 
             <q-input
@@ -20,7 +20,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('identifier') }}
+              {{ $t('Common.Identifier') }}
             </div>
 
             <q-input
@@ -41,10 +41,9 @@
             <q-item
               v-for="(field, ii) in row"
               :key="ii"
-              class="rounded-lg bg-dark-2 cursor-pointer"
+              class="bg-dark-2 cursor-pointer rounded-borders"
               clickable
               @click="fieldDialog(field, i)"
-              v-ripple
             >
               <q-item-section>
                 <q-item-label>
@@ -57,7 +56,14 @@
               </q-item-section>
 
               <q-item-section side>
-                <q-btn @click="removeField(i)" :label="$t('remove')" color="negative" flat no-caps unelevated></q-btn>
+                <q-btn
+                  @click="removeField(i)"
+                  :label="$t('Common.Remove')"
+                  color="negative"
+                  flat
+                  no-caps
+                  unelevated
+                ></q-btn>
               </q-item-section>
             </q-item>
           </div>
@@ -65,7 +71,7 @@
           <div class="col-12">
             <q-btn
               class="full-width dashed-border"
-              :label="$t('message_editor.add_embed_field')"
+              :label="$t('Components.MessageEditor.AddEmbedField')"
               @click="addField"
               :disable="component.action.show_modal.components.length >= 5"
               unelevated
@@ -78,13 +84,13 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               unelevated
               no-caps
               color="primary"
@@ -99,9 +105,9 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { computed, defineComponent, ref } from 'vue'
 import ComponentActionShowModalField from './ComponentActionShowModalField.vue'
 
 export default defineComponent({

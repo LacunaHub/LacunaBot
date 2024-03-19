@@ -3,7 +3,7 @@
     <q-item class="q-py-md">
       <q-item-section>
         <q-item-label class="text-subtitle1">
-          {{ $t('pages.landing.ft_activities_title') }}
+          {{ $t('Pages.GuildPage.NavNames.Activities') }}
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -69,7 +69,7 @@
             >
               {{ level.experience.level }}
               <q-tooltip
-                class="bg-black rounded-lg"
+                class="bg-black"
                 anchor="top middle"
                 self="bottom middle"
                 transition-show=""
@@ -83,9 +83,9 @@
       </q-list>
 
       <q-card-section v-else>
-        <q-banner class="rounded-lg bg-dark-2" dense>
+        <q-banner class="bg-dark-2 rounded-borders" dense>
           <span>
-            {{ $t('pages.dashboard.no_activities') }}
+            {{ $t('Pages.DashboardPage.NoActivities') }}
           </span>
 
           <template #avatar>
@@ -150,7 +150,7 @@ const getActivities = async () => {
 
     $q.notify({
       message: error.message,
-      classes: 'rounded-lg q-notification-custom',
+      classes: 'q-notification-custom',
       color: 'black',
       icon: 'error',
       iconColor: 'negative',

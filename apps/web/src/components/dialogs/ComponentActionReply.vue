@@ -1,11 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 1000px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 1000px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.message') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
             </div>
 
             <MessageEditor
@@ -19,26 +19,37 @@
         </div>
       </q-card-section>
 
-      <q-item v-for="option in ['EPHEMERAL']" :key="option" class="q-my-sm" tag="label" dense v-ripple>
-        <q-item-section>
-          <q-item-label>
-            {{ $t(`common.actions_keys.EPHEMERAL_REPLY`) }}
-          </q-item-label>
-        </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-item v-for="option in ['EPHEMERAL']" :key="option" tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="component.action.reply.options" :val="option" dense></q-checkbox>
+            </q-item-section>
 
-        <q-item-section side>
-          <q-checkbox v-model="component.action.reply.options" :val="option" dense></q-checkbox>
-        </q-item-section>
-      </q-item>
+            <q-item-section>
+              <q-item-label>
+                {{ $t('CaseLog.Actions.EphemeralReply') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -47,8 +58,8 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
+import { defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({

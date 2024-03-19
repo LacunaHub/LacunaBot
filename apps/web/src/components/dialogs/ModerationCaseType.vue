@@ -1,10 +1,10 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg" tag="label" v-ripple>
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
+      <q-item class="q-py-md rounded-t-lg" tag="label">
         <q-item-section>
           <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(`common.case_log_keys.${caseType.name}`) }}
+            {{ $t(localeStringsMap.caseLogTypes[caseType.name]) }}
           </q-item-label>
         </q-item-section>
 
@@ -17,7 +17,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('pages.guild.md_case_log_channel_title') }}
+              {{ $t('Pages.GuildPage.Moderation.CaseLogChannel') }}
             </div>
 
             <q-select
@@ -35,15 +35,7 @@
               clearable
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
 
               <template #option="{ opt, toggleOption, selected }">
@@ -68,39 +60,52 @@
         </div>
       </q-card-section>
 
-      <q-list v-if="caseType.config.custom_dm_message !== undefined" class="q-px-none" padding dense>
-        <q-item tag="label" :disable="!caseType.config.active" v-ripple="caseType.config.active">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('mod_case_type.custom_dm_message_title') }}
-            </q-item-label>
-          </q-item-section>
+      <div v-if="caseType.config.custom_dm_message !== undefined" class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-expansion-item tag="label" :disable="!caseType.config.active">
+            <template #header>
+              <q-item-section side>
+                <q-checkbox
+                  v-model="caseType.config.custom_dm_message"
+                  :disable="!caseType.config.active"
+                  dense
+                ></q-checkbox>
+              </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox
-              v-model="caseType.config.custom_dm_message"
-              :disable="!caseType.config.active"
-              dense
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('Components.CaseType.CustomDMMessage') }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-      <q-card-section v-if="caseType.config.custom_dm_message !== undefined">
-        <MessageEditor
-          :message="caseType.config.dm_message"
-          :disable="!caseType.config.active || !caseType.config.custom_dm_message"
-        />
-      </q-card-section>
+            <q-card class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <MessageEditor
+                  :message="caseType.config.dm_message"
+                  :disable="!caseType.config.active || !caseType.config.custom_dm_message"
+                />
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('done')" unelevated no-caps color="primary" @click="onConfirm" />
+            <q-btn
+              class="full-width"
+              :label="$t('Common.Done')"
+              unelevated
+              no-caps
+              color="primary"
+              @click="onConfirm"
+            />
           </div>
         </div>
       </q-card-section>
@@ -109,9 +114,10 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
+import { defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({
@@ -140,6 +146,7 @@ export default defineComponent({
       guild,
 
       dialogRef,
+      localeStringsMap,
 
       onConfirm() {
         onDialogOK(caseType.value)

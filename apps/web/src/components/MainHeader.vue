@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-black fixed fixed-top">
+  <q-header class="bg-dark-1 fixed fixed-top">
     <q-toolbar class="q-py-xs q-px-md">
       <q-btn
         v-if="$q.screen.lt.md"
@@ -30,27 +30,27 @@
           style="display: none"
         >
           <span>
-            {{ $t('header.guilds') }}
+            {{ $t('Components.Header.Guilds') }}
           </span>
         </router-link>
         <router-link to="/state" class="header-link text-uppercase q-mr-lg" active-class="header-link--active">
           <span>
-            {{ $t('header.state') }}
+            {{ $t('Components.Header.State') }}
           </span>
         </router-link>
         <a href="https://docs.lacunabot.com" target="_blank" class="header-link text-uppercase q-mr-lg">
           <span>
-            {{ $t('header.docs') }}
+            {{ $t('Components.Header.Docs') }}
           </span>
         </a>
         <router-link to="/patrons" class="header-link text-uppercase q-mr-lg" active-class="header-link--active">
           <span>
-            {{ $t('header.patrons') }}
+            {{ $t('Components.Header.Patrons') }}
           </span>
         </router-link>
         <a href="https://discord.gg/9NeMc3J" target="_blank" class="header-link text-uppercase">
           <span>
-            {{ $t('header.help') }}
+            {{ $t('Components.Header.Community') }}
           </span>
         </a>
       </div>
@@ -58,7 +58,7 @@
       <q-separator class="gt-sm" spaced="lg" inset vertical></q-separator>
 
       <q-btn v-if="!user.access_token" class="q-px-sm" flat to="/authorize">
-        {{ $t('header.login') }}
+        {{ $t('Components.Header.Login') }}
         <q-icon class="q-ml-sm" name="login" size="24px"></q-icon>
       </q-btn>
 
@@ -72,12 +72,12 @@
           <q-list>
             <q-item clickable active-class="" to="/@me">
               <q-item-section>
-                {{ $t('pages.dashboard.profile') }}
+                {{ $t('Pages.DashboardPage.Profile') }}
               </q-item-section>
             </q-item>
             <q-item clickable active-class="" to="/@me/guilds">
               <q-item-section>
-                {{ $t('pages.dashboard.my_guilds') }}
+                {{ $t('Pages.DashboardPage.MyGuilds') }}
               </q-item-section>
             </q-item>
 
@@ -85,22 +85,22 @@
 
             <q-item clickable>
               <q-item-section>
-                {{ $t('pages.guild.gs_locale_title') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.Locale') }}
               </q-item-section>
 
               <q-menu class="bg-dark-2" anchor="top left" self="top right">
                 <q-list>
                   <q-item
-                    v-for="locale in availableLocales"
-                    :key="locale.value"
+                    v-for="locale in languages"
+                    :key="locale.code"
                     clickable
-                    @click="setLocale(locale.value)"
-                    :active="currentLocale === locale.value"
+                    @click="setLocale(locale.code)"
+                    :active="currentLocale === locale.code"
                     active-class="menu-item--active"
                   >
                     <q-item-section>
                       <q-item-label>
-                        {{ locale.label }}
+                        {{ locale.name }}
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -108,7 +108,7 @@
                   <q-item clickable href="https://crowdin.com/project/lacuna" target="_blank">
                     <q-item-section>
                       <q-item-label>
-                        {{ $t('pages.guild.gs_translate_title') }}
+                        {{ $t('Pages.GuildPage.GeneralSettings.Translate') }}
                       </q-item-label>
                     </q-item-section>
 
@@ -121,12 +121,12 @@
             </q-item>
             <q-item clickable @click="changeLogDialog">
               <q-item-section>
-                {{ $t('header.change_log') }}
+                {{ $t('Components.Header.ReleaseNotes') }}
               </q-item-section>
             </q-item>
             <q-item clickable @click="user.logout">
               <q-item-section class="text-red">
-                {{ $t('logout') }}
+                {{ $t('Components.Header.Logout') }}
               </q-item-section>
             </q-item>
           </q-list>
@@ -138,49 +138,42 @@
 
     <transition enter-active-class="animated fadeInDown">
       <q-list v-if="displayMobileNav" class="text-uppercase">
-        <q-item
-          clickable
-          to="/guilds"
-          active-class="nav-item--active"
-          v-ripple
-          @click="toggleMobileNav"
-          style="display: none"
-        >
+        <q-item clickable to="/guilds" active-class="nav-item--active" @click="toggleMobileNav" style="display: none">
           <q-item-section>
             <q-item-label>
-              {{ $t('header.guilds') }}
+              {{ $t('Components.Header.Guilds') }}
             </q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable to="/state" active-class="nav-item--active" v-ripple @click="toggleMobileNav">
+        <q-item clickable to="/state" active-class="nav-item--active" @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
-              {{ $t('header.state') }}
+              {{ $t('Components.Header.State') }}
             </q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable href="https://docs.lacunabot.com" target="_blank" v-ripple @click="toggleMobileNav">
+        <q-item clickable href="https://docs.lacunabot.com" target="_blank" @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
-              {{ $t('header.docs') }}
+              {{ $t('Components.Header.Docs') }}
             </q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable to="/patrons" active-class="nav-item--active" v-ripple @click="toggleMobileNav">
+        <q-item clickable to="/patrons" active-class="nav-item--active" @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
-              {{ $t('header.patrons') }}
+              {{ $t('Components.Header.Patrons') }}
             </q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable href="https://discord.gg/9NeMc3J" target="_blank" v-ripple @click="toggleMobileNav">
+        <q-item clickable href="https://discord.gg/9NeMc3J" target="_blank" @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
-              {{ $t('header.help') }}
+              {{ $t('Components.Header.Community') }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -190,10 +183,10 @@
 </template>
 
 <script>
+import { languages } from '@lacunahub/lacuna-locale'
 import { useUserStore } from 'src/stores/user'
-import { defineComponent } from 'vue'
-import { availableLocales } from 'src/utils/Constants'
 import { getLocale } from 'src/utils/Utils'
+import { defineComponent } from 'vue'
 import ChangeLog from './dialogs/ChangeLog.vue'
 
 export default defineComponent({
@@ -204,7 +197,7 @@ export default defineComponent({
 
     return {
       user,
-      availableLocales,
+      languages,
       currentLocale: getLocale()
     }
   },

@@ -35,14 +35,14 @@ export default defineComponent({
 
     const textColor = ref('text-positive')
     const messages = ref({
-      title: 'pages.authorization.authorization_successful',
-      description: 'pages.authorization.close_window_and_go_back'
+      title: 'Pages.AuthorizationResultPage.AuthorizationSuccessful',
+      description: 'Pages.AuthorizationResultPage.CloseWindowAndGoBack'
     })
 
     if (status === 'failed') {
       textColor.value = 'text-negative'
-      messages.value.title = 'pages.authorization.authorization_failed'
-      messages.value.description = 'pages.authorization.something_went_wrong'
+      messages.value.title = 'Pages.AuthorizationResultPage.AuthorizationFailed'
+      messages.value.description = 'Pages.AuthorizationResultPage.SomethingWentWrong'
     }
 
     return { textColor, messages }

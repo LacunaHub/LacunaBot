@@ -17,18 +17,18 @@
           <div class="col-12 col-md-6">
             <div
               :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h2'} text-weight-bold`"
-              v-html="$t('pages.landing.title').replace(/\(([^)]+)\)/i, `<em class='gradient'>$1</em>`)"
+              v-html="$t('Pages.LandingPage.Title').replace(/\(([^)]+)\)/i, `<em class='gradient'>$1</em>`)"
             ></div>
 
             <div class="text--secondary q-mt-md">
-              {{ $t('pages.landing.description') }}
+              {{ $t('Pages.LandingPage.Description') }}
             </div>
           </div>
 
           <div class="col-12 q-mt-lg">
             <q-btn
               :class="`${$q.screen.lt.sm ? 'full-width' : ''}`"
-              :label="$t('pages.landing.add_to_me')"
+              :label="$t('Pages.LandingPage.AddToMe')"
               icon="discord"
               @click="addToMe"
               color="primary"
@@ -39,7 +39,7 @@
 
             <q-btn
               :class="`${$q.screen.lt.sm ? 'full-width q-mt-md' : 'q-ml-md'}`"
-              :label="$t('pages.landing.learn_more')"
+              :label="$t('Pages.LandingPage.LearnMore')"
               color="dark-1"
               size="large"
               unelevated
@@ -52,10 +52,10 @@
         <q-carousel-slide name="custom-behavior" class="row items-center content-center q-col-gutter-md">
           <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
             <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
-              {{ $t('pages.landing.ft_custom_behavior_title') }}
+              {{ $t('Pages.GuildPage.NavNames.CustomBehavior') }}
             </div>
             <div class="text--secondary">
-              {{ $t('pages.landing.ft_custom_behavior_description') }}
+              {{ $t('Pages.LandingPage.FeatureCustomBehaviorDescription') }}
             </div>
           </div>
 
@@ -77,10 +77,10 @@
         <q-carousel-slide name="moderation" class="row items-center content-center q-col-gutter-md">
           <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
             <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
-              {{ $t('pages.landing.ft_moderation_title') }}
+              {{ $t('Pages.GuildPage.NavNames.Moderation') }}
             </div>
             <div class="text--secondary">
-              {{ $t('pages.landing.ft_moderation_description') }}
+              {{ $t('Pages.LandingPage.FeatureModerationDescription') }}
             </div>
           </div>
 
@@ -102,10 +102,10 @@
         <q-carousel-slide name="activities" class="row items-center content-center q-col-gutter-md">
           <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
             <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
-              {{ $t('pages.landing.ft_activities_title') }}
+              {{ $t('Pages.GuildPage.NavNames.Activities') }}
             </div>
             <div class="text--secondary">
-              {{ $t('pages.landing.ft_activities_description') }}
+              {{ $t('Pages.LandingPage.FeatureActivitiesDescription') }}
             </div>
           </div>
 
@@ -127,10 +127,10 @@
         <q-carousel-slide name="social-alerts" class="row items-center content-center q-col-gutter-md">
           <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
             <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
-              {{ $t('pages.landing.ft_subscriptions_title') }}
+              {{ $t('Pages.GuildPage.NavNames.Subscriptions') }}
             </div>
             <div class="text--secondary">
-              {{ $t('pages.landing.ft_subscriptions_description') }}
+              {{ $t('Pages.LandingPage.FeatureSubscriptionsDescription') }}
             </div>
           </div>
 
@@ -152,10 +152,10 @@
         <q-carousel-slide name="music" class="row items-center content-center q-col-gutter-md">
           <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
             <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
-              {{ $t('pages.landing.ft_music_title') }}
+              {{ $t('Pages.GuildPage.VoiceChannels.Music') }}
             </div>
             <div class="text--secondary">
-              {{ $t('pages.landing.ft_music_description') }}
+              {{ $t('Pages.LandingPage.FeatureMusicDescription') }}
             </div>
           </div>
 
@@ -177,10 +177,10 @@
         <q-carousel-slide name="useful-features" class="row items-center content-center q-col-gutter-md">
           <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
             <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
-              {{ $t('pages.landing.ft_utility_title') }}
+              {{ $t('Pages.LandingPage.FeatureUtility') }}
             </div>
             <div class="text--secondary">
-              {{ $t('pages.landing.ft_utility_description') }}
+              {{ $t('Pages.LandingPage.FeatureUtilityDescription') }}
             </div>
           </div>
 
@@ -202,15 +202,15 @@
         <q-carousel-slide name="ready-to-start" class="row items-center content-center q-col-gutter-md">
           <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-left'}`">
             <div :class="`${$q.screen.lt.sm ? 'text-h4' : 'text-h3'} text-weight-bold q-mb-sm`">
-              {{ $t('pages.landing.ready_title') }}
+              {{ $t('Pages.LandingPage.ReadyToGetStarted') }}
             </div>
             <div class="text--secondary">
-              {{ $t('pages.landing.ready_description') }}
+              {{ $t('Pages.LandingPage.ReadyToGetStartedDescription') }}
             </div>
 
             <q-btn
               :class="`q-mt-lg ${$q.screen.lt.sm ? 'full-width' : ''}`"
-              :label="$t('pages.landing.add_to_me')"
+              :label="$t('Pages.LandingPage.AddToMe')"
               icon="discord"
               @click="addToMe"
               color="primary"
@@ -244,13 +244,13 @@
               to="/@me/guilds"
               style="background: rgba(0, 0, 0, 0.3)"
             >
-              {{ $t('pages.dashboard.profile') }}
+              {{ $t('Pages.DashboardPage.Profile') }}
               <q-avatar class="q-ml-sm" size="32px">
                 <img :src="user.avatarURL" />
               </q-avatar>
             </q-btn>
             <q-btn v-else class="q-px-md" flat to="/authorize" style="background: rgba(0, 0, 0, 0.3)">
-              {{ $t('header.login') }}
+              {{ $t('Components.Header.Login') }}
               <q-icon class="q-ml-sm" name="login" size="24px"></q-icon>
             </q-btn>
           </q-carousel-control>

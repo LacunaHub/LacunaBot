@@ -1,11 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
             <div>
-              {{ $t('ims.btn_name_title') }}
+              {{ $t('Components.InteractiveMessage.ButtonName') }}
             </div>
 
             <q-input v-model="button.label" class="q-pt-sm" :maxlength="80" filled dense hide-bottom-space>
@@ -27,7 +27,7 @@
 
           <div class="col-6">
             <div>
-              {{ $t('ims.btn_style_title') }}
+              {{ $t('Components.InteractiveMessage.ButtonStyle') }}
             </div>
 
             <q-select
@@ -41,7 +41,7 @@
             >
               <template #selected-item="{ opt }">
                 <span>
-                  {{ $t(`common.discord_button_styles.${opt.toUpperCase()}`) }}
+                  {{ $t(localeStringsMap.discordButtonStyles[opt.toUpperCase()]) }}
                 </span>
               </template>
 
@@ -49,7 +49,7 @@
                 <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t(`common.discord_button_styles.${opt.toUpperCase()}`) }}
+                      {{ $t(localeStringsMap.discordButtonStyles[opt.toUpperCase()]) }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -59,7 +59,7 @@
 
           <div v-if="button.style === 'Link'" class="col-12">
             <div>
-              {{ $t('ims.btn_url_title') }}
+              {{ $t('Components.InteractiveMessage.ButtonURL') }}
             </div>
 
             <q-input
@@ -75,7 +75,7 @@
 
           <div v-else class="col-12">
             <div>
-              {{ $t('identifier') }}
+              {{ $t('Common.Identifier') }}
             </div>
 
             <q-input
@@ -93,13 +93,13 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               class="full-width"
-              :label="$t('done')"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -112,7 +112,7 @@
     </q-card>
 
     <q-dialog v-model="emojiPickerModal" transition-show="jump-down" transition-hide="jump-up">
-      <q-card class="rounded-lg" style="max-width: 380px">
+      <q-card style="max-width: 380px">
         <emoji-picker
           :data="guild.emojiIndex"
           @select="onSelectEmoji"
@@ -126,10 +126,11 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
-import { parseEmoji } from 'src/utils/Utils'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
+import { parseEmoji } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'MessageEditorButtonComponent',
@@ -161,6 +162,7 @@ export default defineComponent({
       emojiPickerModal,
 
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {

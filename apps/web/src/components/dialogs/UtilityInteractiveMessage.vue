@@ -1,19 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 900px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'ims.add_im' : 'ims.edit_im') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 900px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div v-if="mode === 'CREATE'" class="col-12">
             <div>
-              {{ $t('common.channel') }}
+              {{ $t('Commands.OptionTypes.Channel') }}
             </div>
 
             <q-select
@@ -29,15 +21,7 @@
               map-options
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
 
               <template #option="{ opt, toggleOption, selected }">
@@ -62,7 +46,7 @@
 
           <div class="col-12">
             <div>
-              {{ $t('common.message') }}
+              {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
             </div>
 
             <MessageEditor :message="im.message" hide-replacers hide-code-snippets class="q-pt-sm" />
@@ -74,20 +58,19 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('ims.actions_rows_title') }}
+              {{ $t('Components.InteractiveMessage.ActionRows') }}
             </div>
           </div>
 
           <div class="col-12" v-for="(row, i) in im.components" :key="i">
-            <q-card flat bordered class="bg-transparent rounded-lg">
+            <q-card flat bordered class="bg-transparent">
               <q-card-section v-if="row[0].type === 'BUTTON'">
                 <div class="row q-col-gutter-sm">
                   <div class="col-auto" v-for="(button, ii) in row" :key="button.id">
                     <q-chip
-                      class="rounded-lg full-width no-shadow"
+                      class="full-width no-shadow"
                       square
                       :label="button.appearance.label"
-                      :ripple="false"
                       :style="{ background: buttonStyles[button.appearance.style] }"
                       clickable
                       removable
@@ -98,7 +81,7 @@
 
                   <div v-if="row.length < 5" class="col-auto">
                     <q-chip
-                      class="rounded-lg dashed-border no-shadow full-width"
+                      class="dashed-border no-shadow full-width"
                       outline
                       square
                       clickable
@@ -114,7 +97,7 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-12">
                     <div>
-                      {{ $t('ims.select_menu_placeholder_title') }}
+                      {{ $t('Components.InteractiveMessage.SelectMenuPlaceholder') }}
                     </div>
 
                     <q-input
@@ -131,10 +114,9 @@
                     <div class="row q-col-gutter-sm">
                       <div class="col-auto" v-for="(option, ii) in row[0]._options" :key="ii">
                         <q-chip
-                          class="rounded-lg full-width no-shadow"
+                          class="full-width no-shadow"
                           square
                           :label="option.appearance.label"
-                          :ripple="false"
                           clickable
                           removable
                           @click="optionDialog(option, i)"
@@ -146,7 +128,7 @@
 
                       <div v-if="row[0]._options.length < 25" class="col-auto">
                         <q-chip
-                          class="rounded-lg dashed-border no-shadow full-width"
+                          class="dashed-border no-shadow full-width"
                           outline
                           square
                           clickable
@@ -163,7 +145,7 @@
               <q-card-actions align="right">
                 <q-btn
                   @click="im.components.splice(i, 1)"
-                  :label="$t('remove')"
+                  :label="$t('Common.Remove')"
                   color="negative"
                   flat
                   no-caps
@@ -179,7 +161,7 @@
                 <q-item clickable v-close-popup @click="addActionRow('BUTTON')">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('ims.action_row_buttons_title') }}
+                      {{ $t('Components.InteractiveMessage.ActionRowButtons') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -187,7 +169,7 @@
                 <q-item clickable v-close-popup @click="addActionRow('SELECT_MENU')">
                   <q-item-section>
                     <q-item-label>
-                      {{ $t('ims.action_row_select_menu_title') }}
+                      {{ $t('Components.InteractiveMessage.ActionRowSelectMenu') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -201,16 +183,15 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.reactions') }}
+              {{ $t('Common.Reactions') }}
             </div>
 
             <div class="row q-col-gutter-sm q-pt-sm">
               <div class="col-auto" v-for="(reaction, i) in im.reactions" :key="i">
                 <q-chip
-                  class="rounded-lg full-width no-shadow"
+                  class="full-width no-shadow"
                   square
                   :label="reaction.emoji.id ? `:${reaction.emoji.name}:` : reaction.emoji.name"
-                  :ripple="false"
                   clickable
                   removable
                   @click="reactionDialog(reaction)"
@@ -220,7 +201,7 @@
 
               <div v-if="im.reactions.length < 10" class="col-auto">
                 <q-chip
-                  class="rounded-lg dashed-border no-shadow full-width"
+                  class="dashed-border no-shadow full-width"
                   outline
                   square
                   clickable
@@ -237,14 +218,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -259,8 +240,8 @@
 
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
-              :label="$t('done')"
+              class="full-width"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -273,7 +254,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -289,7 +270,7 @@
     </q-card>
 
     <q-dialog v-model="emojiPickerModal" transition-show="jump-down" transition-hide="jump-up">
-      <q-card class="rounded-lg" style="max-width: 380px">
+      <q-card style="max-width: 380px">
         <emoji-picker
           :data="guild.emojiIndex"
           @select="addReaction"
@@ -413,7 +394,7 @@ export default defineComponent({
 
               $q.notify({
                 message: error.message,
-                classes: 'rounded-lg q-notification-custom',
+                classes: 'q-notification-custom',
                 color: 'black',
                 icon: 'error',
                 iconColor: 'negative',
@@ -445,7 +426,7 @@ export default defineComponent({
 
             $q.notify({
               message: error.message,
-              classes: 'rounded-lg q-notification-custom',
+              classes: 'q-notification-custom',
               color: 'black',
               icon: 'error',
               iconColor: 'negative',

@@ -1,19 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'auto_threads.add_auto_thread' : 'auto_threads.edit_auto_thread') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.channel') }}
+              {{ $t('Commands.OptionTypes.Channel') }}
             </div>
 
             <q-select
@@ -30,15 +22,7 @@
               map-options
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
 
               <template #option="{ opt, toggleOption, selected }">
@@ -76,22 +60,14 @@
               readonly
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
             </q-select>
           </div>
 
           <div class="col-12">
             <div>
-              {{ $t('auto_threads.default_name_title') }}
+              {{ $t('Components.AutoThread.ThreadName') }}
             </div>
 
             <q-input
@@ -110,10 +86,10 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('auto_reactions.text_matches_title') }}
+              {{ $t('Components.AutoReaction.TextMatches') }}
             </div>
             <div class="text--secondary">
-              {{ $t('auto_reactions.text_matches_description') }}
+              {{ $t('Components.AutoReaction.TextMatchesDescription') }}
             </div>
 
             <q-select
@@ -129,26 +105,17 @@
               multiple
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt"
-                  size="sm"
-                  removable
-                  @remove="removeAtIndex(index)"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt" size="sm" removable @remove="removeAtIndex(index)"></q-chip>
               </template>
             </q-select>
           </div>
 
           <div class="col-12">
             <div>
-              {{ $t('auto_reactions.excluded_text_matches_title') }}
+              {{ $t('Components.AutoReaction.ExcludedTextMatches') }}
             </div>
             <div class="text--secondary">
-              {{ $t('auto_reactions.excluded_text_matches_description') }}
+              {{ $t('Components.AutoReaction.ExcludedTextMatchesDescription') }}
             </div>
 
             <q-select
@@ -164,16 +131,7 @@
               multiple
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt"
-                  size="sm"
-                  removable
-                  @remove="removeAtIndex(index)"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt" size="sm" removable @remove="removeAtIndex(index)"></q-chip>
               </template>
             </q-select>
           </div>
@@ -183,14 +141,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -199,8 +157,8 @@
             />
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
-              :label="$t('done')"
+              class="full-width"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               split
               unelevated
@@ -212,7 +170,7 @@
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -226,9 +184,9 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'UtilityAutoThread',

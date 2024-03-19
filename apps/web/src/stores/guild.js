@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import { EmojiIndex } from 'emoji-mart-vue-fast/src'
 import Twemoji from 'emoji-mart-vue-fast/data/twitter.json'
+import { EmojiIndex } from 'emoji-mart-vue-fast/src'
+import { defineStore } from 'pinia'
 
 export const useGuildStore = defineStore('guild', {
     state: () => ({

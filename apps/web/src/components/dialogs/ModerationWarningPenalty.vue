@@ -1,19 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'mod_warning_penalty.add_penalty' : 'mod_warning_penalty.edit_penalty') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('mod_warning_penalty.warnings_amount_title') }}
+              {{ $t('Components.WarningPenalty.WarningCount') }}
             </div>
 
             <q-slider v-model.number="penalty.penalties" class="q-pt-sm q-px-sm" :min="1" :max="100" label></q-slider>
@@ -21,263 +13,338 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item
-          v-for="action in actions"
-          :key="action"
-          tag="label"
-          :disable="penalty.options.some(i => action.exclusive.includes(i))"
-          v-ripple="!penalty.options.some(i => action.exclusive.includes(i))"
-        >
-          <q-item-section>
-            <q-item-label>
-              {{ $t(`common.actions_keys.${action.name}`) }}
-            </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-checkbox
-              v-model="penalty.options"
-              :val="action.name"
-              :disable="penalty.options.some(i => action.exclusive.includes(i))"
-              dense
-              @update:model-value="onSelectOption"
-            ></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
-
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="penalty.options.includes('ACTION_BAN')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('automoder.penalty_timeout') }}
-              </div>
-
-              <q-select
-                v-model.number="penalty.ban_timeout"
-                :options="[
-                  0, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400, 172800, 259200, 604800, 1209600
-                ]"
-                class="q-pt-sm"
-                filled
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-item
+            v-for="action in actions.filter(i => i.expandable === false)"
+            tag="label"
+            :key="action"
+            :disable="penalty.options.some(i => action.exclusive.includes(i))"
+          >
+            <q-item-section side>
+              <q-checkbox
+                v-model="penalty.options"
+                :val="action.name"
+                :disable="penalty.options.some(i => action.exclusive.includes(i))"
                 dense
-                hide-bottom-space
-              >
-                <template #selected-item="{ opt }">
-                  <span v-if="opt === 0" class="text-lowercase">
-                    {{ $t('automoder.indefinitely') }}
-                  </span>
-                  <span v-else>
-                    {{
-                      $dt
-                        .now()
-                        .plus({ seconds: opt })
-                        .toRelative({ unit: ['days', 'hours', 'minutes'], padding: 30000 })
-                    }}
-                  </span>
-                </template>
+                @update:model-value="onSelectOption"
+              ></q-checkbox>
+            </q-item-section>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                    <q-item-section>
-                      <q-item-label v-if="opt === 0" class="text-lowercase">
-                        {{ $t('automoder.indefinitely') }}
-                      </q-item-label>
-                      <q-item-label v-else>
-                        {{
-                          $dt
-                            .now()
-                            .plus({ seconds: opt })
-                            .toRelative({ unit: ['days', 'hours', 'minutes'], padding: 30000 })
-                        }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+            <q-item-section>
+              <q-item-label>
+                {{ $t(localeStringsMap.actions[action.name]) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="penalty.options.includes('ACTION_MUTE')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('automoder.penalty_timeout') }}
-              </div>
+          <q-expansion-item
+            v-for="action in actions.filter(i => typeof i.expandable === 'undefined')"
+            :key="action"
+            :disable="penalty.options.some(i => action.exclusive.includes(i))"
+          >
+            <template #header>
+              <q-item-section side>
+                <q-checkbox
+                  v-model="penalty.options"
+                  :val="action.name"
+                  :disable="penalty.options.some(i => action.exclusive.includes(i))"
+                  dense
+                  @update:model-value="onSelectOption"
+                ></q-checkbox>
+              </q-item-section>
 
-              <q-select
-                v-model.number="penalty.mute_timeout"
-                :options="[
-                  60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400, 172800, 259200, 604800, 1209600
-                ]"
-                class="q-pt-sm"
-                filled
-                dense
-                hide-bottom-space
-              >
-                <template #selected-item="{ opt }">
-                  <span>
-                    {{
-                      $dt
-                        .now()
-                        .plus({ seconds: opt })
-                        .toRelative({ unit: ['days', 'hours', 'minutes'], padding: 30000 })
-                    }}
-                  </span>
-                </template>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t(localeStringsMap.actions[action.name]) }}
+                </q-item-label>
+              </q-item-section>
+            </template>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                    <q-item-section>
-                      <q-item-label>
-                        {{
-                          $dt
-                            .now()
-                            .plus({ seconds: opt })
-                            .toRelative({ unit: ['days', 'hours', 'minutes'], padding: 30000 })
-                        }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+            <q-card v-if="action.name === 'ACTION_BAN'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('Components.AutoMod.PenaltyTimeout') }}
+                    </div>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="penalty.options.includes('ACTION_MODIFY_ROLES')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('common.add_roles') }}
-              </div>
+                    <q-select
+                      v-if="penalty.options.includes('ACTION_BAN')"
+                      v-model.number="penalty.ban_timeout"
+                      :options="[
+                        0, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400, 172800, 259200, 604800, 1209600
+                      ]"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                    >
+                      <template #selected-item="{ opt }">
+                        <span v-if="opt === 0" class="text-lowercase">
+                          {{ $t('Common.Indefinitely') }}
+                        </span>
+                        <span v-else>
+                          {{
+                            $dt
+                              .now()
+                              .plus({ seconds: opt })
+                              .toRelative({ unit: ['days', 'hours', 'minutes'], padding: 30000 })
+                          }}
+                        </span>
+                      </template>
 
-              <q-select
-                v-model="penalty.modify_roles.add"
-                :options="guild.rolesUnmanaged"
-                option-label="name"
-                option-value="id"
-                use-chips
-                class="q-pt-sm"
-                multiple
-                filled
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-              >
-                <template #selected-item="{ opt, index, removeAtIndex }">
-                  <q-chip
-                    class="rounded-lg"
-                    square
-                    :label="opt.name ?? opt"
-                    size="sm"
-                    :style="`background: ${opt.color}`"
-                    :ripple="false"
-                    removable
-                    @remove="removeAtIndex(index)"
-                  ></q-chip>
-                </template>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label v-if="opt === 0" class="text-lowercase">
+                              {{ $t('Common.Indefinitely') }}
+                            </q-item-label>
+                            <q-item-label v-else>
+                              {{
+                                $dt
+                                  .now()
+                                  .plus({ seconds: opt })
+                                  .toRelative({ unit: ['days', 'hours', 'minutes'], padding: 30000 })
+                              }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item
-                    clickable
-                    @click="toggleOption(opt)"
-                    :active="selected"
-                    :disable="opt.higher"
-                    active-class="menu-item--active"
-                  >
-                    <q-item-section>
-                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
+                    <q-select
+                      v-else
+                      disable
+                      :label="
+                        $dt
+                          .now()
+                          .plus({ seconds: 300 })
+                          .toRelative({ unit: ['hours', 'minutes'], padding: 300 })
+                      "
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                    ></q-select>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
 
-            <div class="col-12">
-              <div>
-                {{ $t('common.remove_roles') }}
-              </div>
+            <q-card v-if="action.name === 'ACTION_MUTE'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('Components.AutoMod.PenaltyTimeout') }}
+                    </div>
 
-              <q-select
-                v-model="penalty.modify_roles.remove"
-                :options="guild.rolesUnmanaged"
-                option-label="name"
-                option-value="id"
-                use-chips
-                class="q-pt-sm"
-                multiple
-                filled
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-              >
-                <template #selected-item="{ opt, index, removeAtIndex }">
-                  <q-chip
-                    class="rounded-lg"
-                    square
-                    :label="opt.name ?? opt"
-                    size="sm"
-                    :style="`background: ${opt.color}`"
-                    :ripple="false"
-                    removable
-                    @remove="removeAtIndex(index)"
-                  ></q-chip>
-                </template>
+                    <q-select
+                      v-if="penalty.options.includes('ACTION_MUTE')"
+                      v-model.number="penalty.mute_timeout"
+                      :options="[
+                        60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400, 172800, 259200, 604800,
+                        1209600
+                      ]"
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                    >
+                      <template #selected-item="{ opt }">
+                        <span>
+                          {{
+                            $dt
+                              .now()
+                              .plus({ seconds: opt })
+                              .toRelative({ unit: ['days', 'hours', 'minutes'], padding: 30000 })
+                          }}
+                        </span>
+                      </template>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item
-                    clickable
-                    @click="toggleOption(opt)"
-                    :active="selected"
-                    :disable="opt.higher"
-                    active-class="menu-item--active"
-                  >
-                    <q-item-section>
-                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label>
+                              {{
+                                $dt
+                                  .now()
+                                  .plus({ seconds: opt })
+                                  .toRelative({ unit: ['days', 'hours', 'minutes'], padding: 30000 })
+                              }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
 
-      <transition enter-active-class="animated fadeInUp">
-        <q-card-section v-if="penalty.options.includes('ACTION_SEND_MESSAGE')">
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('pages.guild.gs_message_template_title') }}
-              </div>
+                    <q-select
+                      v-else
+                      disable
+                      :label="
+                        $dt
+                          .now()
+                          .plus({ seconds: 60 })
+                          .toRelative({ unit: ['hours', 'minutes'], padding: 300 })
+                      "
+                      class="q-pt-sm"
+                      filled
+                      dense
+                      hide-bottom-space
+                    ></q-select>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
 
-              <MessageEditor :message="penalty.send_message" avlReplacers="message guild member" class="q-pt-sm" />
-            </div>
-          </div>
-        </q-card-section>
-      </transition>
+            <q-card v-if="action.name === 'ACTION_MODIFY_ROLES'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('Common.AddRoles') }}
+                    </div>
+
+                    <q-select
+                      v-if="penalty.options.includes('ACTION_MODIFY_ROLES')"
+                      v-model="penalty.modify_roles.add"
+                      :options="guild.rolesUnmanaged"
+                      option-label="name"
+                      option-value="id"
+                      use-chips
+                      class="q-pt-sm"
+                      multiple
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          square
+                          :label="opt.name ?? opt"
+                          size="sm"
+                          :style="`background: ${opt.color}`"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
+
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          :disable="opt.higher"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+
+                    <q-select v-else disable class="q-pt-sm" filled dense hide-bottom-space></q-select>
+                  </div>
+
+                  <div class="col-12">
+                    <div>
+                      {{ $t('Common.RemoveRoles') }}
+                    </div>
+
+                    <q-select
+                      v-if="penalty.options.includes('ACTION_MODIFY_ROLES')"
+                      v-model="penalty.modify_roles.remove"
+                      :options="guild.rolesUnmanaged"
+                      option-label="name"
+                      option-value="id"
+                      use-chips
+                      class="q-pt-sm"
+                      multiple
+                      filled
+                      dense
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                    >
+                      <template #selected-item="{ opt, index, removeAtIndex }">
+                        <q-chip
+                          square
+                          :label="opt.name ?? opt"
+                          size="sm"
+                          :style="`background: ${opt.color}`"
+                          removable
+                          @remove="removeAtIndex(index)"
+                        ></q-chip>
+                      </template>
+
+                      <template #option="{ opt, toggleOption, selected }">
+                        <q-item
+                          clickable
+                          @click="toggleOption(opt)"
+                          :active="selected"
+                          :disable="opt.higher"
+                          active-class="menu-item--active"
+                        >
+                          <q-item-section>
+                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+
+                    <q-select v-else disable class="q-pt-sm" filled dense hide-bottom-space></q-select>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+
+            <q-card v-if="action.name === 'ACTION_SEND_MESSAGE'" class="bg-dark-1 no-border-radius" bordered>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div class="col-12">
+                    <div>
+                      {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
+                    </div>
+
+                    <MessageEditor
+                      :message="penalty.send_message"
+                      :disable="!penalty.options.includes('ACTION_SEND_MESSAGE')"
+                      avlReplacers="message guild member"
+                      class="q-pt-sm"
+                    />
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               unelevated
               no-caps
@@ -286,8 +353,8 @@
             />
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
-              :label="$t('done')"
+              class="full-width"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               split
               unelevated
@@ -299,7 +366,7 @@
                 <q-item clickable v-close-popup @click="onDelete">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -313,10 +380,11 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
+import { localeStringsMap } from 'src/utils/Constants'
 import { suid } from 'src/utils/Utils'
+import { computed, defineComponent, ref } from 'vue'
 import MessageEditor from '../MessageEditor.vue'
 
 export default defineComponent({
@@ -364,6 +432,7 @@ export default defineComponent({
       mode,
       penalty,
       isValid,
+      localeStringsMap,
 
       onConfirm() {
         if (isValid.value) {
@@ -390,10 +459,10 @@ export default defineComponent({
       actions: [
         { name: 'ACTION_BAN', exclusive: ['ACTION_MUTE', 'ACTION_KICK', 'ACTION_MODIFY_ROLES'] },
         { name: 'ACTION_MUTE', exclusive: ['ACTION_BAN', 'ACTION_KICK'] },
-        { name: 'ACTION_KICK', exclusive: ['ACTION_BAN', 'ACTION_MUTE', 'ACTION_MODIFY_ROLES'] },
+        { name: 'ACTION_KICK', exclusive: ['ACTION_BAN', 'ACTION_MUTE', 'ACTION_MODIFY_ROLES'], expandable: false },
         { name: 'ACTION_MODIFY_ROLES', exclusive: ['ACTION_BAN', 'ACTION_KICK'] },
         { name: 'ACTION_SEND_MESSAGE', exclusive: [] },
-        { name: 'ACTION_RESET_VIOLATIONS', exclusive: [] }
+        { name: 'ACTION_RESET_VIOLATIONS', exclusive: [], expandable: false }
       ]
     }
   },

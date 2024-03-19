@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md">
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">Telegram</q-item-label>
@@ -19,8 +19,8 @@
               :key="telegram.channel_id"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item class="rounded-lg" clickable v-ripple @click="telegramDialog(telegram)">
+              <q-card class="bg-dark-2" flat>
+                <q-item clickable @click="telegramDialog(telegram)">
                   <q-item-section>
                     <q-item-label class="ellipsis"> @{{ telegram.channel_username }} </q-item-label>
                   </q-item-section>
@@ -46,7 +46,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">Twitch</q-item-label>
@@ -64,8 +64,8 @@
               :key="twitch.broadcaster_id"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item class="rounded-lg" clickable v-ripple @click="twitchDialog(twitch)">
+              <q-card class="bg-dark-2" flat>
+                <q-item clickable @click="twitchDialog(twitch)">
                   <q-item-section avatar style="min-width: 24px">
                     <q-avatar size="24px">
                       <img :src="twitch.broadcaster_thumbnail_url" :alt="twitch.broadcaster_name" />
@@ -99,7 +99,7 @@
     </div>
 
     <div class="col-12">
-      <q-card class="rounded-lg bg-dark-1" flat>
+      <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
             <q-item-label class="text-subtitle1">YouTube</q-item-label>
@@ -117,8 +117,8 @@
               :key="youtube.channel_id"
               class="col-12 col-sm-6 col-md-4"
             >
-              <q-card class="rounded-lg bg-dark-2" flat>
-                <q-item class="rounded-lg" clickable v-ripple @click="youtubeDialog(youtube)">
+              <q-card class="bg-dark-2" flat>
+                <q-item clickable @click="youtubeDialog(youtube)">
                   <q-item-section avatar style="min-width: 24px">
                     <q-avatar size="24px">
                       <img :src="youtube.channel_thumbnail_url" :alt="youtube.channel_name" />
@@ -154,12 +154,12 @@
 </template>
 
 <script>
-import { useGuildStore } from 'src/stores/guild'
-import { defineComponent } from 'vue'
 import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
+import SubscriptionsTelegram from 'src/components/dialogs/SubscriptionsTelegram.vue'
 import SubscriptionsTwitch from 'src/components/dialogs/SubscriptionsTwitch.vue'
 import SubscriptionsYouTube from 'src/components/dialogs/SubscriptionsYouTube.vue'
-import SubscriptionsTelegram from 'src/components/dialogs/SubscriptionsTelegram.vue'
+import { useGuildStore } from 'src/stores/guild'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsSubscriptions',

@@ -4,7 +4,7 @@
       <div class="text-h1">404</div>
 
       <div class="text-h6">
-        {{ $t('pages.error.not_found') }}
+        {{ $t('Pages.ErrorPage.ThereIsNothingHere') }}
       </div>
 
       <q-btn class="q-mt-xl text--secondary" unelevated to="/" icon="home" no-caps flat round />

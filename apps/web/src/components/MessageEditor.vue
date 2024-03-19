@@ -25,6 +25,17 @@
         dense
       ></q-btn>
       <q-btn
+        v-if="withImage"
+        v-model="currentView"
+        @click="switchView('IMAGE')"
+        :disable="disable"
+        class="q-mr-xs"
+        icon="image"
+        :color="currentView === 'IMAGE' ? 'secondary' : ''"
+        unelevated
+        dense
+      ></q-btn>
+      <q-btn
         v-if="withComponents"
         v-model="currentView"
         @click="switchView('COMPONENTS')"
@@ -52,16 +63,16 @@
       <q-btn
         v-if="!hideReplacers"
         :disable="disable"
-        @click="replacersModal = true"
+        @click="modalReplacers = true"
         class="q-ml-xs"
         icon="data_object"
         flat
         dense
       ></q-btn>
-      <q-btn :disable="disable" @click="mentionsModal = true" class="q-ml-xs" icon="alternate_email" flat dense></q-btn>
+      <q-btn :disable="disable" @click="modalMentions = true" class="q-ml-xs" icon="alternate_email" flat dense></q-btn>
       <q-btn
         :disable="disable"
-        @click="emojiPickerModal = true"
+        @click="modalEmojiPicker = true"
         class="q-ml-xs"
         icon="emoji_emotions"
         flat
@@ -84,29 +95,37 @@
         hide-bottom-space
       ></q-input>
 
-      <q-card v-if="currentView === 'EMBED'" key="EMBED" class="bg-dark-2 rounded-b-lg" flat>
+      <q-card v-if="currentView === 'EMBED'" key="EMBED" class="bg-transparent rounded-b-lg" bordered flat>
         <div
           class="absolute-left cursor-pointer"
           :style="`background: ${messageEmbed.color || 'black'}; width: 8px; border-radius: 0 0 0 16px`"
-          @click="embedColorModal = true"
-        ></div>
+        >
+          <q-popup-proxy anchor="center middle">
+            <q-color v-model="messageEmbed.color" class="bg-dark-2" flat no-header-tabs format-model="hex"></q-color>
+          </q-popup-proxy>
+        </div>
 
-        <q-item class="q-ml-sm" tag="label" v-ripple :disable="disable" dense>
-          <q-item-section>
-            {{ $t('message_editor.message_embed') }}
-          </q-item-section>
-          <q-item-section side>
-            <q-checkbox v-model="messageEmbed.active" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
+        <div class="q-pa-md q-ml-sm">
+          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+            <q-item tag="label" :disable="disable">
+              <q-item-section side>
+                <q-toggle v-model="messageEmbed.active" dense></q-toggle>
+              </q-item-section>
 
-        <q-separator></q-separator>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('Components.MessageEditor.SendEmbedMessage') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
 
         <q-card-section class="q-ml-sm">
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.author_name') }}
+                {{ $t('Components.MessageEditor.AuthorName') }}
               </div>
 
               <q-input
@@ -122,7 +141,7 @@
 
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.author_icon_url') }}
+                {{ $t('Components.MessageEditor.AuthorIconURL') }}
               </div>
 
               <q-input
@@ -138,7 +157,7 @@
 
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.author_url') }}
+                {{ $t('Components.MessageEditor.AuthorURL') }}
               </div>
 
               <q-input
@@ -158,7 +177,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('message_editor.title') }}
+                {{ $t('Components.MessageEditor.Title') }}
               </div>
 
               <q-input
@@ -174,7 +193,7 @@
 
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('message_editor.title_url') }}
+                {{ $t('Components.MessageEditor.TitleURL') }}
               </div>
 
               <q-input
@@ -190,12 +209,12 @@
 
             <div class="col-12">
               <div>
-                {{ $t('description') }}
+                {{ $t('Common.Description') }}
               </div>
 
               <q-input
                 v-model.trim="messageEmbed.description"
-                class="rounded-lg q-pt-sm"
+                class="rounded-borders q-pt-sm"
                 type="textarea"
                 :disable="!messageEmbed.active || disable"
                 filled
@@ -220,7 +239,7 @@
                       filled
                       dense
                       hide-bottom-space
-                      :placeholder="$t('message_editor.field_name')"
+                      :placeholder="$t('Components.MessageEditor.FieldName')"
                     ></q-input>
 
                     <q-separator></q-separator>
@@ -235,7 +254,7 @@
                       filled
                       dense
                       hide-bottom-space
-                      :placeholder="$t('message_editor.field_value')"
+                      :placeholder="$t('Components.MessageEditor.FieldValue')"
                     ></q-input>
 
                     <q-separator></q-separator>
@@ -244,7 +263,7 @@
                       <q-checkbox
                         v-model="field.inline"
                         dense
-                        :label="$t('message_editor.field_inline')"
+                        :label="$t('Components.MessageEditor.FieldInline')"
                         :disable="!messageEmbed.active || disable"
                       ></q-checkbox>
 
@@ -252,7 +271,7 @@
 
                       <q-btn
                         @click="messageEmbed.fields.splice(i, 1)"
-                        :label="$t('remove')"
+                        :label="$t('Common.Remove')"
                         :disable="!messageEmbed.active || disable"
                         color="negative"
                         flat
@@ -268,7 +287,7 @@
             <div class="col-12">
               <q-btn
                 class="full-width dashed-border"
-                :label="$t('message_editor.add_embed_field')"
+                :label="$t('Components.MessageEditor.AddEmbedField')"
                 @click="addEmbedField"
                 :disable="messageEmbed.fields.length >= 25 || !messageEmbed.active || disable"
                 unelevated
@@ -282,7 +301,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('message_editor.image_url') }}
+                {{ $t('Components.MessageEditor.ImageURL') }}
               </div>
 
               <q-input
@@ -298,7 +317,7 @@
 
             <div class="col-12 col-md-6">
               <div>
-                {{ $t('message_editor.thumbnail_url') }}
+                {{ $t('Components.MessageEditor.ThumbnailURL') }}
               </div>
 
               <q-input
@@ -318,7 +337,7 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.footer_text') }}
+                {{ $t('Components.MessageEditor.FooterText') }}
               </div>
 
               <q-input
@@ -334,7 +353,7 @@
 
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.footer_icon_url') }}
+                {{ $t('Components.MessageEditor.FooterIconURL') }}
               </div>
 
               <q-input
@@ -350,7 +369,7 @@
 
             <div class="col-12 col-md-4">
               <div>
-                {{ $t('message_editor.footer_timestamp') }}
+                {{ $t('Components.MessageEditor.FooterTimestamp') }}
               </div>
 
               <q-input
@@ -366,30 +385,33 @@
         </q-card-section>
       </q-card>
 
+      <q-card v-if="currentView === 'IMAGE'" key="IMAGE" class="bg-transparent rounded-b-lg" bordered flat>
+        <ImageEditor :image="messageImage" @change="onChangeImage" />
+      </q-card>
+
       <q-card v-if="currentView === 'COMPONENTS'" key="COMPONENTS" class="bg-dark-2 rounded-b-lg" flat>
         <q-card-section>
           <div class="row q-col-gutter-md">
             <div v-for="(row, i) in messageComponents" :key="i" class="col-12">
-              <q-card class="bg-transparent rounded-lg" flat bordered>
+              <q-card class="bg-transparent" flat bordered>
                 <q-card-section>
                   <div class="row q-col-gutter-sm">
                     <div class="col-auto" v-for="(component, ii) in row" :key="ii">
                       <q-chip
-                        class="rounded-lg full-width no-shadow"
+                        class="full-width no-shadow"
                         square
                         :label="component.label"
-                        :ripple="false"
                         :style="{ background: imButtonStyles[component.style.toUpperCase()] }"
                         clickable
                         removable
-                        @click="buttonDialog(component, i, ii)"
+                        @click="onClickButtonComponent(component, i, ii)"
                         @remove="row.length === 1 ? messageComponents.splice(i, 1) : row.splice(ii, 1)"
                       ></q-chip>
                     </div>
 
                     <div v-if="row.length < 5" class="col-auto">
                       <q-chip
-                        class="rounded-lg dashed-border no-shadow full-width"
+                        class="dashed-border no-shadow full-width"
                         outline
                         square
                         clickable
@@ -404,7 +426,7 @@
                 <q-card-actions align="right">
                   <q-btn
                     @click="messageComponents.splice(i, 1)"
-                    :label="$t('remove')"
+                    :label="$t('Common.Remove')"
                     color="negative"
                     flat
                     no-caps
@@ -449,6 +471,18 @@
               <div class="break-word" v-html="$markdown(message.content || '')"></div>
             </div>
 
+            <div v-if="withImage && messageImage.active" class="q-pt-xs">
+              <div
+                class="flex flex-center bg-grey-8 rounded-borders text-grey-6 text-center text-italic"
+                :style="{
+                  minHeight: '256px',
+                  maxWidth: `${$q.screen.lt.md ? '100' : '45'}%`
+                }"
+              >
+                Image
+              </div>
+            </div>
+
             <div
               v-if="withEmbed && message.embed.active"
               class="q-pt-xs"
@@ -472,10 +506,11 @@
                         style="min-width: 24px; padding: 0; padding-right: 8px"
                       >
                         <q-avatar size="24px">
-                          <img
-                            :src="message.embed.author.icon_url"
-                            onerror="this.onerror=null;this.src='https://via.placeholder.com/64x64'"
-                          />
+                          <q-img :src="message.embed.author.icon_url" :style="{ height: '24px', width: '24px' }">
+                            <template #error>
+                              <div class="bg-grey-8"></div>
+                            </template>
+                          </q-img>
                         </q-avatar>
                       </q-item-section>
 
@@ -517,21 +552,25 @@
 
                   <q-item-section v-if="message.embed.thumbnail.url" side top>
                     <q-avatar size="64px" rounded>
-                      <img
-                        :src="message.embed.thumbnail.url"
-                        onerror="this.onerror=null;this.src='https://via.placeholder.com/64x64'"
-                      />
+                      <q-img :src="message.embed.thumbnail.url" :style="{ height: '64px', width: '64px' }">
+                        <template #error>
+                          <div class="bg-grey-8" :style="{ height: '100%', width: '100%' }"></div>
+                        </template>
+                      </q-img>
                     </q-avatar>
                   </q-item-section>
                 </q-item>
 
                 <div v-if="message.embed.image.url" class="q-px-md">
-                  <img
-                    class="rounded-md"
+                  <q-img
+                    class="rounded-borders"
                     :src="message.embed.image.url"
-                    onerror="this.onerror=null;this.src='https://via.placeholder.com/600x256'"
-                    style="max-width: 100%"
-                  />
+                    :style="{ maxHeight: '256px', height: '256px', width: '100%' }"
+                  >
+                    <template #error>
+                      <div class="bg-grey-8" :style="{ height: '100%', width: '100%' }"></div>
+                    </template>
+                  </q-img>
                 </div>
 
                 <q-item v-if="message.embed.footer.text || message.embed.timestamp" dense>
@@ -541,10 +580,11 @@
                     style="min-width: 20px; padding: 0; padding-right: 8px"
                   >
                     <q-avatar size="20px">
-                      <img
-                        :src="message.embed.footer.icon_url"
-                        onerror="this.onerror=null;this.src='https://via.placeholder.com/64x64'"
-                      />
+                      <q-img :src="message.embed.footer.icon_url" :style="{ height: '20px', width: '20px' }">
+                        <template #error>
+                          <div class="bg-grey-8"></div>
+                        </template>
+                      </q-img>
                     </q-avatar>
                   </q-item-section>
 
@@ -572,7 +612,6 @@
                         class="full-width no-shadow"
                         style="border-radius: 4px !important"
                         square
-                        :ripple="false"
                         :label="component.label"
                         :style="{ background: imButtonStyles[component.style.toUpperCase()] }"
                       ></q-chip>
@@ -586,68 +625,72 @@
       </q-card>
     </transition-group>
 
-    <q-dialog v-model="replacersModal" transition-show="jump-down" transition-hide="jump-up">
+    <q-dialog v-model="modalReplacers" transition-show="jump-down" transition-hide="jump-up">
       <q-card class="bg-dark-1" flat style="width: 380px; max-width: 80vw">
         <q-tabs
-          v-model="replacersModalTab"
+          v-model="modalReplacersTab"
           class="bg-dark-2"
           align="justify"
           active-bg-color="secondary"
           indicator-color="transparent"
           no-caps
         >
-          <q-tab name="replacers" :label="$t('message_editor.replacers')" style="width: 50%"></q-tab>
+          <q-tab name="replacers" :label="$t('Components.MessageEditor.Replacers')" style="width: 50%"></q-tab>
 
           <q-tab
             v-if="!hideCodeSnippets"
             name="functions"
-            :label="$t('message_editor.functions')"
+            :label="$t('Components.MessageEditor.Functions')"
             style="width: 50%"
           ></q-tab>
         </q-tabs>
 
         <q-separator></q-separator>
 
-        <q-tab-panels v-model="replacersModalTab" class="bg-dark-1" animated style="max-height: 50vh; overflow-y: auto">
-          <q-tab-panel name="replacers" class="q-px-none" style="overflow-y: hidden">
+        <q-tab-panels v-model="modalReplacersTab" class="bg-dark-1" animated style="max-height: 50vh; overflow-y: auto">
+          <q-tab-panel name="replacers" class="q-pa-none" style="overflow-y: hidden">
             <q-list>
               <q-item
-                v-for="replacer in replacers.vars.filter(i => avlReplacers.includes(i.name.split('.')[0]))"
-                :key="replacer.name"
+                v-for="replacer in replacers.variables.filter(i => avlReplacers.includes(i.split('.')[0])).sort()"
+                :key="replacer"
                 clickable
-                v-ripple
-                @click="onSelectReplacer(replacer)"
               >
-                <q-item-section>
+                <q-item-section @click="onSelectReplacer(replacer)">
                   <q-item-label>
-                    {{ replacer.name }}
+                    {{ replacer }}
                   </q-item-label>
+                </q-item-section>
 
-                  <q-item-label class="text--secondary">
-                    {{ replacer.description }}
-                  </q-item-label>
+                <q-item-section side>
+                  <q-btn
+                    icon="link"
+                    round
+                    flat
+                    :href="`https://docs.lacunabot.com/useful/replacers/data-types/${getReplacerPath(replacer)}`"
+                    target="_blank"
+                  ></q-btn>
                 </q-item-section>
               </q-item>
             </q-list>
           </q-tab-panel>
 
-          <q-tab-panel name="functions" class="q-px-none" style="overflow-y: hidden">
+          <q-tab-panel name="functions" class="q-pa-none" style="overflow-y: hidden">
             <q-list>
-              <q-item
-                v-for="func in replacers.functions"
-                :key="func.name"
-                clickable
-                v-ripple
-                @click="onSelectReplacer(func)"
-              >
-                <q-item-section>
+              <q-item v-for="func in replacers.functions" :key="func.name" clickable>
+                <q-item-section @click="onSelectReplacer(func)">
                   <q-item-label>
                     {{ func.name }}
                   </q-item-label>
+                </q-item-section>
 
-                  <q-item-label class="text--secondary">
-                    {{ func.description }}
-                  </q-item-label>
+                <q-item-section side>
+                  <q-btn
+                    icon="link"
+                    round
+                    flat
+                    :href="`https://docs.lacunabot.com/useful/replacers/functions#${getReplacerPath(func)}`"
+                    target="_blank"
+                  ></q-btn>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -656,27 +699,27 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="mentionsModal" transition-show="jump-down" transition-hide="jump-up">
+    <q-dialog v-model="modalMentions" transition-show="jump-down" transition-hide="jump-up">
       <q-card class="bg-dark-1" flat style="width: 380px; max-width: 80vw">
         <q-tabs
-          v-model="mentionsModalTab"
+          v-model="modalMentionsTab"
           class="bg-dark-2"
           align="justify"
           active-bg-color="secondary"
           indicator-color="transparent"
           no-caps
         >
-          <q-tab name="roles" :label="$t('common.roles')" style="width: 50%"></q-tab>
+          <q-tab name="roles" :label="$t('Common.Roles')" style="width: 50%"></q-tab>
 
-          <q-tab name="channels" :label="$t('common.channels')" style="width: 50%"></q-tab>
+          <q-tab name="channels" :label="$t('Common.Channels')" style="width: 50%"></q-tab>
         </q-tabs>
 
         <q-separator></q-separator>
 
-        <q-tab-panels v-model="mentionsModalTab" class="bg-dark-1" animated style="max-height: 50vh; overflow-y: auto">
+        <q-tab-panels v-model="modalMentionsTab" class="bg-dark-1" animated style="max-height: 50vh; overflow-y: auto">
           <q-tab-panel name="roles" class="q-px-none" style="overflow-y: hidden">
             <q-list>
-              <q-item v-for="role in guild.roles" :key="role.id" clickable v-ripple @click="onSelectMention(role)">
+              <q-item v-for="role in guild.roles" :key="role.id" clickable @click="onSelectMention(role)">
                 <q-item-section>
                   <q-item-label :style="{ color: role.color }">
                     {{ role.name }}
@@ -688,13 +731,7 @@
 
           <q-tab-panel name="channels" class="q-px-none" style="overflow-y: hidden">
             <q-list>
-              <q-item
-                v-for="channel in guild.channels"
-                :key="channel.id"
-                clickable
-                v-ripple
-                @click="onSelectMention(channel)"
-              >
+              <q-item v-for="channel in guild.channels" :key="channel.id" clickable @click="onSelectMention(channel)">
                 <q-item-section avatar>
                   <q-icon :name="channel.icon"></q-icon>
                 </q-item-section>
@@ -715,7 +752,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="emojiPickerModal" transition-show="jump-down" transition-hide="jump-up">
+    <q-dialog v-model="modalEmojiPicker" transition-show="jump-down" transition-hide="jump-up">
       <q-card style="max-width: 380px">
         <emoji-picker
           :data="guild.emojiIndex"
@@ -726,198 +763,208 @@
         ></emoji-picker>
       </q-card>
     </q-dialog>
-
-    <q-dialog v-model="embedColorModal" transition-show="jump-down" transition-hide="jump-up">
-      <q-color v-model="messageEmbed.color" class="bg-dark-1" no-header-tabs format-model="hex"></q-color>
-    </q-dialog>
   </div>
 </template>
 
-<script>
-import { copyToClipboard, debounce } from 'quasar'
+<script setup>
+import { copyToClipboard, debounce, useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { resolveEmbed, suid } from 'src/utils/Utils'
-import { defineComponent } from 'vue'
 import replacers from 'src/utils/replacers.json'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { imButtonStyles } from '../utils/Constants'
+import ImageEditor from './ImageEditor.vue'
 import MessageEditorButtonComponent from './dialogs/MessageEditorButtonComponent.vue'
 
-export default defineComponent({
-  name: 'MessageEditor',
-
-  setup() {
-    const guild = useGuildStore()
-
-    return {
-      guild,
-      replacers,
-      imButtonStyles
+const props = defineProps({
+  message: {
+    type: Object,
+    default() {
+      return { content: null }
     }
   },
-
-  props: {
-    message: {
-      type: Object,
-      default() {
-        return { content: null }
-      }
-    },
-    disable: {
-      type: Boolean,
-      default: false
-    },
-    disableEmbed: {
-      type: Boolean,
-      default: false
-    },
-    disableComponents: {
-      type: Boolean,
-      default: true
-    },
-    disablePreview: {
-      type: Boolean,
-      default: false
-    },
-    hideReplacers: {
-      type: Boolean,
-      default: false
-    },
-    hideCodeSnippets: {
-      type: Boolean,
-      default: false
-    },
-    avlReplacers: {
-      type: String,
-      default: 'guild member'
-    }
+  disable: {
+    type: Boolean,
+    default: false
   },
-
-  data() {
-    return {
-      currentView: 'CONTENT',
-      messageEmbed: JSON.parse(
-        JSON.stringify(
-          this.message.embed
-            ? { ...this.message.embed, fields: this.message.embed.fields.map(i => ({ ...i, key: suid(6) })) }
-            : {}
-        )
-      ),
-      messageComponents: JSON.parse(
-        JSON.stringify(this.message.components && !this.disableComponents ? this.message.components : [])
-      ),
-      replacersModal: false,
-      replacersModalTab: 'replacers',
-      mentionsModal: false,
-      mentionsModalTab: 'roles',
-      emojiPickerModal: false,
-      embedColorModal: false
-    }
+  disableEmbed: {
+    type: Boolean,
+    default: false
   },
-
-  computed: {
-    withEmbed() {
-      return typeof this.message.embed !== 'undefined' && !this.disableEmbed
-    },
-    withComponents() {
-      return !this.disableComponents
-    }
+  disableImage: {
+    type: Boolean,
+    default: true
   },
-
-  methods: {
-    switchView(view) {
-      this.currentView = view
-    },
-    showCopiedNotification() {
-      this.$q.notify({
-        message: this.$t('copied_to_clipboard'),
-        classes: 'rounded-lg q-notification-custom',
-        color: 'black',
-        icon: 'assignment',
-        timeout: 1500
-      })
-    },
-    onSelectReplacer(replacer) {
-      const isFunc = 'snippet' in replacer
-      replacer = isFunc ? `{- ${replacer.snippet} -}` : `{ ${replacer.name} }`
-
-      copyToClipboard(replacer)
-      this.showCopiedNotification()
-      this.replacersModal = false
-    },
-    onSelectMention(mention) {
-      const isRole = 'color' in mention
-      mention = isRole ? `<@&${mention.id}>` : `<#${mention.id}>`
-
-      copyToClipboard(mention)
-      this.showCopiedNotification()
-      this.mentionsModal = false
-    },
-    onSelectEmoji(emoji) {
-      emoji = emoji.custom ? emoji.emoticons[0] : emoji.native
-
-      copyToClipboard(emoji)
-      this.showCopiedNotification()
-      this.emojiPickerModal = false
-    },
-    addEmbedField() {
-      if (this.withEmbed && this.messageEmbed.fields.length < 25) {
-        this.messageEmbed.fields.push({ name: '', value: '', inline: false, key: suid(6) })
-      }
-    },
-    addRowComponent() {
-      if (this.withComponents && this.messageComponents.length < 5) {
-        this.messageComponents.push([])
-      }
-    },
-    addButtonComponent(rowIndex) {
-      const row = this.messageComponents[rowIndex]
-
-      if (!row) return
-
-      row.push({
-        type: 'Button',
-        customId: `button-${row.length + 1}`,
-        disabled: false,
-        emoji: { name: null, id: null, animated: false },
-        label: 'Button',
-        style: 'Primary',
-        url: null
-      })
-    },
-    buttonDialog(btn, rowIndex, componentIndex) {
-      const row = this.messageComponents[rowIndex]
-
-      this.$q
-        .dialog({
-          component: MessageEditorButtonComponent,
-
-          componentProps: {
-            buttonProp: btn
-          }
-        })
-        .onOk(({ button }) => {
-          row[componentIndex] = button
-        })
-    }
+  disableComponents: {
+    type: Boolean,
+    default: true
   },
-
-  watch: {
-    messageEmbed: {
-      deep: true,
-      handler: debounce(function (value) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.message.embed = resolveEmbed(value)
-      }, 500)
-    },
-    messageComponents: {
-      deep: true,
-      handler: debounce(function (value) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.message.components = value
-      }, 500)
-    }
+  disablePreview: {
+    type: Boolean,
+    default: false
+  },
+  hideReplacers: {
+    type: Boolean,
+    default: false
+  },
+  hideCodeSnippets: {
+    type: Boolean,
+    default: false
+  },
+  avlReplacers: {
+    type: String,
+    default: 'guild member'
   }
 })
+
+const $q = useQuasar(),
+  { t: $t } = useI18n()
+const guild = useGuildStore()
+
+const withEmbed = computed(() => {
+    return typeof props.message.embed !== 'undefined' && !props.disableEmbed
+  }),
+  withImage = computed(() => {
+    return typeof props.message.image !== 'undefined' && !props.disableImage
+  }),
+  withComponents = computed(() => {
+    return !props.disableComponents
+  })
+
+const currentView = ref('CONTENT')
+const messageEmbed = ref(
+    withEmbed.value
+      ? JSON.parse(
+          JSON.stringify({
+            ...props.message.embed,
+            fields: props.message.embed.fields.map(i => ({ ...i, key: suid(6) }))
+          })
+        )
+      : {}
+  ),
+  messageComponents = ref(props.message.components ? JSON.parse(JSON.stringify(props.message.components)) : []),
+  messageImage = computed(() => {
+    return withImage.value ? JSON.parse(JSON.stringify(props.message.image)) : {}
+  })
+const modalReplacers = ref(false),
+  modalReplacersTab = ref('replacers'),
+  modalMentions = ref(false),
+  modalMentionsTab = ref('roles'),
+  modalEmojiPicker = ref(false)
+
+const switchView = view => {
+  currentView.value = view
+}
+
+const addEmbedField = () => {
+  if (withEmbed.value && messageEmbed.value.fields.length < 25) {
+    messageEmbed.value.fields.push({ name: '', value: '', inline: false, key: suid(6) })
+  }
+}
+
+const addRowComponent = () => {
+    if (withComponents.value && messageComponents.value.length < 5) {
+      messageComponents.value.push([])
+    }
+  },
+  addButtonComponent = rowIndex => {
+    const row = messageComponents.value[rowIndex]
+
+    if (!row) return
+
+    row.push({
+      type: 'Button',
+      customId: `button-${row.length + 1}`,
+      disabled: false,
+      emoji: { name: null, id: null, animated: false },
+      label: 'Button',
+      style: 'Primary',
+      url: null
+    })
+  },
+  onClickButtonComponent = (btn, rowIndex, componentIndex) => {
+    const row = messageComponents.value[rowIndex]
+
+    return $q
+      .dialog({
+        component: MessageEditorButtonComponent,
+
+        componentProps: {
+          buttonProp: btn
+        }
+      })
+      .onOk(({ button }) => {
+        row[componentIndex] = button
+      })
+  }
+
+const onChangeImage = debounce(value => {
+  // eslint-disable-next-line vue/no-mutating-props
+  props.message.image = value
+}, 500)
+
+const showCopyNotification = () => {
+  return $q.notify({
+    message: $t('Common.CopiedToClipboard'),
+    classes: 'q-notification-custom',
+    color: 'black',
+    icon: 'assignment',
+    timeout: 1500
+  })
+}
+
+const onSelectReplacer = replacer => {
+    const isFunc = typeof replacer !== 'string'
+    replacer = isFunc ? `{- ${replacer.snippet} -}` : `{ ${replacer} }`
+
+    copyToClipboard(replacer)
+    showCopyNotification()
+    modalReplacers.value = false
+  },
+  getReplacerPath = replacer => {
+    const isFunc = typeof replacer !== 'string'
+
+    if (isFunc) {
+      return replacer.name.toLowerCase()
+    } else {
+      const [dataType, property] = replacer.split('.')
+
+      return `${dataType}#.${property}`
+    }
+  },
+  onSelectMention = mention => {
+    const isRole = 'color' in mention
+    mention = isRole ? `<@&${mention.id}>` : `<#${mention.id}>`
+
+    copyToClipboard(mention)
+    showCopyNotification()
+    modalMentions.value = false
+  },
+  onSelectEmoji = emoji => {
+    emoji = emoji.custom ? emoji.emoticons[0] : emoji.native
+
+    copyToClipboard(emoji)
+    showCopyNotification()
+    modalEmojiPicker.value = false
+  }
+
+watch(
+  () => messageEmbed.value,
+  debounce(value => {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.message.embed = resolveEmbed(value)
+  }, 500),
+  { deep: true }
+)
+watch(
+  () => messageComponents.value,
+  debounce(value => {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.message.components = value
+  }, 500),
+  { deep: true }
+)
 </script>
 
 <style lang="scss">

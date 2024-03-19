@@ -1,6 +1,6 @@
-import { boot } from 'quasar/wrappers'
 import axios from 'axios'
 import { Cookies } from 'quasar'
+import { boot } from 'quasar/wrappers'
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -12,43 +12,15 @@ const api = axios.create({ baseURL: process.env.API })
 
 const interfaces = {
     common: {
-        getAutomationTasks() {
-            return api.get(`/common/automation-tasks`, {
+        getPlugins() {
+            return api.get(`/common/plugins`, {
                 headers: {
                     Authorization: Cookies.get('access_token')
                 }
             })
         },
-        getAutomationTask(automationId, guildId) {
-            return api.get(`/common/automation-tasks/${automationId}?guild_id=${guildId}`, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
-        },
-        publishAutomationTask(guildId, options) {
-            return api.post(`/common/automation-tasks?guild_id=${guildId}`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
-        },
-        getCustomCommands() {
-            return api.get(`/common/custom-commands`, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
-        },
-        getCustomCommand(commandId, guildId) {
-            return api.get(`/common/custom-commands/${commandId}?guild_id=${guildId}`, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
-        },
-        publishCustomCommand(guildId, options) {
-            return api.post(`/common/custom-commands?guild_id=${guildId}`, options.data, {
+        getPlugin(pluginId, guildId) {
+            return api.get(`/common/plugins/${pluginId}?guildId=${guildId}`, {
                 headers: {
                     Authorization: Cookies.get('access_token')
                 }

@@ -1,24 +1,16 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="rounded-lg bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t(mode === 'CREATE' ? 'irs.add_ir' : 'irs.edit_ir') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
+    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section v-if="mode === 'CREATE'">
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <q-btn-toggle
               v-model="ir.type"
               :options="[
-                { label: $t('common.role'), value: 'ROLE' },
-                { label: $t('common.channel'), value: 'CHANNEL' }
+                { label: $t('Commands.OptionTypes.Role'), value: 'ROLE' },
+                { label: $t('Commands.OptionTypes.Channel'), value: 'CHANNEL' }
               ]"
-              class="rounded-lg bg-dark-2"
+              class="bg-dark-2"
               toggle-color="secondary"
               unelevated
               no-caps
@@ -30,40 +22,42 @@
         </div>
       </q-card-section>
 
-      <q-list class="q-px-none q-py-md" dense>
-        <q-item tag="label" v-ripple="ir.type !== 'CHANNEL'" :disable="ir.type === 'CHANNEL'">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('irs.single_element_title') }}
-            </q-item-label>
-            <q-item-label class="text--secondary">
-              {{ $t('irs.single_element_description') }}
-            </q-item-label>
-          </q-item-section>
+      <div class="q-pa-md">
+        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-item tag="label" :disable="ir.type === 'CHANNEL'">
+            <q-item-section side>
+              <q-checkbox v-model="ir.element.single" :disable="ir.type === 'CHANNEL'" dense></q-checkbox>
+            </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox v-model="ir.element.single" :disable="ir.type === 'CHANNEL'" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
+            <q-item-section>
+              <q-item-label>
+                {{ $t('Components.InteractiveReaction.SingleElement') }}
+              </q-item-label>
+              <q-item-label class="text--secondary">
+                {{ $t('Components.InteractiveReaction.SingleElementDescription') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
 
-        <q-item tag="label" v-ripple>
-          <q-item-section>
-            <q-item-label>
-              {{ $t('irs.reverse_element_title') }}
-            </q-item-label>
-          </q-item-section>
+          <q-item tag="label">
+            <q-item-section side>
+              <q-checkbox v-model="ir.element.reverse" dense></q-checkbox>
+            </q-item-section>
 
-          <q-item-section side>
-            <q-checkbox v-model="ir.element.reverse" dense></q-checkbox>
-          </q-item-section>
-        </q-item>
-      </q-list>
+            <q-item-section>
+              <q-item-label>
+                {{ $t('Components.InteractiveReaction.ReverseElement') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
       <q-card-section v-if="mode === 'CREATE'">
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <div>
-              {{ $t('common.channel') }}
+              {{ $t('Commands.OptionTypes.Channel') }}
             </div>
 
             <q-select
@@ -79,15 +73,7 @@
               map-options
             >
               <template #selected-item="{ opt }">
-                <q-chip
-                  class="rounded-lg"
-                  color="dark-1"
-                  square
-                  :label="opt.name ?? opt"
-                  :icon="opt.icon"
-                  size="sm"
-                  :ripple="false"
-                ></q-chip>
+                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
               </template>
 
               <template #option="{ opt, toggleOption, selected }">
@@ -112,10 +98,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('irs.message_id_title') }}
+              {{ $t('Components.InteractiveReaction.MessageId') }}
             </div>
             <div class="text--secondary">
-              {{ $t('irs.message_id_description') }}
+              {{ $t('Components.InteractiveReaction.MessageIdDescription') }}
             </div>
 
             <q-input v-model="ir.message.id" class="q-pt-sm" :maxlength="64" filled dense hide-bottom-space></q-input>
@@ -127,7 +113,7 @@
         <div class="row q-col-gutter-md">
           <div v-if="mode === 'CREATE'" class="col-12">
             <div>
-              {{ $t('automoder.nnm_removable_symbols.EMOJIS') }}
+              {{ $t('Components.AutoMod.NicknamesModerationRemovableSymbols.Emojis') }}
             </div>
 
             <q-input :model-value="emoji" class="q-pt-sm" readonly filled dense hide-bottom-space>
@@ -143,10 +129,10 @@
 
           <div class="col-12">
             <div>
-              {{ $t('irs.references_title') }}
+              {{ $t('Components.InteractiveReaction.References') }}
             </div>
             <div class="text--secondary">
-              {{ $t('irs.references_description') }}
+              {{ $t('Components.InteractiveReaction.ReferencesDescription') }}
             </div>
 
             <q-select
@@ -167,12 +153,10 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   square
                   :label="opt.name ?? opt"
                   size="sm"
                   :style="`background: ${opt.color}`"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -210,13 +194,11 @@
             >
               <template #selected-item="{ opt, index, removeAtIndex }">
                 <q-chip
-                  class="rounded-lg"
                   color="dark-1"
                   square
                   :label="opt.name ?? opt"
                   :icon="opt.icon"
                   size="sm"
-                  :ripple="false"
                   removable
                   @remove="removeAtIndex(index)"
                 ></q-chip>
@@ -247,14 +229,14 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-6">
-            <q-btn class="full-width" :label="$t('close')" unelevated no-caps color="dark-2" @click="onCancel" />
+            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
           <div class="col-6">
             <q-btn
               v-if="mode === 'CREATE'"
               class="full-width"
-              :label="$t('add')"
+              :label="$t('Common.Add')"
               :disable="!isValid"
               :loading="confirmLoading"
               unelevated
@@ -269,8 +251,8 @@
 
             <q-btn-dropdown
               v-if="mode === 'UPDATE'"
-              class="full-width rounded-lg"
-              :label="$t('done')"
+              class="full-width"
+              :label="$t('Common.Done')"
               :disable="!isValid"
               :loading="confirmLoading"
               split
@@ -283,7 +265,7 @@
                 <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
                   <q-item-section class="text-negative">
                     <q-item-label>
-                      {{ $t('delete') }}
+                      {{ $t('Common.Delete') }}
                     </q-item-label>
                   </q-item-section>
                 </q-item>
@@ -299,7 +281,7 @@
     </q-card>
 
     <q-dialog v-model="emojiPickerModal" transition-show="jump-down" transition-hide="jump-up">
-      <q-card class="rounded-lg" style="max-width: 380px">
+      <q-card style="max-width: 380px">
         <emoji-picker
           :data="guild.emojiIndex"
           @select="onSelectEmoji"
@@ -398,7 +380,7 @@ export default defineComponent({
 
               $q.notify({
                 message: error.message,
-                classes: 'rounded-lg q-notification-custom',
+                classes: 'q-notification-custom',
                 color: 'black',
                 icon: 'error',
                 iconColor: 'negative',
@@ -430,7 +412,7 @@ export default defineComponent({
 
             $q.notify({
               message: error.message,
-              classes: 'rounded-lg q-notification-custom',
+              classes: 'q-notification-custom',
               color: 'black',
               icon: 'error',
               iconColor: 'negative',

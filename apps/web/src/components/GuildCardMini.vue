@@ -1,6 +1,6 @@
 <template>
-  <q-card class="g-card rounded-lg bg-dark-1 cursor-pointer" :style="joined ? '' : 'opacity: 0.4'" flat>
-    <q-item class="rounded-lg" clickable v-ripple>
+  <q-card class="g-card bg-dark-1 cursor-pointer" :style="joined ? '' : 'opacity: 0.4'" flat>
+    <q-item clickable>
       <q-item-section avatar>
         <q-avatar size="48px">
           <img :src="icon" :alt="name" />

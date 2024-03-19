@@ -1,8 +1,8 @@
 <template>
-  <q-page class="q-ma-md row justify-center items-start">
+  <q-page class="q-pa-md row justify-center items-start">
     <div id="dashboard-page-container" class="row q-col-gutter-md">
       <div class="col-12">
-        <div class="shadow-0 rounded-lg">
+        <div class="shadow-0">
           <q-toolbar v-if="pageLoading" class="bg-dark-1 q-pa-md rounded-t-lg">
             <q-item-section avatar>
               <q-skeleton class="rounded-circle" type="QAvatar" />
@@ -28,9 +28,9 @@
           </q-toolbar>
 
           <q-tabs class="bg-dark-1 rounded-b-lg" no-caps align="left">
-            <q-route-tab to="/@me" :label="$t('pages.dashboard.profile')"></q-route-tab>
-            <q-route-tab to="/@me/guilds" :label="$t('pages.dashboard.my_guilds')"></q-route-tab>
-            <q-route-tab to="/@me/bills" :label="$t('pages.dashboard.bills')"></q-route-tab>
+            <q-route-tab to="/@me" :label="$t('Pages.DashboardPage.Profile')"></q-route-tab>
+            <q-route-tab to="/@me/guilds" :label="$t('Pages.DashboardPage.MyGuilds')"></q-route-tab>
+            <q-route-tab to="/@me/bills" :label="$t('Pages.DashboardPage.Bills')"></q-route-tab>
           </q-tabs>
         </div>
       </div>
@@ -92,7 +92,7 @@ const getMe = async () => {
 
       $q.notify({
         message: error.message,
-        classes: 'rounded-lg q-notification-custom',
+        classes: 'q-notification-custom',
         color: 'black',
         icon: 'error',
         iconColor: 'negative',
