@@ -68,7 +68,7 @@ module.exports = configure(function (ctx) {
             env: {
                 API: ctx.dev ? 'http://localhost:5810' : 'https://api.lacunabot.com',
                 GTAG: 'G-881ZHWECYQ',
-                MONACO_LIB: readFileSync(__dirname + '\\src\\utils\\monaco-lib.d.ts', 'utf-8')
+                MONACO_LIB: readFileSync(__dirname + '/src/utils/monaco-lib.d.ts', 'utf-8')
             },
             // rawDefine: {}
             // ignorePublicFolder: true,
