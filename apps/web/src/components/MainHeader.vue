@@ -183,7 +183,7 @@
 </template>
 
 <script>
-import { languages } from 'lacuna-locale'
+import { languages } from '@lacunahub/lacuna-locale'
 import { useUserStore } from 'src/stores/user'
 import { getLocale } from 'src/utils/Utils'
 import { defineComponent } from 'vue'

@@ -1,4 +1,4 @@
-import { messages } from 'lacuna-locale'
+import { messages } from '@lacunahub/lacuna-locale'
 import { boot } from 'quasar/wrappers'
 import { getLocale } from 'src/utils/Utils'
 import { createI18n } from 'vue-i18n'

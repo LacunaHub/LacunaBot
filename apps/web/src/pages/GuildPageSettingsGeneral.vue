@@ -481,7 +481,7 @@
 </template>
 
 <script>
-import { languages } from 'lacuna-locale'
+import { languages } from '@lacunahub/lacuna-locale'
 import MessageEditor from 'src/components/MessageEditor.vue'
 import { useGuildStore } from 'src/stores/guild'
 import { localeStringsMap } from 'src/utils/Constants'
