@@ -403,7 +403,6 @@ import boostyLogo from 'src/assets/boosty-logo.svg'
 import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
 import lacunaLogo from 'src/assets/lacuna-logo.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
-import qiwiLogo from 'src/assets/qiwi-logo.svg'
 import { interfaces } from 'src/boot/axios'
 import { DateTime } from 'src/boot/luxon'
 import { useGuildStore } from 'src/stores/guild'
@@ -423,9 +422,9 @@ const guild = useGuildStore()
 
 const confirmLoading = ref(false)
 const tier = ref(0),
-  provider = ref('QIWI'),
+  provider = ref('PAYPAL'),
   paymentProviders = ref([
-    { name: 'QIWI', value: 'QIWI', icon: qiwiLogo },
+    // { name: 'QIWI', value: 'QIWI', icon: qiwiLogo },
     { name: 'PayPal', value: 'PAYPAL', icon: paypalLogo },
     { name: 'Patreon', value: 'PATREON' },
     { name: 'Boosty', value: 'BOOSTY', icon: boostyLogo },
@@ -433,7 +432,7 @@ const tier = ref(0),
   ])
 
 const currency = computed(() => {
-  return provider.value === 'QIWI' ? { name: 'RUB', symbol: '₽' } : { name: 'USD', symbol: '$' }
+  return /* provider.value === 'QIWI' ? { name: 'RUB', symbol: '₽' } : */ { name: 'USD', symbol: '$' }
 })
 const periods = computed(() => {
   return guild.prices.map(i => {
