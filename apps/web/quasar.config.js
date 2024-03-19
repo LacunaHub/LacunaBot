@@ -87,6 +87,8 @@ module.exports = configure(function (ctx) {
                         // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
                         // compositionOnly: false,
 
+                        runtimeOnly: ctx.dev,
+
                         // you need to set i18n resource including paths !
                         include: path.resolve(__dirname, './src/i18n/**')
                     }
