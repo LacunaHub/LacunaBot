@@ -12,7 +12,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.KickCommand.Texts.InvalidUser', { username: `**${interaction.member.displayName}**` })}`,
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.KickCommand.Texts.InvalidUser', {
+                username: `**${interaction.member.displayName}**`
+            })}`,
             ephemeral: true
         })
 
@@ -21,7 +23,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (mention.id === interaction.member.id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.KickCommand.Texts.YouCannotKickYourself', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.KickCommand.Texts.YouCannotKickYourself', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -32,7 +34,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention.kickable) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.KickCommand.Texts.CannotKickThisUser', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.KickCommand.Texts.CannotKickThisUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -43,7 +45,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.respect_hierarchy && mention.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -54,7 +56,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.KickMembers)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -65,7 +67,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -95,7 +97,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('Commands.KickCommand.Texts.UserHasBeenKicked', {
+        content: `${self.staticEmojis.OK} | ${t('Commands.KickCommand.Texts.UserHasBeenKicked', {
             username: `**${interaction.member.displayName}**`,
             target: `**${mention.user.tag}**`
         })}`

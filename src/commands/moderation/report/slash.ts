@@ -44,7 +44,7 @@ export default async (
 
     if (!mention || mention.user.bot) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidUser', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidUser', {
                 username: `**${interaction.member['displayName']}**`
             })}`,
             ephemeral: true
@@ -55,7 +55,7 @@ export default async (
 
     if (!reason || reason.length < 20) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidReason', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidReason', {
                 username: `**${interaction.member['displayName']}**`
             })}`,
             ephemeral: true
@@ -84,7 +84,7 @@ export default async (
 
     if (report && Date.now() - report.created_at < ms('24h')) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouRecentlyReportedThisUser', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouRecentlyReportedThisUser', {
                 username: `**${interaction.member['displayName']}**`
             })}`
         })
@@ -99,7 +99,7 @@ export default async (
 
     if (reportCount >= 3) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouHaveToManySubmittedReports', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouHaveToManySubmittedReports', {
                 username: `**${interaction.member['displayName']}**`
             })}`
         })
@@ -183,7 +183,10 @@ export default async (
                     new ActionRowBuilder<ButtonBuilder>().addComponents(
                         new ButtonBuilder().setCustomId(`R-KICK-${mention.id}`).setLabel(t('CaseLog.Actions.Kick')).setStyle(ButtonStyle.Primary),
                         new ButtonBuilder().setCustomId(`R-WARN-${mention.id}`).setLabel(t('CaseLog.Actions.Warn')).setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder().setCustomId(`R-SKIP-${mention.id}`).setEmoji(self._emojis.details.ERROR).setStyle(ButtonStyle.Secondary)
+                        new ButtonBuilder()
+                            .setCustomId(`R-SKIP-${mention.id}`)
+                            .setEmoji(self.staticEmojis.details.ERROR)
+                            .setStyle(ButtonStyle.Secondary)
                     ),
                     new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                         new StringSelectMenuBuilder()
@@ -209,7 +212,9 @@ export default async (
     }
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('Commands.ReportCommand.Texts.ReportSubmitted', { username: `**${interaction.member.displayName}**` })}`
+        content: `${self.staticEmojis.OK} | ${t('Commands.ReportCommand.Texts.ReportSubmitted', {
+            username: `**${interaction.member.displayName}**`
+        })}`
     })
     self.cache.delete(`REPORT-${mention.id}-${interaction.user.id}`)
 

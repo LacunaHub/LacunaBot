@@ -82,7 +82,7 @@ const handler = async (
             if (message?.id === interaction.message?.id) {
                 if (interaction.member.voice.channel?.id !== player.voiceChannelId) {
                     await interaction.reply({
-                        content: `${self._emojis.ERROR} | ${self.i18n.t(
+                        content: `${self.staticEmojis.ERROR} | ${self.i18n.t(
                             server.locale,
                             'Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel',
                             {

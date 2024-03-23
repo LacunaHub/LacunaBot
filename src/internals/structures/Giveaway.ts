@@ -155,7 +155,7 @@ export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument
 
         if (giveaway.participants.has(interaction.user.id)) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouAreAlreadyInGiveaway', {
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouAreAlreadyInGiveaway', {
                     username: `**${interaction.user.username}**`,
                     giveaway: `**${giveaway.prize}**`
                 })}`,
@@ -179,7 +179,7 @@ export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument
 
             await message.edit({ components: rows })
             await interaction.reply({
-                content: `${self._emojis.OK} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouHaveParticipatedInGiveaway', {
+                content: `${self.staticEmojis.OK} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouHaveParticipatedInGiveaway', {
                     username: `**${interaction.user.username}**`,
                     giveaway: `**${giveaway.prize}**`
                 })}`,

@@ -62,7 +62,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!command && !customCommand) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${t('Commands.HelpCommand.Texts.UnknownCommand', {
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.HelpCommand.Texts.UnknownCommand', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true

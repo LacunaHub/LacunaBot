@@ -455,7 +455,7 @@ export default class Automation {
                         const interaction = this.signal as ButtonInteraction | AnySelectMenuInteraction | ModalSubmitInteraction
 
                         await interaction.reply({
-                            content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
+                            content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
                                 username: `**${interaction.user.globalName}**`
                             })}`,
                             ephemeral: true
@@ -466,7 +466,7 @@ export default class Automation {
                         const message = this.signal as Message
 
                         await message.reply({
-                            content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
+                            content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
                                 username: `**${message.author.globalName}**`
                             })}`
                         })

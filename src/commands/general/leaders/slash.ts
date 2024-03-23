@@ -24,7 +24,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (sorting === 1) {
         if (!server.modules.levels.active && !server.modules.levels.voice) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.LevelsIsDisabled', {
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.LeadersCommand.Texts.LevelsIsDisabled', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -39,7 +39,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!activities?.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.NoLevelsYet', {
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.LeadersCommand.Texts.NoLevelsYet', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -82,7 +82,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     if (sorting === 2) {
         if (!server.modules.economy.active) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -97,7 +97,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!activities?.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.NoWalletsYet', {
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.LeadersCommand.Texts.NoWalletsYet', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
