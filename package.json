@@ -4,10 +4,11 @@
   "description": "Feature-rich Discord bot",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc --build tsconfig.json",
-    "clean-build": "rm -rf ./dist/ && npm run build",
-    "start": "pm2 start process.json",
-    "dev": "npm run build && npm run start && pm2 logs"
+    "build": "node ./clean.dist.js && tsc --build tsconfig.json",
+    "start": "node -r ./config.env.js .",
+    "start:api": "wait-on tcp:5565 && node -r ./config.env.js ./dist/api",
+    "start:bot": "node -r ./config.env.js ./dist/internals",
+    "dev": "npm run build && concurrently \"npm:start\" \"npm:start:api\" \"npm:start:bot\""
   },
   "repository": {
     "type": "git",
@@ -74,7 +75,9 @@
     "@types/unzalgo": "3.0.x",
     "@types/uuid": "8.3.x",
     "@types/xml2js": "0.4.x",
+    "concurrently": "8.2.x",
     "tslib": "2.6.x",
-    "typescript": "5.1.x"
+    "typescript": "5.1.x",
+    "wait-on": "^7.2.0"
   }
 }

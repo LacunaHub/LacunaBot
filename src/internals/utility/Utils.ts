@@ -9,7 +9,6 @@ import {
     TextInputBuilder,
     TextInputStyle
 } from 'discord.js'
-import dotenv from 'dotenv'
 import { parseString } from 'xml2js'
 
 const snowflakeRegexp = /\d{17,20}/
@@ -313,20 +312,6 @@ export function transformModalComponents(components: any[][]) {
             )
             .toJSON()
     })
-}
-
-export function configureEnvironments() {
-    dotenv.config()
-
-    process.env.API_URL =
-        process.env.NODE_ENV === 'development'
-            ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.API_PORT}`
-            : `https://api.${process.env.WEBSITE_DOMAIN}`
-    process.env.WEBSITE_URL =
-        process.env.NODE_ENV === 'development'
-            ? `http://${process.env.WEBSITE_DOMAIN}:${process.env.WEBSITE_PORT}`
-            : `https://${process.env.WEBSITE_DOMAIN}`
-    process.env.CLIENT_OAUTH2_REDIRECT_URI = `${process.env.API_URL}/authorize/callback`
 }
 
 /**

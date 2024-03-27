@@ -24,7 +24,7 @@ import { authorize, checkPermissions } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
 const router: Router = new Router({ prefix: '/guilds' })
-const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
+const OAuth2 = new DiscordOAuth2(process.env.LCN_DISCORD_CLIENT_ID, process.env.LCN_DISCORD_CLIENT_SECRET)
 
 router.get('/:guild_id/settings', createRateLimitMiddleware(10), authorize, checkPermissions, getSettings)
 router.post('/:guild_id/settings', createRateLimitMiddleware(10), authorize, checkPermissions, updateSettings)
@@ -50,7 +50,7 @@ async function getSettings(ctx: Context) {
     let selfMember: APIGuildMember
 
     try {
-        selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guildId, process.env.DISCORD_CLIENT_ID))) as any
+        selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guildId, process.env.LCN_DISCORD_CLIENT_ID))) as any
     } catch (err) {}
 
     if (!selfMember) {
@@ -66,14 +66,14 @@ async function getSettings(ctx: Context) {
         guildChannels = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildChannels(guildId))) as any
         guildRoles = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildRoles(guildId))) as any
         guildEmojis = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildEmojis(guildId))) as any
-        selfCommands = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.applicationCommands(process.env.DISCORD_CLIENT_ID), {
+        selfCommands = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.applicationCommands(process.env.LCN_DISCORD_CLIENT_ID), {
             query: makeURLSearchParams({ with_localizations: true }) as any
         })) as any
     } catch (err) {}
 
     const selfRoles = guildRoles
         .sort((a, b) => a.position - b.position)
-        .filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.DISCORD_CLIENT_ID)
+        .filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.LCN_DISCORD_CLIENT_ID)
     const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (DiscordUtils.compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
     const selfPermissions = selfRoles.reduce((x, y) => x | BigInt(y.permissions), 0n)
 
@@ -194,7 +194,7 @@ async function updateSettings(ctx: Context) {
     let selfMember: APIGuildMember
 
     try {
-        selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guildId, process.env.DISCORD_CLIENT_ID))) as any
+        selfMember = (await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guildId, process.env.LCN_DISCORD_CLIENT_ID))) as any
     } catch (err) {}
 
     if (!selfMember) {

@@ -101,7 +101,7 @@ export default class Lacuna extends Client {
 
         this.rest.on('rateLimited', rateLimitData => this.logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`))
 
-        await this.login(process.env.DISCORD_CLIENT_TOKEN)
+        await this.login(process.env.LCN_DISCORD_CLIENT_TOKEN)
         this.logger.log('[Lacuna] Connected to Discord client')
 
         this.loadEvents(true)

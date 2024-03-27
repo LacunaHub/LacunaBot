@@ -12,8 +12,8 @@ export default {
     error: (...args: any[]) => logger.error(...args),
 
     telegram: new TelegramLogger({
-        botToken: process.env.TELEGRAM_BOT_TOKEN,
-        chatId: process.env.TELEGRAM_LOG_CHAT_ID as any
+        botToken: process.env.LCN_TELEGRAM_BOT_TOKEN,
+        chatId: process.env.LCN_TELEGRAM_LOG_CHAT_ID as any
     }),
 
     async appendServerLog(guildId: string, data: Partial<ServerLogEntry>) {

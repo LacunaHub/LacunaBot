@@ -24,13 +24,13 @@ export async function createTelegramSubscription(server: ServerDocument, data: a
     try {
         if (tgChannel.photo_file_id) {
             const getFileResponse = await fetch(
-                `https://api.telegram.org/bot${process.env.TELEGRAM_PUBLIC_BOT_TOKEN}/getFile?file_id=${tgChannel.photo_file_id}`
+                `https://api.telegram.org/bot${process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN}/getFile?file_id=${tgChannel.photo_file_id}`
             )
 
             if (getFileResponse.ok) {
                 const file: IFile = (await getFileResponse.json()).result
                 const downloadFileResponse = await fetch(
-                    `https://api.telegram.org/file/bot${process.env.TELEGRAM_PUBLIC_BOT_TOKEN}/${file.file_path}`
+                    `https://api.telegram.org/file/bot${process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN}/${file.file_path}`
                 )
 
                 if (downloadFileResponse.ok) {

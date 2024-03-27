@@ -10,7 +10,7 @@ import { authorize } from '../utility/Authorize'
 import { createRateLimitMiddleware } from '../utility/Utils'
 
 const router: Router = new Router({ prefix: '/users' })
-const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
+const OAuth2 = new DiscordOAuth2(process.env.LCN_DISCORD_CLIENT_ID, process.env.LCN_DISCORD_CLIENT_SECRET)
 
 router.get('/@me', createRateLimitMiddleware(5), authorize, getMe)
 router.get('/@me/bills', createRateLimitMiddleware(5), authorize, getBills)
@@ -44,7 +44,7 @@ async function getMe(ctx: Context) {
             let me: any
 
             try {
-                me = await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.DISCORD_CLIENT_ID))
+                me = await DiscordUtils.restApi.get(DiscordUtils.apiRoutes.guildMember(guild.id, process.env.LCN_DISCORD_CLIENT_ID))
             } catch (err) {}
 
             guild['joined'] = Boolean(me)

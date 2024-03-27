@@ -9,7 +9,7 @@ export async function searchRepositories(options: SearchRepositoriesOptions): Pr
         const response = await fetch(`https://api.github.com/search/repositories?${searchParams}`, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}`
+                Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
             }
         })
 
@@ -32,7 +32,7 @@ export async function getRepository(fullName: string): Promise<Repository> {
         const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}`
+                Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
             }
         })
 
@@ -56,7 +56,7 @@ export async function getRepositoryTree(options: GetRepositoryTreeOptions): Prom
         const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${options.treeSHA}?recursive=${!!options.recursive}`, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}`
+                Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
             }
         })
 
@@ -77,7 +77,7 @@ export async function getFileContent(file: TreeFile): Promise<FileContent> {
         const response = await fetch(file.url, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}`
+                Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
             }
         })
 

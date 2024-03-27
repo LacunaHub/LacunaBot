@@ -13,7 +13,7 @@ export async function searchChannels(term: string) {
     logger.log(`[YouTube] Searching channels with term "${term}"`)
 
     const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&${term}&maxResults=15&type=channel&key=${process.env.GOOGLE_API_KEY}`,
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&${term}&maxResults=15&type=channel&key=${process.env.LCN_GOOGLE_API_KEY}`,
         {
             method: 'GET'
         }
@@ -48,7 +48,7 @@ export function hubSubscribe(channelId: string, mode: string = 'subscribe') {
             'hub.callback': `${process.env.API_URL}/subscriptions/youtube/hubbub-webhook`,
             'hub.topic': topicUrl,
             'hub.mode': mode,
-            'hub.secret': process.env.YOUTUBE_HMAC_SECRET,
+            'hub.secret': process.env.LCN_YOUTUBE_HMAC_SECRET,
             'hub.lease_seconds': '604800',
             'hub.verify': 'async'
         }) as any

@@ -39,7 +39,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 .setStyle(ButtonStyle.Link)
                 .setLabel(t('Commands.HelpCommand.Texts.ControlPanel'))
                 .setURL(`${process.env.WEBSITE_URL}/guilds/${interaction.guildId}/settings`),
-            new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('Components.Header.Docs')).setURL(`https://docs.${process.env.WEBSITE_DOMAIN}`)
+            new ButtonBuilder()
+                .setStyle(ButtonStyle.Link)
+                .setLabel(t('Components.Header.Docs'))
+                .setURL(`https://docs.${process.env.LCN_WEBSITE_DOMAIN}`)
         )
 
         if (categories.general.size)

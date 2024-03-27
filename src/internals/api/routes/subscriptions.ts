@@ -144,7 +144,7 @@ function eventSubAuthentication(ctx: Context, next: Next) {
     }
 
     const signature = crypto
-        .createHmac('sha256', process.env.TWITCH_SIGNING_SECRET)
+        .createHmac('sha256', process.env.LCN_TWITCH_SIGNING_SECRET)
         .update(messageId + messageTimestamp + JSON.stringify(ctx.request.body))
         .digest('hex')
 
@@ -212,7 +212,7 @@ async function hubbubWebhook(ctx: Context) {
 
     const [algorithm, hmac] = hubSignature.split('=')
 
-    const signature = crypto.createHmac(algorithm, process.env.YOUTUBE_HMAC_SECRET).update(rawBody).digest('hex')
+    const signature = crypto.createHmac(algorithm, process.env.LCN_YOUTUBE_HMAC_SECRET).update(rawBody).digest('hex')
 
     if (hmac !== signature) {
         ctx.status = 204
@@ -253,7 +253,7 @@ async function telegramWebhook(ctx: Context) {
 
     const [sigAlgorithm, sigHmac] = tbSignature.split('=')
     const signature = crypto
-        .createHmac(sigAlgorithm, process.env.TELEGRAM_PUBLIC_BOT_HMAC_SECRET)
+        .createHmac(sigAlgorithm, process.env.LCN_TELEGRAM_PUBLIC_BOT_HMAC_SECRET)
         .update(`${data.channel_id}:${data.message_id}`)
         .digest('hex')
 

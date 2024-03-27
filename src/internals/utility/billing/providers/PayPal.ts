@@ -51,7 +51,7 @@ async function createOrder(data: Order): Promise<APIOrder> {
     return fetch(`${PAYPAL_API}/checkout/orders`, {
         method: 'POST',
         headers: {
-            Authorization: `Basic ${Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`).toString('base64')}`,
+            Authorization: `Basic ${Buffer.from(`${process.env.LCN_PAYPAL_CLIENT_ID}:${process.env.LCN_PAYPAL_SECRET}`).toString('base64')}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -84,7 +84,7 @@ export async function captureOrder(token: string): Promise<APIOrder> {
     return fetch(`${PAYPAL_API}/checkout/orders/${token}/capture`, {
         method: 'POST',
         headers: {
-            Authorization: `Basic ${Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`).toString('base64')}`,
+            Authorization: `Basic ${Buffer.from(`${process.env.LCN_PAYPAL_CLIENT_ID}:${process.env.LCN_PAYPAL_SECRET}`).toString('base64')}`,
             'Content-Type': 'application/json'
         }
     })

@@ -6,8 +6,8 @@ import Logger from '../internals/Logger'
 import { apiRoutes, restApi } from '../internals/utility/DiscordUtils'
 import { truncateString } from '../internals/utility/Utils'
 
-const telegramBaseApiUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_PUBLIC_BOT_TOKEN}`
-const [telegramBotId] = process.env.TELEGRAM_PUBLIC_BOT_TOKEN.split(':')
+const telegramBaseApiUrl = `https://api.telegram.org/bot${process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN}`
+const [telegramBotId] = process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN.split(':')
 
 export async function searchChannels(query: string) {
     if (isNaN(query as any)) {

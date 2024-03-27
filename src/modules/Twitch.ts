@@ -17,8 +17,8 @@ async function getAppAccessToken() {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: new URLSearchParams({
-                client_id: process.env.TWITCH_CLIENT_ID,
-                client_secret: process.env.TWITCH_CLIENT_SECRET,
+                client_id: process.env.LCN_TWITCH_CLIENT_ID,
+                client_secret: process.env.LCN_TWITCH_CLIENT_SECRET,
                 grant_type: 'client_credentials'
             })
         })
@@ -43,7 +43,7 @@ export async function searchChannels(query: string) {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.TWITCH_CLIENT_ID
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID
         }
     })
 
@@ -71,7 +71,7 @@ export async function eventSubSubscribe(type: string, user_id: string) {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.TWITCH_CLIENT_ID,
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -81,7 +81,7 @@ export async function eventSubSubscribe(type: string, user_id: string) {
             transport: {
                 method: 'webhook',
                 callback: `${process.env.API_URL}/subscriptions/twitch/eventsub-webhook`,
-                secret: process.env.TWITCH_SIGNING_SECRET
+                secret: process.env.LCN_TWITCH_SIGNING_SECRET
             }
         })
     })
@@ -94,7 +94,7 @@ export async function eventSubUnsubscribe(subscription_id: string) {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.TWITCH_CLIENT_ID
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID
         }
     })
 }
@@ -106,7 +106,7 @@ export async function getEventSubsByUserId(userId: string) {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.TWITCH_CLIENT_ID
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID
         }
     })
 }
@@ -119,7 +119,7 @@ export async function getStream(user_id: string) {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.TWITCH_CLIENT_ID
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID
         }
     })
 

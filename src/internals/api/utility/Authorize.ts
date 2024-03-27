@@ -5,7 +5,7 @@ import DiscordOAuth2 from '../discord/OAuth2'
 import APIError from './APIError'
 import { isBotExpert } from './Utils'
 
-const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
+const OAuth2 = new DiscordOAuth2(process.env.LCN_DISCORD_CLIENT_ID, process.env.LCN_DISCORD_CLIENT_SECRET)
 
 export async function authorize(ctx: Context, next: Next) {
     const accessToken = ctx.request.headers.authorization

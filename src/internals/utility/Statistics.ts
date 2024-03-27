@@ -65,18 +65,18 @@ export function scheduleStatsCollect() {
 
 export async function sendBotStatsToListings(guilds: number) {
     try {
-        const topGGResponse = await fetch(`https://top.gg/api/bots/${process.env.DISCORD_CLIENT_ID}/stats`, {
+        const topGGResponse = await fetch(`https://top.gg/api/bots/${process.env.LCN_DISCORD_CLIENT_ID}/stats`, {
                 method: 'POST',
                 headers: {
-                    Authorization: process.env.LISTING_TOP_GG_API_KEY,
+                    Authorization: process.env.LCN_TOP_GG_API_KEY,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ server_count: guilds })
             }),
-            botsGGResponse = await fetch(`https://discord.bots.gg/api/v1/bots/${process.env.DISCORD_CLIENT_ID}/stats`, {
+            botsGGResponse = await fetch(`https://discord.bots.gg/api/v1/bots/${process.env.LCN_DISCORD_CLIENT_ID}/stats`, {
                 method: 'POST',
                 headers: {
-                    Authorization: process.env.LISTING_BOTS_GG_API_KEY,
+                    Authorization: process.env.LCN_BOTS_GG_API_KEY,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ guildCount: guilds })

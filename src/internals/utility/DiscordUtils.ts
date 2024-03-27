@@ -4,7 +4,7 @@ import Logger from '../Logger'
 export const restApi = new REST({
     version: '10',
     rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5
-}).setToken(process.env.DISCORD_CLIENT_TOKEN)
+}).setToken(process.env.LCN_DISCORD_CLIENT_TOKEN)
 export const apiRoutes = Routes
 
 restApi.on('rateLimited', rateLimitData => Logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`))

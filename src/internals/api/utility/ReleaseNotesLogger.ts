@@ -4,8 +4,8 @@ import database from '../../../database'
 import Logger from '../../Logger'
 import { apiRoutes, restApi } from '../../utility/DiscordUtils'
 
-const newsChannelId = process.env.RNL_NEWS_CHANNEL_ID,
-    newsRoleId = process.env.RNL_NEWS_ROLE_ID
+const newsChannelId = process.env.LCN_RNL_NEWS_CHANNEL_ID,
+    newsRoleId = process.env.LCN_RNL_NEWS_ROLE_ID
 
 export async function getReleaseNotes() {
     try {

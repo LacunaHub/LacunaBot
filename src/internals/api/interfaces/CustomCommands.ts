@@ -19,7 +19,7 @@ export async function createCustomCommand(server: ServerDocument, data: ServerMo
     let apiCommand: any
 
     try {
-        apiCommand = await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, server._id), {
+        apiCommand = await DiscordUtils.restApi.post(DiscordUtils.apiRoutes.applicationGuildCommands(process.env.LCN_DISCORD_CLIENT_ID, server._id), {
             body: data.command
         })
     } catch (err) {
@@ -59,7 +59,7 @@ export async function updateCustomCommand(server: ServerDocument, data: ServerMo
     if (JSON.stringify(data.command) !== JSON.stringify(customCommand.command)) {
         try {
             await DiscordUtils.restApi.patch(
-                DiscordUtils.apiRoutes.applicationGuildCommand(process.env.DISCORD_CLIENT_ID, server._id, customCommand.id),
+                DiscordUtils.apiRoutes.applicationGuildCommand(process.env.LCN_DISCORD_CLIENT_ID, server._id, customCommand.id),
                 {
                     body: data.command
                 }
@@ -97,7 +97,9 @@ export async function deleteCustomCommand(server: ServerDocument, data: { id: st
     if (!customCommand) throw new APIError(1011)
 
     try {
-        await DiscordUtils.restApi.delete(DiscordUtils.apiRoutes.applicationGuildCommand(process.env.DISCORD_CLIENT_ID, server._id, customCommand.id))
+        await DiscordUtils.restApi.delete(
+            DiscordUtils.apiRoutes.applicationGuildCommand(process.env.LCN_DISCORD_CLIENT_ID, server._id, customCommand.id)
+        )
     } catch (err) {
         await Logger.handleError({
             module: 'CustomCommands',

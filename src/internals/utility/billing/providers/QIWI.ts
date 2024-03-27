@@ -60,7 +60,7 @@ async function createBill(data: BillData): Promise<APIBill> {
     return fetch(`https://api.qiwi.com/partner/bill/v1/bills/${data.bill_id}`, {
         method: 'PUT',
         headers: {
-            Authorization: `Bearer ${process.env.QIWI_SECRET_KEY}`,
+            Authorization: `Bearer ${process.env.LCN_QIWI_SECRET_KEY}`,
             'Content-Type': 'application/json;charset=UTF-8',
             Accept: 'application/json'
         },
@@ -83,7 +83,7 @@ async function getBill(bill_id: string): Promise<APIBill> {
     return fetch(`https://api.qiwi.com/partner/bill/v1/bills/${bill_id}`, {
         method: 'GET',
         headers: {
-            Authorization: `Bearer ${process.env.QIWI_SECRET_KEY}`,
+            Authorization: `Bearer ${process.env.LCN_QIWI_SECRET_KEY}`,
             Accept: 'application/json'
         }
     })

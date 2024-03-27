@@ -5,7 +5,7 @@ import db from '../../../database'
 import DiscordOAuth2 from '../discord/OAuth2'
 
 const router: Router = new Router({ prefix: '/authorize', methods: ['GET'] })
-const OAuth2 = new DiscordOAuth2(process.env.DISCORD_CLIENT_ID, process.env.DISCORD_CLIENT_SECRET)
+const OAuth2 = new DiscordOAuth2(process.env.LCN_DISCORD_CLIENT_ID, process.env.LCN_DISCORD_CLIENT_SECRET)
 
 router.get('/', authorize)
 router.get('/callback', callback)
@@ -52,13 +52,13 @@ async function callback(ctx: Context) {
     const userEntry = await db.users.findOne({ _id: currentUser.id })
     const cookieOptions = {
         maxAge: exchangedCode.expires_in * 1000,
-        domain: process.env.WEBSITE_DOMAIN,
+        domain: process.env.LCN_WEBSITE_DOMAIN,
         httpOnly: false
     }
 
     ctx.cookies
         .set('access_token', exchangedCode.access_token, cookieOptions)
-        .set('refresh_token', exchangedCode.refresh_token, { domain: process.env.WEBSITE_DOMAIN, httpOnly: false })
+        .set('refresh_token', exchangedCode.refresh_token, { domain: process.env.LCN_WEBSITE_DOMAIN, httpOnly: false })
 
     ctx.cookies
         .set('user_id', currentUser.id, cookieOptions)
