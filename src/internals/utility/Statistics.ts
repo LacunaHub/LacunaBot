@@ -1,33 +1,31 @@
 import fetch from 'node-fetch'
 import { Range, RecurrenceRule, scheduleJob } from 'node-schedule'
+import { clusterManager } from '..'
 import database from '../../database'
-import { bridgeClient } from '../Cluster'
 import Lacuna from '../Lacuna'
 import logger from '../Logger'
-
-const totalShards = Number(process.env.DISCORD_CLIENT_TOTAL_SHARDS)
-const shardsPerCluster = Number(process.env.DISCORD_CLIENT_SHARDS_PER_CLUSTER)
 
 export function scheduleStatsCollect() {
     const rule = new RecurrenceRule()
     rule.minute = new Range(0, 59, 10)
 
     const job = scheduleJob(rule, async () => {
-        const stats = await bridgeClient.broadcastEval((self: Lacuna) => {
-                return {
-                    guildCount: self.guilds.cache.size,
-                    latency: self.ws.ping,
-                    commandUsageCount: self.commands
-                        .filter(c => c.is_slash_command)
-                        .map(c => {
-                            return { name: c.name, uses: c.uses }
-                        })
-                }
-            }),
-            flatStats = stats.flat()
+        const stats = await clusterManager.server.broadcastEval((self: Lacuna) => {
+            return {
+                guildCount: self.guilds.cache.size,
+                latency: self.ws.ping,
+                commandUsageCount: self.commands
+                    .filter(c => c.is_slash_command)
+                    .map(c => {
+                        return { name: c.name, uses: c.uses }
+                    })
+            }
+        })
+
+        const flatStats = stats.flat()
 
         // check if all shards are spawned
-        if (flatStats.length < totalShards / shardsPerCluster) return
+        if (flatStats.length < clusterManager.shardCount / clusterManager.options.shardsPerCluster) return
 
         const totalGuilds: number = flatStats.reduce((a, b) => a + b.guildCount, 0)
         const storedStats: StatsMetrics = (await database.qdb.get('stats.metrics')) ?? {

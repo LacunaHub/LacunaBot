@@ -28,7 +28,7 @@ async function getState(ctx: Context) {
         }
     })
     const flatStats = stats.flat().sort((a, b) => a.clusterId - b.clusterId)
-    const { data: servers } = await bridgeClient.request({ type: 'server-performance' }, { timeout: 15000, internal: false })
+    const { data: servers } = await bridgeClient.request({ type: 'server-performance' })
     const statsMetrics: StatsMetrics = (await database.qdb.get('stats.metrics')) ?? { total_guilds: [], shard_latencies: [], command_usage_count: [] }
 
     ctx.status = 200

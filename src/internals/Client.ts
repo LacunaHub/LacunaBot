@@ -1,9 +1,7 @@
-import { ClusterClient } from 'discord-hybrid-sharding'
 import { ActivityType, Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
 import Lacuna from './Lacuna'
 
 const { version } = require('../../package.json')
-const clusterClientInfo = ClusterClient.getInfo()
 
 const client = new Lacuna({
     presence: {
@@ -98,9 +96,7 @@ const client = new Lacuna({
                 return Boolean(state.channelId) === false
             }
         }
-    },
-    shards: clusterClientInfo.SHARD_LIST,
-    shardCount: clusterClientInfo.TOTAL_SHARDS
+    }
 })
 
 export default client

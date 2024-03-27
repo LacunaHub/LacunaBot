@@ -1,9 +1,5 @@
-import { configureEnvironments } from '../utility/Utils'
-
-configureEnvironments()
-
 import koaCors from '@koa/cors'
-import { Client as BridgeClient } from 'discord-cross-hosting'
+import { ServerClient } from '@lacunahub/letsfrag'
 import Koa from 'koa'
 import koaBody from 'koa-body'
 import koaJson from 'koa-json'
@@ -24,11 +20,10 @@ import { passKnownReferrers } from './utility/Authorize'
 import ReleaseNotesLogger from './utility/ReleaseNotesLogger'
 
 const app: Koa = new Koa()
-const bridgeClient = new BridgeClient({
-    host: process.env.DISCORD_CLIENT_BRIDGE_HOST,
-    port: Number(process.env.DISCORD_CLIENT_BRIDGE_PORT),
-    authToken: process.env.DISCORD_CLIENT_BRIDGE_AUTH_TOKEN,
-    agent: 'api'
+const bridgeClient = new ServerClient(null, {
+    host: process.env.LCN_SERVER_HOST,
+    port: Number(process.env.LCN_SERVER_PORT),
+    authorization: process.env.LCN_SERVER_AUTHORIZATION
 })
 
 app.use(koaBody({ jsonLimit: '50mb' }))
@@ -40,7 +35,7 @@ app.use(
 )
 app.use(koaCors({ credentials: true, exposeHeaders: ['Content-Disposition'] }))
 
-app.proxy = process.env.WEBSITE_DOMAIN !== 'localhost'
+app.proxy = process.env.LCN_WEBSITE_DOMAIN !== 'localhost'
 app.keys = ['discord_oauth_state']
 
 app.use(async (ctx, next) => {
@@ -67,9 +62,9 @@ app.use(users.routes()).use(users.allowedMethods())
 database.connect()
 bridgeClient.connect()
 
-app.listen(process.env.API_PORT, () => {
-    Logger.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${app.proxy}`)
-    Logger.telegram.log(`[API] Server started on port ${process.env.API_PORT} with proxy state ${app.proxy}`)
+app.listen(process.env.LCN_API_PORT, () => {
+    Logger.log(`[API] Server started on port ${process.env.LCN_API_PORT} with proxy state ${app.proxy}`)
+    Logger.telegram.log(`[API] Server started on port ${process.env.LCN_API_PORT} with proxy state ${app.proxy}`)
 
     syncQiwiBills()
     handleDiamondGuilds()
