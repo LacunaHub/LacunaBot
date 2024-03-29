@@ -215,7 +215,7 @@
                   </q-item-section>
 
                   <q-item-section :class="`${averageLatency.color} text-subtitle1`" side>
-                    {{ Math.round(averageLatency.value) }}MS
+                    {{ Math.round(averageLatency.value) || 0 }}MS
                   </q-item-section>
                 </q-item>
 
