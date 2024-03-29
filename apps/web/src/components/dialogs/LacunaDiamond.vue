@@ -214,7 +214,7 @@
               style="background-color: #f15f2c"
               unelevated
               no-caps
-              href="https://boosty.to/xelitte/purchase/2062351"
+              href="https://boosty.to/xelitte/purchase/2203744"
               target="_blank"
             >
               <q-avatar class="q-mr-xs" size="24px" square>
