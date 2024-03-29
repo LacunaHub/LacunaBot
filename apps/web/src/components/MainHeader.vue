@@ -1,24 +1,16 @@
 <template>
   <q-header class="bg-dark-1 fixed fixed-top">
     <q-toolbar class="q-py-xs q-px-md">
-      <q-btn
-        v-if="$q.screen.lt.md"
-        dense
-        flat
-        :style="{
-          'margin-right': user.access_token ? '' : '62px'
-        }"
-        @click="toggleMobileNav"
-      >
+      <q-btn v-if="$q.screen.lt.md" dense flat @click="toggleMobileNav">
         <q-icon name="menu" size="28px"></q-icon>
       </q-btn>
 
-      <q-toolbar-title :class="`${$q.screen.lt.md ? 'row justify-center' : ''}`">
+      <q-toolbar-title>
         <router-link to="/@me/guilds" class="toolbar-title-logo">
           <q-avatar size="60px">
             <img src="~/assets/lacuna-logo.svg" />
           </q-avatar>
-          <span class="text-uppercase text-body2 text-weight-bold q-ml-sm gt-sm">Lacuna</span>
+          <span class="text-uppercase text-body2 text-weight-bold q-ml-sm">Lacuna</span>
         </router-link>
       </q-toolbar-title>
 
@@ -38,21 +30,70 @@
             {{ $t('Components.Header.State') }}
           </span>
         </router-link>
-        <a href="https://docs.lacunabot.com" target="_blank" class="header-link text-uppercase q-mr-lg">
-          <span>
-            {{ $t('Components.Header.Docs') }}
-          </span>
-        </a>
-        <router-link to="/patrons" class="header-link text-uppercase q-mr-lg" active-class="header-link--active">
+        <router-link to="/patrons" class="header-link text-uppercase" active-class="header-link--active">
           <span>
             {{ $t('Components.Header.Patrons') }}
           </span>
         </router-link>
-        <a href="https://discord.gg/9NeMc3J" target="_blank" class="header-link text-uppercase">
-          <span>
-            {{ $t('Components.Header.Community') }}
-          </span>
-        </a>
+      </div>
+
+      <q-separator class="gt-sm" spaced="lg" inset vertical></q-separator>
+
+      <div class="gt-sm">
+        <q-btn
+          class="header-link"
+          icon="menu_book"
+          size="small"
+          round
+          unelevated
+          no-caps
+          href="https://docs.lacunabot.com"
+          target="_blank"
+        >
+          <q-tooltip
+            class="bg-black text-body2"
+            anchor="top middle"
+            self="bottom middle"
+            transition-show=""
+            transition-hide=""
+          >
+            {{ $t('Components.Header.Docs') }}
+          </q-tooltip>
+        </q-btn>
+
+        <q-btn
+          class="header-link"
+          size="small"
+          round
+          unelevated
+          no-caps
+          href="https://discord.gg/9NeMc3J"
+          target="_blank"
+        >
+          <q-icon name="fab fa-discord" size="xs"></q-icon>
+        </q-btn>
+
+        <q-btn
+          class="header-link"
+          icon="forum"
+          size="small"
+          round
+          unelevated
+          no-caps
+          href="https://github.com/orgs/LacunaHub/discussions"
+          target="_blank"
+        />
+
+        <q-btn
+          class="header-link"
+          icon="translate"
+          size="small"
+          round
+          unelevated
+          no-caps
+          href="https://crowdin.com/project/lacuna"
+          target="_blank"
+        />
       </div>
 
       <q-separator class="gt-sm" spaced="lg" inset vertical></q-separator>
@@ -66,7 +107,7 @@
         <q-avatar size="32px">
           <img :src="user.avatarURL" />
         </q-avatar>
-        <q-icon class="gt-sm" name="arrow_drop_down" size="16px"></q-icon>
+        <q-icon name="arrow_drop_down" size="16px"></q-icon>
 
         <q-menu class="bg-dark-2" style="min-width: max-content">
           <q-list>
@@ -147,33 +188,59 @@
         </q-item>
 
         <q-item clickable to="/state" active-class="nav-item--active" @click="toggleMobileNav">
-          <q-item-section>
+          <q-item-section class="q-pl-sm">
             <q-item-label>
               {{ $t('Components.Header.State') }}
             </q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable href="https://docs.lacunabot.com" target="_blank" @click="toggleMobileNav">
-          <q-item-section>
-            <q-item-label>
-              {{ $t('Components.Header.Docs') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-
         <q-item clickable to="/patrons" active-class="nav-item--active" @click="toggleMobileNav">
-          <q-item-section>
+          <q-item-section class="q-pl-sm">
             <q-item-label>
               {{ $t('Components.Header.Patrons') }}
             </q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable href="https://discord.gg/9NeMc3J" target="_blank" @click="toggleMobileNav">
+        <q-separator></q-separator>
+
+        <q-item @click="toggleMobileNav">
           <q-item-section>
             <q-item-label>
-              {{ $t('Components.Header.Community') }}
+              <q-btn
+                icon="menu_book"
+                size="small"
+                round
+                unelevated
+                no-caps
+                href="https://docs.lacunabot.com"
+                target="_blank"
+              >
+              </q-btn>
+              <q-btn size="small" round unelevated no-caps href="https://discord.gg/9NeMc3J" target="_blank">
+                <q-icon name="fab fa-discord" size="xs"></q-icon>
+              </q-btn>
+
+              <q-btn
+                icon="forum"
+                size="small"
+                round
+                unelevated
+                no-caps
+                href="https://github.com/orgs/LacunaHub/discussions"
+                target="_blank"
+              />
+
+              <q-btn
+                icon="translate"
+                size="small"
+                round
+                unelevated
+                no-caps
+                href="https://crowdin.com/project/lacuna"
+                target="_blank"
+              />
             </q-item-label>
           </q-item-section>
         </q-item>
