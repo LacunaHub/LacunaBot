@@ -45,7 +45,7 @@ export default async function transferDiamond(ctx: Context) {
         {
             $set: {
                 'premium.available': false,
-                'premium.will_expire_on': 0,
+                'premium.expires_at': 0,
                 'premium.bill_id': null
             }
         }

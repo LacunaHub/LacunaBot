@@ -65,7 +65,7 @@ export class DiamondGuild {
                 {
                     $set: {
                         'premium.available': false,
-                        'premium.will_expire_on': 0,
+                        'premium.expires_at': 0,
                         'premium.bill_id': null
                     }
                 }
@@ -88,7 +88,7 @@ export class DiamondGuild {
 export async function handleDiamondGuilds() {
     const servers = await database.servers.find({
         'premium.available': true,
-        'premium.will_expire_on': { $gt: 0 }
+        'premium.expires_at': { $gt: 0 }
     })
 
     for (const server of servers) {
