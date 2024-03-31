@@ -1,3 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { Queue } from '@lacunahub/lavaluna.js'
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -8,8 +10,6 @@ import {
     StringSelectMenuBuilder,
     StringSelectMenuInteraction
 } from 'discord.js'
-import { Queue } from 'lavaluna.js'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray, generateSimpleId } from '../../../internals/utility/Utils'
 
@@ -20,7 +20,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -31,7 +31,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player.queue.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.QueueCommand.Texts.PlaybackQueueIsEmpty', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.QueueCommand.Texts.PlaybackQueueIsEmpty', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true

@@ -1,6 +1,6 @@
+import { ServerMessageTemplateImage } from '@lacunahub/lacuna-database-driver'
 import { CanvasRenderingContext2D, Image, createCanvas, loadImage } from 'canvas'
 import database from '../database'
-import { MessageImage } from '../database/schemas/Servers'
 import Logger from '../internals/Logger'
 import { capitalizeFirstLetter } from '../internals/utility/Utils'
 
@@ -31,7 +31,7 @@ export const textTransforms = ['none', 'capitalize', 'uppercase', 'lowercase']
 export const textDecorations = ['none', 'underline', 'line-through']
 export const textAligns = ['center', 'start', 'end']
 
-export async function generateImage(image: MessageImage) {
+export async function generateImage(image: ServerMessageTemplateImage) {
     const canvas = createCanvas(image.width, image.height),
         ctx = canvas.getContext('2d')
 
@@ -45,7 +45,7 @@ export async function generateImage(image: MessageImage) {
     ctx.strokeRect(borderRadiuses.lg / 2, borderRadiuses.lg / 2, image.width - borderRadiuses.lg, image.height - borderRadiuses.lg)
     ctx.fillRect(borderRadiuses.lg / 2, borderRadiuses.lg / 2, image.width - borderRadiuses.lg, image.height - borderRadiuses.lg)
 
-    const { allowedImageHosts } = await database.json.get()
+    const { allowedImageHosts } = await database.getInternalData()
 
     if (image.background.url) {
         try {

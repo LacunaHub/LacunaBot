@@ -1,10 +1,10 @@
+import { ServerDocument, ServerModulesInteractiveReaction } from '@lacunahub/lacuna-database-driver'
 import { Events, Message } from 'discord.js'
-import { InteractiveReaction, ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, message: Message) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
-    const elements: InteractiveReaction[] = server.modules.reactions.filter(r => r.message.id == message.id)
+    const elements: ServerModulesInteractiveReaction[] = server.modules.reactions.filter(r => r.message.id == message.id)
 
     if (elements.length) {
         await self.db.servers.updateOne(

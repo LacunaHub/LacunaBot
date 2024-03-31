@@ -1,12 +1,12 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, EmbedBuilder, Message } from 'discord.js'
 import { fetchLogWebhook, isRateLimited } from '..'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { truncateString } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, before: Message, message: Message): Promise<boolean> {
     if (server.moderation.logs.types.message_update.active) {
-        if (isRateLimited(server._id, server.server.premium.available)) return false
+        if (isRateLimited(server._id, server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
@@ -39,8 +39,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
             try {
                 await webhook.send({
                     embeds: [embed],
-                    avatarURL: server.server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.server.premium.available ? webhook.name : self.user.username
+                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
+                    username: server.premium.available ? webhook.name : self.user.username
                 })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsMessageUpdate', action: 'SendMessageViaWebhook', error: err, guild_id: message.guildId })

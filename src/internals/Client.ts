@@ -1,9 +1,7 @@
-import { ClusterClient } from 'discord-hybrid-sharding'
 import { ActivityType, Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
 import Lacuna from './Lacuna'
 
 const { version } = require('../../package.json')
-const clusterClientInfo = ClusterClient.getInfo()
 
 const client = new Lacuna({
     presence: {
@@ -36,7 +34,7 @@ const client = new Lacuna({
         if (manager.name === 'GuildMemberManager')
             return new LimitedCollection({
                 maxSize: 1000,
-                keepOverLimit: v => v.id === process.env.DISCORD_CLIENT_ID || Boolean(v.voice.channelId)
+                keepOverLimit: v => v.id === process.env.LCN_DISCORD_CLIENT_ID || Boolean(v.voice.channelId)
             })
 
         if (manager.name === 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
@@ -46,13 +44,16 @@ const client = new Lacuna({
         if (manager.name === 'UserManager')
             return new LimitedCollection({
                 maxSize: 1000,
-                keepOverLimit: v => v.id === process.env.DISCORD_CLIENT_ID
+                keepOverLimit: v => v.id === process.env.LCN_DISCORD_CLIENT_ID
             })
 
         return new Collection()
     },
     rest: {
-        rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5
+        rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5,
+        store: {
+            uri: process.env.LCN_REDIS_URI
+        }
     },
     sweepers: {
         ...Options.DefaultSweeperSettings,
@@ -69,7 +70,7 @@ const client = new Lacuna({
         guildMembers: {
             interval: 30 * 60,
             filter: () => member => {
-                return Boolean(member.voice?.channelId) === false && member.id !== process.env.DISCORD_CLIENT_ID
+                return Boolean(member.voice?.channelId) === false && member.id !== process.env.LCN_DISCORD_CLIENT_ID
             }
         },
         messages: {
@@ -89,7 +90,7 @@ const client = new Lacuna({
         users: {
             interval: 30 * 60,
             filter: () => user => {
-                return user.id !== process.env.DISCORD_CLIENT_ID
+                return user.id !== process.env.LCN_DISCORD_CLIENT_ID
             }
         },
         voiceStates: {
@@ -98,9 +99,7 @@ const client = new Lacuna({
                 return Boolean(state.channelId) === false
             }
         }
-    },
-    shards: clusterClientInfo.SHARD_LIST,
-    shardCount: clusterClientInfo.TOTAL_SHARDS
+    }
 })
 
 export default client

@@ -1,7 +1,7 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, Team } from 'discord.js'
 import numbro from 'numbro'
 import os from 'os'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 const { version } = require('../../../../package.json')
@@ -29,7 +29,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         .setFooter({ text: `© ${appTeam.name}`, iconURL: appTeam.iconURL() })
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('Components.Header.State')).setURL(`${process.env.WEBSITE_URL}/state`)
+        new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('Components.Header.State')).setURL(`${process.env.LCN_WEBSITE_URL}/state`)
     )
 
     await interaction.reply({ embeds: [embed], components: [row] })

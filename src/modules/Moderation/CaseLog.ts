@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     ActionRowBuilder,
     BaseGuildTextChannel,
@@ -14,7 +15,6 @@ import {
     User
 } from 'discord.js'
 import db from '../../database'
-import { ServerDocument } from '../../database/schemas/Servers'
 import i18n from '../../i18n'
 import Lacuna from '../../internals/Lacuna'
 import Logger from '../../internals/Logger'
@@ -81,7 +81,7 @@ export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageO
 export async function onPressChangeReasonButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
     if (!interaction.memberPermissions.has(self.PermissionFlags.ManageMessages)) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.CommandExecutionDenied', {
+            content: `${self.staticEmojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.CommandExecutionDenied', {
                 username: `**${interaction.user.username}**`
             })}`,
             ephemeral: true
@@ -114,7 +114,7 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
 
     if (!reason) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.InvalidReason', {
+            content: `${self.staticEmojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.InvalidReason', {
                 username: `**${interaction.user.username}**`
             })}`,
             ephemeral: true
@@ -129,7 +129,7 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
     await interaction.message.edit({ embeds: [embed] })
 
     await interaction.reply({
-        content: `${self._emojis.OK} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged', {
+        content: `${self.staticEmojis.OK} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged', {
             username: `**${interaction.user.username}**`
         })}`,
         ephemeral: true

@@ -1,7 +1,7 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Events, GuildMember } from 'discord.js'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
-import { active_patron_role_id, former_patron_role_id, support_server_id } from '../../internals/utility/billing'
+import { activePatronRoleId, formerPatronRoleId, supportServerId } from '../../internals/utility/Constants'
 import Automation from '../../modules/Automation'
 import Automoder from '../../modules/Automoder'
 import Greeting from '../../modules/Greeting'
@@ -32,15 +32,15 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     await GuildImageRotation.rotateBanner(self, server, member.guild, member)
     await Logs.GuildMemberAdd(self, server, member)
 
-    if (member.guild.id === support_server_id) {
+    if (member.guild.id === supportServerId) {
         const user = await self.db.users.findOne({ _id: member.id })
 
         if (user?.premium?.available) {
-            await member.roles.add(active_patron_role_id)
+            await member.roles.add(activePatronRoleId)
         }
 
         if (user?.premium?.available === false && user?.premium?.last_charge_timestamp) {
-            await member.roles.add(former_patron_role_id)
+            await member.roles.add(formerPatronRoleId)
         }
     }
 

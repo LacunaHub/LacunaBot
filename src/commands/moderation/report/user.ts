@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     ActionRowBuilder,
     ModalActionRowComponentBuilder,
@@ -6,7 +7,6 @@ import {
     TextInputStyle,
     UserContextMenuCommandInteraction
 } from 'discord.js'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { capitalizeFirstLetter } from '../../../internals/utility/Utils'
 

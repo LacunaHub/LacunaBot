@@ -1,19 +1,20 @@
 {
-  "name": "lacuna",
+  "name": "lacuna-bot",
   "version": "4.11.1",
-  "description": "A Discord bot",
+  "description": "Feature-rich Discord bot",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc --build tsconfig.json",
-    "clean-build": "rm -rf ./dist/ && npm run build",
-    "start": "pm2 start process.json",
-    "dev": "npm run build && npm run start && pm2 logs"
+    "build": "node ./clean.dist.js && tsc --build tsconfig.json",
+    "start": "node -r ./config.env.js .",
+    "start:api": "wait-on tcp:5565 && node -r ./config.env.js ./dist/api",
+    "start:bot": "node -r ./config.env.js ./dist/internals",
+    "dev": "npm run build && concurrently \"npm:start\" \"npm:start:api\" \"npm:start:bot\""
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LacunaHub/Discord.git"
   },
-  "author": "Daniyar Kurmangaliiev",
+  "author": "Lacuna (https://github.com/LacunaHub)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/LacunaHub/Discord/issues"
@@ -22,6 +23,11 @@
   "dependencies": {
     "@koa/cors": "4.0.x",
     "@koa/router": "12.0.x",
+    "@lacunahub/lacuna-database-driver": "^1.0.4",
+    "@lacunahub/lacuna-locale": "1.0.0",
+    "@lacunahub/lavaluna.js": "1.0.x",
+    "@lacunahub/letsfrag": "^0.1.0",
+    "@lacunahub/logger": "1.0.x",
     "bufferutil": "4.0.x",
     "canvas": "2.11.x",
     "discord-cross-hosting": "2.3.x",
@@ -33,10 +39,9 @@
     "koa-body": "6.0.x",
     "koa-bodyparser": "4.4.x",
     "koa-json": "2.0.x",
+    "koa-logger": "^3.2.1",
     "koa-morgan": "1.0.x",
     "koa-ratelimit": "5.0.x",
-    "lacuna-locale": "github:LacunaHub/Locale",
-    "lavaluna.js": "1.0.x",
     "moment": "2.29.x",
     "mongoose": "5.13.x",
     "ms": "2.1.x",
@@ -61,6 +66,7 @@
     "@types/koa__router": "12.0.x",
     "@types/koa-bodyparser": "4.3.x",
     "@types/koa-json": "2.0.x",
+    "@types/koa-logger": "^3.1.5",
     "@types/koa-morgan": "1.0.x",
     "@types/koa-ratelimit": "5.0.x",
     "@types/ms": "0.7.x",
@@ -72,7 +78,9 @@
     "@types/unzalgo": "3.0.x",
     "@types/uuid": "8.3.x",
     "@types/xml2js": "0.4.x",
+    "concurrently": "8.2.x",
     "tslib": "2.6.x",
-    "typescript": "5.1.x"
+    "typescript": "5.1.x",
+    "wait-on": "^7.2.0"
   }
 }

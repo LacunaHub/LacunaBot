@@ -1,5 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, Events, GuildBan, User } from 'discord.js'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import Logs from '../../modules/Logs'
 import { caseLog } from '../../modules/Moderation'

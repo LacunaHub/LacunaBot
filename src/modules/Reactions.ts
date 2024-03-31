@@ -1,6 +1,6 @@
+import { ServerDocument, ServerModulesAutoReaction } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, Collection, Message, MessageReaction, User } from 'discord.js'
 import { split } from 'unicode-default-word-boundary'
-import { AutoReaction, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 
 export function generateId() {
@@ -19,7 +19,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
 
         const message = await reaction.message.fetch()
         const element = server.modules.reactions
-            .slice(0, server.server.premium.available ? 200 : 50)
+            .slice(0, server.premium.available ? 200 : 50)
             .find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
 
         if (element) {
@@ -185,7 +185,7 @@ export async function reactionRemove(self: Lacuna, server: ServerDocument, react
 
         const message = reaction.message
         const element = server.modules.reactions
-            .slice(0, server.server.premium.available ? 200 : 50)
+            .slice(0, server.premium.available ? 200 : 50)
             .find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
 
         if (element) {
@@ -272,8 +272,8 @@ export const autoReactionMessageTypes = {
 }
 
 export async function autoReact(self: Lacuna, server: ServerDocument, message: Message) {
-    const ar: AutoReaction = server.modules.autoreactions
-        .slice(0, server.server.premium.available ? 20 : 2)
+    const ar: ServerModulesAutoReaction = server.modules.autoreactions
+        .slice(0, server.premium.available ? 20 : 2)
         .find(i => i.channel_id == message.channel.id)
 
     if (ar) {

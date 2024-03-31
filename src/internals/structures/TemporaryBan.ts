@@ -1,5 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Job, scheduleJob } from 'node-schedule'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 
 export default class TemporaryBan {

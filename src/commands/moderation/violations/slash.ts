@@ -1,3 +1,4 @@
+import { ServerDocument, ServerModerationWarningsViolator } from '@lacunahub/lacuna-database-driver'
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -9,7 +10,6 @@ import {
     GuildMember,
     Message
 } from 'discord.js'
-import { ServerDocument, WarningsViolator } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
 
@@ -25,7 +25,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!violator || !violator.violations.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('Commands.ViolationsCommand.Texts.ThisUserHasNoViolations', {
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.ViolationsCommand.Texts.ThisUserHasNoViolations', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -60,7 +60,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!violators.length) {
             await interaction.editReply({
-                content: `${self._emojis.ERROR} | ${t('Commands.ViolationsCommand.Texts.NoOneHasAnyViolations', {
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.ViolationsCommand.Texts.NoOneHasAnyViolations', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -68,7 +68,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        const chunks: WarningsViolator[][] = chunkArray(violators, 9)
+        const chunks: ServerModerationWarningsViolator[][] = chunkArray(violators, 9)
         const embed = new EmbedBuilder().setTitle(t('Commands.ViolationsCommand.Texts.ListOfViolators')),
             embedFields = []
 

@@ -1,12 +1,10 @@
-import { Shard as BridgeShard } from 'discord-cross-hosting'
-import { ClusterClient } from 'discord-hybrid-sharding'
-import { Client, ClientOptions, Collection, LimitedCollection, parseEmoji, PermissionsBitField } from 'discord.js'
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { LavalunaManager } from '@lacunahub/lavaluna.js'
+import { ClusterShardClient, ClusterShardClientOptions } from '@lacunahub/letsfrag'
+import { Collection, LimitedCollection, PermissionsBitField, parseEmoji } from 'discord.js'
 import { readdirSync } from 'fs'
-import { LavalunaManager } from 'lavaluna.js'
-import { connect } from 'mongoose'
 import { os } from 'node-os-utils'
 import db from '../database'
-import { ServerDocument } from '../database/schemas/Servers'
 import i18n from '../i18n'
 import Utils from '../internals/utility/Utils'
 import logger from './Logger'
@@ -16,58 +14,22 @@ import Giveaway, { handleEntries as handleGiveawayEntries } from './structures/G
 import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './structures/TemporaryBan'
 import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole'
 
-export default class Lacuna extends Client {
-    public cluster: ClusterClient<Lacuna>
-    public machine: BridgeShard
+export default class Lacuna extends ClusterShardClient {
     public hostname: string
     public logger: typeof logger
     public db: typeof db
-    public cache: LimitedCollection<string, any>
-    public commands: Collection<string, Command>
-    public events: Collection<string, Event>
+    public cache = new LimitedCollection<string, any>()
+    public commands = new Collection<string, Command>()
+    public events = new Collection<string, Event>()
     public lava: LavalunaManager | null = null
-    public giveaways: Collection<string, Giveaway>
-    public tempbans: Collection<string, TemporaryBan>
-    public temproles: Collection<string, TemporaryRole>
+    public giveaways = new Collection<string, Giveaway>()
+    public tempbans = new Collection<string, TemporaryBan>()
+    public temproles = new Collection<string, TemporaryRole>()
     public i18n: typeof i18n
     public utils: typeof Utils
     public PermissionFlags: typeof PermissionsBitField.Flags
 
-    constructor(options?: ClientOptions) {
-        super(options)
-
-        this.cluster = null
-
-        this.machine = null
-
-        this.hostname = os.hostname()
-
-        this.logger = logger
-
-        this.db = db
-
-        this.cache = new LimitedCollection({ maxSize: 100 })
-
-        this.commands = new Collection()
-
-        this.events = new Collection()
-
-        this.giveaways = new Collection()
-
-        this.tempbans = new Collection()
-
-        this.temproles = new Collection()
-
-        this.i18n = i18n
-
-        this.utils = Utils
-
-        this.PermissionFlags = PermissionsBitField.Flags
-
-        this.start()
-    }
-
-    get _emojis() {
+    public get staticEmojis() {
         const OK = '<:OK:905724948453134349>'
         const ERROR = '<:ERROR:905724969827315732>'
         const DIAMOND = '<:DIAMOND:905707582042288178>'
@@ -93,19 +55,31 @@ export default class Lacuna extends Client {
         }
     }
 
+    constructor(options?: ClusterShardClientOptions) {
+        super(options)
+
+        this.hostname = os.hostname()
+
+        this.logger = logger
+
+        this.db = db
+
+        this.i18n = i18n
+
+        this.utils = Utils
+
+        this.PermissionFlags = PermissionsBitField.Flags
+
+        this.start()
+    }
+
     async start() {
-        await connect(process.env.DB_URI, { dbName: 'lacuna', useNewUrlParser: true, useUnifiedTopology: true })
-        this.logger.log('[Lacuna] Connected to MongoDB')
-
-        await this.db.qdb.connect()
-        this.logger.log('[Lacuna] QuickMongo initialized')
-
-        this.cluster = new ClusterClient(this)
-        this.machine = new BridgeShard(this.cluster)
+        await this.db.connect()
+        this.logger.log('[Lacuna] Connected to database')
 
         this.rest.on('rateLimited', rateLimitData => this.logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`))
 
-        await this.login(process.env.DISCORD_CLIENT_TOKEN)
+        await this.login(process.env.LCN_DISCORD_CLIENT_TOKEN)
         this.logger.log('[Lacuna] Connected to Discord client')
 
         this.loadEvents(true)

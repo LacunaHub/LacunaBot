@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     ApplicationCommandOptionType,
     BaseGuildTextChannel,
@@ -8,7 +9,6 @@ import {
     PermissionsString,
     Team
 } from 'discord.js'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 
 export default class Command {
@@ -101,16 +101,18 @@ export default class Command {
 
         if (!executable) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.user.username}**` })}`,
+                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
+                    username: `**${interaction.user.username}**`
+                })}`,
                 ephemeral: true
             })
 
             return false
         }
 
-        if (this.premium_only && !server.server.premium.available) {
+        if (this.premium_only && !server.premium.available) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
+                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
                     username: `**${interaction.user.username}**`
                 })}`,
                 ephemeral: true
@@ -123,7 +125,7 @@ export default class Command {
 
         if (throttled.status) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandThrottling', {
+                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandThrottling', {
                     username: `**${interaction.user.username}**`,
                     time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
                 })}`,
@@ -172,16 +174,18 @@ export default class Command {
 
         if (!executable) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.user.tag}**` })}`,
+                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.user.tag}**` })}`,
                 ephemeral: true
             })
 
             return false
         }
 
-        if (this.premium_only && !server.server.premium.available) {
+        if (this.premium_only && !server.premium.available) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', { username: `**${interaction.user.tag}**` })}`,
+                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
+                    username: `**${interaction.user.tag}**`
+                })}`,
                 ephemeral: true
             })
 
@@ -192,7 +196,7 @@ export default class Command {
 
         if (throttled.status) {
             await interaction.reply({
-                content: `${this.self._emojis.ERROR} | ${t('Commands.CommandThrottling', {
+                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandThrottling', {
                     username: `**${interaction.user.username}**`,
                     time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
                 })}`,

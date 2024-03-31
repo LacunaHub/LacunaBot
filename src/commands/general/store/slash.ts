@@ -1,5 +1,5 @@
+import { ServerDocument, ServerModulesEconomyStoreItem } from '@lacunahub/lacuna-database-driver'
 import { ActionRowBuilder, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message, StringSelectMenuBuilder } from 'discord.js'
-import { EconomyStoreItem, ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'
 import { purchaseItem } from '../../../modules/Economy'
@@ -10,7 +10,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -21,7 +21,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!server.modules.economy.store.items.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.Texts.NoItemsForPurchaseInStore', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.StoreCommand.Texts.NoItemsForPurchaseInStore', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -34,7 +34,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!sku) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.SubCommands.BuyCommand.Texts.InvalidSKU', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.StoreCommand.SubCommands.BuyCommand.Texts.InvalidSKU', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -43,11 +43,11 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
         return false
     }
 
-    const item = server.modules.economy.store.items.slice(0, server.server.premium.available ? 200 : 50).find(i => i.id == sku)
+    const item = server.modules.economy.store.items.slice(0, server.premium.available ? 200 : 50).find(i => i.id == sku)
 
     if (!item) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.SubCommands.BuyCommand.Texts.ItemNotFound', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.StoreCommand.SubCommands.BuyCommand.Texts.ItemNotFound', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -61,7 +61,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (result == 'INSUFFICIENT_FUNDS') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.Texts.InsufficientFundsToPurchaseItem', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.StoreCommand.Texts.InsufficientFundsToPurchaseItem', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -69,7 +69,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
 
     if (result == 'PURCHASED') {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.Texts.ItemPreviouslyPurchased', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.StoreCommand.Texts.ItemPreviouslyPurchased', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -78,13 +78,13 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
     if (result == 'SUCCESS') {
         if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
             try {
-                const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: interaction.member }),
+                const replacer = new Replacer(server.premium.available, { guild: interaction.guild, member: interaction.member }),
                     messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
                 await interaction.editReply(messagePayload)
             } catch (err) {
                 await interaction.editReply({
-                    content: `${self._emojis.OK} | ${t('Commands.StoreCommand.Texts.UserHasPurchasedItem', {
+                    content: `${self.staticEmojis.OK} | ${t('Commands.StoreCommand.Texts.UserHasPurchasedItem', {
                         username: `**${interaction.member.displayName}**`,
                         item: `**${item.name}**`
                     })}`
@@ -92,7 +92,7 @@ export async function buySlash(self: Lacuna, server: ServerDocument, interaction
             }
         } else {
             await interaction.editReply({
-                content: `${self._emojis.OK} | ${t('Commands.StoreCommand.Texts.UserHasPurchasedItem', {
+                content: `${self.staticEmojis.OK} | ${t('Commands.StoreCommand.Texts.UserHasPurchasedItem', {
                     username: `**${interaction.member.displayName}**`,
                     item: `**${item.name}**`
                 })}`
@@ -108,7 +108,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -119,7 +119,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
     if (!server.modules.economy.store.items.length) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.StoreCommand.Texts.NoItemsForPurchaseInStore', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.StoreCommand.Texts.NoItemsForPurchaseInStore', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -131,9 +131,9 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
     await interaction.deferReply({ ephemeral: true })
 
     let page: number = interaction.options?.getInteger('page') ? interaction.options.getInteger('page') - 1 : 0
-    const chunks: Array<EconomyStoreItem[]> = chunkArray(
+    const chunks: Array<ServerModulesEconomyStoreItem[]> = chunkArray(
         server.modules.economy.store.items
-            .slice(0, server.server.premium.available ? 200 : 50)
+            .slice(0, server.premium.available ? 200 : 50)
             .filter(i => !i.options.includes('LIMITED_QUANTITY') || i.quantity > 0),
         8
     )
@@ -237,12 +237,12 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
         } else {
             await i.deferUpdate()
 
-            const item = server.modules.economy.store.items.slice(0, server.server.premium.available ? 200 : 50).find(i => i.id == value)
+            const item = server.modules.economy.store.items.slice(0, server.premium.available ? 200 : 50).find(i => i.id == value)
             const result = await purchaseItem(item, self, interaction.guild, interaction.member)
 
             if (result == 'INSUFFICIENT_FUNDS') {
                 await i.followUp({
-                    content: `${self._emojis.ERROR} | ${t('Command.StoreCommand.Texts.InsufficientFundsToPurchaseItem', {
+                    content: `${self.staticEmojis.ERROR} | ${t('Command.StoreCommand.Texts.InsufficientFundsToPurchaseItem', {
                         username: `**${interaction.member.displayName}**`
                     })}`,
                     ephemeral: true
@@ -251,7 +251,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'PURCHASED') {
                 await i.followUp({
-                    content: `${self._emojis.ERROR} | ${t('Command.StoreCommand.Texts.ItemPreviouslyPurchased', {
+                    content: `${self.staticEmojis.ERROR} | ${t('Command.StoreCommand.Texts.ItemPreviouslyPurchased', {
                         username: `**${interaction.member.displayName}**`
                     })}`,
                     ephemeral: true
@@ -260,14 +260,14 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'SUCCESS') {
                 if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-                    const replacer = new Replacer(server.server.premium.available, { guild: interaction.guild, member: interaction.member }),
+                    const replacer = new Replacer(server.premium.available, { guild: interaction.guild, member: interaction.member }),
                         messagePayload = await replacer.replaceTemplateMessage(item.custom_purchase_reply)
 
                     try {
                         await i.followUp({ ...messagePayload, ephemeral: true })
                     } catch (err) {
                         await i.followUp({
-                            content: `${self._emojis.OK} | ${t('Command.StoreCommand.Texts.UserHasPurchasedItem', {
+                            content: `${self.staticEmojis.OK} | ${t('Command.StoreCommand.Texts.UserHasPurchasedItem', {
                                 username: `**${interaction.member.displayName}**`,
                                 item: `**${item.name}**`
                             })}`,
@@ -276,7 +276,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
                     }
                 } else {
                     await i.followUp({
-                        content: `${self._emojis.OK} | ${t('Command.StoreCommand.Texts.UserHasPurchasedItem', {
+                        content: `${self.staticEmojis.OK} | ${t('Command.StoreCommand.Texts.UserHasPurchasedItem', {
                             username: `**${interaction.member.displayName}**`,
                             item: `**${item.name}**`
                         })}`,

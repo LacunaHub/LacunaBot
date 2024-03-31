@@ -1,5 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ActionRowBuilder, ButtonInteraction, ChatInputCommandInteraction, Message, StringSelectMenuBuilder } from 'discord.js'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>) => {
@@ -8,7 +8,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -19,7 +19,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (player.voiceChannelId !== interaction.member.voice.channelId) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true

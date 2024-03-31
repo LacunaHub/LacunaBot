@@ -1,5 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 import { commandOptionTypes } from '../../../internals/utility/Constants'
 
@@ -9,7 +9,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const commandName: string = interaction.options?.getString('command')
 
     if (!commandName) {
-        const commands = self.commands.filter(c => !c.private && !(c.premium_only && !server.server.premium.available))
+        const commands = self.commands.filter(c => !c.private && !(c.premium_only && !server.premium.available))
         const customCommand = server.modules.custom_commands.map(i => i.command)
 
         const categories = {
@@ -38,8 +38,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             new ButtonBuilder()
                 .setStyle(ButtonStyle.Link)
                 .setLabel(t('Commands.HelpCommand.Texts.ControlPanel'))
-                .setURL(`${process.env.WEBSITE_URL}/guilds/${interaction.guildId}/settings`),
-            new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('Components.Header.Docs')).setURL(`https://docs.${process.env.WEBSITE_DOMAIN}`)
+                .setURL(`${process.env.LCN_WEBSITE_URL}/guilds/${interaction.guildId}/settings`),
+            new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('Components.Header.Docs')).setURL(`https://docs.${process.env.LCN_ROOT_DOMAIN}`)
         )
 
         if (categories.general.size)
@@ -62,7 +62,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!command && !customCommand) {
             await interaction.reply({
-                content: `${self._emojis.ERROR} | ${t('Commands.HelpCommand.Texts.UnknownCommand', {
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.HelpCommand.Texts.UnknownCommand', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true

@@ -1,5 +1,5 @@
+import { Node } from '@lacunahub/lavaluna.js'
 import { BaseGuildTextChannel, BaseGuildVoiceChannel, Message } from 'discord.js'
-import { Node } from 'lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, node: Node) {

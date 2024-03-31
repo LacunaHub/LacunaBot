@@ -1,6 +1,6 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { GuildMember } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../Lacuna'
 import { generateSimpleId } from '../utility/Utils'
 

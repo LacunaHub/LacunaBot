@@ -1,5 +1,5 @@
+import { Player } from '@lacunahub/lavaluna.js'
 import { EmbedBuilder, Message } from 'discord.js'
-import { Player } from 'lavaluna.js'
 import numbro from 'numbro'
 import Lacuna from '../../internals/Lacuna'
 import { getTrackSourceByUrl } from '../../internals/utility/Utils'
@@ -14,7 +14,7 @@ const handler = async (self: Lacuna, player: Player) => {
 
         embed.data.fields[0].value = track.info.isStream ? '♾️' : `\`[${numbro(track.info.length / 1000).format({ output: 'time' })}]\``
         embed.data.fields[1].value = `⏭️ ${track.info.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.info.length) / 1000)}:R>`}`
-        embed.data.fields[2].value = `[${self._emojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.info.uri})`
+        embed.data.fields[2].value = `[${self.staticEmojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.info.uri})`
 
         if (embed.data.footer?.text) embed.setFooter({ text: embed.data.footer.text.replace(/\s[\w\W]+/i, ` ${track.requester}`) })
 

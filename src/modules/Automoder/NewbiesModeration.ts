@@ -1,7 +1,7 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { GuildMember } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
-import { ServerDocument } from '../../database/schemas/Servers'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
 import { caseLog } from '../Moderation'

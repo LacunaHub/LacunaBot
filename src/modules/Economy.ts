@@ -1,5 +1,5 @@
+import { ServerDocument, ServerModulesEconomyStoreItem } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, BaseGuildVoiceChannel, Collection, Guild, GuildMember, Message, VoiceState } from 'discord.js'
-import { EconomyStoreItem, ServerDocument } from '../database/schemas/Servers'
 import Lacuna from '../internals/Lacuna'
 import TemporaryRole from '../internals/structures/TemporaryRole'
 import { hasRestrictedPermissions } from './Levels'
@@ -75,7 +75,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 
                 return i.options.includes('ECONOMY_TEXT')
             })
-            .slice(0, server.server.premium.available ? 10 : 1)
+            .slice(0, server.premium.available ? 10 : 1)
 
         const multiplier = multipliers.reduce((x, y) => x * (y.economy_text_multiplier / 100), 100) / 100
         let amount: number =
@@ -123,7 +123,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 }
 
 export async function voiceAssign(self: Lacuna, server: ServerDocument, state: VoiceState) {
-    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.server.premium.available) return false
+    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.premium.available) return false
 
     const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
@@ -188,7 +188,7 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
 }
 
 export async function voiceUnassign(self: Lacuna, server: ServerDocument, state: VoiceState, channel: BaseGuildVoiceChannel) {
-    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.server.premium.available) return false
+    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.premium.available) return false
 
     const members = channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
@@ -225,7 +225,7 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
 
                     return i.options.includes('ECONOMY_VOICE')
                 })
-                .slice(0, server.server.premium.available ? 10 : 1)
+                .slice(0, server.premium.available ? 10 : 1)
 
             const multiplier = multipliers.reduce((x, y) => x * (y.economy_voice_multiplier / 100), 100) / 100
             let amount: number =
@@ -272,7 +272,7 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
     }
 }
 
-export async function purchaseItem(item: EconomyStoreItem, self: Lacuna, guild: Guild, member: GuildMember) {
+export async function purchaseItem(item: ServerModulesEconomyStoreItem, self: Lacuna, guild: Guild, member: GuildMember) {
     let user = await self.db.users.findOne({ _id: member.id })
 
     if (!user) {

@@ -1,21 +1,21 @@
+import { LavalunaManager } from '@lacunahub/lavaluna.js'
 import { Events } from 'discord.js'
-import { LavalunaManager } from 'lavaluna.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna) => {
-    const [name, hostname, port, password] = process.env.WINTER_MUSIC_NODE.split(':')
-
     self.lava = new LavalunaManager({
-        nodes: [
-            {
+        nodes: process.env.LCN_LAVALINK_NODES.split(',').map(v => {
+            const [name, hostname, port, password] = v.split(':')
+
+            return {
                 name,
                 hostname,
-                port: Number(port),
+                port: +port,
                 password,
                 reconnectRetryAmount: 100,
                 reconnectRetryDelay: 60000
             }
-        ],
+        }),
         clientId: self.user.id,
         clientName: `${self.user.username}#${self.cluster.id}`,
         send(id, payload) {

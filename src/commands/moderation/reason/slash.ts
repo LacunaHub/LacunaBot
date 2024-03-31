@@ -1,5 +1,5 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
-import { ServerDocument } from '../../../database/schemas/Servers'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
@@ -10,7 +10,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!case_id) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.ReasonCommand.Texts.InvalidCaseId', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReasonCommand.Texts.InvalidCaseId', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -21,7 +21,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!reason) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.ReasonCommand.Texts.InvalidReason', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReasonCommand.Texts.InvalidReason', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -34,7 +34,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!case_log) {
         await interaction.reply({
-            content: `${self._emojis.ERROR} | ${t('Commands.ReasonCommand.Texts.CaseLogIsNotSet', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReasonCommand.Texts.CaseLogIsNotSet', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -49,7 +49,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!case_message) {
         await interaction.editReply({
-            content: `${self._emojis.ERROR} | ${t('Commands.ReasonCommand.Texts.CaseMessageNotFound', {
+            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReasonCommand.Texts.CaseMessageNotFound', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -65,7 +65,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await case_message.edit({ embeds: [embed] })
 
     await interaction.editReply({
-        content: `${self._emojis.OK} | ${t('Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged', {
+        content: `${self.staticEmojis.OK} | ${t('Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged', {
             username: `**${interaction.member.displayName}**`
         })}`
     })
