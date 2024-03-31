@@ -50,7 +50,10 @@ const client = new Lacuna({
         return new Collection()
     },
     rest: {
-        rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5
+        rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5,
+        store: {
+            uri: process.env.LCN_REDIS_URI
+        }
     },
     sweepers: {
         ...Options.DefaultSweeperSettings,

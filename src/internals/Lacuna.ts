@@ -1,7 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { LavalunaManager } from '@lacunahub/lavaluna.js'
-import { ClusterShardClient } from '@lacunahub/letsfrag'
-import { ClientOptions, Collection, LimitedCollection, parseEmoji, PermissionsBitField } from 'discord.js'
+import { ClusterShardClient, ClusterShardClientOptions } from '@lacunahub/letsfrag'
+import { Collection, LimitedCollection, PermissionsBitField, parseEmoji } from 'discord.js'
 import { readdirSync } from 'fs'
 import { os } from 'node-os-utils'
 import db from '../database'
@@ -55,7 +55,7 @@ export default class Lacuna extends ClusterShardClient {
         }
     }
 
-    constructor(options?: ClientOptions) {
+    constructor(options?: ClusterShardClientOptions) {
         super(options)
 
         this.hostname = os.hostname()

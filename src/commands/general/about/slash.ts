@@ -29,7 +29,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         .setFooter({ text: `© ${appTeam.name}`, iconURL: appTeam.iconURL() })
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('Components.Header.State')).setURL(`${process.env.WEBSITE_URL}/state`)
+        new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('Components.Header.State')).setURL(`${process.env.LCN_WEBSITE_URL}/state`)
     )
 
     await interaction.reply({ embeds: [embed], components: [row] })

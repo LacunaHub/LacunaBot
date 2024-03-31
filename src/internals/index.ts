@@ -6,6 +6,7 @@ const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
         host: process.env.LCN_SERVER_HOST,
         port: +process.env.LCN_SERVER_PORT,
         authorization: process.env.LCN_SERVER_AUTHORIZATION,
+        type: 'bot',
         reconnect: true,
         retries: 100
     },

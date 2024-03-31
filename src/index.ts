@@ -1,4 +1,4 @@
-import { Server } from '@lacunahub/letsfrag'
+import { IPCMessageType, Server } from '@lacunahub/letsfrag'
 import logger from './internals/Logger'
 
 const server = new Server({
@@ -9,11 +9,16 @@ const server = new Server({
     botToken: process.env.LCN_DISCORD_CLIENT_TOKEN
 })
 
-server.on('connect', client => logger.info(`[Bridge] Client "${client.id}" connected`))
-server.on('disconnect', client => logger.warn(`[Bridge] Client "${client.id}" disconnected`))
-server.on('ready', url => logger.info(`[Bridge] Bridge is ready on url ${url}`))
-
-server.initialize()
+server.on('connect', client => logger.info(`[Server] Client "${client.id}" connected`))
+server.on('disconnect', client => logger.warn(`[Server] Client "${client.id}" disconnected`))
+server.on('error', err => logger.error(`[Server]`, err))
+server.on('message', (message, client) => logger.log(`[Server] Client "${client.id}" sent a message with type "${IPCMessageType[message.type]}"`))
+server.on('ready', url => logger.info(`[Server] Server is ready on url ${url}`))
+server.on('request', (message, _, client) =>
+    logger.log(`[Server] Client "${client.id}" initiated a request with type "${IPCMessageType[message.type]}"`)
+)
 
 process.on('uncaughtException', logger.error)
 process.on('unhandledRejection', logger.error)
+
+server.initialize()

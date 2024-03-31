@@ -41,12 +41,7 @@ export default {
     async handleError(data: { module: string; action?: string; error: any; guild_id?: string }) {
         const err = data.error.toString()
 
-        console.error(
-            `[ERROR: ${new Date().toISOString()}] -`,
-            `[${data.module}${data.action ?? ''}]`,
-            err,
-            data.guild_id ? `(occurred on ${data.guild_id})` : ''
-        )
+        logger.error(`[${data.module}${data.action ?? ''}]`, err, data.guild_id ? `(occurred on ${data.guild_id})` : '')
 
         if (typeof data.guild_id === 'string') {
             await this.appendServerLog(data.guild_id, {

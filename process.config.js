@@ -7,21 +7,25 @@ if (isMaster) {
     apps.push(
         {
             name: 'server',
-            script: 'npm run start'
+            script: './process.npm.js',
+            args: 'run start'
         },
         {
             name: 'api',
-            script: 'npm run start:api'
+            script: './process.npm.js',
+            args: 'run start:api'
         },
         {
             name: 'bot',
-            script: 'npm run start:bot'
+            script: './process.npm.js',
+            args: 'run start:bot'
         }
     )
 } else {
     apps.push({
         name: 'bot',
-        script: 'npm run start:bot'
+        script: './process.npm.js',
+        args: 'run start:bot'
     })
 }
 
