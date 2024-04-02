@@ -1,6 +1,8 @@
 import { ClusterManager } from '@lacunahub/letsfrag'
 import logger from './Logger'
 
+const clusterCount = Math.round(require('node-os-utils').mem.totalMem() / (1024 * 1024 * 1024))
+
 const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
     server: {
         host: process.env.LCN_SERVER_HOST,
@@ -11,11 +13,12 @@ const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
         retries: 100
     },
     mode: 'fork',
+    clusterCount: clusterCount,
     autoRespawn: true,
     spawnDelay: 10_000
 })
 
-clusterManager.on('clusterCreate', cluster => logger.info(`[ClusterManager] Cluster #${cluster.id} has been created`))
+clusterManager.on('clusterCreate', cluster => logger.info(`[ClusterManager] Cluster #${cluster.id} with shards (${cluster.shards}) has been created`))
 clusterManager.on('ready', manager => logger.info(`[ClusterManager] Manager with clusters (${manager.clusters}) is ready`))
 
 clusterManager.spawn()
