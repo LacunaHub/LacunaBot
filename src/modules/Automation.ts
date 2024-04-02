@@ -26,7 +26,7 @@ import {
     VoiceState,
     resolveColor
 } from 'discord.js'
-import IVM, { Context } from 'isolated-vm'
+import { Context, Isolate } from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'
 import safeRegex from 'safe-regex'
 import Lacuna from '../internals/Lacuna'
@@ -46,7 +46,7 @@ export default class Automation {
     public automation: ServerModulesAutomation
     public signal: AutomationSignal
     private storage: QDatabase
-    private isolate: IVM.Isolate
+    private isolate: Isolate
     private usedPatterns: string[]
     private usedFunctions: string[]
 
@@ -61,13 +61,23 @@ export default class Automation {
 
         this.storage = new this.self.db.qdb.table('public-storage')
 
-        this.isolate = new IVM.Isolate({
-            memoryLimit: 16,
-            onCatastrophicError(message) {
-                Logger.error('(Catastrophic Error):', message)
-                Logger.telegram.error('Catastrophic Error:', message)
-            }
-        })
+        const isolateState =
+            this.self.isolates.get(signal.guild.id) ??
+            this.self.isolates
+                .set(signal.guild.id, {
+                    value: new Isolate({
+                        memoryLimit: 8,
+                        onCatastrophicError(message) {
+                            Logger.error('(Catastrophic Error):', message)
+                            Logger.telegram.error('Catastrophic Error:', message)
+                        }
+                    }),
+                    lastUsed: Date.now()
+                })
+                .get(signal.guild.id)
+
+        isolateState.lastUsed = Date.now()
+        this.isolate = isolateState.value
 
         this.usedPatterns = []
 
@@ -1192,7 +1202,7 @@ export default class Automation {
             target: { id: globalValues.member.user.id, name: globalValues.member.user.username }
         })
 
-        if (!this.isolate.isDisposed) this.isolate.dispose()
+        ctx.release()
 
         return true
     }
