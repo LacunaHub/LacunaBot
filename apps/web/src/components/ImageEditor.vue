@@ -188,6 +188,15 @@
                   format-model="rgba"
                 ></q-color>
               </q-popup-proxy>
+
+              <template v-slot:append>
+                <q-icon
+                  v-if="image.background.color"
+                  name="cancel"
+                  @click.stop="image.background.color = null"
+                  class="cursor-pointer q-field__focusable-action"
+                />
+              </template>
             </q-input>
           </div>
 
