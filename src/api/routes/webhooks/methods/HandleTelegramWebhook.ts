@@ -1,9 +1,9 @@
 import { createHmac } from 'crypto'
 import { Context } from 'koa'
-import { handleTelegramWebhook } from '../../../modules/social-alerts/TelegramAlerts'
+import { handleTelegramWebhook as handleWebhook } from '../../../modules/social-alerts/TelegramAlerts'
 import APIError from '../../../utility/APIError'
 
-export default async function telegramWebhook(ctx: Context) {
+export default async function handleTelegramWebhook(ctx: Context) {
     const tbSignature = ctx.request.headers['x-tb-signature'] as string,
         data = ctx.request.body
 
@@ -16,7 +16,7 @@ export default async function telegramWebhook(ctx: Context) {
 
     if (sigHmac !== signature) ctx.throw(403, new APIError())
 
-    handleTelegramWebhook(data)
+    handleWebhook(data)
 
     ctx.status = 204
 }
