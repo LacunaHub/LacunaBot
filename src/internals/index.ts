@@ -13,7 +13,7 @@ const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
         retries: 100
     },
     mode: 'fork',
-    clusterCount: clusterCount,
+    clusterCount: process.env.NODE_ENV === 'development' ? -1 : clusterCount,
     autoRespawn: true,
     spawnDelay: 10_000
 })
