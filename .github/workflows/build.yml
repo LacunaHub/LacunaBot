@@ -5,6 +5,13 @@ on:
         branches: [master]
     workflow_dispatch:
 
+permissions:
+    packages: read
+    contents: read
+
+env:
+    GITHUB_PKG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
     build:
         runs-on: self-hosted

@@ -1,6 +1,6 @@
 {
   "name": "lacuna-bot",
-  "version": "4.11.1",
+  "version": "4.11.2",
   "description": "Feature-rich Discord bot",
   "main": "dist/index.js",
   "scripts": {
@@ -30,8 +30,6 @@
     "@lacunahub/logger": "1.0.x",
     "bufferutil": "4.0.x",
     "canvas": "2.11.x",
-    "discord-cross-hosting": "2.3.x",
-    "discord-hybrid-sharding": "2.1.x",
     "discord.js": "14.13.x",
     "dotenv": "8.2.x",
     "isolated-vm": "4.6.x",

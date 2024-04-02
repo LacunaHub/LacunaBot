@@ -3,6 +3,7 @@ import { LavalunaManager } from '@lacunahub/lavaluna.js'
 import { ClusterShardClient, ClusterShardClientOptions } from '@lacunahub/letsfrag'
 import { Collection, LimitedCollection, PermissionsBitField, parseEmoji } from 'discord.js'
 import { readdirSync } from 'fs'
+import { Isolate } from 'isolated-vm'
 import { os } from 'node-os-utils'
 import db from '../database'
 import i18n from '../i18n'
@@ -22,6 +23,7 @@ export default class Lacuna extends ClusterShardClient {
     public commands = new Collection<string, Command>()
     public events = new Collection<string, Event>()
     public lava: LavalunaManager | null = null
+    public isolates = new Collection<string, IsolateState>()
     public giveaways = new Collection<string, Giveaway>()
     public tempbans = new Collection<string, TemporaryBan>()
     public temproles = new Collection<string, TemporaryRole>()
@@ -71,6 +73,22 @@ export default class Lacuna extends ClusterShardClient {
         this.PermissionFlags = PermissionsBitField.Flags
 
         this.start()
+
+        // Sweep unused isolates
+        setInterval(() => {
+            const currentDate = Date.now()
+
+            this.isolates.sweep(v => {
+                const { lastUsed, value } = v
+                const shouldSweep = Math.floor(currentDate - lastUsed) > 1000 * 60 * 60
+
+                if (shouldSweep) {
+                    if (!value.isDisposed) value.dispose()
+                }
+
+                return shouldSweep
+            })
+        }, 1000 * 60 * 30)
     }
 
     async start() {
@@ -132,26 +150,6 @@ export default class Lacuna extends ClusterShardClient {
         return commands
     }
 
-    getMusicNodes() {
-        const nodes = [...this.lava?.nodes.cache.values()]
-
-        return (
-            nodes?.map(node => {
-                return {
-                    id: node.options.name,
-                    connected: node.connected,
-                    cpu_load: Number(node.stats.cpu.lavalinkLoad.toFixed(2)),
-                    memory_usage: Math.round((node.stats.memory.used * 100) / node.stats.memory.reservable),
-                    uptime: node.stats.uptime,
-                    players: {
-                        playing: node.stats.playingPlayers,
-                        total: node.stats.players
-                    }
-                }
-            }) ?? []
-        )
-    }
-
     loadCommands() {
         this.logger.log('[Lacuna] Loading commands...')
 
@@ -208,4 +206,9 @@ export default class Lacuna extends ClusterShardClient {
 
         this.logger.log(`[Lacuna] Loaded ${amount} events of ${total}`)
     }
+}
+
+export interface IsolateState {
+    value: Isolate
+    lastUsed: number
 }

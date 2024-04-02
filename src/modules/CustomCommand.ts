@@ -18,7 +18,7 @@ import {
     User,
     resolveColor
 } from 'discord.js'
-import IVM, { Context } from 'isolated-vm'
+import { Context, Isolate } from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'
 import safeRegex from 'safe-regex'
 import Lacuna from '../internals/Lacuna'
@@ -33,7 +33,7 @@ export default class CustomCommand {
     public storage: QDatabase
     private usedPatterns: string[]
     private usedFunctions: string[]
-    private isolate: IVM.Isolate
+    private isolate: Isolate
 
     constructor(command: ServerModulesCustomCommand, self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
         this.command = command
@@ -46,17 +46,27 @@ export default class CustomCommand {
 
         this.storage = new this.self.db.qdb.table('public-storage')
 
+        const isolateState =
+            this.self.isolates.get(interaction.guildId) ??
+            this.self.isolates
+                .set(interaction.guildId, {
+                    value: new Isolate({
+                        memoryLimit: 8,
+                        onCatastrophicError(message) {
+                            logger.error('(Catastrophic Error):', message)
+                            logger.telegram.error('Catastrophic Error:', message)
+                        }
+                    }),
+                    lastUsed: Date.now()
+                })
+                .get(interaction.guildId)
+
+        isolateState.lastUsed = Date.now()
+        this.isolate = isolateState.value
+
         this.usedPatterns = []
 
         this.usedFunctions = []
-
-        this.isolate = new IVM.Isolate({
-            memoryLimit: 16,
-            onCatastrophicError(message) {
-                logger.error('(Catastrophic Error):', message)
-                logger.telegram.error('Catastrophic Error:', message)
-            }
-        })
     }
 
     async getGlobalValues() {
@@ -1223,7 +1233,7 @@ export default class CustomCommand {
             user: { name: this.interaction.user.username, id: this.interaction.user.id }
         })
 
-        if (!this.isolate.isDisposed) this.isolate.dispose()
+        ctx.release()
 
         return true
     }

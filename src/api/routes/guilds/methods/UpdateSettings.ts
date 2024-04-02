@@ -980,8 +980,8 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
                             height: typeof height === 'number' && height <= 1920 && height >= 256 ? height : 256,
                             width: typeof width === 'number' && width <= 1920 && width >= 256 ? width : 256,
                             background: {
-                                color: newImage.background?.color ?? oldImage.background?.color,
-                                url: newImage.background?.url ?? oldImage.background?.url
+                                color: typeof newImage.background?.color === 'undefined' ? oldImage.background?.color : newImage.background?.color,
+                                url: typeof newImage.background?.url === 'undefined' ? oldImage.background?.url : newImage.background?.url
                             },
                             elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
                                 const element = {
@@ -1100,8 +1100,8 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
                             height: typeof height === 'number' && height <= 1920 && height >= 256 ? height : 256,
                             width: typeof width === 'number' && width <= 1920 && width >= 256 ? width : 256,
                             background: {
-                                color: newImage.background?.color ?? oldImage.background?.color,
-                                url: newImage.background?.url ?? oldImage.background?.url
+                                color: typeof newImage.background?.color === 'undefined' ? oldImage.background?.color : newImage.background?.color,
+                                url: typeof newImage.background?.url === 'undefined' ? oldImage.background?.url : newImage.background?.url
                             },
                             elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
                                 const element = {
@@ -1257,8 +1257,9 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
                                 height: typeof height === 'number' && height <= 1920 && height >= 256 ? height : 256,
                                 width: typeof width === 'number' && width <= 1920 && width >= 256 ? width : 256,
                                 background: {
-                                    color: newImage.background?.color ?? oldImage.background?.color,
-                                    url: newImage.background?.url ?? oldImage.background?.url
+                                    color:
+                                        typeof newImage.background?.color === 'undefined' ? oldImage.background?.color : newImage.background?.color,
+                                    url: typeof newImage.background?.url === 'undefined' ? oldImage.background?.url : newImage.background?.url
                                 },
                                 elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
                                     const element = {
@@ -1494,8 +1495,8 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
                             height: 540,
                             width: 960,
                             background: {
-                                color: newImage.background?.color ?? oldImage.background?.color,
-                                url: newImage.background?.url ?? oldImage.background?.url
+                                color: typeof newImage.background?.color === 'undefined' ? oldImage.background?.color : newImage.background?.color,
+                                url: typeof newImage.background?.url === 'undefined' ? oldImage.background?.url : newImage.background?.url
                             },
                             elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
                                 const element = {
