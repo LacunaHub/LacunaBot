@@ -26,7 +26,7 @@
     "@lacunahub/lacuna-database-driver": "^1.0.4",
     "@lacunahub/lacuna-locale": "1.0.0",
     "@lacunahub/lavaluna.js": "1.0.x",
-    "@lacunahub/letsfrag": "^0.1.0",
+    "@lacunahub/letsfrag": "^0.1.1",
     "@lacunahub/logger": "1.0.x",
     "bufferutil": "4.0.x",
     "canvas": "2.11.x",
