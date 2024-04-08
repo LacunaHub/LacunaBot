@@ -107,6 +107,7 @@ export interface StatsMetricsData {
 }
 
 export interface BotStats {
+    host: string
     clusterId: number
     guilds: number
     users: number
