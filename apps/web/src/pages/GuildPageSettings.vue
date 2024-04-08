@@ -240,7 +240,7 @@ import { interfaces } from 'src/boot/axios'
 import ChangeLog from 'src/components/dialogs/ChangeLog.vue'
 import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import UserSurvey from 'src/components/dialogs/UserSurvey.vue'
-import { useChangeLogStore } from 'src/stores/change-log'
+import { useReleaseNotesCache } from 'src/stores/ReleaseNotesCache'
 import { useGuildStore } from 'src/stores/guild'
 import { decimalToHex, handleAxiosError, objectDifferences } from 'src/utils/Utils'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -255,7 +255,7 @@ const $q = useQuasar(),
 
 const pageLoading = ref(true)
 const guild = useGuildStore(),
-  changeLog = useChangeLogStore()
+  releaseNoteCache = useReleaseNotesCache()
 const guildId = route.params.guild_id,
   documentTitle = ref(null)
 const freezedGuild = ref({}),
@@ -469,7 +469,7 @@ onMounted(async () => {
 
   const changeLogViewedVersion = $q.localStorage.getItem('change-log-viewed-version')
 
-  if (changeLogViewedVersion !== changeLog.current.version) {
+  if (changeLogViewedVersion !== releaseNoteCache.current.version) {
     $q.dialog({
       component: ChangeLog
     })

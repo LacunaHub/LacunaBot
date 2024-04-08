@@ -1,9 +1,15 @@
 <template>
   <q-header class="bg-dark-1 fixed fixed-top">
     <q-toolbar class="q-py-xs q-px-md">
-      <q-btn v-if="$q.screen.lt.md" dense flat @click="toggleMobileNav">
-        <q-icon name="menu" size="28px"></q-icon>
-      </q-btn>
+      <q-btn
+        v-if="$q.screen.lt.md"
+        icon="r_menu"
+        size="small"
+        round
+        unelevated
+        no-caps
+        @click="toggleLeftDrawer"
+      ></q-btn>
 
       <q-toolbar-title>
         <router-link to="/@me/guilds" class="toolbar-title-logo">
@@ -42,7 +48,7 @@
       <div class="gt-sm">
         <q-btn
           class="header-link"
-          icon="menu_book"
+          icon="r_menu_book"
           size="small"
           round
           unelevated
@@ -75,7 +81,7 @@
 
         <q-btn
           class="header-link"
-          icon="forum"
+          icon="r_forum"
           size="small"
           round
           unelevated
@@ -86,7 +92,7 @@
 
         <q-btn
           class="header-link"
-          icon="translate"
+          icon="r_translate"
           size="small"
           round
           unelevated
@@ -100,86 +106,126 @@
 
       <q-btn v-if="!user.access_token" class="q-px-sm" flat to="/authorize">
         {{ $t('Components.Header.Login') }}
-        <q-icon class="q-ml-sm" name="login" size="24px"></q-icon>
+        <q-icon class="q-ml-sm" name="r_login"></q-icon>
       </q-btn>
 
-      <q-btn v-else dense flat>
-        <q-avatar size="32px">
-          <img :src="user.avatarURL" />
+      <q-btn v-else dense round flat @click="toggleRightDrawer">
+        <q-avatar size="lg">
+          <img class="bordered-avatar" :src="user.avatarURL" />
         </q-avatar>
-        <q-icon name="arrow_drop_down" size="16px"></q-icon>
+      </q-btn>
+    </q-toolbar>
+  </q-header>
 
-        <q-menu class="bg-dark-2" style="min-width: max-content">
-          <q-list>
-            <q-item clickable active-class="" to="/@me">
+  <q-drawer v-model="displayRightDrawer" class="bg-dark-1" side="right" behavior="mobile">
+    <q-scroll-area class="fit">
+      <q-toolbar class="q-pa-md">
+        <q-item-section avatar>
+          <q-avatar size="xl">
+            <img class="bordered-avatar" :src="user.avatarURL" alt="User Avatar" />
+          </q-avatar>
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>{{ user.name }}</q-item-label>
+        </q-item-section>
+
+        <q-item-section side>
+          <q-btn icon="close" size="x-small" round unelevated no-caps @click="toggleRightDrawer" />
+        </q-item-section>
+      </q-toolbar>
+
+      <q-separator inset></q-separator>
+
+      <q-list padding>
+        <q-item clickable active-class="nav-item--active" exact to="/@me">
+          <q-item-section>
+            {{ $t('Pages.DashboardPage.Profile') }}
+          </q-item-section>
+        </q-item>
+        <q-item clickable active-class="nav-item--active" exact to="/@me/guilds">
+          <q-item-section>
+            {{ $t('Pages.DashboardPage.MyGuilds') }}
+          </q-item-section>
+        </q-item>
+        <q-item clickable active-class="nav-item--active" exact to="/@me/bills">
+          <q-item-section>
+            {{ $t('Pages.DashboardPage.Bills') }}
+          </q-item-section>
+        </q-item>
+
+        <q-separator class="q-my-sm" inset></q-separator>
+
+        <q-expansion-item :label="$t('Pages.GuildPage.GeneralSettings.Locale')">
+          <q-list class="q-ml-md border-left">
+            <q-item
+              v-for="locale in languages"
+              :key="locale.code"
+              clickable
+              @click="setLocale(locale.code)"
+              :active="currentLocale === locale.code"
+              active-class="menu-item--active"
+            >
               <q-item-section>
-                {{ $t('Pages.DashboardPage.Profile') }}
+                <q-item-label>
+                  {{ locale.name }}
+                </q-item-label>
               </q-item-section>
             </q-item>
-            <q-item clickable active-class="" to="/@me/guilds">
-              <q-item-section>
-                {{ $t('Pages.DashboardPage.MyGuilds') }}
-              </q-item-section>
-            </q-item>
 
-            <q-separator></q-separator>
-
-            <q-item clickable>
+            <q-item clickable href="https://crowdin.com/project/lacuna" target="_blank">
               <q-item-section>
-                {{ $t('Pages.GuildPage.GeneralSettings.Locale') }}
+                <q-item-label>
+                  {{ $t('Pages.GuildPage.GeneralSettings.Translate') }}
+                </q-item-label>
               </q-item-section>
 
-              <q-menu class="bg-dark-2" anchor="top left" self="top right">
-                <q-list>
-                  <q-item
-                    v-for="locale in languages"
-                    :key="locale.code"
-                    clickable
-                    @click="setLocale(locale.code)"
-                    :active="currentLocale === locale.code"
-                    active-class="menu-item--active"
-                  >
-                    <q-item-section>
-                      <q-item-label>
-                        {{ locale.name }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item clickable href="https://crowdin.com/project/lacuna" target="_blank">
-                    <q-item-section>
-                      <q-item-label>
-                        {{ $t('Pages.GuildPage.GeneralSettings.Translate') }}
-                      </q-item-label>
-                    </q-item-section>
-
-                    <q-item-section side>
-                      <q-icon name="open_in_new" size="16px"></q-icon>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-item>
-            <q-item clickable @click="changeLogDialog">
-              <q-item-section>
-                {{ $t('Components.Header.ReleaseNotes') }}
-              </q-item-section>
-            </q-item>
-            <q-item clickable @click="user.logout">
-              <q-item-section class="text-red">
-                {{ $t('Components.Header.Logout') }}
+              <q-item-section side>
+                <q-icon name="open_in_new" size="16px"></q-icon>
               </q-item-section>
             </q-item>
           </q-list>
-        </q-menu>
-      </q-btn>
-    </q-toolbar>
+        </q-expansion-item>
 
-    <q-separator v-if="displayMobileNav"></q-separator>
+        <q-item clickable @click="changeLogDialog">
+          <q-item-section>
+            {{ $t('Components.Header.ReleaseNotes') }}
+          </q-item-section>
+        </q-item>
 
-    <transition enter-active-class="animated fadeInDown">
-      <q-list v-if="displayMobileNav" class="text-uppercase">
-        <q-item clickable to="/guilds" active-class="nav-item--active" @click="toggleMobileNav" style="display: none">
+        <q-separator class="q-my-sm" inset></q-separator>
+
+        <q-item clickable @click="user.logout">
+          <q-item-section class="text-red">
+            {{ $t('Components.Header.Logout') }}
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-scroll-area>
+  </q-drawer>
+
+  <q-drawer v-model="displayLeftDrawer" class="bg-dark-1" behavior="mobile">
+    <q-scroll-area class="fit">
+      <q-toolbar class="q-pa-md">
+        <q-item-section avatar>
+          <q-avatar size="xl">
+            <img src="~/assets/lacuna-logo.svg" />
+          </q-avatar>
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label class="text-uppercase text-weight-bold">Lacuna</q-item-label>
+        </q-item-section>
+
+        <q-item-section side>
+          <q-btn icon="close" size="x-small" round unelevated no-caps @click="toggleLeftDrawer" />
+        </q-item-section>
+      </q-toolbar>
+
+      <q-separator class="q-my-sm" inset></q-separator>
+
+      <q-list>
+        <q-item clickable to="/guilds" active-class="nav-item--active" style="display: none">
           <q-item-section>
             <q-item-label>
               {{ $t('Components.Header.Guilds') }}
@@ -187,29 +233,29 @@
           </q-item-section>
         </q-item>
 
-        <q-item clickable to="/state" active-class="nav-item--active" @click="toggleMobileNav">
-          <q-item-section class="q-pl-sm">
+        <q-item clickable to="/state" active-class="nav-item--active">
+          <q-item-section>
             <q-item-label>
               {{ $t('Components.Header.State') }}
             </q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable to="/patrons" active-class="nav-item--active" @click="toggleMobileNav">
-          <q-item-section class="q-pl-sm">
+        <q-item clickable to="/patrons" active-class="nav-item--active">
+          <q-item-section>
             <q-item-label>
               {{ $t('Components.Header.Patrons') }}
             </q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-separator></q-separator>
+        <q-separator class="q-my-sm" inset></q-separator>
 
-        <q-item @click="toggleMobileNav">
+        <q-item>
           <q-item-section>
             <q-item-label>
               <q-btn
-                icon="menu_book"
+                icon="r_menu_book"
                 size="small"
                 round
                 unelevated
@@ -218,12 +264,13 @@
                 target="_blank"
               >
               </q-btn>
+
               <q-btn size="small" round unelevated no-caps href="https://discord.gg/9NeMc3J" target="_blank">
                 <q-icon name="fab fa-discord" size="xs"></q-icon>
               </q-btn>
 
               <q-btn
-                icon="forum"
+                icon="r_forum"
                 size="small"
                 round
                 unelevated
@@ -233,7 +280,7 @@
               />
 
               <q-btn
-                icon="translate"
+                icon="r_translate"
                 size="small"
                 round
                 unelevated
@@ -245,8 +292,8 @@
           </q-item-section>
         </q-item>
       </q-list>
-    </transition>
-  </q-header>
+    </q-scroll-area>
+  </q-drawer>
 </template>
 
 <script>
@@ -271,13 +318,17 @@ export default defineComponent({
 
   data() {
     return {
-      displayMobileNav: false
+      displayLeftDrawer: false,
+      displayRightDrawer: false
     }
   },
 
   methods: {
-    toggleMobileNav() {
-      this.displayMobileNav = !this.displayMobileNav
+    toggleLeftDrawer() {
+      this.displayLeftDrawer = !this.displayLeftDrawer
+    },
+    toggleRightDrawer() {
+      this.displayRightDrawer = !this.displayRightDrawer
     },
     setLocale(locale) {
       this.$i18n.locale = locale
@@ -317,6 +368,7 @@ export default defineComponent({
 }
 
 .nav-item--active {
-  color: $almost-white-1;
+  color: white;
+  background: $secondary;
 }
 </style>

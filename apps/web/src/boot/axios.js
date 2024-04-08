@@ -25,6 +25,12 @@ const interfaces = {
                     Authorization: Cookies.get('access_token')
                 }
             })
+        },
+        getReleaseNotes() {
+            return api.get('/common/release-notes')
+        },
+        getVersion() {
+            return api.get('/common/version')
         }
     },
     guilds: {

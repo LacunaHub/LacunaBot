@@ -14,7 +14,7 @@
       </q-card-section>
 
       <q-card-section
-        v-html="changeLogStore.parseContent(versionChanges.content)"
+        v-html="releaseNotesCache.parseContent(versionChanges.content)"
         class="q-dialog-card-body"
       ></q-card-section>
 
@@ -31,7 +31,7 @@
 
 <script setup>
 import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { useChangeLogStore } from 'src/stores/change-log'
+import { useReleaseNotesCache } from 'src/stores/ReleaseNotesCache'
 import { computed, onMounted, ref } from 'vue'
 import { event } from 'vue-gtag'
 
@@ -40,12 +40,12 @@ defineEmits(useDialogPluginComponent.emits)
 const $q = useQuasar(),
   { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent()
 
-const changeLogStore = useChangeLogStore()
+const releaseNotesCache = useReleaseNotesCache()
 
-const versionList = changeLogStore.list.map(v => v.version),
+const versionList = releaseNotesCache.releases.map(v => v.version),
   selectedVersion = ref(versionList.at(0)),
   versionChanges = computed(() => {
-    return changeLogStore.list.find(v => v.version === selectedVersion.value)
+    return releaseNotesCache.releases.find(v => v.version === selectedVersion.value)
   })
 
 const onCancel = () => {
@@ -57,6 +57,6 @@ const onCancel = () => {
 
 onMounted(() => {
   event('view_change_log', { event_category: 'utility' })
-  $q.localStorage.set('change-log-viewed-version', changeLogStore.current.version)
+  $q.localStorage.set('change-log-viewed-version', releaseNotesCache.current.version)
 })
 </script>

@@ -82,6 +82,10 @@
   border-bottom-width: 0 !important;
 }
 
+.border-left {
+  border-left: 1px solid $dark-3;
+}
+
 /* OTHER HELPERS */
 
 .partial-full-width {
@@ -109,6 +113,10 @@
 
 .break-word {
   word-break: break-word;
+}
+
+.bordered-avatar {
+  border: 2px solid $dark-2;
 }
 
 .patron-avatar {
