@@ -17,6 +17,7 @@ const handler = async (self: Lacuna, player: Player) => {
         embed.data.fields[2].value = `[${self.staticEmojis[trackSource.toUpperCase()] ?? ''} ${trackSource}](${track.info.uri})`
 
         if (embed.data.footer?.text) embed.setFooter({ text: embed.data.footer.text.replace(/\s[\w\W]+/i, ` ${track.requester}`) })
+        if (track.info.artworkUrl) embed.setThumbnail(track.info.artworkUrl)
 
         try {
             if (player.state === 'CONNECTED') {
