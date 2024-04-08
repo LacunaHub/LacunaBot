@@ -1,13 +1,14 @@
-import { ClusterShardClient } from '@lacunahub/letsfrag'
 import { Context } from 'koa'
 import { lava, serverClient } from '../../..'
 import database from '../../../../database'
+import Lacuna from '../../../../internals/Lacuna'
 import { BotStats, StatsMetrics } from '../../../modules/Statistics'
 
 export default async function getState(ctx: Context) {
     const version = await database.qdb.get('version')
-    const stats = await serverClient.broadcastEval<BotStats[][]>((self: ClusterShardClient) => {
+    const stats = await serverClient.broadcastEval<BotStats[][]>((self: Lacuna) => {
             return {
+                host: self.hostname,
                 clusterId: self.cluster.id,
                 guilds: self.guilds.cache.size,
                 users: self.guilds.cache.reduce((x, y) => (x += y.memberCount), 0),
@@ -57,6 +58,7 @@ export default async function getState(ctx: Context) {
         }),
         shards: flatStats.map(v => {
             return {
+                host: v.host,
                 cluster_id: v.clusterId,
                 guilds: v.guilds,
                 users: v.users,
