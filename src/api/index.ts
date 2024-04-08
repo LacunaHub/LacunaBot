@@ -7,6 +7,7 @@ import koaJSON from 'koa-json'
 import koaLogger from 'koa-logger'
 import database from '../database'
 import Logger from '../internals/Logger'
+import ReleaseNotesLogger from './modules/ReleaseNotesLogger'
 import Statistics from './modules/Statistics'
 import { handleDiamondGuilds } from './modules/billing/utility/DiamondGuild'
 import { handlePatrons } from './modules/billing/utility/Patron'
@@ -80,7 +81,7 @@ app.listen(process.env.LCN_API_PORT, () => {
     handlePatrons()
     Statistics.createCollectionSchedule()
     YouTubeAlerts.createRefreshmentSchedule()
-    // ReleaseNotesLogger.createSchedule()
+    ReleaseNotesLogger.createSchedule()
 })
 
 process.on('uncaughtException', Logger.error)
