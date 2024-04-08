@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/LacunaHub/Discord#readme",
   "dependencies": {
-    "@koa/cors": "4.0.x",
+    "@koa/cors": "5.0.x",
     "@koa/router": "12.0.x",
     "@lacunahub/lacuna-database-driver": "^1.0.5",
     "@lacunahub/lacuna-locale": "1.0.0",
