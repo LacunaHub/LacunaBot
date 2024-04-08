@@ -39,7 +39,7 @@
     "koa-json": "2.0.x",
     "koa-logger": "^3.2.1",
     "koa-morgan": "1.0.x",
-    "koa-ratelimit": "5.0.x",
+    "koa-ratelimit": "5.1.x",
     "moment": "2.30.x",
     "mongoose": "5.13.x",
     "ms": "2.1.x",
