@@ -8,7 +8,7 @@ export default async function updateLinkedRoles(ctx: Context) {
         savedState = ctx.cookies.get('discord_oauth_state')
 
     if (state !== savedState) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed`)
+        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Invalid state')}`)
 
         return
     }
@@ -20,7 +20,7 @@ export default async function updateLinkedRoles(ctx: Context) {
         exchangedCode = await oauth2.exchangeCode(code, `${process.env.LCN_API_URL}/authorize/linked-roles/callback`)
         currentUser = await oauth2.getUser(exchangedCode.access_token)
     } catch (err) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed`)
+        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Failed to exchange code')}`)
 
         return
     }
@@ -33,7 +33,7 @@ export default async function updateLinkedRoles(ctx: Context) {
             }
         })
     } catch (err) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed`)
+        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Failed to update role connections')}`)
 
         return
     }
