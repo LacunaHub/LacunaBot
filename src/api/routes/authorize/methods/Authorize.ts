@@ -1,11 +1,13 @@
-import { APIUser, RESTPostOAuth2AccessTokenResult, SnowflakeUtil } from 'discord.js'
+import { APIUser, OAuth2Scopes, RESTPostOAuth2AccessTokenResult, SnowflakeUtil } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
+import { supportServerId } from '../../../../internals/utility/Constants'
 import { oauth2 } from '../../../utility/DiscordOAuth2'
+import DiscordUtils from '../../../utility/DiscordUtils'
 
 export default async function authorize(ctx: Context) {
     if (ctx.query.error) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed`)
+        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent(ctx.query.error as string)}`)
 
         return
     }
@@ -15,7 +17,7 @@ export default async function authorize(ctx: Context) {
         savedState = ctx.cookies.get('discord_oauth_state')
 
     if (state !== savedState) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed`)
+        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Invalid state')}`)
 
         return
     }
@@ -27,7 +29,7 @@ export default async function authorize(ctx: Context) {
         exchangedCode = await oauth2.exchangeCode(code)
         currentUser = await oauth2.getUser(exchangedCode.access_token)
     } catch (err) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed`)
+        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Failed to exchange code')}`)
 
         return
     }
@@ -69,6 +71,10 @@ export default async function authorize(ctx: Context) {
             updateData['user.global_name'] = currentUser.global_name
         }
 
+        if (userEntry.user.email !== currentUser.email) {
+            updateData['user.email'] = currentUser.email ?? null
+        }
+
         if (Object.keys(updateData).length) {
             await database.users.updateOne(
                 { _id: currentUser.id },
@@ -77,12 +83,16 @@ export default async function authorize(ctx: Context) {
                 }
             )
 
-            await oauth2.updateUserRoleConnection(exchangedCode.access_token, {
-                platform_name: 'Lacuna',
-                metadata: {
-                    account_created_at: new Date(SnowflakeUtil.timestampFrom(currentUser.id)).toISOString()
-                }
-            })
+            if (exchangedCode.scope.includes(OAuth2Scopes.RoleConnectionsWrite)) {
+                try {
+                    await oauth2.updateUserRoleConnection(exchangedCode.access_token, {
+                        platform_name: 'Lacuna',
+                        metadata: {
+                            account_created_at: new Date(SnowflakeUtil.timestampFrom(currentUser.id)).toISOString()
+                        }
+                    })
+                } catch (err) {}
+            }
         }
     } else {
         await database.users.create({
@@ -92,9 +102,20 @@ export default async function authorize(ctx: Context) {
                 discriminator: currentUser.discriminator,
                 avatar: currentUser.avatar,
                 flags: currentUser.public_flags,
-                global_name: currentUser.global_name
+                global_name: currentUser.global_name,
+                email: currentUser.email ?? null
             }
         })
+    }
+
+    if (exchangedCode.scope.includes(OAuth2Scopes.GuildsJoin)) {
+        try {
+            await DiscordUtils.rest.put(DiscordUtils.restRoutes.guildMember(supportServerId, currentUser.id), {
+                body: {
+                    access_token: exchangedCode.access_token
+                }
+            })
+        } catch (err) {}
     }
 
     ctx.redirect(

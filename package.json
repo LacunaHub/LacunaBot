@@ -23,7 +23,7 @@
   "dependencies": {
     "@koa/cors": "4.0.x",
     "@koa/router": "12.0.x",
-    "@lacunahub/lacuna-database-driver": "^1.0.4",
+    "@lacunahub/lacuna-database-driver": "^1.0.5",
     "@lacunahub/lacuna-locale": "1.0.0",
     "@lacunahub/lavaluna.js": "1.0.x",
     "@lacunahub/letsfrag": "^0.1.1",
