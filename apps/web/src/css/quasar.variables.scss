@@ -23,7 +23,7 @@ $warning: #ffa726;
 
 $dark-1: #0f0f12;
 $dark-2: #16151a;
-$dark-3: darken($dark-2, 5.7%);
+$dark-3: lighten($dark-2, 4%);
 
 $almost-white-1: #f4f4f4;
 $almost-white-2: darken($almost-white-1, 10%);
@@ -43,7 +43,7 @@ $input-label-color: $almost-white-1 !important;
 
 $generic-border-radius: $border-radius-lg !important;
 
-$separator-dark-color: $dark-2 !important;
+$separator-dark-color: $dark-3 !important;
 
 $button-border-radius: $border-radius-lg;
 

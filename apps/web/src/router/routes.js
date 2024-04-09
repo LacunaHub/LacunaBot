@@ -62,11 +62,7 @@ const routes = [
         children: [
             {
                 path: '',
-                component: () => import('pages/LandingPage.vue'),
-                beforeEnter: () => {
-                    event('login', { method: 'Discord' })
-                    window.location.href = `${process.env.API}/authorize`
-                }
+                component: () => import('pages/AuthorizationPage.vue')
             },
             {
                 path: 'add',

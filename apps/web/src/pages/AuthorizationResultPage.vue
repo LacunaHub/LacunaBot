@@ -13,7 +13,9 @@
         {{ $t(messages.description) }}
       </div>
 
-      <q-btn class="q-mt-xl text--secondary" unelevated to="/" icon="home" no-caps flat round />
+      <div v-if="messages.reason" class="text--secondary">[{{ messages.reason }}]</div>
+
+      <q-btn class="q-mt-xl text--secondary" unelevated to="/" icon="r_home" no-caps flat round />
     </div>
   </div>
 </template>
@@ -27,7 +29,8 @@ export default defineComponent({
   setup() {
     const query = new URLSearchParams(window.location.search),
       status = query.get('status'),
-      closeWindow = query.get('closeWindow')
+      closeWindow = query.get('closeWindow'),
+      message = query.get('message')
 
     if (closeWindow === 'true') {
       window.close()
@@ -36,13 +39,15 @@ export default defineComponent({
     const textColor = ref('text-positive')
     const messages = ref({
       title: 'Pages.AuthorizationResultPage.AuthorizationSuccessful',
-      description: 'Pages.AuthorizationResultPage.CloseWindowAndGoBack'
+      description: 'Pages.AuthorizationResultPage.CloseWindowAndGoBack',
+      reason: null
     })
 
     if (status === 'failed') {
       textColor.value = 'text-negative'
       messages.value.title = 'Pages.AuthorizationResultPage.AuthorizationFailed'
       messages.value.description = 'Pages.AuthorizationResultPage.SomethingWentWrong'
+      messages.value.reason = message
     }
 
     return { textColor, messages }

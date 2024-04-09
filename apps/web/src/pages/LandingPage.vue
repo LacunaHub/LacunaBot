@@ -251,7 +251,7 @@
             </q-btn>
             <q-btn v-else class="q-px-md" flat to="/authorize" style="background: rgba(0, 0, 0, 0.3)">
               {{ $t('Components.Header.Login') }}
-              <q-icon class="q-ml-sm" name="login" size="24px"></q-icon>
+              <q-icon class="q-ml-sm" name="r_login"></q-icon>
             </q-btn>
           </q-carousel-control>
         </template>

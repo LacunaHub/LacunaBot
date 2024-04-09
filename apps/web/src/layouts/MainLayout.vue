@@ -14,22 +14,11 @@
   </q-layout>
 </template>
 
-<script>
-import { defineComponent } from 'vue'
+<script setup>
 import MainHeader from 'src/components/MainHeader.vue'
-import { useChangeLogStore } from 'src/stores/change-log'
+import { useReleaseNotesCache } from 'src/stores/ReleaseNotesCache'
 
-export default defineComponent({
-  name: 'MainLayout',
+const releaseNotes = useReleaseNotesCache()
 
-  setup() {
-    const changeLog = useChangeLogStore()
-
-    changeLog.getChangeLog()
-  },
-
-  components: {
-    MainHeader
-  }
-})
+releaseNotes.getReleaseNotes()
 </script>
