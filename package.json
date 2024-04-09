@@ -43,7 +43,7 @@
     "moment": "2.30.x",
     "mongoose": "5.13.x",
     "ms": "2.1.x",
-    "node-fetch": "2.6.x",
+    "node-fetch": "3.3.x",
     "node-os-utils": "1.3.x",
     "node-schedule": "2.1.x",
     "numbro": "2.5.x",
