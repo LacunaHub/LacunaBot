@@ -29,6 +29,9 @@ const interfaces = {
         getReleaseNotes() {
             return api.get('/common/release-notes')
         },
+        getState() {
+            return api.get('/common/state')
+        },
         getVersion() {
             return api.get('/common/version')
         }
@@ -127,12 +130,6 @@ const interfaces = {
                     Authorization: Cookies.get('access_token')
                 }
             })
-        }
-    },
-
-    state: {
-        get() {
-            return api.get('/state')
         }
     },
 

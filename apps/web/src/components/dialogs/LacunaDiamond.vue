@@ -723,7 +723,7 @@ const onConfirm = () => {
       .then(response => {
         event('checkout_progress', { event_label: provider.value })
 
-        if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY'].includes(provider.value)) {
+        if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY', 'PROJECT_TEAM'].includes(provider.value)) {
           window.location.reload()
         } else {
           const payUrl = response.data

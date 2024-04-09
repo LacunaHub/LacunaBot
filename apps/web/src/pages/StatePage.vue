@@ -5,7 +5,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <q-card class="bg-dark-1" flat>
-              <q-list>
+              <q-list padding>
                 <q-item>
                   <q-item-section class="text--secondary">
                     {{ $t('Commands.AboutCommand.Texts.TotalGuilds') }}
@@ -39,7 +39,7 @@
 
               <q-separator inset></q-separator>
 
-              <q-list>
+              <q-list padding>
                 <q-item>
                   <q-item-section class="text--secondary">
                     {{ $t('Pages.StatePage.AvgLatency') }}
@@ -65,7 +65,7 @@
 
           <div class="col-12">
             <q-card class="bg-dark-1" flat>
-              <q-item class="q-pt-md">
+              <q-item class="q-py-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
                     {{ $t('Pages.StatePage.Clusters') }}
@@ -89,7 +89,7 @@
 
           <div class="col-12">
             <q-card class="bg-dark-1" flat>
-              <q-item class="q-pt-md">
+              <q-item class="q-py-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
                     {{ $t('Pages.StatePage.Shards') }}
@@ -113,7 +113,7 @@
 
           <div class="col-12">
             <q-card class="bg-dark-1" flat>
-              <q-item class="q-pt-md">
+              <q-item class="q-py-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
                     {{ $t('Pages.StatePage.MusicPlayers') }}
@@ -175,7 +175,7 @@
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <q-card class="bg-dark-1" flat>
-              <q-list>
+              <q-list padding>
                 <q-item>
                   <q-item-section class="text--secondary">
                     {{ $t('Commands.AboutCommand.Texts.TotalGuilds') }}
@@ -208,7 +208,7 @@
 
               <q-separator inset></q-separator>
 
-              <q-list>
+              <q-list padding>
                 <q-item>
                   <q-item-section class="text--secondary">
                     {{ $t('Pages.StatePage.AvgLatency') }}
@@ -232,7 +232,7 @@
 
           <div class="col-12">
             <q-card class="bg-dark-1" flat>
-              <q-item class="q-pt-md">
+              <q-item class="q-py-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
                     {{ $t('Pages.StatePage.Clusters') }}
@@ -304,7 +304,7 @@
 
           <div class="col-12">
             <q-card class="bg-dark-1" flat>
-              <q-item class="q-pt-md">
+              <q-item class="q-py-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
                     {{ $t('Pages.StatePage.Shards') }}
@@ -312,91 +312,38 @@
                 </q-item-section>
               </q-item>
 
-              <q-list padding>
-                <q-expansion-item
-                  v-for="shard in state.shards"
-                  :key="shard.cluster_id"
-                  :class="`${getShardColor(shard.latency)}`"
-                  expand-separator
-                >
-                  <template #header>
-                    <q-item-section>
-                      <q-item-label>{{ shard.hostname }}#{{ shard.cluster_id }}</q-item-label>
-                    </q-item-section>
+              <q-card-section>
+                <div class="row q-col-gutter-md">
+                  <div v-for="shard in state.shards" :key="shard.cluster_id" class="col-shrink">
+                    <q-avatar :class="`${getShardColor(shard.latency)}`" rounded>
+                      <span class="text-body1">#{{ shard.cluster_id }}</span>
 
-                    <q-item-section side>
-                      <div>
-                        <span>{{ Math.round(shard.latency) }}MS</span>
-                        <span class="q-px-sm">-</span>
-                        <span>{{ $numbro(shard.uptime / 1000).format({ output: 'time' }) }}</span>
-                      </div>
-                    </q-item-section>
-                  </template>
-
-                  <q-card class="no-border-radius bg-dark-1" flat>
-                    <q-card-section>
-                      <div class="row">
-                        <div class="col">
-                          <span>
-                            <q-icon class="opacity-md" name="hub"></q-icon>
-                            {{ shard.guilds }}
-
-                            <q-tooltip
-                              class="bg-black text-body2"
-                              anchor="top middle"
-                              self="bottom middle"
-                              transition-show=""
-                              transition-hide=""
-                            >
-                              {{ $t('Commands.AboutCommand.Texts.TotalGuilds') }}
-                            </q-tooltip>
-                          </span>
+                      <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">
+                        <div class="text-h6">{{ shard.host }}#{{ shard.cluster_id }}</div>
+                        <div>{{ $t('Commands.AboutCommand.Texts.Latency') }}: {{ shard.latency }}MS</div>
+                        <div>
+                          {{ $t('Commands.AboutCommand.Texts.ShardUptime') }}:
+                          {{ $numbro(shard.uptime / 1000).format({ output: 'time' }) }}
                         </div>
 
-                        <div class="col text-center">
-                          <span>
-                            <q-icon class="opacity-md" name="group"></q-icon>
-                            {{ shard.cached_users }}/{{ shard.users }}
+                        <q-separator class="q-my-sm"></q-separator>
 
-                            <q-tooltip
-                              class="bg-black text-body2"
-                              anchor="top middle"
-                              self="bottom middle"
-                              transition-show=""
-                              transition-hide=""
-                            >
-                              {{ $t('Commands.AboutCommand.Texts.TotalGuilds') }}
-                            </q-tooltip>
-                          </span>
+                        <div>{{ $t('Commands.AboutCommand.Texts.TotalGuilds') }}: {{ shard.guilds }}</div>
+                        <div>
+                          {{ $t('Commands.AboutCommand.Texts.TotalUsers') }}: {{ shard.cached_users }}/{{ shard.users }}
                         </div>
-
-                        <div class="col text-right">
-                          <span>
-                            <q-icon class="opacity-md" name="forum"></q-icon>
-                            {{ shard.channels }}
-
-                            <q-tooltip
-                              class="bg-black text-body2"
-                              anchor="top middle"
-                              self="bottom middle"
-                              transition-show=""
-                              transition-hide=""
-                            >
-                              {{ $t('Pages.StatePage.TotalChannels') }}
-                            </q-tooltip>
-                          </span>
-                        </div>
-                      </div>
-                    </q-card-section>
-                  </q-card>
-                </q-expansion-item>
-              </q-list>
+                        <div>{{ $t('Pages.StatePage.TotalChannels') }}: {{ shard.channels }}</div>
+                      </q-tooltip>
+                    </q-avatar>
+                  </div>
+                </div>
+              </q-card-section>
             </q-card>
           </div>
 
           <div class="col-12">
             <q-card class="bg-dark-1" flat>
-              <q-item class="q-pt-md">
+              <q-item class="q-py-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
                     {{ $t('Pages.StatePage.MusicPlayers') }}
@@ -625,7 +572,7 @@ useMeta({
 
 const getState = async () => {
   try {
-    const response = await interfaces.state.get(),
+    const response = await interfaces.common.getState(),
       { data } = response
 
     state.value = data
@@ -648,7 +595,7 @@ const getState = async () => {
 const getShardColor = shardLatency => {
   if (shardLatency >= 150 && shardLatency < 500) return 'bg-warning'
   if (shardLatency >= 500) return 'bg-negative'
-  return ''
+  return 'bg-dark-2'
 }
 
 onMounted(async () => {
