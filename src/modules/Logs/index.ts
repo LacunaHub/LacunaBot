@@ -60,6 +60,10 @@ export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextCha
             webhook = await self.fetchWebhook(logWebhook.id, logWebhook.token)
         } catch (err) {
             await self.logger.handleError({ module: 'Logs', action: 'FetchWebhook', error: err, guild_id: logChannel.guildId })
+
+            // Unknown Webhook
+            // See https://github.com/LacunaHub/LacunaBot/issues/190
+            if (err?.code !== 10015) return null
         }
     }
 
