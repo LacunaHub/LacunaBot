@@ -11,7 +11,7 @@ import {
     Message
 } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
-import { chunkArray } from '../../../internals/utility/Utils'
+import { chunkArray, truncateString } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -46,13 +46,19 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 { name: t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours'), value: last24Hr.length.toString(), inline: true },
                 { name: t('Commands.ViolationsCommand.Texts.ViolationsIn7Days'), value: last7d.length.toString(), inline: true },
                 { name: t('Commands.ViolationsCommand.Texts.TotalViolations'), value: violator.violations.length.toString(), inline: true },
-                {
-                    name: t('Commands.ViolationsCommand.Texts.Last10Violations'),
-                    value: last10Violations
-                        .map((v, i) => `${i + 1}. **${v.reason || '-'}** – <t:${Math.round(v.timestamp / 1000)}:R> \`${v.id}\``)
-                        .join('\n')
-                }
+                { name: t('Commands.ViolationsCommand.Texts.Last10Violations'), value: '\u200B' }
             ])
+
+        if (last10Violations.length) {
+            embed.addFields(
+                last10Violations.map((v, i) => {
+                    return {
+                        name: `${i + 1}. \`${v.id}\` – <t:${Math.round(v.timestamp / 1000)}:R>`,
+                        value: truncateString(v.reason || '-', 1024)
+                    }
+                })
+            )
+        }
 
         await interaction.editReply({ embeds: [embed] })
     } else {

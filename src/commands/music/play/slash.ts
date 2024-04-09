@@ -198,6 +198,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             ])
             .setFooter({ text: t('Commands.PlayCommand.Texts.AddedBy', { requester: track.requester }) })
 
+        if (track.info.artworkUrl) {
+            embed.setThumbnail(track.info.artworkUrl)
+        }
+
         if (player.playing || player.paused)
             await interaction.editReply({
                 content: `${self.staticEmojis.OK} | ${t('Commands.PlayCommand.Texts.PlaylistHasBeenAddedToQueue', {
@@ -266,6 +270,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 }
             ])
             .setFooter({ text: t('Commands.PlayCommand.Texts.AddedBy', { requester: track.requester }) })
+
+        if (track.info.artworkUrl) {
+            embed.setThumbnail(track.info.artworkUrl)
+        }
 
         if (player.playing || player.paused)
             await interaction.editReply({
