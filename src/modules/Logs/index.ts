@@ -119,7 +119,7 @@ export function isRateLimited(guildId: string, premium: boolean) {
     }
 
     if (!rateLimit) {
-        rateLimit = rateLimitCache.set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: premium ? 49 : 4 }).get(guildId)
+        rateLimit = rateLimitCache.set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: premium ? 19 : 4 }).get(guildId)
 
         return false
     }
