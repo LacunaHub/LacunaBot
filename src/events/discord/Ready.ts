@@ -11,6 +11,7 @@ const handler = async (self: Lacuna) => {
                 name,
                 hostname,
                 port: +port,
+                secure: +port === 443,
                 password,
                 reconnectRetryAmount: 100,
                 reconnectRetryDelay: 60000

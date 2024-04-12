@@ -30,6 +30,7 @@ const lava = new LavalunaManager({
             name,
             hostname,
             port: +port,
+            secure: +port === 443,
             password,
             reconnectRetryAmount: 100,
             reconnectRetryDelay: 60000
