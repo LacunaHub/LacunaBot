@@ -31,7 +31,7 @@
     "bufferutil": "4.0.x",
     "canvas": "2.11.x",
     "discord.js": "14.13.x",
-    "dotenv": "8.2.x",
+    "dotenv": "16.4.x",
     "isolated-vm": "4.6.x",
     "koa": "2.14.x",
     "koa-body": "6.0.x",
