@@ -30,7 +30,7 @@
     "@lacunahub/logger": "1.0.x",
     "bufferutil": "4.0.x",
     "canvas": "2.11.x",
-    "discord.js": "14.14.x",
+    "discord.js": "14.13.x",
     "dotenv": "16.4.x",
     "isolated-vm": "4.7.x",
     "koa": "2.14.x",
