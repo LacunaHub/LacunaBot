@@ -77,7 +77,7 @@
 
             <q-select
               v-model.number="currency.income.messages.rate_limit_per_user"
-              :options="[0, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
+              :options="[0, 60, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 64800, 86400]"
               class="q-pt-sm"
               filled
               dense
