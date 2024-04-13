@@ -320,7 +320,7 @@
 
                       <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">
                         <div class="text-h6">{{ shard.host }}#{{ shard.cluster_id }}</div>
-                        <div>{{ $t('Commands.AboutCommand.Texts.Latency') }}: {{ shard.latency }}MS</div>
+                        <div>{{ $t('Commands.AboutCommand.Texts.Latency') }}: {{ Math.round(shard.latency) }}MS</div>
                         <div>
                           {{ $t('Commands.AboutCommand.Texts.ShardUptime') }}:
                           {{ $numbro(shard.uptime / 1000).format({ output: 'time' }) }}
