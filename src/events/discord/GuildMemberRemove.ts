@@ -8,12 +8,6 @@ import Logs from '../../modules/Logs'
 import { caseLog } from '../../modules/Moderation'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
-    if (member.partial) {
-        try {
-            member = await member.fetch()
-        } catch (err) {}
-    }
-
     if (!member || !member.guild) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })

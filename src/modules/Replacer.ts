@@ -185,7 +185,6 @@ export default class Replacer {
         }
 
         if (guild) {
-            guild = await guild.fetch()
             guildOwner = await guild.fetchOwner()
         }
 
