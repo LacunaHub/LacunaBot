@@ -10,12 +10,6 @@ import Logs from '../../modules/Logs'
 import { checkReportsOnGuildMemberAdd } from '../../modules/Reports'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
-    if (member.partial) {
-        try {
-            member = await member.fetch()
-        } catch (err) {}
-    }
-
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
 
     await Greeting.sendMessage(self, server, member)

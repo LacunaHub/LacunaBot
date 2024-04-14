@@ -1,7 +1,7 @@
 import { BillDocument, ServerDocument } from '@lacunahub/lacuna-database-driver'
 import database from '../../../database'
 import Logger from '../../../internals/Logger'
-import { activePatronRoleId, bigPatronRoleId, formerPatronRoleId, supportServerId } from '../../../internals/utility/Constants'
+import { activePatronRoleId, bigPatronRoleId, supportServerId } from '../../../internals/utility/Constants'
 import DiscordUtils from '../../utility/DiscordUtils'
 import { DiamondGuild, diamondGuilds } from './utility/DiamondGuild'
 import { Patron, patrons } from './utility/Patron'
@@ -104,11 +104,11 @@ export async function addPremium(bill: BillDocument, period: number) {
         Logger.log(`[Billing] User ${bill.custom_fields.user_id} became a Patron`)
     }
 
-    try {
-        await DiscordUtils.rest.delete(DiscordUtils.restRoutes.guildMemberRole(supportServerId, bill.custom_fields.user_id, formerPatronRoleId))
-    } catch (err) {
-        await Logger.handleError({ module: 'Billing', action: 'RemoveFormerPatronRole', error: err })
-    }
+    // try {
+    //     await DiscordUtils.rest.delete(DiscordUtils.restRoutes.guildMemberRole(supportServerId, bill.custom_fields.user_id, formerPatronRoleId))
+    // } catch (err) {
+    //     await Logger.handleError({ module: 'Billing', action: 'RemoveFormerPatronRole', error: err })
+    // }
 
     return new Patron(bill.custom_fields.user_id, period)
 }
