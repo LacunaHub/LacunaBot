@@ -20,6 +20,7 @@ import {
     Message,
     ModalComponentData,
     ModalSubmitInteraction,
+    Routes,
     StartThreadOptions,
     StringSelectMenuInteraction,
     ThreadChannel,
@@ -612,13 +613,7 @@ export default class Automation {
 
                             if (!channel) throw new Error('Unknown channel')
 
-                            const message = await channel.messages.fetch({ message: messageId })
-
-                            if (!message) throw new Error('Unknown message')
-
-                            if (message.deletable) {
-                                await message.delete()
-                            }
+                            await this.self.rest.delete(Routes.channelMessage(channelId, messageId))
                         },
                         deleteReply: async () => {
                             const used = this.useFunction('deleteReply')

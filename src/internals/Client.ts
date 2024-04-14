@@ -34,17 +34,17 @@ const client = new Lacuna({
 
         if (manager.name === 'GuildMemberManager')
             return new LimitedCollection({
-                maxSize: 1000,
+                maxSize: 3000,
                 keepOverLimit: v => v.id === process.env.LCN_DISCORD_CLIENT_ID || Boolean(v.voice.channelId)
             })
 
         if (manager.name === 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
 
-        if (manager.name === 'MessageManager') return new LimitedCollection({ maxSize: 25 })
+        if (manager.name === 'MessageManager') return new LimitedCollection({ maxSize: 50 })
 
         if (manager.name === 'UserManager')
             return new LimitedCollection({
-                maxSize: 1000,
+                maxSize: 10000,
                 keepOverLimit: v => v.id === process.env.LCN_DISCORD_CLIENT_ID
             })
 
@@ -70,7 +70,7 @@ const client = new Lacuna({
             lifetime: 30 * 60
         },
         guildMembers: {
-            interval: 30 * 60,
+            interval: 60 * 60,
             filter: () => member => {
                 return Boolean(member.voice?.channelId) === false && member.id !== process.env.LCN_DISCORD_CLIENT_ID
             }
@@ -90,7 +90,7 @@ const client = new Lacuna({
             lifetime: 30 * 60
         },
         users: {
-            interval: 30 * 60,
+            interval: 60 * 60,
             filter: () => user => {
                 return user.id !== process.env.LCN_DISCORD_CLIENT_ID
             }

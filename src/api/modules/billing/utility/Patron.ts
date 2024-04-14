@@ -1,7 +1,7 @@
 import { Job, scheduleJob } from 'node-schedule'
 import database from '../../../../database'
 import Logger from '../../../../internals/Logger'
-import { activePatronRoleId, formerPatronRoleId, supportServerId } from '../../../../internals/utility/Constants'
+import { activePatronRoleId, supportServerId } from '../../../../internals/utility/Constants'
 import DiscordUtils from '../../../utility/DiscordUtils'
 
 export const patrons = new Map<string, Patron>()
@@ -36,7 +36,7 @@ export class Patron {
         try {
             await database.users.updateOne({ _id: this.user_id }, { $set: { 'premium.available': false } })
             await DiscordUtils.rest.delete(DiscordUtils.restRoutes.guildMemberRole(supportServerId, this.user_id, activePatronRoleId))
-            await DiscordUtils.rest.put(DiscordUtils.restRoutes.guildMemberRole(supportServerId, this.user_id, formerPatronRoleId))
+            // await DiscordUtils.rest.put(DiscordUtils.restRoutes.guildMemberRole(supportServerId, this.user_id, formerPatronRoleId))
         } catch (err) {
             await Logger.handleError({ module: 'Patron', action: 'ExpirePatronage', error: err })
         }

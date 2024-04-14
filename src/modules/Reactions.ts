@@ -17,7 +17,7 @@ export async function reactionAdd(self: Lacuna, server: ServerDocument, reaction
     if (server.modules.reactions.length) {
         const t = self.i18n.t.bind(null, server.locale)
 
-        const message = await reaction.message.fetch()
+        const message = reaction.message
         const element = server.modules.reactions
             .slice(0, server.premium.available ? 200 : 50)
             .find(r => r.message.id == message.id && (r.emoji.id ? r.emoji.id == reaction.emoji.id : r.emoji.name == reaction.emoji.name))
