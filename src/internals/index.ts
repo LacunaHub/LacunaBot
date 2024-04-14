@@ -1,7 +1,8 @@
 import { ClusterManager } from '@lacunahub/letsfrag'
+import { mem } from 'node-os-utils'
 import logger from './Logger'
 
-const clusterCount = Math.round(require('node-os-utils').mem.totalMem() / (1024 * 1024 * 1024))
+const clusterCount = Math.round(mem.totalMem() / (1024 * 1024 * 1024))
 
 const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
     server: {

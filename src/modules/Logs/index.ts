@@ -60,6 +60,10 @@ export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextCha
             webhook = await self.fetchWebhook(logWebhook.id, logWebhook.token)
         } catch (err) {
             await self.logger.handleError({ module: 'Logs', action: 'FetchWebhook', error: err, guild_id: logChannel.guildId })
+
+            // Unknown Webhook
+            // See https://github.com/LacunaHub/LacunaBot/issues/190
+            if (err?.code !== 10015) return null
         }
     }
 
@@ -115,7 +119,7 @@ export function isRateLimited(guildId: string, premium: boolean) {
     }
 
     if (!rateLimit) {
-        rateLimit = rateLimitCache.set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: premium ? 49 : 4 }).get(guildId)
+        rateLimit = rateLimitCache.set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: premium ? 19 : 4 }).get(guildId)
 
         return false
     }

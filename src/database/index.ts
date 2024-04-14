@@ -10,7 +10,7 @@ export default new Database({
     qdb: {
         uri: process.env.LCN_DB_URI,
         options: {
-            dbName: 'lacuna-qmongo',
+            dbName: 'lcnqm',
             collectionName: 'internal-storage'
         }
     }
