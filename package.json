@@ -53,7 +53,7 @@
     "unicode-default-word-boundary": "13.0.x",
     "unzalgo": "3.0.x",
     "utf-8-validate": "6.0.x",
-    "uuid": "8.3.x",
+    "uuid": "9.0.x",
     "xml2js": "0.6.x",
     "zlib-sync": "0.1.x"
   },
@@ -73,7 +73,7 @@
     "@types/node-schedule": "2.1.x",
     "@types/safe-regex": "1.1.x",
     "@types/unzalgo": "3.0.x",
-    "@types/uuid": "8.3.x",
+    "@types/uuid": "9.0.x",
     "@types/xml2js": "0.4.x",
     "concurrently": "8.2.x",
     "tslib": "2.6.x",
