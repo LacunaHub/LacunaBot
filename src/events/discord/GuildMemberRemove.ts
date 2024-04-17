@@ -1,6 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember, User } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
+import { fetchGuild } from '../../internals/utility/Utils'
 import Automation from '../../modules/Automation'
 import Farewell from '../../modules/Farewell'
 import GuildImageRotation from '../../modules/GuildImageRotation'
@@ -12,6 +13,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
 
+    await fetchGuild(self.cache, member.guild)
     await Farewell.sendMessage(self, server, member)
     await Farewell.saveNicknameAndRoles(self, server, member)
     await Automation.handleEvent('GUILD_MEMBER_REMOVE', self, server, member)

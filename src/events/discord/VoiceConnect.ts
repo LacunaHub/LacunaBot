@@ -1,6 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { VoiceState } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
+import { fetchGuild } from '../../internals/utility/Utils'
 import Automation from '../../modules/Automation'
 import { voiceAssign as economyVoiceAssign } from '../../modules/Economy'
 import GuildImageRotation from '../../modules/GuildImageRotation'
@@ -12,11 +13,11 @@ const handler = async (self: Lacuna, state: VoiceState) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: state.guild.id })
     const player = self.lava.nodes.getPlayer(state.guild.id)
 
-    if (player && state.channelId === player.voiceChannelId) {
+    if (player && player.voiceChannelId === state.channelId) {
         const listeners: number = state.channel.members.filter(m => !m.user.bot).size
 
         if (listeners) {
-            player.pause(false)
+            await player.pause(false)
 
             const timeout = player.get<NodeJS.Timeout>('timeout')
 
@@ -27,6 +28,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
         }
     }
 
+    await fetchGuild(self.cache, state.guild)
     await Automation.handleEvent('VOICE_CONNECT', self, server, state)
     await createTemporaryVoice(self, server, state)
     await Levels.onVoiceConnect(self, server, state)
@@ -47,6 +49,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
             await self.logger.handleError({ module: 'VoiceRoles', action: 'AddRoles', error: err, guild_id: state.guild.id })
         }
     }
+
     await GuildImageRotation.rotateBanner(self, server, state.guild, state.member)
     await Logs.VoiceConnect(self, server, state)
 
