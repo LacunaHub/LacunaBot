@@ -1,6 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChannelType, Events, Message, MessageType } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
+import { fetchGuild } from '../../internals/utility/Utils'
 import Automation from '../../modules/Automation'
 import Automoder from '../../modules/Automoder'
 import { messageCreate as addWalletCash } from '../../modules/Economy'
@@ -20,6 +21,7 @@ const handler = async (self: Lacuna, message: Message) => {
         return false
     }
 
+    await fetchGuild(self.cache, message.guild)
     await Automation.handleEvent('MESSAGE_CREATE', self, server, message)
 
     if ([MessageType.Default, MessageType.Reply].includes(message.type)) {

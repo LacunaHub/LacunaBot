@@ -18,7 +18,7 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
         if (voice) {
             const listens = Boolean(voice.channel.members.filter(m => !m.user.bot).size)
 
-            player.pause(!listens)
+            await player.pause(!listens)
 
             if (listens) {
                 const timeout = player.get<NodeJS.Timeout>('timeout')

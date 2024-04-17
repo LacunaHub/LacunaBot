@@ -185,6 +185,10 @@ export default class Replacer {
         }
 
         if (guild) {
+            if (typeof guild.approximatePresenceCount !== 'number') {
+                guild = await guild.fetch()
+            }
+
             guildOwner = await guild.fetchOwner()
         }
 

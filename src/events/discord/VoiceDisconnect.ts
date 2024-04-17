@@ -1,6 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { VoiceChannel, VoiceState } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
+import { fetchGuild } from '../../internals/utility/Utils'
 import Automation from '../../modules/Automation'
 import { voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
 import GuildImageRotation from '../../modules/GuildImageRotation'
@@ -10,20 +11,19 @@ import { deleteTemporaryVoice } from '../../modules/VoiceManager'
 
 const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: state.guild.id })
-
     const player = self.lava.nodes.getPlayer(state.guild.id)
 
     if (player && !player.voiceChannelId && state.member.id === self.user.id) {
-        player.destroy()
+        await player.destroy()
 
         return
     }
 
-    if (player?.voiceChannelId === channel?.id) {
+    if (player && player.voiceChannelId === channel?.id) {
         const listeners: number = channel.members.filter(m => !m.user.bot).size
 
         if (!listeners) {
-            player.pause(true)
+            await player.pause(true)
             player.set(
                 'timeout',
                 setTimeout(() => player.destroy(), 300000)
@@ -31,6 +31,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
         }
     }
 
+    await fetchGuild(self.cache, state.guild)
     await Automation.handleEvent('VOICE_DISCONNECT', self, server, state)
     await deleteTemporaryVoice(self, server, state, channel)
     await Levels.onVoiceDisconnect(self, server, state, channel)
