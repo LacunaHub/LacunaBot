@@ -5,7 +5,7 @@ import Automation from '../../modules/Automation'
 import Logs from '../../modules/Logs'
 
 const handler = async (self: Lacuna, message: Message) => {
-    if (message.partial || message.author.bot || message.channel.type == ChannelType.DM) return false
+    if (message.partial || message.author.bot || message.channel.type === ChannelType.DM) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
 

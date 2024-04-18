@@ -4,12 +4,14 @@ import {
     ButtonBuilder,
     ButtonStyle,
     EmbedBuilder,
+    Guild,
     ModalActionRowComponentBuilder,
     StringSelectMenuBuilder,
     TextInputBuilder,
     TextInputStyle
 } from 'discord.js'
 import { parseString } from 'xml2js'
+import Lacuna from '../Lacuna'
 
 const snowflakeRegexp = /\d{17,20}/
 
@@ -526,6 +528,17 @@ export function debounce(func: Function, wait: number = 0, options?: { leading: 
 
 export function hmsToMS(hms: string) {
     return hms.split(':').reduce((x, y) => 60 * x + +y, 0) * 1000
+}
+
+export async function fetchGuild(cache: Lacuna['cache'], guild: Guild) {
+    const timestamp = cache.get(`FETCH-${guild.id}`) ?? 0
+
+    if (typeof guild.approximatePresenceCount !== 'number' || Date.now() - timestamp > 1000 * 60 * 60) {
+        cache.set(`FETCH-${guild.id}`, Date.now())
+        return await guild.fetch()
+    }
+
+    return guild
 }
 
 export default {

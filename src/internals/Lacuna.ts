@@ -1,7 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { LavalunaManager } from '@lacunahub/lavaluna.js'
 import { ClusterShardClient, ClusterShardClientOptions } from '@lacunahub/letsfrag'
-import { Collection, LimitedCollection, PermissionsBitField, parseEmoji } from 'discord.js'
+import { Collection, PermissionsBitField, parseEmoji } from 'discord.js'
 import { readdirSync } from 'fs'
 import { Isolate } from 'isolated-vm'
 import { os } from 'node-os-utils'
@@ -19,7 +19,7 @@ export default class Lacuna extends ClusterShardClient {
     public hostname: string
     public logger: typeof logger
     public db: typeof db
-    public cache = new LimitedCollection<string, any>()
+    public cache = new Map<string, any>()
     public commands = new Collection<string, Command>()
     public events = new Collection<string, Event>()
     public lava: LavalunaManager | null = null

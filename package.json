@@ -1,6 +1,6 @@
 {
   "name": "lacuna-bot",
-  "version": "4.11.5",
+  "version": "4.11.6",
   "description": "Feature-rich Discord bot",
   "main": "dist/index.js",
   "scripts": {
@@ -33,7 +33,7 @@
     "discord.js": "14.13.x",
     "dotenv": "16.4.x",
     "isolated-vm": "4.7.x",
-    "koa": "2.14.x",
+    "koa": "2.15.x",
     "koa-body": "6.0.x",
     "koa-bodyparser": "4.4.x",
     "koa-json": "2.0.x",
@@ -47,6 +47,7 @@
     "node-os-utils": "1.3.x",
     "node-schedule": "2.1.x",
     "numbro": "2.5.x",
+    "prom-client": "^15.1.2",
     "quickmongo": "5.2.x",
     "raw-body": "2.5.x",
     "safe-regex": "2.1.x",
@@ -58,7 +59,7 @@
     "zlib-sync": "0.1.x"
   },
   "devDependencies": {
-    "@types/koa": "2.13.x",
+    "@types/koa": "2.15.x",
     "@types/koa__cors": "4.0.x",
     "@types/koa__router": "12.0.x",
     "@types/koa-bodyparser": "4.3.x",

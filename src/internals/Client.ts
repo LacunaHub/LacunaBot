@@ -9,7 +9,7 @@ const client = new Lacuna({
         status: 'online',
         activities: [
             {
-                name: `lacunabot.com (v${version.split('.').slice(0, 2).join('.')})`,
+                name: `lacunabot.com (v${version})`,
                 type: ActivityType.Custom
             }
         ]
@@ -26,7 +26,7 @@ const client = new Lacuna({
         GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.MessageContent
     ],
-    partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
+    partials: [Partials.User, Partials.GuildMember, Partials.Reaction],
     makeCache: manager => {
         if (manager.name === 'GuildBanManager') return new LimitedCollection({ maxSize: 100 })
 
@@ -34,13 +34,13 @@ const client = new Lacuna({
 
         if (manager.name === 'GuildMemberManager')
             return new LimitedCollection({
-                maxSize: 3000,
-                keepOverLimit: v => v.id === process.env.LCN_DISCORD_CLIENT_ID || Boolean(v.voice.channelId)
+                maxSize: 2500,
+                keepOverLimit: v => v.id === process.env.LCN_DISCORD_CLIENT_ID || !!v.voice?.channelId
             })
 
         if (manager.name === 'GuildScheduledEventManager') return new LimitedCollection({ maxSize: 0 })
 
-        if (manager.name === 'MessageManager') return new LimitedCollection({ maxSize: 50 })
+        if (manager.name === 'MessageManager') return new LimitedCollection({ maxSize: 100 })
 
         if (manager.name === 'UserManager')
             return new LimitedCollection({
@@ -61,9 +61,7 @@ const client = new Lacuna({
         ...Options.DefaultSweeperSettings,
         bans: {
             interval: 15 * 60,
-            filter: () => ban => {
-                return true
-            }
+            filter: () => ban => true
         },
         invites: {
             interval: 15 * 60,
@@ -72,7 +70,7 @@ const client = new Lacuna({
         guildMembers: {
             interval: 60 * 60,
             filter: () => member => {
-                return Boolean(member.voice?.channelId) === false && member.id !== process.env.LCN_DISCORD_CLIENT_ID
+                return !!member.voice?.channelId === false && member.id !== process.env.LCN_DISCORD_CLIENT_ID
             }
         },
         messages: {
@@ -82,7 +80,7 @@ const client = new Lacuna({
         reactions: {
             interval: 15 * 60,
             filter: () => reaction => {
-                return Date.now() - reaction.message.createdTimestamp > 30 * 60 * 1000
+                return Date.now() - reaction.message.createdTimestamp > 1000 * 60 * 30
             }
         },
         threads: {
@@ -98,7 +96,7 @@ const client = new Lacuna({
         voiceStates: {
             interval: 15 * 60,
             filter: () => state => {
-                return Boolean(state.channelId) === false
+                return !!state.channelId === false
             }
         }
     }
