@@ -26,7 +26,7 @@ const client = new Lacuna({
         GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.MessageContent
     ],
-    partials: [Partials.User, Partials.GuildMember, Partials.Reaction],
+    partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
     makeCache: manager => {
         if (manager.name === 'GuildBanManager') return new LimitedCollection({ maxSize: 100 })
 
