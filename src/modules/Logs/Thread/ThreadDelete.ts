@@ -18,14 +18,15 @@ export default async function (self: Lacuna, server: ServerDocument, thread: Thr
             if (!webhook) return false
 
             const audit = thread.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await thread.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.ThreadDelete })
+                ? await thread.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.ThreadDelete })
                 : null
-            const executor = audit?.entries?.first()?.executor
+            const entry = audit?.entries?.find(v => v.targetId === thread.id)
+            const executor = entry?.executor
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.ThreadDeleted'))
                 .setDescription(
-                    t('Logs.ThreadDeletedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, thread: `<#${thread.id}>` })
+                    t('Logs.ThreadDeletedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, thread: `**${thread.name}**` })
                 )
                 .addFields([{ name: t('Commands.OptionTypes.Channel'), value: thread.parent?.id ? `<#${thread.parentId}>` : '-', inline: true }])
                 .setFooter({ text: thread.id })

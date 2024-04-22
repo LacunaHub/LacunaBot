@@ -1,5 +1,5 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember, User } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import { fetchGuild } from '../../internals/utility/Utils'
 import Automation from '../../modules/Automation'
@@ -26,7 +26,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
         server.moderation.case_log.types.KICK.active
     ) {
         const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberKick })
-        const entry = audit.entries.find(e => (e.target as User).id == member.id)
+        const entry = audit.entries.find(v => v.targetId === member.id)
 
         if (entry && entry.executor.id !== self.user.id) {
             await caseLog.createCaseEntry(member.guild, { type: 'KICK', target: member.user, executor: entry.executor, reason: entry.reason })

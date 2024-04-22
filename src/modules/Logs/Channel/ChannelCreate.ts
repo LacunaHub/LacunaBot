@@ -18,9 +18,10 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
             if (!webhook) return false
 
             const audit = channel.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await channel.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.ChannelCreate })
+                ? await channel.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.ChannelCreate })
                 : null
-            const executor = audit?.entries?.first()?.executor
+            const entry = audit?.entries?.find(v => v.targetId === channel.id)
+            const executor = entry?.executor
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.ChannelCreated'))

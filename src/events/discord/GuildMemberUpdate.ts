@@ -1,5 +1,5 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember, User } from 'discord.js'
+import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import Automoder from '../../modules/Automoder'
 import Greeting from '../../modules/Greeting'
@@ -11,14 +11,16 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
     if (!before || !member) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
-    const addedRoles = member.roles.cache.filter(r => !before.roles.cache.has(r.id)),
-        removedRoles = before.roles.cache.filter(r => !member.roles.cache.has(r.id))
+    const isRolesAdded = !before.partial && !member.partial && member.roles.cache.some(v => !before.roles.cache.has(v.id)),
+        isRolesRemoved = !before.partial && !member.partial && before.roles.cache.some(v => !member.roles.cache.has(v.id))
 
-    if (addedRoles.size) {
+    if (isRolesAdded) {
+        const addedRoles = member.roles.cache.filter(v => !before.roles.cache.has(v.id))
         self.emit('roleMemberAdd', member, addedRoles)
     }
 
-    if (removedRoles.size) {
+    if (isRolesRemoved) {
+        const removedRoles = before.roles.cache.filter(v => !member.roles.cache.has(v.id))
         self.emit('roleMemberRemove', member, removedRoles)
     }
 
@@ -38,7 +40,7 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
             (server.moderation.case_log.types.MUTE_ADD.active || server.moderation.case_log.types.MUTE_REMOVE.active)
         ) {
             const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberUpdate })
-            const entry = audit.entries.find(e => (e.target as User).id == member.id)
+            const entry = audit.entries.find(v => v.targetId === member.id)
 
             if (entry && entry.executor.id !== self.user.id) {
                 await caseLog.createCaseEntry(member.guild, {

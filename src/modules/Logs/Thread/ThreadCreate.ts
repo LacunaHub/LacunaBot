@@ -19,9 +19,10 @@ export default async function (self: Lacuna, server: ServerDocument, thread: Thr
             if (!webhook) return false
 
             const audit = thread.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await thread.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.ThreadCreate })
+                ? await thread.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.ThreadCreate })
                 : null
-            const executor = audit?.entries?.first()?.executor
+            const entry = audit?.entries?.find(v => v.targetId === thread.id)
+            const executor = entry?.executor
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.ThreadCreated'))
