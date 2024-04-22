@@ -18,13 +18,16 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
             if (!webhook) return false
 
             const audit = role.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await role.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.RoleDelete })
+                ? await role.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.RoleDelete })
                 : null
-            const executor = audit?.entries?.first()?.executor
+            const entry = audit?.entries?.find(v => v.targetId === role.id)
+            const executor = entry?.executor
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.RoleDeleted'))
-                .setDescription(t('Logs.RoleDeletedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, role: `<@&${role.id}>` }))
+                .setDescription(
+                    t('Logs.RoleDeletedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, role: `**@${role.name}**` })
+                )
                 .addFields([
                     { name: t('Logs.RoleColor'), value: `\`${role.hexColor}\``, inline: true },
                     { name: t('Logs.RolePosition'), value: role.rawPosition.toString(), inline: true }
