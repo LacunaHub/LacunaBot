@@ -127,7 +127,7 @@ export default async function getMetrics(ctx: Context) {
 
         messageCounter.set({ shard: cluster.clusterId }, cluster.messageCount || 0)
 
-        voiceConnectionCounter.set({ shard: cluster.clusterId }, cluster.voiceChannelCount || 0)
+        voiceConnectionCounter.set({ shard: cluster.clusterId }, cluster.voiceConnectionCount || 0)
 
         wsPingGauge.set({ hostname: cluster.hostname, shard: cluster.clusterId }, cluster.wsPing)
         wsStatusGauge.set({ hostname: cluster.hostname, shard: cluster.clusterId }, cluster.wsStatus)
