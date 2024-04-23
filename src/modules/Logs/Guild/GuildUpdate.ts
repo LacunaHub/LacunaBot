@@ -19,9 +19,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             if (!webhook) return false
 
             const audit = guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.GuildUpdate })
+                ? await guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.GuildUpdate })
                 : null
-            const executor = audit?.entries?.first()?.executor
+            const entry = audit?.entries?.find(v => v.targetId === guild.id)
+            const executor = entry?.executor
 
             if (before.name !== guild.name) {
                 const embed = new EmbedBuilder()

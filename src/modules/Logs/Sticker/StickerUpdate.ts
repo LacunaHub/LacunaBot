@@ -18,9 +18,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
             if (!webhook) return false
 
             const audit = sticker.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await sticker.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.StickerUpdate })
+                ? await sticker.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.StickerUpdate })
                 : null
-            const executor = audit?.entries?.first()?.executor
+            const entry = audit?.entries?.find(v => v.targetId === sticker.id)
+            const executor = entry?.executor
 
             if (before.name !== sticker.name) {
                 const embed = new EmbedBuilder()

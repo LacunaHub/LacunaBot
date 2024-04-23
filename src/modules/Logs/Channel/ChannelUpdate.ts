@@ -19,9 +19,10 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
             if (!webhook) return false
 
             const audit = channel.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await channel.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.ChannelUpdate })
+                ? await channel.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.ChannelUpdate })
                 : null
-            const executor = audit?.entries?.first()?.executor
+            const entry = audit?.entries?.find(v => v.targetId === channel.id)
+            const executor = entry?.executor
 
             if (before.name !== channel.name) {
                 const embed = new EmbedBuilder()
@@ -58,7 +59,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 }
             }
 
-            if ((before as any).topic !== (channel as any).topic) {
+            if (before['topic'] !== channel['topic']) {
                 const embed = new EmbedBuilder()
                     .setTitle(t('Logs.ChannelUpdated'))
                     .setDescription(
@@ -93,7 +94,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                 }
             }
 
-            if ((before as TextChannel).rateLimitPerUser !== (channel as TextChannel).rateLimitPerUser) {
+            if (before.isTextBased() && channel.isTextBased() && before.rateLimitPerUser !== channel.rateLimitPerUser) {
                 const embed = new EmbedBuilder()
                     .setTitle(t('Logs.ChannelUpdated'))
                     .setDescription(

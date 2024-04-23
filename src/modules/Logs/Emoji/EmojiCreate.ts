@@ -18,9 +18,10 @@ export default async function (self: Lacuna, server: ServerDocument, emoji: Guil
             if (!webhook) return false
 
             const audit = emoji.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await emoji.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.EmojiCreate })
+                ? await emoji.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.EmojiCreate })
                 : null
-            const executor = audit?.entries?.first()?.executor
+            const entry = audit?.entries?.find(v => v.targetId === emoji.id)
+            const executor = entry?.executor
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.EmojiCreated'))

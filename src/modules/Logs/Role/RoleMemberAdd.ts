@@ -19,9 +19,10 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             if (!webhook) return false
 
             const audit = member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await member.guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MemberRoleUpdate })
+                ? await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberRoleUpdate })
                 : null
-            const executor = audit?.entries?.first()?.executor
+            const entry = audit?.entries?.find(v => v.targetId === member.id)
+            const executor = entry?.executor
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.RoleMemberAdded'))

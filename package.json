@@ -1,6 +1,6 @@
 {
   "name": "lacuna-bot",
-  "version": "4.11.6",
+  "version": "4.11.7",
   "description": "Feature-rich Discord bot",
   "main": "dist/index.js",
   "scripts": {
