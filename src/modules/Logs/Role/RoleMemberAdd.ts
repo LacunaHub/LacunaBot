@@ -28,21 +28,17 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 .setTitle(t('Logs.RoleMemberAdded'))
                 .setDescription(
                     t('Logs.RoleMemberAddedTemplate', {
-                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
-                        target: `**${member.user.tag}**`
+                        username: `<@${executor?.id ?? '0'}>`,
+                        target: `<@${member.id}> (${member.user.tag})`
                     })
                 )
                 .addFields([{ name: t('Common.Roles'), value: roles.map(role => `<@&${role.id}>`).join(', '), inline: true }])
-                .setFooter({ text: member.id })
+                .setFooter({ text: `UID: ${member.id}` })
                 .setTimestamp()
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsRoleMemberAdd', action: 'SendMessageViaWebhook', error: err, guild_id: member.guild.id })
 

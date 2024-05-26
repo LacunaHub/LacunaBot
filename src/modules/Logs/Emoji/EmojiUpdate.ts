@@ -28,24 +28,20 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTitle(t('Logs.EmojiUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
-                            change: t('Logs.EmojiUpdatedName', { emoji: `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>` })
+                            username: `<@${executor?.id ?? '0'}>`,
+                            change: t('Logs.EmojiUpdatedName', { emoji: emoji.toString() })
                         })
                     )
                     .setFields([
                         { name: t('Logs.BeforeChange'), value: before.name },
                         { name: t('Logs.AfterChange'), value: emoji.name }
                     ])
-                    .setFooter({ text: emoji.id })
+                    .setFooter({ text: `EID: ${emoji.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsEmojiUpdateName',

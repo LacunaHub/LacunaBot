@@ -27,20 +27,16 @@ export default async function (self: Lacuna, server: ServerDocument, emoji: Guil
                 .setTitle(t('Logs.EmojiCreated'))
                 .setDescription(
                     t('Logs.EmojiCreatedTemplate', {
-                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
-                        emoji: `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`
+                        username: `<@${executor?.id ?? '0'}>`,
+                        emoji: emoji.toString()
                     })
                 )
-                .setFooter({ text: emoji.id })
+                .setFooter({ text: `EID: ${emoji.id}` })
                 .setTimestamp()
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsEmojiCreate', action: 'SendMessageViaWebhook', error: err, guild_id: emoji.guild.id })
 

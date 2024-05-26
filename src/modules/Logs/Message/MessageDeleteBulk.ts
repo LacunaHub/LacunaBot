@@ -33,11 +33,7 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
                 .setColor('#EF5350')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({
                     module: 'LogsMessageDeleteBulk',

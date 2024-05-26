@@ -29,7 +29,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTitle(t('Logs.GuildUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            username: `<@${executor?.id ?? '0'}>`,
                             change: t('Logs.GuildUpdatedName')
                         })
                     )
@@ -41,11 +41,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({ module: 'LogsGuildUpdateName', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
 
@@ -58,7 +54,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTitle(t('Logs.GuildUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            username: `<@${executor?.id ?? '0'}>`,
                             change: t('Logs.GuildUpdatedAFKChannel')
                         })
                     )
@@ -70,11 +66,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsGuildUpdateAfkChannel',
@@ -92,7 +84,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTitle(t('Logs.GuildUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            username: `<@${executor?.id ?? '0'}>`,
                             change: t('Logs.GuildUpdatedAFKTimeout')
                         })
                     )
@@ -112,11 +104,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsGuildUpdateAfkTimeout',
@@ -134,7 +122,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTitle(t('Logs.GuildUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            username: `<@${executor?.id ?? '0'}>`,
                             change: t('Logs.GuildUpdatedDescription')
                         })
                     )
@@ -146,11 +134,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsGuildUpdateDescription',

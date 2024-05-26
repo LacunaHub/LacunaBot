@@ -22,17 +22,13 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
                 .addFields([
                     { name: t('Logs.InviteCode'), value: invite.code, inline: true },
                     { name: t('Commands.OptionTypes.Channel'), value: `<#${invite.channel.id}>`, inline: true },
-                    { name: t('Logs.InviteInviter'), value: invite.inviter?.tag ?? '-', inline: true }
+                    { name: t('Logs.InviteInviter'), value: `<@${invite.inviter?.id ?? '0'}>`, inline: true }
                 ])
                 .setTimestamp()
                 .setColor('#EF5350')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsInviteDelete', action: 'SendMessageViaWebhook', error: err, guild_id: invite.guild.id })
 

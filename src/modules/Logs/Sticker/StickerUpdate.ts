@@ -28,7 +28,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
                     .setTitle(t('Logs.StickerUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            username: `<@${executor?.id ?? '0'}>`,
                             change: t('Logs.StickerUpdatedName', { sticker: `**${sticker.name}**` })
                         })
                     )
@@ -36,16 +36,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Sti
                         { name: t('Logs.BeforeChange'), value: before.name, inline: true },
                         { name: t('Logs.AfterChange'), value: sticker.name, inline: true }
                     ])
-                    .setFooter({ text: sticker.id })
+                    .setFooter({ text: `SID: ${sticker.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsStickerUpdateName',

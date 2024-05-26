@@ -21,21 +21,17 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
                 .setTitle(t('Logs.VoiceMove'))
                 .setDescription(
                     t('Logs.VoiceMoveTemplate', {
-                        username: `**${state.member.user.tag}**`,
+                        username: `<@${state.id}> (${state.member.user.tag})`,
                         from: `<#${before.channelId}>`,
                         to: `<#${state.channelId}>`
                     })
                 )
-                .setFooter({ text: state.member.id })
+                .setFooter({ text: `UID: ${state.id}` })
                 .setTimestamp()
                 .setColor('#FFA726')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsVoiceMove', action: 'SendMessageViaWebhook', error: err, guild_id: state.guild.id })
 

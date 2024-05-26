@@ -28,7 +28,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                     .setTitle(t('Logs.RoleUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            username: `<@${executor?.id ?? '0'}>`,
                             change: t('Logs.RoleUpdatedName', { role: `<@&${role.id}>` })
                         })
                     )
@@ -36,16 +36,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                         { name: t('Logs.BeforeChange'), value: before.name, inline: true },
                         { name: t('Logs.AfterChange'), value: role.name, inline: true }
                     ])
-                    .setFooter({ text: role.id })
+                    .setFooter({ text: `RID: ${role.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsRoleUpdateName',
@@ -76,11 +72,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsRoleUpdateColor',
@@ -107,11 +99,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsRoleUpdatePermissions',

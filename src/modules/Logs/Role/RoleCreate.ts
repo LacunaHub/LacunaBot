@@ -25,21 +25,17 @@ export default async function (self: Lacuna, server: ServerDocument, role: Role)
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.RoleCreated'))
-                .setDescription(t('Logs.RoleCreatedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, role: `<@&${role.id}>` }))
+                .setDescription(t('Logs.RoleCreatedTemplate', { username: `<@${executor?.id ?? '0'}>`, role: `<@&${role.id}>` }))
                 .addFields([
                     { name: t('Logs.RoleColor'), value: `\`${role.hexColor}\``, inline: true },
                     { name: t('Logs.RolePosition'), value: role.rawPosition.toString(), inline: true }
                 ])
-                .setFooter({ text: role.id })
+                .setFooter({ text: `RID: ${role.id}` })
                 .setTimestamp()
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsRoleCreate', action: 'SendMessageViaWebhook', error: err, guild_id: role.guild.id })
 
