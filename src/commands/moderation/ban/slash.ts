@@ -120,7 +120,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_ADD', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'BanAdd', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
         content: `${self.staticEmojis.OK} | ${t('Commands.BanCommand.Texts.UserHasBeenBanned', {
             username: `**${interaction.member.displayName}**`,

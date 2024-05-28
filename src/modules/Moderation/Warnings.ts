@@ -56,7 +56,7 @@ export async function addWarn(
         )
     }
 
-    await caseLog.createCaseEntry(signal.guild, { type: 'WARN_ADD', target: target.user, executor: executor.user, reason })
+    await caseLog.createCaseEntry(signal.guild, { type: 'WarnAdd', target: target.user, executor: executor.user, reason })
 
     if (penalty) {
         const ban = penalty.options.includes('ACTION_BAN')
@@ -85,7 +85,7 @@ export async function addWarn(
                 }
             }
 
-            await caseLog.createCaseEntry(signal.guild, { type: 'BAN_ADD', target: target.user, executor: self.user, reason })
+            await caseLog.createCaseEntry(signal.guild, { type: 'BanAdd', target: target.user, executor: self.user, reason })
         }
 
         if (mute && !ban && !kick && target.moderatable) {
@@ -100,7 +100,7 @@ export async function addWarn(
                 await self.logger.handleError({ module: 'WarningPenalty', action: 'DisableCommunication', error: err, guild_id: signal.guildId })
             }
 
-            await caseLog.createCaseEntry(signal.guild, { type: 'MUTE_ADD', target: target.user, executor: self.user, reason })
+            await caseLog.createCaseEntry(signal.guild, { type: 'MuteAdd', target: target.user, executor: self.user, reason })
 
             if (server.moderation.mutes.rar) {
                 const current_roles = target.roles.cache.filter(r => r.editable && r.id != signal.guild.id).map(r => r.id)
@@ -137,7 +137,7 @@ export async function addWarn(
                 await self.logger.handleError({ module: 'WarningPenalty', action: 'Kick', error: err, guild_id: signal.guildId })
             }
 
-            await caseLog.createCaseEntry(signal.guild, { type: 'KICK', target: target.user, executor: self.user, reason })
+            await caseLog.createCaseEntry(signal.guild, { type: 'Kick', target: target.user, executor: self.user, reason })
         }
 
         if (modify_roles && !ban && !kick) {
