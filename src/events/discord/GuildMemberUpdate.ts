@@ -32,20 +32,19 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
     await Automoder.nicknamesModeration(self, server, member)
 
     if (before.communicationDisabledUntilTimestamp !== member.communicationDisabledUntilTimestamp) {
-        const caseLogChannel = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel,
-            botMember = member.guild.members.me
+        const case_log = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
 
         if (
-            caseLogChannel &&
-            botMember.permissions.has(self.PermissionFlags.ViewAuditLog) &&
+            case_log &&
+            member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog) &&
             (server.moderation.case_log.types.MUTE_ADD.active || server.moderation.case_log.types.MUTE_REMOVE.active)
         ) {
-            const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberUpdate }),
-                entry = audit.entries.find(v => v.targetId === member.id)
+            const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberUpdate })
+            const entry = audit.entries.find(v => v.targetId === member.id)
 
             if (entry && entry.executor.id !== self.user.id) {
                 await caseLog.createCaseEntry(member.guild, {
-                    type: member.communicationDisabledUntilTimestamp ? 'MuteAdd' : 'MuteRemove',
+                    type: member.communicationDisabledUntilTimestamp ? 'MUTE_ADD' : 'MUTE_REMOVE',
                     target: member.user,
                     executor: entry.executor,
                     reason: entry.reason

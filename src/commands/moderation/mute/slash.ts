@@ -141,7 +141,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'MuteAdd', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_ADD', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
         content: `${self.staticEmojis.OK} | ${t('Commands.MuteCommand.Texts.UserHasBeenMuted', {
             username: `**${interaction.member.displayName}**`,

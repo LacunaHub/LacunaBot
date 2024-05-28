@@ -104,7 +104,7 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
             }
         }
 
-        await caseLog.createCaseEntry(message.guild, { type: 'BanAdd', target: message.author, executor: self.user, reason })
+        await caseLog.createCaseEntry(message.guild, { type: 'BAN_ADD', target: message.author, executor: self.user, reason })
     }
 
     if (mute && !ban && !kick && message.member.moderatable) {
@@ -117,7 +117,7 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
             await self.logger.handleError({ module: 'LinksFilter', action: 'DisableCommunication', error: err, guild_id: message.guildId })
         }
 
-        await caseLog.createCaseEntry(message.guild, { type: 'MuteAdd', target: message.author, executor: self.user, reason })
+        await caseLog.createCaseEntry(message.guild, { type: 'MUTE_ADD', target: message.author, executor: self.user, reason })
 
         if (server.moderation.mutes.rar) {
             const current_roles = message.member.roles.cache.filter(r => r.editable && r.id != message.guild.id).map(r => r.id)
@@ -152,7 +152,7 @@ async function penalty(self: Lacuna, server: ServerDocument, message: Message) {
             await message.member.kick(reason)
         } catch (err) {}
 
-        await caseLog.createCaseEntry(message.guild, { type: 'Kick', target: message.author, executor: self.user, reason })
+        await caseLog.createCaseEntry(message.guild, { type: 'KICK', target: message.author, executor: self.user, reason })
     }
 
     if (modify_roles && !ban && !kick) {
