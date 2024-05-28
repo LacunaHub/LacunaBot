@@ -9,14 +9,15 @@ const handler = async (self: Lacuna, ban: GuildBan) => {
 
     if (!server) return false
 
-    const case_log = ban.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
+    const caseLogChannel = ban.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel,
+        botMember = ban.guild.members.me
 
-    if (case_log && ban.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog) && server.moderation.case_log.types.BAN_ADD.active) {
-        const audit = await ban.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberBanAdd })
-        const entry = audit.entries.find(v => v.targetId === ban.user.id)
+    if (caseLogChannel && botMember.permissions.has(self.PermissionFlags.ViewAuditLog) && server.moderation.case_log.types.BAN_ADD.active) {
+        const audit = await ban.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberBanAdd }),
+            entry = audit.entries.find(v => v.targetId === ban.user.id)
 
         if (entry && entry.executor.id !== self.user.id) {
-            await caseLog.createCaseEntry(ban.guild, { type: 'BAN_ADD', target: ban.user, executor: entry.executor, reason: entry.reason })
+            await caseLog.createCaseEntry(ban.guild, { type: 'BanAdd', target: ban.user, executor: entry.executor, reason: entry.reason })
         }
     }
 

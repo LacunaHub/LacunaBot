@@ -95,7 +95,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         await self.logger.handleError({ module: 'KickCommand', action: 'Kick', error: err, guild_id: interaction.guildId })
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })
+    await caseLog.createCaseEntry(interaction.guild, { type: 'Kick', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
         content: `${self.staticEmojis.OK} | ${t('Commands.KickCommand.Texts.UserHasBeenKicked', {
             username: `**${interaction.member.displayName}**`,
