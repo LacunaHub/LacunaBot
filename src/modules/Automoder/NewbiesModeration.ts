@@ -47,7 +47,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 }
             }
 
-            await caseLog.createCaseEntry(member.guild, { type: 'BAN_ADD', target: member.user, executor: self.user, reason })
+            await caseLog.createCaseEntry(member.guild, { type: 'BanAdd', target: member.user, executor: self.user, reason })
         }
 
         if (mute && !ban && !kick && member.moderatable) {
@@ -60,7 +60,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 await self.logger.handleError({ module: 'NewbiesModeration', action: 'DisableCommunication', error: err, guild_id: member.guild.id })
             }
 
-            await caseLog.createCaseEntry(member.guild, { type: 'MUTE_ADD', target: member.user, executor: self.user, reason })
+            await caseLog.createCaseEntry(member.guild, { type: 'MuteAdd', target: member.user, executor: self.user, reason })
 
             if (server.moderation.mutes.rar) {
                 const current_roles = member.roles.cache.filter(r => r.editable && r.id != member.guild.id).map(r => r.id)
@@ -94,7 +94,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
             try {
                 await member.kick(reason)
             } catch (err) {}
-            await caseLog.createCaseEntry(member.guild, { type: 'KICK', target: member.user, executor: self.user, reason })
+            await caseLog.createCaseEntry(member.guild, { type: 'Kick', target: member.user, executor: self.user, reason })
         }
 
         if (modify_roles && !ban && !kick) {
