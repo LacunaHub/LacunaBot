@@ -110,7 +110,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             await self.logger.handleError({ module: 'Reports', action: 'KickQuickAction', error: err, guild_id: interaction.guildId })
         }
 
-        await caseLog.createCaseEntry(interaction.guild, { type: 'Kick', target: member.user, executor: interaction.user, reason })
+        await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: member.user, executor: interaction.user, reason })
     }
 
     if (action === 'WARN') {
@@ -254,7 +254,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             })
         }
 
-        await caseLog.createCaseEntry(interaction.guild, { type: 'BanAdd', target: member.user, executor: interaction.user, reason })
+        await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_ADD', target: member.user, executor: interaction.user, reason })
     }
 
     if (action === 'MUTE') {
@@ -313,7 +313,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             }
         }
 
-        await caseLog.createCaseEntry(interaction.guild, { type: 'MuteAdd', target: member.user, executor: interaction.user, reason })
+        await caseLog.createCaseEntry(interaction.guild, { type: 'MUTE_ADD', target: member.user, executor: interaction.user, reason })
     }
 
     await removeComponentsFromMessage(interaction)

@@ -18,35 +18,14 @@ import db from '../../database'
 import i18n from '../../i18n'
 import Lacuna from '../../internals/Lacuna'
 import Logger from '../../internals/Logger'
-import { capitalizeFirstLetter } from '../../internals/utility/Utils'
+import { capitalizeFirstLetter, snakeToPascalCase } from '../../internals/utility/Utils'
+import { images } from '../Logs'
 
-export const CaseLogImages = {
-    BanAdd: 'https://i.imgur.com/qI02Ivf.png',
-    BanRemove: 'https://i.imgur.com/FVnlHqJ.png',
-    Kick: 'https://i.imgur.com/RYVLGuy.png',
-    MuteAdd: 'https://i.imgur.com/t5FJ6Gw.png',
-    MuteRemove: 'https://i.imgur.com/rtL11np.png',
-    PruneMessages: 'https://i.imgur.com/vUd9gtw.png',
-    WarnAdd: 'https://i.imgur.com/R03G3G5.png',
-    WarnRemove: 'https://i.imgur.com/AXNkdfG.png'
-}
-
-export const CaseLogTypesCompatibility = {
-    BanAdd: 'BAN_ADD',
-    BanRemove: 'BAN_REMOVE',
-    Kick: 'KICK',
-    MuteAdd: 'MUTE_ADD',
-    MuteRemove: 'MUTE_REMOVE',
-    PruneMessages: 'PRUNE_MESSAGES',
-    WarnAdd: 'WARN_ADD',
-    WarnRemove: 'WARN_REMOVE'
-}
-
-export async function createCaseEntry(guild: Guild, options: CreateCaseMessageOptions) {
+export async function createCaseEntry(guild: Guild, options: ICreateCaseMessageOptions) {
     const server = await db.servers.findOne({ _id: guild.id })
     const caseLog = guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
 
-    if (caseLog && server.moderation.case_log.types[CaseLogTypesCompatibility[options.type]].active) {
+    if (caseLog && server.moderation.case_log.types[options.type].active) {
         const t = i18n.t.bind(null, server.locale)
         const caseId = server.moderation.case_log.case_count + 1
 
@@ -54,20 +33,19 @@ export async function createCaseEntry(guild: Guild, options: CreateCaseMessageOp
             await caseLog.send({
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle(t(`CaseLog.CaseTypes.${options.type}`))
-                        // .setAuthor({ name: t(`CaseLog.CaseTypes.${options.type}`), iconURL: CaseLogImages[options.type] })
+                        .setAuthor({ name: t(`CaseLog.CaseTypes.${snakeToPascalCase(options.type)}`), iconURL: images[options.type] })
                         .addFields([
                             {
                                 name: t('Commands.OptionTypes.User'),
-                                value: options.target ? `<@${options.target.id}> (${options.target.tag})` : '-',
+                                value: options.target ? `${options.target.tag}\n(${options.target.id})` : '-',
                                 inline: true
                             },
-                            { name: t('CaseLog.Moderator'), value: `<@${options.executor.id}> (${options.executor.tag})`, inline: true },
+                            { name: t('CaseLog.Moderator'), value: options.executor.tag, inline: true },
                             { name: capitalizeFirstLetter(t('Commands.Options.Reason')), value: options.reason ?? '-' }
                         ])
                         .setFooter({ text: t('CaseLog.CaseNumber', { caseNumber: caseId }) })
                         .setTimestamp()
-                        .setColor(options.type.endsWith('Remove') ? '#2FDF84' : '#EF5350')
+                        .setColor(options.type.endsWith('REMOVE') ? '#2FDF84' : '#EF5350')
                 ],
                 components: [
                     new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -93,7 +71,7 @@ export async function createCaseEntry(guild: Guild, options: CreateCaseMessageOp
         guild.client.emit('moduleExecution', {
             module: 'Moderation',
             category: 'CaseLog',
-            label: options.type,
+            label: snakeToPascalCase(options.type),
             guild: { id: guild.id, name: guild.name },
             target: { id: options.target.id, name: options.target.tag }
         })
@@ -166,11 +144,9 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
     })
 }
 
-export interface CreateCaseMessageOptions {
-    type: CaseMessageType
+export interface ICreateCaseMessageOptions {
+    type: 'BAN_ADD' | 'BAN_REMOVE' | 'KICK' | 'MUTE_ADD' | 'MUTE_REMOVE' | 'PRUNE_MESSAGES' | 'WARN_ADD' | 'WARN_REMOVE'
     target?: User
     executor: User
     reason?: string
 }
-
-export type CaseMessageType = 'BanAdd' | 'BanRemove' | 'Kick' | 'MuteAdd' | 'MuteRemove' | 'PruneMessages' | 'WarnAdd' | 'WarnRemove'
