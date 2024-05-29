@@ -1,37 +1,39 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModerationAutoModNicknames } from '@lacunahub/lacuna-database-driver'
 import { GuildMember } from 'discord.js'
 import { clean, isZalgo } from 'unzalgo'
-import Lacuna from '../../internals/Lacuna'
+import Lacuna from '../../../internals/Lacuna'
 
-const adjectives = ['Foggy', 'Magnanimous', 'Taboo', 'Compulsive', 'Busy', 'Angry', 'Responsive', 'Amiable', 'Nice', 'Unexpected']
+const predefinedNicknames = ['Foggy', 'Magnanimous', 'Taboo', 'Compulsive', 'Busy', 'Angry', 'Responsive', 'Amiable', 'Nice', 'Unexpected']
 
-export default async function (self: Lacuna, server: ServerDocument, member: GuildMember) {
+export default async function moderateNicknames(self: Lacuna, server: ServerDocument, member: GuildMember) {
     const reason = 'AutoMod: Nicknames moderation'
     const config = server.moderation.automoder.nicknames
 
     if (!config.active) return false
-    if (member.user.bot && config.ignored.bots) return false
-    if (member.permissions.any(BigInt(config.ignored.permissions.reduce((x, y) => x | y, 0)), false)) return false
 
+    const configPermissions = BigInt(config.ignored.permissions.reduce((x, y) => x | y, 0))
+
+    if (member.user.bot && config.ignored.bots) return false
+    if (member.permissions.any(configPermissions, false)) return false
     if (member.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
 
-    let name = adjustNickname(config, member.displayName)
+    let nickname = adjustNickname(config, member.displayName)
 
-    if (!name.length) {
-        const random = Math.floor(Math.random() * adjectives.length)
+    if (!nickname.length) {
+        const random = Math.floor(Math.random() * predefinedNicknames.length)
 
-        name = adjectives[random]
+        nickname = predefinedNicknames[random]
     }
 
-    if (member.manageable && name !== member.displayName) {
+    if (member.manageable && nickname !== member.displayName) {
         try {
-            await member.setNickname(name, reason)
+            await member.setNickname(nickname, reason)
         } catch (err) {
-            await self.logger.handleError({ module: 'NicknameModeration', action: 'SetNickname', error: err, guild_id: member.guild.id })
+            await self.logger.handleError({ module: 'AutoMod', action: 'SetNickname', error: err, guild_id: member.guild.id })
         }
 
         self.emit('moduleExecution', {
-            module: 'AutoModer',
+            module: 'AutoMod',
             category: 'NicknamesModeration',
             guild: { id: member.guild.id, name: member.guild.name },
             target: { id: member.id, name: member.user.tag }
@@ -41,7 +43,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
     return true
 }
 
-function adjustNickname(config: ServerDocument['moderation']['automoder']['nicknames'], name: string): string {
+function adjustNickname(config: ServerModerationAutoModNicknames, name: string): string {
     const regexps = {
         special_characters: /[-!@#$%\^&*()_=+\[\]\\{};:'"|,<.>\/?]/g,
         emojis: /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}/gu

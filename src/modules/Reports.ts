@@ -4,7 +4,8 @@ import ms from 'ms'
 import Lacuna from '../internals/Lacuna'
 import TemporaryBan from '../internals/structures/TemporaryBan'
 import { capitalizeFirstLetter } from '../internals/utility/Utils'
-import { caseLog, warnings } from './Moderation'
+import warnUserAction from './AutoMod/actions/WarnUserAction'
+import { caseLog } from './Moderation'
 
 export async function onPressReportButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
@@ -125,7 +126,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             return false
         }
 
-        await warnings.addWarn(self, server, interaction, { target: member, executor: interaction.member, reason })
+        await warnUserAction(self, server, interaction, { target: member, executor: interaction.member, reason })
     }
 
     await removeComponentsFromMessage(interaction)
