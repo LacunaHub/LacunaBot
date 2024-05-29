@@ -3,8 +3,8 @@ import { Events, GuildMember } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import { activePatronRoleId, formerPatronRoleId, supportServerId } from '../../internals/utility/Constants'
 import { fetchGuild } from '../../internals/utility/Utils'
+import AutoMod from '../../modules/AutoMod'
 import Automation from '../../modules/Automation'
-import Automoder from '../../modules/Automoder'
 import Greeting from '../../modules/Greeting'
 import GuildImageRotation from '../../modules/GuildImageRotation'
 import Logs from '../../modules/Logs'
@@ -23,8 +23,8 @@ const handler = async (self: Lacuna, member: GuildMember) => {
 
     await Automation.handleEvent('GUILD_MEMBER_ADD', self, server, member)
     await checkReportsOnGuildMemberAdd(self, server, member)
-    await Automoder.nicknamesModeration(self, server, member)
-    await Automoder.newbiesModeration(self, server, member)
+    await AutoMod.moderateNicknames(self, server, member)
+    await AutoMod.moderateNewbies(self, server, member)
     await GuildImageRotation.rotateBanner(self, server, member.guild, member)
     await Logs.GuildMemberAdd(self, server, member)
 

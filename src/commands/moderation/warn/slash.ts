@@ -1,7 +1,8 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
-import { caseLog, warnings } from '../../../modules/Moderation'
+import warnUserAction from '../../../modules/AutoMod/actions/WarnUserAction'
+import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
 
 export async function addSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
@@ -65,7 +66,7 @@ export async function addSlash(self: Lacuna, server: ServerDocument, interaction
     }
 
     await interaction.deferReply({ ephemeral: true })
-    await warnings.addWarn(self, server, interaction, { target: mention, executor: interaction.member, reason: reason })
+    await warnUserAction(self, server, interaction, { target: mention, executor: interaction.member, reason: reason })
 
     await interaction.editReply({
         content: `${self.staticEmojis.OK} | ${t('Commands.WarnCommand.SubCommands.AddCommand.Texts.UserHasBeenWarned', {
@@ -169,7 +170,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         })
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'WarnRemove', target: mention, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, { type: 'WarnRemove', target: mention, executor: interaction.user, reason })
 
     return true
 }

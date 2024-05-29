@@ -1,10 +1,10 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
-import Automoder from '../../modules/Automoder'
+import AutoMod from '../../modules/AutoMod'
 import Greeting from '../../modules/Greeting'
 import Logs from '../../modules/Logs'
-import { caseLog } from '../../modules/Moderation'
+import { createCaseLogEntry } from '../../modules/Moderation/CaseLog'
 
 const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) => {
     if (self.user.id === member.id) return false
@@ -29,7 +29,7 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
         await Greeting.restoreNicknameAndRoles(self, server, member)
     }
 
-    await Automoder.nicknamesModeration(self, server, member)
+    await AutoMod.moderateNicknames(self, server, member)
 
     if (before.communicationDisabledUntilTimestamp !== member.communicationDisabledUntilTimestamp) {
         const caseLogChannel = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel,
@@ -44,7 +44,7 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
                 entry = audit.entries.find(v => v.targetId === member.id)
 
             if (entry && entry.executor.id !== self.user.id) {
-                await caseLog.createCaseEntry(member.guild, {
+                await createCaseLogEntry(member.guild, {
                     type: member.communicationDisabledUntilTimestamp ? 'MuteAdd' : 'MuteRemove',
                     target: member.user,
                     executor: entry.executor,

@@ -4,7 +4,8 @@ import ms from 'ms'
 import Lacuna from '../internals/Lacuna'
 import TemporaryBan from '../internals/structures/TemporaryBan'
 import { capitalizeFirstLetter } from '../internals/utility/Utils'
-import { caseLog, warnings } from './Moderation'
+import warnUserAction from './AutoMod/actions/WarnUserAction'
+import { createCaseLogEntry } from './Moderation/CaseLog'
 
 export async function onPressReportButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
@@ -110,7 +111,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             await self.logger.handleError({ module: 'Reports', action: 'KickQuickAction', error: err, guild_id: interaction.guildId })
         }
 
-        await caseLog.createCaseEntry(interaction.guild, { type: 'Kick', target: member.user, executor: interaction.user, reason })
+        await createCaseLogEntry(interaction.guild, { type: 'Kick', target: member.user, executor: interaction.user, reason })
     }
 
     if (action === 'WARN') {
@@ -125,7 +126,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             return false
         }
 
-        await warnings.addWarn(self, server, interaction, { target: member, executor: interaction.member, reason })
+        await warnUserAction(self, server, interaction, { target: member, executor: interaction.member, reason })
     }
 
     await removeComponentsFromMessage(interaction)
@@ -254,7 +255,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             })
         }
 
-        await caseLog.createCaseEntry(interaction.guild, { type: 'BanAdd', target: member.user, executor: interaction.user, reason })
+        await createCaseLogEntry(interaction.guild, { type: 'BanAdd', target: member.user, executor: interaction.user, reason })
     }
 
     if (action === 'MUTE') {
@@ -313,7 +314,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             }
         }
 
-        await caseLog.createCaseEntry(interaction.guild, { type: 'MuteAdd', target: member.user, executor: interaction.user, reason })
+        await createCaseLogEntry(interaction.guild, { type: 'MuteAdd', target: member.user, executor: interaction.user, reason })
     }
 
     await removeComponentsFromMessage(interaction)
