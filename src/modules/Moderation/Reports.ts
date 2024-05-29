@@ -1,18 +1,27 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, ButtonInteraction, EmbedBuilder, GuildMember, StringSelectMenuInteraction } from 'discord.js'
 import ms from 'ms'
-import Lacuna from '../internals/Lacuna'
-import TemporaryBan from '../internals/structures/TemporaryBan'
-import { capitalizeFirstLetter } from '../internals/utility/Utils'
-import warnUserAction from './AutoMod/actions/WarnUserAction'
-import { createCaseLogEntry } from './Moderation/CaseLog'
+import Lacuna from '../../internals/Lacuna'
+import { capitalizeFirstLetter } from '../../internals/utility/Utils'
+import banAction from '../AutoMod/actions/BanAction'
+import kickAction from '../AutoMod/actions/KickAction'
+import muteAction from '../AutoMod/actions/MuteAction'
+import warnUserAction from '../AutoMod/actions/WarnUserAction'
+
+const QuickActionLocales = {
+    BAN: 'CaseLog.CaseTypes.BanAdd',
+    KICK: 'CaseLog.CaseTypes.Kick',
+    MUTE: 'CaseLog.CaseTypes.MuteAdd',
+    WARN: 'CaseLog.CaseTypes.WarnAdd'
+}
 
 export async function onPressReportButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
     const [, action, user_id] = interaction.customId.split('-')
 
     let member: GuildMember
-    const reason = '-'
+    const reason = interaction.message.url
+    let closeReason = t('Commands.ReportCommand.Texts.ReportClosedBy', { username: `<@${interaction.user.id}> (${interaction.user.tag})` })
 
     await interaction.deferUpdate()
 
@@ -28,14 +37,36 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             ephemeral: true
         })
 
-        await removeComponentsFromMessage(interaction)
+        await markReportAsClosed(interaction, closeReason)
 
         return false
     }
 
+    if (action === 'SKIP') {
+        if (!interaction.memberPermissions.has(self.PermissionFlags.ModerateMembers)) {
+            await interaction.followUp({
+                content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
+                    username: `**${interaction.member.displayName}**`
+                })}`,
+                ephemeral: true
+            })
+
+            return false
+        }
+
+        await markReportAsClosed(interaction, closeReason)
+
+        return true
+    }
+
     if (member.id === interaction.user.id) {
+        const message =
+            action === 'KICK'
+                ? 'Commands.KickCommand.Texts.YouCannotKickYourself'
+                : 'Commands.WarnCommand.SubCommands.AddCommand.Texts.YouCannotWarnYourself'
+
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.member.displayName}**` })}`,
+            content: `${self.staticEmojis.ERROR} | ${t(message, { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -55,7 +86,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
     if (
         server.moderation.deny_moderate_users_with_mp &&
-        member.permissions.has(self.PermissionFlags[action == 'KICK' ? 'KickMembers' : 'ManageRoles'])
+        member.permissions.has(self.PermissionFlags[action == 'KICK' ? 'KickMembers' : 'ModerateMembers'])
     ) {
         await interaction.followUp({
             content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
@@ -64,12 +95,12 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             ephemeral: true
         })
 
-        await removeComponentsFromMessage(interaction)
+        await markReportAsClosed(interaction, closeReason)
 
         return false
     }
 
-    if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+    if (member.roles.cache.some(v => server.moderation.unmoderated_roles.includes(v.id))) {
         await interaction.followUp({
             content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
                 username: `**${interaction.member.displayName}**`
@@ -77,7 +108,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             ephemeral: true
         })
 
-        await removeComponentsFromMessage(interaction)
+        await markReportAsClosed(interaction, closeReason)
 
         return false
     }
@@ -105,17 +136,11 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             return false
         }
 
-        try {
-            await member.kick(reason)
-        } catch (err) {
-            await self.logger.handleError({ module: 'Reports', action: 'KickQuickAction', error: err, guild_id: interaction.guildId })
-        }
-
-        await createCaseLogEntry(interaction.guild, { type: 'Kick', target: member.user, executor: interaction.user, reason })
+        await kickAction(self, { guild: interaction.guild, target: member, reason })
     }
 
     if (action === 'WARN') {
-        if (!interaction.memberPermissions.has(self.PermissionFlags.ManageRoles)) {
+        if (!interaction.memberPermissions.has(self.PermissionFlags.ModerateMembers)) {
             await interaction.followUp({
                 content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
                     username: `**${interaction.member.displayName}**`
@@ -129,7 +154,8 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
         await warnUserAction(self, server, interaction, { target: member, executor: interaction.member, reason })
     }
 
-    await removeComponentsFromMessage(interaction)
+    closeReason += `: ${t(QuickActionLocales[action])}`
+    await markReportAsClosed(interaction, closeReason)
 
     self.emit('moduleExecution', {
         module: 'Moderation',
@@ -146,7 +172,8 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
     let member: GuildMember
     const duration = interaction.values[0]
-    const reason = '-'
+    const reason = interaction.message.url
+    let closeReason = t('Commands.ReportCommand.Texts.ReportClosedBy', { username: `<@${interaction.user.id}> (${interaction.user.tag})` })
 
     await interaction.deferUpdate()
 
@@ -162,14 +189,16 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             ephemeral: true
         })
 
-        await removeComponentsFromMessage(interaction)
+        await markReportAsClosed(interaction, closeReason)
 
         return false
     }
 
     if (member.id === interaction.user.id) {
+        const message = action === 'BAN' ? 'Commands.BanCommand.Texts.YouCannotBanYourself' : 'Commands.MuteCommand.Texts.YouCannotMuteYourself'
+
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.member.displayName}**` })}`,
+            content: `${self.staticEmojis.ERROR} | ${t(message, { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -198,12 +227,12 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             ephemeral: true
         })
 
-        await removeComponentsFromMessage(interaction)
+        await markReportAsClosed(interaction, closeReason)
 
         return false
     }
 
-    if (member.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
+    if (member.roles.cache.some(v => server.moderation.unmoderated_roles.includes(v.id))) {
         await interaction.followUp({
             content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
                 username: `**${interaction.member.displayName}**`
@@ -211,7 +240,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             ephemeral: true
         })
 
-        await removeComponentsFromMessage(interaction)
+        await markReportAsClosed(interaction, closeReason)
 
         return false
     }
@@ -239,23 +268,12 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        if (duration === 'indefinitely') {
-            try {
-                await interaction.guild.members.ban(member, { reason })
-            } catch (err) {
-                await self.logger.handleError({ module: 'Reports', action: 'BanQuickAction', error: err, guild_id: interaction.guildId })
-            }
-        } else {
-            new TemporaryBan(self, {
-                user_id: member.id,
-                guild_id: interaction.guild.id,
-                expires_timestamp: Date.now() + ms(duration),
-                reason,
-                initial: true
-            })
-        }
-
-        await createCaseLogEntry(interaction.guild, { type: 'BanAdd', target: member.user, executor: interaction.user, reason })
+        await banAction(self, server, {
+            config: { ban_timeout: duration === 'indefinitely' ? null : ms(duration) / 1000 } as any,
+            guild: interaction.guild,
+            target: member,
+            reason
+        })
     }
 
     if (action === 'MUTE') {
@@ -281,43 +299,16 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        try {
-            await member.disableCommunicationUntil(Date.now() + ms(duration), reason)
-        } catch (err) {
-            await self.logger.handleError({ module: 'Reports', action: 'MuteQuickAction', error: err, guild_id: interaction.guildId })
-        }
-
-        if (server.moderation.mutes.rar) {
-            const current_roles = member.roles.cache.filter(r => r.editable && r.id !== interaction.guildId).map(r => r.id)
-
-            await self.db.servers.updateOne(
-                { _id: interaction.guildId },
-                {
-                    $push: {
-                        'moderation.mutes.rar_data': {
-                            user_id: member.id,
-                            roles: current_roles
-                        }
-                    }
-                }
-            )
-
-            const strict_roles = [
-                ...server.moderation.mutes.rar_strict.filter(r => current_roles.includes(r)),
-                ...member.roles.cache.filter(r => !r.editable).map(r => r.id)
-            ]
-
-            try {
-                await member.roles.set(strict_roles, reason)
-            } catch (err) {
-                await self.logger.handleError({ module: 'Reports', action: 'RemoveAllRoles', error: err, guild_id: interaction.guildId })
-            }
-        }
-
-        await createCaseLogEntry(interaction.guild, { type: 'MuteAdd', target: member.user, executor: interaction.user, reason })
+        await muteAction(self, server, {
+            config: { mute_timeout: ms(duration) / 1000 } as any,
+            guild: interaction.guild,
+            target: member,
+            reason
+        })
     }
 
-    await removeComponentsFromMessage(interaction)
+    closeReason += `: ${t(QuickActionLocales[action])}`
+    await markReportAsClosed(interaction, closeReason)
 
     self.emit('moduleExecution', {
         module: 'Moderation',
@@ -390,10 +381,14 @@ export async function checkReportsOnGuildMemberAdd(self: Lacuna, server: ServerD
     }
 }
 
-async function removeComponentsFromMessage(interaction: ButtonInteraction | StringSelectMenuInteraction) {
+async function markReportAsClosed(interaction: ButtonInteraction | StringSelectMenuInteraction, reason: string) {
     try {
-        const message = await interaction.channel.messages.fetch({ message: interaction.message.id })
-        await message.edit({ components: [] })
+        const message = await interaction.channel.messages.fetch({ message: interaction.message.id }),
+            embed = new EmbedBuilder(message.embeds[0])
+
+        embed.setDescription(reason)
+
+        await message.edit({ embeds: [embed], components: [] })
     } catch (err) {}
 }
 

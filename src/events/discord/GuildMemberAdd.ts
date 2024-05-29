@@ -8,7 +8,7 @@ import Automation from '../../modules/Automation'
 import Greeting from '../../modules/Greeting'
 import GuildImageRotation from '../../modules/GuildImageRotation'
 import Logs from '../../modules/Logs'
-import { checkReportsOnGuildMemberAdd } from '../../modules/Reports'
+import { checkReportsOnGuildMemberAdd } from '../../modules/Moderation/Reports'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })

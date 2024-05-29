@@ -19,8 +19,8 @@ import Automation from '../../modules/Automation'
 import CustomCommand from '../../modules/CustomCommand'
 import InteractiveMessages from '../../modules/InteractiveMessages'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
+import { onPressReportButton, onSelectReportOption } from '../../modules/Moderation/Reports'
 import { createPoll, onPressPollButton } from '../../modules/Polls'
-import { onPressReportButton, onSelectReportOption } from '../../modules/Reports'
 
 const handler = async (
     self: Lacuna,
