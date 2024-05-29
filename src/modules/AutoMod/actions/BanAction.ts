@@ -11,7 +11,7 @@ import { Guild, GuildMember } from 'discord.js'
 import moment from 'moment'
 import Lacuna from '../../../internals/Lacuna'
 import TemporaryBan from '../../../internals/structures/TemporaryBan'
-import { caseLog } from '../../Moderation'
+import { createCaseLogEntry } from '../../Moderation/CaseLog'
 
 export default async function banAction(self: Lacuna, server: ServerDocument, options: ActionOptions) {
     const { config, guild, target } = options
@@ -36,7 +36,7 @@ export default async function banAction(self: Lacuna, server: ServerDocument, op
         }
     }
 
-    await caseLog.createCaseEntry(guild, { type: 'BanAdd', target: target.user, executor: self.user, reason })
+    await createCaseLogEntry(guild, { type: 'BanAdd', target: target.user, executor: self.user, reason })
 }
 
 export interface ActionOptions {

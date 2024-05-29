@@ -2,7 +2,7 @@ import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, Message } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import { generateSimpleId } from '../../../internals/utility/Utils'
-import { caseLog } from '../../Moderation'
+import { createCaseLogEntry } from '../../Moderation/CaseLog'
 import Replacer from '../../Replacer'
 import banAction from './BanAction'
 import kickAction from './KickAction'
@@ -56,7 +56,7 @@ export default async function warnUserAction(
         )
     }
 
-    await caseLog.createCaseEntry(signal.guild, { type: 'WarnAdd', target: target.user, executor: executor.user, reason })
+    await createCaseLogEntry(signal.guild, { type: 'WarnAdd', target: target.user, executor: executor.user, reason })
 
     if (penalty) {
         const optBan = penalty.options.includes('ACTION_BAN'),

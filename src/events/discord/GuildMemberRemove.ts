@@ -6,7 +6,7 @@ import Automation from '../../modules/Automation'
 import Farewell from '../../modules/Farewell'
 import GuildImageRotation from '../../modules/GuildImageRotation'
 import Logs from '../../modules/Logs'
-import { caseLog } from '../../modules/Moderation'
+import { createCaseLogEntry } from '../../modules/Moderation/CaseLog'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
     if (!member || !member.guild) return false
@@ -26,7 +26,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
             entry = audit.entries.find(v => v.targetId === member.id)
 
         if (entry && entry.executor.id !== self.user.id) {
-            await caseLog.createCaseEntry(member.guild, { type: 'Kick', target: member.user, executor: entry.executor, reason: entry.reason })
+            await createCaseLogEntry(member.guild, { type: 'Kick', target: member.user, executor: entry.executor, reason: entry.reason })
         }
     }
 

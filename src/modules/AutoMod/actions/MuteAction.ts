@@ -2,7 +2,7 @@ import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import moment from 'moment'
 import ms from 'ms'
 import Lacuna from '../../../internals/Lacuna'
-import { caseLog } from '../../Moderation'
+import { createCaseLogEntry } from '../../Moderation/CaseLog'
 import { ActionOptions } from './BanAction'
 
 export default async function muteAction(self: Lacuna, server: ServerDocument, options: ActionOptions) {
@@ -18,7 +18,7 @@ export default async function muteAction(self: Lacuna, server: ServerDocument, o
         await self.logger.handleError({ module: 'AutoMod', action: 'DisableCommunication', error: err, guild_id: guild.id })
     }
 
-    await caseLog.createCaseEntry(guild, { type: 'MuteAdd', target: target.user, executor: self.user, reason })
+    await createCaseLogEntry(guild, { type: 'MuteAdd', target: target.user, executor: self.user, reason })
 
     if (server.moderation.mutes.rar) {
         const currentRoles = target.roles.cache.filter(r => r.editable && r.id !== guild.id).map(r => r.id)

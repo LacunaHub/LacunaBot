@@ -2,7 +2,7 @@ import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, Events, GuildBan } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import Logs from '../../modules/Logs'
-import { caseLog } from '../../modules/Moderation'
+import { createCaseLogEntry } from '../../modules/Moderation/CaseLog'
 
 const handler = async (self: Lacuna, ban: GuildBan) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: ban.guild.id })
@@ -16,7 +16,7 @@ const handler = async (self: Lacuna, ban: GuildBan) => {
 
         if (entry && entry.executor.id !== self.user.id) {
             reason = entry.reason
-            await caseLog.createCaseEntry(ban.guild, { type: 'BanRemove', target: ban.user, executor: entry.executor, reason: entry.reason })
+            await createCaseLogEntry(ban.guild, { type: 'BanRemove', target: ban.user, executor: entry.executor, reason: entry.reason })
         }
     }
 

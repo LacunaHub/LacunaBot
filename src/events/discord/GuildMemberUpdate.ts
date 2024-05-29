@@ -4,7 +4,7 @@ import Lacuna from '../../internals/Lacuna'
 import AutoMod from '../../modules/AutoMod'
 import Greeting from '../../modules/Greeting'
 import Logs from '../../modules/Logs'
-import { caseLog } from '../../modules/Moderation'
+import { createCaseLogEntry } from '../../modules/Moderation/CaseLog'
 
 const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) => {
     if (self.user.id === member.id) return false
@@ -44,7 +44,7 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
                 entry = audit.entries.find(v => v.targetId === member.id)
 
             if (entry && entry.executor.id !== self.user.id) {
-                await caseLog.createCaseEntry(member.guild, {
+                await createCaseLogEntry(member.guild, {
                     type: member.communicationDisabledUntilTimestamp ? 'MuteAdd' : 'MuteRemove',
                     target: member.user,
                     executor: entry.executor,

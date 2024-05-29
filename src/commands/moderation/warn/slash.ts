@@ -2,7 +2,7 @@ import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import warnUserAction from '../../../modules/AutoMod/actions/WarnUserAction'
-import { caseLog } from '../../../modules/Moderation'
+import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
 
 export async function addSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
@@ -170,7 +170,7 @@ export async function removeSlash(self: Lacuna, server: ServerDocument, interact
         })
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'WarnRemove', target: mention, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, { type: 'WarnRemove', target: mention, executor: interaction.user, reason })
 
     return true
 }

@@ -42,7 +42,7 @@ export const CaseLogTypesCompatibility = {
     WarnRemove: 'WARN_REMOVE'
 }
 
-export async function createCaseEntry(guild: Guild, options: CreateCaseMessageOptions) {
+export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessageOptions) {
     const server = await db.servers.findOne({ _id: guild.id })
     const caseLog = guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
 
