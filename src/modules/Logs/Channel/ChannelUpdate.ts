@@ -29,7 +29,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTitle(t('Logs.ChannelUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            username: `<@${executor?.id ?? '0'}>`,
                             change: t('Logs.ChannelUpdatedName', { channel: `<#${channel.id}>` })
                         })
                     )
@@ -37,16 +37,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         { name: t('Logs.BeforeChange'), value: before.name, inline: true },
                         { name: t('Logs.AfterChange'), value: channel.name, inline: true }
                     ])
-                    .setFooter({ text: channel.id })
+                    .setFooter({ text: `CID: ${channel.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateName',
@@ -72,16 +68,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         { name: t('Logs.BeforeChange'), value: (before as any).topic ?? '-', inline: true },
                         { name: t('Logs.AfterChange'), value: (channel as any).topic ?? '-', inline: true }
                     ])
-                    .setFooter({ text: channel.id })
+                    .setFooter({ text: `CID: ${channel.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateTopic',
@@ -119,16 +111,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                             inline: true
                         }
                     ])
-                    .setFooter({ text: channel.id })
+                    .setFooter({ text: `CID: ${channel.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateRateLimit',
@@ -154,16 +142,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         { name: t('Logs.BeforeChange'), value: before?.parent?.name ?? '-', inline: true },
                         { name: t('Logs.AfterChange'), value: channel?.parent?.name ?? '-', inline: true }
                     ])
-                    .setFooter({ text: channel.id })
+                    .setFooter({ text: `CID: ${channel.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateParent',
@@ -189,16 +173,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         { name: t('Logs.BeforeChange'), value: `${before.bitrate / 1000}kbps`, inline: true },
                         { name: t('Logs.AfterChange'), value: `${channel.bitrate / 1000}kbps`, inline: true }
                     ])
-                    .setFooter({ text: channel.id })
+                    .setFooter({ text: `CID: ${channel.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateBitrate',
@@ -224,16 +204,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                         { name: t('Logs.BeforeChange'), value: before.userLimit.toString(), inline: true },
                         { name: t('Logs.AfterChange'), value: channel.userLimit.toString(), inline: true }
                     ])
-                    .setFooter({ text: channel.id })
+                    .setFooter({ text: `CID: ${channel.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateUserLimit',

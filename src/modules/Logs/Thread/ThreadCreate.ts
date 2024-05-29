@@ -26,9 +26,7 @@ export default async function (self: Lacuna, server: ServerDocument, thread: Thr
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.ThreadCreated'))
-                .setDescription(
-                    t('Logs.ThreadCreatedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, thread: `<#${thread.id}>` })
-                )
+                .setDescription(t('Logs.ThreadCreatedTemplate', { username: `<@${executor?.id ?? '0'}>`, thread: `<#${thread.id}>` }))
                 .addFields([
                     { name: t('Commands.OptionTypes.Channel'), value: thread.parent?.id ? `<#${thread.parentId}>` : '-', inline: true },
                     {
@@ -37,16 +35,12 @@ export default async function (self: Lacuna, server: ServerDocument, thread: Thr
                         inline: true
                     }
                 ])
-                .setFooter({ text: thread.id })
+                .setFooter({ text: `TID: ${thread.id}` })
                 .setTimestamp()
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsThreadCreate', action: 'SendMessageViaWebhook', error: err, guild_id: thread.guildId })
 

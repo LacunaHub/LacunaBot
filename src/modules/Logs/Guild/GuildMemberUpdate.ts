@@ -28,8 +28,8 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTitle(t('Logs.GuildMemberUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
-                            change: t('Logs.GuildMemberUpdatedNickname', { username: `**${member.user.tag}** (${member.id})` })
+                            username: `<@${executor?.id ?? member.id}>`,
+                            change: t('Logs.GuildMemberUpdatedNickname', { username: `<@${member.id}> (${member.user.tag})` })
                         })
                     )
                     .setFields([
@@ -40,11 +40,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsGuildMemberUpdateName',

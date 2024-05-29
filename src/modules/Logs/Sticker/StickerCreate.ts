@@ -25,19 +25,13 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.StickerCreated'))
-                .setDescription(
-                    t('Logs.StickerCreatedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, sticker: `**${sticker.name}**` })
-                )
-                .setFooter({ text: sticker.id })
+                .setDescription(t('Logs.StickerCreatedTemplate', { username: `<@${executor?.id ?? '0'}>`, sticker: `**${sticker.name}**` }))
+                .setFooter({ text: `SID: ${sticker.id}` })
                 .setTimestamp()
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsStickerCreate', action: 'SendMessageViaWebhook', error: err, guild_id: sticker.guildId })
 

@@ -1,7 +1,8 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { BaseGuildTextChannel, EmbedBuilder, Message } from 'discord.js'
+import { BaseGuildTextChannel, EmbedBuilder, Message, escapeMarkdown } from 'discord.js'
 import { fetchLogWebhook, isRateLimited } from '..'
 import Lacuna from '../../../internals/Lacuna'
+import { DiffMatchPatch } from '../../../internals/utility/DiffMatchPatch'
 import { truncateString } from '../../../internals/utility/Utils'
 
 export default async function (self: Lacuna, server: ServerDocument, before: Message, message: Message): Promise<boolean> {
@@ -18,30 +19,27 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
 
             if (!webhook) return false
 
-            const before_content = truncateString(before.content ?? '', 800)
-            const content = truncateString(message.content ?? '', 800)
+            const contentBefore = truncateString(escapeMarkdown(before.content ?? ''), 800),
+                content = truncateString(escapeMarkdown(message.content ?? ''), 800)
+            const dmp = new DiffMatchPatch(),
+                diff = dmp.prettyMarkdown(dmp.main(contentBefore, content))
             const attachment = message.attachments.first()
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.MessageUpdated'))
                 .addFields([
-                    { name: t('Logs.MessageAuthor'), value: `${message.author.tag}\n(${message.author.id})`, inline: true },
+                    { name: t('Logs.MessageAuthor'), value: `<@${message.author.id}> (${message.author.username})`, inline: true },
                     { name: t('Commands.OptionTypes.Channel'), value: `<#${message.channel.id}>`, inline: true },
-                    { name: t('Logs.BeforeChange'), value: before_content || `\`[${t('Commands.OptionTypes.Attachment')}]\`` },
-                    { name: t('Logs.AfterChange'), value: content || `\`[${t('Commands.OptionTypes.Attachment')}]\`` }
+                    { name: t('Logs.MessageContent'), value: diff || `\`[${t('Commands.OptionTypes.Attachment')}]\`` }
                 ])
-                .setFooter({ text: message.id })
+                .setFooter({ text: `MID: ${message.id}` })
                 .setTimestamp()
                 .setColor('#FFA726')
 
             if (attachment && attachment.height) embed.setImage(attachment.url)
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsMessageUpdate', action: 'SendMessageViaWebhook', error: err, guild_id: message.guildId })
 

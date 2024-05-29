@@ -19,7 +19,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.GuildMemberAdded'))
-                .setDescription(`${member.user.tag} (${member.id})`)
+                .setDescription(`<@${member.id}> (${member.user.tag})`)
                 .addFields([
                     {
                         name: t('Commands.UserCommand.Texts.AccountRegistrationDate'),
@@ -32,11 +32,7 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({
                     module: 'LogsGuildMemberAdd',

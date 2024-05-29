@@ -29,8 +29,8 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 .setTitle(t('Logs.GuildBanAdded'))
                 .setDescription(
                     t('Logs.GuildBanAddedTemplate', {
-                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
-                        target: `**${user.tag}** (${user.id})`
+                        username: `<@${executor?.id ?? '0'}>`,
+                        target: `<@${user.id}> (${user.tag})`
                     })
                 )
                 .addFields([{ name: capitalizeFirstLetter(t('Commands.Options.Reason')), value: reason ?? '-' }])
@@ -38,11 +38,7 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                 .setColor('#EF5350')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsGuildBanAdd', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
 

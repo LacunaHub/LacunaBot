@@ -22,18 +22,17 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.VoiceConnection'))
                 .setDescription(
-                    t('Logs.VoiceConnectionTemplate', { username: `**${state.member.user.tag}**`, channel: `<#${state?.channelId ?? '1'}>` })
+                    t('Logs.VoiceConnectionTemplate', {
+                        username: `<@${state.id}> (${state.member.user.tag})`,
+                        channel: `<#${state?.channelId ?? '0'}>`
+                    })
                 )
-                .setFooter({ text: state.member.id })
+                .setFooter({ text: `UID: ${state.id}` })
                 .setTimestamp()
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsVoiceConnect', action: 'SendMessageViaWebhook', error: err, guild_id: state.guild.id })
 

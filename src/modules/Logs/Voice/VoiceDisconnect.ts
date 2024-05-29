@@ -22,18 +22,17 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.VoiceDisconnection'))
                 .setDescription(
-                    t('Logs.VoiceDisconnectionTemplate', { username: `**${state.member.user.tag}**`, channel: `<#${channel?.id ?? '1'}>` })
+                    t('Logs.VoiceDisconnectionTemplate', {
+                        username: `<@${state.id}> (${state.member.user.tag})`,
+                        channel: `<#${channel?.id ?? '0'}>`
+                    })
                 )
-                .setFooter({ text: state.member.id })
+                .setFooter({ text: `UID: ${state.id}` })
                 .setTimestamp()
                 .setColor('#EF5350')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({
                     module: 'LogsVoiceDisconnect',

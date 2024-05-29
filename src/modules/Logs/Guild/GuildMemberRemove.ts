@@ -19,20 +19,13 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.GuildMemberRemoved'))
-                .setDescription(`${member.user.tag} (${member.id})`)
-                .addFields([
-                    { name: t('Commands.ServerCommand.Texts.MemberCount'), value: member.guild.memberCount.toString() },
-                    { name: '\u200B', value: '\u200B', inline: true }
-                ])
+                .setDescription(`<@${member.id}> (${member.user.tag})`)
+                .addFields([{ name: t('Commands.ServerCommand.Texts.MemberCount'), value: member.guild.memberCount.toString() }])
                 .setTimestamp()
                 .setColor('#EF5350')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({
                     module: 'LogsGuildMemberRemove',

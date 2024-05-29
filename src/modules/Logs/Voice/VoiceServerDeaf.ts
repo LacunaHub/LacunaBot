@@ -20,20 +20,16 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.VoiceServerDeaf'))
                 .addFields([
-                    { name: t('Commands.OptionTypes.User'), value: `${state.member.user.tag}`, inline: true },
+                    { name: t('Commands.OptionTypes.User'), value: `<@${state.id}> (${state.member.user.tag})`, inline: true },
                     { name: t('Commands.OptionTypes.Channel'), value: `<#${state.channelId}>`, inline: true },
                     { name: '\u200B', value: '\u200B', inline: true }
                 ])
-                .setFooter({ text: state.member.id })
+                .setFooter({ text: `UID: ${state.id}` })
                 .setTimestamp()
                 .setColor('#FFA726')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await webhook.send({ embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({
                     module: 'LogsVoiceServerDeaf',

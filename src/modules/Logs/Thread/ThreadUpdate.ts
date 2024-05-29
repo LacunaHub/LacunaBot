@@ -29,7 +29,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                     .setTitle(t('Logs.ThreadUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            username: `<@${executor?.id ?? '0'}>`,
                             change: t('Logs.ThreadUpdatedName', { thread: `<#${thread.id}>` })
                         })
                     )
@@ -37,16 +37,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                         { name: t('Logs.BeforeChange'), value: before.name, inline: true },
                         { name: t('Logs.AfterChange'), value: thread.name, inline: true }
                     ])
-                    .setFooter({ text: thread.id })
+                    .setFooter({ text: `TID: ${thread.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsThreadUpdateName',
@@ -85,11 +81,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await webhook.send({ embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsThreadUpdateAutoArchiveDuration',
