@@ -1,3 +1,5 @@
+import { supportServerMaxAllowedBoosts } from '../../internals/utility/Constants'
+
 export default class APIError extends Error {
     public code: number
 
@@ -74,6 +76,7 @@ export const apiErrors = {
     4019: 'You are not a Diamond Subscriber',
     4020: 'You are not a Server Booster on our support server',
     4021: 'Invalid payment',
+    4022: `The support server has the maximum allowed number of boosts (${supportServerMaxAllowedBoosts})`,
     5001: 'Cannot get a list of guilds',
     5002: 'Cannot create a custom command',
     5003: 'Cannot update a custom command',
@@ -91,5 +94,6 @@ export const apiErrors = {
     5015: 'Cannot create a Twitch EventSub subscription',
     5016: 'Cannot delete a Twitch EventSub subscription',
     5017: 'Cannot create a YouTube subscription',
-    5018: 'Cannot delete a YouTube subscription'
+    5018: 'Cannot delete a YouTube subscription',
+    5019: 'Cannot get support server information'
 }
