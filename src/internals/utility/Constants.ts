@@ -61,3 +61,5 @@ export const formerPatronRoleId = process.env.LCN_FORMER_PATRON_ROLE_ID
 export const serverBoosterRoleId = process.env.LCN_SERVER_BOOSTER_ROLE_ID
 export const newsChannelId = process.env.LCN_NEWS_CHANNEL_ID
 export const newsRoleId = process.env.LCN_NEWS_ROLE_ID
+export const supportServerMaxAllowedBoosts =
+    typeof process.env.LCN_SUPPORT_SERVER_MAX_ALLOWED_BOOSTS === 'undefined' ? 21 : +process.env.LCN_SUPPORT_SERVER_MAX_ALLOWED_BOOSTS

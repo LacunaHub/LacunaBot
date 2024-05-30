@@ -1,10 +1,17 @@
-import { APIUser } from 'discord.js'
+import { APIGuild, APIUser } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
-import { projectTeamRoleId, serverBoosterRoleId, subscribedPatronRoleId } from '../../../../internals/utility/Constants'
+import {
+    projectTeamRoleId,
+    serverBoosterRoleId,
+    subscribedPatronRoleId,
+    supportServerId,
+    supportServerMaxAllowedBoosts
+} from '../../../../internals/utility/Constants'
 import { DiscordRolesCheckout } from '../../../modules/billing/providers/DiscordRoles'
 import { Order } from '../../../modules/billing/providers/PayPal'
 import APIError from '../../../utility/APIError'
+import DiscordUtils from '../../../utility/DiscordUtils'
 
 export default async function createPayment(ctx: Context) {
     const currentUser: Partial<APIUser> = ctx.state.user
@@ -73,6 +80,20 @@ export default async function createPayment(ctx: Context) {
         ctx.body = approveLink.href
     } else if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY', 'PROJECT_TEAM'].includes(provider)) {
         if (server.premium.available) ctx.throw(400, new APIError(2009))
+
+        if (provider === 'DISCORD_NITRO_BOOST') {
+            let supportServer: APIGuild
+
+            try {
+                supportServer = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guild(supportServerId))) as any
+            } catch (err) {
+                ctx.throw(500, new APIError(5019))
+            }
+
+            if (supportServer.premium_subscription_count >= supportServerMaxAllowedBoosts) {
+                ctx.throw(400, new APIError(4022))
+            }
+        }
 
         data.amount.currency = 'DRC'
         data.amount.value = 1
