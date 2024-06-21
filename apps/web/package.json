@@ -1,6 +1,6 @@
 {
   "name": "website",
-  "version": "0.3.30",
+  "version": "0.3.31",
   "description": "Web Dashboard for Lacuna Discord bot",
   "productName": "Lacuna",
   "author": "Daniyar Kurmangaliyev",
@@ -40,7 +40,7 @@
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^8.5.0",
-    "prettier": "^2.5.1"
+    "prettier": "^3.3.2"
   },
   "engines": {
     "node": "^18 || ^16 || ^14.19",
