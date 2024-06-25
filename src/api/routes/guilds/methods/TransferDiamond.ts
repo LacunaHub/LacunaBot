@@ -1,3 +1,4 @@
+import { PaymentDocument, SubscriptionDocument } from '@lacunahub/lacuna-database-driver'
 import { RESTAPIPartialCurrentUserGuild } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
@@ -27,9 +28,16 @@ export default async function transferDiamond(ctx: Context) {
     const server = await database.servers.findOne({ _id: guildId })
 
     if (!server || server.blocked) ctx.throw(404, new APIError(1003))
-    if (!server.premium.available || !server.premium.bill_id) ctx.throw(402, new APIError(2001))
+    if (!server.premium.available || !server.premium.charged_via) ctx.throw(402, new APIError(2001))
 
-    const bill = await database.bills.findOne({ _id: server.premium.bill_id })
+    const [sBillType, sBillId] = server.premium.charged_via?.split(':') ?? []
+    let bill: PaymentDocument | SubscriptionDocument
+
+    if (sBillType === 'Payment') {
+        bill = await database.payments.findOne({ _id: sBillId })
+    } else if (sBillType === 'Subscription') {
+        bill = await database.subscriptions.findOne({ _id: sBillId })
+    }
 
     if (!bill) {
         ctx.throw(400, new APIError(1018))
@@ -45,29 +53,40 @@ export default async function transferDiamond(ctx: Context) {
         {
             $set: {
                 'premium.available': false,
-                'premium.expires_at': 0,
-                'premium.bill_id': null
+                'premium.expires_at': null,
+                'premium.charged_via': null
             }
         }
     )
 
-    await database.bills.updateOne(
-        { _id: server.premium.bill_id },
-        {
-            $set: {
-                'custom_fields.reference_id': toGuildId
+    if (sBillType === 'Payment') {
+        await database.payments.updateOne(
+            { _id: bill._id },
+            {
+                $set: {
+                    'metadata.ref_id': toGuildId
+                }
             }
-        }
-    )
+        )
+    } else if (sBillType === 'Subscription') {
+        await database.subscriptions.updateOne(
+            { _id: bill._id },
+            {
+                $set: {
+                    'metadata.ref_id': toGuildId
+                }
+            }
+        )
+    }
 
-    bill.custom_fields.reference_id = toGuildId
+    bill.metadata.ref_id = toGuildId
     const diamondGuild = diamondGuilds.get(guildId)
 
     if (diamondGuild) {
         diamondGuild.cancel()
     }
 
-    await addDiamond(bill)
+    await addDiamond(bill, { until: server.premium.expires_at })
 
     ctx.status = 204
 }

@@ -29,17 +29,13 @@ export default async function updateSettings(ctx: Context) {
         ctx.throw(406, new APIError(2004))
     }
 
-    const diamondPrices = await database.getDiamondPrices()
     server = await setSettings(server, data, currentUser.id)
 
     ctx.status = 200
     ctx.body = {
         _id: server._id,
         locale: server.locale,
-        premium: {
-            available: server.premium.available,
-            will_expire_on: server.premium.expires_at
-        },
+        premium: server.premium,
         server: {
             bot_expert_roles: server.bot_experts
         },
@@ -87,7 +83,6 @@ export default async function updateSettings(ctx: Context) {
             automation: server.modules.automation,
             guild_image_rotation: server.modules.guild_image_rotation
         },
-        prices: diamondPrices,
         change_log: server.change_log.reverse()
     }
 }

@@ -66,7 +66,7 @@ app.use(async (ctx, next) => {
 app.use(routes.authorize.routes()).use(routes.authorize.allowedMethods())
 app.use(routes.common.routes()).use(routes.common.allowedMethods())
 app.use(routes.guilds.routes()).use(routes.guilds.allowedMethods())
-app.use(routes.payments.routes()).use(routes.payments.allowedMethods())
+app.use(routes.billing.routes()).use(routes.billing.allowedMethods())
 app.use(routes.state.routes()).use(routes.state.allowedMethods())
 app.use(routes.users.routes()).use(routes.users.allowedMethods())
 app.use(routes.webhooks.routes()).use(routes.webhooks.allowedMethods())

@@ -7,18 +7,18 @@ import DiscordUtils from '../../../utility/DiscordUtils'
 export const patrons = new Map<string, Patron>()
 
 export class Patron {
-    public user_id: string
-    public expiration: number
+    public userId: string
+    public expiresAt: number
     public schedule: Job
 
-    constructor(user_id: string, expiration: number | Date) {
-        this.user_id = user_id
+    constructor(userId: string, expiresAt: number | Date) {
+        this.userId = userId
 
-        this.expiration = expiration instanceof Date ? expiration.getTime() : expiration
+        this.expiresAt = expiresAt instanceof Date ? expiresAt.getTime() : expiresAt
 
         this.schedule = null
 
-        if (Date.now() >= this.expiration || this.expiration - Date.now() <= 30000) {
+        if (Date.now() >= this.expiresAt || this.expiresAt - Date.now() <= 30000) {
             this.expire()
 
             return
@@ -28,15 +28,14 @@ export class Patron {
     }
 
     initialize() {
-        this.schedule = scheduleJob(`PATRON:${this.user_id}`, this.expiration, () => this.expire())
-        patrons.set(this.user_id, this)
+        this.schedule = scheduleJob(`PATRON:${this.userId}`, this.expiresAt, this.expire.bind(this))
+        patrons.set(this.userId, this)
     }
 
     async expire() {
         try {
-            await database.users.updateOne({ _id: this.user_id }, { $set: { 'premium.available': false } })
-            await DiscordUtils.rest.delete(DiscordUtils.restRoutes.guildMemberRole(supportServerId, this.user_id, activePatronRoleId))
-            // await DiscordUtils.rest.put(DiscordUtils.restRoutes.guildMemberRole(supportServerId, this.user_id, formerPatronRoleId))
+            await database.users.updateOne({ _id: this.userId }, { $set: { 'premium.available': false } })
+            await DiscordUtils.rest.delete(DiscordUtils.restRoutes.guildMemberRole(supportServerId, this.userId, activePatronRoleId))
         } catch (err) {
             await Logger.handleError({ module: 'Patron', action: 'ExpirePatronage', error: err })
         }
@@ -44,7 +43,7 @@ export class Patron {
 
     cancel() {
         this.schedule.cancel()
-        patrons.delete(this.user_id)
+        patrons.delete(this.userId)
     }
 }
 

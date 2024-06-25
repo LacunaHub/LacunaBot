@@ -13,8 +13,6 @@ import {
 import { parseString } from 'xml2js'
 import Lacuna from '../Lacuna'
 
-const snowflakeRegexp = /\d{17,20}/
-
 export function truncateArray(array: any[], limit: number = 15, separator: string = '\n'): string {
     if (!Array.isArray(array)) throw new TypeError('IS_NOT_ARRAY')
     if (typeof limit != 'number') throw new TypeError('LIMIT_IS_NOT_INTEGER')
@@ -79,18 +77,6 @@ export function splitStringCase(str: string): { upper: string[]; lower: string[]
     }
 
     return { upper, lower, length: str.length }
-}
-
-export function isSnowflake(str: string): boolean {
-    if (typeof str != 'string') throw new TypeError('STR_IS_NOT_STRING')
-
-    return snowflakeRegexp.test(str)
-}
-
-export function parseSnowflake(str: string): string | null {
-    if (typeof str != 'string') throw new TypeError('STR_IS_NOT_STRING')
-
-    return str.match(snowflakeRegexp)?.toString() ?? null
 }
 
 export function removeDiscordPatterns(str: string): string {
@@ -547,8 +533,6 @@ export default {
     chunkArray,
     truncateString,
     splitStringCase,
-    isSnowflake,
-    parseSnowflake,
     removeDiscordPatterns,
     escapeRegexp,
     parseCommandArguments,

@@ -47,6 +47,11 @@ export default async function getCurrentUser(ctx: Context) {
             id: user._id,
             ...user.user
         },
-        guilds
+        guilds,
+        premium: {
+            available: user.premium.available,
+            expires_at: user.premium.expiration_timestamp
+        },
+        tokens: user.tokens
     }
 }
