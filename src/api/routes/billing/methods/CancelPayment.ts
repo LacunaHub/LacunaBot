@@ -1,3 +1,4 @@
+import { PaymentStatus } from '@lacunahub/lacuna-database-driver'
 import { Context } from 'koa'
 import database from '../../../../database'
 import APIError from '../../../utility/APIError'
@@ -9,21 +10,21 @@ export default async function cancelPayment(ctx: Context) {
         ctx.throw(400, new APIError(4021))
     }
 
-    const bill = await database.bills.findOne({ external_id: token })
+    const payment = await database.payments.findOne({ 'metadata.provider_external_id': token })
 
-    if (!bill) {
+    if (!payment) {
         ctx.throw(404, new APIError(1018))
     }
 
-    await database.bills.updateOne(
-        { _id: bill._id },
+    await database.payments.updateOne(
+        { _id: payment._id },
         {
             $set: {
-                'status.value': 'REJECTED',
-                'status.changed_timestamp': Date.now()
+                status: PaymentStatus.Rejected,
+                updated_at: Date.now()
             }
         }
     )
 
-    ctx.redirect(`${process.env.LCN_WEBSITE_URL}/@me/bills`)
+    ctx.redirect(`${process.env.LCN_WEBSITE_URL}/@me/bills?close=true`)
 }

@@ -22,7 +22,7 @@ export default async function getCurrentUserDiamondGuilds(ctx: Context) {
     const servers = await database.servers.find({
         _id: { $in: guilds.map(i => i.id) },
         'premium.available': true,
-        'premium.bill_id': { $ne: null }
+        'premium.charged_via': { $ne: null }
     })
 
     ctx.status = 200

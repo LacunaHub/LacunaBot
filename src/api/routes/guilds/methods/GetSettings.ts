@@ -87,16 +87,12 @@ export default async function getSettings(ctx: Context) {
     })
 
     const commandsCache = (await database.qdb.get('commands')) as any
-    const diamondPrices = await database.getDiamondPrices()
 
     ctx.status = 200
     ctx.body = {
         _id: server._id,
         locale: server.locale,
-        premium: {
-            available: server.premium.available,
-            will_expire_on: server.premium.expires_at
-        },
+        premium: server.premium,
         server: {
             bot_expert_roles: server.bot_experts
         },
@@ -162,7 +158,6 @@ export default async function getSettings(ctx: Context) {
             automation: server.modules.automation,
             guild_image_rotation: server.modules.guild_image_rotation
         },
-        prices: diamondPrices,
         change_log: server.change_log.reverse()
     }
 }

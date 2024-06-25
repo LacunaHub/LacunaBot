@@ -1,5 +1,3 @@
-import { supportServerMaxAllowedBoosts } from '../../internals/utility/Constants'
-
 export default class APIError extends Error {
     public code: number
 
@@ -28,9 +26,10 @@ export const apiErrors = {
     1015: 'Unknown Twitch subscription',
     1016: 'Unknown YouTube subscription',
     1017: 'Unknown auto-voice',
-    1018: 'Unknown bill',
-    1019: 'Unknown premium tier',
-    1020: 'Unknown payment provider',
+    1018: 'Unknown payment',
+    1019: 'Unknown payment tier',
+    1020: 'Unknown payment method',
+    1021: 'Unknown product',
     2001: 'Server has no premium',
     2002: 'Automation is already exists',
     2003: 'Custom command is already exists',
@@ -63,7 +62,7 @@ export const apiErrors = {
     4006: 'An interactive message must have components and/or reactions',
     4007: 'Emoji is already used on message',
     4008: 'Single reference cannot be used on another interactive reaction',
-    4009: 'You have created too many bills lately',
+    4009: 'You have created too many payments lately',
     4010: 'Invalid automation',
     4011: 'Invalid custom command',
     4012: 'Invalid method of modifying custom command',
@@ -76,7 +75,9 @@ export const apiErrors = {
     4019: 'You are not a Diamond Subscriber',
     4020: 'You are not a Server Booster on our support server',
     4021: 'Invalid payment',
-    4022: `The support server has the maximum allowed number of boosts (${supportServerMaxAllowedBoosts})`,
+    4022: 'The support server has the maximum allowed number of boosts (21)',
+    4023: "You don't have enough tokens",
+    4024: 'You are not authorized to use this payment method',
     5001: 'Cannot get a list of guilds',
     5002: 'Cannot create a custom command',
     5003: 'Cannot update a custom command',
@@ -88,7 +89,7 @@ export const apiErrors = {
     5009: 'Cannot create a webhook',
     5010: 'Cannot update a webhook',
     5011: 'Cannot delete a webhook',
-    5012: 'Cannot retrieve bill payment URL',
+    5012: 'Cannot retrieve payment URL',
     5013: 'Cannot charge a payment',
     5014: 'Cannot charge an uncompleted payment',
     5015: 'Cannot create a Twitch EventSub subscription',
