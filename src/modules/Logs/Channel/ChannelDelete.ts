@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildChannel } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, channel: GuildChannel): Promise<boolean> {
@@ -13,10 +13,6 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
         const isOk = logChannel && logChannel.permissionsFor(channel.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = channel.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await channel.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.ChannelDelete })
                 : null
@@ -35,7 +31,7 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
                 .setColor('#EF5350')
 
             try {
-                await webhook.send({ embeds: [embed] })
+                await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsChannelDelete', action: 'SendMessageViaWebhook', error: err, guild_id: channel.guildId })
 

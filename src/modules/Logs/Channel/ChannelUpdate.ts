@@ -1,7 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildChannel, TextChannel } from 'discord.js'
 import numbro from 'numbro'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: GuildChannel, channel: GuildChannel): Promise<boolean> {
@@ -14,10 +14,6 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
         const isOk = logChannel && logChannel.permissionsFor(channel.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = channel.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await channel.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.ChannelUpdate })
                 : null
@@ -42,7 +38,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateName',
@@ -73,7 +69,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateTopic',
@@ -116,7 +112,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateRateLimit',
@@ -147,7 +143,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateParent',
@@ -178,7 +174,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateBitrate',
@@ -209,7 +205,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsChannelUpdateUserLimit',
