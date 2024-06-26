@@ -283,6 +283,7 @@
 <script>
 import { useMeta } from 'quasar'
 import { useUserStore } from 'src/stores/user'
+import { openPopupWindow } from 'src/utils/Utils'
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
@@ -335,9 +336,7 @@ export default defineComponent({
         path: '/authorize/add',
         query: { scope: 'bot applications.commands', redirect_uri: window.location.origin, response_type: 'code' }
       })
-      const popup = window.open(route.href, 'add', 'width=400,height=620,top=5')
-      const popupOpenTimestamp = Date.now()
-
+      const popup = openPopupWindow({ url: route.href, title: 'Add bot', w: 520, h: 720 })
       const listener = event => {
         if (event.data.guild_id) this.$router.push('/@me/guilds')
 
@@ -348,7 +347,7 @@ export default defineComponent({
       window.onmessage = listener
 
       const interval = setInterval(() => {
-        if (Date.now() - popupOpenTimestamp > 300000 || popup.closed) {
+        if (popup.closed) {
           window.onmessage = null
           clearInterval(interval)
         }

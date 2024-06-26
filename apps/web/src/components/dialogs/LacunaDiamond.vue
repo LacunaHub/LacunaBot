@@ -3,10 +3,10 @@
     <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
       <q-card-section v-if="guild.premium.available">
         <q-banner class="bg-dark-2 rounded-borders" dense>
-          <span v-if="guild.premium.will_expire_on">
+          <span v-if="guild.premium.expires_at">
             {{
               $t('Components.LacunaDiamond.HasSubscription', {
-                date: $dt.fromMillis(guild.premium.will_expire_on).toFormat('ff')
+                date: $dt.fromMillis(guild.premium.expires_at).toFormat('ff')
               })
             }}
           </span>
@@ -25,7 +25,7 @@
 
       <q-card-section>
         <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-6" v-for="(bonus, i) in bonuses" :key="i">
+          <div class="col-12 col-md-6" v-for="(bonus, i) in lacunaDiamondFeatures" :key="i">
             <q-item :class="`no-padding q-item__${bonus.name}`">
               <q-item-section avatar top>
                 <q-avatar size="64px" square>
@@ -42,7 +42,7 @@
 
               <q-item-section>
                 <q-item-label>
-                  {{ bonus.description }}
+                  {{ $t(bonus.description) }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -68,11 +68,11 @@
                 </tr>
               </thead>
 
-              <tbody v-for="(plan, i) in planComparison" :key="i" class="bg-dark-1">
+              <tbody v-for="(plan, i) in lacunaDiamondPlanComparison" :key="i" class="bg-dark-1">
                 <tr class="q-tr--no-hover">
                   <td style="min-width: 220px; width: 50%">
                     <div class="text-h6">
-                      {{ plan.categoryName }}
+                      {{ $t(plan.categoryName) }}
                     </div>
                   </td>
                   <td class="text-center" style="min-width: 100px; width: 20%"></td>
@@ -81,7 +81,7 @@
 
                 <tr v-for="(feature, ii) in plan.features" :key="ii" class="q-tr--no-hover">
                   <td class="text-almost-white-2" style="min-width: 220px; width: 50%">
-                    {{ feature.name }}
+                    {{ $t(feature.name) }}
                   </td>
                   <td class="text-center" style="min-width: 100px; width: 20%">
                     <div v-if="feature.free.type === 'text'" class="text-subtitle1">
@@ -122,39 +122,21 @@
         </q-list>
       </div>
 
-      <q-card-section v-if="provider === 'DISCORD_NITRO_BOOST'">
+      <q-card-section v-if="selectedMethod === 'DiscordNitroBoost'">
         <q-card class="bg-dark-2" flat>
           <q-card-section>
-            <ol class="q-pl-md q-my-none" type="1">
-              <i18n-t keypath="Components.LacunaDiamond.DNBStep1" tag="li">
-                <template #server>
-                  <a class="origin" href="https://discord.gg/srfhGjbKce" target="_blank">
-                    {{ $t('Common.SupportServer').toLowerCase() }}
-                  </a>
-                </template>
-              </i18n-t>
-              <i18n-t keypath="Components.LacunaDiamond.DNBStep2" tag="li">
-                <template #article>
-                  <a
-                    class="origin"
-                    href="https://support.discord.com/hc/articles/360028038352-Server-Boosting-FAQ-#h_9dfb44db-c394-4339-863b-e6d1e3fb0469"
-                    target="_blank"
-                  >
-                    {{ $t('Components.LacunaDiamond.DNBStep2Article') }}
-                  </a>
-                </template>
-              </i18n-t>
-              <i18n-t keypath="Components.LacunaDiamond.DNBStep3" tag="li">
-                <template #server>
-                  <a class="origin" href="https://discord.gg/srfhGjbKce" target="_blank">
-                    {{ $t('Common.SupportServer').toLowerCase() }}
-                  </a>
-                </template>
-              </i18n-t>
-              <li>
-                {{ $t('Components.LacunaDiamond.DNBStep4') }}
-              </li>
-            </ol>
+            <q-btn
+              class="full-width"
+              style="background-color: #5662f6"
+              unelevated
+              no-caps
+              href="https://discord.gg/srfhGjbKce"
+              target="_blank"
+            >
+              <q-icon class="q-mr-sm" name="fab fa-discord" size="24px"></q-icon>
+
+              <span>Lacuna Hub</span>
+            </q-btn>
           </q-card-section>
 
           <q-card-section class="q-pt-none">
@@ -171,7 +153,7 @@
         </q-card>
       </q-card-section>
 
-      <q-card-section v-else-if="provider === 'PATREON'">
+      <q-card-section v-else-if="selectedMethod === 'Patreon'">
         <q-card class="bg-dark-2" flat>
           <q-card-section>
             <q-btn
@@ -206,7 +188,7 @@
         </q-card>
       </q-card-section>
 
-      <q-card-section v-else-if="provider === 'BOOSTY'">
+      <q-card-section v-else-if="selectedMethod === 'Boosty'">
         <q-card class="bg-dark-2" flat>
           <q-card-section>
             <q-btn
@@ -214,7 +196,7 @@
               style="background-color: #f15f2c"
               unelevated
               no-caps
-              href="https://boosty.to/xelitte/purchase/2203744"
+              href="https://boosty.to/xelitte/purchase/2710502"
               target="_blank"
             >
               <q-avatar class="q-mr-xs" size="24px" square>
@@ -243,39 +225,85 @@
         </q-card>
       </q-card-section>
 
-      <div v-else-if="provider === 'PROJECT_TEAM'"></div>
+      <div v-else-if="selectedMethod === 'ProjectTeam'"></div>
 
       <q-card-section v-else>
         <div>
           {{ $t('Components.LacunaDiamond.SelectPlan') }}
         </div>
 
+        <q-skeleton v-if="pageLoading" class="q-mt-sm" type="rect" height="62px"></q-skeleton>
+
         <q-tabs
-          v-model.number="tier"
+          v-else
+          v-model.number="selectedTier"
           class="bg-dark-2 rounded-borders q-mt-sm"
           align="justify"
           active-bg-color="secondary"
           indicator-color="transparent"
         >
           <q-tab
-            v-for="(period, i) in periods"
-            :key="period.name"
-            :name="i"
+            v-for="(price, i) of selectedMethodPrices"
+            :key="i"
+            :name="price.tier"
             no-caps
-            :style="{ width: $q.screen.lt.sm ? 'fit-content' : `calc(100% / ${periods.length})` }"
+            :style="{ width: $q.screen.lt.sm ? 'fit-content' : `calc(100% / ${price.length})` }"
           >
             <div>
-              <del v-if="period.discounts[currency.name]" class="q-mr-xs opacity-lg">
-                {{ period.prices[currency.name] }}{{ currency.symbol }}
+              <del v-if="price.salePrice" class="q-mr-xs opacity-lg">
+                {{ price.price }}{{ selectedMethodCurrency.symbol }}
               </del>
               <span class="text-h5 text-white">
-                {{ period.prices[currency.name] - period.discounts[currency.name] }}{{ currency.symbol }}
+                {{ price.salePrice ? price.salePrice : price.price }}{{ selectedMethodCurrency.symbol }}
               </span>
               <br />
-              <span class="text-caption">{{ period.name }}</span>
+              <span class="text-caption">
+                {{
+                  DateTime.fromMillis(Date.now() + price.durationSeconds * 1000)
+                    .diffNow(
+                      price.durationSeconds > 604800 ? 'months' : price.durationSeconds > 86400 ? 'days' : 'hours'
+                    )
+                    .toHuman({ maximumFractionDigits: 0 })
+                }}
+              </span>
             </div>
           </q-tab>
         </q-tabs>
+      </q-card-section>
+
+      <q-card-section v-if="selectedMethod === 'Tokens'">
+        <q-card class="bg-dark-2" flat>
+          <q-card-section>
+            <q-btn
+              class="full-width"
+              style="background-color: #ff3366"
+              unelevated
+              no-caps
+              href="https://top.gg/bot/740585412560420914/vote"
+              target="_blank"
+            >
+              <q-icon class="q-mr-sm" name="fas fa-angle-up" size="24px"></q-icon>
+
+              <span>Vote for Lacuna</span>
+            </q-btn>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <q-banner class="bg-dark-1 rounded-borders" dense>
+              <span>
+                {{
+                  $t('Components.LacunaDiamond.TokensInfo', {
+                    bonusesDurationInHours: splitRelativeTime(guild.locale, 24, 'hours')
+                  })
+                }}
+              </span>
+
+              <template #avatar>
+                <q-icon name="info" color="info"></q-icon>
+              </template>
+            </q-banner>
+          </q-card-section>
+        </q-card>
       </q-card-section>
 
       <q-card-section>
@@ -283,101 +311,75 @@
           {{ $t('Components.LacunaDiamond.SelectPaymentMethod') }}
         </div>
 
+        <q-skeleton v-if="pageLoading" class="q-mt-sm" type="rect" height="62px"></q-skeleton>
+
         <q-tabs
-          v-model="provider"
+          v-else
+          v-model="selectedMethod"
           class="bg-dark-2 rounded-borders q-mt-sm"
           align="justify"
           active-bg-color="secondary"
           indicator-color="transparent"
+          @update:model-value="onUpdatePaymentMethod"
         >
           <q-tab
-            v-for="provider in paymentProviders"
-            :key="provider.value"
-            :name="provider.value"
+            v-for="method in paymentMethods"
+            :key="method.value"
+            :name="method.value"
             no-caps
-            :style="{ width: $q.screen.lt.sm ? 'fit-content' : `calc(100% / ${paymentProviders.length})` }"
+            :style="{ width: $q.screen.lt.sm ? 'fit-content' : `calc(100% / ${paymentMethods.length})` }"
           >
             <q-avatar size="32px" square>
               <q-icon
-                v-if="provider.value === 'PATREON'"
+                v-if="method.value === 'Patreon'"
                 name="fab fa-patreon"
                 size="20px"
                 style="color: #ff424d"
               ></q-icon>
 
-              <img v-else :src="provider.icon" />
+              <q-icon
+                v-else-if="method.value === 'Tokens'"
+                name="fas fa-angle-up"
+                size="20px"
+                style="color: #ff3366"
+              ></q-icon>
+
+              <img v-else :src="method.icon" />
             </q-avatar>
 
             <div class="text-white">
-              {{ provider.name }}
+              {{ method.name }}
             </div>
           </q-tab>
         </q-tabs>
-
-        <!-- <q-select
-          v-model="provider"
-          :options="paymentProviders"
-          option-label="name"
-          class="q-pt-sm"
-          filled
-          dense
-          hide-bottom-space
-          emit-value
-          map-options
-        >
-          <template #prepend>
-            <q-avatar size="32px" square>
-              <img :src="paymentProviders.find(i => i.value === provider).icon" alt="" />
-            </q-avatar>
-          </template>
-
-          <template #option="{ opt, toggleOption, selected }">
-            <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-              <q-item-section avatar>
-                <q-avatar size="32px">
-                  <img :src="opt.icon" alt="" />
-                </q-avatar>
-              </q-item-section>
-
-              <q-item-section>
-                <q-item-label>{{ opt.name }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select> -->
       </q-card-section>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
-          <div class="col-6">
+          <div class="col-12 col-md-6">
             <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
           </div>
 
-          <div class="col-6">
+          <div class="col-12 col-md-6">
             <q-btn-dropdown
               class="full-width"
               :label="
                 $t(
                   `Components.LacunaDiamond.${
-                    ['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY', 'PROJECT_TEAM'].includes(provider) ? 'Check' : 'Pay'
+                    ['Patreon', 'Boosty', 'DiscordNitroBoost', 'ProjectTeam'].includes(selectedMethod) ? 'Check' : 'Pay'
                   }`
                 )
               "
               unelevated
               @click="onConfirm"
               :loading="confirmLoading"
-              :disable="guild.premium.available && guild.premium.will_expire_on === 0"
+              :disable="pageLoading || (guild.premium.available && guild.premium.expires_at === 0)"
               no-caps
               color="primary"
               split
             >
               <q-list>
-                <q-item
-                  clickable
-                  v-close-popup
-                  @click="transferDialog"
-                  :disable="!guild.guild.owner || guild.premium.available"
-                >
+                <q-item clickable v-close-popup @click="transferDialog">
                   <q-item-section>
                     <q-item-label>
                       {{ $t('Common.Transfer') }}
@@ -406,7 +408,8 @@ import paypalLogo from 'src/assets/paypal-logo.svg'
 import { interfaces } from 'src/boot/axios'
 import { DateTime } from 'src/boot/luxon'
 import { useGuildStore } from 'src/stores/guild'
-import { handleAxiosError, splitRelativeTime } from 'src/utils/Utils'
+import { lacunaDiamondFeatures, lacunaDiamondPlanComparison } from 'src/utils/Constants'
+import { handleAxiosError, openPopupWindow, splitRelativeTime } from 'src/utils/Utils'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { event } from 'vue-gtag'
 import { useI18n } from 'vue-i18n'
@@ -418,259 +421,42 @@ const $q = useQuasar(),
   { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 const { t: $t } = useI18n()
 
+const pageLoading = ref(true),
+  confirmLoading = ref(false)
 const guild = useGuildStore()
+const products = ref([])
+const paymentMethods = ref([]),
+  selectedMethod = ref('PayPal'),
+  selectedMethodCurrency = computed(() => {
+    if (selectedMethod.value === 'Tokens') return { code: 'TKN', symbol: 't' }
 
-const confirmLoading = ref(false)
-const tier = ref(0),
-  provider = ref('PAYPAL'),
-  paymentProviders = ref([
-    // { name: 'QIWI', value: 'QIWI', icon: qiwiLogo },
-    { name: 'PayPal', value: 'PAYPAL', icon: paypalLogo },
-    { name: 'Patreon', value: 'PATREON' },
-    { name: 'Boosty', value: 'BOOSTY', icon: boostyLogo },
-    { name: 'Discord Nitro Boost', value: 'DISCORD_NITRO_BOOST', icon: discordNitroBoost }
-  ])
+    return { code: 'USD', symbol: '$' }
+  }),
+  selectedMethodPrices = computed(() => {
+    return products.value
+      .filter(v => v.prices.some(vv => vv.currency_code === selectedMethodCurrency.value.code))
+      .map(v => {
+        const price = v.prices.find(vv => vv.currency_code === selectedMethodCurrency.value.code)
 
-const currency = computed(() => {
-  return /* provider.value === 'QIWI' ? { name: 'RUB', symbol: '₽' } : */ { name: 'USD', symbol: '$' }
-})
-const periods = computed(() => {
-  return guild.prices.map(i => {
-    return {
-      name: DateTime.fromMillis(Date.now() + i.months * 2592000 * 1000)
-        .diff(DateTime.now(), 'months')
-        .toHuman({ maximumFractionDigits: 0 }),
-      ...i
-    }
-  })
-})
+        return {
+          type: v.type,
+          currencyCode: price.currency_code,
+          price: price.amount,
+          salePrice: price.sale_amount,
+          tier: v.tier,
+          durationSeconds: v.duration_seconds
+        }
+      })
+  }),
+  selectedTier = ref(0)
 
-const bonuses = [
-    {
-      name: 'music',
-      description: $t('Components.LacunaDiamond.BonusMusicDescription'),
-      icon: 'https://cdn.lordicon.com/pmkcstki.json',
-      iconColors: 'primary:#00bcd4'
-    },
-    {
-      name: 'limits',
-      description: $t('Components.LacunaDiamond.BonusIncreasedLimitsDescription'),
-      icon: 'https://cdn.lordicon.com/orshjpvs.json',
-      iconColors: 'primary:#3a3347,secondary:#ebe6ef'
-    },
-    {
-      name: 'personalization',
-      description: $t('Components.LacunaDiamond.BonusPersonalizationDescription'),
-      icon: 'https://cdn.lordicon.com/pjlunxyy.json',
-      iconColors: 'primary:#3a3347,secondary:#646e78,tertiary:#ab6836,quaternary:#51acf7'
-    },
-    {
-      name: 'subscriptions',
-      description: $t('Components.LacunaDiamond.BonusCustomBehaviorWithCodeDescription'),
-      icon: 'https://cdn.lordicon.com/qatykyxz.json',
-      iconColors: 'primary:#121331,secondary:#00bcd4'
-    },
-    {
-      name: 'activities',
-      description: $t('Components.LacunaDiamond.BonusActivitiesDescription'),
-      icon: 'https://cdn.lordicon.com/qmcsqnle.json',
-      iconColors: 'primary:#ffc738,secondary:#b26836'
-    },
-    {
-      name: 'respect',
-      description: $t('Components.LacunaDiamond.BonusRespectDescription'),
-      icon: 'https://cdn.lordicon.com/cmfqmqbx.json',
-      iconColors: 'primary:#f9c9c0,secondary:#4bb3fd,tertiary:#f28ba8'
-    }
-  ],
-  planComparison = [
-    {
-      categoryName: $t('Pages.GuildPage.NavNames.CustomBehavior'),
-      features: [
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ExecuteCode'),
-          free: { value: false, type: 'boolean' },
-          diamond: { value: true, type: 'boolean' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.CustomCommandsNumber'),
-          free: { value: '25', type: 'text' },
-          diamond: { value: '100', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutomationNumber'),
-          free: { value: '5', type: 'text' },
-          diamond: { value: '20', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutomationSequentialExecutionsWithOneTrigger'),
-          free: { value: '1', type: 'text' },
-          diamond: { value: '5', type: 'text' }
-        }
-      ]
-    },
-    {
-      categoryName: $t('Pages.LandingPage.FeatureUtility'),
-      features: [
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.InteractiveMessagesNumber'),
-          free: { value: '5', type: 'text' },
-          diamond: { value: '50', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.InteractiveReactionsNumber'),
-          free: { value: '50', type: 'text' },
-          diamond: { value: '200', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.TempVoiceChannelsNumber'),
-          free: { value: '2', type: 'text' },
-          diamond: { value: '20', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.VoiceRolesNumber'),
-          free: { value: '2', type: 'text' },
-          diamond: { value: '20', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutoThreadsNumber'),
-          free: { value: '2', type: 'text' },
-          diamond: { value: '20', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AutoReactionsNumber'),
-          free: { value: '2', type: 'text' },
-          diamond: { value: '20', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ImageRotationInterval'),
-          free: { value: splitRelativeTime(guild.locale, 1, 'hours'), type: 'text' },
-          diamond: { value: splitRelativeTime(guild.locale, 2, 'minutes'), type: 'text' }
-        }
-      ]
-    },
-    {
-      categoryName: $t('Pages.GuildPage.NavNames.Moderation'),
-      features: [
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActionLogWebhookModifying'),
-          free: { value: false, type: 'boolean' },
-          diamond: { value: true, type: 'boolean' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActionLogEventsProcessedPerMinuteNumber'),
-          free: { value: '5', type: 'text' },
-          diamond: { value: '50', type: 'text' }
-        }
-      ]
-    },
-    {
-      categoryName: $t('Pages.GuildPage.VoiceChannels.Music'),
-      features: [
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaylistsPlayback'),
-          free: { value: false, type: 'boolean' },
-          diamond: { value: true, type: 'boolean' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.AudioStreamingPlayback'),
-          free: { value: false, type: 'boolean' },
-          diamond: { value: true, type: 'boolean' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackVolumeChanging'),
-          free: { value: false, type: 'boolean' },
-          diamond: { value: true, type: 'boolean' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackQueueTrackNumber'),
-          free: { value: '15', type: 'text' },
-          diamond: { value: 'all_inclusive', type: 'icon' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackFilters'),
-          free: { value: false, type: 'boolean' },
-          diamond: { value: true, type: 'boolean' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PlaybackSeek'),
-          free: { value: false, type: 'boolean' },
-          diamond: { value: true, type: 'boolean' }
-        }
-      ]
-    },
-    {
-      categoryName: $t('Pages.GuildPage.NavNames.Activities'),
-      features: [
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.EarnCurrenciesInVoiceChannels'),
-          free: { value: false, type: 'boolean' },
-          diamond: { value: true, type: 'boolean' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.VoiceExpMembersNumber'),
-          free: { value: '15', type: 'text' },
-          diamond: { value: 'all_inclusive', type: 'icon' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.LevelAwardsNumber'),
-          free: { value: '50', type: 'text' },
-          diamond: { value: '200', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.StoreItemsNumber'),
-          free: { value: '50', type: 'text' },
-          diamond: { value: '200', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ActivityMultipliersNumber'),
-          free: { value: '1', type: 'text' },
-          diamond: { value: '10', type: 'text' }
-        }
-      ]
-    },
-    {
-      categoryName: $t('Pages.GuildPage.NavNames.Subscriptions'),
-      features: [
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
-            socialPlatform: 'Telegram'
-          }),
-          free: { value: '1', type: 'text' },
-          diamond: { value: '10', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
-            socialPlatform: 'YouTube'
-          }),
-          free: { value: '1', type: 'text' },
-          diamond: { value: '10', type: 'text' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber', {
-            socialPlatform: 'Twitch'
-          }),
-          free: { value: '1', type: 'text' },
-          diamond: { value: '10', type: 'text' }
-        }
-      ]
-    },
-    {
-      categoryName: $t('Common.Other'),
-      features: [
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.PrioritySupport'),
-          free: { value: false, type: 'boolean' },
-          diamond: { value: true, type: 'boolean' }
-        },
-        {
-          name: $t('Components.LacunaDiamond.PlanComparisonFeatures.ImageEditorElementsNumber'),
-          free: { value: '5', type: 'text' },
-          diamond: { value: '50', type: 'text' }
-        }
-      ]
-    }
-  ]
+const onUpdatePaymentMethod = () => {
+  const paymentMethodProducts = products.value.filter(v =>
+    v.prices.some(vv => vv.currency_code === selectedMethodCurrency.value.code)
+  )
+
+  selectedTier.value = paymentMethodProducts.at(0).tier
+}
 
 const transferDialog = () => {
   return $q
@@ -693,9 +479,9 @@ const onKeyUp = keyboardEvent => {
   const correct = iddqd.value.keys.join('').toLowerCase() === 'iddqd'
 
   if (correct) {
-    paymentProviders.value.pop()
-    paymentProviders.value.push({ name: 'Team', value: 'PROJECT_TEAM', icon: lacunaLogo })
-    provider.value = 'PROJECT_TEAM'
+    paymentMethods.value.pop()
+    paymentMethods.value.push({ name: 'Team', value: 'ProjectTeam', icon: lacunaLogo })
+    selectedMethod.value = 'ProjectTeam'
     iddqd.value.keys = []
 
     return
@@ -708,46 +494,69 @@ const onKeyUp = keyboardEvent => {
   }, 5000)
 }
 
-const onConfirm = () => {
+const onConfirm = async () => {
     confirmLoading.value = true
 
-    return interfaces.payments
-      .create({
-        data: {
-          tier: tier.value,
-          provider: provider.value,
-          guild_id: guild._id,
-          guild_name: guild.guild.name
-        }
-      })
-      .then(response => {
-        event('checkout_progress', { event_label: provider.value })
+    try {
+      const isSubscription = ['Patreon', 'Boosty', 'DiscordNitroBoost', 'ProjectTeam'].includes(selectedMethod.value)
 
-        if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY', 'PROJECT_TEAM'].includes(provider.value)) {
-          window.location.reload()
-        } else {
-          const payUrl = response.data
+      event('checkout_progress', { event_label: selectedMethod.value, selected_tier: selectedTier.value })
 
-          if (payUrl) {
-            window.open(payUrl, '_blank')
+      if (isSubscription) {
+        await interfaces.billing.createSubscription({
+          data: {
+            subscription_method: selectedMethod.value,
+            guild_id: guild._id
           }
-        }
-
-        onDialogOK()
-      })
-      .catch(err => {
-        const error = handleAxiosError(err)
-
-        $q.notify({
-          message: error.message,
-          classes: 'q-notification-custom',
-          color: 'black',
-          icon: 'error',
-          iconColor: 'negative',
-          timeout: 5000
         })
+
+        location.reload()
+      } else {
+        const response = await interfaces.billing.createPayment({
+          data: {
+            product: products.value.find(v => v.tier === selectedTier.value),
+            payment_method: selectedMethod.value,
+            guild_id: guild._id,
+            guild_name: guild.guild.name
+          }
+        })
+
+        const payUrl = response.data
+
+        if (payUrl) {
+          const popup = openPopupWindow({ url: payUrl, title: `Diamond for ${guild.guild.name}`, w: 520, h: 720 })
+          const listener = () => {
+            window.onmessage = null
+            popup.close()
+            location.reload()
+          }
+
+          window.onmessage = listener
+
+          const interval = setInterval(() => {
+            if (popup.closed) {
+              window.onmessage = null
+              clearInterval(interval)
+            }
+          }, 1000)
+        }
+      }
+
+      onDialogOK()
+    } catch (err) {
+      const error = handleAxiosError(err)
+
+      $q.notify({
+        message: error.message,
+        classes: 'q-notification-custom',
+        color: 'black',
+        icon: 'error',
+        iconColor: 'negative',
+        timeout: 5000
       })
-      .finally(() => (confirmLoading.value = false))
+    } finally {
+      confirmLoading.value = false
+    }
   },
   onCancel = () => {
     onDialogCancel()
@@ -756,7 +565,37 @@ const onConfirm = () => {
     onDialogHide()
   }
 
-onMounted(() => {
+onMounted(async () => {
+  try {
+    const response = await interfaces.common.getProducts()
+
+    products.value = response.data.products
+    paymentMethods.value = response.data.payment_methods.map(v => {
+      let icon
+
+      if (v.value === 'PayPal') icon = paypalLogo
+      if (v.value === 'Boosty') icon = boostyLogo
+      if (v.value === 'DiscordNitroBoost') icon = discordNitroBoost
+
+      return { ...v, icon }
+    })
+  } catch (err) {
+    const error = handleAxiosError(err)
+
+    $q.notify({
+      message: error.message,
+      classes: 'q-notification-custom',
+      color: 'black',
+      icon: 'error',
+      iconColor: 'negative',
+      timeout: 5000
+    })
+
+    return
+  }
+
+  onUpdatePaymentMethod()
+  pageLoading.value = false
   window.addEventListener('keyup', onKeyUp)
 })
 

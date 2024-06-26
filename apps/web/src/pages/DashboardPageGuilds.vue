@@ -44,6 +44,7 @@
 <script setup>
 import GuildCardMini from 'src/components/GuildCardMini.vue'
 import { useUserStore } from 'src/stores/user'
+import { openPopupWindow } from 'src/utils/Utils'
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -73,9 +74,7 @@ const gotoGuild = async (gid, joined) => {
         disable_guild_select: true
       }
     })
-    const popup = window.open(route.href, `Add to ${gid}`, 'width=400,height=620,top=5')
-    const popupOpenTimestamp = Date.now()
-
+    const popup = openPopupWindow({ url: route.href, title: `Add to ${gid}`, w: 520, h: 720 })
     const listener = async event => {
       if (event.data.guild_id) {
         await router.push(`/guilds/${gid}/settings`)
@@ -88,7 +87,7 @@ const gotoGuild = async (gid, joined) => {
     window.onmessage = listener
 
     const interval = setInterval(() => {
-      if (Date.now() - popupOpenTimestamp > 300000 || popup.closed) {
+      if (popup.closed) {
         window.onmessage = null
         clearInterval(interval)
       }

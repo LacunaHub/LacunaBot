@@ -26,6 +26,9 @@ const interfaces = {
                 }
             })
         },
+        getProducts() {
+            return api.get('/common/products')
+        },
         getReleaseNotes() {
             return api.get('/common/release-notes')
         },
@@ -123,9 +126,16 @@ const interfaces = {
         }
     },
 
-    payments: {
-        create(options) {
-            return api.post(`/payments`, options.data, {
+    billing: {
+        createPayment(options) {
+            return api.post(`/billing/payments`, options.data, {
+                headers: {
+                    Authorization: Cookies.get('access_token')
+                }
+            })
+        },
+        createSubscription(options) {
+            return api.post(`/billing/subscriptions`, options.data, {
                 headers: {
                     Authorization: Cookies.get('access_token')
                 }

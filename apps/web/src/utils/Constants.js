@@ -1,3 +1,5 @@
+import { splitRelativeTime } from './Utils'
+
 export const metaTitleTemplate = title => (title ? `${title} – Lacuna` : 'Lacuna – Discord Bot')
 
 export const imButtonStyles = {
@@ -362,3 +364,213 @@ export const localeStringsMap = {
 }
 
 export const allowedImageHosts = ['cdn.discordapp.com', 'i.imgur.com']
+
+export const lacunaDiamondFeatures = [
+    {
+        name: 'music',
+        description: 'Components.LacunaDiamond.BonusMusicDescription',
+        icon: 'https://cdn.lordicon.com/pmkcstki.json',
+        iconColors: 'primary:#00bcd4'
+    },
+    {
+        name: 'limits',
+        description: 'Components.LacunaDiamond.BonusIncreasedLimitsDescription',
+        icon: 'https://cdn.lordicon.com/orshjpvs.json',
+        iconColors: 'primary:#3a3347,secondary:#ebe6ef'
+    },
+    {
+        name: 'subscriptions',
+        description: 'Components.LacunaDiamond.BonusCustomBehaviorWithCodeDescription',
+        icon: 'https://cdn.lordicon.com/qatykyxz.json',
+        iconColors: 'primary:#121331,secondary:#00bcd4'
+    },
+    {
+        name: 'activities',
+        description: 'Components.LacunaDiamond.BonusActivitiesDescription',
+        icon: 'https://cdn.lordicon.com/qmcsqnle.json',
+        iconColors: 'primary:#ffc738,secondary:#b26836'
+    },
+    {
+        name: 'respect',
+        description: 'Components.LacunaDiamond.BonusRespectDescription',
+        icon: 'https://cdn.lordicon.com/cmfqmqbx.json',
+        iconColors: 'primary:#f9c9c0,secondary:#4bb3fd,tertiary:#f28ba8'
+    }
+]
+export const lacunaDiamondPlanComparison = [
+    {
+        categoryName: 'Pages.GuildPage.NavNames.CustomBehavior',
+        features: [
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.ExecuteCode',
+                free: { value: false, type: 'boolean' },
+                diamond: { value: true, type: 'boolean' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.CustomCommandsNumber',
+                free: { value: '25', type: 'text' },
+                diamond: { value: '100', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.AutomationNumber',
+                free: { value: '5', type: 'text' },
+                diamond: { value: '20', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.AutomationSequentialExecutionsWithOneTrigger',
+                free: { value: '1', type: 'text' },
+                diamond: { value: '5', type: 'text' }
+            }
+        ]
+    },
+    {
+        categoryName: 'Pages.LandingPage.FeatureUtility',
+        features: [
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.InteractiveMessagesNumber',
+                free: { value: '5', type: 'text' },
+                diamond: { value: '50', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.InteractiveReactionsNumber',
+                free: { value: '50', type: 'text' },
+                diamond: { value: '200', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.TempVoiceChannelsNumber',
+                free: { value: '2', type: 'text' },
+                diamond: { value: '20', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.VoiceRolesNumber',
+                free: { value: '2', type: 'text' },
+                diamond: { value: '20', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.AutoThreadsNumber',
+                free: { value: '2', type: 'text' },
+                diamond: { value: '20', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.AutoReactionsNumber',
+                free: { value: '2', type: 'text' },
+                diamond: { value: '20', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.ImageRotationInterval',
+                free: { value: splitRelativeTime(null, 1, 'hours'), type: 'text' },
+                diamond: { value: splitRelativeTime(null, 2, 'minutes'), type: 'text' }
+            }
+        ]
+    },
+    {
+        categoryName: 'Pages.GuildPage.NavNames.Moderation',
+        features: [
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.ActionLogEventsProcessedPerMinuteNumber',
+                free: { value: '5', type: 'text' },
+                diamond: { value: '20', type: 'text' }
+            }
+        ]
+    },
+    {
+        categoryName: 'Pages.GuildPage.VoiceChannels.Music',
+        features: [
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.PlaylistsPlayback',
+                free: { value: false, type: 'boolean' },
+                diamond: { value: true, type: 'boolean' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.AudioStreamingPlayback',
+                free: { value: false, type: 'boolean' },
+                diamond: { value: true, type: 'boolean' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.PlaybackVolumeChanging',
+                free: { value: false, type: 'boolean' },
+                diamond: { value: true, type: 'boolean' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.PlaybackQueueTrackNumber',
+                free: { value: '15', type: 'text' },
+                diamond: { value: 'all_inclusive', type: 'icon' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.PlaybackFilters',
+                free: { value: false, type: 'boolean' },
+                diamond: { value: true, type: 'boolean' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.PlaybackSeek',
+                free: { value: false, type: 'boolean' },
+                diamond: { value: true, type: 'boolean' }
+            }
+        ]
+    },
+    {
+        categoryName: 'Pages.GuildPage.NavNames.Activities',
+        features: [
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.EarnCurrenciesInVoiceChannels',
+                free: { value: false, type: 'boolean' },
+                diamond: { value: true, type: 'boolean' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.VoiceExpMembersNumber',
+                free: { value: '15', type: 'text' },
+                diamond: { value: 'all_inclusive', type: 'icon' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.LevelAwardsNumber',
+                free: { value: '50', type: 'text' },
+                diamond: { value: '200', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.StoreItemsNumber',
+                free: { value: '50', type: 'text' },
+                diamond: { value: '200', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.ActivityMultipliersNumber',
+                free: { value: '1', type: 'text' },
+                diamond: { value: '10', type: 'text' }
+            }
+        ]
+    },
+    {
+        categoryName: 'Pages.GuildPage.NavNames.Subscriptions',
+        features: [
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber',
+                free: { value: '1', type: 'text' },
+                diamond: { value: '10', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber',
+                free: { value: '1', type: 'text' },
+                diamond: { value: '10', type: 'text' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber',
+                free: { value: '1', type: 'text' },
+                diamond: { value: '10', type: 'text' }
+            }
+        ]
+    },
+    {
+        categoryName: 'Common.Other',
+        features: [
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.PrioritySupport',
+                free: { value: false, type: 'boolean' },
+                diamond: { value: true, type: 'boolean' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.ImageEditorElementsNumber',
+                free: { value: '5', type: 'text' },
+                diamond: { value: '50', type: 'text' }
+            }
+        ]
+    }
+]

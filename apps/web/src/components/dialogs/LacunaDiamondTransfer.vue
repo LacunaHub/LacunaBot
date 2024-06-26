@@ -2,11 +2,15 @@
   <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
     <q-card class="bg-dark-1" flat style="width: 512px; max-width: 90vw">
       <q-card-section>
-        <div class="row q-col-gutter-md text-center">
-          <div class="col-12 text--secondary">
+        <q-banner class="bg-dark-2 rounded-borders" dense>
+          <span>
             {{ $t('Components.LacunaDiamond.TransferringDescription') }}
-          </div>
-        </div>
+          </span>
+
+          <template #avatar>
+            <q-icon name="info" color="info"></q-icon>
+          </template>
+        </q-banner>
       </q-card-section>
 
       <q-card-section>
@@ -81,7 +85,7 @@
               unelevated
               @click="onConfirm"
               :loading="confirmLoading"
-              :disable="!fromGuild"
+              :disable="!fromGuild || !guild.guild.owner || guild.premium.available"
               no-caps
               color="primary"
             >

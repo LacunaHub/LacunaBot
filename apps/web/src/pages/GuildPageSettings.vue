@@ -275,9 +275,7 @@ const guildClone = computed(() => {
       })
     )
   }),
-  hasDiamondDiscount = computed(() => {
-    return guild.prices.some(i => Object.values(i.discounts).some(i => i !== 0))
-  })
+  hasDiamondDiscount = ref(false)
 
 const navItems = [
   { name: t('Pages.GuildPage.NavNames.General'), path: 'settings', icon: controlPanelImg },
@@ -291,7 +289,7 @@ const navItems = [
     path: 'settings/moderation',
     icon: shieldImg
   },
-  { name: t('Pages.GuildPage.NavNames.CustomBehavior'), path: 'settings/custom-behavior', icon: boxImg, new: true },
+  { name: t('Pages.GuildPage.NavNames.CustomBehavior'), path: 'settings/custom-behavior', icon: boxImg },
   {
     name: t('Pages.GuildPage.NavNames.Activities'),
     path: 'settings/activities',
@@ -307,7 +305,7 @@ const navItems = [
     path: 'settings/voice-channels',
     icon: karaokeImg
   },
-  { name: t('Pages.GuildPage.NavNames.Utility'), path: 'settings/utility', icon: layersImg, new: true }
+  { name: t('Pages.GuildPage.NavNames.Utility'), path: 'settings/utility', icon: layersImg }
 ]
 
 useMeta(() => {
