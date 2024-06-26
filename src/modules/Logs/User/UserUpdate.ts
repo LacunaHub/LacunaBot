@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, EmbedBuilder, Guild, User } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, guild: Guild, before: User, user: User): Promise<boolean> {
@@ -13,10 +13,6 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
         const isOk = logChannel && logChannel.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             if (before.username !== user.username) {
                 const embed = new EmbedBuilder()
                     .setTitle(t('Logs.UserUpdated'))
@@ -30,7 +26,7 @@ export default async function (self: Lacuna, server: ServerDocument, guild: Guil
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsUserUpdateUsername',

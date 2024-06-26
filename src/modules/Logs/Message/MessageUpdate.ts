@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, EmbedBuilder, Message, escapeMarkdown } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 import { DiffMatchPatch } from '../../../internals/utility/DiffMatchPatch'
 import { truncateString } from '../../../internals/utility/Utils'
@@ -15,10 +15,6 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
         const isOk = logChannel && logChannel.permissionsFor(message.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk && before.content !== message.content) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const contentBefore = truncateString(escapeMarkdown(before.content ?? ''), 800),
                 content = truncateString(escapeMarkdown(message.content ?? ''), 800)
             const dmp = new DiffMatchPatch(),
@@ -39,7 +35,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
             if (attachment && attachment.height) embed.setImage(attachment.url)
 
             try {
-                await webhook.send({ embeds: [embed] })
+                await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsMessageUpdate', action: 'SendMessageViaWebhook', error: err, guild_id: message.guildId })
 

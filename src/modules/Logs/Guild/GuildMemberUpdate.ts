@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildMember } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: GuildMember, member: GuildMember): Promise<boolean> {
@@ -13,10 +13,6 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
         const isOk = logChannel && logChannel.permissionsFor(member.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberUpdate })
                 : null
@@ -40,7 +36,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsGuildMemberUpdateName',

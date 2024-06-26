@@ -1,7 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, ThreadChannel } from 'discord.js'
 import numbro from 'numbro'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: ThreadChannel, thread: ThreadChannel): Promise<boolean> {
@@ -14,10 +14,6 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
         const isOk = logChannel && logChannel.permissionsFor(thread.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = thread.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await thread.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.ThreadUpdate })
                 : null
@@ -42,7 +38,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsThreadUpdateName',
@@ -81,7 +77,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Thr
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({ embeds: [embed] })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsThreadUpdateAutoArchiveDuration',

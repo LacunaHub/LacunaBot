@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Sticker } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, sticker: Sticker): Promise<boolean> {
@@ -13,10 +13,6 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
         const isOk = logChannel && logChannel.permissionsFor(sticker.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = sticker.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await sticker.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.StickerCreate })
                 : null
@@ -31,7 +27,7 @@ export default async function (self: Lacuna, server: ServerDocument, sticker: St
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({ embeds: [embed] })
+                await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsStickerCreate', action: 'SendMessageViaWebhook', error: err, guild_id: sticker.guildId })
 

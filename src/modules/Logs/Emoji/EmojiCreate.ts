@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildEmoji } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, emoji: GuildEmoji): Promise<boolean> {
@@ -13,10 +13,6 @@ export default async function (self: Lacuna, server: ServerDocument, emoji: Guil
         const isOk = logChannel && logChannel.permissionsFor(emoji.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = emoji.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await emoji.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.EmojiCreate })
                 : null
@@ -36,7 +32,7 @@ export default async function (self: Lacuna, server: ServerDocument, emoji: Guil
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({ embeds: [embed] })
+                await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsEmojiCreate', action: 'SendMessageViaWebhook', error: err, guild_id: emoji.guild.id })
 
