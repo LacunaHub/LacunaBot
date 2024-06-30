@@ -1,12 +1,10 @@
-import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import { balanceSlash, transferSlash } from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash: () => {},
-    name,
+const options: CommandOptions = {
     description: 'Commands.WalletCommand.Description',
+    group: CommandGroup.General,
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
@@ -37,7 +35,7 @@ export default {
                     name: 'Commands.Options.Amount',
                     description: 'Commands.WalletCommand.SubCommands.TransferCommand.Options.Amount.Description',
                     required: true,
-                    min_value: 1
+                    minValue: 1
                 },
                 {
                     type: ApplicationCommandOptionType.String,
@@ -49,18 +47,11 @@ export default {
             ]
         }
     ],
-    group: 'GENERAL',
-    subcommands: [
-        {
-            name: 'balance',
-            slash: balanceSlash
-        },
-        {
-            name: 'transfer',
-            slash: transferSlash
-        }
-    ],
-    permissions: {
-        self: new PermissionsBitField(['EmbedLinks']).toArray()
+    selfPermissions: ['EmbedLinks'],
+    subcommandFns: {
+        balance: balanceSlash,
+        transfer: transferSlash
     }
 }
+
+export default options

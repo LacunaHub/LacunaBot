@@ -1,10 +1,10 @@
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import slash from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash,
-    name,
+const options: CommandOptions = {
     description: 'Commands.QueueCommand.Description',
-    group: 'MUSIC'
+    group: CommandGroup.Music,
+    slashFn: slash
 }
+
+export default options

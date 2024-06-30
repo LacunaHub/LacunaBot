@@ -1,14 +1,11 @@
-import { PermissionsBitField } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import slash from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash,
-    name,
+const options: CommandOptions = {
     description: 'Commands.AboutCommand.Description',
-    group: 'GENERAL',
-    permissions: {
-        self: new PermissionsBitField(['EmbedLinks']).toArray()
-    }
+    group: CommandGroup.General,
+    selfPermissions: ['EmbedLinks'],
+    slashFn: slash
 }
+
+export default options

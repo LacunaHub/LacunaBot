@@ -1,12 +1,10 @@
-import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import { createSlash } from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash: () => {},
-    name,
+const options: CommandOptions = {
     description: 'Commands.PollCommand.Description',
+    group: CommandGroup.Utility,
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
@@ -46,15 +44,11 @@ export default {
             ]
         }
     ],
-    group: 'UTILITY',
-    subcommands: [
-        {
-            slash: createSlash,
-            name: 'create'
-        }
-    ],
-    permissions: {
-        self: new PermissionsBitField(['EmbedLinks']).toArray(),
-        user: new PermissionsBitField(['ManageMessages']).toArray()
+    defaultMemberPermissions: ['ManageMessages'],
+    selfPermissions: ['EmbedLinks'],
+    subcommandFns: {
+        create: createSlash
     }
 }
+
+export default options

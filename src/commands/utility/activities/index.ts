@@ -1,12 +1,10 @@
-import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import { assignLevelAward, resetLevelSlash, resetWalletSlash, setWalletBalanceSlash } from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash: () => {},
-    name,
+const options: CommandOptions = {
     description: 'Commands.ActivitiesCommand.Description',
+    group: CommandGroup.Utility,
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
@@ -44,8 +42,8 @@ export default {
                     name: 'Commands.Options.Amount',
                     description: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Amount.Description',
                     required: true,
-                    min_value: -(Math.pow(2, 31) - 1),
-                    max_value: Math.pow(2, 31) - 1
+                    minValue: -(Math.pow(2, 31) - 1),
+                    maxValue: Math.pow(2, 31) - 1
                 },
                 {
                     type: ApplicationCommandOptionType.String,
@@ -59,8 +57,8 @@ export default {
                     name: 'Commands.Options.Operation',
                     description: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Operation.Description',
                     required: false,
-                    min_value: 1,
-                    max_value: 3,
+                    minValue: 1,
+                    maxValue: 3,
                     choices: [
                         {
                             name: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Operation.ChoiceSet',
@@ -94,8 +92,8 @@ export default {
                     name: 'Commands.Options.ResetAll',
                     description: 'Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Options.ResetAll.Description',
                     required: false,
-                    min_value: 1,
-                    max_value: 2,
+                    minValue: 1,
+                    maxValue: 2,
                     choices: [
                         {
                             name: 'Common.No',
@@ -125,8 +123,8 @@ export default {
                     name: 'Commands.Options.ResetAll',
                     description: 'Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Options.ResetAll.Description',
                     required: false,
-                    min_value: 1,
-                    max_value: 2,
+                    minValue: 1,
+                    maxValue: 2,
                     choices: [
                         {
                             name: 'Common.No',
@@ -141,26 +139,13 @@ export default {
             ]
         }
     ],
-    group: 'UTILITY',
-    subcommands: [
-        {
-            name: 'assign-level-award',
-            slash: assignLevelAward
-        },
-        {
-            name: 'set-wallet-balance',
-            slash: setWalletBalanceSlash
-        },
-        {
-            name: 'reset-wallet',
-            slash: resetWalletSlash
-        },
-        {
-            name: 'reset-level',
-            slash: resetLevelSlash
-        }
-    ],
-    permissions: {
-        user: new PermissionsBitField(['Administrator']).toArray()
+    defaultMemberPermissions: ['Administrator'],
+    subcommandFns: {
+        'assign-level-award': assignLevelAward,
+        'set-wallet-balance': setWalletBalanceSlash,
+        'reset-wallet': resetWalletSlash,
+        'reset-level': resetLevelSlash
     }
 }
+
+export default options

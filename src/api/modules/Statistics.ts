@@ -14,11 +14,9 @@ export function createCollectionSchedule() {
             return {
                 guildCount: self.guilds.cache.size,
                 latency: self.ws.ping,
-                commandUsageCount: self.commands
-                    .filter(c => c.is_slash_command)
-                    .map(c => {
-                        return { name: c.name, uses: c.uses }
-                    })
+                commandUsageCount: self.commands.map(c => {
+                    return { name: c.name, uses: c.uses }
+                })
             }
         })
 
