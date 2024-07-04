@@ -1,3 +1,4 @@
+import auth from './auth'
 import authorize from './authorize'
 import billing from './billing'
 import common from './common'
@@ -7,6 +8,7 @@ import users from './users'
 import webhooks from './webhooks'
 
 export default {
+    auth,
     authorize,
     common,
     guilds,

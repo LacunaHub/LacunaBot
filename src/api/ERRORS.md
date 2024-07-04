@@ -85,3 +85,4 @@
 | 5017 | Cannot create a YouTube subscription                             |
 | 5018 | Cannot delete a YouTube subscription                             |
 | 5019 | Cannot get support server information                            |
+| 5020 | Cannot exchange the code                                         |
