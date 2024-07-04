@@ -342,7 +342,7 @@ const getSettings = async () => {
       const { status } = err.response
 
       if (status === 401) {
-        router.push('/authorize')
+        router.push('/auth')
       } else if (status === 403) {
         router.push('/forbidden')
       } else {

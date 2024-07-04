@@ -31,11 +31,16 @@
               :label="$t('Pages.LandingPage.AddToMe')"
               icon="discord"
               @click="addToMe"
+              :loading="addToMeLoading"
               color="primary"
               size="large"
               unelevated
               no-caps
-            ></q-btn>
+            >
+              <template #loading>
+                <q-spinner-dots color="white"></q-spinner-dots>
+              </template>
+            </q-btn>
 
             <q-btn
               :class="`${$q.screen.lt.sm ? 'full-width q-mt-md' : 'q-ml-md'}`"
@@ -44,7 +49,7 @@
               size="large"
               unelevated
               no-caps
-              @click="$refs.carousel.next()"
+              @click="carousel.next()"
             ></q-btn>
           </div>
         </q-carousel-slide>
@@ -213,11 +218,16 @@
               :label="$t('Pages.LandingPage.AddToMe')"
               icon="discord"
               @click="addToMe"
+              :loading="addToMeLoading"
               color="primary"
               size="large"
               unelevated
               no-caps
-            ></q-btn>
+            >
+              <template #loading>
+                <q-spinner-dots color="white"></q-spinner-dots>
+              </template>
+            </q-btn>
           </div>
 
           <div :class="`col-12 col-md-6 ${$q.screen.lt.md ? 'text-center' : 'text-right'}`">
@@ -249,7 +259,7 @@
                 <img :src="user.avatarURL" />
               </q-avatar>
             </q-btn>
-            <q-btn v-else class="q-px-md" flat to="/authorize" style="background: rgba(0, 0, 0, 0.3)">
+            <q-btn v-else class="q-px-md" flat to="/auth" style="background: rgba(0, 0, 0, 0.3)">
               {{ $t('Components.Header.Login') }}
               <q-icon class="q-ml-sm" name="r_login"></q-icon>
             </q-btn>
@@ -280,113 +290,132 @@
   </q-page>
 </template>
 
-<script>
-import { useMeta } from 'quasar'
+<script setup>
+import { useMeta, useQuasar } from 'quasar'
+import { interfaces } from 'src/boot/axios'
 import { useUserStore } from 'src/stores/user'
-import { openPopupWindow } from 'src/utils/Utils'
-import { defineComponent, ref } from 'vue'
+import { handleAxiosError, openPopupWindow } from 'src/utils/Utils'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-export default defineComponent({
-  name: 'LandingPage',
+const $q = useQuasar(),
+  router = useRouter()
+const user = useUserStore()
 
-  setup() {
-    const user = useUserStore()
+const carousel = ref(null),
+  currentCarouselSlide = ref('introduction'),
+  availableCarouselSlides = [
+    'introduction',
+    'custom-behavior',
+    'moderation',
+    'activities',
+    'social-alerts',
+    'music',
+    'useful-features',
+    'ready-to-start'
+  ],
+  wheelCounter = ref({
+    spins: 0,
+    firstSpin: null,
+    timeout: null
+  })
+const addToMeLoading = ref(false)
 
-    useMeta({
-      title: 'Lacuna',
-      titleTemplate: title => `${title} – Discord Bot`,
-      meta: {
-        description: {
-          name: 'description',
-          content:
-            "Lacuna is a feature-rich Discord bot designed to enhance your server's community management and moderation experience. With a wide range of commands and customizable settings, Lacuna offers powerful tools to help you maintain a thriving and well-governed server."
-        },
-        keywords: {
-          name: 'keywords',
-          content:
-            'discord bot, community management, moderation, server management, customizable commands, automated tasks, server analytics, user moderation, automated moderation, custom roles, server settings'
-        }
-      }
-    })
-
-    return {
-      user,
-      currentCarouselSlide: ref('introduction'),
-      availableCarouselSlides: [
-        'introduction',
-        'custom-behavior',
-        'moderation',
-        'activities',
-        'social-alerts',
-        'music',
-        'useful-features',
-        'ready-to-start'
-      ],
-      wheelCounter: ref({
-        spins: 0,
-        firstSpin: null,
-        timeout: null
-      })
-    }
-  },
-
-  methods: {
-    addToMe() {
-      const route = this.$router.resolve({
-        path: '/authorize/add',
-        query: { scope: 'bot applications.commands', redirect_uri: window.location.origin, response_type: 'code' }
-      })
-      const popup = openPopupWindow({ url: route.href, title: 'Add bot', w: 520, h: 720 })
-      const listener = event => {
-        if (event.data.guild_id) this.$router.push('/@me/guilds')
-
-        window.onmessage = null
-        popup.close()
-      }
-
-      window.onmessage = listener
-
-      const interval = setInterval(() => {
-        if (popup.closed) {
-          window.onmessage = null
-          clearInterval(interval)
-        }
-      }, 1000)
+useMeta({
+  title: 'Lacuna',
+  titleTemplate: title => `${title} – Discord Bot`,
+  meta: {
+    description: {
+      name: 'description',
+      content:
+        "Lacuna is a feature-rich Discord bot designed to enhance your server's community management and moderation experience. With a wide range of commands and customizable settings, Lacuna offers powerful tools to help you maintain a thriving and well-governed server."
     },
-    onWheel(event) {
-      const wheelUp = event.deltaY > 0
-
-      if (wheelUp) {
-        this.$refs.carousel.next()
-
-        clearTimeout(this.wheelCounter.timeout)
-        this.wheelCounter.spins++
-
-        if (this.wheelCounter.firstSpin === null) {
-          this.wheelCounter.firstSpin = Date.now()
-        }
-
-        this.wheelCounter.timeout = setTimeout(() => {
-          this.wheelCounter.spins = 0
-          this.wheelCounter.firstSpin = null
-
-          clearTimeout(this.wheelCounter.timeout)
-        }, 10000)
-      } else {
-        this.$refs.carousel.previous()
-      }
-    },
-    onUpdateCarouselSlide(value) {
-      const carouselSlideIndex = this.availableCarouselSlides.indexOf(value),
-        positionHorizontal = carouselSlideIndex * 10,
-        backgroundPosition = `${positionHorizontal}% 0%`
-
-      if (positionHorizontal >= 0 && positionHorizontal < this.availableCarouselSlides.length * 10) {
-        document.querySelector('.q-carousel-section > .q-carousel').style.backgroundPosition = backgroundPosition
-      }
+    keywords: {
+      name: 'keywords',
+      content:
+        'discord bot, community management, moderation, server management, customizable commands, automated tasks, server analytics, user moderation, automated moderation, custom roles, server settings'
     }
   }
 })
+
+const addToMe = async () => {
+  const query = new URLSearchParams()
+  query.append('scope', 'bot applications.commands')
+  query.append('redirect_uri', location.origin)
+  query.append('response_type', 'code')
+
+  addToMeLoading.value = true
+
+  try {
+    const { data: authBot } = await interfaces.auth.getBotAuthURI(query)
+
+    const popup = openPopupWindow({ url: authBot.uri, title: 'Add bot', w: 520, h: 720 })
+    const listener = async event => {
+      window.onmessage = null
+      popup.close()
+
+      if (event.data.guild_id) {
+        await router.push(`/guilds/${event.data.guild_id}/settings`)
+      }
+    }
+
+    window.onmessage = listener
+
+    const interval = setInterval(() => {
+      if (popup.closed) {
+        window.onmessage = null
+        clearInterval(interval)
+        addToMeLoading.value = false
+      }
+    }, 1000)
+  } catch (err) {
+    const error = handleAxiosError(err)
+
+    $q.notify({
+      message: error.message,
+      classes: 'q-notification-custom',
+      color: 'black',
+      icon: 'error',
+      iconColor: 'negative',
+      timeout: 5000
+    })
+
+    addToMeLoading.value = false
+  }
+}
+
+const onWheel = event => {
+    const wheelUp = event.deltaY > 0
+
+    if (wheelUp) {
+      carousel.value.next()
+
+      clearTimeout(wheelCounter.value.timeout)
+      wheelCounter.value.spins++
+
+      if (wheelCounter.value.firstSpin === null) {
+        wheelCounter.value.firstSpin = Date.now()
+      }
+
+      wheelCounter.value.timeout = setTimeout(() => {
+        wheelCounter.value.spins = 0
+        wheelCounter.value.firstSpin = null
+
+        clearTimeout(wheelCounter.value.timeout)
+      }, 10000)
+    } else {
+      carousel.value.previous()
+    }
+  },
+  onUpdateCarouselSlide = value => {
+    const carouselSlideIndex = availableCarouselSlides.indexOf(value),
+      positionHorizontal = carouselSlideIndex * 10,
+      backgroundPosition = `${positionHorizontal}% 0%`
+
+    if (positionHorizontal >= 0 && positionHorizontal < availableCarouselSlides.length * 10) {
+      document.querySelector('.q-carousel-section > .q-carousel').style.backgroundPosition = backgroundPosition
+    }
+  }
 </script>
 
 <style lang="scss" scoped>
