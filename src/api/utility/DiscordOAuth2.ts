@@ -40,7 +40,7 @@ export class DiscordOAuth2 {
         url.searchParams.set('response_type', 'code')
         url.searchParams.set('state', state)
         url.searchParams.set('scope', scope.join(' '))
-        url.searchParams.set('prompt', 'consent')
+        url.searchParams.set('prompt', 'none')
 
         return { url, state }
     }

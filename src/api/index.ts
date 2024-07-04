@@ -63,6 +63,7 @@ app.use(async (ctx, next) => {
     }
 }).use(passKnownReferrers)
 
+app.use(routes.auth.routes()).use(routes.auth.allowedMethods())
 app.use(routes.authorize.routes()).use(routes.authorize.allowedMethods())
 app.use(routes.common.routes()).use(routes.common.allowedMethods())
 app.use(routes.guilds.routes()).use(routes.guilds.allowedMethods())
