@@ -67,7 +67,7 @@
     "@types/koa-morgan": "1.0.x",
     "@types/koa-ratelimit": "5.0.x",
     "@types/ms": "0.7.x",
-    "@types/node": "18.11.x",
+    "@types/node": "20.14.x",
     "@types/node-fetch": "2.6.11",
     "@types/node-os-utils": "1.3.x",
     "@types/node-schedule": "2.1.x",
