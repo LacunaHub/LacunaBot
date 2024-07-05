@@ -27,7 +27,7 @@
     "@lacunahub/lacuna-locale": "1.0.0",
     "@lacunahub/lavaluna.js": "1.0.x",
     "@lacunahub/letsfrag": "^0.1.2",
-    "@lacunahub/logger": "1.0.x",
+    "@lacunahub/logger": "^1.0.3",
     "bufferutil": "4.0.x",
     "canvas": "2.11.x",
     "discord.js": "14.13.x",
