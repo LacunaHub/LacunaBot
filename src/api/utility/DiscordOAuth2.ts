@@ -8,6 +8,7 @@ import {
     RESTPostOAuth2AccessTokenResult,
     RESTPostOAuth2RefreshTokenResult
 } from 'discord.js'
+import fetch from 'node-fetch'
 
 export class DiscordOAuth2 {
     public clientId: string

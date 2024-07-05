@@ -1,6 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { APIWebhook, DataResolver } from 'discord.js'
+import { APIWebhook, resolveImage } from 'discord.js'
 import { Context } from 'koa'
+import fetch from 'node-fetch'
 import database from '../../../../database'
 import Logger from '../../../../internals/Logger'
 import { TelegramFile } from '../../../modules/social-alerts/TelegramAlerts'
@@ -81,7 +82,7 @@ export async function createTelegramSocialAlert(server: ServerDocument, data: an
         webhook = (await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelWebhooks(data.notification_channel_id), {
             body: {
                 name: tgChannel.title,
-                avatar: await DataResolver.resolveImage(channelPhoto)
+                avatar: await resolveImage(channelPhoto)
             }
         })) as any
     } catch (err) {

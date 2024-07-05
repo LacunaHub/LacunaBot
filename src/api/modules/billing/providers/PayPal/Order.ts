@@ -1,4 +1,5 @@
 import { PaymentAmount, PaymentStatus, PaymentType, Product } from '@lacunahub/lacuna-database-driver'
+import fetch from 'node-fetch'
 import { HATEOASLink, PayPalAPI } from '.'
 import { PaymentData } from '../..'
 import database from '../../../../../database'

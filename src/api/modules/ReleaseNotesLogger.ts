@@ -1,3 +1,4 @@
+import fetch from 'node-fetch'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 import database from '../../database'
 import Logger from '../../internals/Logger'

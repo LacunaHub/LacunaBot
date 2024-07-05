@@ -1,5 +1,5 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { APIWebhook, DataResolver } from 'discord.js'
+import { APIWebhook, resolveImage } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
 import Logger from '../../../../internals/Logger'
@@ -57,7 +57,7 @@ export async function createTwitchSocialAlert(server: ServerDocument, data: any)
         webhook = (await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelWebhooks(data.notification_channel_id), {
             body: {
                 name: data.broadcaster.name,
-                avatar: await DataResolver.resolveImage(data.broadcaster.thumbnail)
+                avatar: await resolveImage(data.broadcaster.thumbnail)
             }
         })) as any
     } catch (err) {

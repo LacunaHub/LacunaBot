@@ -1,5 +1,5 @@
 import { ServerDocument, ServerModerationLogsTypeKey } from '@lacunahub/lacuna-database-driver'
-import { APIWebhook, DataResolver, MessagePayload, WebhookMessageCreateOptions } from 'discord.js'
+import { APIWebhook, MessagePayload, WebhookMessageCreateOptions, resolveImage } from 'discord.js'
 import DiscordUtils from '../../api/utility/DiscordUtils'
 import Lacuna from '../../internals/Lacuna'
 import { Webhook } from '../../internals/structures/Webhook'
@@ -55,7 +55,7 @@ export async function sendLog(self: Lacuna, server: ServerDocument, channelId: s
             const createdWebhook = (await self.rest.post(DiscordUtils.restRoutes.channelWebhooks(channelId), {
                 body: {
                     name: self.user.username,
-                    avatar: await DataResolver.resolveImage(self.user.displayAvatarURL())
+                    avatar: await resolveImage(self.user.displayAvatarURL())
                 },
                 headers: {
                     'X-Audit-Log-Reason': 'Logs: No webhook for the logs'

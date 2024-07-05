@@ -1,4 +1,5 @@
 import { AttachmentBuilder, MessagePayload, makeURLSearchParams } from 'discord.js'
+import fetch from 'node-fetch'
 import database from '../../../database'
 import { handleModuleExecutionData } from '../../../events/system/ModuleExecution'
 import Logger from '../../../internals/Logger'

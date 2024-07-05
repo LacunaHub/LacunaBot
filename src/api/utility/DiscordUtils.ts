@@ -1,5 +1,6 @@
 import { RequestManager, RequestManagerOptions } from '@lacunahub/letsfrag'
 import { APIRole, Routes } from 'discord.js'
+import fetch from 'node-fetch'
 import Logger from '../../internals/Logger'
 
 const rest = new RequestManager({

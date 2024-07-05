@@ -399,7 +399,7 @@ export function debounce(func: Function, wait: number = 0, options?: { leading: 
         return result
     }
 
-    function startTimer(pendingFunc: Function, milliseconds: number) {
+    function startTimer(pendingFunc: () => void, milliseconds: number) {
         return setTimeout(pendingFunc, milliseconds)
     }
 
