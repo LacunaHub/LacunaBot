@@ -63,7 +63,7 @@ export default async function getMetrics(ctx: Context) {
             voiceConnectionCount: voiceConnectionCount,
             wsPing: self.ws.ping,
             wsStatus: self.ws.status,
-            commandUsageCount: self.commands.filter(v => v.is_slash_command).map(v => ({ name: v.name, uses: v.uses }))
+            commandUsageCount: self.commands.map(v => ({ name: v.name, uses: v.uses }))
         }
     })
     const flatStats = stats.flat().sort((x, y) => x.clusterId - y.clusterId)

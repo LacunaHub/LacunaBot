@@ -1043,10 +1043,10 @@ export default class CustomCommand {
 
                     if (index > 0) continue
 
-                    const command = this.self.commands.find(i => i.is_slash_command && i.name === forward_to_command)
+                    const command = this.self.commands.find(i => i.name === forward_to_command)
 
                     if (command) {
-                        await command.executeSlash(this.server, this.interaction)
+                        await command.execute(this.server, this.interaction)
                     }
                 }
 

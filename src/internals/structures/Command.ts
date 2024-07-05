@@ -1,103 +1,104 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
+    ApplicationCommandOptionAllowedChannelTypes,
     ApplicationCommandOptionType,
-    BaseGuildTextChannel,
+    ApplicationCommandType,
     ChatInputCommandInteraction,
-    ContextMenuCommandInteraction,
-    GuildMember,
-    Message,
+    ContextMenuCommandBuilder,
+    MessageContextMenuCommandInteraction,
+    PermissionsBitField,
     PermissionsString,
-    Team
+    SlashCommandAttachmentOption,
+    SlashCommandBooleanOption,
+    SlashCommandBuilder,
+    SlashCommandChannelOption,
+    SlashCommandIntegerOption,
+    SlashCommandMentionableOption,
+    SlashCommandNumberOption,
+    SlashCommandRoleOption,
+    SlashCommandStringOption,
+    SlashCommandSubcommandBuilder,
+    SlashCommandUserOption,
+    Team,
+    User,
+    UserContextMenuCommandInteraction
 } from 'discord.js'
+import i18n from '../../i18n'
 import Lacuna from '../Lacuna'
+import { normalizeCommandOption } from '../utility/Utils'
 
-export default class Command {
+export class Command {
     public self: Lacuna
-    public prefix: CommandOptions['prefix']
-    public slash: CommandOptions['slash']
-    public user: CommandOptions['user']
-    public message: CommandOptions['message']
     public name: string
-    public pretty_name?: string
+    public prettyName: string | null
     public description: string
-    public type: CommandOptions['type']
+    public group: CommandGroup
     public options: CommandOption[]
-    public default_permission: boolean
-    public group: CommandOptions['group']
-    public is_prefix_command: boolean
-    public is_slash_command: boolean
-    public is_user_command: boolean
-    public is_message_command: boolean
-    public subcommands?: CommandOptions['subcommands']
-    public uses: number
-    public premium_only: boolean
+    public defaultMemberPermissions: string | null
+    public selfPermissions: string | null
+    public nsfw: boolean
+    public integrationTypes: CommandIntegrationTypes[]
+    public contexts: CommandContexts[]
+    public premium: boolean
     public private: boolean
-    public permissions: CommandOptions['permissions']
+    public uses: number
 
-    constructor(self: Lacuna, options: CommandOptions) {
+    private slashFn: CommandSlashFn
+    private userFn: CommandUserFn
+    private messageFn: CommandMessageFn
+    private subcommandFns: Record<string, CommandSlashFn> | null
+
+    public get isSlashCommand() {
+        return typeof this.slashFn !== 'undefined' || !!this.subcommandFns
+    }
+
+    public get isUserContextCommand() {
+        return typeof this.userFn !== 'undefined'
+    }
+
+    public get isMessageContextCommand() {
+        return typeof this.messageFn !== 'undefined'
+    }
+
+    constructor(self: Lacuna, name: string, options: CommandOptions) {
         this.self = self
 
-        this.prefix = options.prefix
-
-        this.slash = options.slash
-
-        this.user = options.user
-
-        this.message = options.message
-
-        this.name = options.name
-
-        this.pretty_name = options.pretty_name ?? null
+        this.name = name
+        this.prettyName = options.prettyName ?? null
 
         this.description = options.description
 
-        this.type = options.type
+        this.group = options.group
 
-        this.options = options.options
+        this.options = options.options ?? []
 
-        this.default_permission = Boolean(options.default_permission)
+        this.defaultMemberPermissions = options.defaultMemberPermissions
+            ? new PermissionsBitField(options.defaultMemberPermissions).bitfield.toString()
+            : null
+        this.selfPermissions = options.selfPermissions ? new PermissionsBitField(options.selfPermissions).bitfield.toString() : null
 
-        this.group = options.group ?? 'GENERAL'
+        this.nsfw = !!options.nsfw
 
-        this.is_prefix_command = Boolean(options.prefix)
+        this.integrationTypes = options.integrationTypes ?? [CommandIntegrationTypes.GuildInstall]
+        this.contexts = options.contexts ?? [CommandContexts.Guild]
 
-        this.is_slash_command = Boolean(options.slash)
-
-        this.is_user_command = Boolean(options.user)
-
-        this.is_message_command = Boolean(options.message)
-
-        this.subcommands = options.subcommands ?? []
+        this.premium = !!options.premium
+        this.private = !!options.private
 
         this.uses = 0
 
-        this.premium_only = Boolean(options.premium_only)
+        this.slashFn = options.slashFn
+        this.userFn = options.userFn
+        this.messageFn = options.messageFn
+        this.subcommandFns = options.subcommandFns ?? null
 
-        this.private = Boolean(options.private)
-
-        this.permissions = {
-            self: options.permissions?.self ?? [],
-            user: options.permissions?.user ?? []
-        }
-
-        this.self.commands.set(this.name, this)
+        if ((typeof this.userFn !== 'undefined' || typeof this.messageFn !== 'undefined') && !this.prettyName)
+            throw new RangeError('[Command#constructor] Property "prettyName" required for context commands')
     }
 
-    isExecutable(server: ServerDocument, signal: ChatInputCommandInteraction | ContextMenuCommandInteraction): boolean {
-        const config = server.commands.configuration.find(i => i.name === this.name)
-
-        if ((this.self.application.owner as Team).members.some(m => m.id == (signal.member as GuildMember).id)) return true
-
-        if (this.private) return false
-
-        if (config?.inactive) return false
-
-        return true
-    }
-
-    async executeSlash(server: ServerDocument, interaction: ChatInputCommandInteraction): Promise<boolean> {
+    public async execute(server: ServerDocument, interaction: CommandInteraction): Promise<boolean> {
         const t = this.self.i18n.t.bind(null, server.locale)
-        const executable: boolean = this.isExecutable(server, interaction)
+        const executable = this.executable(server, interaction)
 
         if (!executable) {
             await interaction.reply({
@@ -110,7 +111,7 @@ export default class Command {
             return false
         }
 
-        if (this.premium_only && !server.premium.available) {
+        if (this.premium && !server.premium.available) {
             await interaction.reply({
                 content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
                     username: `**${interaction.user.username}**`
@@ -135,97 +136,65 @@ export default class Command {
             return false
         }
 
-        this.uses++
+        if (interaction.isChatInputCommand() || interaction.isButton() || interaction.isModalSubmit()) {
+            const subcommandName = this.subcommandFns ? interaction.options?.getSubcommand() : null,
+                subcommandFn = this.subcommandFns?.[subcommandName]
 
-        const sc: string = this.subcommands.length ? interaction.options?.getSubcommand() : null
-        const subcommand: CommandSubcommand = this.subcommands?.find(s => s.name == sc)
-
-        if (subcommand) await subcommand.slash(this.self, server, interaction)
-        else await this.slash(this.self, server, interaction)
+            if (subcommandFn) await subcommandFn(this.self, server, interaction)
+            else await this.slashFn(this.self, server, interaction)
+        } else if (interaction.isUserContextMenuCommand()) {
+            await this.userFn(this.self, server, interaction)
+        } else if (interaction.isMessageContextMenuCommand()) {
+            await this.messageFn(this.self, server, interaction)
+        }
 
         await this.throttle(server, interaction)
+        this.uses++
 
         this.self.emit('commandExecution', {
             command: this.name,
-            subcommand: subcommand?.name ?? null,
             options:
-                interaction.options?.data?.map(i => {
-                    if (subcommand)
+                interaction.options?.data?.map(v => {
+                    if (v.type === ApplicationCommandOptionType.Subcommand)
                         return {
-                            name: i.name,
-                            type: i.type,
-                            value: i.value ?? null,
-                            options: i.options.map(ii => ({ name: ii.name, type: ii.type, value: ii.value ?? null }))
+                            name: v.name,
+                            type: v.type,
+                            value: v.value ?? null,
+                            options: v.options.map(vv => ({ name: vv.name, type: vv.type, value: vv.value ?? null }))
                         }
 
-                    return { name: i.name, type: i.type, value: i.value ?? null }
+                    return { name: v.name, type: v.type, value: v.value ?? null }
                 }) ?? [],
             guild: { name: interaction.guild.name, id: interaction.guild.id },
-            channel: { name: (interaction.channel as BaseGuildTextChannel)?.name, id: interaction.channelId },
+            channel: { name: interaction.channel.name, id: interaction.channelId },
             user: { name: interaction.user.username, id: interaction.user.id }
         })
 
         return true
     }
 
-    async executeContext(server: ServerDocument, interaction: ContextMenuCommandInteraction): Promise<boolean> {
-        const t = this.self.i18n.t.bind(null, server.locale)
-        const executable: boolean = this.isExecutable(server, interaction)
+    private executable(server: ServerDocument, interaction: CommandInteraction): boolean {
+        if (this.self.application.owner instanceof User && this.self.application.owner.id === interaction.user.id) return true
+        if (this.self.application.owner instanceof Team && this.self.application.owner.members.some(v => v.id === interaction.user.id)) return true
 
-        if (!executable) {
-            await interaction.reply({
-                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', { username: `**${interaction.user.tag}**` })}`,
-                ephemeral: true
-            })
+        if (this.private) {
+            const ownerIds = []
 
-            return false
+            if (this.self.application.owner instanceof User) ownerIds.push(this.self.application.owner.id)
+            else if (this.self.application.owner instanceof Team) ownerIds.push(...this.self.application.owner.members.map(v => v.id))
+
+            return ownerIds.includes(interaction.user.id)
         }
 
-        if (this.premium_only && !server.premium.available) {
-            await interaction.reply({
-                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
-                    username: `**${interaction.user.tag}**`
-                })}`,
-                ephemeral: true
-            })
+        const commandConfig = server.commands.configuration.find(v => v.name === this.name)
 
-            return false
-        }
-
-        const throttled = await this.throttled(server, interaction)
-
-        if (throttled.status) {
-            await interaction.reply({
-                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandThrottling', {
-                    username: `**${interaction.user.username}**`,
-                    time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
-                })}`,
-                ephemeral: true
-            })
-
-            return false
-        }
-
-        this.uses++
-
-        if (interaction.isMessageContextMenuCommand()) await this.message(this.self, server, interaction)
-        if (interaction.isUserContextMenuCommand()) await this.user(this.self, server, interaction)
-
-        await this.throttle(server, interaction)
-
-        this.self.emit('commandExecution', {
-            command: this.name,
-            options: interaction.options.data.map(i => ({ name: i.name, type: i.type, value: i.value ?? null })),
-            guild: { name: interaction.guild.name, id: interaction.guild.id },
-            channel: { name: (interaction.channel as BaseGuildTextChannel)?.name, id: interaction.channelId },
-            user: { name: interaction.user.username, id: interaction.user.id }
-        })
+        if (commandConfig?.inactive) return false
 
         return true
     }
 
-    async throttled(server: ServerDocument, interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction) {
-        const config = server.commands.configuration.find(i => i.name === this.name)
+    private async throttled(server: ServerDocument, interaction: CommandInteraction) {
+        const config = server.commands.configuration.find(v => v.name === this.name)
 
         if (config?.options?.includes('THROTTLING')) {
             let path = `${interaction.guildId}.users.${interaction.user.id}`
@@ -261,10 +230,11 @@ export default class Command {
         }
     }
 
-    async throttle(server: ServerDocument, interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction) {
-        const config = server.commands.configuration.find(i => i.name === this.name)
+    private async throttle(server: ServerDocument, interaction: CommandInteraction) {
+        const config = server.commands.configuration.find(v => v.name === this.name)
 
-        if ((this.self.application.owner as Team).members.some(m => m.id === interaction.user.id)) return false
+        if (this.self.application.owner instanceof User && this.self.application.owner.id === interaction.user.id) return null
+        if (this.self.application.owner instanceof Team && this.self.application.owner.members.some(v => v.id === interaction.user.id)) return null
 
         if (config?.options?.includes('THROTTLING')) {
             let path = `${interaction.guildId}.users.${interaction.user.id}`
@@ -302,45 +272,315 @@ export default class Command {
             }
         }
     }
-}
 
-export interface CommandOptions {
-    prefix(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean>
-    slash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction): Promise<boolean>
-    user(self: Lacuna, server: ServerDocument, interaction: ContextMenuCommandInteraction): Promise<boolean>
-    message(self: Lacuna, server: ServerDocument, interaction: ContextMenuCommandInteraction): Promise<boolean>
-    name: string
-    pretty_name?: string
-    description: string
-    type: ApplicationCommandOptionType
-    options: CommandOption[]
-    default_permission: boolean
-    group?: 'GENERAL' | 'MODERATION' | 'MUSIC' | 'UTILITY'
-    subcommands?: CommandSubcommand[]
-    premium_only: boolean
-    private: boolean
-    permissions: {
-        self: PermissionsString[]
-        user: PermissionsString[]
+    public static buildJSON(type: CommandBuildJSONType, command: Command) {
+        const tEn = i18n.t.bind(null, 'en'),
+            tRu = i18n.t.bind(null, 'ru'),
+            tUk = i18n.t.bind(null, 'uk')
+
+        if (type === CommandBuildJSONType.Slash) {
+            const slashCommand = new SlashCommandBuilder()
+                .setName(command.name)
+                .setDescription(tEn(command.description))
+                .setDescriptionLocalizations({
+                    ru: tRu(command.description),
+                    uk: tUk(command.description)
+                })
+                .setDefaultMemberPermissions(command.defaultMemberPermissions)
+                .setNSFW(command.nsfw)
+
+            for (const option of command.options) {
+                const buildOptions = (
+                    builder: SlashCommandBuilder | SlashCommandSubcommandBuilder,
+                    opt: Exclude<CommandOption, CommandSubcommandOption | CommandSubcommandGroupOption>
+                ) => {
+                    const name = normalizeCommandOption(tEn(opt.name)),
+                        localizedNames = {
+                            ru: normalizeCommandOption(tRu(opt.name)),
+                            uk: normalizeCommandOption(tUk(opt.name))
+                        }
+                    const description = tEn(opt.description),
+                        localizedDescriptions = {
+                            ru: tRu(opt.description),
+                            uk: tUk(opt.description)
+                        }
+                    const localizeChoices = (choices: (CommandStringOptionChoice | CommandNumericOptionChoice)[]) => {
+                        return choices.map(v => {
+                            return {
+                                name: tEn(v.name),
+                                name_localizations: {
+                                    ru: tRu(v.name),
+                                    uk: tUk(v.name)
+                                },
+                                value: v.value as any
+                            }
+                        })
+                    }
+
+                    if (opt.type === ApplicationCommandOptionType.String) {
+                        const optBuilder = new SlashCommandStringOption()
+                            .setName(name)
+                            .setNameLocalizations(localizedNames)
+                            .setDescription(description)
+                            .setDescriptionLocalizations(localizedDescriptions)
+
+                        if (typeof opt.required === 'boolean') optBuilder.setRequired(opt.required)
+                        if (Array.isArray(opt.choices)) optBuilder.setChoices(...localizeChoices(opt.choices))
+                        if (typeof opt.minLength === 'number') optBuilder.setMinLength(opt.minLength)
+                        if (typeof opt.maxLength === 'number') optBuilder.setMaxLength(opt.maxLength)
+                        if (typeof opt.autocomplete === 'boolean') optBuilder.setAutocomplete(opt.autocomplete)
+
+                        builder.addStringOption(optBuilder)
+                    } else if (opt.type === ApplicationCommandOptionType.Integer) {
+                        const optBuilder = new SlashCommandIntegerOption()
+                            .setName(name)
+                            .setNameLocalizations(localizedNames)
+                            .setDescription(description)
+                            .setDescriptionLocalizations(localizedDescriptions)
+
+                        if (typeof opt.required === 'boolean') optBuilder.setRequired(opt.required)
+                        if (Array.isArray(opt.choices)) optBuilder.setChoices(...localizeChoices(opt.choices))
+                        if (typeof opt.minValue === 'number') optBuilder.setMinValue(opt.minValue)
+                        if (typeof opt.maxValue === 'number') optBuilder.setMaxValue(opt.maxValue)
+                        if (typeof opt.autocomplete === 'boolean') optBuilder.setAutocomplete(opt.autocomplete)
+
+                        builder.addIntegerOption(optBuilder)
+                    } else if (opt.type === ApplicationCommandOptionType.Number) {
+                        const optBuilder = new SlashCommandNumberOption()
+                            .setName(name)
+                            .setNameLocalizations(localizedNames)
+                            .setDescription(description)
+                            .setDescriptionLocalizations(localizedDescriptions)
+
+                        if (typeof opt.required === 'boolean') optBuilder.setRequired(opt.required)
+                        if (Array.isArray(opt.choices)) optBuilder.setChoices(...localizeChoices(opt.choices))
+                        if (typeof opt.minValue === 'number') optBuilder.setMinValue(opt.minValue)
+                        if (typeof opt.maxValue === 'number') optBuilder.setMaxValue(opt.maxValue)
+                        if (typeof opt.autocomplete === 'boolean') optBuilder.setAutocomplete(opt.autocomplete)
+
+                        builder.addNumberOption(optBuilder)
+                    } else if (opt.type === ApplicationCommandOptionType.Channel) {
+                        const optBuilder = new SlashCommandChannelOption()
+                            .setName(name)
+                            .setNameLocalizations(localizedNames)
+                            .setDescription(description)
+                            .setDescriptionLocalizations(localizedDescriptions)
+
+                        if (typeof opt.required === 'boolean') optBuilder.setRequired(opt.required)
+                        if (Array.isArray(opt.channelTypes)) optBuilder.addChannelTypes(...opt.channelTypes)
+
+                        builder.addChannelOption(optBuilder)
+                    } else {
+                        let addFn:
+                                | typeof builder.addBooleanOption
+                                | typeof builder.addUserOption
+                                | typeof builder.addRoleOption
+                                | typeof builder.addMentionableOption
+                                | typeof builder.addAttachmentOption,
+                            optionBuilder:
+                                | SlashCommandBooleanOption
+                                | SlashCommandUserOption
+                                | SlashCommandRoleOption
+                                | SlashCommandMentionableOption
+                                | SlashCommandAttachmentOption
+
+                        switch (opt.type) {
+                            case ApplicationCommandOptionType.Boolean:
+                                addFn = builder.addBooleanOption.bind(builder)
+                                optionBuilder = new SlashCommandBooleanOption()
+                                break
+                            case ApplicationCommandOptionType.User:
+                                addFn = builder.addUserOption.bind(builder)
+                                optionBuilder = new SlashCommandUserOption()
+                                break
+                            case ApplicationCommandOptionType.Role:
+                                addFn = builder.addRoleOption.bind(builder)
+                                optionBuilder = new SlashCommandRoleOption()
+                                break
+                            case ApplicationCommandOptionType.Mentionable:
+                                addFn = builder.addMentionableOption.bind(builder)
+                                optionBuilder = new SlashCommandMentionableOption()
+                                break
+                            case ApplicationCommandOptionType.Attachment:
+                                addFn = builder.addAttachmentOption.bind(builder)
+                                optionBuilder = new SlashCommandAttachmentOption()
+                                break
+                        }
+
+                        addFn(
+                            optionBuilder
+                                .setName(name)
+                                .setNameLocalizations(localizedNames)
+                                .setDescription(description)
+                                .setDescriptionLocalizations(localizedDescriptions)
+                                .setRequired(opt.required) as any
+                        )
+                    }
+                }
+
+                if (option.type === ApplicationCommandOptionType.Subcommand) {
+                    const subcommandBuilder = new SlashCommandSubcommandBuilder()
+                        .setName(option.name)
+                        .setDescription(tEn(option.description))
+                        .setDescriptionLocalizations({
+                            ru: tRu(option.description),
+                            uk: tUk(option.description)
+                        })
+
+                    for (const opt of option.options) {
+                        buildOptions(subcommandBuilder, opt)
+                    }
+
+                    slashCommand.addSubcommand(subcommandBuilder)
+                } else if (option.type === ApplicationCommandOptionType.SubcommandGroup) {
+                } else {
+                    buildOptions(slashCommand, option)
+                }
+            }
+
+            return { ...slashCommand.toJSON(), integration_types: command.integrationTypes, contexts: command.contexts }
+        } else if (type === CommandBuildJSONType.UserContextMenu || type === CommandBuildJSONType.MessageContextMenu) {
+            const contextMenuCommand = new ContextMenuCommandBuilder()
+                .setType(type === CommandBuildJSONType.UserContextMenu ? ApplicationCommandType.User : ApplicationCommandType.Message)
+                .setName(tEn(command.prettyName))
+                .setNameLocalizations({
+                    ru: tRu(command.prettyName),
+                    uk: tUk(command.prettyName)
+                })
+                .setDefaultMemberPermissions(command.defaultMemberPermissions)
+
+            return { ...contextMenuCommand.toJSON(), integration_types: command.integrationTypes, contexts: command.contexts }
+        }
     }
 }
 
-export interface CommandOption {
+export enum CommandGroup {
+    General,
+    Moderation,
+    Music,
+    Utility
+}
+
+export enum CommandIntegrationTypes {
+    GuildInstall,
+    UserInstall
+}
+
+export enum CommandContexts {
+    Guild,
+    BotDM,
+    PrivateChannel
+}
+
+export type CommandSlashFn = (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => Promise<boolean>
+export type CommandUserFn = (self: Lacuna, server: ServerDocument, interaction: UserContextMenuCommandInteraction<'cached'>) => Promise<boolean>
+export type CommandMessageFn = (self: Lacuna, server: ServerDocument, interaction: MessageContextMenuCommandInteraction<'cached'>) => Promise<boolean>
+
+export interface CommandOptions {
+    prettyName?: string
+    description: string
+    group: CommandGroup
+    options?: CommandOption[]
+    defaultMemberPermissions?: PermissionsString[]
+    selfPermissions?: PermissionsString[]
+    nsfw?: boolean
+    integrationTypes?: CommandIntegrationTypes[]
+    contexts?: CommandContexts[]
+    premium?: boolean
+    private?: boolean
+    slashFn?: CommandSlashFn
+    userFn?: CommandUserFn
+    messageFn?: CommandMessageFn
+    subcommandFns?: Record<string, CommandSlashFn>
+}
+
+export type CommandOption =
+    | CommandSubcommandOption
+    | CommandSubcommandGroupOption
+    | CommandStringOption
+    | CommandNumericOption
+    | CommandBooleanOption
+    | CommandUserOption
+    | CommandChannelOption
+    | CommandRoleOption
+    | CommandMentionableOption
+    | CommandAttachmentOption
+
+export interface BaseCommandOption {
     type: ApplicationCommandOptionType
     name: string
     description: string
-    required: boolean
-    options?: CommandOption[]
-    choices?: CommandOptionChoice[]
+    required?: boolean
 }
 
-export interface CommandOptionChoice {
-    name: string
-    value: string | number
+export interface CommandSubcommandOption extends Omit<BaseCommandOption, 'required'> {
+    type: ApplicationCommandOptionType.Subcommand
+    options: Exclude<CommandOption, CommandSubcommandOption | CommandSubcommandGroupOption>[]
 }
 
-export interface CommandSubcommand {
-    prefix(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean>
-    slash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction): Promise<boolean>
+export interface CommandSubcommandGroupOption extends Omit<BaseCommandOption, 'required'> {
+    type: ApplicationCommandOptionType.SubcommandGroup
+    options?: CommandSubcommandOption[]
+}
+
+export interface CommandStringOption extends BaseCommandOption {
+    type: ApplicationCommandOptionType.String
+    choices?: CommandStringOptionChoice[]
+    maxLength?: number
+    minLength?: number
+    autocomplete?: boolean
+}
+
+export interface CommandStringOptionChoice {
     name: string
+    value: string
+}
+
+export interface CommandNumericOption extends BaseCommandOption {
+    type: ApplicationCommandOptionType.Integer | ApplicationCommandOptionType.Number
+    choices?: CommandNumericOptionChoice[]
+    maxValue?: number
+    minValue?: number
+    autocomplete?: boolean
+}
+
+export interface CommandNumericOptionChoice {
+    name: string
+    value: number
+}
+
+export interface CommandBooleanOption extends BaseCommandOption {
+    type: ApplicationCommandOptionType.Boolean
+}
+
+export interface CommandUserOption extends BaseCommandOption {
+    type: ApplicationCommandOptionType.User
+}
+
+export interface CommandChannelOption extends BaseCommandOption {
+    type: ApplicationCommandOptionType.Channel
+    channelTypes: ApplicationCommandOptionAllowedChannelTypes[]
+}
+
+export interface CommandRoleOption extends BaseCommandOption {
+    type: ApplicationCommandOptionType.Role
+}
+
+export interface CommandMentionableOption extends BaseCommandOption {
+    type: ApplicationCommandOptionType.Mentionable
+}
+
+export interface CommandAttachmentOption extends BaseCommandOption {
+    type: ApplicationCommandOptionType.Attachment
+}
+
+export type CommandInteraction =
+    | ChatInputCommandInteraction<'cached'>
+    | UserContextMenuCommandInteraction<'cached'>
+    | MessageContextMenuCommandInteraction<'cached'>
+
+export enum CommandBuildJSONType {
+    Slash,
+    UserContextMenu,
+    MessageContextMenu
 }

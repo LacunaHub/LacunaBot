@@ -1,12 +1,10 @@
-import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import { createSlash, endSlash, rerollSlash } from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash: () => {},
-    name,
+const options: CommandOptions = {
     description: 'Commands.GiveawayCommand.Description',
+    group: CommandGroup.Utility,
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
@@ -30,8 +28,8 @@ export default {
                     name: 'Commands.Options.WinnerCount',
                     description: 'Commands.GiveawayCommand.SubCommands.CreateCommand.Options.WinnerCount.Description',
                     required: false,
-                    min_value: 1,
-                    max_value: 50
+                    minValue: 1,
+                    maxValue: 50
                 },
                 {
                     type: ApplicationCommandOptionType.String,
@@ -68,23 +66,13 @@ export default {
             ]
         }
     ],
-    group: 'UTILITY',
-    subcommands: [
-        {
-            slash: createSlash,
-            name: 'create'
-        },
-        {
-            slash: endSlash,
-            name: 'end'
-        },
-        {
-            slash: rerollSlash,
-            name: 'reroll'
-        }
-    ],
-    permissions: {
-        self: new PermissionsBitField(['EmbedLinks']).toArray(),
-        user: new PermissionsBitField(['ManageMessages']).toArray()
+    defaultMemberPermissions: ['ManageMessages'],
+    selfPermissions: ['EmbedLinks'],
+    subcommandFns: {
+        create: createSlash,
+        end: endSlash,
+        reroll: rerollSlash
     }
 }
+
+export default options

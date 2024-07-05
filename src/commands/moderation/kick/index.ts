@@ -1,12 +1,10 @@
-import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import slash from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash,
-    name,
+const options: CommandOptions = {
     description: 'Commands.KickCommand.Description',
+    group: CommandGroup.Moderation,
     options: [
         {
             type: ApplicationCommandOptionType.User,
@@ -21,9 +19,9 @@ export default {
             required: false
         }
     ],
-    group: 'MODERATION',
-    permissions: {
-        self: new PermissionsBitField(['EmbedLinks', 'KickMembers']).toArray(),
-        user: new PermissionsBitField(['KickMembers']).toArray()
-    }
+    defaultMemberPermissions: ['KickMembers'],
+    selfPermissions: ['EmbedLinks', 'KickMembers'],
+    slashFn: slash
 }
+
+export default options

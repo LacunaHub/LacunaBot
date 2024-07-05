@@ -11,6 +11,7 @@ import {
 } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
+import { CommandGroup } from '../../../../internals/structures/Command'
 import APIError from '../../../utility/APIError'
 import DiscordUtils from '../../../utility/DiscordUtils'
 
@@ -111,7 +112,7 @@ export default async function getSettings(ctx: Context) {
                     return {
                         name: i.name_localizations?.[server.locale] ?? i.name,
                         description: i.description_localizations?.[server.locale] ?? i.description,
-                        group: commandCache?.group ?? 'GENERAL'
+                        group: CommandGroup[commandCache?.group].toUpperCase()
                     }
                 })
         },

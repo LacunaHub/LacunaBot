@@ -1,12 +1,10 @@
-import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import { buySlash, itemsSlash } from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash: () => {},
-    name,
+const options: CommandOptions = {
     description: 'Commands.StoreCommand.Description',
+    group: CommandGroup.General,
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
@@ -32,23 +30,16 @@ export default {
                     name: 'Commands.Options.Page',
                     description: 'Commands.StoreCommand.SubCommands.ItemsCommand.Options.Page.Description',
                     required: false,
-                    min_value: 1
+                    minValue: 1
                 }
             ]
         }
     ],
-    group: 'GENERAL',
-    subcommands: [
-        {
-            slash: buySlash,
-            name: 'buy'
-        },
-        {
-            slash: itemsSlash,
-            name: 'items'
-        }
-    ],
-    permissions: {
-        self: new PermissionsBitField(['EmbedLinks']).toArray()
+    selfPermissions: ['EmbedLinks'],
+    subcommandFns: {
+        buy: buySlash,
+        items: itemsSlash
     }
 }
+
+export default options

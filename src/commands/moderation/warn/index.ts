@@ -1,12 +1,10 @@
-import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import { addSlash, removeSlash } from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash: () => {},
-    name,
+const options: CommandOptions = {
     description: 'Commands.WarnCommand.Description',
+    group: CommandGroup.Moderation,
     options: [
         {
             type: ApplicationCommandOptionType.Subcommand,
@@ -53,19 +51,12 @@ export default {
             ]
         }
     ],
-    group: 'MODERATION',
-    subcommands: [
-        {
-            slash: addSlash,
-            name: 'add'
-        },
-        {
-            slash: removeSlash,
-            name: 'remove'
-        }
-    ],
-    permissions: {
-        self: new PermissionsBitField(['EmbedLinks']).toArray(),
-        user: new PermissionsBitField(['ManageRoles']).toArray()
+    defaultMemberPermissions: ['ManageRoles'],
+    selfPermissions: ['EmbedLinks'],
+    subcommandFns: {
+        add: addSlash,
+        remove: removeSlash
     }
 }
+
+export default options

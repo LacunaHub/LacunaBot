@@ -1,7 +1,7 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, Events, PermissionsBitField } from 'discord.js'
+import { Events } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
+import { Command, CommandBuildJSONType } from '../../internals/structures/Command'
 import RoleConnectionMetadata from '../../internals/utility/RoleConnectionMetadata'
-import { normalizeCommandOption } from '../../internals/utility/Utils'
 
 const { version } = require('../../../package.json')
 
@@ -17,125 +17,29 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
                 tUk = self.i18n.t.bind(null, 'uk')
 
             const commands = [
-                ...self.commands
-                    .filter(c => c.is_slash_command)
-                    .map(command => {
-                        return {
-                            name: command.name,
-                            description: tEn(command.description),
-                            description_localizations: {
-                                ru: tRu(command.description),
-                                uk: tUk(command.description)
-                            },
-                            type: command.type,
-                            options:
-                                command.options?.map(option => {
-                                    if (option.type === ApplicationCommandOptionType.Subcommand)
-                                        return {
-                                            ...option,
-                                            type: ApplicationCommandOptionType.Subcommand,
-                                            description: tEn(option.description),
-                                            description_localizations: {
-                                                ru: tRu(option.description),
-                                                uk: tUk(option.description)
-                                            },
-                                            options:
-                                                option.options?.map(opt => {
-                                                    return {
-                                                        ...opt,
-                                                        type: opt.type,
-                                                        name: normalizeCommandOption(tEn(opt.name)),
-                                                        name_localizations: {
-                                                            ru: normalizeCommandOption(tRu(opt.name)),
-                                                            uk: normalizeCommandOption(tUk(opt.name))
-                                                        },
-                                                        description: tEn(opt.description),
-                                                        description_localizations: {
-                                                            ru: tRu(opt.description),
-                                                            uk: tUk(opt.description)
-                                                        },
-                                                        choices:
-                                                            opt.choices?.map(choice => {
-                                                                return {
-                                                                    ...choice,
-                                                                    name: tEn(choice.name),
-                                                                    name_localizations: {
-                                                                        ru: tRu(choice.name),
-                                                                        uk: tUk(choice.name)
-                                                                    }
-                                                                }
-                                                            }) ?? null
-                                                    }
-                                                }) ?? []
-                                        }
-
-                                    return {
-                                        ...option,
-                                        type: option.type,
-                                        name: normalizeCommandOption(tEn(option.name)),
-                                        name_localizations: {
-                                            ru: normalizeCommandOption(tRu(option.name)),
-                                            uk: normalizeCommandOption(tUk(option.name))
-                                        },
-                                        description: tEn(option.description),
-                                        description_localizations: {
-                                            ru: tRu(option.description),
-                                            uk: tUk(option.description)
-                                        },
-                                        choices:
-                                            option.choices?.map(choice => {
-                                                return {
-                                                    ...choice,
-                                                    name: tEn(choice.name),
-                                                    name_localizations: {
-                                                        ru: tRu(choice.name),
-                                                        uk: tUk(choice.name)
-                                                    }
-                                                }
-                                            }) ?? null
-                                    }
-                                }) ?? [],
-                            default_member_permissions: command.permissions.user.length
-                                ? new PermissionsBitField(command.permissions.user)
-                                : undefined,
-                            dm_permission: false
-                        }
-                    }),
-                ...self.commands
-                    .filter(i => i.is_user_command || i.is_message_command)
-                    .map(command => {
-                        return {
-                            name: tEn(command.pretty_name),
-                            name_localizations: {
-                                ru: tRu(command.pretty_name),
-                                uk: tUk(command.pretty_name)
-                            },
-                            type: command.is_user_command ? ApplicationCommandType.User : ApplicationCommandType.Message,
-                            default_member_permissions: command.permissions.user.length
-                                ? new PermissionsBitField(command.permissions.user)
-                                : undefined,
-                            dm_permission: false
-                        }
-                    })
+                ...self.commands.filter(v => v.isSlashCommand).map(v => Command.buildJSON(CommandBuildJSONType.Slash, v)),
+                ...self.commands.filter(v => v.isUserContextCommand).map(v => Command.buildJSON(CommandBuildJSONType.UserContextMenu, v)),
+                ...self.commands.filter(v => v.isMessageContextCommand).map(v => Command.buildJSON(CommandBuildJSONType.MessageContextMenu, v))
             ]
 
             await self.application.commands.set(commands as any)
             await self.db.qdb.set(
                 'commands',
                 self.commands
-                    .filter(c => !c.private)
-                    .map(c => {
+                    .filter(v => !v.private)
+                    .map(v => {
                         return {
-                            name: c.name,
-                            pretty_name: c.pretty_name,
-                            description: c.description,
-                            options: c.options,
-                            group: c.group,
-                            premium_only: c.premium_only,
-                            is_slash_command: c.is_slash_command,
-                            is_user_command: c.is_user_command,
-                            is_message_command: c.is_message_command,
-                            permissions: c.permissions
+                            name: v.name,
+                            pretty_name: v.prettyName,
+                            description: v.description,
+                            options: v.options,
+                            group: v.group,
+                            premium: v.premium,
+                            is_slash_command: v.isSlashCommand,
+                            is_user_command: v.isUserContextCommand,
+                            is_message_command: v.isMessageContextCommand,
+                            default_member_permissions: v.defaultMemberPermissions,
+                            self_permissions: v.selfPermissions
                         }
                     })
             )

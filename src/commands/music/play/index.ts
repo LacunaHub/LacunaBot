@@ -1,12 +1,10 @@
 import { ApplicationCommandOptionType } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import slash from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash,
-    name,
+const options: CommandOptions = {
     description: 'Commands.PlayCommand.Description',
+    group: CommandGroup.Music,
     options: [
         {
             type: ApplicationCommandOptionType.String,
@@ -16,5 +14,7 @@ export default {
             autocomplete: true
         }
     ],
-    group: 'MUSIC'
+    slashFn: slash
 }
+
+export default options
