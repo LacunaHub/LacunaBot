@@ -100,11 +100,12 @@ export class Command {
         const t = this.self.i18n.t.bind(null, server.locale)
         const executable = this.executable(server, interaction)
 
-        if (!executable) {
+        if (typeof executable === 'string') {
+            let replyText = 'Commands.CommandExecutionDenied'
+            if (executable === 'NoDisabled') replyText = 'Commands.CommandExecutionDisabled'
+
             await interaction.reply({
-                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
-                    username: `**${interaction.user.username}**`
-                })}`,
+                content: `${this.self.staticEmojis.ERROR} | ${t(replyText, { username: `**${interaction.user.username}**` })}`,
                 ephemeral: true
             })
 
@@ -173,9 +174,9 @@ export class Command {
         return true
     }
 
-    private executable(server: ServerDocument, interaction: CommandInteraction): boolean {
-        if (this.self.application.owner instanceof User && this.self.application.owner.id === interaction.user.id) return true
-        if (this.self.application.owner instanceof Team && this.self.application.owner.members.some(v => v.id === interaction.user.id)) return true
+    private executable(server: ServerDocument, interaction: CommandInteraction): string | null {
+        if (this.self.application.owner instanceof User && this.self.application.owner.id === interaction.user.id) return null
+        if (this.self.application.owner instanceof Team && this.self.application.owner.members.some(v => v.id === interaction.user.id)) return null
 
         if (this.private) {
             const ownerIds = []
@@ -183,14 +184,14 @@ export class Command {
             if (this.self.application.owner instanceof User) ownerIds.push(this.self.application.owner.id)
             else if (this.self.application.owner instanceof Team) ownerIds.push(...this.self.application.owner.members.map(v => v.id))
 
-            return ownerIds.includes(interaction.user.id)
+            return ownerIds.includes(interaction.user.id) ? null : 'No'
         }
 
         const commandConfig = server.commands.configuration.find(v => v.name === this.name)
 
-        if (commandConfig?.inactive) return false
+        if (commandConfig?.inactive) return 'NoDisabled'
 
-        return true
+        return null
     }
 
     private async throttled(server: ServerDocument, interaction: CommandInteraction) {
