@@ -26,7 +26,8 @@ export default async function getCurrentUser(ctx: Context) {
 
     for (const guild of guilds) {
         const permissions = new PermissionsBitField(BigInt(guild.permissions)),
-            permitted = !!(guild.owner || permissions.has(PermissionsBitField.Flags.Administrator))
+            isAdministrator = permissions.has(PermissionsBitField.Flags.Administrator),
+            permitted = guild.owner || isAdministrator
 
         if (permitted) {
             let me: any

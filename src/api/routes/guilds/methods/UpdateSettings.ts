@@ -36,9 +36,7 @@ export default async function updateSettings(ctx: Context) {
         _id: server._id,
         locale: server.locale,
         premium: server.premium,
-        server: {
-            bot_expert_roles: server.bot_experts
-        },
+        bot_experts: server.bot_experts,
         commands: server.commands,
         moderation: {
             case_log: {
@@ -96,9 +94,9 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
         }
     }
 
-    // if (Array.isArray(data.bot_experts) && JSON.stringify(data.bot_experts) !== JSON.stringify(guild.bot_experts)) {
-    //     updateData['bot_experts'] = data.bot_experts
-    // }
+    if (Array.isArray(data.bot_experts) && JSON.stringify(data.bot_experts) !== JSON.stringify(guild.bot_experts)) {
+        updateData['bot_experts'] = data.bot_experts
+    }
 
     if (data.commands) {
         if (
