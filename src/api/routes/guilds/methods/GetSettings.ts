@@ -94,9 +94,7 @@ export default async function getSettings(ctx: Context) {
         _id: server._id,
         locale: server.locale,
         premium: server.premium,
-        server: {
-            bot_expert_roles: server.bot_experts
-        },
+        bot_experts: server.bot_experts,
         commands: server.commands,
         guild: {
             ...guild,
