@@ -21,7 +21,6 @@ import CustomCommand from '../../modules/CustomCommand'
 import InteractiveMessages from '../../modules/InteractiveMessages'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
 import { onPressReportButton, onSelectReportOption } from '../../modules/Moderation/Reports'
-import { createPoll, onPressPollButton } from '../../modules/Polls'
 
 const handler = async (
     self: Lacuna,
@@ -205,10 +204,6 @@ const handler = async (
             return true
         }
 
-        if (/POLL\-\d+\-OPT\-\d+/.test(interaction.customId)) {
-            await onPressPollButton(self, server, interaction)
-        }
-
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {
             await onPressChangeReasonButton(self, server, interaction)
         }
@@ -231,10 +226,6 @@ const handler = async (
     if (interaction.isModalSubmit()) {
         if (/UD\-.*/.test(interaction.customId)) {
             await Automation.handleEvent('INTERACTION_MODAL_SUBMIT', self, server, interaction)
-        }
-
-        if (/POLL\-\d+\-(true|false)\-(true|false)/.test(interaction.customId)) {
-            await createPoll(self, server, interaction)
         }
 
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {
