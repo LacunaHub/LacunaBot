@@ -268,7 +268,7 @@ const guildClone = computed(() => {
         _id: guild._id,
         prefix: guild.prefix,
         locale: guild.locale,
-        server: guild.server,
+        bot_experts: guild.bot_experts,
         commands: guild.commands,
         moderation: guild.moderation,
         modules: guild.modules
