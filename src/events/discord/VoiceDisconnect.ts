@@ -32,7 +32,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
     }
 
     await fetchGuild(self.cache, state.guild)
-    await Automation.handleEvent('VOICE_DISCONNECT', self, server, state)
+    await Automation.handleEvent('VOICE_DISCONNECT', self, server, state, { channelId: channel.id })
     await deleteTemporaryVoice(self, server, state, channel)
     await Levels.onVoiceDisconnect(self, server, state, channel)
     await economyVoiceUnassign(self, server, state, channel)
