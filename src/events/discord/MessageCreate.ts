@@ -7,8 +7,7 @@ import Automation from '../../modules/Automation'
 import { messageCreate as addWalletCash } from '../../modules/Economy'
 import GuildImageRotation from '../../modules/GuildImageRotation'
 import Levels from '../../modules/Levels'
-import { autoReact } from '../../modules/Reactions'
-import { autoThread } from '../../modules/Threads'
+import { addAutoReactions, createAutoThread } from '../../modules/Useful'
 
 const handler = async (self: Lacuna, message: Message) => {
     if (message.author.bot || message.channel.type === ChannelType.DM) return false
@@ -34,8 +33,8 @@ const handler = async (self: Lacuna, message: Message) => {
     await AutoMod.moderateNicknames(self, server, message.member)
     await AutoMod.moderateWords(self, server, message)
     await AutoMod.slowdownUsers(self, server, message)
-    await autoThread(self, server, message)
-    await autoReact(self, server, message)
+    await addAutoReactions(self, server, message)
+    await createAutoThread(self, server, message)
     await GuildImageRotation.rotateBanner(self, server, message.guild, message.member)
 
     return true
