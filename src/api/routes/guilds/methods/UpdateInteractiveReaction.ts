@@ -3,7 +3,7 @@ import { parseEmoji } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
 import Logger from '../../../../internals/Logger'
-import { generateId } from '../../../../modules/Reactions'
+import { generateSimpleId } from '../../../../internals/utility/Utils'
 import APIError from '../../../utility/APIError'
 import DiscordUtils from '../../../utility/DiscordUtils'
 
@@ -45,7 +45,7 @@ export default async function updateInteractiveReaction(ctx: Context) {
 }
 
 export async function createInteractiveReaction(server: ServerDocument, data: Partial<ServerModulesInteractiveReaction>) {
-    const element_id = data.id ?? generateId(),
+    const element_id = data.id ?? `L${generateSimpleId(9)}`,
         emoji = parseEmoji(data.emoji as any),
         interactiveReactions = server.modules.reactions
 
