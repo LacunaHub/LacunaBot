@@ -61,7 +61,7 @@
 
                   <q-icon class="q-ml-lg" name="circle" color="grey"></q-icon>
                   <span class="q-ml-sm">
-                    {{ $t('Pages.GuildPage.MembersPlural', guild.approximate_members_count) }}
+                    {{ $t('Pages.GuildPage.MembersPlural', guild.approximate_member_count) }}
                   </span>
                 </div>
               </div>
