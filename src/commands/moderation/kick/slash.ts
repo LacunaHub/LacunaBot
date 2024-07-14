@@ -1,7 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
-import { caseLog } from '../../../modules/Moderation'
+import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
 import Replacer from '../../../modules/Replacer'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
@@ -95,7 +95,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         await self.logger.handleError({ module: 'KickCommand', action: 'Kick', error: err, guild_id: interaction.guildId })
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'KICK', target: mention.user, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, { type: 'Kick', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
         content: `${self.staticEmojis.OK} | ${t('Commands.KickCommand.Texts.UserHasBeenKicked', {
             username: `**${interaction.member.displayName}**`,

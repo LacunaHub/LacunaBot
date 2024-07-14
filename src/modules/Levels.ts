@@ -68,43 +68,27 @@ export async function onMessageCreate(self: Lacuna, server: ServerDocument, mess
 
     if (hasRestrictions) return false
 
-    let user = await self.db.users.findOne({ _id: message.author.id })
-
-    if (!user) {
-        user = await self.db.users.create({
-            _id: message.author.id,
+    const user = await self.db.users.fetch(
+        { _id: message.author.id },
+        {
             user: {
                 username: message.author.username,
-                discriminator: message.author.discriminator,
                 avatar: message.author.avatar,
-                flags: message.author.flags?.bitfield ?? 0
-            }
-        } as any)
-    }
-
-    let userLevel = user.activities.levels.find(i => i.guild_id === message.guildId)
-
-    if (!userLevel) {
-        userLevel = {
-            guild_id: message.guildId,
-            experience: { total: 0, current: 0, level: 0 },
-            activity: {
-                total_messages: 0,
-                last_message_at: null,
-                total_voice_time: 0,
-                voice_connected_at: null
+                flags: message.author.flags?.bitfield ?? 0,
+                global_name: message.author.globalName
             }
         }
+    )
 
-        await self.db.users.updateOne(
-            { _id: message.author.id },
-            {
-                $push: { 'activities.levels': userLevel as never }
-            }
-        )
-    }
-
+    const userLevel = await self.db.users.fetchLevel(user, message.guildId)
     if (Date.now() - userLevel.activity.last_message_at < 60000) return false
+
+    await self.db.users.fetchServerProfile(user, message.guildId, {
+        accent_color: message.member.displayColor,
+        avatar: message.member.avatar,
+        banner: null,
+        nickname: message.member.nickname
+    })
 
     const currentXp: number = userLevel.experience.current
     const currentLevel: number = userLevel.experience.level,
@@ -191,11 +175,9 @@ export async function onVoiceConnect(self: Lacuna, server: ServerDocument, state
     if (state.guild.afkChannelId === state.channelId) return false
 
     const activeVoiceStates = state.guild.voiceStates.cache.filter(i => !i.member.user.bot && i.channelId).size
-
     if (activeVoiceStates >= 15 && !server.premium.available) return false
 
     const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
-
     if (members.size < 2) return false
 
     for (const [_, member] of members) {
@@ -210,41 +192,24 @@ export async function onVoiceConnect(self: Lacuna, server: ServerDocument, state
 
         if (hasRestrictions) continue
 
-        let user = await self.db.users.findOne({ _id: member.id })
-
-        if (!user) {
-            user = await self.db.users.create({
-                _id: member.id,
+        const user = await self.db.users.fetch(
+            { _id: member.id },
+            {
                 user: {
                     username: member.user.username,
-                    discriminator: member.user.discriminator,
                     avatar: member.user.avatar,
-                    flags: member.user.flags?.bitfield ?? 0
-                }
-            } as any)
-        }
-
-        let userLevel = user.activities.levels.find(i => i.guild_id === server._id)
-
-        if (!userLevel) {
-            userLevel = {
-                guild_id: server._id,
-                experience: { total: 0, current: 0, level: 0 },
-                activity: {
-                    total_messages: 0,
-                    last_message_at: null,
-                    total_voice_time: 0,
-                    voice_connected_at: null
+                    flags: member.user.flags?.bitfield ?? 0,
+                    global_name: member.user.globalName
                 }
             }
-
-            await self.db.users.updateOne(
-                { _id: member.id },
-                {
-                    $push: { 'activities.levels': userLevel as never }
-                }
-            )
-        }
+        )
+        const userLevel = await self.db.users.fetchLevel(user, server._id)
+        await self.db.users.fetchServerProfile(user, server._id, {
+            accent_color: member.displayColor,
+            avatar: member.avatar,
+            banner: null,
+            nickname: member.nickname
+        })
 
         if (!userLevel.activity.voice_connected_at || Date.now() - userLevel.activity.voice_connected_at > 1000 * 60 * 60 * 10) {
             await self.db.users.updateOne(

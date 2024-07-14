@@ -9,7 +9,7 @@ import db from '../database'
 import i18n from '../i18n'
 import Utils from '../internals/utility/Utils'
 import logger from './Logger'
-import Command, { CommandOptions } from './structures/Command'
+import { Command, CommandOptions } from './structures/Command'
 import Event, { EventOptions } from './structures/Event'
 import Giveaway, { handleEntries as handleGiveawayEntries } from './structures/Giveaway'
 import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './structures/TemporaryBan'
@@ -165,10 +165,10 @@ export default class Lacuna extends ClusterShardClient {
                 .map(dirent => dirent.name)
 
             for (const dir of dirs) {
-                const command: CommandOptions = require(`../commands/${directory}/${dir}`).default
+                const commandOptions: CommandOptions = require(`../commands/${directory}/${dir}`).default
+                const command = new Command(this, dir, commandOptions)
 
-                new Command(this, command)
-
+                this.commands.set(command.name, command)
                 delete require.cache[require.resolve(`../commands/${directory}/${dir}`)]
             }
 

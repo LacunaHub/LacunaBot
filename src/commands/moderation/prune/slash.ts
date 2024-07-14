@@ -1,7 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, ChatInputCommandInteraction } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
-import { caseLog } from '../../../modules/Moderation'
+import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -55,7 +55,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         })
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'PRUNE_MESSAGES', target: mention, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, { type: 'PruneMessages', target: mention, executor: interaction.user, reason })
 
     return true
 }

@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildEmoji } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, emoji: GuildEmoji): Promise<boolean> {
@@ -13,10 +13,6 @@ export default async function (self: Lacuna, server: ServerDocument, emoji: Guil
         const isOk = logChannel && logChannel.permissionsFor(emoji.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = emoji.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await emoji.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.EmojiDelete })
                 : null
@@ -27,20 +23,16 @@ export default async function (self: Lacuna, server: ServerDocument, emoji: Guil
                 .setTitle(t('Logs.EmojiDeleted'))
                 .setDescription(
                     t('Logs.EmojiDeletedTemplate', {
-                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
-                        emoji: `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`
+                        username: `<@${executor?.id ?? '0'}>`,
+                        emoji: `**${emoji.name}**`
                     })
                 )
-                .setFooter({ text: emoji.id })
+                .setFooter({ text: `EID: ${emoji.id}` })
                 .setTimestamp()
                 .setColor('#EF5350')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsEmojiDelete', action: 'SendMessageViaWebhook', error: err, guild_id: emoji.guild.id })
 

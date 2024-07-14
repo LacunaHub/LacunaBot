@@ -8,6 +8,7 @@ import {
     RESTPostOAuth2AccessTokenResult,
     RESTPostOAuth2RefreshTokenResult
 } from 'discord.js'
+import fetch from 'node-fetch'
 
 export class DiscordOAuth2 {
     public clientId: string
@@ -40,7 +41,7 @@ export class DiscordOAuth2 {
         url.searchParams.set('response_type', 'code')
         url.searchParams.set('state', state)
         url.searchParams.set('scope', scope.join(' '))
-        url.searchParams.set('prompt', 'consent')
+        url.searchParams.set('prompt', 'none')
 
         return { url, state }
     }

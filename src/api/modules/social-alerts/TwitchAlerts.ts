@@ -227,22 +227,22 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
                         error: err,
                         guild_id: guild._id
                     })
+
+                    continue
                 }
 
-                if (webhook)
-                    await database.servers.updateOne(
-                        {
-                            _id: guild._id,
-                            'modules.subscriptions.twitch.broadcaster_id': data.event.broadcaster_user_id
-                        },
-                        {
-                            $set: {
-                                'modules.subscriptions.twitch.$.webhook_id': webhook.id,
-                                'modules.subscriptions.twitch.$.webhook_token': webhook.token
-                            }
+                await database.servers.updateOne(
+                    {
+                        _id: guild._id,
+                        'modules.subscriptions.twitch.broadcaster_id': data.event.broadcaster_user_id
+                    },
+                    {
+                        $set: {
+                            'modules.subscriptions.twitch.$.webhook_id': webhook.id,
+                            'modules.subscriptions.twitch.$.webhook_token': webhook.token
                         }
-                    )
-                else continue
+                    }
+                )
             }
 
             let notificationText = guildSubscription.notification_message.content || null

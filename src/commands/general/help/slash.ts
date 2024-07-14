@@ -1,6 +1,15 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
+import {
+    ActionRowBuilder,
+    ApplicationCommandOptionType,
+    ButtonBuilder,
+    ButtonStyle,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    PermissionsBitField
+} from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
+import { CommandGroup, CommandOption, CommandSubcommandGroupOption, CommandSubcommandOption } from '../../../internals/structures/Command'
 import { commandOptionTypes } from '../../../internals/utility/Constants'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
@@ -9,25 +18,25 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const commandName: string = interaction.options?.getString('command')
 
     if (!commandName) {
-        const commands = self.commands.filter(c => !c.private && !(c.premium_only && !server.premium.available))
+        const commands = self.commands.filter(c => !c.private && !(c.premium && !server.premium.available))
         const customCommand = server.modules.custom_commands.map(i => i.command)
 
         const categories = {
             general: commands.filter(c => {
                 const config = server.commands.configuration.find(e => e.name == c.name)
-                return c.group == 'GENERAL' && (!config || (config && !config.inactive))
+                return c.group === CommandGroup.General && (!config || (config && !config.inactive))
             }),
             moderation: commands.filter(c => {
                 const config = server.commands.configuration.find(e => e.name == c.name)
-                return c.group == 'MODERATION' && (!config || (config && !config.inactive))
+                return c.group === CommandGroup.Moderation && (!config || (config && !config.inactive))
             }),
             music: commands.filter(c => {
                 const config = server.commands.configuration.find(e => e.name == c.name)
-                return c.group == 'MUSIC' && (!config || (config && !config.inactive))
+                return c.group === CommandGroup.Music && (!config || (config && !config.inactive))
             }),
             utility: commands.filter(c => {
                 const config = server.commands.configuration.find(e => e.name == c.name)
-                return c.group == 'UTILITY' && (!config || (config && !config.inactive))
+                return c.group === CommandGroup.Utility && (!config || (config && !config.inactive))
             })
         }
 
@@ -43,22 +52,22 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         )
 
         if (categories.general.size)
-            embedFields.push({ name: t('Commands.Categories.General'), value: categories.general.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.General'), value: categories.general.map(v => `\`${v.name}\``).join(', ') })
         if (categories.moderation.size)
-            embedFields.push({ name: t('Commands.Categories.Moderation'), value: categories.moderation.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.Moderation'), value: categories.moderation.map(v => `\`${v.name}\``).join(', ') })
         if (categories.music.size)
-            embedFields.push({ name: t('Commands.Categories.Music'), value: categories.music.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.Music'), value: categories.music.map(v => `\`${v.name}\``).join(', ') })
         if (categories.utility.size)
-            embedFields.push({ name: t('Commands.Categories.Useful'), value: categories.utility.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.Useful'), value: categories.utility.map(v => `\`${v.name}\``).join(', ') })
         if (customCommand.length)
-            embedFields.push({ name: t('Commands.Categories.Custom'), value: customCommand.map(c => `\`${c.name}\``).join(', ') })
+            embedFields.push({ name: t('Commands.Categories.Custom'), value: customCommand.map(v => `\`${v.name}\``).join(', ') })
 
         embed.addFields(embedFields)
 
         await interaction.reply({ embeds: [embed], components: [row] })
     } else {
-        const command = self.commands.find(c => !c.private && c.name == commandName)
-        const customCommand = server.modules.custom_commands.map(i => i.command).find(i => i.name == commandName)
+        const command = self.commands.find(v => !v.private && v.name == commandName)
+        const customCommand = server.modules.custom_commands.map(v => v.command).find(v => v.name == commandName)
 
         if (!command && !customCommand) {
             await interaction.reply({
@@ -76,14 +85,18 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 .setTitle(t('Commands.HelpCommand.Texts.HelpForCommand', { command: command.name }))
                 .setDescription(t(command.description))
 
-            if (command.permissions.self.length || command.permissions.user.length) {
-                const self_permissions = command.permissions.self.length
-                    ? `${t('Commands.HelpCommand.Texts.CommandPermissionsForBot')}\n- ${command.permissions.self
+            if (command.selfPermissions || command.defaultMemberPermissions) {
+                const self_permissions = command.selfPermissions
+                    ? `${t('Commands.HelpCommand.Texts.CommandPermissionsForBot')}\n- ${new PermissionsBitField(BigInt(command.selfPermissions))
+                          .toArray()
                           .map(p => t(`Common.DiscordPermissions.${p}`))
                           .join('\n- ')}`
                     : `~~${t('Commands.HelpCommand.Texts.CommandPermissionsForBot')}~~`
-                const user_permissions = command.permissions.user.length
-                    ? `${t('Commands.HelpCommand.Texts.CommandPermissionsForAuthor')}\n- ${command.permissions.user
+                const user_permissions = command.defaultMemberPermissions
+                    ? `${t('Commands.HelpCommand.Texts.CommandPermissionsForAuthor')}\n- ${new PermissionsBitField(
+                          BigInt(command.defaultMemberPermissions)
+                      )
+                          .toArray()
                           .map(p => t(`Common.DiscordPermissions.${p}`))
                           .join('\n- ')}`
                     : `~~${t('Commands.HelpCommand.Texts.CommandPermissionsForAuthor')}~~`
@@ -93,80 +106,70 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 ])
             }
 
-            if (
-                command.options?.filter(
-                    opt => ![ApplicationCommandOptionType.Subcommand, ApplicationCommandOptionType.SubcommandGroup].includes(opt.type)
-                )?.length
-            ) {
-                const usage =
-                    `/${command.name} ` +
-                    command.options
-                        .map(opt => {
-                            return `${opt.required ? '<' : '['}${t(opt.name)}${opt.required ? '>' : ']'}`
-                        })
-                        .join(' ')
-
-                const args = command.options
-                    .map(opt => {
-                        return (
-                            `\`${opt.required ? '<' : '['}${t(opt.name)}${opt.required ? '>' : ']'}\`: ${t(opt.description)}` +
-                            `\n- ${
-                                opt.required
-                                    ? t('Commands.HelpCommand.Texts.CommandArgumentRequired')
-                                    : t('Commands.HelpCommand.Texts.CommandArgumentOptional')
-                            }` +
-                            `\n- ${t('Commands.HelpCommand.Texts.CommandArgumentType', {
-                                type: t(`Commands.OptionTypes.${commandOptionTypes[opt.type]}`)?.toLowerCase()
-                            })}`
-                        )
-                    })
-                    .join('\n')
-
-                embed.addFields([
-                    { name: t('Commands.HelpCommand.Texts.CommandUsage'), value: `\`${usage}\`` },
-                    { name: t('Commands.HelpCommand.Texts.CommandArguments'), value: args }
-                ])
-            }
-
-            if (
-                command.options?.filter(opt =>
-                    [ApplicationCommandOptionType.Subcommand, ApplicationCommandOptionType.SubcommandGroup].includes(opt.type)
-                )?.length
-            ) {
+            if (command.options.length) {
                 const usage = command.options
-                    .map(opt => {
-                        const args = opt?.options
-                            ?.map(o => {
-                                return `${o.required ? '<' : '['}${t(o.name)}${o.required ? '>' : ']'}`
-                            })
-                            .join(' ')
+                    .map(v => {
+                        if (v.type === ApplicationCommandOptionType.Subcommand) {
+                            const args = v.options
+                                ? v.options.map(vv => `${vv.required ? '<' : '['}${t(vv.name)}${vv.required ? '>' : ']'}`).join(' ')
+                                : null
 
-                        return `\`/${command.name} ${opt.name} ${args}\`: ${t(opt.description)?.toLowerCase()}`
+                            return `\`/${command.name} ${v.name}${args ? ` ${args}` : ''}\`: ${t(v.description)?.toLowerCase()}`
+                        } else if (v.type === ApplicationCommandOptionType.SubcommandGroup) {
+                        } else {
+                            return `${v.required ? '<' : '['}${t(v.name)}${v.required ? '>' : ']'}`
+                        }
                     })
                     .join('\n\n')
 
-                const subcommands = command.options.map(opt => {
-                    const args = opt.options
-                        ?.map(o => {
+                if (command.options.every(v => v.type === ApplicationCommandOptionType.Subcommand)) {
+                    const subcommands = (command.options as CommandSubcommandOption[]).map(v => {
+                        const args = v.options
+                            ? v.options
+                                  .map(vv => {
+                                      return (
+                                          `\`${vv.required ? '<' : '['}${t(vv.name)}${vv.required ? '>' : ']'}\`: ${t(vv.description)}` +
+                                          `\n- ${
+                                              vv.required
+                                                  ? t('Commands.HelpCommand.Texts.CommandArgumentRequired')
+                                                  : t('Commands.HelpCommand.Texts.CommandArgumentOptional')
+                                          }` +
+                                          `\n- ${t('Commands.HelpCommand.Texts.CommandArgumentType', {
+                                              type: t(`Commands.OptionTypes.${commandOptionTypes[vv.type]}`)?.toLowerCase()
+                                          })}`
+                                      )
+                                  })
+                                  .join('\n')
+                            : null
+
+                        return { name: v.name, value: args }
+                    })
+
+                    embed.addFields([{ name: t('Commands.HelpCommand.Texts.CommandUsage'), value: usage }])
+                    embed.addFields([...subcommands.map(v => ({ name: `${command.name} ${v.name}`, value: v.value }))])
+                } else if (command.options.every(v => v.type === ApplicationCommandOptionType.SubcommandGroup)) {
+                } else {
+                    const args = (command.options as Exclude<CommandOption, CommandSubcommandOption | CommandSubcommandGroupOption>[])
+                        .map(v => {
                             return (
-                                `\`${o.required ? '<' : '['}${t(o.name)}${o.required ? '>' : ']'}\`: ${t(o.description)}` +
+                                `\`${v.required ? '<' : '['}${t(v.name)}${v.required ? '>' : ']'}\`: ${t(v.description)}` +
                                 `\n- ${
-                                    o.required
+                                    v.required
                                         ? t('Commands.HelpCommand.Texts.CommandArgumentRequired')
                                         : t('Commands.HelpCommand.Texts.CommandArgumentOptional')
                                 }` +
                                 `\n- ${t('Commands.HelpCommand.Texts.CommandArgumentType', {
-                                    type: t(`Commands.OptionTypes.${commandOptionTypes[o.type]}`)?.toLowerCase()
+                                    type: t(`Commands.OptionTypes.${commandOptionTypes[v.type]}`)?.toLowerCase()
                                 })}`
                             )
                         })
                         .join('\n')
 
-                    return { name: opt.name, value: args }
-                })
-
-                embed.addFields([{ name: t('Commands.HelpCommand.Texts.CommandUsage'), value: usage }])
-                for (const sc of subcommands) embed.addFields([{ name: `${command.name} ${sc.name}`, value: sc.value }])
+                    embed.addFields([
+                        { name: t('Commands.HelpCommand.Texts.CommandUsage'), value: `\`${usage}\`` },
+                        { name: t('Commands.HelpCommand.Texts.CommandArguments'), value: args }
+                    ])
+                }
             }
 
             await interaction.reply({ embeds: [embed] })

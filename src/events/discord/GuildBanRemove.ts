@@ -2,20 +2,21 @@ import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, Events, GuildBan } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import Logs from '../../modules/Logs'
-import { caseLog } from '../../modules/Moderation'
+import { createCaseLogEntry } from '../../modules/Moderation/CaseLog'
 
 const handler = async (self: Lacuna, ban: GuildBan) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: ban.guild.id })
-    const case_log = ban.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
+    const caseLogChannel = ban.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel,
+        botMember = ban.guild.members.me
     let reason: string
 
-    if (case_log && ban.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog) && server.moderation.case_log.types.BAN_REMOVE.active) {
-        const audit = await ban.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberBanRemove })
-        const entry = audit.entries.find(v => v.targetId === ban.user.id)
+    if (caseLogChannel && botMember.permissions.has(self.PermissionFlags.ViewAuditLog) && server.moderation.case_log.types.BAN_REMOVE.active) {
+        const audit = await ban.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberBanRemove }),
+            entry = audit.entries.find(v => v.targetId === ban.user.id)
 
         if (entry && entry.executor.id !== self.user.id) {
             reason = entry.reason
-            await caseLog.createCaseEntry(ban.guild, { type: 'BAN_REMOVE', target: ban.user, executor: entry.executor, reason: entry.reason })
+            await createCaseLogEntry(ban.guild, { type: 'BanRemove', target: ban.user, executor: entry.executor, reason: entry.reason })
         }
     }
 

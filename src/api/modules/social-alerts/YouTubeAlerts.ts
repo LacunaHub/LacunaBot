@@ -136,19 +136,19 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
                     error: err,
                     guild_id: guild._id
                 })
+
+                continue
             }
 
-            if (webhook)
-                await database.servers.updateOne(
-                    { _id: guild._id, 'modules.subscriptions.youtube.channel_id': data.channelId },
-                    {
-                        $set: {
-                            'modules.subscriptions.youtube.$.webhook_id': webhook.id,
-                            'modules.subscriptions.youtube.$.webhook_token': webhook.token
-                        }
+            await database.servers.updateOne(
+                { _id: guild._id, 'modules.subscriptions.youtube.channel_id': data.channelId },
+                {
+                    $set: {
+                        'modules.subscriptions.youtube.$.webhook_id': webhook.id,
+                        'modules.subscriptions.youtube.$.webhook_token': webhook.token
                     }
-                )
-            else continue
+                }
+            )
         }
 
         let notificationText = guildSubscription.notification_message.content || null

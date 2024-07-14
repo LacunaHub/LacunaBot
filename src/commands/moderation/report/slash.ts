@@ -66,19 +66,17 @@ export default async (
 
     await interaction.deferReply({ ephemeral: true })
 
-    let mentionUser = await self.db.users.findOne({ _id: mention.id })
-
-    if (!mentionUser) {
-        mentionUser = await self.db.users.create({
-            _id: mention.id,
+    const mentionUser = await self.db.users.fetch(
+        { _id: mention.id },
+        {
             user: {
                 username: mention.user.username,
-                discriminator: mention.user.discriminator,
                 avatar: mention.user.avatar,
-                flags: mention.user.flags
+                flags: mention.user.flags?.bitfield ?? 0,
+                global_name: mention.user.globalName
             }
-        } as any)
-    }
+        }
+    )
 
     const report = mentionUser.reports.find(i => i.sender_id === interaction.user.id)
 
@@ -146,8 +144,8 @@ export default async (
                 embed.setFields([
                     ...fields,
                     {
-                        name: `${interaction.user.tag} <t:${Math.round(Date.now() / 1000)}:R>`,
-                        value: reason
+                        name: `<t:${Math.round(Date.now() / 1000)}:R>`,
+                        value: `<@${interaction.user.id}> (${interaction.user.tag})\n\n${reason}`
                     }
                 ])
 
@@ -158,11 +156,11 @@ export default async (
                 }
             } else {
                 const embed = new EmbedBuilder()
-                    .setAuthor({ name: mention.user.tag, iconURL: mention.user.displayAvatarURL() })
+                    // .setAuthor({ name: mention.user.tag, iconURL: mention.user.displayAvatarURL() })
                     .addFields([
                         {
-                            name: `${interaction.user.tag} <t:${Math.round(Date.now() / 1000)}:R>`,
-                            value: reason
+                            name: `<t:${Math.round(Date.now() / 1000)}:R>`,
+                            value: `<@${interaction.user.id}> (${interaction.user.tag})\n\n${reason}`
                         }
                     ])
                     .setFooter({ text: `ID: ${mention.id}` })
@@ -171,7 +169,7 @@ export default async (
                     return {
                         label:
                             i === 'indefinitely'
-                                ? t('Indefinitely').toLowerCase()
+                                ? t('Common.Indefinitely').toLowerCase()
                                 : moment(Date.now() + ms(i))
                                       .locale(server.locale)
                                       .fromNow(true),
@@ -183,10 +181,7 @@ export default async (
                     new ActionRowBuilder<ButtonBuilder>().addComponents(
                         new ButtonBuilder().setCustomId(`R-KICK-${mention.id}`).setLabel(t('CaseLog.Actions.Kick')).setStyle(ButtonStyle.Primary),
                         new ButtonBuilder().setCustomId(`R-WARN-${mention.id}`).setLabel(t('CaseLog.Actions.Warn')).setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder()
-                            .setCustomId(`R-SKIP-${mention.id}`)
-                            .setEmoji(self.staticEmojis.details.ERROR)
-                            .setStyle(ButtonStyle.Secondary)
+                        new ButtonBuilder().setCustomId(`R-SKIP-${mention.id}`).setLabel(t('Common.Close')).setStyle(ButtonStyle.Secondary)
                     ),
                     new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                         new StringSelectMenuBuilder()
@@ -203,7 +198,11 @@ export default async (
                 ]
 
                 try {
-                    await channel.send({ embeds: [embed], components: rows })
+                    await channel.send({
+                        content: t('Commands.ReportCommand.Texts.ReceivedCompliantAboutUser', { username: `<@${mention.id}> (${mention.user.tag})` }),
+                        embeds: [embed],
+                        components: rows
+                    })
                 } catch (err) {
                     await self.logger.handleError({ module: 'ReportCommand', action: 'SendReportMessage', error: err, guild_id: interaction.guildId })
                 }

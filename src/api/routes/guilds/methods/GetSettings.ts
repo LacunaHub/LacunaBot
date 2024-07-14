@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     APIApplicationCommand,
     APIEmoji,
@@ -11,17 +12,14 @@ import {
 } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
+import { CommandGroup } from '../../../../internals/structures/Command'
 import APIError from '../../../utility/APIError'
 import DiscordUtils from '../../../utility/DiscordUtils'
 
 export default async function getSettings(ctx: Context) {
-    const guildId: string = ctx.params.guild_id,
+    const guildId: string = ctx.params.guildId,
         guild: RESTAPIPartialCurrentUserGuild = ctx.state.guild
-    const server = await database.servers.findOne({ _id: guildId })
-
-    if (!server || server.blocked) {
-        ctx.throw(404, new APIError(1003))
-    }
+    const server: ServerDocument = ctx.state.server
 
     let selfMember: APIGuildMember
 
@@ -87,19 +85,13 @@ export default async function getSettings(ctx: Context) {
     })
 
     const commandsCache = (await database.qdb.get('commands')) as any
-    const diamondPrices = await database.getDiamondPrices()
 
     ctx.status = 200
     ctx.body = {
         _id: server._id,
         locale: server.locale,
-        premium: {
-            available: server.premium.available,
-            will_expire_on: server.premium.expires_at
-        },
-        server: {
-            bot_expert_roles: server.bot_experts
-        },
+        premium: server.premium,
+        bot_experts: server.bot_experts,
         commands: server.commands,
         guild: {
             ...guild,
@@ -115,7 +107,7 @@ export default async function getSettings(ctx: Context) {
                     return {
                         name: i.name_localizations?.[server.locale] ?? i.name,
                         description: i.description_localizations?.[server.locale] ?? i.description,
-                        group: commandCache?.group ?? 'GENERAL'
+                        group: CommandGroup[commandCache?.group].toUpperCase()
                     }
                 })
         },
@@ -162,7 +154,7 @@ export default async function getSettings(ctx: Context) {
             automation: server.modules.automation,
             guild_image_rotation: server.modules.guild_image_rotation
         },
-        prices: diamondPrices,
+        web_page: server.web_page,
         change_log: server.change_log.reverse()
     }
 }

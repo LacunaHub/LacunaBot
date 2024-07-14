@@ -1,14 +1,11 @@
-import { PermissionsBitField } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import slash from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash,
-    name,
+const options: CommandOptions = {
     description: 'Commands.StopCommand.Description',
-    group: 'MUSIC',
-    permissions: {
-        user: new PermissionsBitField(['ManageChannels']).toArray()
-    }
+    group: CommandGroup.Music,
+    defaultMemberPermissions: ['ManageChannels'],
+    slashFn: slash
 }
+
+export default options

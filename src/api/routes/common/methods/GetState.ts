@@ -19,7 +19,6 @@ export default async function getState(ctx: Context) {
             }
         }),
         flatStats = stats.flat().sort((a, b) => a.clusterId - b.clusterId)
-    const hosts = await serverClient.getHostsData()
     const lavaNodes = [...lava.nodes.cache.values()].map(v => {
         return {
             id: v.options.name,
@@ -46,16 +45,6 @@ export default async function getState(ctx: Context) {
         users: flatStats.reduce((a, b) => (a += b.users), 0) || 0,
         cached_users: flatStats.reduce((a, b) => (a += b.cachedUsers), 0) || 0,
         channels: flatStats.reduce((a, b) => (a += b.channels), 0) || 0,
-        servers: hosts.map(v => {
-            return {
-                hostname: v.hostname,
-                uptime: v.uptime,
-                cpu_usage: v.cpuUsage,
-                memory_usage: +((v.memoryUsed.usedMemMb * 100) / v.memoryUsed.totalMemMb).toFixed(2),
-                shardCount: v.shards.length,
-                clusterCount: v.clusters.length
-            }
-        }),
         shards: flatStats.map(v => {
             return {
                 host: v.host,

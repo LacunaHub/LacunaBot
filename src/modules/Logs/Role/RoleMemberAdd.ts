@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, Collection, EmbedBuilder, GuildMember, Role } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, member: GuildMember, roles: Collection<string, Role>): Promise<boolean> {
@@ -14,10 +14,6 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
         const isOk = logChannel && logChannel.permissionsFor(member.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberRoleUpdate })
                 : null
@@ -28,21 +24,17 @@ export default async function (self: Lacuna, server: ServerDocument, member: Gui
                 .setTitle(t('Logs.RoleMemberAdded'))
                 .setDescription(
                     t('Logs.RoleMemberAddedTemplate', {
-                        username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
-                        target: `**${member.user.tag}**`
+                        username: `<@${executor?.id ?? '0'}>`,
+                        target: `<@${member.id}> (${member.user.tag})`
                     })
                 )
                 .addFields([{ name: t('Common.Roles'), value: roles.map(role => `<@&${role.id}>`).join(', '), inline: true }])
-                .setFooter({ text: member.id })
+                .setFooter({ text: `UID: ${member.id}` })
                 .setTimestamp()
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsRoleMemberAdd', action: 'SendMessageViaWebhook', error: err, guild_id: member.guild.id })
 

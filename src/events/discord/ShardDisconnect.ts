@@ -1,4 +1,4 @@
-import { Events } from 'discord.js'
+import { CloseEvent, Events } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, event: CloseEvent, id: number) {

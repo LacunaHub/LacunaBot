@@ -6,10 +6,11 @@ import {
     ButtonInteraction,
     ButtonStyle,
     ChatInputCommandInteraction,
-    ContextMenuCommandInteraction,
     Events,
     Message,
-    ModalSubmitInteraction
+    MessageContextMenuCommandInteraction,
+    ModalSubmitInteraction,
+    UserContextMenuCommandInteraction
 } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
@@ -19,14 +20,14 @@ import Automation from '../../modules/Automation'
 import CustomCommand from '../../modules/CustomCommand'
 import InteractiveMessages from '../../modules/InteractiveMessages'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
-import { createPoll, onPressPollButton } from '../../modules/Polls'
-import { onPressReportButton, onSelectReportOption } from '../../modules/Reports'
+import { onPressReportButton, onSelectReportOption } from '../../modules/Moderation/Reports'
 
 const handler = async (
     self: Lacuna,
     interaction:
         | ChatInputCommandInteraction<'cached'>
-        | ContextMenuCommandInteraction<'cached'>
+        | UserContextMenuCommandInteraction<'cached'>
+        | MessageContextMenuCommandInteraction<'cached'>
         | ButtonInteraction<'cached'>
         | AnySelectMenuInteraction<'cached'>
         | AutocompleteInteraction<'cached'>
@@ -42,15 +43,11 @@ const handler = async (
     interaction.member = await interaction.guild.members.fetch(interaction.user.id)
 
     if (interaction.isChatInputCommand()) {
-        const command = self.commands.find(c => c.is_slash_command && c.name === interaction.commandName)
-        const customCommand = server.modules.custom_commands.find(i => i.id === interaction.commandId)
+        const command = self.commands.find(v => v.name === interaction.commandName)
+        const customCommand = server.modules.custom_commands.find(v => v.id === interaction.commandId)
 
         if (command) {
-            await command.executeSlash(server, interaction)
-
-            if (interaction.commandGuildId) {
-                await self.updateApplicationCommands(server)
-            }
+            await command.execute(server, interaction)
         }
 
         if (!command && customCommand) {
@@ -62,11 +59,11 @@ const handler = async (
 
     if (interaction.isContextMenuCommand()) {
         const command = self.commands.find(
-            c => (c.is_message_command || c.is_user_command) && self.i18n.t('en', c.pretty_name) === interaction.commandName
+            v => (v.isUserContextCommand || v.isMessageContextCommand) && self.i18n.t('en', v.prettyName) === interaction.commandName
         )
 
         if (command) {
-            await command.executeContext(server, interaction)
+            await command.execute(server, interaction)
         }
     }
 
@@ -111,7 +108,7 @@ const handler = async (
                     filtersButton = rows[2].components[1]
 
                 if (interaction.customId === stopButton.customId) {
-                    await self.commands.get('stop').executeSlash(server, interaction as any)
+                    await self.commands.get('stop').execute(server, interaction as any)
                 }
 
                 if (interaction.customId === previousButton.customId) {
@@ -146,11 +143,11 @@ const handler = async (
                 }
 
                 if (interaction.customId === queueButton.customId) {
-                    await self.commands.get('queue').executeSlash(server, interaction as any)
+                    await self.commands.get('queue').execute(server, interaction as any)
                 }
 
                 if ([volumeDownButton.customId, volumeUpButton.customId].includes(interaction.customId)) {
-                    await self.commands.get('volume').executeSlash(server, interaction as any)
+                    await self.commands.get('volume').execute(server, interaction as any)
                 }
 
                 if (interaction.customId === shufflePlayButton.customId) {
@@ -164,11 +161,11 @@ const handler = async (
                 }
 
                 if ([seekBackwardButton.customId, seekForwardButton.customId].includes(interaction.customId)) {
-                    await self.commands.get('seek').executeSlash(server, interaction as any)
+                    await self.commands.get('seek').execute(server, interaction as any)
                 }
 
                 if (interaction.customId === filtersButton.customId) {
-                    await self.commands.get('filters').executeSlash(server, interaction as any)
+                    await self.commands.get('filters').execute(server, interaction as any)
                 }
 
                 if (
@@ -207,10 +204,6 @@ const handler = async (
             return true
         }
 
-        if (/POLL\-\d+\-OPT\-\d+/.test(interaction.customId)) {
-            await onPressPollButton(self, server, interaction)
-        }
-
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {
             await onPressChangeReasonButton(self, server, interaction)
         }
@@ -235,17 +228,13 @@ const handler = async (
             await Automation.handleEvent('INTERACTION_MODAL_SUBMIT', self, server, interaction)
         }
 
-        if (/POLL\-\d+\-(true|false)\-(true|false)/.test(interaction.customId)) {
-            await createPoll(self, server, interaction)
-        }
-
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {
             await onSubmitChangeReasonModal(self, server, interaction)
         }
 
         if (/REPORT\-\d+/.test(interaction.customId)) {
             const reportCommand = self.commands.get('report')
-            await reportCommand.executeSlash(server, interaction as any)
+            await reportCommand.execute(server, interaction as any)
         }
     }
 

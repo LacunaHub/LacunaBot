@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, EmbedBuilder, Guild, Invite } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, invite: Invite): Promise<boolean> {
@@ -13,26 +13,18 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
         const isOk = logChannel && logChannel.permissionsFor((invite.guild as Guild).members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.InviteDeleted'))
                 .addFields([
                     { name: t('Logs.InviteCode'), value: invite.code, inline: true },
                     { name: t('Commands.OptionTypes.Channel'), value: `<#${invite.channel.id}>`, inline: true },
-                    { name: t('Logs.InviteInviter'), value: invite.inviter?.tag ?? '-', inline: true }
+                    { name: t('Logs.InviteInviter'), value: `<@${invite.inviter?.id ?? '0'}>`, inline: true }
                 ])
                 .setTimestamp()
                 .setColor('#EF5350')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsInviteDelete', action: 'SendMessageViaWebhook', error: err, guild_id: invite.guild.id })
 

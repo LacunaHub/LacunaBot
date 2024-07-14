@@ -1,3 +1,5 @@
+import fetch from 'node-fetch'
+
 export async function searchRepositories(options: SearchRepositoriesOptions): Promise<SearchRepositoriesResponse> {
     if (!options.q) throw new TypeError('Query parameter "q" is required')
 

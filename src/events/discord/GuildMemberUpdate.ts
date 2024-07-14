@@ -1,10 +1,10 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, Events, GuildMember } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
-import Automoder from '../../modules/Automoder'
+import AutoMod from '../../modules/AutoMod'
 import Greeting from '../../modules/Greeting'
 import Logs from '../../modules/Logs'
-import { caseLog } from '../../modules/Moderation'
+import { createCaseLogEntry } from '../../modules/Moderation/CaseLog'
 
 const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) => {
     if (self.user.id === member.id) return false
@@ -29,22 +29,23 @@ const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) =
         await Greeting.restoreNicknameAndRoles(self, server, member)
     }
 
-    await Automoder.nicknamesModeration(self, server, member)
+    await AutoMod.moderateNicknames(self, server, member)
 
     if (before.communicationDisabledUntilTimestamp !== member.communicationDisabledUntilTimestamp) {
-        const case_log = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
+        const caseLogChannel = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel,
+            botMember = member.guild.members.me
 
         if (
-            case_log &&
-            member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog) &&
+            caseLogChannel &&
+            botMember.permissions.has(self.PermissionFlags.ViewAuditLog) &&
             (server.moderation.case_log.types.MUTE_ADD.active || server.moderation.case_log.types.MUTE_REMOVE.active)
         ) {
-            const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberUpdate })
-            const entry = audit.entries.find(v => v.targetId === member.id)
+            const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberUpdate }),
+                entry = audit.entries.find(v => v.targetId === member.id)
 
             if (entry && entry.executor.id !== self.user.id) {
-                await caseLog.createCaseEntry(member.guild, {
-                    type: member.communicationDisabledUntilTimestamp ? 'MUTE_ADD' : 'MUTE_REMOVE',
+                await createCaseLogEntry(member.guild, {
+                    type: member.communicationDisabledUntilTimestamp ? 'MuteAdd' : 'MuteRemove',
                     target: member.user,
                     executor: entry.executor,
                     reason: entry.reason

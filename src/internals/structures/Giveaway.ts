@@ -133,7 +133,7 @@ export default class Giveaway {
                 await this.self.logger.handleError({ module: 'Giveaways', action: 'SendCongrats', error: err, guild_id: this.guildId })
             }
         } else {
-            embed.setDescription(t('Commands.GiveawayCommand.Texts.NoGiveawayParticipants'))
+            embed.setDescription(t('Commands.GiveawayCommand.SubCommands.EndCommand.Texts.NoGiveawayParticipants'))
         }
 
         try {

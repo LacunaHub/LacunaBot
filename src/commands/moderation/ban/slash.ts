@@ -4,7 +4,7 @@ import moment from 'moment'
 import ms from 'ms'
 import Lacuna from '../../../internals/Lacuna'
 import TemporaryBan from '../../../internals/structures/TemporaryBan'
-import { caseLog } from '../../../modules/Moderation'
+import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
 import Replacer from '../../../modules/Replacer'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
@@ -120,7 +120,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_ADD', target: mention.user, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, { type: 'BanAdd', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
         content: `${self.staticEmojis.OK} | ${t('Commands.BanCommand.Texts.UserHasBeenBanned', {
             username: `**${interaction.member.displayName}**`,

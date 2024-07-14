@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildEmoji } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: GuildEmoji, emoji: GuildEmoji): Promise<boolean> {
@@ -13,10 +13,6 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
         const isOk = logChannel && logChannel.permissionsFor(emoji.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = emoji.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await emoji.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.EmojiUpdate })
                 : null
@@ -28,24 +24,20 @@ export default async function (self: Lacuna, server: ServerDocument, before: Gui
                     .setTitle(t('Logs.EmojiUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
-                            change: t('Logs.EmojiUpdatedName', { emoji: `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>` })
+                            username: `<@${executor?.id ?? '0'}>`,
+                            change: t('Logs.EmojiUpdatedName', { emoji: emoji.toString() })
                         })
                     )
                     .setFields([
                         { name: t('Logs.BeforeChange'), value: before.name },
                         { name: t('Logs.AfterChange'), value: emoji.name }
                     ])
-                    .setFooter({ text: emoji.id })
+                    .setFooter({ text: `EID: ${emoji.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsEmojiUpdateName',

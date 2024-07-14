@@ -2,7 +2,7 @@ import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChannelType, Events, MessageReaction, User } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import InteractiveMessages from '../../modules/InteractiveMessages'
-import { reactionRemove } from '../../modules/Reactions'
+import InteractiveReactions from '../../modules/InteractiveReactions'
 
 const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
     if (self.user.id === user.id) return false
@@ -12,8 +12,8 @@ const handler = async (self: Lacuna, reaction: MessageReaction, user: User) => {
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: reaction.message.guildId })
 
-    await reactionRemove(self, server, reaction, user)
     await InteractiveMessages.handleReactionRemove(self, server, reaction, user)
+    await InteractiveReactions.handleReactionRemove(self, server, reaction, user)
 
     return true
 }

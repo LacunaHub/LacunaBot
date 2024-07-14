@@ -1,29 +1,34 @@
-import { BillDocument } from '@lacunahub/lacuna-database-driver'
+import { PaymentDocument, SubscriptionDocument, SubscriptionStatus, SubscriptionType } from '@lacunahub/lacuna-database-driver'
+import { APIGuild } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import { addDiamond } from '..'
 import database from '../../../../database'
 import Logger from '../../../../internals/Logger'
 import { projectTeamRoleId, serverBoosterRoleId, subscribedPatronRoleId } from '../../../../internals/utility/Constants'
+import DiscordUtils from '../../../utility/DiscordUtils'
 import { isRolesMember } from '../providers/DiscordRoles'
 
 export const diamondGuilds = new Map<string, DiamondGuild>()
 
 export class DiamondGuild {
-    public guild_id: string
-    public expiration: number
-    public bill_id?: string
+    public guildId: string
+    public expiresAt: number
+    public billId: string
+    public billType: string
     public schedule: Job
 
-    constructor(guild_id: string, expiration: number, bill_id?: string) {
-        this.guild_id = guild_id
+    constructor(guildId: string, expiresAt: number, billId: string, billType: string) {
+        this.guildId = guildId
 
-        this.expiration = expiration
+        this.expiresAt = expiresAt
 
-        this.bill_id = bill_id
+        this.billId = billId
+
+        this.billType = billType
 
         this.schedule = null
 
-        if (Date.now() >= this.expiration || this.expiration - Date.now() <= 30000) {
+        if (Date.now() >= this.expiresAt || this.expiresAt - Date.now() <= 30000) {
             this.expire()
 
             return
@@ -33,55 +38,74 @@ export class DiamondGuild {
     }
 
     initialize() {
-        this.schedule = scheduleJob(`DIAMOND:${this.guild_id}`, this.expiration, () => this.expire())
-        diamondGuilds.set(this.guild_id, this)
+        this.schedule = scheduleJob(`DIAMOND:${this.guildId}`, this.expiresAt, this.expire.bind(this))
+        diamondGuilds.set(this.guildId, this)
     }
 
     async expire() {
-        let bill: BillDocument,
-            rolesMember: boolean = false
+        let bill: PaymentDocument | SubscriptionDocument
 
-        if (this.bill_id) {
-            bill = await database.bills.findOne({ _id: this.bill_id })
-
-            if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY', 'PROJECT_TEAM'].includes(bill?.type)) {
-                let roleIds = [subscribedPatronRoleId]
-
-                if (bill.type === 'DISCORD_NITRO_BOOST') {
-                    roleIds = [serverBoosterRoleId]
-                } else if (bill.type === 'PROJECT_TEAM') {
-                    roleIds = [projectTeamRoleId]
-                }
-
-                rolesMember = await isRolesMember(bill.custom_fields.user_id, roleIds)
-            }
+        if (this.billType === 'Payment') {
+            bill = await database.payments.findOne({ _id: this.billId })
+        } else if (this.billType === 'Subscription') {
+            bill = await database.subscriptions.findOne({ _id: this.billId })
         }
 
-        if (rolesMember) {
+        let renewDiamond = false
+
+        if ('subscriber_id' in bill) {
+            let roleIds = [subscribedPatronRoleId]
+
+            if (bill.type === SubscriptionType.DiscordNitroBoost) {
+                roleIds = [serverBoosterRoleId]
+            } else if (bill.type === SubscriptionType.ProjectTeam) {
+                roleIds = [projectTeamRoleId]
+            }
+
+            renewDiamond = await isRolesMember(bill.subscriber_id, roleIds)
+        }
+
+        if (renewDiamond) {
             await addDiamond(bill)
         } else {
             await database.servers.updateOne(
-                { _id: this.guild_id },
+                { _id: this.guildId },
                 {
                     $set: {
                         'premium.available': false,
-                        'premium.expires_at': 0,
-                        'premium.bill_id': null
+                        'premium.expires_at': null,
+                        'premium.charged_via': null
                     }
                 }
             )
 
-            if (['DISCORD_NITRO_BOOST', 'PATREON', 'BOOSTY', 'PROJECT_TEAM'].includes(bill?.type)) {
-                await database.bills.updateOne({ _id: bill._id }, { $set: { 'status.value': 'REJECTED' } })
+            if ('subscriber_id' in bill) {
+                await database.subscriptions.updateOne(
+                    { _id: bill._id },
+                    {
+                        $set: {
+                            status: SubscriptionStatus.Cancelled,
+                            updated_at: Date.now()
+                        }
+                    }
+                )
             }
 
-            Logger.info(`[DiamondGuild] Lacuna Diamond on guild ${this.guild_id} was expired`)
+            Logger.info(`[DiamondGuild] Lacuna Diamond on guild ${this.guildId} was expired`)
+
+            try {
+                const guild = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guild(this.guildId))) as APIGuild
+
+                if (guild.system_channel_id) {
+                    await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelMessages(guild.system_channel_id), {})
+                }
+            } catch (err) {}
         }
     }
 
     cancel() {
         this.schedule.cancel()
-        diamondGuilds.delete(this.guild_id)
+        diamondGuilds.delete(this.guildId)
     }
 }
 
@@ -92,12 +116,13 @@ export async function handleDiamondGuilds() {
     })
 
     for (const server of servers) {
-        const { expires_at, bill_id } = server.premium
+        const { expires_at, charged_via } = server.premium,
+            [billType, billId] = charged_via?.split(':') ?? []
         const diamondGuild = diamondGuilds.get(server._id)
 
         if (diamondGuild) continue
 
-        new DiamondGuild(server._id, expires_at, bill_id)
+        new DiamondGuild(server._id, expires_at, billId, billType)
     }
 
     Logger.log(`[DiamondGuild] Found ${servers.length} guilds with Lacuna Diamond`)

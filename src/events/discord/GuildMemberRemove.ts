@@ -6,7 +6,7 @@ import Automation from '../../modules/Automation'
 import Farewell from '../../modules/Farewell'
 import GuildImageRotation from '../../modules/GuildImageRotation'
 import Logs from '../../modules/Logs'
-import { caseLog } from '../../modules/Moderation'
+import { createCaseLogEntry } from '../../modules/Moderation/CaseLog'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
     if (!member || !member.guild) return false
@@ -18,18 +18,15 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     await Farewell.saveNicknameAndRoles(self, server, member)
     await Automation.handleEvent('GUILD_MEMBER_REMOVE', self, server, member)
 
-    const caseLogChannel = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
+    const caseLogChannel = member.guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel,
+        botMember = member.guild.members.me
 
-    if (
-        caseLogChannel &&
-        member.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog) &&
-        server.moderation.case_log.types.KICK.active
-    ) {
-        const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberKick })
-        const entry = audit.entries.find(v => v.targetId === member.id)
+    if (caseLogChannel && botMember.permissions.has(self.PermissionFlags.ViewAuditLog) && server.moderation.case_log.types.KICK.active) {
+        const audit = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberKick }),
+            entry = audit.entries.find(v => v.targetId === member.id)
 
         if (entry && entry.executor.id !== self.user.id) {
-            await caseLog.createCaseEntry(member.guild, { type: 'KICK', target: member.user, executor: entry.executor, reason: entry.reason })
+            await createCaseLogEntry(member.guild, { type: 'Kick', target: member.user, executor: entry.executor, reason: entry.reason })
         }
     }
 

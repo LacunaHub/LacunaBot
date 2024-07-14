@@ -9,16 +9,11 @@ import APIError from '../../../utility/APIError'
 import DiscordUtils from '../../../utility/DiscordUtils'
 
 export default async function updateSettings(ctx: Context) {
-    const guildId: string = ctx.params.guild_id
+    const guildId: string = ctx.params.guildId
     const currentUser: Partial<APIUser> = ctx.state.user
     const data: Partial<ServerDocument> = ctx.request.body
 
-    let server = await database.servers.findOne({ _id: guildId })
-
-    if (!server || server.blocked) {
-        ctx.throw(404, new APIError(1003))
-    }
-
+    let server: ServerDocument = ctx.state.server
     let selfMember: APIGuildMember
 
     try {
@@ -29,20 +24,14 @@ export default async function updateSettings(ctx: Context) {
         ctx.throw(406, new APIError(2004))
     }
 
-    const diamondPrices = await database.getDiamondPrices()
     server = await setSettings(server, data, currentUser.id)
 
     ctx.status = 200
     ctx.body = {
         _id: server._id,
         locale: server.locale,
-        premium: {
-            available: server.premium.available,
-            will_expire_on: server.premium.expires_at
-        },
-        server: {
-            bot_expert_roles: server.bot_experts
-        },
+        premium: server.premium,
+        bot_experts: server.bot_experts,
         commands: server.commands,
         moderation: {
             case_log: {
@@ -87,7 +76,7 @@ export default async function updateSettings(ctx: Context) {
             automation: server.modules.automation,
             guild_image_rotation: server.modules.guild_image_rotation
         },
-        prices: diamondPrices,
+        web_page: server.web_page,
         change_log: server.change_log.reverse()
     }
 }
@@ -101,9 +90,9 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
         }
     }
 
-    // if (Array.isArray(data.bot_experts) && JSON.stringify(data.bot_experts) !== JSON.stringify(guild.bot_experts)) {
-    //     updateData['bot_experts'] = data.bot_experts
-    // }
+    if (Array.isArray(data.bot_experts) && JSON.stringify(data.bot_experts) !== JSON.stringify(guild.bot_experts)) {
+        updateData['bot_experts'] = data.bot_experts
+    }
 
     if (data.commands) {
         if (
@@ -1526,6 +1515,12 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
                     }
                 }
             }
+        }
+    }
+
+    if (data.web_page) {
+        if (typeof data.web_page.public_leaderboard === 'boolean' && data.web_page.public_leaderboard !== guild.web_page.public_leaderboard) {
+            updateData['web_page.public_leaderboard'] = data.web_page.public_leaderboard
         }
     }
 

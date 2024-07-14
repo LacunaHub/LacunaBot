@@ -73,7 +73,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const is_url = new RegExp(`^https?:\/\/`).test(query)
     const { allowedMusicHosts } = await self.db.getInternalData()
 
-    if (is_url && !allowedMusicHosts.some(h => query.startsWith(h))) {
+    if (is_url && !allowedMusicHosts?.some(h => query.startsWith(h))) {
         await interaction.reply({
             content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.HostIsNotAllowedToBePlayed', {
                 username: `**${interaction.member.displayName}**`

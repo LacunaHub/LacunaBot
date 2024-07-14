@@ -1,4 +1,5 @@
 import { AttachmentBuilder, MessagePayload, makeURLSearchParams } from 'discord.js'
+import fetch from 'node-fetch'
 import database from '../../../database'
 import { handleModuleExecutionData } from '../../../events/system/ModuleExecution'
 import Logger from '../../../internals/Logger'
@@ -102,19 +103,19 @@ export async function handleTelegramWebhook(data: TelegramWebhookData) {
                     error: err,
                     guild_id: guild._id
                 })
+
+                continue
             }
 
-            if (webhook)
-                await database.servers.updateOne(
-                    { _id: guild._id, 'modules.subscriptions.telegram.channel_id': data.channel_id },
-                    {
-                        $set: {
-                            'modules.subscriptions.telegram.$.webhook_id': webhook.id,
-                            'modules.subscriptions.telegram.$.webhook_token': webhook.token
-                        }
+            await database.servers.updateOne(
+                { _id: guild._id, 'modules.subscriptions.telegram.channel_id': data.channel_id },
+                {
+                    $set: {
+                        'modules.subscriptions.telegram.$.webhook_id': webhook.id,
+                        'modules.subscriptions.telegram.$.webhook_token': webhook.token
                     }
-                )
-            else continue
+                }
+            )
         }
 
         const mentions = []

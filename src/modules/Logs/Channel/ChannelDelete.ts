@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildChannel } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, channel: GuildChannel): Promise<boolean> {
@@ -13,10 +13,6 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
         const isOk = logChannel && logChannel.permissionsFor(channel.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = channel.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await channel.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.ChannelDelete })
                 : null
@@ -25,23 +21,17 @@ export default async function (self: Lacuna, server: ServerDocument, channel: Gu
 
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.ChannelDeleted'))
-                .setDescription(
-                    t('Logs.ChannelDeletedTemplate', { username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`, channel: `**${channel.name}**` })
-                )
+                .setDescription(t('Logs.ChannelDeletedTemplate', { username: `<@${executor?.id ?? '0'}>`, channel: `**#${channel.name}**` }))
                 .addFields([
                     { name: t('Logs.ChannelCategory'), value: channel?.parent?.name ?? '-', inline: true },
                     { name: t('Logs.ChannelPosition'), value: channel.rawPosition.toString(), inline: true }
                 ])
-                .setFooter({ text: channel.id })
+                .setFooter({ text: `CID: ${channel.id}` })
                 .setTimestamp()
                 .setColor('#EF5350')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsChannelDelete', action: 'SendMessageViaWebhook', error: err, guild_id: channel.guildId })
 

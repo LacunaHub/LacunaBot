@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Role } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, before: Role, role: Role): Promise<boolean> {
@@ -13,10 +13,6 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
         const isOk = logChannel && logChannel.permissionsFor(role.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const audit = role.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
                 ? await role.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.RoleUpdate })
                 : null
@@ -28,7 +24,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                     .setTitle(t('Logs.RoleUpdated'))
                     .setDescription(
                         t('Logs.UserChangesSomething', {
-                            username: `**${executor?.tag ?? t('Logs.UnknownUser')}**`,
+                            username: `<@${executor?.id ?? '0'}>`,
                             change: t('Logs.RoleUpdatedName', { role: `<@&${role.id}>` })
                         })
                     )
@@ -36,16 +32,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                         { name: t('Logs.BeforeChange'), value: before.name, inline: true },
                         { name: t('Logs.AfterChange'), value: role.name, inline: true }
                     ])
-                    .setFooter({ text: role.id })
+                    .setFooter({ text: `RID: ${role.id}` })
                     .setTimestamp()
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsRoleUpdateName',
@@ -76,11 +68,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsRoleUpdateColor',
@@ -107,11 +95,7 @@ export default async function (self: Lacuna, server: ServerDocument, before: Rol
                     .setColor('#FFA726')
 
                 try {
-                    await webhook.send({
-                        embeds: [embed],
-                        avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                        username: server.premium.available ? webhook.name : self.user.username
-                    })
+                    await sendLog(self, server, logChannel.id, { embeds: [embed] })
                 } catch (err) {
                     await self.logger.handleError({
                         module: 'LogsRoleUpdatePermissions',

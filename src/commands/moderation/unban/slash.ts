@@ -1,7 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChatInputCommandInteraction, GuildBan } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
-import { caseLog } from '../../../modules/Moderation'
+import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -46,7 +46,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         await interaction.guild.bans.remove(userId, reason)
     }
 
-    await caseLog.createCaseEntry(interaction.guild, { type: 'BAN_REMOVE', target: userBan.user, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, { type: 'BanRemove', target: userBan.user, executor: interaction.user, reason })
     await interaction.editReply({
         content: `${self.staticEmojis.OK} | ${t('Commands.UnbanCommand.Texts.UserHasBeenUnbanned', {
             username: `**${interaction.member.displayName}**`,

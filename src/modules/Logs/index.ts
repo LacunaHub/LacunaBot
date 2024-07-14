@@ -1,6 +1,8 @@
-import { ServerModerationLogsWebhook } from '@lacunahub/lacuna-database-driver'
-import { BaseGuildTextChannel, Webhook } from 'discord.js'
+import { ServerDocument, ServerModerationLogsTypeKey } from '@lacunahub/lacuna-database-driver'
+import { APIWebhook, MessagePayload, WebhookMessageCreateOptions, resolveImage } from 'discord.js'
+import DiscordUtils from '../../api/utility/DiscordUtils'
 import Lacuna from '../../internals/Lacuna'
+import { Webhook } from '../../internals/structures/Webhook'
 import ChannelCreate from './Channel/ChannelCreate'
 import ChannelDelete from './Channel/ChannelDelete'
 import ChannelUpdate from './Channel/ChannelUpdate'
@@ -40,74 +42,93 @@ import VoiceServerUnmute from './Voice/VoiceServerUnmute'
 
 const rateLimitCache = new Map()
 
-export const images = {
-    BAN_ADD: 'https://i.imgur.com/qI02Ivf.png',
-    BAN_REMOVE: 'https://i.imgur.com/FVnlHqJ.png',
-    KICK: 'https://i.imgur.com/RYVLGuy.png',
-    MUTE_ADD: 'https://i.imgur.com/t5FJ6Gw.png',
-    MUTE_REMOVE: 'https://i.imgur.com/rtL11np.png',
-    PRUNE_MESSAGES: 'https://i.imgur.com/vUd9gtw.png',
-    WARN_ADD: 'https://i.imgur.com/R03G3G5.png',
-    WARN_REMOVE: 'https://i.imgur.com/AXNkdfG.png'
-}
-
-export async function fetchLogWebhook(self: Lacuna, logChannel: BaseGuildTextChannel, webhooks: ServerModerationLogsWebhook[]) {
-    const logWebhook = webhooks.find(i => i.channel_id === logChannel.id)
+export async function sendLog(self: Lacuna, server: ServerDocument, channelId: string, message: MessagePayload | WebhookMessageCreateOptions) {
+    const channelWebhook = server.moderation.logs.webhooks.find(i => i.channel_id === channelId)
     let webhook: Webhook
 
-    if (logWebhook) {
-        try {
-            webhook = await self.fetchWebhook(logWebhook.id, logWebhook.token)
-        } catch (err) {
-            await self.logger.handleError({ module: 'Logs', action: 'FetchWebhook', error: err, guild_id: logChannel.guildId })
+    if (channelWebhook) {
+        webhook = new Webhook({ id: channelWebhook.id, token: channelWebhook.token })
+    }
 
-            // Unknown Webhook
-            // See https://github.com/LacunaHub/LacunaBot/issues/190
-            if (err?.code !== 10015) return null
+    if (typeof webhook === 'undefined') {
+        try {
+            const createdWebhook = (await self.rest.post(DiscordUtils.restRoutes.channelWebhooks(channelId), {
+                body: {
+                    name: self.user.username,
+                    avatar: await resolveImage(self.user.displayAvatarURL())
+                },
+                headers: {
+                    'X-Audit-Log-Reason': 'Logs: No webhook for the logs'
+                }
+            })) as APIWebhook
+
+            await self.db.servers.updateOne(
+                { _id: server._id },
+                {
+                    $push: {
+                        'moderation.logs.webhooks': {
+                            id: createdWebhook.id,
+                            token: createdWebhook.token,
+                            channel_id: createdWebhook.channel_id
+                        }
+                    }
+                }
+            )
+
+            webhook = new Webhook({ id: createdWebhook.id, token: createdWebhook.token })
+        } catch (err) {
+            await self.logger.handleError({ module: 'Logs', action: 'CreateWebhook', error: err, guild_id: server._id })
+
+            // Disable logs that uses the specified channelId when this error occurs:
+            // Maximum number of webhooks reached (15)
+            // Maximum number of webhooks per guild reached (1000)
+            if (err?.code === 30007 || err?.code === 30058) {
+                const eventsWithThisChannelId = Object.keys(server.moderation.logs.types).filter(
+                    (v: ServerModerationLogsTypeKey) => server.moderation.logs.types[v].channel_id === channelId
+                ) as ServerModerationLogsTypeKey[]
+
+                if (eventsWithThisChannelId.length > 0) {
+                    await self.db.servers.updateOne(
+                        { _id: server._id },
+                        {
+                            $set: Object.assign(
+                                {},
+                                ...eventsWithThisChannelId.map(v => {
+                                    return {
+                                        [`moderation.logs.types.${v}.active`]: false,
+                                        [`moderation.logs.types.${v}.channel_id`]: null
+                                    }
+                                })
+                            )
+                        }
+                    )
+                }
+            }
+
+            return null
         }
     }
 
-    if (!webhook) {
-        if (logWebhook) {
+    try {
+        return await webhook.send(message)
+    } catch (err) {
+        // Unknown Webhook
+        // See https://github.com/LacunaHub/LacunaBot/issues/190
+        if (err?.code === 10015) {
             await self.db.servers.updateOne(
-                { _id: logChannel.guildId },
+                { _id: server._id },
                 {
                     $pull: {
                         'moderation.logs.webhooks': {
-                            channel_id: logChannel.id
+                            channel_id: channelId
                         }
                     }
                 }
             )
         }
-
-        try {
-            webhook = await logChannel.createWebhook({
-                name: self.user.username,
-                avatar: self.user.displayAvatarURL(),
-                reason: 'Logs: No webhook for the logs'
-            })
-        } catch (err) {
-            await self.logger.handleError({ module: 'Logs', action: 'CreateWebhook', error: err, guild_id: logChannel.guildId })
-
-            return null
-        }
-
-        await self.db.servers.updateOne(
-            { _id: logChannel.guildId },
-            {
-                $push: {
-                    'moderation.logs.webhooks': {
-                        id: webhook.id,
-                        token: webhook.token,
-                        channel_id: webhook.channelId
-                    }
-                }
-            }
-        )
     }
 
-    return webhook
+    return null
 }
 
 export function isRateLimited(guildId: string, premium: boolean) {

@@ -1,71 +1,68 @@
-import { BillDocument } from '@lacunahub/lacuna-database-driver'
+import { SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@lacunahub/lacuna-database-driver'
 import { APIGuildMember } from 'discord.js'
-import { v4 as idv4 } from 'uuid'
-import { addDiamond } from '..'
+import { SubscriptionData, addDiamond } from '..'
 import database from '../../../../database'
 import { supportServerId } from '../../../../internals/utility/Constants'
 import DiscordUtils from '../../../utility/DiscordUtils'
-import { OrderData } from './PayPal'
+import { generateSnowflake } from '../../../utility/Snowflake'
 
 export class DiscordRolesCheckout {
-    public billId: string
-    public amount: OrderData['amount']
-    public custom_fields: OrderData['custom_fields']
+    public subscriptionId: string
+    public subscriberId: string
+    public productId: SubscriptionMetadataProduct
+    public refId: string
+    public type: SubscriptionType
     public roleIds: string[]
-    public billType: BillDocument['type']
-    public maxActiveBills: number
+    public maxActiveSubscriptions: number
 
-    constructor(data: OrderData, billType: BillDocument['type'], roleIds: string[], maxActiveBills?: number) {
-        this.billId = idv4()
+    constructor(data: SubscriptionData, subscriptionMethod: string, roleIds: string[], maxActiveSubscriptions?: number) {
+        this.subscriptionId = generateSnowflake()
 
-        this.billType = billType
+        this.subscriberId = data.subscriberId
 
-        this.amount = data.amount
+        this.productId = data.productId
 
-        this.custom_fields = data.custom_fields
+        this.refId = data.refId
+
+        this.type = SubscriptionType[subscriptionMethod]
 
         this.roleIds = roleIds
 
-        this.maxActiveBills = maxActiveBills ?? 1
+        this.maxActiveSubscriptions = maxActiveSubscriptions ?? 1
     }
 
     async create() {
-        const rolesMember = await isRolesMember(this.custom_fields.user_id, this.roleIds)
+        const rolesMember = await isRolesMember(this.subscriberId, this.roleIds)
 
         if (rolesMember) {
-            const activeBills = await database.bills.find({
-                'custom_fields.user_id': this.custom_fields.user_id,
-                type: this.billType,
-                'status.value': { $ne: 'REJECTED' }
+            const activeSubscriptions = await database.subscriptions.find({
+                subscriber_id: this.subscriberId,
+                type: [SubscriptionType.Patreon, SubscriptionType.Boosty].includes(this.type)
+                    ? { $in: [SubscriptionType.Patreon, SubscriptionType.Boosty] }
+                    : this.type,
+                status: { $ne: SubscriptionStatus.Cancelled }
             })
 
-            if (activeBills.length >= this.maxActiveBills) return 'MAX_ACTIVE_BILLS'
+            if (activeSubscriptions.length >= this.maxActiveSubscriptions) return 'MaxActiveSubscriptions'
 
-            const bill = await database.bills.create({
-                _id: this.billId,
-                type: this.billType,
-                amount: Number(this.amount.value),
-                currency: this.amount.currency,
-                status: {
-                    value: 'PAID',
-                    changed_timestamp: Date.now()
-                },
-                custom_fields: {
-                    type: this.custom_fields.type,
-                    reference_id: this.custom_fields.reference_id,
-                    user_id: this.custom_fields.user_id,
-                    tier: 0
-                },
-                comment: null,
-                creation_timestamp: Date.now()
-            } as any)
+            const subscription = await database.subscriptions.create({
+                _id: this.subscriptionId,
+                type: this.type,
+                status: SubscriptionStatus.Active,
+                subscriber_id: this.subscriberId,
+                metadata: {
+                    provider_external_id: null,
+                    product_id: this.productId,
+                    ref_id: this.refId
+                }
+            })
 
-            await addDiamond(bill)
+            await addDiamond(subscription)
 
-            return 'ROLES_MEMBER'
+            return 'RolesMember'
         }
 
-        return 'NO_ROLES'
+        return 'NoRoles'
     }
 }
 

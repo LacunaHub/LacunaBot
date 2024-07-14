@@ -3,6 +3,7 @@ import { authenticate } from '../../utility/Authentication'
 import { createRateLimit } from '../../utility/Utils'
 import handleGitHubWebhook, { verifyGitHubSignature } from './methods/HandleGitHubWebhook'
 import handleTelegramWebhook from './methods/HandleTelegramWebhook'
+import handleTopGGWebhook from './methods/HandleTopGGWebhook'
 import handleTwitchWebhook, { authenticateEventSub } from './methods/HandleTwitchWebhook'
 import handleYouTubeWebhook from './methods/HandleYouTubeWebhook'
 import handleYouTubeWebhookChallenge from './methods/HandleYouTubeWebhookChallenge'
@@ -20,5 +21,6 @@ router.get('/subscriptions/youtube/hubbub-webhook', handleYouTubeWebhookChalleng
 router.post('/subscriptions/youtube/hubbub-webhook', handleYouTubeWebhook)
 router.post('/subscriptions/telegram/webhook', handleTelegramWebhook)
 router.post('/webhooks/github', verifyGitHubSignature, handleGitHubWebhook)
+router.post('/webhooks/top-gg', handleTopGGWebhook)
 
 export default router

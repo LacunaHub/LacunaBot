@@ -1,6 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, EmbedBuilder, VoiceState } from 'discord.js'
-import { fetchLogWebhook, isRateLimited } from '..'
+import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
 export default async function (self: Lacuna, server: ServerDocument, state: VoiceState): Promise<boolean> {
@@ -15,25 +15,20 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
         const isOk = logChannel && logChannel.permissionsFor(state.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
-            const webhook = await fetchLogWebhook(self, logChannel, server.moderation.logs.webhooks)
-
-            if (!webhook) return false
-
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.VoiceConnection'))
                 .setDescription(
-                    t('Logs.VoiceConnectionTemplate', { username: `**${state.member.user.tag}**`, channel: `<#${state?.channelId ?? '1'}>` })
+                    t('Logs.VoiceConnectionTemplate', {
+                        username: `<@${state.id}> (${state.member.user.tag})`,
+                        channel: `<#${state?.channelId ?? '0'}>`
+                    })
                 )
-                .setFooter({ text: state.member.id })
+                .setFooter({ text: `UID: ${state.id}` })
                 .setTimestamp()
                 .setColor('#2FDF84')
 
             try {
-                await webhook.send({
-                    embeds: [embed],
-                    avatarURL: server.premium.available ? webhook.avatarURL() : self.user.avatarURL(),
-                    username: server.premium.available ? webhook.name : self.user.username
-                })
+                await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
                 await self.logger.handleError({ module: 'LogsVoiceConnect', action: 'SendMessageViaWebhook', error: err, guild_id: state.guild.id })
 

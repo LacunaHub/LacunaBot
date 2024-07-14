@@ -1,12 +1,10 @@
-import { ApplicationCommandOptionType, PermissionsBitField } from 'discord.js'
+import { ApplicationCommandOptionType } from 'discord.js'
+import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
 import slash from './slash'
 
-const name = __dirname.split(/\\/).pop().split('/').pop()
-
-export default {
-    slash,
-    name,
+const options: CommandOptions = {
     description: 'Commands.UnbanCommand.Description',
+    group: CommandGroup.Moderation,
     options: [
         {
             type: ApplicationCommandOptionType.String,
@@ -22,9 +20,9 @@ export default {
             required: false
         }
     ],
-    group: 'MODERATION',
-    permissions: {
-        self: new PermissionsBitField(['EmbedLinks', 'BanMembers']).toArray(),
-        user: new PermissionsBitField(['BanMembers']).toArray()
-    }
+    defaultMemberPermissions: ['BanMembers'],
+    selfPermissions: ['EmbedLinks', 'BanMembers'],
+    slashFn: slash
 }
+
+export default options
