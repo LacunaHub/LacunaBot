@@ -1,14 +1,9 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Context } from 'koa'
-import database from '../../../../database'
-import APIError from '../../../utility/APIError'
 
-export default async function downloadLogs(ctx: Context) {
-    const guildId = ctx.params.guild_id,
-        server = await database.servers.findOne({ _id: guildId })
-
-    if (!server || server.blocked) {
-        ctx.throw(404, new APIError(1003))
-    }
+export default async function getLogs(ctx: Context) {
+    const guildId: string = ctx.params.guildId,
+        server: ServerDocument = ctx.state.server
 
     const fileName = `${guildId}-${new Date().toISOString()}.log`
     const fileData = server.logs

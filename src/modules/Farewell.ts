@@ -38,19 +38,17 @@ async function saveNicknameAndRoles(self: Lacuna, server: ServerDocument, member
     if (member.user.bot) return false
 
     if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
-        let user = await self.db.users.findOne({ _id: member.id })
-
-        if (!user) {
-            user = await self.db.users.create({
-                _id: member.id,
+        const user = await self.db.users.fetch(
+            { _id: member.id },
+            {
                 user: {
                     username: member.user.username,
-                    discriminator: member.user.discriminator,
                     avatar: member.user.avatar,
-                    flags: member.user.flags
+                    flags: member.user.flags?.bitfield ?? 0,
+                    global_name: member.user.globalName
                 }
-            })
-        }
+            }
+        )
 
         const data = user?.restoring_data?.find?.(i => i.guild_id === member.guild.id)
 

@@ -777,42 +777,19 @@ export default class CustomCommand {
                             if (amount > INT32_MAX || amount < -INT32_MAX)
                                 amount = amount > INT32_MAX ? INT32_MAX : amount < -INT32_MAX ? -INT32_MAX : 0
 
-                            let user = await this.self.db.users.findOne({ _id: member.id })
-
-                            if (!user) {
-                                user = await this.self.db.users.create({
-                                    _id: member.id,
+                            const user = await this.self.db.users.fetch(
+                                { _id: member.id },
+                                {
                                     user: {
                                         username: member.user.username,
-                                        discriminator: member.user.discriminator,
                                         avatar: member.user.avatar,
-                                        flags: member.user.flags?.bitfield ?? 0
-                                    }
-                                } as any)
-                            }
-
-                            let wallet = user.activities.wallets.find(i => i.guild_id == this.interaction.guildId)
-
-                            if (!wallet) {
-                                wallet = {
-                                    guild_id: this.interaction.guildId,
-                                    currencies: [],
-                                    transactions: [],
-                                    activity: {
-                                        last_message_at: 0,
-                                        voice_connected_at: 0
+                                        flags: member.user.flags?.bitfield ?? 0,
+                                        global_name: member.user.globalName
                                     }
                                 }
-
-                                await this.self.db.users.updateOne(
-                                    { _id: member.id },
-                                    {
-                                        $push: { 'activities.wallets': wallet as never }
-                                    }
-                                )
-                            }
-
-                            const walletCurrency = wallet.currencies.find(i => i.id === currency.id)
+                            )
+                            const userWallet = await this.self.db.users.fetchWallet(user, this.interaction.guildId)
+                            const walletCurrency = userWallet.currencies.find(i => i.id === currency.id)
 
                             if (amount < 0 && (walletCurrency?.amount ?? 0) - Math.abs(amount) < 0) amount = -(walletCurrency?.amount ?? 0)
 
@@ -1085,42 +1062,19 @@ export default class CustomCommand {
 
                         if (amount > INT32_MAX || amount < -INT32_MAX) amount = amount > INT32_MAX ? INT32_MAX : amount < -INT32_MAX ? -INT32_MAX : 0
 
-                        let user = await this.self.db.users.findOne({ _id: member.id })
-
-                        if (!user) {
-                            user = await this.self.db.users.create({
-                                _id: member.id,
+                        const user = await this.self.db.users.fetch(
+                            { _id: member.id },
+                            {
                                 user: {
                                     username: member.user.username,
-                                    discriminator: member.user.discriminator,
                                     avatar: member.user.avatar,
-                                    flags: member.user.flags?.bitfield ?? 0
-                                }
-                            } as any)
-                        }
-
-                        let wallet = user.activities.wallets.find(i => i.guild_id == this.interaction.guildId)
-
-                        if (!wallet) {
-                            wallet = {
-                                guild_id: this.interaction.guildId,
-                                currencies: [],
-                                transactions: [],
-                                activity: {
-                                    last_message_at: 0,
-                                    voice_connected_at: 0
+                                    flags: member.user.flags?.bitfield ?? 0,
+                                    global_name: member.user.globalName
                                 }
                             }
-
-                            await this.self.db.users.updateOne(
-                                { _id: member.id },
-                                {
-                                    $push: { 'activities.wallets': wallet as never }
-                                }
-                            )
-                        }
-
-                        const walletCurrency = wallet.currencies.find(c => c.id === currency_id)
+                        )
+                        const userWallet = await this.self.db.users.fetchWallet(user, this.interaction.guildId)
+                        const walletCurrency = userWallet.currencies.find(c => c.id === currency_id)
 
                         if (amount < 0 && (walletCurrency?.amount ?? 0) - Math.abs(amount) < 0) amount = -(walletCurrency?.amount ?? 0)
 

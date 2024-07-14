@@ -35,19 +35,17 @@ export async function assignLevelAward(self: Lacuna, server: ServerDocument, int
 
     await interaction.deferReply({ ephemeral: true })
 
-    let user = await self.db.users.findOne({ _id: mention.id })
-
-    if (!user) {
-        user = await self.db.users.create({
-            _id: mention.id,
+    const user = await self.db.users.fetch(
+        { _id: mention.id },
+        {
             user: {
                 username: mention.user.username,
-                discriminator: mention.user.discriminator,
                 avatar: mention.user.avatar,
-                flags: mention.user.flags?.bitfield ?? 0
+                flags: mention.user.flags?.bitfield ?? 0,
+                global_name: mention.user.globalName
             }
-        } as any)
-    }
+        }
+    )
 
     let userLevel = user.activities.levels.find(v => v.guild_id === interaction.guildId)
     const awardLevel = +(award.conditions ? award.conditions.level : award.level) || 0,
@@ -175,44 +173,21 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     }
 
     await interaction.deferReply({ ephemeral: true })
-    let user = await self.db.users.findOne({ _id: mention.id })
-
-    if (!user) {
-        user = await self.db.users.create({
-            _id: mention.id,
+    const user = await self.db.users.fetch(
+        { _id: mention.id },
+        {
             user: {
                 username: mention.username,
-                discriminator: mention.discriminator,
                 avatar: mention.avatar,
                 flags: mention.flags?.bitfield ?? 0,
                 global_name: mention.globalName
             }
-        } as any)
-    }
-
-    let wallet = user.activities.wallets.find(i => i.guild_id === interaction.guildId)
-
-    if (!wallet) {
-        wallet = {
-            guild_id: interaction.guildId,
-            currencies: [],
-            transactions: [],
-            activity: {
-                last_message_at: 0,
-                voice_connected_at: 0
-            }
         }
-
-        await self.db.users.updateOne(
-            { _id: mention.id },
-            {
-                $push: { 'activities.wallets': wallet as never }
-            }
-        )
-    }
+    )
+    const userWallet = await self.db.users.fetchWallet(user, interaction.guildId)
 
     const currencyId = server.modules.economy.currencies.find(i => i.id === currency)?.id ?? 'DEFAULT'
-    const walletCurrency = wallet.currencies.find(i => i.id === currencyId)
+    const walletCurrency = userWallet.currencies.find(i => i.id === currencyId)
     const INT32_MAX = Math.pow(2, 31) - 1
 
     if (operation === 2) amount = Math.abs(amount)

@@ -10,22 +10,18 @@
 | 1011 | Unknown custom command                                           |
 | 1012 | Unknown interactive message                                      |
 | 1013 | Unknown interactive reaction                                     |
-| 1014 | Unknown Telegram subscription                                    |
-| 1015 | Unknown Twitch subscription                                      |
-| 1016 | Unknown YouTube subscription                                     |
-| 1017 | Unknown auto-voice                                               |
+| 1014 | Unknown social alert subscription                                |
+| 1017 | Unknown auto voice                                               |
 | 1018 | Unknown payment                                                  |
 | 1019 | Unknown payment tier                                             |
 | 1020 | Unknown payment method                                           |
 | 1021 | Unknown product                                                  |
 | 2001 | Server has no premium                                            |
-| 2002 | Automation is already exists                                     |
-| 2003 | Custom command is already exists                                 |
-| 2004 | Bot must be a guild member                                       |
-| 2005 | Telegram subscription is already exists                          |
-| 2006 | Twitch subscription is already exists                            |
-| 2007 | YouTube subscription is already exists                           |
-| 2008 | Auto-voice is already exists                                     |
+| 2002 | Automation already exists                                        |
+| 2003 | Custom command already exists                                    |
+| 2004 | Bot must be added to the server                                  |
+| 2005 | Social alert subscription already exists                         |
+| 2008 | Auto voice already exists                                        |
 | 2009 | Server already has premium                                       |
 | 3001 | Maximum number of custom commands reached                        |
 | 3002 | Maximum number of premium custom commands reached                |
@@ -33,18 +29,14 @@
 | 3004 | Maximum number of premium interactive messages reached           |
 | 3005 | Maximum number of interactive reactions reached                  |
 | 3006 | Maximum number of premium interactive reactions reached          |
-| 3007 | Maximum number of Telegram subscriptions reached                 |
-| 3008 | Maximum number of premium Telegram subscriptions reached         |
-| 3009 | Maximum number of Twitch subscriptions reached                   |
-| 3010 | Maximum number of premium Twitch subscriptions reached           |
-| 3011 | Maximum number of YouTube subscriptions reached                  |
-| 3012 | Maximum number of premium YouTube subscriptions reached          |
-| 3013 | Maximum number of auto-voices reached                            |
-| 3014 | Maximum number of premium auto-voices reached                    |
+| 3007 | Maximum number of social alert subscriptions reached             |
+| 3008 | Maximum number of premium social alert subscriptions reached     |
+| 3013 | Maximum number of auto voices reached                            |
+| 3014 | Maximum number of premium auto voices reached                    |
 | 3015 | Maximum number of premium servers reached                        |
 | 4001 | Unauthorized                                                     |
 | 4002 | Missing access                                                   |
-| 4003 | A custom command must contain components                         |
+| 4003 | Custom command must contain at least one component               |
 | 4004 | Custom command name must be unique                               |
 | 4005 | An interactive message cannot be empty                           |
 | 4006 | An interactive message must have components and/or reactions     |
@@ -53,19 +45,15 @@
 | 4009 | You have created too many payments lately                        |
 | 4010 | Invalid automation                                               |
 | 4011 | Invalid custom command                                           |
-| 4012 | Invalid method of modifying custom command                       |
-| 4013 | Invalid method of modifying interactive message                  |
-| 4014 | Invalid method of modifying interactive reaction                 |
-| 4015 | Invalid method of modifying Telegram subscription                |
-| 4016 | Invalid method of modifying Twitch subscription                  |
-| 4017 | Invalid method of modifying YouTube subscription                 |
-| 4018 | Invalid method of modifying auto-voice                           |
 | 4019 | You are not a Diamond Subscriber                                 |
 | 4020 | You are not a Server Booster on our support server               |
 | 4021 | Invalid payment                                                  |
 | 4022 | The support server has the maximum allowed number of boosts (21) |
 | 4023 | You don't have enough tokens                                     |
 | 4024 | You are not authorized to use this payment method                |
+| 4025 | You are not authorized to view this leaderboard                  |
+| 4026 | Levels are disabled on this server                               |
+| 4027 | Economy is disabled on this server                               |
 | 5001 | Cannot get a list of guilds                                      |
 | 5002 | Cannot create a custom command                                   |
 | 5003 | Cannot update a custom command                                   |

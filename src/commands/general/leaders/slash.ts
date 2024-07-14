@@ -144,7 +144,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             .setCustomId('forward')
             .setStyle(ButtonStyle.Secondary)
             .setLabel(t('Common.NextPage'))
-            .setDisabled(fields.length == 1)
+            .setDisabled(fields.length == 1),
+        new ButtonBuilder()
+            .setStyle(ButtonStyle.Link)
+            .setLabel(t('Pages.GuildPage.Leaders.Leaderboard'))
+            .setURL(`${process.env.LCN_WEBSITE_URL}/guilds/${interaction.guildId}/leaders`)
     )
 
     const field = fields[page]

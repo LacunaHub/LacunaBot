@@ -136,40 +136,18 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
         return false
     }
 
-    let mention_user = await self.db.users.findOne({ _id: mention.id })
-
-    if (!mention_user) {
-        mention_user = await self.db.users.create({
-            _id: mention.id,
+    const mentionUser = await self.db.users.fetch(
+        { _id: mention.id },
+        {
             user: {
                 username: mention.user.username,
-                discriminator: mention.user.discriminator,
                 avatar: mention.user.avatar,
-                flags: mention.user.flags?.bitfield ?? 0
-            }
-        } as any)
-    }
-
-    let mention_wallet = mention_user.activities.wallets.find(i => i.guild_id == interaction.guildId)
-
-    if (!mention_wallet) {
-        mention_wallet = {
-            guild_id: interaction.guildId,
-            currencies: [],
-            transactions: [],
-            activity: {
-                last_message_at: 0,
-                voice_connected_at: 0
+                flags: mention.user.flags?.bitfield ?? 0,
+                global_name: mention.user.globalName
             }
         }
-
-        await self.db.users.updateOne(
-            { _id: mention.id },
-            {
-                $push: { 'activities.wallets': mention_wallet as never }
-            }
-        )
-    }
+    )
+    const mentionWallet = await self.db.users.fetchWallet(mentionUser, interaction.guildId)
 
     await self.db.users.updateOne(
         { _id: interaction.user.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } },
@@ -195,7 +173,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
         { arrayFilters: [{ 'guild.guild_id': interaction.guildId }, { 'currency.id': currency_id }] }
     )
 
-    if (mention_wallet.currencies.some(c => c.id == currency_id)) {
+    if (mentionWallet.currencies.some(c => c.id === currency_id)) {
         await self.db.users.updateOne(
             { _id: mention.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } },
             {
