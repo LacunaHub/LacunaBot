@@ -543,8 +543,11 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          return interfaces.guilds
-            .updateCustomCommands(guild._id, { method: mode.value.toLowerCase(), data: command.value })
+          return (
+            mode.value === 'CREATE'
+              ? interfaces.guilds.createCustomCommand(guild._id, command.value)
+              : interfaces.guilds.updateCustomCommand(guild._id, command.value.id, command.value)
+          )
             .then(response => {
               onDialogOK({ mode: mode.value, command: response.data })
             })
@@ -576,7 +579,7 @@ export default defineComponent({
         confirmLoading.value = true
 
         return interfaces.guilds
-          .updateCustomCommands(guild._id, { method: 'delete', data: command.value })
+          .deleteCustomCommand(guild._id, command.value.id)
           .then(() => {
             onDialogOK({ mode: 'DELETE', command: command.value })
           })

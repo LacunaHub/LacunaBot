@@ -1,5 +1,5 @@
 import { route } from 'quasar/wrappers'
-import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
+import { createMemoryHistory, createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import routes from './routes'
 
 /*
@@ -15,8 +15,8 @@ export default route(function (/* { store, ssrContext } */) {
     const createHistory = process.env.SERVER
         ? createMemoryHistory
         : process.env.VUE_ROUTER_MODE === 'history'
-        ? createWebHistory
-        : createWebHashHistory
+          ? createWebHistory
+          : createWebHashHistory
 
     const Router = createRouter({
         scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -25,7 +25,24 @@ export default route(function (/* { store, ssrContext } */) {
         // Leave this as is and make changes in quasar.conf.js instead!
         // quasar.conf.js -> build -> vueRouterMode
         // quasar.conf.js -> build -> publicPath
-        history: createHistory(process.env.VUE_ROUTER_BASE)
+        history: createHistory(process.env.VUE_ROUTER_BASE),
+
+        scrollBehavior(to, from, savedPosition) {
+            // Exists when Browser's back/forward pressed
+            if (savedPosition) {
+                return savedPosition
+                // For anchors
+            } else if (to.hash) {
+                return { selector: to.hash }
+                // By changing queries we are still in the same component,
+                // so "from.path" === "to.path" (new query changes just "to.fullPath", but not "to.path").
+            } else if (from.path === to.path) {
+                return {}
+            }
+
+            // Scroll to top
+            return { x: 0, y: 0 }
+        }
     })
 
     return Router

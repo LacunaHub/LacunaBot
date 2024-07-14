@@ -68,30 +68,6 @@
               <q-item class="q-py-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
-                    {{ $t('Pages.StatePage.Clusters') }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-list padding>
-                <q-item v-for="n in 2" :key="n">
-                  <q-item-section>
-                    <q-skeleton type="text" width="75px" height="100%" />
-                  </q-item-section>
-
-                  <q-item-section side>
-                    <q-skeleton type="text" width="100px" height="100%" />
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-card>
-          </div>
-
-          <div class="col-12">
-            <q-card class="bg-dark-1" flat>
-              <q-item class="q-py-md">
-                <q-item-section>
-                  <q-item-label class="text-subtitle1">
                     {{ $t('Pages.StatePage.Shards') }}
                   </q-item-label>
                 </q-item-section>
@@ -235,86 +211,14 @@
               <q-item class="q-py-md">
                 <q-item-section>
                   <q-item-label class="text-subtitle1">
-                    {{ $t('Pages.StatePage.Clusters') }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-list padding>
-                <q-expansion-item v-for="server in state.servers" :key="server.hostname" expand-separator>
-                  <template #header>
-                    <q-item-section>
-                      <q-item-label>{{ server.hostname }}</q-item-label>
-                    </q-item-section>
-
-                    <q-item-section side>
-                      {{ $numbro(server.uptime).format({ output: 'time' }) }}
-                    </q-item-section>
-                  </template>
-
-                  <q-card class="bg-dark-1" flat>
-                    <q-card-section>
-                      <div class="row q-col-gutter-md">
-                        <div class="col-6">
-                          <q-linear-progress
-                            class="rounded-borders"
-                            track-color="dark-2"
-                            :value="server.cpu_usage / 100"
-                            size="xl"
-                          >
-                            <div class="absolute-center text-white">{{ server.cpu_usage }}%</div>
-                            <q-tooltip
-                              class="bg-black text-body2"
-                              anchor="top middle"
-                              self="bottom middle"
-                              transition-show=""
-                              transition-hide=""
-                            >
-                              {{ $t('Pages.StatePage.ClusterCPUUsage') }}
-                            </q-tooltip>
-                          </q-linear-progress>
-                        </div>
-
-                        <div class="col-6">
-                          <q-linear-progress
-                            class="rounded-borders"
-                            track-color="dark-2"
-                            :value="server.memory_usage / 100"
-                            size="xl"
-                          >
-                            <div class="absolute-center text-white">{{ server.memory_usage }}%</div>
-                            <q-tooltip
-                              class="bg-black text-body2"
-                              anchor="top middle"
-                              self="bottom middle"
-                              transition-show=""
-                              transition-hide=""
-                            >
-                              {{ $t('Pages.StatePage.ClusterMemoryUsage') }}
-                            </q-tooltip>
-                          </q-linear-progress>
-                        </div>
-                      </div>
-                    </q-card-section>
-                  </q-card>
-                </q-expansion-item>
-              </q-list>
-            </q-card>
-          </div>
-
-          <div class="col-12">
-            <q-card class="bg-dark-1" flat>
-              <q-item class="q-py-md">
-                <q-item-section>
-                  <q-item-label class="text-subtitle1">
                     {{ $t('Pages.StatePage.Shards') }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
 
               <q-card-section>
-                <div class="row q-col-gutter-md">
-                  <div v-for="shard in state.shards" :key="shard.cluster_id" class="col-shrink">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 16px">
+                  <div v-for="shard in state.shards" :key="shard.cluster_id" class="cursor-help">
                     <q-avatar :class="`${getShardColor(shard.latency)}`" rounded>
                       <span class="text-body1">#{{ shard.cluster_id }}</span>
 
@@ -357,14 +261,15 @@
                   :key="player.id"
                   :class="`${player.connected ? '' : 'bg-negative'}`"
                 >
-                  <q-item-section avatar>
+                  <q-item-section>
                     <q-item-label class="text-uppercase">
                       {{ player.id }}
+                      <span class="text--secondary">{{ player.players.playing }}/{{ player.players.total }}</span>
                     </q-item-label>
                   </q-item-section>
 
-                  <q-item-section>
-                    <q-linear-progress class="rounded-borders" track-color="dark-2" :value="player.cpu_load" size="xl">
+                  <q-item-section side>
+                    <!-- <q-linear-progress class="rounded-borders" track-color="dark-2" :value="player.cpu_load" size="xl">
                       <div class="absolute-center text-white">{{ Math.round(player.cpu_load * 100) }}%</div>
                       <q-tooltip
                         class="bg-black text-body2"
@@ -375,11 +280,27 @@
                       >
                         {{ $t('Pages.StatePage.PlayerCPULoad') }}
                       </q-tooltip>
-                    </q-linear-progress>
-                  </q-item-section>
+                    </q-linear-progress> -->
 
-                  <q-item-section class="text-uppercase" side>
-                    {{ player.players.playing }}/{{ player.players.total }}
+                    <q-circular-progress
+                      class="cursor-help ellipsis"
+                      show-value
+                      :value="player.cpu_load"
+                      color="primary"
+                      track-color="dark-2"
+                      size="xl"
+                    >
+                      {{ Math.round(player.cpu_load * 100) }}%
+                      <q-tooltip
+                        class="bg-black text-body2"
+                        anchor="top middle"
+                        self="bottom middle"
+                        transition-show=""
+                        transition-hide=""
+                      >
+                        {{ $t('Pages.StatePage.PlayerCPULoad') }}
+                      </q-tooltip>
+                    </q-circular-progress>
                   </q-item-section>
                 </q-item>
               </q-list>

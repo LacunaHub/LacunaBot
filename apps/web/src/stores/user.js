@@ -5,21 +5,19 @@ export const useUserStore = defineStore('user', {
     state: () => ({
         id: Cookies.get('user_id'),
         name: Cookies.get('user_username'),
-        discriminator: Cookies.get('user_discriminator'),
+        global_name: Cookies.get('user_global_name'),
         avatar: Cookies.get('user_avatar'),
         access_token: Cookies.get('access_token'),
         flags: 0,
-        _guilds: []
+        _guilds: [],
+        tokens: 0
     }),
 
     getters: {
         avatarURL(state) {
             return state.avatar && state.id
                 ? `https://cdn.discordapp.com/avatars/${state.id}/${state.avatar}.png`
-                : `https://cdn.discordapp.com/embed/avatars/${(state.discriminator ?? '0001') % 5}.png`
-        },
-        tag(state) {
-            return `${state.name}#${state.discriminator}`
+                : `https://cdn.discordapp.com/embed/avatars/${'0001' % 5}.png`
         },
         guilds(state) {
             return state._guilds
@@ -69,7 +67,7 @@ export const useUserStore = defineStore('user', {
 
     actions: {
         logout() {
-            const cookiesKeys = ['user_id', 'user_username', 'user_discriminator', 'user_avatar', 'access_token']
+            const cookiesKeys = ['user_id', 'user_username', 'user_global_name', 'user_avatar', 'access_token']
             const domain = window.location.hostname.replace(/^www\./, '')
 
             for (const key of cookiesKeys) {
@@ -77,16 +75,6 @@ export const useUserStore = defineStore('user', {
             }
 
             window.location.pathname = '/'
-        },
-        refreshCookies(data) {
-            const cookiesKeys = ['id', 'username', 'discriminator', 'avatar']
-            const domain = window.location.hostname.replace(/^www\./, '')
-
-            for (const key of Object.keys(data).filter(i => cookiesKeys.includes(i))) {
-                if (data[key] !== this[key]) {
-                    Cookies.set(`user_${key}`, data[key], { domain, path: '/' })
-                }
-            }
         }
     }
 })

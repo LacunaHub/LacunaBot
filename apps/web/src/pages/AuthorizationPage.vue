@@ -12,6 +12,18 @@
 
       <div class="q-pa-md">
         <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+          <q-item v-if="updateRoleConnections" :disable="true" tag="label">
+            <q-item-section side>
+              <q-checkbox :model-value="updateRoleConnections" dense></q-checkbox>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>
+                {{ $t('Pages.AuthorizationPage.UpdateYourRoleConnections') }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item tag="label">
             <q-item-section side>
               <q-checkbox v-model="shareEmail" dense @update:model-value="onUpdateShareEmail"></q-checkbox>
@@ -51,8 +63,14 @@
               unelevated
               no-caps
               color="primary"
+              push
               @click="onConfirm"
-            ></q-btn>
+              :loading="confirmLoading"
+            >
+              <template #loading>
+                <q-spinner-dots color="white"></q-spinner-dots>
+              </template>
+            </q-btn>
           </div>
         </div>
       </q-card-section>
@@ -62,13 +80,21 @@
 
 <script setup>
 import { useQuasar } from 'quasar'
-import { onMounted, ref } from 'vue'
+import { interfaces } from 'src/boot/axios'
+import { useUserStore } from 'src/stores/user'
+import { handleAxiosError, openPopupWindow } from 'src/utils/Utils'
+import { ref } from 'vue'
 import { event } from 'vue-gtag'
+import { useRouter } from 'vue-router'
 
-const $q = useQuasar()
+const $q = useQuasar(),
+  router = useRouter(),
+  userStore = useUserStore()
 
+const confirmLoading = ref(false)
 const shareEmail = ref(!!($q.localStorage.getItem('auth-share-email') ?? true)),
-  joinSupportServer = ref(!!$q.localStorage.getItem('auth-join-support-server'))
+  joinSupportServer = ref(!!$q.localStorage.getItem('auth-join-support-server')),
+  updateRoleConnections = location.search.includes('urc=true')
 
 const onUpdateShareEmail = value => {
     $q.localStorage.set('auth-share-email', value)
@@ -77,15 +103,89 @@ const onUpdateShareEmail = value => {
     $q.localStorage.set('auth-join-support-server', value)
   }
 
-const onConfirm = () => {
+const onConfirm = async () => {
   const query = new URLSearchParams()
 
   query.append('share_email', shareEmail.value)
   query.append('join_support_server', joinSupportServer.value)
+  query.append('update_role_connections', updateRoleConnections)
+  query.append('redirect_uri', location.origin)
 
+  confirmLoading.value = true
   event('login', { method: 'Discord' })
-  window.location.href = `${process.env.API}/authorize?${query}`
-}
 
-onMounted(() => {})
+  try {
+    const { data: auth } = await interfaces.auth.getAuthURI(query)
+
+    const popup = openPopupWindow({ url: auth.uri, title: 'Authorization', w: 520, h: 720 })
+    let popupAutoClosed = false
+
+    const listener = async event => {
+      window.onmessage = null
+      popup.close()
+      popupAutoClosed = true
+
+      try {
+        const { data: exCode } = await interfaces.auth.exchangeCode(event.data.code, query.get('redirect_uri'))
+        const cookieOptions = { maxAge: exCode.expires_in * 1000, httpOnly: false, path: '/' }
+
+        if (event.data.state !== auth.state) throw new Error('Invalid state')
+
+        $q.cookies.set('access_token', exCode.access_token, cookieOptions)
+        $q.cookies.set('refresh_token', exCode.refresh_token, { httpOnly: false })
+        $q.cookies.set('user_id', exCode.user.id, cookieOptions)
+        $q.cookies.set('user_username', exCode.user.username, cookieOptions)
+        $q.cookies.set('user_global_name', exCode.user.global_name, cookieOptions)
+
+        if (exCode.user.avatar) $q.cookies.set('user_avatar', exCode.user.avatar, cookieOptions)
+
+        userStore.$patch({
+          id: exCode.user.id,
+          name: exCode.user.username,
+          global_name: exCode.user.global_name,
+          avatar: exCode.user.avatar,
+          access_token: exCode.access_token
+        })
+        router.push({ path: '/@me/guilds' })
+      } catch (err) {
+        const error = handleAxiosError(err)
+
+        $q.notify({
+          message: error.message,
+          classes: 'q-notification-custom',
+          color: 'black',
+          icon: 'error',
+          iconColor: 'negative',
+          timeout: 5000
+        })
+
+        confirmLoading.value = false
+      }
+    }
+
+    window.onmessage = listener
+
+    const interval = setInterval(() => {
+      if (popup.closed) {
+        window.onmessage = null
+        clearInterval(interval)
+
+        if (!popupAutoClosed) confirmLoading.value = false
+      }
+    }, 1000)
+  } catch (err) {
+    const error = handleAxiosError(err)
+
+    $q.notify({
+      message: error.message,
+      classes: 'q-notification-custom',
+      color: 'black',
+      icon: 'error',
+      iconColor: 'negative',
+      timeout: 5000
+    })
+
+    confirmLoading.value = false
+  }
+}
 </script>

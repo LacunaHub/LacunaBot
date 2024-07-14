@@ -42,8 +42,11 @@
 </template>
 
 <script setup>
+import { useQuasar } from 'quasar'
+import { interfaces } from 'src/boot/axios'
 import GuildCardMini from 'src/components/GuildCardMini.vue'
 import { useUserStore } from 'src/stores/user'
+import { handleAxiosError, openPopupWindow } from 'src/utils/Utils'
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -54,7 +57,8 @@ const props = defineProps({
   }
 })
 
-const router = useRouter()
+const $q = useQuasar(),
+  router = useRouter()
 
 const pageLoading = ref(true)
 const user = useUserStore()
@@ -63,36 +67,46 @@ const gotoGuild = async (gid, joined) => {
   if (joined) {
     await router.push(`/guilds/${gid}/settings`)
   } else {
-    const route = router.resolve({
-      path: '/authorize/add',
-      query: {
-        scope: 'bot applications.commands',
-        redirect_uri: window.location.origin,
-        response_type: 'code',
-        guild_id: gid,
-        disable_guild_select: true
-      }
-    })
-    const popup = window.open(route.href, `Add to ${gid}`, 'width=400,height=620,top=5')
-    const popupOpenTimestamp = Date.now()
+    const query = new URLSearchParams()
+    query.append('scope', 'bot applications.commands')
+    query.append('redirect_uri', location.origin)
+    query.append('response_type', 'code')
+    query.append('guild_id', gid)
+    query.append('disable_guild_select', true)
 
-    const listener = async event => {
-      if (event.data.guild_id) {
-        await router.push(`/guilds/${gid}/settings`)
-      }
+    try {
+      const { data: authBot } = await interfaces.auth.getBotAuthURI(query)
 
-      window.onmessage = null
-      popup.close()
-    }
-
-    window.onmessage = listener
-
-    const interval = setInterval(() => {
-      if (Date.now() - popupOpenTimestamp > 300000 || popup.closed) {
+      const popup = openPopupWindow({ url: authBot.uri, title: `Add bot to ${gid}`, w: 520, h: 720 })
+      const listener = async event => {
         window.onmessage = null
-        clearInterval(interval)
+        popup.close()
+
+        if (event.data.guild_id) {
+          await router.push(`/guilds/${event.data.guild_id}/settings`)
+        }
       }
-    }, 1000)
+
+      window.onmessage = listener
+
+      const interval = setInterval(() => {
+        if (popup.closed) {
+          window.onmessage = null
+          clearInterval(interval)
+        }
+      }, 1000)
+    } catch (err) {
+      const error = handleAxiosError(err)
+
+      $q.notify({
+        message: error.message,
+        classes: 'q-notification-custom',
+        color: 'black',
+        icon: 'error',
+        iconColor: 'negative',
+        timeout: 5000
+      })
+    }
   }
 }
 

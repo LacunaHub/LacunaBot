@@ -9,22 +9,43 @@ import { boot } from 'quasar/wrappers'
 // "export default () => {}" function below (which runs individually
 // for each client)
 const api = axios.create({ baseURL: process.env.API })
+const configureRequest = () => {
+    const accessToken = Cookies.get('access_token')
+
+    if (accessToken)
+        return {
+            headers: {
+                Authorization: accessToken
+            }
+        }
+
+    return null
+}
 
 const interfaces = {
+    auth: {
+        getAuthURI(query) {
+            return api.get(`/auth?${query}`)
+        },
+        getBotAuthURI(query) {
+            return api.get(`/auth/bot?${query}`)
+        },
+        exchangeCode(code, redirectURI) {
+            return api.post('/auth/exchange-code', {
+                code,
+                redirect_uri: redirectURI
+            })
+        }
+    },
     common: {
         getPlugins() {
-            return api.get(`/common/plugins`, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get(`/common/plugins`, configureRequest())
         },
         getPlugin(pluginId, guildId) {
-            return api.get(`/common/plugins/${pluginId}?guildId=${guildId}`, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get(`/common/plugins/${pluginId}?guildId=${guildId}`, configureRequest())
+        },
+        getProducts() {
+            return api.get('/common/products')
         },
         getReleaseNotes() {
             return api.get('/common/release-notes')
@@ -37,161 +58,132 @@ const interfaces = {
         }
     },
     guilds: {
+        get(gid) {
+            return api.get(`/guilds/${gid}`)
+        },
+        getLeaders(gid, query) {
+            return api.get(`/guilds/${gid}/leaders?${query}`, configureRequest())
+        },
+        getLogs(guildId) {
+            return api.get(`/guilds/${guildId}/logs`, configureRequest())
+        },
         getSettings(gid) {
-            return api.get(`/guilds/${gid}/settings`, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get(`/guilds/${gid}/settings`, configureRequest())
         },
         updateSettings(gid, options) {
-            return api.post(`/guilds/${gid}/settings`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.post(`/guilds/${gid}/settings`, options.data, configureRequest())
         },
-        updateApplicationCommands(gid) {
-            return api.post(`/guilds/${gid}/application-commands`, null, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+        createAutoVoice(guildId, data) {
+            return api.post(`/guilds/${guildId}/settings/auto-voices`, data, configureRequest())
         },
-        updateCustomCommands(gid, options) {
-            return api.post(`/guilds/${gid}/custom-commands/${options.method}`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+        deleteAutoVoice(guildId, avId) {
+            return api.delete(`/guilds/${guildId}/settings/auto-voices/${avId}`, configureRequest())
         },
-        updateTelegramSubscriptions(gid, options) {
-            return api.post(`/guilds/${gid}/subscriptions/telegram/${options.method}`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+        updateAutoVoice(guildId, avId, data) {
+            return api.patch(`/guilds/${guildId}/settings/auto-voices/${avId}`, data, configureRequest())
         },
-        updateTwitchSubscriptions(gid, options) {
-            return api.post(`/guilds/${gid}/subscriptions/twitch/${options.method}`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+        createCustomCommand(guildId, data) {
+            return api.post(`/guilds/${guildId}/settings/custom-commands`, data, configureRequest())
         },
-        updateYouTubeSubscriptions(gid, options) {
-            return api.post(`/guilds/${gid}/subscriptions/youtube/${options.method}`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+        deleteCustomCommand(guildId, commandId) {
+            return api.delete(`/guilds/${guildId}/settings/custom-commands/${commandId}`, configureRequest())
         },
-        updateAutoVoices(gid, options) {
-            return api.post(`/guilds/${gid}/autovoices/${options.method}`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+        updateCustomCommand(guildId, commandId, data) {
+            return api.patch(`/guilds/${guildId}/settings/custom-commands/${commandId}`, data, configureRequest())
         },
-        updateInteractiveMessages(gid, options) {
-            return api.post(`/guilds/${gid}/interactive-messages/${options.method}`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+        createInteractiveMessage(guildId, data) {
+            return api.post(`/guilds/${guildId}/settings/interactive-messages`, data, configureRequest())
         },
-        updateInteractiveReactions(gid, options) {
-            return api.post(`/guilds/${gid}/reactions/${options.method}`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+        deleteInteractiveMessage(guildId, imId) {
+            return api.delete(`/guilds/${guildId}/settings/interactive-messages/${imId}`, configureRequest())
+        },
+        updateInteractiveMessage(guildId, imId, data) {
+            return api.patch(`/guilds/${guildId}/settings/interactive-messages/${imId}`, data, configureRequest())
+        },
+        createInteractiveReaction(guildId, data) {
+            return api.post(`/guilds/${guildId}/settings/interactive-reactions`, data, configureRequest())
+        },
+        deleteInteractiveReaction(guildId, irId) {
+            return api.delete(`/guilds/${guildId}/settings/interactive-reactions/${irId}`, configureRequest())
+        },
+        updateInteractiveReaction(guildId, irId, data) {
+            return api.patch(`/guilds/${guildId}/settings/interactive-reactions/${irId}`, data, configureRequest())
+        },
+        createTelegramSubscription(guildId, data) {
+            return api.post(`/guilds/${guildId}/settings/social-alerts/telegram`, data, configureRequest())
+        },
+        createTwitchSubscription(guildId, data) {
+            return api.post(`/guilds/${guildId}/settings/social-alerts/twitch`, data, configureRequest())
+        },
+        createYouTubeSubscription(guildId, data) {
+            return api.post(`/guilds/${guildId}/settings/social-alerts/youtube`, data, configureRequest())
+        },
+        deleteTelegramSubscription(guildId, channelId) {
+            return api.delete(`/guilds/${guildId}/settings/social-alerts/telegram/${channelId}`, configureRequest())
+        },
+        deleteTwitchSubscription(guildId, channelId) {
+            return api.delete(`/guilds/${guildId}/settings/social-alerts/twitch/${channelId}`, configureRequest())
+        },
+        deleteYouTubeSubscription(guildId, channelId) {
+            return api.delete(`/guilds/${guildId}/settings/social-alerts/youtube/${channelId}`, configureRequest())
+        },
+        updateTelegramSubscription(guildId, channelId, data) {
+            return api.patch(
+                `/guilds/${guildId}/settings/social-alerts/telegram/${channelId}`,
+                data,
+                configureRequest()
+            )
+        },
+        updateTwitchSubscription(guildId, channelId, data) {
+            return api.patch(`/guilds/${guildId}/settings/social-alerts/twitch/${channelId}`, data, configureRequest())
+        },
+        updateYouTubeSubscription(guildId, channelId, data) {
+            return api.patch(`/guilds/${guildId}/settings/social-alerts/youtube/${channelId}`, data, configureRequest())
         },
         transferDiamond(guildId, toGuildId) {
-            return api.post(`/guilds/${guildId}/transfer-diamond/${toGuildId}`, null, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
-        },
-        downloadLogs(guildId) {
-            return api.post(`/guilds/${guildId}/download-logs`, null, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.post(`/guilds/${guildId}/transfer-diamond/${toGuildId}`, null, configureRequest())
         }
     },
 
-    payments: {
-        create(options) {
-            return api.post(`/payments`, options.data, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+    billing: {
+        createPayment(options) {
+            return api.post(`/billing/payments`, options.data, configureRequest())
+        },
+        createSubscription(options) {
+            return api.post(`/billing/subscriptions`, options.data, configureRequest())
         }
     },
 
     subscriptions: {
         searchTelegramChannels(gid, options) {
-            return api.get(`/subscriptions/telegram/search?gid=${gid}&q=${encodeURI(options.query)}`, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get(
+                `/subscriptions/telegram/search?gid=${gid}&q=${encodeURI(options.query)}`,
+                configureRequest()
+            )
         },
         searchTwitchChannels(gid, options) {
-            return api.get(`/subscriptions/twitch/search?gid=${gid}&q=${encodeURI(options.query)}`, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get(`/subscriptions/twitch/search?gid=${gid}&q=${encodeURI(options.query)}`, configureRequest())
         },
         searchYouTubeChannels(gid, options) {
-            return api.get(`/subscriptions/youtube/search?gid=${gid}&q=${encodeURI(options.query)}`, {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get(`/subscriptions/youtube/search?gid=${gid}&q=${encodeURI(options.query)}`, configureRequest())
         }
     },
 
     users: {
         getMe() {
-            return api.get('/users/@me', {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get('/users/@me', configureRequest())
         },
         getBills() {
-            return api.get('/users/@me/bills', {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get('/users/@me/bills', configureRequest())
         },
         getActivities() {
-            return api.get('/users/@me/activities', {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get('/users/@me/activities', configureRequest())
         },
         getDiamondGuilds() {
-            return api.get('/users/@me/diamond-guilds', {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get('/users/@me/diamond-guilds', configureRequest())
         },
         getPatrons() {
-            return api.get('/users/patrons', {
-                headers: {
-                    Authorization: Cookies.get('access_token')
-                }
-            })
+            return api.get('/users/patrons', configureRequest())
         }
     }
 }

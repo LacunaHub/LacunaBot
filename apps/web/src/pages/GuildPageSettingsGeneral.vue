@@ -59,18 +59,20 @@
 
             <div class="col-12">
               <div>
-                {{ $t('Pages.GuildPage.GeneralSettings.ExpertRoles') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.BotExperts') }}
               </div>
               <div class="text--secondary">
-                {{ $t('Pages.GuildPage.GeneralSettings.ExpertRolesDescription') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.BotExpertsDescription') }}
               </div>
 
               <q-select
-                v-model="guild.server.bot_expert_roles"
+                v-model="guild.bot_experts"
                 :options="guild.roles"
                 option-label="name"
                 option-value="id"
+                use-input
                 use-chips
+                new-value-mode="add-unique"
                 class="q-pt-sm"
                 multiple
                 filled

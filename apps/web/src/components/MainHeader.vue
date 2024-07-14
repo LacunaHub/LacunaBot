@@ -104,7 +104,7 @@
 
       <q-separator class="gt-sm" spaced="lg" inset vertical></q-separator>
 
-      <q-btn v-if="!user.access_token" class="q-px-sm" flat to="/authorize">
+      <q-btn v-if="!user.access_token" class="q-px-sm" flat to="/auth">
         {{ $t('Components.Header.Login') }}
         <q-icon class="q-ml-sm" name="r_login"></q-icon>
       </q-btn>

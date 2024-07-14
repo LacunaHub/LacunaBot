@@ -63,11 +63,11 @@
 
                   <q-item
                     clickable
-                    :to="`/guilds/${guildId}/sphere`"
+                    :to="`/guilds/${guildId}/settings/web-page`"
                     active-class="nav-item--active"
                     style="display: none"
                   >
-                    <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
+                    <q-item-section class="text-subtitle1">Web page</q-item-section>
 
                     <q-item-section avatar side>
                       <q-avatar square size="24px">
@@ -135,11 +135,11 @@
 
                   <q-item
                     clickable
-                    :to="`/guilds/${guildId}/sphere`"
+                    :to="`/guilds/${guildId}/settings/web-page`"
                     active-class="nav-item--active"
                     style="display: none"
                   >
-                    <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
+                    <q-item-section class="text-subtitle1">Web page</q-item-section>
 
                     <q-item-section avatar side>
                       <q-avatar square size="24px">
@@ -268,16 +268,15 @@ const guildClone = computed(() => {
         _id: guild._id,
         prefix: guild.prefix,
         locale: guild.locale,
-        server: guild.server,
+        bot_experts: guild.bot_experts,
         commands: guild.commands,
         moderation: guild.moderation,
-        modules: guild.modules
+        modules: guild.modules,
+        web_page: guild.web_page
       })
     )
   }),
-  hasDiamondDiscount = computed(() => {
-    return guild.prices.some(i => Object.values(i.discounts).some(i => i !== 0))
-  })
+  hasDiamondDiscount = ref(false)
 
 const navItems = [
   { name: t('Pages.GuildPage.NavNames.General'), path: 'settings', icon: controlPanelImg },
@@ -291,7 +290,7 @@ const navItems = [
     path: 'settings/moderation',
     icon: shieldImg
   },
-  { name: t('Pages.GuildPage.NavNames.CustomBehavior'), path: 'settings/custom-behavior', icon: boxImg, new: true },
+  { name: t('Pages.GuildPage.NavNames.CustomBehavior'), path: 'settings/custom-behavior', icon: boxImg },
   {
     name: t('Pages.GuildPage.NavNames.Activities'),
     path: 'settings/activities',
@@ -307,7 +306,7 @@ const navItems = [
     path: 'settings/voice-channels',
     icon: karaokeImg
   },
-  { name: t('Pages.GuildPage.NavNames.Utility'), path: 'settings/utility', icon: layersImg, new: true }
+  { name: t('Pages.GuildPage.NavNames.Utility'), path: 'settings/utility', icon: layersImg }
 ]
 
 useMeta(() => {
@@ -344,7 +343,7 @@ const getSettings = async () => {
       const { status } = err.response
 
       if (status === 401) {
-        router.push('/authorize')
+        router.push('/auth')
       } else if (status === 403) {
         router.push('/forbidden')
       } else {
@@ -404,7 +403,7 @@ const openLacunaDiamondDialog = () => {
 
 const downloadLogs = async () => {
   try {
-    const { data } = await interfaces.guilds.downloadLogs(guild._id)
+    const { data } = await interfaces.guilds.getLogs(guild._id)
     const href = URL.createObjectURL(new Blob([data.data])),
       link = document.createElement('a')
 

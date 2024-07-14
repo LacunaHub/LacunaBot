@@ -64,7 +64,7 @@
       row-key="id"
       :columns="tableColumns"
       :pagination="{ rowsPerPage: 10 }"
-      :rows-per-page-options="[]"
+      :rows-per-page-options="[10, 25, 50, 100]"
       :loading="pageLoading"
     >
       <template #body-cell-status="props">
@@ -100,7 +100,7 @@ const pageLoading = ref(true)
 
 const bills = ref([]),
   tableColumns = [
-    { name: 'date', align: 'left', label: t('Common.Date'), field: 'date', sortable: true },
+    { name: 'date', align: 'left', label: t('Common.Date'), field: 'created_at', sortable: true },
     { name: 'id', align: 'left', label: t('Pages.DashboardPage.BillId'), field: 'id' },
     { name: 'amount', align: 'left', label: t('Pages.DashboardPage.BillAmount'), field: 'amount', sortable: true },
     {
@@ -110,7 +110,7 @@ const bills = ref([]),
       field: 'status',
       sortable: true
     },
-    { name: 'description', align: 'left', label: t('Common.Description'), field: 'description', sortable: true }
+    { name: 'description', align: 'left', label: t('Common.Description'), field: 'comment' }
   ]
 
 const getBills = async () => {
@@ -120,11 +120,8 @@ const getBills = async () => {
 
     bills.value = data.map(i => {
       return {
-        id: i.external_id ?? i._id,
-        amount: `${i.amount} ${i.currency}`,
-        status: i.status.value,
-        date: DateTime.fromMillis(i.creation_timestamp).toFormat('D'),
-        description: `${i.custom_fields.type}:${i.custom_fields.reference_id}`
+        ...i,
+        created_at: DateTime.fromMillis(i.created_at).toLocaleString(DateTime.DATETIME_MED)
       }
     })
 
@@ -145,8 +142,8 @@ const getBills = async () => {
   return false
 }
 const getStatusTextColor = status => {
-  if (status === 'PAID') return 'text-positive'
-  if (status === 'WAITING') return 'text-warning'
+  if (status === 'Paid') return 'text-positive'
+  if (status === 'Unpaid') return 'text-warning'
 
   return 'text-negative'
 }

@@ -86,7 +86,7 @@ const getMe = async () => {
     return true
   } catch (err) {
     if (err.response?.status === 401) {
-      await router.push({ path: '/authorize' })
+      await router.push({ path: '/auth' })
     } else {
       const error = handleAxiosError(err)
 

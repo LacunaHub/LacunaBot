@@ -280,8 +280,11 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          return interfaces.guilds
-            .updateYouTubeSubscriptions(guild._id, { method: mode.value.toLowerCase(), data: youtube.value })
+          return (
+            mode.value === 'CREATE'
+              ? interfaces.guilds.createYouTubeSubscription(guild._id, youtube.value)
+              : interfaces.guilds.updateYouTubeSubscription(guild._id, youtube.value.channel_id, youtube.value)
+          )
             .then(response => {
               onDialogOK({ mode: mode.value, youtube: response.data })
             })
@@ -313,7 +316,7 @@ export default defineComponent({
         confirmLoading.value = true
 
         return interfaces.guilds
-          .updateYouTubeSubscriptions(guild._id, { method: 'delete', data: youtube.value })
+          .deleteYouTubeSubscription(guild._id, youtube.value.channel_id)
           .then(() => {
             onDialogOK({ mode: 'DELETE', youtube: youtube.value })
           })

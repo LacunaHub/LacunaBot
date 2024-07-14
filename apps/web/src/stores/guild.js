@@ -8,12 +8,12 @@ export const useGuildStore = defineStore('guild', {
         locale: null,
         prefix: null,
         premium: {},
-        server: {},
+        bot_experts: [],
         commands: {},
         guild: {},
         moderation: {},
         modules: {},
-        prices: [],
+        web_page: {},
         change_log: []
     }),
 

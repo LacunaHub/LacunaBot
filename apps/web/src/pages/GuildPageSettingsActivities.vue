@@ -55,6 +55,18 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
+
+            <q-item tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="guild.web_page.public_leaderboard" dense></q-checkbox>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('Pages.GuildPage.Activities.PublicLeaderboard') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
           </q-list>
         </div>
 

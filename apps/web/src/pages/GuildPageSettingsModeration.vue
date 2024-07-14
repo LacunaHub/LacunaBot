@@ -351,6 +351,20 @@
               {{ $t('Pages.GuildPage.Moderation.AutoMod') }}
             </q-item-label>
             <q-item-label class="text--secondary">
+              <q-badge class="q-mr-xs cursor-help" color="negative">
+                <span>DEPRECATED</span>
+
+                <q-tooltip
+                  class="bg-black text-body2"
+                  anchor="top middle"
+                  self="bottom middle"
+                  transition-show=""
+                  transition-hide=""
+                >
+                  {{ $t('Pages.GuildPage.Moderation.AutoModDeprecated') }}
+                </q-tooltip>
+              </q-badge>
+
               {{ $t('Pages.GuildPage.Moderation.AutoModDescription') }}
             </q-item-label>
           </q-item-section>
