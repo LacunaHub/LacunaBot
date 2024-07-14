@@ -13,6 +13,7 @@ export const useGuildStore = defineStore('guild', {
         guild: {},
         moderation: {},
         modules: {},
+        web_page: {},
         change_log: []
     }),
 

@@ -63,11 +63,11 @@
 
                   <q-item
                     clickable
-                    :to="`/guilds/${guildId}/sphere`"
+                    :to="`/guilds/${guildId}/settings/web-page`"
                     active-class="nav-item--active"
                     style="display: none"
                   >
-                    <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
+                    <q-item-section class="text-subtitle1">Web page</q-item-section>
 
                     <q-item-section avatar side>
                       <q-avatar square size="24px">
@@ -135,11 +135,11 @@
 
                   <q-item
                     clickable
-                    :to="`/guilds/${guildId}/sphere`"
+                    :to="`/guilds/${guildId}/settings/web-page`"
                     active-class="nav-item--active"
                     style="display: none"
                   >
-                    <q-item-section class="text-subtitle1">Lacuna Sphere</q-item-section>
+                    <q-item-section class="text-subtitle1">Web page</q-item-section>
 
                     <q-item-section avatar side>
                       <q-avatar square size="24px">
@@ -271,7 +271,8 @@ const guildClone = computed(() => {
         bot_experts: guild.bot_experts,
         commands: guild.commands,
         moderation: guild.moderation,
-        modules: guild.modules
+        modules: guild.modules,
+        web_page: guild.web_page
       })
     )
   }),
@@ -402,7 +403,7 @@ const openLacunaDiamondDialog = () => {
 
 const downloadLogs = async () => {
   try {
-    const { data } = await interfaces.guilds.downloadLogs(guild._id)
+    const { data } = await interfaces.guilds.getLogs(guild._id)
     const href = URL.createObjectURL(new Blob([data.data])),
       link = document.createElement('a')
 

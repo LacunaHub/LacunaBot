@@ -182,8 +182,8 @@ export function resolveCustomCommandJSON(data) {
                             option.type === 3
                                 ? String(choice.value)
                                 : isNaN(Number(choice.value))
-                                ? 1
-                                : Number(choice.value)
+                                  ? 1
+                                  : Number(choice.value)
                     })
                 }
             }
@@ -487,10 +487,12 @@ export function getLocale() {
     return (localStorage.getItem('locale') ?? navigator.languages?.[0] ?? navigator.language ?? 'en').split('-')[0]
 }
 
+export function getDefaultAvatarURL(id) {
+    return `https://cdn.discordapp.com/embed/avatars/${(BigInt(id || '0') >> 22n) % 6n}.png`
+}
+
 export function getGuildIconURL(guildId, icon) {
-    return guildId && icon
-        ? `https://cdn.discordapp.com/icons/${guildId}/${icon}.png`
-        : `https://cdn.discordapp.com/embed/avatars/${'0001' % 5}.png`
+    return guildId && icon ? `https://cdn.discordapp.com/icons/${guildId}/${icon}.png` : getDefaultAvatarURL(guildId)
 }
 
 export function handleAxiosError(error) {
@@ -534,13 +536,13 @@ export function openPopupWindow({ url, title, w, h }) {
     const width = window.innerWidth
         ? window.innerWidth
         : document.documentElement.clientWidth
-        ? document.documentElement.clientWidth
-        : screen.width
+          ? document.documentElement.clientWidth
+          : screen.width
     const height = window.innerHeight
         ? window.innerHeight
         : document.documentElement.clientHeight
-        ? document.documentElement.clientHeight
-        : screen.height
+          ? document.documentElement.clientHeight
+          : screen.height
 
     const systemZoom = width / window.screen.availWidth
     const left = (width - w) / 2 / systemZoom + dualScreenLeft

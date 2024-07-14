@@ -360,6 +360,16 @@ export const localeStringsMap = {
         lg: 'Components.ImageEditor.BorderRadiuses.LG',
         xl: 'Components.ImageEditor.BorderRadiuses.XL',
         circle: 'Components.ImageEditor.BorderRadiuses.Circle'
+    },
+    leadersSort: {
+        Level: 'Commands.LeadersCommand.Options.Sorting.ChoiceLevel',
+        MessageCount: 'Commands.LeadersCommand.Options.Sorting.ChoiceMessageCount',
+        VoiceTime: 'Commands.LeadersCommand.Options.Sorting.ChoiceVoiceTime',
+        Currencies: 'Commands.LeadersCommand.Options.Sorting.ChoiceBalance'
+    },
+    sortOrders: {
+        Asc: 'Commands.LeadersCommand.Options.Order.ChoiceAsc',
+        Desc: 'Commands.LeadersCommand.Options.Order.ChoiceDesc'
     }
 }
 

@@ -384,8 +384,11 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          return interfaces.guilds
-            .updateInteractiveMessages(guild._id, { method: mode.value.toLowerCase(), data: im.value })
+          return (
+            mode.value === 'CREATE'
+              ? interfaces.guilds.createInteractiveMessage(guild._id, im.value)
+              : interfaces.guilds.updateInteractiveMessage(guild._id, im.value.id, im.value)
+          )
             .then(response => {
               onDialogOK({ mode: mode.value, im: response.data })
             })
@@ -417,7 +420,7 @@ export default defineComponent({
         confirmLoading.value = true
 
         return interfaces.guilds
-          .updateInteractiveMessages(guild._id, { method: 'delete', data: im.value })
+          .deleteInteractiveMessage(guild._id, im.value.id)
           .then(() => {
             onDialogOK({ mode: 'DELETE', im: im.value })
           })

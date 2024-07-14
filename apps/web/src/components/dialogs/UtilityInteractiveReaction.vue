@@ -370,8 +370,11 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          return interfaces.guilds
-            .updateInteractiveReactions(guild._id, { method: mode.value.toLowerCase(), data: ir.value })
+          return (
+            mode.value === 'CREATE'
+              ? interfaces.guilds.createInteractiveReaction(guild._id, ir.value)
+              : interfaces.guilds.updateInteractiveReaction(guild._id, ir.value.id, ir.value)
+          )
             .then(response => {
               onDialogOK({ mode: mode.value, ir: response.data })
             })
@@ -403,7 +406,7 @@ export default defineComponent({
         confirmLoading.value = true
 
         return interfaces.guilds
-          .updateInteractiveReactions(guild._id, { method: 'delete', data: ir.value })
+          .deleteInteractiveReaction(guild._id, ir.value.id)
           .then(() => {
             onDialogOK({ mode: 'DELETE', ir: ir.value })
           })

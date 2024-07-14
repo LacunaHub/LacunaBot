@@ -457,8 +457,11 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          return interfaces.guilds
-            .updateAutoVoices(guild._id, { method: mode.value.toLowerCase(), data: autoVoice.value })
+          return (
+            mode.value === 'CREATE'
+              ? interfaces.guilds.createAutoVoice(guild._id, autoVoice.value)
+              : interfaces.guilds.updateAutoVoice(guild._id, autoVoice.value.channel_id, autoVoice.value)
+          )
             .then(response => {
               onDialogOK({ mode: mode.value, autoVoice: response.data })
             })
@@ -490,7 +493,7 @@ export default defineComponent({
         confirmLoading.value = true
 
         return interfaces.guilds
-          .updateAutoVoices(guild._id, { method: 'delete', data: autoVoice.value })
+          .deleteAutoVoice(guild._id, autoVoice.value.channel_id)
           .then(() => {
             onDialogOK({ mode: 'DELETE', autoVoice: autoVoice.value })
           })

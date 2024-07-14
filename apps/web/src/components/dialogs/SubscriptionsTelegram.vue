@@ -346,8 +346,11 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          return interfaces.guilds
-            .updateTelegramSubscriptions(guild._id, { method: mode.value.toLowerCase(), data: telegram.value })
+          return (
+            mode.value === 'CREATE'
+              ? interfaces.guilds.createTelegramSubscription(guild._id, telegram.value)
+              : interfaces.guilds.updateTelegramSubscription(guild._id, telegram.value.channel_id, telegram.value)
+          )
             .then(response => {
               onDialogOK({ mode: mode.value, telegram: response.data })
             })
@@ -379,7 +382,7 @@ export default defineComponent({
         confirmLoading.value = true
 
         return interfaces.guilds
-          .updateTelegramSubscriptions(guild._id, { method: 'delete', data: telegram.value })
+          .deleteTelegramSubscription(guild._id, telegram.value.channel_id)
           .then(() => {
             onDialogOK({ mode: 'DELETE', telegram: telegram.value })
           })

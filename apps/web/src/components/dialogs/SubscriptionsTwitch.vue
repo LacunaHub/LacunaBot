@@ -293,8 +293,11 @@ export default defineComponent({
         if (isValid.value) {
           confirmLoading.value = true
 
-          return interfaces.guilds
-            .updateTwitchSubscriptions(guild._id, { method: mode.value.toLowerCase(), data: twitch.value })
+          return (
+            mode.value === 'CREATE'
+              ? interfaces.guilds.createTwitchSubscription(guild._id, twitch.value)
+              : interfaces.guilds.updateTwitchSubscription(guild._id, twitch.value.broadcaster_id, twitch.value)
+          )
             .then(response => {
               onDialogOK({ mode: mode.value, twitch: response.data })
             })
@@ -326,7 +329,7 @@ export default defineComponent({
         confirmLoading.value = true
 
         return interfaces.guilds
-          .updateTwitchSubscriptions(guild._id, { method: 'delete', data: twitch.value })
+          .deleteTwitchSubscription(guild._id, twitch.value.broadcaster_id)
           .then(() => {
             onDialogOK({ mode: 'DELETE', twitch: twitch.value })
           })

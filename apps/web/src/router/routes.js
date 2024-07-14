@@ -14,6 +14,14 @@ const routes = [
                 ]
             },
             {
+                path: 'guilds/:guild_id',
+                component: () => import('src/pages/GuildPage.vue'),
+                children: [
+                    { path: '', component: () => import('src/pages/GuildPageAbout.vue') },
+                    { path: 'leaders', component: () => import('src/pages/GuildPageLeaders.vue') }
+                ]
+            },
+            {
                 path: 'guilds/:guild_id/settings',
                 component: () => import('src/pages/GuildPageSettings.vue'),
                 children: [

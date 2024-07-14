@@ -59,10 +59,10 @@
 
             <div class="col-12">
               <div>
-                {{ $t('Pages.GuildPage.GeneralSettings.ExpertRoles') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.BotExperts') }}
               </div>
               <div class="text--secondary">
-                {{ $t('Pages.GuildPage.GeneralSettings.ExpertRolesDescription') }}
+                {{ $t('Pages.GuildPage.GeneralSettings.BotExpertsDescription') }}
               </div>
 
               <q-select
