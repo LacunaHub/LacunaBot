@@ -7,40 +7,24 @@ import { hasRestrictedPermissions } from './Levels'
 export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message) {
     if (!server.modules.economy.active || !server.modules.economy.currencies.length) return false
 
-    let user = await self.db.users.findOne({ _id: message.author.id })
-
-    if (!user) {
-        user = await self.db.users.create({
-            _id: message.author.id,
+    const user = await self.db.users.fetch(
+        { _id: message.author.id },
+        {
             user: {
                 username: message.author.username,
-                discriminator: message.author.discriminator,
                 avatar: message.author.avatar,
-                flags: message.author.flags?.bitfield ?? 0
-            }
-        } as any)
-    }
-
-    let wallet = user.activities.wallets.find(i => i.guild_id == message.guildId)
-
-    if (!wallet) {
-        wallet = {
-            guild_id: message.guildId,
-            currencies: [],
-            transactions: [],
-            activity: {
-                last_message_at: 0,
-                voice_connected_at: 0
+                flags: message.author.flags?.bitfield ?? 0,
+                global_name: message.author.globalName
             }
         }
-
-        await self.db.users.updateOne(
-            { _id: message.author.id },
-            {
-                $push: { 'activities.wallets': wallet as never }
-            }
-        )
-    }
+    )
+    const userWallet = await self.db.users.fetchWallet(user, message.guildId)
+    await self.db.users.fetchServerProfile(user, server._id, {
+        accent_color: message.member.displayColor,
+        avatar: message.member.avatar,
+        banner: null,
+        nickname: message.member.nickname
+    })
 
     for (const currency of server.modules.economy.currencies) {
         const hasRestrictions = hasRestrictedPermissions({
@@ -56,7 +40,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 
         if (
             currency.income.messages.rate_limit_per_user &&
-            Date.now() - wallet.activity.last_message_at < currency.income.messages.rate_limit_per_user * 1000
+            Date.now() - userWallet.activity.last_message_at < currency.income.messages.rate_limit_per_user * 1000
         )
             continue
 
@@ -84,7 +68,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 
         amount *= multiplier || 1
 
-        if (wallet.currencies.some(c => c.id == currency.id)) {
+        if (userWallet.currencies.some(c => c.id === currency.id)) {
             await self.db.users.updateOne(
                 { _id: message.author.id, 'activities.wallets': { $elemMatch: { guild_id: message.guildId, 'currencies.id': currency.id } } },
                 {
@@ -130,42 +114,27 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
     if (members.size < 2) return false
 
     for (const [, member] of members) {
-        let user = await self.db.users.findOne({ _id: member.id })
-
-        if (!user) {
-            user = await self.db.users.create({
-                _id: member.id,
+        const user = await self.db.users.fetch(
+            { _id: member.id },
+            {
                 user: {
                     username: member.user.username,
-                    discriminator: member.user.discriminator,
                     avatar: member.user.avatar,
-                    flags: member.user.flags?.bitfield ?? 0
-                }
-            } as any)
-        }
-
-        let wallet = user.activities.wallets.find(i => i.guild_id == member.guild.id)
-
-        if (!wallet) {
-            wallet = {
-                guild_id: member.guild.id,
-                currencies: [],
-                transactions: [],
-                activity: {
-                    last_message_at: 0,
-                    voice_connected_at: 0
+                    flags: member.user.flags?.bitfield ?? 0,
+                    global_name: member.user.globalName
                 }
             }
+        )
 
-            await self.db.users.updateOne(
-                { _id: member.id },
-                {
-                    $push: { 'activities.wallets': wallet as never }
-                }
-            )
-        }
+        const userWallet = await self.db.users.fetchWallet(user, server._id)
+        await self.db.users.fetchServerProfile(user, server._id, {
+            accent_color: member.displayColor,
+            avatar: member.avatar,
+            banner: null,
+            nickname: member.nickname
+        })
 
-        if (!wallet.activity.voice_connected_at || Date.now() - wallet.activity.voice_connected_at > 36_000_000) {
+        if (!userWallet.activity.voice_connected_at || Date.now() - userWallet.activity.voice_connected_at > 36_000_000) {
             await self.db.users.updateOne(
                 { _id: member.id, 'activities.wallets.guild_id': member.guild.id },
                 {
@@ -273,49 +242,30 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
 }
 
 export async function purchaseItem(item: ServerModulesEconomyStoreItem, self: Lacuna, guild: Guild, member: GuildMember) {
-    let user = await self.db.users.findOne({ _id: member.id })
-
-    if (!user) {
-        user = await self.db.users.create({
-            _id: guild.id,
+    const user = await self.db.users.fetch(
+        { _id: member.id },
+        {
             user: {
                 username: member.user.username,
-                discriminator: member.user.discriminator,
                 avatar: member.user.avatar,
-                flags: member.user.flags?.bitfield ?? 0
-            }
-        } as any)
-    }
-
-    let wallet = user.activities.wallets.find(i => i.guild_id == guild.id)
-
-    if (!wallet) {
-        wallet = {
-            guild_id: guild.id,
-            currencies: [],
-            transactions: [],
-            activity: {
-                last_message_at: 0,
-                voice_connected_at: 0
+                flags: member.user.flags?.bitfield ?? 0,
+                global_name: member.user.globalName
             }
         }
+    )
 
-        await self.db.users.updateOne(
-            { _id: member.id },
-            {
-                $push: { 'activities.wallets': wallet as never }
-            }
-        )
-    }
-
+    const userWallet = await self.db.users.fetchWallet(user, guild.id)
     const measures = { MINUTES: 60, HOURS: 3600, DAYS: 86400 }
 
-    if (!wallet.currencies.find(c => c.id == item.currency_id) || wallet.currencies.find(c => c.id == item.currency_id).amount < item.purchase_price)
+    if (
+        !userWallet.currencies.find(c => c.id === item.currency_id) ||
+        userWallet.currencies.find(c => c.id === item.currency_id).amount < item.purchase_price
+    )
         return 'INSUFFICIENT_FUNDS'
 
-    if (wallet.transactions.some(t => t.type == 'PURCHASE' && t.details == `${item.id}:${item.references.join(',')}`)) {
+    if (userWallet.transactions.some(t => t.type == 'PURCHASE' && t.details === `${item.id}:${item.references.join(',')}`)) {
         if (item.options.includes('TEMPORARY_REFERENCES')) {
-            const transaction = wallet.transactions.find(t => t.type == 'PURCHASE' && t.details == `${item.id}:${item.references.join(',')}`)
+            const transaction = userWallet.transactions.find(t => t.type === 'PURCHASE' && t.details === `${item.id}:${item.references.join(',')}`)
 
             const not_yet = (Date.now() - transaction.timestamp) / 1000 < item.references_duration.value * measures[item.references_duration.measure]
 

@@ -35,11 +35,10 @@ export async function authenticate(ctx: Context, next: Next): Promise<void> {
 
 export async function checkPermissions(ctx: Context, next: Next): Promise<void> {
     const accessToken = ctx.request.headers.authorization
-    const guildId: string = ctx.params.guild_id
+    const guildId: string = ctx.params.guildId
     const currentUser: UserState = ctx.state.user
 
     let currentUserGuilds: RESTAPIPartialCurrentUserGuild[]
-
     try {
         currentUserGuilds = await oauth2.getUserGuilds(accessToken)
     } catch (err) {}
@@ -88,6 +87,41 @@ export async function isBotExpert(guildId: string, userId: string): Promise<bool
     }
 
     return false
+}
+
+export async function identify(ctx: Context, next: Next) {
+    const accessToken = ctx.request.headers.authorization
+    if (!accessToken) return await next()
+
+    let currentUser: APIUser
+
+    try {
+        currentUser = await oauth2.getUser(accessToken)
+    } catch (err) {}
+
+    if (!currentUser) {
+        ctx.throw(403, new APIError(1001))
+    }
+
+    ctx.state.user = {
+        id: currentUser.id,
+        username: currentUser.username,
+        global_name: currentUser.global_name,
+        avatar: currentUser.avatar,
+        flags: currentUser.flags
+    }
+
+    await next()
+}
+
+export async function isGuildMember(guildId: string, userId: string) {
+    let member: APIGuildMember
+
+    try {
+        member = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildMember(guildId, userId))) as any
+    } catch (err) {}
+
+    return !!member
 }
 
 export interface UserState {

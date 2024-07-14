@@ -66,19 +66,17 @@ export default async (
 
     await interaction.deferReply({ ephemeral: true })
 
-    let mentionUser = await self.db.users.findOne({ _id: mention.id })
-
-    if (!mentionUser) {
-        mentionUser = await self.db.users.create({
-            _id: mention.id,
+    const mentionUser = await self.db.users.fetch(
+        { _id: mention.id },
+        {
             user: {
                 username: mention.user.username,
-                discriminator: mention.user.discriminator,
                 avatar: mention.user.avatar,
-                flags: mention.user.flags
+                flags: mention.user.flags?.bitfield ?? 0,
+                global_name: mention.user.globalName
             }
-        } as any)
-    }
+        }
+    )
 
     const report = mentionUser.reports.find(i => i.sender_id === interaction.user.id)
 

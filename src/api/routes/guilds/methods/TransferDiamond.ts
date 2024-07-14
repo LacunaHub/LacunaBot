@@ -1,4 +1,4 @@
-import { PaymentDocument, SubscriptionDocument } from '@lacunahub/lacuna-database-driver'
+import { PaymentDocument, ServerDocument, SubscriptionDocument } from '@lacunahub/lacuna-database-driver'
 import { RESTAPIPartialCurrentUserGuild } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
@@ -8,8 +8,8 @@ import APIError from '../../../utility/APIError'
 import { oauth2 } from '../../../utility/DiscordOAuth2'
 
 export default async function transferDiamond(ctx: Context) {
-    const guildId = ctx.params.guild_id,
-        toGuildId = ctx.params.to_guild_id
+    const guildId = ctx.params.guildId,
+        targetGuildId = ctx.params.targetGuildId
 
     let userGuilds: RESTAPIPartialCurrentUserGuild[] = []
 
@@ -19,15 +19,13 @@ export default async function transferDiamond(ctx: Context) {
         ctx.throw(400, new APIError(5001))
     }
 
-    const isGuildOwner = userGuilds.filter(i => [guildId, toGuildId].includes(i.id)).every(i => i.owner)
+    const isGuildOwner = userGuilds.filter(i => [guildId, targetGuildId].includes(i.id)).every(i => i.owner)
 
     if (!isGuildOwner) {
         ctx.throw(403, new APIError(4002))
     }
 
-    const server = await database.servers.findOne({ _id: guildId })
-
-    if (!server || server.blocked) ctx.throw(404, new APIError(1003))
+    const server: ServerDocument = ctx.state.server
     if (!server.premium.available || !server.premium.charged_via) ctx.throw(402, new APIError(2001))
 
     const [sBillType, sBillId] = server.premium.charged_via?.split(':') ?? []
@@ -43,7 +41,7 @@ export default async function transferDiamond(ctx: Context) {
         ctx.throw(400, new APIError(1018))
     }
 
-    const toServer = await database.servers.findOne({ _id: toGuildId })
+    const toServer = await database.servers.findOne({ _id: targetGuildId })
 
     if (!toServer || toServer.blocked) ctx.throw(404, new APIError(1003))
     if (toServer.premium.available) ctx.throw(404, new APIError(2009))
@@ -64,7 +62,7 @@ export default async function transferDiamond(ctx: Context) {
             { _id: bill._id },
             {
                 $set: {
-                    'metadata.ref_id': toGuildId
+                    'metadata.ref_id': targetGuildId
                 }
             }
         )
@@ -73,13 +71,13 @@ export default async function transferDiamond(ctx: Context) {
             { _id: bill._id },
             {
                 $set: {
-                    'metadata.ref_id': toGuildId
+                    'metadata.ref_id': targetGuildId
                 }
             }
         )
     }
 
-    bill.metadata.ref_id = toGuildId
+    bill.metadata.ref_id = targetGuildId
     const diamondGuild = diamondGuilds.get(guildId)
 
     if (diamondGuild) {

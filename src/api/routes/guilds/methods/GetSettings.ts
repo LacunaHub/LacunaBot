@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     APIApplicationCommand,
     APIEmoji,
@@ -16,13 +17,9 @@ import APIError from '../../../utility/APIError'
 import DiscordUtils from '../../../utility/DiscordUtils'
 
 export default async function getSettings(ctx: Context) {
-    const guildId: string = ctx.params.guild_id,
+    const guildId: string = ctx.params.guildId,
         guild: RESTAPIPartialCurrentUserGuild = ctx.state.guild
-    const server = await database.servers.findOne({ _id: guildId })
-
-    if (!server || server.blocked) {
-        ctx.throw(404, new APIError(1003))
-    }
+    const server: ServerDocument = ctx.state.server
 
     let selfMember: APIGuildMember
 
@@ -157,6 +154,7 @@ export default async function getSettings(ctx: Context) {
             automation: server.modules.automation,
             guild_image_rotation: server.modules.guild_image_rotation
         },
+        web_page: server.web_page,
         change_log: server.change_log.reverse()
     }
 }
