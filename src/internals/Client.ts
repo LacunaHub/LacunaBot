@@ -1,4 +1,5 @@
 import { ActivityType, Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
+import { keyvRedis } from '.'
 import Lacuna from './Lacuna'
 
 const { version } = require('../../package.json')
@@ -52,7 +53,7 @@ const client = new Lacuna({
     rest: {
         rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5,
         store: {
-            uri: process.env.LCN_REDIS_URI
+            store: keyvRedis
         }
     },
     sweepers: {
