@@ -1,6 +1,4 @@
-import { RequestManagerOptions } from '@lacunahub/letsfrag'
 import { ActivityType, Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
-import fetch from 'node-fetch'
 import Lacuna from './Lacuna'
 
 const { version } = require('../../package.json')
@@ -53,7 +51,6 @@ const client = new Lacuna({
     },
     rest: {
         rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5,
-        makeRequest: fetch as unknown as RequestManagerOptions['makeRequest'],
         store: {
             uri: process.env.LCN_REDIS_URI
         }

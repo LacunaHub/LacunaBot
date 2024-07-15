@@ -1,11 +1,9 @@
-import { RequestManager, RequestManagerOptions } from '@lacunahub/letsfrag'
+import { RequestManager } from '@lacunahub/letsfrag'
 import { APIRole, Routes } from 'discord.js'
-import fetch from 'node-fetch'
 import Logger from '../../internals/Logger'
 
 const rest = new RequestManager({
     rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5,
-    makeRequest: fetch as unknown as RequestManagerOptions['makeRequest'],
     store: {
         uri: process.env.LCN_REDIS_URI,
         hashesNamespace: 'rqm.hashes',
