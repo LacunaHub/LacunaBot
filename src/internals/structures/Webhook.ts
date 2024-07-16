@@ -1,5 +1,6 @@
 import { RequestManager } from '@lacunahub/letsfrag'
 import { REST, WebhookClient, WebhookClientData, WebhookClientOptions } from 'discord.js'
+import { redis } from '../../database'
 
 export class Webhook extends WebhookClient {
     // @ts-ignore
@@ -13,10 +14,10 @@ export class Webhook extends WebhookClient {
         if (useRequestManager) {
             this.rest = new RequestManager({
                 ...options?.rest,
-                store: { uri: process.env.LCN_REDIS_URI }
+                store: { store: redis }
             })
         } else {
-            this.rest = new REST(options.rest)
+            this.rest = new REST(options?.rest)
         }
     }
 }

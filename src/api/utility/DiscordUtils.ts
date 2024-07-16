@@ -1,13 +1,12 @@
 import { RequestManager } from '@lacunahub/letsfrag'
 import { APIRole, Routes } from 'discord.js'
+import { redis } from '../../database'
 import Logger from '../../internals/Logger'
 
 const rest = new RequestManager({
     rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5,
     store: {
-        uri: process.env.LCN_REDIS_URI,
-        hashesNamespace: 'rqm.hashes',
-        handlersNamespace: 'rqm.handlers'
+        store: redis
     }
 })
 
