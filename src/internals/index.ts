@@ -1,11 +1,9 @@
-import KeyvRedis from '@keyv/redis'
 import { ClusterManager } from '@lacunahub/letsfrag'
 import { mem } from 'node-os-utils'
 import logger from './Logger'
 
 const clusterCount = Math.round(mem.totalMem() / (1024 * 1024 * 1024))
 
-const keyvRedis = new KeyvRedis(process.env.LCN_REDIS_URI)
 const clusterManager = new ClusterManager(`${__dirname}/Client.js`, {
     server: {
         host: process.env.LCN_SERVER_HOST,
@@ -26,4 +24,4 @@ clusterManager.on('ready', manager => logger.info(`[ClusterManager] Manager with
 
 clusterManager.spawn()
 
-export { clusterManager, keyvRedis }
+export { clusterManager }
