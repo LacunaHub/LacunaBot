@@ -1,3 +1,4 @@
+import KeyvRedis from '@keyv/redis'
 import { Database } from '@lacunahub/lacuna-database-driver'
 
 export default new Database({
@@ -15,3 +16,5 @@ export default new Database({
         }
     }
 })
+
+export const redis = new KeyvRedis(process.env.LCN_REDIS_URI)
