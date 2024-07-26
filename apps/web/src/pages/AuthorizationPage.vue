@@ -85,11 +85,13 @@ import { useUserStore } from 'src/stores/user'
 import { handleAxiosError, openPopupWindow } from 'src/utils/Utils'
 import { ref } from 'vue'
 import { event } from 'vue-gtag'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 const $q = useQuasar(),
   router = useRouter(),
-  userStore = useUserStore()
+  userStore = useUserStore(),
+  i18n = useI18n()
 
 const confirmLoading = ref(false)
 const shareEmail = ref(!!($q.localStorage.getItem('auth-share-email') ?? true)),
@@ -116,9 +118,25 @@ const onConfirm = async () => {
 
   try {
     const { data: auth } = await interfaces.auth.getAuthURI(query)
+    /** @type Window */
+    let popup,
+      popupAutoClosed = false
 
-    const popup = openPopupWindow({ url: auth.uri, title: 'Authorization', w: 520, h: 720 })
-    let popupAutoClosed = false
+    try {
+      popup = openPopupWindow({ url: auth.uri, title: 'Authorization', w: 520, h: 720 })
+    } catch (err) {
+      $q.notify({
+        message: i18n.t('Pages.AuthorizationPage.CannotCreatePopupWindow', { domain: location.host }),
+        classes: 'q-notification-custom',
+        color: 'black',
+        icon: 'error',
+        iconColor: 'negative',
+        timeout: 7500
+      })
+
+      confirmLoading.value = false
+      return
+    }
 
     const listener = async event => {
       window.onmessage = null
@@ -127,12 +145,12 @@ const onConfirm = async () => {
 
       try {
         const { data: exCode } = await interfaces.auth.exchangeCode(event.data.code, query.get('redirect_uri'))
-        const cookieOptions = { maxAge: exCode.expires_in * 1000, httpOnly: false, path: '/' }
+        const cookieOptions = { expires: new Date(Date.now() + exCode.expires_in * 1000), httpOnly: false, path: '/' }
 
         if (event.data.state !== auth.state) throw new Error('Invalid state')
 
         $q.cookies.set('access_token', exCode.access_token, cookieOptions)
-        $q.cookies.set('refresh_token', exCode.refresh_token, { httpOnly: false })
+        $q.cookies.set('refresh_token', exCode.refresh_token, { httpOnly: false, path: '/' })
         $q.cookies.set('user_id', exCode.user.id, cookieOptions)
         $q.cookies.set('user_username', exCode.user.username, cookieOptions)
         $q.cookies.set('user_global_name', exCode.user.global_name, cookieOptions)
