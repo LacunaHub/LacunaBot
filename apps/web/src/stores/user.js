@@ -67,14 +67,11 @@ export const useUserStore = defineStore('user', {
 
     actions: {
         logout() {
-            const cookiesKeys = ['user_id', 'user_username', 'user_global_name', 'user_avatar', 'access_token']
-            const domain = window.location.hostname.replace(/^www\./, '')
+            const cookieKeys = ['user_id', 'user_username', 'user_global_name', 'user_avatar', 'access_token']
+            const domain = location.host.replace(/^www\./, '')
 
-            for (const key of cookiesKeys) {
-                Cookies.remove(key, { domain, path: '/' })
-            }
-
-            window.location.pathname = '/'
+            for (const key of cookieKeys) Cookies.remove(key, { path: '/' })
+            location.pathname = '/'
         }
     }
 })
