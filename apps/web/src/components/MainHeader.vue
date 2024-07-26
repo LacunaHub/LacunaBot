@@ -56,13 +56,7 @@
           href="https://docs.lacunabot.com"
           target="_blank"
         >
-          <q-tooltip
-            class="bg-black text-body2"
-            anchor="top middle"
-            self="bottom middle"
-            transition-show=""
-            transition-hide=""
-          >
+          <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">
             {{ $t('Components.Header.Docs') }}
           </q-tooltip>
         </q-btn>
@@ -77,6 +71,22 @@
           target="_blank"
         >
           <q-icon name="fab fa-discord" size="xs"></q-icon>
+
+          <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">Discord</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          class="header-link"
+          size="small"
+          round
+          unelevated
+          no-caps
+          href="https://t.me/roviusistaken"
+          target="_blank"
+        >
+          <q-icon name="fab fa-telegram" size="xs"></q-icon>
+
+          <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">Telegram</q-tooltip>
         </q-btn>
 
         <q-btn
@@ -88,7 +98,9 @@
           no-caps
           href="https://github.com/orgs/LacunaHub/discussions"
           target="_blank"
-        />
+        >
+          <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">GitHub Discussions</q-tooltip>
+        </q-btn>
 
         <q-btn
           class="header-link"
@@ -99,7 +111,11 @@
           no-caps
           href="https://crowdin.com/project/lacuna"
           target="_blank"
-        />
+        >
+          <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">
+            {{ $t('Pages.GuildPage.GeneralSettings.Locale') }}
+          </q-tooltip>
+        </q-btn>
       </div>
 
       <q-separator class="gt-sm" spaced="lg" inset vertical></q-separator>
@@ -267,6 +283,10 @@
 
               <q-btn size="small" round unelevated no-caps href="https://discord.gg/9NeMc3J" target="_blank">
                 <q-icon name="fab fa-discord" size="xs"></q-icon>
+              </q-btn>
+
+              <q-btn size="small" round unelevated no-caps href="https://t.me/roviusistaken" target="_blank">
+                <q-icon name="fab fa-telegram" size="xs"></q-icon>
               </q-btn>
 
               <q-btn
