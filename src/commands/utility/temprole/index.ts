@@ -22,7 +22,8 @@ const options: CommandOptions = {
             type: ApplicationCommandOptionType.String,
             name: 'Commands.Options.Duration',
             description: 'Commands.TemproleCommand.Options.Duration.Description',
-            required: true
+            required: true,
+            autocomplete: true
         }
     ],
     defaultMemberPermissions: ['ManageRoles'],

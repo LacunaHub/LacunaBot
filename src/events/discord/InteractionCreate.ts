@@ -12,6 +12,8 @@ import {
     ModalSubmitInteraction,
     UserContextMenuCommandInteraction
 } from 'discord.js'
+import moment from 'moment'
+import ms from 'ms'
 import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
@@ -306,6 +308,33 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
                         }
                     })
                     .slice(0, 25)
+            )
+        }
+    }
+
+    if (['ban', 'mute', 'giveaway', 'temprole'].includes(interaction.commandName) && option?.name === 'duration') {
+        const timeouts = ['1m', '5m', '10m', '30m', '1h', '2h', '5h', '12h', '24h', '2d', '1w', '2w', '4w']
+        let duration = option?.value && ms(option.value) ? ms(option.value) : null
+
+        if (duration) {
+            await interaction.respond([
+                {
+                    name: moment(Date.now() + duration)
+                        .locale(server.locale)
+                        .fromNow(true),
+                    value: ms(duration)
+                }
+            ])
+        } else {
+            await interaction.respond(
+                timeouts.map(v => {
+                    return {
+                        name: moment(Date.now() + ms(v))
+                            .locale(server.locale)
+                            .fromNow(true),
+                        value: v
+                    }
+                })
             )
         }
     }

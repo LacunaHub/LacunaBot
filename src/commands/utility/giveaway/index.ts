@@ -21,7 +21,8 @@ const options: CommandOptions = {
                     type: ApplicationCommandOptionType.String,
                     name: 'Commands.Options.Duration',
                     description: 'Commands.GiveawayCommand.SubCommands.CreateCommand.Options.Duration.Description',
-                    required: true
+                    required: true,
+                    autocomplete: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
