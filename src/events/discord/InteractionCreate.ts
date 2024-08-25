@@ -20,7 +20,7 @@ import Automation from '../../modules/Automation'
 import CustomCommand from '../../modules/CustomCommand'
 import InteractiveMessages from '../../modules/InteractiveMessages'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
-import { onPressReportButton, onSelectReportOption } from '../../modules/Moderation/Reports'
+import Reports from '../../modules/Moderation/Reports'
 
 const handler = async (
     self: Lacuna,
@@ -199,7 +199,7 @@ const handler = async (
         }
 
         if (/R\-\w+\-\d+/.test(interaction.customId)) {
-            await onPressReportButton(self, server, interaction)
+            await Reports.handleButtonClick(self, server, interaction)
 
             return true
         }
@@ -217,7 +217,7 @@ const handler = async (
         await InteractiveMessages.handleSelectMenuSelection(self, server, interaction)
 
         if (interaction.isStringSelectMenu() && /R\-\w+\-\d+/.test(interaction.customId)) {
-            await onSelectReportOption(self, server, interaction)
+            await Reports.handleOptionSelect(self, server, interaction)
 
             return true
         }

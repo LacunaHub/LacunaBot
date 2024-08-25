@@ -26,6 +26,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: UserCon
                 new TextInputBuilder()
                     .setCustomId('REPORT-REASON')
                     .setLabel(capitalizeFirstLetter(t('Commands.Options.Reason')))
+                    .setPlaceholder(t('Commands.ReportCommand.Texts.ReasonPlaceholder'))
                     .setStyle(TextInputStyle.Paragraph)
                     .setMinLength(20)
                     .setMaxLength(1000)

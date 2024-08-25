@@ -1,8 +1,14 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import {
+    ReportType,
+    ServerDocument,
+    UserReportDocument,
+    UserReportMetadataCategory,
+    UserReportMetadataRecommendedAction
+} from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, ButtonInteraction, EmbedBuilder, GuildMember, StringSelectMenuInteraction } from 'discord.js'
 import ms from 'ms'
 import Lacuna from '../../internals/Lacuna'
-import { capitalizeFirstLetter } from '../../internals/utility/Utils'
+import { capitalizeFirstLetter, truncateString } from '../../internals/utility/Utils'
 import banAction from '../AutoMod/actions/BanAction'
 import kickAction from '../AutoMod/actions/KickAction'
 import muteAction from '../AutoMod/actions/MuteAction'
@@ -15,7 +21,7 @@ const QuickActionLocales = {
     WARN: 'CaseLog.CaseTypes.WarnAdd'
 }
 
-export async function onPressReportButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
+async function handleButtonClick(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
     const [, action, user_id] = interaction.customId.split('-')
 
@@ -166,7 +172,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
     })
 }
 
-export async function onSelectReportOption(self: Lacuna, server: ServerDocument, interaction: StringSelectMenuInteraction<'cached'>) {
+async function handleOptionSelect(self: Lacuna, server: ServerDocument, interaction: StringSelectMenuInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
     const [, action, user_id] = interaction.customId.split('-')
 
@@ -319,66 +325,90 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
     })
 }
 
-export async function checkReportsOnGuildMemberAdd(self: Lacuna, server: ServerDocument, member: GuildMember) {
+async function handleGuildMemberAdd(self: Lacuna, server: ServerDocument, member: GuildMember) {
     if (!server.modules.reports.notify_about_unwanted_users) return false
 
     const t = self.i18n.t.bind(null, server.locale)
-    const user = await self.db.users.findOne({ _id: member.id })
+    const userReports = (await self.db.reports.find({
+        type: ReportType.User,
+        accused_id: member.id,
+        checked_at: { $ne: null },
+        'metadata.category': { $exists: true, $ne: UserReportMetadataCategory.Meaningless }
+    })) as UserReportDocument[]
 
-    if (!user?.reports?.length) return false
+    if (!userReports.length) return false
+    if (!server.modules.reports.active || !server.modules.reports.channel_id) return false
 
-    if (server.modules.reports.active && server.modules.reports.channel_id) {
-        const channel = member.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
+    const channel = member.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
+    if (!channel) return false
 
-        if (channel) {
-            const last24h = user.reports.filter(i => Date.now() - i.created_at < ms('24h')),
-                last7d = user.reports.filter(i => Date.now() - i.created_at < ms('7d')),
-                last10Reports = user.reports.slice(Math.max(user.reports.length - 10, 0)).sort((a, b) => b.created_at - a.created_at)
+    const last24h = userReports.filter(i => Date.now() - i.created_at < ms('24h')),
+        last7d = userReports.filter(i => Date.now() - i.created_at < ms('7d')),
+        last10Reports = userReports.slice(Math.max(userReports.length - 10, 0)).sort((a, b) => b.created_at - a.created_at)
+    const recommendedActions = [
+        ...new Set(
+            userReports
+                .filter(v => v.metadata.recommended_action !== UserReportMetadataRecommendedAction.Nothing)
+                .map(v => v.metadata.recommended_action)
+        )
+    ]
 
-            const embed = new EmbedBuilder()
-                .setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL() })
-                .setDescription(t('Commands.ReportCommand.Texts.PotentiallyUnwantedUser'))
-                .addFields([
-                    {
-                        name: t('Commands.ReportCommand.Texts.ReportCount'),
-                        value: user.reports.length.toString(),
-                        inline: true
-                    },
-                    {
-                        name: t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours'),
-                        value: last24h.length.toString(),
-                        inline: true
-                    },
-                    {
-                        name: t('Commands.ViolationsCommand.Texts.ViolationsIn7Days'),
-                        value: last7d.length.toString(),
-                        inline: true
-                    },
-                    {
-                        name: t('Commands.ReportCommand.Texts.RecentReports'),
-                        value: '\u200B'
-                    },
-                    ...last10Reports.map(i => {
-                        return {
-                            name: `<t:${Math.round(i.created_at / 1000)}:R>`,
-                            value: i.reason
-                        }
-                    })
-                ])
-                .setColor('#FFA726')
+    const embed = new EmbedBuilder()
+        .setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL() })
+        .setDescription(t('Commands.ReportCommand.Texts.PotentiallyUnwantedUser'))
+        .addFields([
+            {
+                name: t('Commands.ReportCommand.Texts.ReportCount'),
+                value: userReports.length.toString(),
+                inline: true
+            },
+            {
+                name: t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours'),
+                value: last24h.length.toString(),
+                inline: true
+            },
+            {
+                name: t('Commands.ViolationsCommand.Texts.ViolationsIn7Days'),
+                value: last7d.length.toString(),
+                inline: true
+            },
+            ...last10Reports.map(v => {
+                let reportTypeTitle = `Commands.ReportCommand.Texts.ReportTypes.${UserReportMetadataCategory[v.metadata.category]}.Title`,
+                    reportTypeDescription = `Commands.ReportCommand.Texts.ReportTypes.${UserReportMetadataCategory[v.metadata.category]}.Description`
 
-            try {
-                await channel.send({ embeds: [embed] })
-            } catch (err) {
-                await self.logger.handleError({
-                    module: 'Reports',
-                    action: 'SendNotificationAboutUnwantedUser',
-                    error: err,
-                    guild_id: member.guild.id
-                })
-            }
-        }
+                if (v.metadata.category === UserReportMetadataCategory.Other) {
+                    reportTypeTitle = 'Common.Other'
+                    reportTypeDescription = null
+                }
+
+                return {
+                    name: `**${t(reportTypeTitle)}**` + (reportTypeDescription ? `: ${t(reportTypeDescription)}` : ''),
+                    value: `${truncateString(v.content, 720)} <t:${Math.round(v.created_at / 1000)}:R>`
+                }
+            })
+        ])
+        .setColor('#FFA726')
+
+    if (recommendedActions.length) {
+        embed.setFooter({
+            text: `${t('Commands.ReportCommand.Texts.RecommendedActions')}: ${recommendedActions
+                .map(v => t(`CaseLog.Actions.${UserReportMetadataRecommendedAction[v]}`).toLowerCase())
+                .join(', ')}`
+        })
     }
+
+    try {
+        await channel.send({ embeds: [embed] })
+    } catch (err) {
+        await self.logger.handleError({
+            module: 'Reports',
+            action: 'SendNotificationAboutUnwantedUser',
+            error: err,
+            guild_id: member.guild.id
+        })
+    }
+
+    return true
 }
 
 async function markReportAsClosed(interaction: ButtonInteraction | StringSelectMenuInteraction, reason: string) {
@@ -393,6 +423,7 @@ async function markReportAsClosed(interaction: ButtonInteraction | StringSelectM
 }
 
 export default {
-    onPressReportButton,
-    onSelectReportOption
+    handleButtonClick,
+    handleOptionSelect,
+    handleGuildMemberAdd
 }
