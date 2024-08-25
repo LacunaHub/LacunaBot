@@ -1,10 +1,9 @@
-import { PaymentAmount, PaymentStatus, PaymentType, Product } from '@lacunahub/lacuna-database-driver'
+import { PaymentAmount, PaymentStatus, PaymentType, Product, Snowflake, SnowflakeUtils } from '@lacunahub/lacuna-database-driver'
 import { PaymentData, addDiamond } from '..'
 import database from '../../../../database'
-import { generateSnowflake } from '../../../utility/Snowflake'
 
 export class TokensCheckout {
-    public paymentId: string
+    public paymentId: Snowflake
     public amount: PaymentAmount
     public payerId: string
     public comment: string
@@ -12,7 +11,7 @@ export class TokensCheckout {
     public refId: string
 
     constructor(data: PaymentData) {
-        this.paymentId = generateSnowflake()
+        this.paymentId = SnowflakeUtils.generate()
 
         this.amount = data.amount
 

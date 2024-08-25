@@ -12,7 +12,7 @@ export default async function getPlugins(ctx: Context) {
         ctx.throw(500, new APIError(1, err.message))
     }
 
-    const verifiedRepos: string[] = await database.qdb.get('verifiedPluginRepositories')
+    const verifiedRepos = await database.getVerifiedPluginRepositories()
 
     ctx.status = 200
     ctx.body = {

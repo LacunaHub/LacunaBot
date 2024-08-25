@@ -8,7 +8,7 @@ import Automation from '../../modules/Automation'
 import Greeting from '../../modules/Greeting'
 import GuildImageRotation from '../../modules/GuildImageRotation'
 import Logs from '../../modules/Logs'
-import { checkReportsOnGuildMemberAdd } from '../../modules/Moderation/Reports'
+import Reports from '../../modules/Moderation/Reports'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
@@ -22,7 +22,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     }
 
     await Automation.handleEvent('GUILD_MEMBER_ADD', self, server, member)
-    await checkReportsOnGuildMemberAdd(self, server, member)
+    await Reports.handleGuildMemberAdd(self, server, member)
     await AutoMod.moderateNicknames(self, server, member)
     await AutoMod.moderateNewbies(self, server, member)
     await GuildImageRotation.rotateBanner(self, server, member.guild, member)
