@@ -265,6 +265,92 @@
     </div>
 
     <div class="col-12">
+      <q-list class="bg-dark-1 overflow-hidden rounded-borders">
+        <q-expansion-item>
+          <template #header>
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                {{ $t('Pages.GuildPage.Useful.Reports') }}
+              </q-item-label>
+            </q-item-section>
+
+            <q-item-section side>
+              <q-toggle v-model="guild.modules.reports.active" dense></q-toggle>
+            </q-item-section>
+          </template>
+
+          <q-card class="bg-dark-1" flat>
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12">
+                  <div>
+                    {{ $t('Commands.OptionTypes.Channel') }}
+                  </div>
+
+                  <q-select
+                    v-model="guild.modules.reports.channel_id"
+                    :options="guild.channelsText"
+                    :disable="!guild.modules.reports.active"
+                    option-label="name"
+                    option-value="id"
+                    class="q-pt-sm"
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                  >
+                    <template #selected-item="{ opt }">
+                      <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                        <q-item-section avatar>
+                          <q-icon :name="opt.icon"></q-icon>
+                        </q-item-section>
+
+                        <q-item-section>
+                          <q-item-label>
+                            {{ opt.name }}
+                          </q-item-label>
+
+                          <q-item-label class="text--secondary">
+                            {{ opt.parentName }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+              </div>
+            </q-card-section>
+
+            <div class="q-pa-md">
+              <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+                <q-item tag="label" :disable="!guild.modules.reports.active">
+                  <q-item-section side>
+                    <q-checkbox
+                      v-model="guild.modules.reports.notify_about_unwanted_users"
+                      :disable="!guild.modules.reports.active"
+                      dense
+                    ></q-checkbox>
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('Pages.GuildPage.Useful.ReportsNotifyAboutUnwantedUsers') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </div>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
+    </div>
+
+    <div class="col-12">
       <q-card class="bg-dark-1" flat>
         <q-item class="q-py-md">
           <q-item-section>
