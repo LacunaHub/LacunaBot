@@ -1,13 +1,12 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { EnvData, ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { LavalunaManager } from '@lacunahub/lavaluna.js'
 import { ClusterShardClient, ClusterShardClientOptions } from '@lacunahub/letsfrag'
-import { Collection, PermissionsBitField, parseEmoji } from 'discord.js'
+import { Collection, Guild, PermissionsBitField, parseEmoji } from 'discord.js'
 import { readdirSync } from 'fs'
 import { Isolate } from 'isolated-vm'
 import { os } from 'node-os-utils'
 import db from '../database'
 import i18n from '../i18n'
-import Utils from '../internals/utility/Utils'
 import logger from './Logger'
 import { Command, CommandOptions } from './structures/Command'
 import Event, { EventOptions } from './structures/Event'
@@ -28,7 +27,6 @@ export default class Lacuna extends ClusterShardClient {
     public tempbans = new Collection<string, TemporaryBan>()
     public temproles = new Collection<string, TemporaryRole>()
     public i18n: typeof i18n
-    public utils: typeof Utils
     public PermissionFlags: typeof PermissionsBitField.Flags
 
     public get staticEmojis() {
@@ -67,8 +65,6 @@ export default class Lacuna extends ClusterShardClient {
         this.db = db
 
         this.i18n = i18n
-
-        this.utils = Utils
 
         this.PermissionFlags = PermissionsBitField.Flags
 
@@ -123,7 +119,18 @@ export default class Lacuna extends ClusterShardClient {
         })
     }
 
-    async updateApplicationCommands(server: ServerDocument) {
+    public async getEnv() {
+        let env: EnvData & { _updated_at: number } = this.cache.get('environment')
+
+        if (!env || Date.now() - env._updated_at > 300_000) {
+            const dbEnv = await this.db.getEnv()
+            env = { ...dbEnv, _updated_at: Date.now() }
+        }
+
+        return env
+    }
+
+    public async updateApplicationCommands(server: ServerDocument) {
         const commands = await this.application.commands.set(
             server.modules.custom_commands.map(i => i.command),
             server._id
@@ -148,6 +155,21 @@ export default class Lacuna extends ClusterShardClient {
         )
 
         return commands
+    }
+
+    public async fetchGuild(guild: Guild) {
+        const lastFetchedAt = this.cache.get(`last-guild-fetch-${guild.id}`) ?? 0
+
+        if (
+            typeof guild.approximatePresenceCount !== 'number' ||
+            typeof guild.approximateMemberCount !== 'number' ||
+            Date.now() - lastFetchedAt > 1000 * 60 * 60
+        ) {
+            this.cache.set(`last-guild-fetch-${guild.id}`, Date.now())
+            return await guild.fetch()
+        }
+
+        return guild
     }
 
     loadCommands() {

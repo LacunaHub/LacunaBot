@@ -1,7 +1,6 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { VoiceChannel, VoiceState } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
-import { fetchGuild } from '../../internals/utility/Utils'
 import Automation from '../../modules/Automation'
 import { voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
 import GuildImageRotation from '../../modules/GuildImageRotation'
@@ -31,7 +30,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
         }
     }
 
-    await fetchGuild(self.cache, state.guild)
+    await self.fetchGuild(state.guild)
     await Automation.handleEvent('VOICE_DISCONNECT', self, server, state, { channelId: channel.id })
     await deleteTemporaryVoice(self, server, state, channel)
     await Levels.onVoiceDisconnect(self, server, state, channel)

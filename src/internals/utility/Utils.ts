@@ -4,14 +4,12 @@ import {
     ButtonBuilder,
     ButtonStyle,
     EmbedBuilder,
-    Guild,
     ModalActionRowComponentBuilder,
     StringSelectMenuBuilder,
     TextInputBuilder,
     TextInputStyle
 } from 'discord.js'
 import { parseString } from 'xml2js'
-import Lacuna from '../Lacuna'
 
 export function truncateArray(array: any[], limit: number = 15, separator: string = '\n'): string {
     if (!Array.isArray(array)) throw new TypeError('IS_NOT_ARRAY')
@@ -516,31 +514,10 @@ export function hmsToMS(hms: string) {
     return hms.split(':').reduce((x, y) => 60 * x + +y, 0) * 1000
 }
 
-export async function fetchGuild(cache: Lacuna['cache'], guild: Guild) {
-    const timestamp = cache.get(`FETCH-${guild.id}`) ?? 0
-
-    if (typeof guild.approximatePresenceCount !== 'number' || Date.now() - timestamp > 1000 * 60 * 60) {
-        cache.set(`FETCH-${guild.id}`, Date.now())
-        return await guild.fetch()
+export function parseJSON<T = any>(text: string, reviver?: (this: any, key: string, value: any) => any): T {
+    try {
+        return JSON.parse(text, reviver)
+    } catch (err) {
+        return null
     }
-
-    return guild
-}
-
-export default {
-    truncateArray,
-    shuffleArray,
-    chunkArray,
-    truncateString,
-    splitStringCase,
-    removeDiscordPatterns,
-    escapeRegexp,
-    parseCommandArguments,
-    resolveObjectPath,
-    dotNotateObject,
-    createEnum,
-    shadeColor,
-    convertXml2Json,
-    isValidHttpUrl,
-    snakeToPascalCase
 }

@@ -1,7 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChannelType, Events, Message, MessageType } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
-import { fetchGuild } from '../../internals/utility/Utils'
+import AIMod from '../../modules/AIMod'
 import AutoMod from '../../modules/AutoMod'
 import Automation from '../../modules/Automation'
 import { messageCreate as addWalletCash } from '../../modules/Economy'
@@ -20,8 +20,9 @@ const handler = async (self: Lacuna, message: Message) => {
         return false
     }
 
-    await fetchGuild(self.cache, message.guild)
+    await self.fetchGuild(message.guild)
     await Automation.handleEvent('MESSAGE_CREATE', self, server, message)
+    await AIMod.handleMessageCreate(self, server, message)
 
     if ([MessageType.Default, MessageType.Reply].includes(message.type)) {
         await Levels.onMessageCreate(self, server, message)
