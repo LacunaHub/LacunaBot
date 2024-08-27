@@ -264,6 +264,203 @@
       </q-card>
     </div>
 
+    <div v-if="guild.moderation.ai_mod" class="col-12">
+      <q-list class="bg-dark-1 overflow-hidden rounded-borders">
+        <q-expansion-item>
+          <template #header>
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                {{ $t('AI Mod') }}
+              </q-item-label>
+
+              <q-item-label class="text--secondary">
+                <q-badge class="q-mr-xs" color="warning">
+                  <span>LIMITED BETA</span>
+                </q-badge>
+              </q-item-label>
+            </q-item-section>
+
+            <q-item-section side>
+              <q-toggle v-model="guild.moderation.ai_mod.active" dense></q-toggle>
+            </q-item-section>
+          </template>
+
+          <q-card class="bg-dark-1" flat>
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12">
+                  <div>
+                    {{ $t('Информационный канал') }}
+                  </div>
+
+                  <div class="text--secondary">
+                    {{ $t('В выбранный канал будет отправляться информация о нарушениях') }}
+                  </div>
+
+                  <q-select
+                    v-model="guild.moderation.ai_mod.log_channel_id"
+                    :options="guild.channelsText"
+                    :disable="!guild.moderation.ai_mod.active"
+                    option-label="name"
+                    option-value="id"
+                    class="q-pt-sm"
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                    clearable
+                  >
+                    <template #selected-item="{ opt }">
+                      <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                        <q-item-section avatar>
+                          <q-icon :name="opt.icon"></q-icon>
+                        </q-item-section>
+
+                        <q-item-section>
+                          <q-item-label>
+                            {{ opt.name }}
+                          </q-item-label>
+
+                          <q-item-label class="text--secondary">
+                            {{ opt.parentName }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+              </div>
+            </q-card-section>
+
+            <!-- <div class="q-pa-md">
+              <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+                <q-item tag="label" :disable="!guild.moderation.ai_mod.active">
+                  <q-item-section side>
+                    <q-checkbox
+                      v-model="guild.moderation.ai_mod.independent_decisions"
+                      :disable="!guild.moderation.ai_mod.active"
+                      dense
+                    ></q-checkbox>
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('Разрешить принимать решения самостоятельно') }}
+                    </q-item-label>
+
+                    <q-item-label class="text--secondary">
+                      {{ $t('Позволит боту автоматически применять наказания, если будет обнаружено нарушение') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </div> -->
+
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12">
+                  <div>
+                    {{ $t('Common.IgnoredChannels') }}
+                  </div>
+
+                  <q-select
+                    v-model="guild.moderation.ai_mod.ignored_channels"
+                    :options="guild.channels"
+                    option-label="name"
+                    option-value="id"
+                    :disable="!guild.moderation.ai_mod.active"
+                    class="q-pt-sm"
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                    multiple
+                  >
+                    <template #selected-item="{ opt, index, removeAtIndex }">
+                      <q-chip
+                        color="dark-1"
+                        square
+                        :label="opt.name ?? opt"
+                        :icon="opt.icon"
+                        size="sm"
+                        removable
+                        @remove="removeAtIndex(index)"
+                      ></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                        <q-item-section avatar>
+                          <q-icon :name="opt.icon"></q-icon>
+                        </q-item-section>
+
+                        <q-item-section>
+                          <q-item-label>
+                            {{ opt.name }}
+                          </q-item-label>
+
+                          <q-item-label class="text--secondary">
+                            {{ opt.parentName }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+
+                <div class="col-12">
+                  <div>
+                    {{ $t('Common.IgnoredRoles') }}
+                  </div>
+
+                  <q-select
+                    v-model="guild.moderation.ai_mod.ignored_roles"
+                    :options="guild.roles"
+                    option-label="name"
+                    option-value="id"
+                    :disable="!guild.moderation.ai_mod.active"
+                    use-chips
+                    class="q-pt-sm"
+                    multiple
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                  >
+                    <template #selected-item="{ opt, index, removeAtIndex }">
+                      <q-chip
+                        square
+                        :label="opt.name ?? opt"
+                        size="sm"
+                        :style="`background: ${opt.color}`"
+                        removable
+                        @remove="removeAtIndex(index)"
+                      ></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                        <q-item-section>
+                          <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
+    </div>
+
     <div class="col-12">
       <q-list class="bg-dark-1 overflow-hidden rounded-borders">
         <q-expansion-item>
@@ -351,82 +548,86 @@
     </div>
 
     <div class="col-12">
-      <q-card class="bg-dark-1" flat>
-        <q-item class="q-py-md">
-          <q-item-section>
-            <q-item-label class="text-subtitle1">
-              {{ $t('Pages.GuildPage.Moderation.Mutes') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+      <q-list class="bg-dark-1 overflow-hidden rounded-borders">
+        <q-expansion-item>
+          <template #header>
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                {{ $t('Pages.GuildPage.Moderation.Mutes') }}
+              </q-item-label>
+            </q-item-section>
+          </template>
 
-        <div class="q-pa-md">
-          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-            <q-item tag="label">
-              <q-item-section side>
-                <q-checkbox v-model="guild.moderation.mutes.rar" dense></q-checkbox>
-              </q-item-section>
+          <q-card class="bg-dark-1" flat>
+            <div class="q-pa-md">
+              <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+                <q-item tag="label">
+                  <q-item-section side>
+                    <q-checkbox v-model="guild.moderation.mutes.rar" dense></q-checkbox>
+                  </q-item-section>
 
-              <q-item-section>
-                <q-item-label>
-                  {{ $t('Pages.GuildPage.Moderation.MutesRAR') }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-
-        <q-card-section>
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('Pages.GuildPage.Moderation.MutesRARStrict') }}
-              </div>
-
-              <q-select
-                v-model="guild.moderation.mutes.rar_strict"
-                :options="guild.rolesUnmanaged"
-                option-label="name"
-                option-value="id"
-                :disable="!guild.moderation.mutes.rar"
-                use-chips
-                class="q-pt-sm"
-                multiple
-                filled
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-              >
-                <template #selected-item="{ opt, index, removeAtIndex }">
-                  <q-chip
-                    square
-                    :label="opt.name ?? opt"
-                    size="sm"
-                    :style="`background: ${opt.color}`"
-                    removable
-                    @remove="removeAtIndex(index)"
-                  ></q-chip>
-                </template>
-
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item
-                    clickable
-                    @click="toggleOption(opt)"
-                    :active="selected"
-                    :disable="opt.higher"
-                    active-class="menu-item--active"
-                  >
-                    <q-item-section>
-                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('Pages.GuildPage.Moderation.MutesRAR') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
             </div>
-          </div>
-        </q-card-section>
-      </q-card>
+
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12">
+                  <div>
+                    {{ $t('Pages.GuildPage.Moderation.MutesRARStrict') }}
+                  </div>
+
+                  <q-select
+                    v-model="guild.moderation.mutes.rar_strict"
+                    :options="guild.rolesUnmanaged"
+                    option-label="name"
+                    option-value="id"
+                    :disable="!guild.moderation.mutes.rar"
+                    use-chips
+                    class="q-pt-sm"
+                    multiple
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                  >
+                    <template #selected-item="{ opt, index, removeAtIndex }">
+                      <q-chip
+                        square
+                        :label="opt.name ?? opt"
+                        size="sm"
+                        :style="`background: ${opt.color}`"
+                        removable
+                        @remove="removeAtIndex(index)"
+                      ></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item
+                        clickable
+                        @click="toggleOption(opt)"
+                        :active="selected"
+                        :disable="opt.higher"
+                        active-class="menu-item--active"
+                      >
+                        <q-item-section>
+                          <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
     </div>
 
     <div class="col-12">
