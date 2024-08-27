@@ -2,7 +2,6 @@ import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Events, GuildMember } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import { activePatronRoleId, formerPatronRoleId, supportServerId } from '../../internals/utility/Constants'
-import { fetchGuild } from '../../internals/utility/Utils'
 import AutoMod from '../../modules/AutoMod'
 import Automation from '../../modules/Automation'
 import Greeting from '../../modules/Greeting'
@@ -13,7 +12,7 @@ import Reports from '../../modules/Moderation/Reports'
 const handler = async (self: Lacuna, member: GuildMember) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
 
-    await fetchGuild(self.cache, member.guild)
+    await self.fetchGuild(member.guild)
     await Greeting.sendMessage(self, server, member)
 
     if (!member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED')) {

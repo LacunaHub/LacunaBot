@@ -1,6 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Message } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
+import { removeDiscordPatterns, splitStringCase } from '../../../internals/utility/Utils'
 import banAction from '../actions/BanAction'
 import deleteMessageAction from '../actions/DeleteMessageAction'
 import kickAction from '../actions/KickAction'
@@ -22,7 +23,7 @@ export default async function moderateCaps(self: Lacuna, server: ServerDocument,
     if (target.permissions.any(configPermissions, false)) return false
     if (target.roles.cache.some(r => config.ignored.roles.includes(r.id))) return false
 
-    const splittedCase = self.utils.splitStringCase(self.utils.removeDiscordPatterns(message.content)),
+    const splittedCase = splitStringCase(removeDiscordPatterns(message.content)),
         upperCasePercent = splittedCase.length ? Math.floor((splittedCase.upper.length * 100) / splittedCase.length) : 0
 
     if (upperCasePercent >= config.percentage_of_caps && message.content.length >= config.minimum_content_length) {

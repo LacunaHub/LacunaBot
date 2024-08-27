@@ -13,6 +13,7 @@ import {
 import { Context } from 'koa'
 import database from '../../../../database'
 import { CommandGroup } from '../../../../internals/structures/Command'
+import { supportServerId } from '../../../../internals/utility/Constants'
 import APIError from '../../../utility/APIError'
 import DiscordUtils from '../../../utility/DiscordUtils'
 
@@ -85,6 +86,8 @@ export default async function getSettings(ctx: Context) {
     })
 
     const commandsCache = (await database.qdb.get('commands')) as any
+    const env = await database.getEnv(),
+        aiModClosedBetaServerIds = [supportServerId, ...(env.aiClosedBetaServerIds ?? [])]
 
     ctx.status = 200
     ctx.body = {
@@ -129,7 +132,8 @@ export default async function getSettings(ctx: Context) {
             mutes: {
                 rar: server.moderation.mutes.rar,
                 rar_strict: server.moderation.mutes.rar_strict
-            }
+            },
+            ai_mod: aiModClosedBetaServerIds.includes(server._id) ? server.moderation.ai_mod : null
         },
         modules: {
             welcome: server.modules.welcome,
