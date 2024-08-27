@@ -207,56 +207,6 @@ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
 
 # Настройка бота
 
-В корневой папке приложения должен находиться файл `data.json` и `.env`
-
-Пример `data.json`
-
-```json
-{
-    "playableMusicHosts": [],
-    "diamondPrices": [
-        {
-            "months": 1,
-            "prices": {
-                "RUB": 159,
-                "USD": 1.99
-            },
-            "discounts": {
-                "RUB": 0,
-                "USD": 0
-            }
-        },
-        {
-            "months": 2,
-            "prices": {
-                "RUB": 299,
-                "USD": 3.79
-            },
-            "discounts": {
-                "RUB": 0,
-                "USD": 0
-            }
-        },
-        {
-            "months": 12,
-            "prices": {
-                "RUB": 1699,
-                "USD": 19.99
-            },
-            "discounts": {
-                "RUB": 0,
-                "USD": 0
-            }
-        }
-    ],
-    "allowedApiHosts": [],
-    "allowedApiUrls": [],
-    "allowedImageHosts": [],
-    "rootUsers": [],
-    "blockedUsers": []
-}
-```
-
 Пример `.env`
 
 ```make
@@ -276,6 +226,7 @@ LCN_SERVER_PORT=5565
 LCN_SERVER_AUTHORIZATION=
 
 LCN_GOOGLE_API_KEY=
+LCN_GEMINI_API_KEY=
 
 LCN_BOTS_GG_API_KEY=
 LCN_TOP_GG_API_KEY=
