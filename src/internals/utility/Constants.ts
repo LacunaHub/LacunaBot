@@ -56,6 +56,7 @@ export const supportServerId = process.env.LCN_SUPPORT_SERVER_ID
 export const projectTeamRoleId = process.env.LCN_PROJECT_TEAM_ROLE_ID
 export const subscribedPatronRoleId = process.env.LCN_SUBSCRIBED_PATRON_ROLE_ID
 export const activePatronRoleId = process.env.LCN_ACTIVE_PATRON_ROLE_ID
+export const longTermPatronRoleId = process.env.LCN_LONG_TERM_PATRON_ROLE_ID
 export const bigPatronRoleId = process.env.LCN_BIG_PATRON_ROLE_ID
 export const formerPatronRoleId = process.env.LCN_FORMER_PATRON_ROLE_ID
 export const serverBoosterRoleId = process.env.LCN_SERVER_BOOSTER_ROLE_ID

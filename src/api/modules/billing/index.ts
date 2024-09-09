@@ -2,7 +2,6 @@ import {
     DiamondProductTier,
     PaymentAmount,
     PaymentDocument,
-    PaymentStatus,
     PaymentType,
     Product,
     ServerDocument,
@@ -13,7 +12,7 @@ import {
 } from '@lacunahub/lacuna-database-driver'
 import database from '../../../database'
 import Logger from '../../../internals/Logger'
-import { activePatronRoleId, bigPatronRoleId, supportServerId } from '../../../internals/utility/Constants'
+import { activePatronRoleId, longTermPatronRoleId, supportServerId } from '../../../internals/utility/Constants'
 import DiscordUtils from '../../utility/DiscordUtils'
 import { DiamondGuild, diamondGuilds } from './utility/DiamondGuild'
 import { Patron, patrons } from './utility/Patron'
@@ -131,42 +130,31 @@ export async function addPremium(bill: PaymentDocument | SubscriptionDocument, u
     if (isPayment) userId = bill.payer_id
     else if (isSubscription) userId = bill.subscriber_id
 
+    const dateNow = Date.now()
     await database.users.updateOne(
         { _id: userId },
         {
             $set: {
                 'premium.available': true,
                 'premium.expiration_timestamp': until,
-                'premium.last_charge_timestamp': Date.now()
+                'premium.last_charge_timestamp': dateNow
+            },
+            $inc: {
+                'premium.for_how_long': Math.ceil((until - dateNow) / 1000)
             }
         }
     )
 
-    if (isPayment && [PaymentType.PayPal].includes(bill.type)) {
-        const userBills = await database.payments.find({
-                type: { $in: [PaymentType.PayPal] },
-                status: PaymentStatus.Paid,
-                payer_id: userId
-            }),
-            supportedAmount = userBills.reduce(
-                (x, y) => {
-                    x[y.amount.currency_code] += y.amount.value
-                    return x
-                },
-                { RUB: 0, USD: 0 }
-            )
-        const patronRoles = [activePatronRoleId]
+    const user = await database.users.findOne({ _id: userId })
+    const rolesToAdd = [activePatronRoleId]
 
-        if (supportedAmount.RUB >= 1000 || supportedAmount.USD >= 15) {
-            patronRoles.push(bigPatronRoleId)
-        }
+    if (user.premium.for_how_long >= 60 * 60 * 24 * 365) rolesToAdd.push(longTermPatronRoleId)
 
-        for (const role of patronRoles) {
-            try {
-                await DiscordUtils.rest.put(DiscordUtils.restRoutes.guildMemberRole(supportServerId, userId, role))
-            } catch (err) {
-                await Logger.handleError({ module: 'Billing', action: 'AddPatronRoles', error: err })
-            }
+    for (const role of rolesToAdd) {
+        try {
+            await DiscordUtils.rest.put(DiscordUtils.restRoutes.guildMemberRole(supportServerId, userId, role))
+        } catch (err) {
+            await Logger.handleError({ module: 'Billing', action: 'AddPatronRoles', error: err })
         }
     }
 
