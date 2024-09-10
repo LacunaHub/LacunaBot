@@ -103,7 +103,7 @@ export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessag
 export async function onPressChangeReasonButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
     if (!interaction.memberPermissions.has(self.PermissionFlags.ManageMessages)) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.CommandExecutionDenied', {
+            content: `${self.staticEmojis.Cross} | ${self.i18n.t(server.locale, 'Commands.CommandExecutionDenied', {
                 username: `**${interaction.user.username}**`
             })}`,
             ephemeral: true
@@ -136,7 +136,7 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
 
     if (!reason) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.InvalidReason', {
+            content: `${self.staticEmojis.Cross} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.InvalidReason', {
                 username: `**${interaction.user.username}**`
             })}`,
             ephemeral: true
@@ -151,7 +151,7 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
     await interaction.message.edit({ embeds: [embed] })
 
     await interaction.reply({
-        content: `${self.staticEmojis.OK} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged', {
+        content: `${self.staticEmojis.Check} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged', {
             username: `**${interaction.user.username}**`
         })}`,
         ephemeral: true

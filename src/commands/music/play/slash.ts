@@ -14,7 +14,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!voice) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.YouNeedToConnectToVoiceChannel', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.YouNeedToConnectToVoiceChannel', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -28,7 +28,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         server.modules.music.blocked.channels.includes(voice.id)
     ) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsDisallowedInVoiceChannel', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.PlaybackIsDisallowedInVoiceChannel', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -41,7 +41,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!has_permissions) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.MissingRequiredPermissionsInVoiceChannel', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.MissingRequiredPermissionsInVoiceChannel', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -52,7 +52,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (voice.full && !voice.permissionsFor(interaction.guild.members.me).has('MoveMembers') && !voice.members.has(self.user.id)) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.VoiceChannelIsFull', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.VoiceChannelIsFull', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -63,7 +63,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!query) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.NoQuery', { username: `**${interaction.member.displayName}**` })}`,
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.NoQuery', { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -75,7 +75,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (is_url && !allowedMusicHosts?.some(h => query.startsWith(h))) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.HostIsNotAllowedToBePlayed', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.HostIsNotAllowedToBePlayed', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -91,7 +91,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         search = await self.lava.search({ query, source: lavalinkSources[server.modules.music.default_source] }, { requester: interaction.user.tag })
     } catch (err) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.TrackLoadFailed', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.TrackLoadFailed', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -101,7 +101,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (search.loadType === 'error') {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.TrackLoadFailed', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.TrackLoadFailed', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -111,7 +111,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (search.loadType === 'empty') {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.NoMatches', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.NoMatches', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -132,29 +132,29 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     const rows = [
         new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder().setCustomId('PLAYER-SHUFFLE-PLAY').setStyle(ButtonStyle.Secondary).setEmoji('🔀'),
-            new ButtonBuilder().setCustomId('PLAYER-PREVIOUS').setStyle(ButtonStyle.Secondary).setEmoji('⏮️'),
-            new ButtonBuilder().setCustomId('PLAYER-PAUSE-RESUME').setStyle(ButtonStyle.Secondary).setEmoji('⏸️'),
-            new ButtonBuilder().setCustomId('PLAYER-SKIP').setStyle(ButtonStyle.Secondary).setEmoji('⏭️'),
-            new ButtonBuilder().setCustomId('PLAYER-REPEAT').setStyle(ButtonStyle.Secondary).setEmoji('➡️')
+            new ButtonBuilder().setCustomId('PLAYER-SHUFFLE-PLAY').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.Shuffle),
+            new ButtonBuilder().setCustomId('PLAYER-PREVIOUS').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.StepBackward),
+            new ButtonBuilder().setCustomId('PLAYER-PAUSE-RESUME').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.Pause),
+            new ButtonBuilder().setCustomId('PLAYER-SKIP').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.StepForward),
+            new ButtonBuilder().setCustomId('PLAYER-REPEAT').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.ArrowRight)
         ),
         new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder().setCustomId('PLAYER-VOLUME-DOWN').setStyle(ButtonStyle.Secondary).setEmoji('🔉'),
-            new ButtonBuilder().setCustomId('PLAYER-SEEK-REWIND').setStyle(ButtonStyle.Secondary).setEmoji('⏪'),
-            new ButtonBuilder().setCustomId('PLAYER-STOP').setStyle(ButtonStyle.Secondary).setEmoji('⏹️'),
-            new ButtonBuilder().setCustomId('PLAYER-SEEK-FAST-FORWARD').setStyle(ButtonStyle.Secondary).setEmoji('⏩'),
-            new ButtonBuilder().setCustomId('PLAYER-VOLUME-UP').setStyle(ButtonStyle.Secondary).setEmoji('🔊')
+            new ButtonBuilder().setCustomId('PLAYER-VOLUME-DOWN').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.VolumeDown),
+            new ButtonBuilder().setCustomId('PLAYER-SEEK-REWIND').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.Rewind),
+            new ButtonBuilder().setCustomId('PLAYER-STOP').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.Stop),
+            new ButtonBuilder().setCustomId('PLAYER-SEEK-FAST-FORWARD').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.FastForward),
+            new ButtonBuilder().setCustomId('PLAYER-VOLUME-UP').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.VolumeUp)
         ),
         new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder().setCustomId('PLAYER-QUEUE').setStyle(ButtonStyle.Secondary).setEmoji('🎶'),
-            new ButtonBuilder().setCustomId('PLAYER-FILTERS').setStyle(ButtonStyle.Secondary).setEmoji('🎛️')
+            new ButtonBuilder().setCustomId('PLAYER-QUEUE').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.MusicQueue),
+            new ButtonBuilder().setCustomId('PLAYER-FILTERS').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.SettingsSliders)
         )
     ]
 
     if (search.loadType === 'playlist') {
         if (!server.premium.available) {
             await interaction.editReply({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaylistsAvailableOnlyForPremium', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.PlaylistsAvailableOnlyForPremium', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -164,7 +164,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (player.queue.length >= queueMaxLength && queueMaxLength) {
             await interaction.editReply({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.QueueLimitReached', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.QueueLimitReached', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -187,7 +187,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 },
                 {
                     name: '\u200B',
-                    value: `⏭️ ${track.info.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.info.length) / 1000)}:R>`}`,
+                    value: `${self.staticEmojis.StepForward} ${
+                        track.info.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.info.length) / 1000)}:R>`
+                    }`,
                     inline: true
                 },
                 {
@@ -204,7 +206,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (player.playing || player.paused)
             await interaction.editReply({
-                content: `${self.staticEmojis.OK} | ${t('Commands.PlayCommand.Texts.PlaylistHasBeenAddedToQueue', {
+                content: `${self.staticEmojis.Check} | ${t('Commands.PlayCommand.Texts.PlaylistHasBeenAddedToQueue', {
                     username: `**${interaction.member.displayName}**`,
                     playlist: `**${search.playlist.name}**`
                 })}`
@@ -220,7 +222,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (player.queue.length >= queueMaxLength && queueMaxLength) {
             await interaction.editReply({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.QueueLimitReached', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.QueueLimitReached', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -230,7 +232,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (track.info.isStream && !server.premium.available) {
             await interaction.editReply({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.StreamPlaybackAvailableOnlyForPremium', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.StreamPlaybackAvailableOnlyForPremium', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -240,7 +242,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (track.info.isStream && !server.modules.music.allow_radio_playback) {
             await interaction.editReply({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.StreamPlaybackIsDisabled', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.StreamPlaybackIsDisabled', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -260,7 +262,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 },
                 {
                     name: '\u200B',
-                    value: `⏭️ ${track.info.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.info.length) / 1000)}:R>`}`,
+                    value: `${self.staticEmojis.StepForward} ${
+                        track.info.isStream ? '♾️' : `<t:${Math.round((Date.now() + track.info.length) / 1000)}:R>`
+                    }`,
                     inline: true
                 },
                 {
@@ -277,7 +281,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (player.playing || player.paused)
             await interaction.editReply({
-                content: `${self.staticEmojis.OK} | ${t('Commands.PlayCommand.Texts.TrackHasBeenAddedToQueue', {
+                content: `${self.staticEmojis.Check} | ${t('Commands.PlayCommand.Texts.TrackHasBeenAddedToQueue', {
                     username: `**${interaction.member.displayName}**`,
                     track: `**${track.info.author} - ${track.info.title}**`
                 })}`

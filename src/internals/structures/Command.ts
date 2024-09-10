@@ -105,7 +105,7 @@ export class Command {
             if (executable === 'NoDisabled') replyText = 'Commands.CommandExecutionDisabled'
 
             await interaction.reply({
-                content: `${this.self.staticEmojis.ERROR} | ${t(replyText, { username: `**${interaction.user.username}**` })}`,
+                content: `${this.self.staticEmojis.Cross} | ${t(replyText, { username: `**${interaction.user.username}**` })}`,
                 ephemeral: true
             })
 
@@ -114,7 +114,7 @@ export class Command {
 
         if (this.premium && !server.premium.available) {
             await interaction.reply({
-                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
+                content: `${this.self.staticEmojis.Cross} | ${t('Commands.CommandExecutionOnlyWithPremium', {
                     username: `**${interaction.user.username}**`
                 })}`,
                 ephemeral: true
@@ -127,7 +127,7 @@ export class Command {
 
         if (throttled.status) {
             await interaction.reply({
-                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandThrottling', {
+                content: `${this.self.staticEmojis.Cross} | ${t('Commands.CommandThrottling', {
                     username: `**${interaction.user.username}**`,
                     time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
                 })}`,

@@ -1,5 +1,5 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, Message } from 'discord.js'
+import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, GuildTextBasedChannel, Message } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import { generateSimpleId } from '../../../internals/utility/Utils'
 import { createCaseLogEntry } from '../../Moderation/CaseLog'
@@ -80,7 +80,7 @@ export default async function warnUserAction(
                     }),
                     messagePayload = await replacer.replaceTemplateMessage(penalty.send_message)
 
-                await signal.channel.send(messagePayload)
+                await (signal.channel as GuildTextBasedChannel).send(messagePayload)
             } catch (err) {
                 await self.logger.handleError({ module: 'WarningPenalty', action: 'SendMessage', error: err, guild_id: signal.guildId })
             }

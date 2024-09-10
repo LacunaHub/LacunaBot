@@ -11,7 +11,7 @@ export async function assignLevelAward(self: Lacuna, server: ServerDocument, int
 
     if (!mention) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Texts.InvalidUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Texts.InvalidUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -24,7 +24,7 @@ export async function assignLevelAward(self: Lacuna, server: ServerDocument, int
 
     if (!award) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Texts.UnknownAward', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Texts.UnknownAward', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -134,7 +134,7 @@ export async function assignLevelAward(self: Lacuna, server: ServerDocument, int
 
     await Levels.updateAwards(self, server, mention, userLevel, award)
     await interaction.editReply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Texts.AwardHasBeenAssigned', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Texts.AwardHasBeenAssigned', {
             username: `**${interaction.member.displayName}**`
         })}`
     })
@@ -152,7 +152,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
 
     if (!mention) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Texts.InvalidUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Texts.InvalidUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -163,7 +163,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
 
     if (!amount && typeof amount !== 'number') {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Texts.InvalidAmount', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Texts.InvalidAmount', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -222,7 +222,7 @@ export async function setWalletBalanceSlash(self: Lacuna, server: ServerDocument
     }
 
     await interaction.editReply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Texts.WalletBalanceHasBeenSet', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Texts.WalletBalanceHasBeenSet', {
             username: `**${interaction.member.displayName}**`,
             target: `**${mention.displayName}**`
         })}`
@@ -239,7 +239,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
 
     if (!activities.length) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.NoExistingWallets', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.NoExistingWallets', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -252,7 +252,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
 
     if (!mention && !resetAll) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.NoRequiredArgs', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.NoRequiredArgs', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -271,7 +271,7 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
         )
 
         await interaction.editReply({
-            content: `${self.staticEmojis.OK} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.UserWalletHasBeenReset', {
+            content: `${self.staticEmojis.Check} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.UserWalletHasBeenReset', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -286,13 +286,13 @@ export async function resetWalletSlash(self: Lacuna, server: ServerDocument, int
         )
 
         await interaction.editReply({
-            content: `${self.staticEmojis.OK} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.AllWalletsHaveBeenReset', {
+            content: `${self.staticEmojis.Check} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.AllWalletsHaveBeenReset', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
     } else {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.NoRequiredArgs', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Texts.NoRequiredArgs', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -309,7 +309,7 @@ export async function resetLevelSlash(self: Lacuna, server: ServerDocument, inte
 
     if (!activities.length) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.NoExistingLevels', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.NoExistingLevels', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -322,7 +322,7 @@ export async function resetLevelSlash(self: Lacuna, server: ServerDocument, inte
 
     if (!mention && !resetAll) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.NoRequiredArgs', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.NoRequiredArgs', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -341,7 +341,7 @@ export async function resetLevelSlash(self: Lacuna, server: ServerDocument, inte
         )
 
         await interaction.editReply({
-            content: `${self.staticEmojis.OK} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.UserLevelHasBeenReset', {
+            content: `${self.staticEmojis.Check} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.UserLevelHasBeenReset', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -356,13 +356,13 @@ export async function resetLevelSlash(self: Lacuna, server: ServerDocument, inte
         )
 
         await interaction.editReply({
-            content: `${self.staticEmojis.OK} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.AllLevelsHaveBeenReset', {
+            content: `${self.staticEmojis.Check} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.AllLevelsHaveBeenReset', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
     } else {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.NoRequiredArgs', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Texts.NoRequiredArgs', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })

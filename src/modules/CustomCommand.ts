@@ -340,7 +340,7 @@ export default class CustomCommand {
 
         if (throttled.status) {
             await this.interaction.reply({
-                content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandThrottling', {
+                content: `${this.self.staticEmojis.Cross} | ${t('Commands.CommandThrottling', {
                     username: `**${this.interaction.user.username}**`,
                     time: `<t:${Math.round(throttled.retry_after / 1000)}:T>`
                 })}`,
@@ -506,7 +506,7 @@ export default class CustomCommand {
 
                 if (action.type === 'EXECUTE_CODE' && !this.server.premium.available) {
                     await this.interaction.reply({
-                        content: `${this.self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionOnlyWithPremium', {
+                        content: `${this.self.staticEmojis.Cross} | ${t('Commands.CommandExecutionOnlyWithPremium', {
                             username: `**${this.interaction.user.globalName}**`
                         })}`,
                         ephemeral: true

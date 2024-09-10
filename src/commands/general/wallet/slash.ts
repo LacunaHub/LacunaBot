@@ -7,7 +7,7 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.LeadersCommand.Texts.EconomyIsDisabled', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -56,7 +56,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!server.modules.economy.active) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.LeaderCommand.Texts.EconomyIsDisabled', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.LeaderCommand.Texts.EconomyIsDisabled', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -72,7 +72,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (isNotAllowedRole || isBlockedRole) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.CommandExecutionDenied', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -87,7 +87,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!mention) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -98,7 +98,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!amount) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidAmount', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidAmount', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -127,7 +127,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!transaction_currency || transaction_currency.amount < amount) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.NoSuchAmountOfFunds', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.NoSuchAmountOfFunds', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -224,7 +224,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     }
 
     await interaction.reply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.SuccessfulFundsTransfer', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.SuccessfulFundsTransfer', {
             username: `**${interaction.member.displayName}**`,
             amount: `**${amount}${server.modules.economy.currencies.find(c => c.id == currency_id).symbol}**`,
             target: `**${mention.displayName}**`

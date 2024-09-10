@@ -16,7 +16,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.TemproleCommand.Texts.InvalidUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.TemproleCommand.Texts.InvalidUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -27,7 +27,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!role) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.TemproleCommand.Texts.NoRole', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.TemproleCommand.Texts.NoRole', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -38,7 +38,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!duration) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.TemproleCommand.Texts.InvalidDuration', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.TemproleCommand.Texts.InvalidDuration', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -49,7 +49,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!role.editable) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.TemproleCommand.Texts.RoleIsNotEditable', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.TemproleCommand.Texts.RoleIsNotEditable', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -62,7 +62,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (has_role) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.TemproleCommand.Texts.UserAlreadyHasThisRole', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.TemproleCommand.Texts.UserAlreadyHasThisRole', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -89,7 +89,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     })
 
     await interaction.editReply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.TemproleCommand.Texts.RoleAssignedToUser', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.TemproleCommand.Texts.RoleAssignedToUser', {
             username: `**${interaction.member.displayName}**`,
             role: `**${role.name}**`,
             target: `**${mention.user.tag}**`,

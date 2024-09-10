@@ -44,7 +44,7 @@ export default async (
 
     if (!mention || mention.user.bot) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.InvalidUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -55,7 +55,7 @@ export default async (
 
     if (!reason || reason.length < 20) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidReason', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.InvalidReason', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -74,7 +74,7 @@ export default async (
 
     if (report) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouRecentlyReportedThisUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.YouRecentlyReportedThisUser', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -90,7 +90,7 @@ export default async (
 
     if (reportCount >= 3) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouHaveToManySubmittedReports', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.YouHaveToManySubmittedReports', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -195,7 +195,7 @@ export default async (
     }
 
     await interaction.editReply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.ReportCommand.Texts.ReportSubmitted', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.ReportCommand.Texts.ReportSubmitted', {
             username: `**${interaction.member.displayName}**`
         })}`
     })
