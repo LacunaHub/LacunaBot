@@ -4,12 +4,12 @@ import {
     AnySelectMenuInteraction,
     AutocompleteInteraction,
     ButtonInteraction,
-    ButtonStyle,
     ChatInputCommandInteraction,
     Events,
     Message,
     MessageContextMenuCommandInteraction,
     ModalSubmitInteraction,
+    parseEmoji,
     UserContextMenuCommandInteraction
 } from 'discord.js'
 import moment from 'moment'
@@ -81,7 +81,7 @@ const handler = async (
             if (message?.id === interaction.message?.id) {
                 if (interaction.member.voice.channel?.id !== player.voiceChannelId) {
                     await interaction.reply({
-                        content: `${self.staticEmojis.ERROR} | ${self.i18n.t(
+                        content: `${self.staticEmojis.Cross} | ${self.i18n.t(
                             server.locale,
                             'Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel',
                             {
@@ -124,7 +124,7 @@ const handler = async (
 
                 if (interaction.customId === playPauseButton.customId) {
                     await player.pause(!player.paused)
-                    ;(playPauseButton as any).data.emoji = { name: player.paused ? '▶️' : '⏸️' }
+                    ;(playPauseButton as any).data.emoji = parseEmoji(player.paused ? self.staticEmojis.Play : self.staticEmojis.Pause)
                 }
 
                 if (interaction.customId === nextButton.customId) {
@@ -133,13 +133,13 @@ const handler = async (
 
                 if (interaction.customId === repeatButton.customId) {
                     if (player.queueRepeat) {
-                        ;(repeatButton as any).data.emoji = { name: '🔂' }
+                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.RepeatOne)
                         player.setRepeatMode('TRACK')
                     } else if (player.trackRepeat) {
-                        ;(repeatButton as any).data.emoji = { name: '➡️' }
+                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.ArrowRight)
                         player.setRepeatMode('OFF')
                     } else {
-                        ;(repeatButton as any).data.emoji = { name: '🔁' }
+                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.Repeat)
                         player.setRepeatMode('QUEUE')
                     }
                 }
@@ -154,10 +154,10 @@ const handler = async (
 
                 if (interaction.customId === shufflePlayButton.customId) {
                     if (player.shufflePlay) {
-                        ;(shufflePlayButton as any).data.style = ButtonStyle.Secondary
+                        ;(shufflePlayButton as any).data.emoji = parseEmoji(self.staticEmojis.Shuffle)
                         player.setShufflePlay(false)
                     } else {
-                        ;(shufflePlayButton as any).data.style = ButtonStyle.Success
+                        ;(shufflePlayButton as any).data.emoji = parseEmoji(self.staticEmojis.ShuffleOn)
                         player.setShufflePlay(true)
                     }
                 }

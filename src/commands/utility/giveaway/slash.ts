@@ -17,7 +17,7 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!prize) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidPrize', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidPrize', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -28,7 +28,7 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!duration) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidDuration', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidDuration', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -42,7 +42,7 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 
     if (numberOfWinners && (numberOfWinners < 1 || numberOfWinners > 50)) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidWinnerCount', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidWinnerCount', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -53,7 +53,7 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 
     if (self.giveaways.filter(i => i.guildId === interaction.guildId).size >= 20) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.MaxActiveGiveawaysReached', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.MaxActiveGiveawaysReached', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -100,7 +100,7 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
     })
 
     await interaction.editReply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.GiveawayHasBeenCreated', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.GiveawayHasBeenCreated', {
             username: `**${interaction.member.displayName}**`
         })}`
     })
@@ -115,7 +115,7 @@ export async function endSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (!message_id) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.InvalidMessageId', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.InvalidMessageId', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -139,7 +139,7 @@ export async function endSlash(self: Lacuna, server: ServerDocument, interaction
             })
         } else {
             await interaction.editReply({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -152,7 +152,7 @@ export async function endSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (giveawayMessage && !giveawayMessage.components.length) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound', {
                 username: `**${interaction.member.displayName}**`
             })}`
         })
@@ -173,7 +173,7 @@ export async function rerollSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!messageId) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.InvalidMessageId', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.InvalidMessageId', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -197,7 +197,7 @@ export async function rerollSlash(self: Lacuna, server: ServerDocument, interact
             })
         } else {
             await interaction.editReply({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })

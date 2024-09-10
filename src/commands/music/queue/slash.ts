@@ -20,7 +20,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -31,7 +31,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player.queue.length) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.QueueCommand.Texts.PlaybackQueueIsEmpty', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.QueueCommand.Texts.PlaybackQueueIsEmpty', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true

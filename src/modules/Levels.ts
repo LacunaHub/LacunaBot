@@ -8,6 +8,7 @@ import {
     Collection,
     ContextMenuCommandInteraction,
     GuildMember,
+    GuildTextBasedChannel,
     Message,
     Role,
     VoiceState
@@ -442,7 +443,7 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, sig
 
         try {
             if (alert.format === 'CURRENT_CHANNEL') {
-                await signal.channel.send(messagePayload)
+                await (signal.channel as GuildTextBasedChannel).send(messagePayload)
             }
 
             if (alert.format === 'DM') {

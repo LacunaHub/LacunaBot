@@ -1,7 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Events, GuildMember } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
-import { activePatronRoleId, formerPatronRoleId, supportServerId } from '../../internals/utility/Constants'
+import { activePatronRoleId, supportServerId } from '../../internals/utility/Constants'
 import AutoMod from '../../modules/AutoMod'
 import Automation from '../../modules/Automation'
 import Greeting from '../../modules/Greeting'
@@ -32,10 +32,6 @@ const handler = async (self: Lacuna, member: GuildMember) => {
 
         if (user?.premium?.available) {
             await member.roles.add(activePatronRoleId)
-        }
-
-        if (user?.premium?.available === false && user?.premium?.last_charge_timestamp) {
-            await member.roles.add(formerPatronRoleId)
         }
     }
 
