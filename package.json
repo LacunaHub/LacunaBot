@@ -75,7 +75,7 @@
     "@types/unzalgo": "3.0.x",
     "@types/xml2js": "0.4.x",
     "concurrently": "8.2.x",
-    "tslib": "2.6.x",
+    "tslib": "2.7.x",
     "typescript": "5.4.x",
     "wait-on": "^7.2.0"
   }
