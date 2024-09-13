@@ -34,7 +34,7 @@
     "canvas": "2.11.x",
     "discord.js": "^14.16.1",
     "dotenv": "16.4.x",
-    "isolated-vm": "4.7.x",
+    "isolated-vm": "5.0.x",
     "koa": "2.15.x",
     "koa-body": "6.0.x",
     "koa-bodyparser": "4.4.x",
