@@ -52,7 +52,7 @@
     "quickmongo": "5.2.x",
     "raw-body": "2.5.x",
     "safe-regex": "2.1.x",
-    "unicode-default-word-boundary": "13.0.x",
+    "unicode-default-word-boundary": "16.0.x",
     "unzalgo": "3.0.x",
     "utf-8-validate": "6.0.x",
     "xml2js": "0.6.x",
