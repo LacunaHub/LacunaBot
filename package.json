@@ -50,7 +50,7 @@
     "numbro": "2.5.x",
     "prom-client": "^15.1.3",
     "quickmongo": "5.2.x",
-    "raw-body": "2.5.x",
+    "raw-body": "3.0.x",
     "safe-regex": "2.1.x",
     "unicode-default-word-boundary": "16.0.x",
     "unzalgo": "3.0.x",
