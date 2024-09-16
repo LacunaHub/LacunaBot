@@ -76,6 +76,7 @@ export default class Lacuna extends ClusterShardClient {
         await this.db.connect()
         this.logger.log('[Lacuna] Connected to database')
 
+        // @ts-ignore
         this.rest.on('rateLimited', rateLimitData => this.logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`))
 
         await this.login(process.env.LCN_DISCORD_CLIENT_TOKEN)
