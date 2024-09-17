@@ -54,7 +54,7 @@
     "tslib": "^2.7.0",
     "unicode-default-word-boundary": "^16.0.0",
     "unzalgo": "^3.0.0",
-    "utf-8-validate": "^6.0.3",
+    "utf-8-validate": "^6.0.4",
     "xml2js": "^0.6.2",
     "zlib-sync": "^0.1.9"
   },
