@@ -1,8 +1,9 @@
 import { ServerDocument, ServerModerationLogsTypeKey } from '@lacunahub/lacuna-database-driver'
+import { WebhookClient } from '@lacunahub/letsfrag'
 import { APIWebhook, MessagePayload, WebhookMessageCreateOptions, resolveImage } from 'discord.js'
 import DiscordUtils from '../../api/utility/DiscordUtils'
+import { redisStore } from '../../database'
 import Lacuna from '../../internals/Lacuna'
-import { Webhook } from '../../internals/structures/Webhook'
 import ChannelCreate from './Channel/ChannelCreate'
 import ChannelDelete from './Channel/ChannelDelete'
 import ChannelUpdate from './Channel/ChannelUpdate'
@@ -44,10 +45,10 @@ const rateLimitCache = new Map()
 
 export async function sendLog(self: Lacuna, server: ServerDocument, channelId: string, message: MessagePayload | WebhookMessageCreateOptions) {
     const channelWebhook = server.moderation.logs.webhooks.find(i => i.channel_id === channelId)
-    let webhook: Webhook
+    let webhook: WebhookClient
 
     if (channelWebhook) {
-        webhook = new Webhook({ id: channelWebhook.id, token: channelWebhook.token })
+        webhook = new WebhookClient({ id: channelWebhook.id, token: channelWebhook.token }, { rest: { store: redisStore } })
     }
 
     if (typeof webhook === 'undefined') {
@@ -75,7 +76,7 @@ export async function sendLog(self: Lacuna, server: ServerDocument, channelId: s
                 }
             )
 
-            webhook = new Webhook({ id: createdWebhook.id, token: createdWebhook.token })
+            webhook = new WebhookClient({ id: createdWebhook.id, token: createdWebhook.token }, { rest: { store: redisStore } })
         } catch (err) {
             await self.logger.handleError({ module: 'Logs', action: 'CreateWebhook', error: err, guild_id: server._id })
 

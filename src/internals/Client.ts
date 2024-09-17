@@ -1,5 +1,5 @@
 import { ActivityType, Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
-import { redis } from '../database'
+import { redisStore } from '../database'
 import Lacuna from './Lacuna'
 
 const { version } = require('../../package.json')
@@ -52,9 +52,7 @@ const client = new Lacuna({
     },
     rest: {
         rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5,
-        store: {
-            store: redis
-        }
+        store: redisStore
     },
     sweepers: {
         ...Options.DefaultSweeperSettings,
