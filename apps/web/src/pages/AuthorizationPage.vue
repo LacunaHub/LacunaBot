@@ -86,10 +86,11 @@ import { handleAxiosError, openPopupWindow } from 'src/utils/Utils'
 import { ref } from 'vue'
 import { event } from 'vue-gtag'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const $q = useQuasar(),
   router = useRouter(),
+  route = useRoute(),
   userStore = useUserStore(),
   i18n = useI18n()
 
@@ -164,7 +165,9 @@ const onConfirm = async () => {
           avatar: exCode.user.avatar,
           access_token: exCode.access_token
         })
-        router.push({ path: '/@me/guilds' })
+
+        const returnTo = route.query.returnTo || '/@me/guilds'
+        router.push(decodeURIComponent(returnTo))
       } catch (err) {
         const error = handleAxiosError(err)
 

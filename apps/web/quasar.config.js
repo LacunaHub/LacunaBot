@@ -116,7 +116,10 @@ module.exports = configure(function (ctx) {
         framework: {
             config: {
                 dark: true,
-                ripple: false
+                ripple: false,
+                loading: {
+                    spinner: 'QSpinnerTail'
+                }
             },
 
             lang: 'ru',
@@ -132,7 +135,7 @@ module.exports = configure(function (ctx) {
             // directives: [],
 
             // Quasar plugins
-            plugins: ['Cookies', 'Dialog', 'Meta', 'Notify', 'LocalStorage']
+            plugins: ['Cookies', 'Dialog', 'Meta', 'Notify', 'LocalStorage', 'Loading']
         },
 
         // animations: 'all', // --- includes all animations

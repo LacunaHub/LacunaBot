@@ -1,6 +1,6 @@
 <template>
   <div class="row q-col-gutter-md">
-    <div class="col-12">
+    <div v-if="guild.premium.available" class="col-12">
       <q-banner class="bg-dark-1 rounded-borders" dense>
         <span v-if="guild.premium.expires_at">
           {{
@@ -23,9 +23,9 @@
     </div>
 
     <div class="col-12">
-      <div class="row q-col-gutter-md">
-        <div class="col-12 col-md-4" v-for="(feature, i) in lacunaDiamondFeatures" :key="i">
-          <q-card class="bg-dark-1" flat>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(49%, 1fr)); gap: 16px">
+        <div v-for="(feature, i) in lacunaDiamondFeatures" :key="i">
+          <q-card class="bg-dark-1" flat style="height: 100%">
             <q-item :class="`q-item__${feature.name}`">
               <q-item-section avatar top>
                 <q-avatar size="64px" square>
@@ -136,312 +136,62 @@
         <q-item class="q-py-md rounded-t-lg">
           <q-item-section>
             <q-item-label class="text-subtitle1">
-              {{ $t('Components.LacunaDiamond.SelectPaymentMethod') }}
+              {{ $t('Components.LacunaDiamond.WaysToGet') }}
             </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-btn-toggle
-              v-model="selectedPaymentType"
-              color="dark-2"
-              toggle-color="primary"
-              no-caps
-              unelevated
-              :options="[
-                { label: 'Единовременная оплата', value: 'OneTime', icon: 'paid' },
-                { label: 'Подписаться', value: 'Subscription', icon: 'currency_exchange' }
-              ]"
-              @update:model-value="onUpdatePaymentType"
-            />
           </q-item-section>
         </q-item>
 
-        <div v-if="selectedPaymentType === 'OneTime'">
-          <q-card-section>
-            <q-skeleton v-if="pageLoading" class="q-mt-sm" type="rect" height="62px"></q-skeleton>
+        <q-card-section>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px">
+            <q-skeleton v-for="i in pageLoading ? 4 : 0" :key="i" type="rect" height="54px"></q-skeleton>
 
-            <q-select
-              v-model="selectedMethod"
-              :options="paymentMethods.filter(v => !isSubscriptionMethod(v.value))"
-              option-label="name"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            >
-              <template #selected-item="{ opt }">
-                <span>
-                  <q-icon v-if="opt.value === 'Tokens'" name="group_work" size="md" style="color: #ff3366"></q-icon>
-
-                  <q-avatar v-else size="md">
-                    <img :src="opt.icon" alt="" />
-                  </q-avatar>
-                </span>
-
-                <span class="q-ml-sm">{{ opt.name }}</span>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+            <div v-for="method in paymentMethods" :key="method.value">
+              <q-card class="bg-dark-2" flat @click="paymentMethodDialog(method.value)">
+                <q-item clickable>
                   <q-item-section avatar>
-                    <q-icon v-if="opt.value === 'Tokens'" name="group_work" size="md" style="color: #ff3366"></q-icon>
+                    <q-avatar size="lg">
+                      <q-icon
+                        v-if="method.value === 'Tokens'"
+                        name="group_work"
+                        size="md"
+                        style="color: #ff3366"
+                      ></q-icon>
 
-                    <q-avatar v-else size="md">
-                      <img :src="opt.icon" alt="" />
+                      <q-icon
+                        v-else-if="method.value === 'Patreon'"
+                        name="fab fa-patreon"
+                        size="md"
+                        style="color: #ff424d"
+                      ></q-icon>
+
+                      <img v-else :src="method.icon" />
                     </q-avatar>
                   </q-item-section>
 
-                  <q-item-section>
-                    <q-item-label>{{ opt.name }}</q-item-label>
+                  <q-item-section class="ellipsis">
+                    <div>{{ method.name }}</div>
                   </q-item-section>
                 </q-item>
-              </template>
-            </q-select>
-
-            <!-- <q-tabs
-              v-model="selectedMethod"
-              class="bg-dark-2 rounded-borders q-mt-sm"
-              align="justify"
-              active-bg-color="secondary"
-              indicator-color="transparent"
-              @update:model-value="onUpdatePaymentMethod"
-            >
-              <q-tab
-                v-for="method in paymentMethods.filter(v => !isSubscriptionMethod(v.value))"
-                :key="method.value"
-                :name="method.value"
-                no-caps
-                :style="{ width: $q.screen.lt.sm ? 'fit-content' : `calc(100% / ${paymentMethods.length})` }"
-              >
-                <q-avatar size="32px" square>
-                  <q-icon
-                    v-if="method.value === 'Patreon'"
-                    name="fab fa-patreon"
-                    size="20px"
-                    style="color: #ff424d"
-                  ></q-icon>
-
-                  <q-icon
-                    v-else-if="method.value === 'Tokens'"
-                    name="fas fa-angle-up"
-                    size="20px"
-                    style="color: #ff3366"
-                  ></q-icon>
-
-                  <img v-else :src="method.icon" />
-                </q-avatar>
-
-                <div class="text-white">
-                  {{ method.name }}
-                </div>
-              </q-tab>
-            </q-tabs> -->
-          </q-card-section>
-
-          <q-item class="q-py-md">
-            <q-item-section>
-              <q-item-label class="text-subtitle1">
-                {{ $t('Components.LacunaDiamond.SelectPlan') }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-card-section>
-            <div class="row q-col-gutter-md">
-              <div class="col-12 col-md-4" v-for="(price, i) of selectedMethodPrices" :key="i">
-                <q-btn
-                  class="full-width"
-                  unelevated
-                  @click="onPay(price.tier)"
-                  :loading="loadingStates.includes(price.tier)"
-                  :disable="
-                    pageLoading ||
-                    (guild.premium.available && guild.premium.expires_at === 0) ||
-                    loadingStates.length > 0
-                  "
-                  no-caps
-                  color="primary"
-                  push
-                >
-                  <template #default>
-                    <del v-if="price.salePrice" class="q-mr-xs opacity-md">
-                      {{ price.price }}{{ selectedMethodCurrency.symbol }}
-                    </del>
-                    <span class="text-h6 text-white">
-                      {{ price.salePrice ? price.salePrice : price.price }}{{ selectedMethodCurrency.symbol }}
-                    </span>
-                    <span class="q-mx-sm">/</span>
-                    <span class="text-caption">
-                      {{
-                        DateTime.fromMillis(Date.now() + price.durationSeconds * 1000)
-                          .diffNow(
-                            price.durationSeconds > 604800 ? 'months' : price.durationSeconds > 86400 ? 'days' : 'hours'
-                          )
-                          .toHuman({ maximumFractionDigits: 0 })
-                      }}
-                    </span>
-                  </template>
-
-                  <template #loading>
-                    <q-spinner-dots color="white"></q-spinner-dots>
-                  </template>
-                </q-btn>
-              </div>
+              </q-card>
             </div>
-          </q-card-section>
 
-          <q-card-section v-if="selectedMethod === 'Tokens'">
-            <q-banner class="bg-dark-2 rounded-borders" :inline-actions="$q.screen.gt.sm" dense>
-              <span>
-                {{
-                  $t('Components.LacunaDiamond.TokensInfo', {
-                    bonusesDurationInHours: splitRelativeTime(null, 24, 'hours')
-                  })
-                }}
-              </span>
-
-              <template #avatar>
-                <q-icon name="info" color="info" size="md"></q-icon>
-              </template>
-
-              <template #action>
-                <q-btn
-                  style="background-color: #ff3366"
-                  unelevated
-                  no-caps
-                  href="https://top.gg/bot/740585412560420914/vote"
-                  target="_blank"
-                >
-                  <span>Vote for Lacuna</span>
-                </q-btn>
-              </template>
-            </q-banner>
-          </q-card-section>
-        </div>
-
-        <div v-else-if="selectedPaymentType === 'Subscription'">
-          <q-card-section>
-            <div class="row q-col-gutter-md">
-              <div
-                class="col-12 col-md-4"
-                v-for="method in paymentMethods.filter(v => isSubscriptionMethod(v.value))"
-                :key="method.value"
-              >
-                <q-btn-group
-                  v-if="method.value === 'Patreon'"
-                  class="full-width"
-                  push
-                  unelevated
-                  :style="{ backgroundColor: '#ff424d', opacity: selectedMethod === 'Patreon' ? '1' : '0.75' }"
-                >
-                  <q-btn class="full-width" push unelevated no-caps @click="selectedMethod = 'Patreon'">
-                    <q-icon class="q-mr-sm" name="fab fa-patreon" size="md"></q-icon>
-
-                    <span>{{ method.name }}</span>
-                  </q-btn>
-
-                  <q-separator vertical color="white" inset></q-separator>
-
-                  <q-btn
-                    push
-                    unelevated
-                    icon="link"
-                    href="https://www.patreon.com/xelitte/join"
-                    target="_blank"
-                  ></q-btn>
-                </q-btn-group>
-
-                <q-btn-group
-                  v-if="method.value === 'Boosty'"
-                  class="full-width"
-                  push
-                  unelevated
-                  :style="{ backgroundColor: '#f15f2c', opacity: selectedMethod === 'Boosty' ? '1' : '0.75' }"
-                >
-                  <q-btn class="full-width" push unelevated no-caps @click="selectedMethod = 'Boosty'">
-                    <q-avatar class="q-mr-sm" size="md">
-                      <img src="~assets/boosty-logo-white.svg" />
+            <div v-if="!pageLoading">
+              <q-card class="bg-dark-2" flat @click="transferDiamondDialog">
+                <q-item clickable>
+                  <q-item-section avatar>
+                    <q-avatar size="lg">
+                      <q-icon name="r_move_down" size="md" color="primary"></q-icon>
                     </q-avatar>
+                  </q-item-section>
 
-                    <span>{{ method.name }}</span>
-                  </q-btn>
-
-                  <q-separator vertical color="white" inset></q-separator>
-
-                  <q-btn
-                    push
-                    unelevated
-                    icon="link"
-                    href="https://boosty.to/xelitte/purchase/2710502"
-                    target="_blank"
-                  ></q-btn>
-                </q-btn-group>
-
-                <q-btn-group
-                  v-if="method.value === 'DiscordNitroBoost'"
-                  class="full-width"
-                  push
-                  unelevated
-                  :style="{
-                    backgroundColor: '#5662f6',
-                    opacity: selectedMethod === 'DiscordNitroBoost' ? '1' : '0.75'
-                  }"
-                >
-                  <q-btn class="full-width" push unelevated no-caps @click="selectedMethod = 'DiscordNitroBoost'">
-                    <q-icon class="q-mr-sm" name="fab fa-discord" size="md"></q-icon>
-
-                    <span>{{ method.name }}</span>
-                  </q-btn>
-
-                  <q-separator vertical color="white" inset></q-separator>
-
-                  <q-btn push unelevated icon="link" href="https://discord.gg/srfhGjbKce" target="_blank"></q-btn>
-                </q-btn-group>
-              </div>
+                  <q-item-section class="ellipsis">
+                    <div>{{ $t('Common.Transfer') }}</div>
+                  </q-item-section>
+                </q-item>
+              </q-card>
             </div>
-          </q-card-section>
-
-          <q-card-section>
-            <q-banner class="bg-dark-2 rounded-borders" :inline-actions="$q.screen.gt.sm" dense>
-              <span v-if="selectedMethod === 'Patreon'">
-                {{ $t('Components.LacunaDiamond.PatreonAfterCheckout') }}
-
-                <b>
-                  {{ $t('Components.LacunaDiamond.PatreonAfterCheckoutImportantInfo', { platform: 'Patreon' }) }}
-                </b>
-              </span>
-
-              <span v-if="selectedMethod === 'Boosty'">
-                {{ $t('Components.LacunaDiamond.PatreonAfterCheckout') }}
-
-                <b>
-                  {{ $t('Components.LacunaDiamond.PatreonAfterCheckoutImportantInfo', { platform: 'Boosty' }) }}
-                </b>
-              </span>
-
-              <span v-if="selectedMethod === 'DiscordNitroBoost'">
-                {{ $t('Components.LacunaDiamond.DNBBonusesInfo') }}
-              </span>
-
-              <template #avatar>
-                <q-icon name="info" color="info" size="md"></q-icon>
-              </template>
-
-              <template #action>
-                <q-btn
-                  color="primary"
-                  unelevated
-                  no-caps
-                  href="https://top.gg/bot/740585412560420914/vote"
-                  target="_blank"
-                >
-                  <span>Проверить наличие подписки</span>
-                </q-btn>
-              </template>
-            </q-banner>
-          </q-card-section>
-        </div>
+          </div>
+        </q-card-section>
       </q-card>
     </div>
   </div>
@@ -451,21 +201,22 @@
 import { useQuasar } from 'quasar'
 import boostyLogo from 'src/assets/boosty-logo.svg'
 import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
+import lacunaLogo from 'src/assets/lacuna-logo.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
 import { interfaces } from 'src/boot/axios'
-import { DateTime } from 'src/boot/luxon'
+import LacunaDiamondMethodDirect from 'src/components/dialogs/LacunaDiamondMethodDirect.vue'
+import LacunaDiamondMethodDiscordRoles from 'src/components/dialogs/LacunaDiamondMethodDiscordRoles.vue'
+import LacunaDiamondTransfer from 'src/components/dialogs/LacunaDiamondTransfer.vue'
 import { useGuildStore } from 'src/stores/guild'
 import { lacunaDiamondFeatures, lacunaDiamondPlanComparison } from 'src/utils/Constants'
-import { handleAxiosError, openPopupWindow, splitRelativeTime } from 'src/utils/Utils'
-import { computed, onMounted, ref } from 'vue'
+import { handleAxiosError, openPopupWindow } from 'src/utils/Utils'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { event } from 'vue-gtag'
 
 const $q = useQuasar(),
   guild = useGuildStore()
 
-const pageLoading = ref(true),
-  loadingStates = ref([])
-const selectedPaymentType = ref('OneTime')
+const pageLoading = ref(true)
 const paymentMethods = ref([]),
   selectedMethod = ref('PayPal'),
   selectedMethodCurrency = computed(() => {
@@ -495,16 +246,41 @@ const isSubscriptionMethod = method => {
   return ['Patreon', 'Boosty', 'DiscordNitroBoost', 'ProjectTeam'].includes(method)
 }
 
-const onUpdatePaymentType = () => {
-  if (selectedPaymentType.value === 'OneTime') {
-    selectedMethod.value = 'PayPal'
-  } else {
-    selectedMethod.value = 'Patreon'
+const paymentMethodDialog = method => {
+  selectedMethod.value = method
+  const isSubscription = isSubscriptionMethod(selectedMethod.value)
+  let component = LacunaDiamondMethodDirect,
+    componentProps = {
+      method: selectedMethod.value,
+      currency: selectedMethodCurrency.value,
+      prices: selectedMethodPrices.value
+    }
+
+  if (isSubscription) {
+    component = LacunaDiamondMethodDiscordRoles
+    componentProps = {
+      currentPlatform: selectedMethod.value,
+      platforms: paymentMethods.value.filter(v => isSubscriptionMethod(v.value))
+    }
   }
+
+  return $q.dialog({ component, componentProps }).onOk(data => {
+    if (isSubscriptionMethod(data.platform)) selectedMethod.value = data.platform
+    onPay(data.tier)
+  })
+}
+const transferDiamondDialog = () => {
+  return $q
+    .dialog({
+      component: LacunaDiamondTransfer
+    })
+    .onOk(() => {
+      window.location.reload()
+    })
 }
 
 const onPay = async tier => {
-  loadingStates.value.push(tier)
+  $q.loading.show()
 
   try {
     const isSubscription = isSubscriptionMethod(selectedMethod.value)
@@ -548,6 +324,8 @@ const onPay = async tier => {
             clearInterval(interval)
           }
         }, 1000)
+      } else {
+        location.reload()
       }
     }
   } catch (err) {
@@ -562,8 +340,32 @@ const onPay = async tier => {
       timeout: 5000
     })
   } finally {
-    loadingStates.value.splice(loadingStates.value.indexOf(tier), 1)
+    $q.loading.hide()
   }
+}
+
+const iddqd = ref({
+  keys: [],
+  timeout: null
+})
+const onKeyUp = keyboardEvent => {
+  clearTimeout(iddqd.value.timeout)
+  iddqd.value.keys.push(keyboardEvent.key)
+
+  const correct = iddqd.value.keys.join('').toLowerCase() === 'iddqd'
+
+  if (correct) {
+    paymentMethods.value.push({ name: 'Team', value: 'ProjectTeam', icon: lacunaLogo })
+    iddqd.value.keys = []
+
+    return
+  }
+
+  iddqd.value.timeout = setTimeout(() => {
+    iddqd.value.keys = []
+
+    clearTimeout(iddqd.value.timeout)
+  }, 5000)
 }
 
 onMounted(async () => {
@@ -596,5 +398,10 @@ onMounted(async () => {
   }
 
   pageLoading.value = false
+  window.addEventListener('keyup', onKeyUp)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keyup', onKeyUp)
 })
 </script>

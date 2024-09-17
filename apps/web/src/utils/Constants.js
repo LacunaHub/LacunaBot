@@ -555,16 +555,6 @@ export const lacunaDiamondPlanComparison = [
                 name: 'Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber',
                 free: { value: '1', type: 'text' },
                 diamond: { value: '10', type: 'text' }
-            },
-            {
-                name: 'Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber',
-                free: { value: '1', type: 'text' },
-                diamond: { value: '10', type: 'text' }
-            },
-            {
-                name: 'Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber',
-                free: { value: '1', type: 'text' },
-                diamond: { value: '10', type: 'text' }
             }
         ]
     },

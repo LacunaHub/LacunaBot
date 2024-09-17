@@ -48,7 +48,7 @@ import GuildCardMini from 'src/components/GuildCardMini.vue'
 import { useUserStore } from 'src/stores/user'
 import { handleAxiosError, openPopupWindow } from 'src/utils/Utils'
 import { onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps({
   parentLoading: {
@@ -58,14 +58,20 @@ const props = defineProps({
 })
 
 const $q = useQuasar(),
-  router = useRouter()
+  router = useRouter(),
+  route = useRoute()
 
 const pageLoading = ref(true)
 const user = useUserStore()
 
 const gotoGuild = async (gid, joined) => {
+  const fromPromoPage = route.query.fpp === '1'
+
+  let gidPath = 'settings'
+  if (fromPromoPage) gidPath += '/diamond'
+
   if (joined) {
-    await router.push(`/guilds/${gid}/settings`)
+    await router.push(`/guilds/${gid}/${gidPath}`)
   } else {
     const query = new URLSearchParams()
     query.append('scope', 'bot applications.commands')
@@ -83,7 +89,7 @@ const gotoGuild = async (gid, joined) => {
         popup.close()
 
         if (event.data.guild_id) {
-          await router.push(`/guilds/${event.data.guild_id}/settings`)
+          await router.push(`/guilds/${event.data.guild_id}/${gidPath}`)
         }
       }
 

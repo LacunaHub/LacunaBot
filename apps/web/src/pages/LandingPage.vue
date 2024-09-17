@@ -247,9 +247,15 @@
 
         <template #control>
           <q-carousel-control position="top-right" :offset="[18, 18]" class="text-white rounded-borders">
+            <q-btn flat to="/diamond" style="background: rgba(0, 0, 0, 0.3)">
+              <q-avatar square size="24px">
+                <img src="~assets/lacuna-diamond.svg" />
+              </q-avatar>
+            </q-btn>
+
             <q-btn
               v-if="user.access_token"
-              class="q-px-md"
+              class="q-ml-sm"
               flat
               to="/@me/guilds"
               style="background: rgba(0, 0, 0, 0.3)"
@@ -259,7 +265,7 @@
                 <img :src="user.avatarURL" />
               </q-avatar>
             </q-btn>
-            <q-btn v-else class="q-px-md" flat to="/auth" style="background: rgba(0, 0, 0, 0.3)">
+            <q-btn v-else class="q-ml-sm" flat to="/auth" style="background: rgba(0, 0, 0, 0.3)">
               {{ $t('Components.Header.Login') }}
               <q-icon class="q-ml-sm" name="r_login"></q-icon>
             </q-btn>

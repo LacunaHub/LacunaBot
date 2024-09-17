@@ -61,7 +61,7 @@
         </div>
 
         <div v-else class="row q-col-gutter-md justify-center items-start">
-          <div v-for="patron in activePatrons" :key="patron._id" class="col-shrink">
+          <div v-for="patron in activePatrons" :key="patron.id" class="col-shrink">
             <PatronAvatar :patron="patron" />
           </div>
         </div>
@@ -79,7 +79,7 @@
         </div>
 
         <div v-else class="row q-col-gutter-md justify-center items-start">
-          <div v-for="patron in formerPatrons" :key="patron._id" class="col-shrink">
+          <div v-for="patron in formerPatrons" :key="patron.id" class="col-shrink">
             <PatronAvatar :patron="patron" />
           </div>
         </div>

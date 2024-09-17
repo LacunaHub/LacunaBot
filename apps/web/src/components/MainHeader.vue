@@ -36,10 +36,8 @@
             {{ $t('Components.Header.State') }}
           </span>
         </router-link>
-        <router-link to="/patrons" class="header-link text-uppercase" active-class="header-link--active">
-          <span>
-            {{ $t('Components.Header.Patrons') }}
-          </span>
+        <router-link to="/diamond" class="header-link text-uppercase text-primary" active-class="header-link--active">
+          <span>Diamond</span>
         </router-link>
       </div>
 
@@ -257,11 +255,9 @@
           </q-item-section>
         </q-item>
 
-        <q-item clickable to="/patrons" active-class="nav-item--active">
+        <q-item clickable to="/diamond" active-class="nav-item--active">
           <q-item-section>
-            <q-item-label>
-              {{ $t('Components.Header.Patrons') }}
-            </q-item-label>
+            <q-item-label>Diamond</q-item-label>
           </q-item-section>
         </q-item>
 
@@ -385,6 +381,15 @@ export default defineComponent({
 .header-link:hover,
 .header-link--active {
   color: $almost-white-1;
+}
+
+.header-link.text-primary {
+  opacity: 0.8;
+}
+
+.header-link:hover.text-primary,
+.header-link--active.text-primary {
+  opacity: 1;
 }
 
 .nav-item--active {

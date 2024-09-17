@@ -122,276 +122,69 @@
         </q-list>
       </div>
 
-      <q-card-section v-if="selectedMethod === 'DiscordNitroBoost'">
-        <q-card class="bg-dark-2" flat>
-          <q-card-section>
-            <q-btn
-              class="full-width"
-              style="background-color: #5662f6"
-              unelevated
-              no-caps
-              href="https://discord.gg/srfhGjbKce"
-              target="_blank"
-            >
-              <q-icon class="q-mr-sm" name="fab fa-discord" size="24px"></q-icon>
-
-              <span>Lacuna Hub</span>
-            </q-btn>
-          </q-card-section>
-
-          <q-card-section class="q-pt-none">
-            <q-banner class="bg-dark-1 rounded-borders" dense>
-              <span>
-                {{ $t('Components.LacunaDiamond.DNBBonusesInfo') }}
-              </span>
-
-              <template #avatar>
-                <q-icon name="info" color="info"></q-icon>
-              </template>
-            </q-banner>
-          </q-card-section>
-        </q-card>
-      </q-card-section>
-
-      <q-card-section v-else-if="selectedMethod === 'Patreon'">
-        <q-card class="bg-dark-2" flat>
-          <q-card-section>
-            <q-btn
-              class="full-width"
-              style="background-color: #ff424d"
-              unelevated
-              no-caps
-              href="https://www.patreon.com/xelitte/join"
-              target="_blank"
-            >
-              <q-icon class="q-mr-sm" name="fab fa-patreon" size="24px"></q-icon>
-
-              <span>Become a Patron</span>
-            </q-btn>
-          </q-card-section>
-
-          <q-card-section class="q-pt-none">
-            <q-banner class="bg-dark-1 rounded-borders" dense>
-              <span>
-                {{ $t('Components.LacunaDiamond.PatreonAfterCheckout') }}
-
-                <b>
-                  {{ $t('Components.LacunaDiamond.PatreonAfterCheckoutImportantInfo', { platform: 'Patreon' }) }}
-                </b>
-              </span>
-
-              <template #avatar>
-                <q-icon name="info" color="info"></q-icon>
-              </template>
-            </q-banner>
-          </q-card-section>
-        </q-card>
-      </q-card-section>
-
-      <q-card-section v-else-if="selectedMethod === 'Boosty'">
-        <q-card class="bg-dark-2" flat>
-          <q-card-section>
-            <q-btn
-              class="full-width"
-              style="background-color: #f15f2c"
-              unelevated
-              no-caps
-              href="https://boosty.to/xelitte/purchase/2710502"
-              target="_blank"
-            >
-              <q-avatar class="q-mr-xs" size="24px" square>
-                <img src="~assets/boosty-logo-white.svg" />
-              </q-avatar>
-
-              <span>Subscribe</span>
-            </q-btn>
-          </q-card-section>
-
-          <q-card-section class="q-pt-none">
-            <q-banner class="bg-dark-1 rounded-borders" dense>
-              <span>
-                {{ $t('Components.LacunaDiamond.PatreonAfterCheckout') }}
-
-                <b>
-                  {{ $t('Components.LacunaDiamond.PatreonAfterCheckoutImportantInfo', { platform: 'Boosty' }) }}
-                </b>
-              </span>
-
-              <template #avatar>
-                <q-icon name="info" color="info"></q-icon>
-              </template>
-            </q-banner>
-          </q-card-section>
-        </q-card>
-      </q-card-section>
-
-      <div v-else-if="selectedMethod === 'ProjectTeam'"></div>
-
-      <q-card-section v-else>
-        <div>
-          {{ $t('Components.LacunaDiamond.SelectPlan') }}
-        </div>
-
-        <q-skeleton v-if="pageLoading" class="q-mt-sm" type="rect" height="62px"></q-skeleton>
-
-        <q-tabs
-          v-else
-          v-model.number="selectedTier"
-          class="bg-dark-2 rounded-borders q-mt-sm"
-          align="justify"
-          active-bg-color="secondary"
-          indicator-color="transparent"
-        >
-          <q-tab
-            v-for="(price, i) of selectedMethodPrices"
-            :key="i"
-            :name="price.tier"
-            no-caps
-            :style="{ width: $q.screen.lt.sm ? 'fit-content' : `calc(100% / ${price.length})` }"
-          >
-            <div>
-              <del v-if="price.salePrice" class="q-mr-xs opacity-lg">
-                {{ price.price }}{{ selectedMethodCurrency.symbol }}
-              </del>
-              <span class="text-h5 text-white">
-                {{ price.salePrice ? price.salePrice : price.price }}{{ selectedMethodCurrency.symbol }}
-              </span>
-              <br />
-              <span class="text-caption">
-                {{
-                  DateTime.fromMillis(Date.now() + price.durationSeconds * 1000)
-                    .diffNow(
-                      price.durationSeconds > 604800 ? 'months' : price.durationSeconds > 86400 ? 'days' : 'hours'
-                    )
-                    .toHuman({ maximumFractionDigits: 0 })
-                }}
-              </span>
-            </div>
-          </q-tab>
-        </q-tabs>
-      </q-card-section>
-
-      <q-card-section v-if="selectedMethod === 'Tokens'">
-        <q-card class="bg-dark-2" flat>
-          <q-card-section>
-            <q-btn
-              class="full-width"
-              style="background-color: #ff3366"
-              unelevated
-              no-caps
-              href="https://top.gg/bot/740585412560420914/vote"
-              target="_blank"
-            >
-              <q-icon class="q-mr-sm" name="fas fa-angle-up" size="24px"></q-icon>
-
-              <span>Vote for Lacuna</span>
-            </q-btn>
-          </q-card-section>
-
-          <q-card-section class="q-pt-none">
-            <q-banner class="bg-dark-1 rounded-borders" dense>
-              <span>
-                {{
-                  $t('Components.LacunaDiamond.TokensInfo', {
-                    bonusesDurationInHours: splitRelativeTime(guild.locale, 24, 'hours')
-                  })
-                }}
-              </span>
-
-              <template #avatar>
-                <q-icon name="info" color="info"></q-icon>
-              </template>
-            </q-banner>
-          </q-card-section>
-        </q-card>
-      </q-card-section>
-
       <q-card-section>
         <div>
-          {{ $t('Components.LacunaDiamond.SelectPaymentMethod') }}
+          {{ $t('Components.LacunaDiamond.WaysToGet') }}
         </div>
 
-        <q-skeleton v-if="pageLoading" class="q-mt-sm" type="rect" height="62px"></q-skeleton>
-
-        <q-tabs
-          v-else
-          v-model="selectedMethod"
-          class="bg-dark-2 rounded-borders q-mt-sm"
-          align="justify"
-          active-bg-color="secondary"
-          indicator-color="transparent"
-          @update:model-value="onUpdatePaymentMethod"
+        <div
+          class="q-mt-sm"
+          style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px"
         >
-          <q-tab
-            v-for="method in paymentMethods"
-            :key="method.value"
-            :name="method.value"
-            no-caps
-            :style="{ width: $q.screen.lt.sm ? 'fit-content' : `calc(100% / ${paymentMethods.length})` }"
-          >
-            <q-avatar size="32px" square>
-              <q-icon
-                v-if="method.value === 'Patreon'"
-                name="fab fa-patreon"
-                size="20px"
-                style="color: #ff424d"
-              ></q-icon>
+          <q-skeleton v-for="i in pageLoading ? 4 : 0" :key="i" type="rect" height="54px"></q-skeleton>
 
-              <q-icon
-                v-else-if="method.value === 'Tokens'"
-                name="fas fa-angle-up"
-                size="20px"
-                style="color: #ff3366"
-              ></q-icon>
+          <div v-for="method in paymentMethods" :key="method.value">
+            <q-card class="bg-dark-2" flat @click="paymentMethodDialog(method.value)">
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar size="lg">
+                    <q-icon
+                      v-if="method.value === 'Tokens'"
+                      name="group_work"
+                      size="md"
+                      style="color: #ff3366"
+                    ></q-icon>
 
-              <img v-else :src="method.icon" />
-            </q-avatar>
+                    <q-icon
+                      v-else-if="method.value === 'Patreon'"
+                      name="fab fa-patreon"
+                      size="md"
+                      style="color: #ff424d"
+                    ></q-icon>
 
-            <div class="text-white">
-              {{ method.name }}
-            </div>
-          </q-tab>
-        </q-tabs>
+                    <img v-else :src="method.icon" />
+                  </q-avatar>
+                </q-item-section>
+
+                <q-item-section class="ellipsis">
+                  <div>{{ method.name }}</div>
+                </q-item-section>
+              </q-item>
+            </q-card>
+          </div>
+
+          <div v-if="!pageLoading">
+            <q-card class="bg-dark-2" flat @click="transferDiamondDialog">
+              <q-item clickable>
+                <q-item-section avatar>
+                  <q-avatar size="lg">
+                    <q-icon name="r_move_down" size="md" color="primary"></q-icon>
+                  </q-avatar>
+                </q-item-section>
+
+                <q-item-section class="ellipsis">
+                  <div>{{ $t('Common.Transfer') }}</div>
+                </q-item-section>
+              </q-item>
+            </q-card>
+          </div>
+        </div>
       </q-card-section>
 
       <q-card-section>
         <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-6">
+          <div class="col-12">
             <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
-
-          <div class="col-12 col-md-6">
-            <q-btn-dropdown
-              class="full-width"
-              :label="
-                $t(
-                  `Components.LacunaDiamond.${
-                    ['Patreon', 'Boosty', 'DiscordNitroBoost', 'ProjectTeam'].includes(selectedMethod) ? 'Check' : 'Pay'
-                  }`
-                )
-              "
-              unelevated
-              @click="onConfirm"
-              :loading="confirmLoading"
-              :disable="pageLoading || (guild.premium.available && guild.premium.expires_at === 0)"
-              no-caps
-              color="primary"
-              split
-            >
-              <q-list>
-                <q-item clickable v-close-popup @click="transferDialog">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ $t('Common.Transfer') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn-dropdown>
           </div>
         </div>
       </q-card-section>
@@ -406,13 +199,14 @@ import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
 import lacunaLogo from 'src/assets/lacuna-logo.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
 import { interfaces } from 'src/boot/axios'
-import { DateTime } from 'src/boot/luxon'
 import { useGuildStore } from 'src/stores/guild'
 import { lacunaDiamondFeatures, lacunaDiamondPlanComparison } from 'src/utils/Constants'
-import { handleAxiosError, openPopupWindow, splitRelativeTime } from 'src/utils/Utils'
+import { handleAxiosError, openPopupWindow } from 'src/utils/Utils'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { event } from 'vue-gtag'
 import { useI18n } from 'vue-i18n'
+import LacunaDiamondMethodDirect from './LacunaDiamondMethodDirect.vue'
+import LacunaDiamondMethodDiscordRoles from './LacunaDiamondMethodDiscordRoles.vue'
 import LacunaDiamondTransfer from './LacunaDiamondTransfer.vue'
 
 defineEmits(useDialogPluginComponent.emits)
@@ -421,8 +215,7 @@ const $q = useQuasar(),
   { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
 const { t: $t } = useI18n()
 
-const pageLoading = ref(true),
-  confirmLoading = ref(false)
+const pageLoading = ref(true)
 const guild = useGuildStore()
 const products = ref([])
 const paymentMethods = ref([]),
@@ -458,7 +251,35 @@ const onUpdatePaymentMethod = () => {
   selectedTier.value = paymentMethodProducts.at(0).tier
 }
 
-const transferDialog = () => {
+const isSubscriptionMethod = method => {
+  return ['Patreon', 'Boosty', 'DiscordNitroBoost', 'ProjectTeam'].includes(method)
+}
+
+const paymentMethodDialog = method => {
+  selectedMethod.value = method
+  const isSubscription = isSubscriptionMethod(selectedMethod.value)
+  let component = LacunaDiamondMethodDirect,
+    componentProps = {
+      method: selectedMethod.value,
+      currency: selectedMethodCurrency.value,
+      prices: selectedMethodPrices.value
+    }
+
+  if (isSubscription) {
+    component = LacunaDiamondMethodDiscordRoles
+    componentProps = {
+      currentPlatform: selectedMethod.value,
+      platforms: paymentMethods.value.filter(v => isSubscriptionMethod(v.value))
+    }
+  }
+
+  return $q.dialog({ component, componentProps }).onOk(data => {
+    if (isSubscriptionMethod(data.platform)) selectedMethod.value = data.platform
+    if (typeof data.tier === 'number') selectedTier.value = data.tier
+    onConfirm()
+  })
+}
+const transferDiamondDialog = () => {
   return $q
     .dialog({
       component: LacunaDiamondTransfer
@@ -479,9 +300,7 @@ const onKeyUp = keyboardEvent => {
   const correct = iddqd.value.keys.join('').toLowerCase() === 'iddqd'
 
   if (correct) {
-    paymentMethods.value.pop()
     paymentMethods.value.push({ name: 'Team', value: 'ProjectTeam', icon: lacunaLogo })
-    selectedMethod.value = 'ProjectTeam'
     iddqd.value.keys = []
 
     return
@@ -495,10 +314,10 @@ const onKeyUp = keyboardEvent => {
 }
 
 const onConfirm = async () => {
-    confirmLoading.value = true
+    $q.loading.show()
 
     try {
-      const isSubscription = ['Patreon', 'Boosty', 'DiscordNitroBoost', 'ProjectTeam'].includes(selectedMethod.value)
+      const isSubscription = isSubscriptionMethod(selectedMethod.value)
 
       event('checkout_progress', { event_label: selectedMethod.value, selected_tier: selectedTier.value })
 
@@ -555,7 +374,7 @@ const onConfirm = async () => {
         timeout: 5000
       })
     } finally {
-      confirmLoading.value = false
+      $q.loading.hide()
     }
   },
   onCancel = () => {
