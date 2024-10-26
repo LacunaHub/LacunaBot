@@ -1,19 +1,18 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { Collection, GuildMember, Role } from 'discord.js'
+import { GuildMember, Role } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/Automation'
-import Logs from '../../modules/Logs'
 
-const handler = async (self: Lacuna, member: GuildMember, roles: Collection<string, Role>) => {
+const handler = async (self: Lacuna, member: GuildMember, roles: Role[]) => {
     const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
+    if (!server || server.blocked) return false
 
     await Automation.handleEvent('ROLE_MEMBER_ADD', self, server, member)
-    await Logs.RoleMemberAdd(self, server, member, roles)
 
     return true
 }
 
 export default {
-    name: 'roleMemberAdd',
+    name: 'guildMemberRoleAdd',
     handler
 }

@@ -46,58 +46,65 @@ export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessag
     const server = await db.servers.findOne({ _id: guild.id })
     const caseLog = guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
 
-    if (caseLog && server.moderation.case_log.types[CaseLogTypesCompatibility[options.type]].active) {
-        const t = i18n.t.bind(null, server.locale)
-        const caseId = server.moderation.case_log.case_count + 1
+    if (!caseLog || !server.moderation.case_log.types[CaseLogTypesCompatibility[options.type]].active) return false
 
-        try {
-            await caseLog.send({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle(t(`CaseLog.CaseTypes.${options.type}`))
-                        // .setAuthor({ name: t(`CaseLog.CaseTypes.${options.type}`), iconURL: CaseLogImages[options.type] })
-                        .addFields([
-                            {
-                                name: t('Commands.OptionTypes.User'),
-                                value: options.target ? `<@${options.target.id}> (${options.target.tag})` : '-',
-                                inline: true
-                            },
-                            { name: t('CaseLog.Moderator'), value: `<@${options.executor.id}> (${options.executor.tag})`, inline: true },
-                            { name: capitalizeFirstLetter(t('Commands.Options.Reason')), value: options.reason ?? '-' }
-                        ])
-                        .setFooter({ text: t('CaseLog.CaseNumber', { caseNumber: caseId }) })
-                        .setTimestamp()
-                        .setColor(options.type.endsWith('Remove') ? '#2FDF84' : '#EF5350')
-                ],
-                components: [
-                    new ActionRowBuilder<ButtonBuilder>().addComponents(
-                        new ButtonBuilder().setCustomId(`CL-REASON-${caseId}`).setLabel(t('CaseLog.ChangeReason')).setStyle(ButtonStyle.Secondary)
-                    )
-                ]
-            })
-        } catch (err) {
-            await Logger.handleError({ module: 'CaseLog', action: 'SendCaseMessage', error: err, guild_id: guild.id })
+    const t = i18n.t.bind(null, server.locale)
+    const caseId = server.moderation.case_log.case_count + 1,
+        executor = typeof options.executor === 'string' ? options.executor : `<@${options.executor.id}> (${options.executor.tag})`
 
-            return
-        }
-
-        await db.servers.updateOne(
-            { _id: server._id },
-            {
-                $inc: {
-                    'moderation.case_log.case_count': 1
-                }
-            }
-        )
-
-        guild.client.emit('moduleExecution', {
-            module: 'Moderation',
-            category: 'CaseLog',
-            label: options.type,
-            guild: { id: guild.id, name: guild.name },
-            target: { id: options.target.id, name: options.target.tag }
+    try {
+        await caseLog.send({
+            embeds: [
+                new EmbedBuilder()
+                    .setTitle(t(`CaseLog.CaseTypes.${options.type}`))
+                    // .setAuthor({ name: t(`CaseLog.CaseTypes.${options.type}`), iconURL: CaseLogImages[options.type] })
+                    .addFields([
+                        {
+                            name: t('Commands.OptionTypes.User'),
+                            value: options.target ? `<@${options.target.id}> (${options.target.tag})` : '-',
+                            inline: true
+                        },
+                        {
+                            name: t('CaseLog.Moderator'),
+                            value: executor,
+                            inline: true
+                        },
+                        { name: capitalizeFirstLetter(t('Commands.Options.Reason')), value: options.reason ?? '-' }
+                    ])
+                    .setFooter({ text: t('CaseLog.CaseNumber', { caseNumber: caseId }) })
+                    .setTimestamp()
+                    .setColor(options.type.endsWith('Remove') ? '#2FDF84' : '#EF5350')
+            ],
+            components: [
+                new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder().setCustomId(`CL-REASON-${caseId}`).setLabel(t('CaseLog.ChangeReason')).setStyle(ButtonStyle.Secondary)
+                )
+            ]
         })
+    } catch (err) {
+        await Logger.handleError({ module: 'CaseLog', action: 'SendCaseMessage', error: err, guild_id: guild.id })
+
+        return false
     }
+
+    await db.servers.updateOne(
+        { _id: server._id },
+        {
+            $inc: {
+                'moderation.case_log.case_count': 1
+            }
+        }
+    )
+
+    guild.client.emit('moduleExecution', {
+        module: 'Moderation',
+        category: 'CaseLog',
+        label: options.type,
+        guild: { id: guild.id, name: guild.name },
+        target: { id: options.target.id, name: options.target.tag }
+    })
+
+    return true
 }
 
 export async function onPressChangeReasonButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
@@ -169,7 +176,7 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
 export interface CreateCaseMessageOptions {
     type: CaseMessageType
     target?: User
-    executor: User
+    executor: User | string
     reason?: string
 }
 

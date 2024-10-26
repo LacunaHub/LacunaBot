@@ -54,7 +54,8 @@ export default async function updateSettings(ctx: Context) {
                 rar: server.moderation.mutes.rar,
                 rar_strict: server.moderation.mutes.rar_strict
             },
-            ai_mod: aiModClosedBetaServerIds.includes(server._id) ? server.moderation.ai_mod : null
+            ai_mod: aiModClosedBetaServerIds.includes(server._id) ? server.moderation.ai_mod : null,
+            dame_rules: server.moderation.dame_rules
         },
         modules: {
             welcome: server.modules.welcome,

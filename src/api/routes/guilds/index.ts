@@ -14,6 +14,9 @@ import updateAutoVoice from './methods/auto-voices/UpdateAutoVoice'
 import createCustomCommand from './methods/custom-commands/CreateCustomCommand'
 import deleteCustomCommand from './methods/custom-commands/DeleteCustomCommand'
 import updateCustomCommand from './methods/custom-commands/UpdateCustomCommand'
+import createDAMERule from './methods/dame-rules/CreateDAMERule'
+import deleteDAMERule from './methods/dame-rules/DeleteDAMERule'
+import updateDAMERule from './methods/dame-rules/UpdateDAMERule'
 import createInteractiveMessage from './methods/interactive-messages/CreateInteractiveMessage'
 import deleteInteractiveMessage from './methods/interactive-messages/DeleteInteractiveMessage'
 import updateInteractiveMessage from './methods/interactive-messages/UpdateInteractiveMessage'
@@ -45,6 +48,10 @@ router.patch('/:guildId/settings/auto-voices/:avId', createRateLimit(5), authent
 router.post('/:guildId/settings/custom-commands', createRateLimit(5), authenticate, checkPermissions, findServer, createCustomCommand)
 router.delete('/:guildId/settings/custom-commands/:cid', createRateLimit(5), authenticate, checkPermissions, findServer, deleteCustomCommand)
 router.patch('/:guildId/settings/custom-commands/:cid', createRateLimit(5), authenticate, checkPermissions, findServer, updateCustomCommand)
+
+router.post('/:guildId/settings/dame-rules', createRateLimit(5), authenticate, checkPermissions, findServer, createDAMERule)
+router.delete('/:guildId/settings/dame-rules/:ruleId', createRateLimit(5), authenticate, checkPermissions, findServer, deleteDAMERule)
+router.patch('/:guildId/settings/dame-rules/:ruleId', createRateLimit(5), authenticate, checkPermissions, findServer, updateDAMERule)
 
 router.post('/:guildId/settings/interactive-messages', createRateLimit(5), authenticate, checkPermissions, findServer, createInteractiveMessage)
 router.delete(

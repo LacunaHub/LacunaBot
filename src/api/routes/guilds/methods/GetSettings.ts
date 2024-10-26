@@ -1,6 +1,7 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     APIApplicationCommand,
+    APIAutoModerationRule,
     APIEmoji,
     APIGuildChannel,
     APIGuildMember,
@@ -35,12 +36,14 @@ export default async function getSettings(ctx: Context) {
     let guildChannels: APIGuildChannel<any>[] = [],
         guildRoles: APIRole[] = [],
         guildEmojis: APIEmoji[] = [],
+        guildAutoModRules: APIAutoModerationRule[] = [],
         selfCommands: APIApplicationCommand[] = []
 
     try {
         guildChannels = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildChannels(guildId))) as any
         guildRoles = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildRoles(guildId))) as any
         guildEmojis = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildEmojis(guildId))) as any
+        guildAutoModRules = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildAutoModerationRules(guildId))) as any
         selfCommands = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.applicationCommands(process.env.LCN_DISCORD_CLIENT_ID), {
             query: makeURLSearchParams({ with_localizations: true }) as any
         })) as any
@@ -89,6 +92,36 @@ export default async function getSettings(ctx: Context) {
     const env = await database.getEnv(),
         aiModClosedBetaServerIds = [supportServerId, ...(env.aiClosedBetaServerIds ?? [])]
 
+    if (guildAutoModRules.some(v => !server.moderation.dame_rules.some(vv => v.id === vv.id))) {
+        const dameRules = guildAutoModRules.map(v => {
+            const dameRule = server.moderation.dame_rules.find(vv => v.id === vv.id)
+
+            return {
+                id: v.id,
+                name: v.name,
+                event_type: v.event_type,
+                trigger_type: v.trigger_type,
+                trigger_metadata: v.trigger_metadata,
+                actions: [...v.actions, ...(dameRule?.actions?.filter(vv => vv.type > 100) ?? [])],
+                enabled: v.enabled,
+                exempt_roles: v.exempt_roles,
+                exempt_channels: v.exempt_channels
+            }
+        })
+
+        if (dameRules.length) {
+            server.moderation.dame_rules = dameRules as any
+            await database.servers.updateOne(
+                { _id: guildId },
+                {
+                    $set: {
+                        'moderation.dame_rules': dameRules
+                    }
+                }
+            )
+        }
+    }
+
     ctx.status = 200
     ctx.body = {
         _id: server._id,
@@ -133,7 +166,8 @@ export default async function getSettings(ctx: Context) {
                 rar: server.moderation.mutes.rar,
                 rar_strict: server.moderation.mutes.rar_strict
             },
-            ai_mod: aiModClosedBetaServerIds.includes(server._id) ? server.moderation.ai_mod : null
+            ai_mod: aiModClosedBetaServerIds.includes(server._id) ? server.moderation.ai_mod : null,
+            dame_rules: server.moderation.dame_rules
         },
         modules: {
             welcome: server.modules.welcome,
