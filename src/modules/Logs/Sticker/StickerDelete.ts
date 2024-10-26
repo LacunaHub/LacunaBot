@@ -1,49 +1,47 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, Sticker } from 'discord.js'
-import { isRateLimited, sendLog } from '..'
+import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry } from 'discord.js'
+import { isRateLimited, LogEventData, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async function (self: Lacuna, server: ServerDocument, sticker: Sticker): Promise<boolean> {
-    if (server.moderation.logs.types.sticker_delete.active) {
-        if (isRateLimited(server._id, server.premium.available)) return false
+export default async function (self: Lacuna, server: ServerDocument, data: StickerDeleteLogEventData): Promise<boolean> {
+    if (!server.moderation.logs.types.sticker_delete.active) return false
+    if (isRateLimited(server._id, server.premium.available)) return false
 
-        const t = self.i18n.t.bind(null, server.locale)
+    const t = self.i18n.t.bind(null, server.locale)
+    const { guild, auditLogEntry } = data
+    const sticker = auditLogEntry.target,
+        executor = auditLogEntry.executor
 
-        const logChannel = sticker.guild.channels.cache.get(server.moderation.logs.types.sticker_delete.channel_id) as BaseGuildTextChannel
-        const isOk = logChannel && logChannel.permissionsFor(sticker.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
+    const logChannel = guild.channels.cache.get(server.moderation.logs.types.sticker_delete.channel_id)
+    if (!logChannel || !logChannel.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)) return false
 
-        if (isOk) {
-            const audit = sticker.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await sticker.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.StickerDelete })
-                : null
-            const entry = audit?.entries?.find(v => v.targetId === sticker.id)
-            const executor = entry?.executor
+    const nameChange = auditLogEntry.changes.find(v => v.key === 'name')
 
-            const embed = new EmbedBuilder()
-                .setTitle(t('Logs.StickerDeleted'))
-                .setDescription(t('Logs.StickerDeletedTemplate', { username: `<@${executor?.id ?? '0'}>`, sticker: `**${sticker.name}**` }))
-                .setFooter({ text: `SID: ${sticker.id}` })
-                .setTimestamp()
-                .setColor('#EF5350')
+    const embed = new EmbedBuilder()
+        .setTitle(t('Logs.StickerDeleted'))
+        .setDescription(t('Logs.StickerDeletedTemplate', { username: `<@${executor?.id ?? '0'}>`, sticker: `**${sticker.name}**` }))
+        .setFooter({ text: `SID: ${sticker.id}` })
+        .setTimestamp()
+        .setColor('#EF5350')
 
-            try {
-                await sendLog(self, server, logChannel.id, { embeds: [embed] })
-            } catch (err) {
-                await self.logger.handleError({ module: 'LogsStickerDelete', action: 'SendMessageViaWebhook', error: err, guild_id: sticker.guildId })
+    try {
+        await sendLog(self, server, logChannel.id, { embeds: [embed] })
+    } catch (err) {
+        await self.logger.handleError({ module: 'LogsStickerDelete', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
 
-                return false
-            }
-
-            self.emit('moduleExecution', {
-                module: 'Logs',
-                category: 'StickerDelete',
-                guild: { id: sticker.guild.id, name: sticker.guild.name },
-                target: { id: sticker.id, name: sticker.name }
-            })
-
-            return true
-        }
+        return false
     }
 
-    return false
+    self.emit('moduleExecution', {
+        module: 'Logs',
+        category: 'StickerDelete',
+        guild: { id: guild.id, name: guild.name },
+        target: { id: sticker.id, name: sticker.name }
+    })
+
+    return true
+}
+
+export interface StickerDeleteLogEventData extends LogEventData {
+    auditLogEntry: GuildAuditLogsEntry<AuditLogEvent.StickerDelete>
 }

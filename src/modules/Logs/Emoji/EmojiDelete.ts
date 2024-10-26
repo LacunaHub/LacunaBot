@@ -1,54 +1,52 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildEmoji } from 'discord.js'
-import { isRateLimited, sendLog } from '..'
+import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry } from 'discord.js'
+import { isRateLimited, LogEventData, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 
-export default async function (self: Lacuna, server: ServerDocument, emoji: GuildEmoji): Promise<boolean> {
-    if (server.moderation.logs.types.emoji_delete.active) {
-        if (isRateLimited(server._id, server.premium.available)) return false
+export default async function (self: Lacuna, server: ServerDocument, data: EmojiDeleteLogEventData): Promise<boolean> {
+    if (!server.moderation.logs.types.emoji_delete.active) return false
+    if (isRateLimited(server._id, server.premium.available)) return false
 
-        const t = self.i18n.t.bind(null, server.locale)
+    const t = self.i18n.t.bind(null, server.locale)
+    const { guild, auditLogEntry } = data
+    const emoji = auditLogEntry.target,
+        executor = auditLogEntry.executor
 
-        const logChannel = emoji.guild.channels.cache.get(server.moderation.logs.types.emoji_delete.channel_id) as BaseGuildTextChannel
-        const isOk = logChannel && logChannel.permissionsFor(emoji.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
+    const logChannel = guild.channels.cache.get(server.moderation.logs.types.emoji_delete.channel_id)
+    if (!logChannel || !logChannel.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)) return false
 
-        if (isOk) {
-            const audit = emoji.guild.members.me.permissions.has(self.PermissionFlags.ViewAuditLog)
-                ? await emoji.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.EmojiDelete })
-                : null
-            const entry = audit?.entries?.find(v => v.targetId === emoji.id)
-            const executor = entry?.executor
+    const nameChange = auditLogEntry.changes.find(v => v.key === 'name')
 
-            const embed = new EmbedBuilder()
-                .setTitle(t('Logs.EmojiDeleted'))
-                .setDescription(
-                    t('Logs.EmojiDeletedTemplate', {
-                        username: `<@${executor?.id ?? '0'}>`,
-                        emoji: `**${emoji.name}**`
-                    })
-                )
-                .setFooter({ text: `EID: ${emoji.id}` })
-                .setTimestamp()
-                .setColor('#EF5350')
-
-            try {
-                await sendLog(self, server, logChannel.id, { embeds: [embed] })
-            } catch (err) {
-                await self.logger.handleError({ module: 'LogsEmojiDelete', action: 'SendMessageViaWebhook', error: err, guild_id: emoji.guild.id })
-
-                return false
-            }
-
-            self.emit('moduleExecution', {
-                module: 'Logs',
-                category: 'EmojiDelete',
-                guild: { id: emoji.guild.id, name: emoji.guild.name },
-                target: { id: emoji.id, name: emoji.name }
+    const embed = new EmbedBuilder()
+        .setTitle(t('Logs.EmojiDeleted'))
+        .setDescription(
+            t('Logs.EmojiDeletedTemplate', {
+                username: `<@${executor?.id ?? '0'}>`,
+                emoji: `**${nameChange.old}**`
             })
+        )
+        .setFooter({ text: `EID: ${emoji.id}` })
+        .setTimestamp()
+        .setColor('#EF5350')
 
-            return true
-        }
+    try {
+        await sendLog(self, server, logChannel.id, { embeds: [embed] })
+    } catch (err) {
+        await self.logger.handleError({ module: 'LogsEmojiDelete', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+
+        return false
     }
 
-    return false
+    self.emit('moduleExecution', {
+        module: 'Logs',
+        category: 'EmojiDelete',
+        guild: { id: guild.id, name: guild.name },
+        target: { id: emoji.id, name: emoji.id }
+    })
+
+    return true
+}
+
+export interface EmojiDeleteLogEventData extends LogEventData {
+    auditLogEntry: GuildAuditLogsEntry<AuditLogEvent.EmojiDelete>
 }

@@ -1,25 +1,21 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { AuditLogEvent, BaseGuildTextChannel, EmbedBuilder, GuildAuditLogsEntry, GuildBan } from 'discord.js'
-import { isRateLimited, sendLog } from '..'
+import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry } from 'discord.js'
+import { isRateLimited, LogEventData, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
 import { capitalizeFirstLetter } from '../../../internals/utility/Utils'
 
-export default async function (
-    self: Lacuna,
-    server: ServerDocument,
-    ban: GuildBan,
-    auditLogsEntry: GuildAuditLogsEntry<AuditLogEvent.MemberBanAdd, 'Delete', 'User', AuditLogEvent.MemberBanAdd>
-): Promise<boolean> {
+export default async function (self: Lacuna, server: ServerDocument, data: GuildBanAddLogEventData): Promise<boolean> {
     if (!server.moderation.logs.types.guild_ban_add.active) return false
     if (isRateLimited(server._id, server.premium.available)) return false
 
     const t = self.i18n.t.bind(null, server.locale)
-    const guild = ban.guild,
-        user = ban.user
-    const logChannel = guild.channels.cache.get(server.moderation.logs.types.guild_ban_add.channel_id) as BaseGuildTextChannel
+    const { guild, auditLogEntry } = data,
+        user = auditLogEntry.target,
+        executor = auditLogEntry.executor
+
+    const logChannel = guild.channels.cache.get(server.moderation.logs.types.guild_ban_add.channel_id)
     if (!logChannel || !logChannel.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)) return false
 
-    const executor = auditLogsEntry?.executor
     const embed = new EmbedBuilder()
         .setTitle(t('Logs.GuildBanAdded'))
         .setDescription(
@@ -28,7 +24,7 @@ export default async function (
                 target: `<@${user.id}> (${user.tag})`
             })
         )
-        .addFields([{ name: capitalizeFirstLetter(t('Commands.Options.Reason')), value: ban.reason ?? '-' }])
+        .addFields([{ name: capitalizeFirstLetter(t('Commands.Options.Reason')), value: auditLogEntry.reason ?? '-' }])
         .setTimestamp()
         .setColor('#EF5350')
 
@@ -48,4 +44,8 @@ export default async function (
     })
 
     return true
+}
+
+export interface GuildBanAddLogEventData extends LogEventData {
+    auditLogEntry: GuildAuditLogsEntry<AuditLogEvent.MemberBanAdd>
 }

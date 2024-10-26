@@ -24,7 +24,9 @@ const client = new Lacuna({
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMessageReactions,
-        GatewayIntentBits.MessageContent
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.AutoModerationConfiguration,
+        GatewayIntentBits.AutoModerationExecution
     ],
     partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Reaction],
     makeCache: manager => {

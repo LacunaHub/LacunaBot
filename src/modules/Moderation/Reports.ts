@@ -7,12 +7,9 @@ import {
 } from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, ButtonInteraction, EmbedBuilder, GuildMember, StringSelectMenuInteraction } from 'discord.js'
 import ms from 'ms'
+import Moderation from '.'
 import Lacuna from '../../internals/Lacuna'
 import { capitalizeFirstLetter, truncateString } from '../../internals/utility/Utils'
-import banAction from '../AutoMod/actions/BanAction'
-import kickAction from '../AutoMod/actions/KickAction'
-import muteAction from '../AutoMod/actions/MuteAction'
-import warnUserAction from '../AutoMod/actions/WarnUserAction'
 
 const QuickActionLocales = {
     BAN: 'CaseLog.CaseTypes.BanAdd',
@@ -142,7 +139,7 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
             return false
         }
 
-        await kickAction(self, { guild: interaction.guild, target: member, reason })
+        await Moderation.kickUser(self, server, interaction.guild, { target: member, executor: interaction.user, reason })
     }
 
     if (action === 'WARN') {
@@ -157,7 +154,12 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
             return false
         }
 
-        await warnUserAction(self, server, interaction, { target: member, executor: interaction.member, reason })
+        await Moderation.warnUser(self, server, interaction.guild, {
+            target: member,
+            executor: interaction.user,
+            reason,
+            channel: interaction.channel
+        })
     }
 
     closeReason += `: ${t(QuickActionLocales[action])}`
@@ -274,11 +276,11 @@ async function handleOptionSelect(self: Lacuna, server: ServerDocument, interact
             return false
         }
 
-        await banAction(self, server, {
-            config: { ban_timeout: duration === 'indefinitely' ? null : ms(duration) / 1000 } as any,
-            guild: interaction.guild,
+        await Moderation.banUser(self, server, interaction.guild, {
             target: member,
-            reason
+            executor: interaction.user,
+            reason,
+            durationSeconds: duration === 'indefinitely' ? null : ms(duration) / 1000
         })
     }
 
@@ -305,11 +307,11 @@ async function handleOptionSelect(self: Lacuna, server: ServerDocument, interact
             return false
         }
 
-        await muteAction(self, server, {
-            config: { mute_timeout: ms(duration) / 1000 } as any,
-            guild: interaction.guild,
+        await Moderation.muteUser(self, server, interaction.guild, {
             target: member,
-            reason
+            executor: interaction.user,
+            reason,
+            durationSeconds: ms(duration) / 1000
         })
     }
 

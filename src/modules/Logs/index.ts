@@ -1,6 +1,6 @@
 import { ServerDocument, ServerModerationLogsTypeKey } from '@lacunahub/lacuna-database-driver'
 import { WebhookClient } from '@lacunahub/letsfrag'
-import { APIWebhook, MessagePayload, WebhookMessageCreateOptions, resolveImage } from 'discord.js'
+import { APIWebhook, Guild, MessagePayload, WebhookMessageCreateOptions, resolveImage } from 'discord.js'
 import DiscordUtils from '../../api/utility/DiscordUtils'
 import { redisStore } from '../../database'
 import Lacuna from '../../internals/Lacuna'
@@ -14,6 +14,8 @@ import GuildBanAdd from './Guild/GuildBanAdd'
 import GuildBanRemove from './Guild/GuildBanRemove'
 import GuildMemberAdd from './Guild/GuildMemberAdd'
 import GuildMemberRemove from './Guild/GuildMemberRemove'
+import GuildMemberRoleAdd from './Guild/GuildMemberRoleAdd'
+import GuildMemberRoleRemove from './Guild/GuildMemberRoleRemove'
 import GuildMemberUpdate from './Guild/GuildMemberUpdate'
 import GuildUpdate from './Guild/GuildUpdate'
 import InviteCreate from './Guild/InviteCreate'
@@ -23,8 +25,6 @@ import MessageDeleteBulk from './Message/MessageDeleteBulk'
 import MessageUpdate from './Message/MessageUpdate'
 import RoleCreate from './Role/RoleCreate'
 import RoleDelete from './Role/RoleDelete'
-import RoleMemberAdd from './Role/RoleMemberAdd'
-import RoleMemberRemove from './Role/RoleMemberRemove'
 import RoleUpdate from './Role/RoleUpdate'
 import StickerCreate from './Sticker/StickerCreate'
 import StickerDelete from './Sticker/StickerDelete'
@@ -173,8 +173,8 @@ export default {
     MessageUpdate,
     RoleCreate,
     RoleDelete,
-    RoleMemberAdd,
-    RoleMemberRemove,
+    GuildMemberRoleAdd,
+    GuildMemberRoleRemove,
     RoleUpdate,
     StickerCreate,
     StickerDelete,
@@ -190,4 +190,8 @@ export default {
     VoiceServerMute,
     VoiceServerUndeaf,
     VoiceServerUnmute
+}
+
+export interface LogEventData {
+    guild: Guild
 }

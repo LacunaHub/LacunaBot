@@ -1,21 +1,19 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { ChannelType, DMChannel, Events, GuildChannel } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
-import Logs from '../../modules/Logs'
 
 const handler = async (self: Lacuna, channel: DMChannel | GuildChannel) => {
     if (channel.type === ChannelType.DM) return false
 
     const server: ServerDocument = await self.db.servers.findOne({ _id: channel.guild.id })
-
-    if (!server) return false
+    if (!server || server.blocked) return false
 
     if (channel.type === ChannelType.GuildVoice) {
-        const autovoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === channel.id)
-        const autovoiceChildren = server.modules.voice_manager.autovoices.find(i => i.children.some(c => c.channel_id === channel.id))
-        const tempVoice = autovoiceChildren ? autovoiceChildren.children.find(c => c.channel_id === channel.id) : null
+        const autoVoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === channel.id)
+        const autoVoiceChildren = server.modules.voice_manager.autovoices.find(i => i.children.some(c => c.channel_id === channel.id))
+        const tempVoice = autoVoiceChildren ? autoVoiceChildren.children.find(c => c.channel_id === channel.id) : null
 
-        if (autovoice) {
+        if (autoVoice) {
             await self.db.servers.updateOne(
                 { _id: channel.guild.id },
                 {
@@ -41,10 +39,6 @@ const handler = async (self: Lacuna, channel: DMChannel | GuildChannel) => {
             )
         }
     }
-
-    await Logs.ChannelDelete(self, server, channel)
-
-    setTimeout(() => self.channels.cache.delete(channel.id), 5000)
 
     return true
 }
