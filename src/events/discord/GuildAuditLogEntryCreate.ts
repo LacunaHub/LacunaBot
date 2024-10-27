@@ -10,7 +10,7 @@ export default {
         if (!server || server.blocked) return false
 
         if (auditLogEntry.executorId) auditLogEntry.executor = await self.users.fetch(auditLogEntry.executorId)
-        if (auditLogEntry.targetType === 'User') auditLogEntry.target = await self.users.fetch(auditLogEntry.targetId)
+        if (auditLogEntry.targetType === 'User' && auditLogEntry.targetId) auditLogEntry.target = await self.users.fetch(auditLogEntry.targetId)
 
         if (auditLogEntry.action === AuditLogEvent.AutoModerationRuleDelete) {
             if (auditLogEntry.executorId !== self.user.id) {

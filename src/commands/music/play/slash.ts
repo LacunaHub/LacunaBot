@@ -147,7 +147,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         ),
         new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder().setCustomId('PLAYER-QUEUE').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.MusicQueue),
-            new ButtonBuilder().setCustomId('PLAYER-FILTERS').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.SettingsSliders)
+            new ButtonBuilder().setCustomId('PLAYER-FILTERS').setStyle(ButtonStyle.Secondary).setEmoji(self.staticEmojis.Sliders)
         )
     ]
 
