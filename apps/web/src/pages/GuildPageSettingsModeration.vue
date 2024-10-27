@@ -264,83 +264,416 @@
       </q-card>
     </div>
 
-    <div class="col-12">
-      <q-card class="bg-dark-1" flat>
-        <q-item class="q-py-md">
-          <q-item-section>
-            <q-item-label class="text-subtitle1">
-              {{ $t('Pages.GuildPage.Moderation.Mutes') }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+    <div v-if="guild.moderation.ai_mod" class="col-12">
+      <q-list class="bg-dark-1 overflow-hidden rounded-borders">
+        <q-expansion-item>
+          <template #header>
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                {{ $t('Pages.GuildPage.Moderation.AIMod') }}
+              </q-item-label>
 
-        <div class="q-pa-md">
-          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-            <q-item tag="label">
-              <q-item-section side>
-                <q-checkbox v-model="guild.moderation.mutes.rar" dense></q-checkbox>
-              </q-item-section>
+              <q-item-label class="text--secondary">
+                <q-badge class="q-mr-xs" color="warning">
+                  <span>LIMITED BETA</span>
+                </q-badge>
+              </q-item-label>
+            </q-item-section>
 
-              <q-item-section>
-                <q-item-label>
-                  {{ $t('Pages.GuildPage.Moderation.MutesRAR') }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
+            <q-item-section side>
+              <q-toggle v-model="guild.moderation.ai_mod.active" dense></q-toggle>
+            </q-item-section>
+          </template>
 
-        <q-card-section>
-          <div class="row q-col-gutter-md">
-            <div class="col-12">
-              <div>
-                {{ $t('Pages.GuildPage.Moderation.MutesRARStrict') }}
-              </div>
+          <q-card class="bg-dark-1" flat>
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12">
+                  <div>
+                    {{ $t('Pages.GuildPage.Moderation.AIModInfoChannel') }}
+                  </div>
 
-              <q-select
-                v-model="guild.moderation.mutes.rar_strict"
-                :options="guild.rolesUnmanaged"
-                option-label="name"
-                option-value="id"
-                :disable="!guild.moderation.mutes.rar"
-                use-chips
-                class="q-pt-sm"
-                multiple
-                filled
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-              >
-                <template #selected-item="{ opt, index, removeAtIndex }">
-                  <q-chip
-                    square
-                    :label="opt.name ?? opt"
-                    size="sm"
-                    :style="`background: ${opt.color}`"
-                    removable
-                    @remove="removeAtIndex(index)"
-                  ></q-chip>
-                </template>
+                  <div class="text--secondary">
+                    {{ $t('Pages.GuildPage.Moderation.AIModInfoChannelDescription') }}
+                  </div>
 
-                <template #option="{ opt, toggleOption, selected }">
-                  <q-item
-                    clickable
-                    @click="toggleOption(opt)"
-                    :active="selected"
-                    :disable="opt.higher"
-                    active-class="menu-item--active"
+                  <q-select
+                    v-model="guild.moderation.ai_mod.log_channel_id"
+                    :options="guild.channelsText"
+                    :disable="!guild.moderation.ai_mod.active"
+                    option-label="name"
+                    option-value="id"
+                    class="q-pt-sm"
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                    clearable
                   >
-                    <q-item-section>
-                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
+                    <template #selected-item="{ opt }">
+                      <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                        <q-item-section avatar>
+                          <q-icon :name="opt.icon"></q-icon>
+                        </q-item-section>
+
+                        <q-item-section>
+                          <q-item-label>
+                            {{ opt.name }}
+                          </q-item-label>
+
+                          <q-item-label class="text--secondary">
+                            {{ opt.parentName }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+              </div>
+            </q-card-section>
+
+            <!-- <div class="q-pa-md">
+              <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+                <q-item tag="label" :disable="!guild.moderation.ai_mod.active">
+                  <q-item-section side>
+                    <q-checkbox
+                      v-model="guild.moderation.ai_mod.independent_decisions"
+                      :disable="!guild.moderation.ai_mod.active"
+                      dense
+                    ></q-checkbox>
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('Разрешить принимать решения самостоятельно') }}
+                    </q-item-label>
+
+                    <q-item-label class="text--secondary">
+                      {{ $t('Позволит боту автоматически применять наказания, если будет обнаружено нарушение') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </div> -->
+
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12">
+                  <div>
+                    {{ $t('Common.IgnoredChannels') }}
+                  </div>
+
+                  <q-select
+                    v-model="guild.moderation.ai_mod.ignored_channels"
+                    :options="guild.channels"
+                    option-label="name"
+                    option-value="id"
+                    :disable="!guild.moderation.ai_mod.active"
+                    class="q-pt-sm"
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                    multiple
+                  >
+                    <template #selected-item="{ opt, index, removeAtIndex }">
+                      <q-chip
+                        color="dark-1"
+                        square
+                        :label="opt.name ?? opt"
+                        :icon="opt.icon"
+                        size="sm"
+                        removable
+                        @remove="removeAtIndex(index)"
+                      ></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                        <q-item-section avatar>
+                          <q-icon :name="opt.icon"></q-icon>
+                        </q-item-section>
+
+                        <q-item-section>
+                          <q-item-label>
+                            {{ opt.name }}
+                          </q-item-label>
+
+                          <q-item-label class="text--secondary">
+                            {{ opt.parentName }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+
+                <div class="col-12">
+                  <div>
+                    {{ $t('Common.IgnoredRoles') }}
+                  </div>
+
+                  <q-select
+                    v-model="guild.moderation.ai_mod.ignored_roles"
+                    :options="guild.roles"
+                    option-label="name"
+                    option-value="id"
+                    :disable="!guild.moderation.ai_mod.active"
+                    use-chips
+                    class="q-pt-sm"
+                    multiple
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                  >
+                    <template #selected-item="{ opt, index, removeAtIndex }">
+                      <q-chip
+                        square
+                        :label="opt.name ?? opt"
+                        size="sm"
+                        :style="`background: ${opt.color}`"
+                        removable
+                        @remove="removeAtIndex(index)"
+                      ></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                        <q-item-section>
+                          <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
+    </div>
+
+    <div class="col-12">
+      <q-list class="bg-dark-1 overflow-hidden rounded-borders">
+        <q-expansion-item>
+          <template #header>
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                {{ $t('Pages.GuildPage.Moderation.DAME') }}
+              </q-item-label>
+
+              <q-item-label class="text--secondary">
+                <q-badge class="q-mr-xs" color="primary">
+                  <span>NEW</span>
+                </q-badge>
+              </q-item-label>
+            </q-item-section>
+          </template>
+
+          <q-card class="bg-dark-1" flat>
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div v-for="(dameRule, i) in guild.moderation.dame_rules" :key="i" class="col-12 col-sm-6 col-md-4">
+                  <q-card class="bg-dark-2" flat>
+                    <q-item @click="dameRuleDialog({ dameRuleProp: dameRule })" class="q-pa-md" clickable>
+                      <q-item-section>
+                        <q-item-label class="ellipsis">
+                          {{ dameRule.name }}
+                        </q-item-label>
+                      </q-item-section>
+
+                      <q-item-section side>
+                        <q-avatar rounded color="dark-3" :icon="getDameRuleIcon(dameRule.trigger_type)" />
+                      </q-item-section>
+                    </q-item>
+                  </q-card>
+                </div>
+
+                <div class="col-12">
+                  <q-btn @click="dameRuleDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
+    </div>
+
+    <div class="col-12">
+      <q-list class="bg-dark-1 overflow-hidden rounded-borders">
+        <q-expansion-item>
+          <template #header>
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                {{ $t('Pages.GuildPage.Useful.Reports') }}
+              </q-item-label>
+            </q-item-section>
+
+            <q-item-section side>
+              <q-toggle v-model="guild.modules.reports.active" dense></q-toggle>
+            </q-item-section>
+          </template>
+
+          <q-card class="bg-dark-1" flat>
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12">
+                  <div>
+                    {{ $t('Commands.OptionTypes.Channel') }}
+                  </div>
+
+                  <q-select
+                    v-model="guild.modules.reports.channel_id"
+                    :options="guild.channelsText"
+                    :disable="!guild.modules.reports.active"
+                    option-label="name"
+                    option-value="id"
+                    class="q-pt-sm"
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                  >
+                    <template #selected-item="{ opt }">
+                      <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                        <q-item-section avatar>
+                          <q-icon :name="opt.icon"></q-icon>
+                        </q-item-section>
+
+                        <q-item-section>
+                          <q-item-label>
+                            {{ opt.name }}
+                          </q-item-label>
+
+                          <q-item-label class="text--secondary">
+                            {{ opt.parentName }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+              </div>
+            </q-card-section>
+
+            <div class="q-pa-md">
+              <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+                <q-item tag="label" :disable="!guild.modules.reports.active">
+                  <q-item-section side>
+                    <q-checkbox
+                      v-model="guild.modules.reports.notify_about_unwanted_users"
+                      :disable="!guild.modules.reports.active"
+                      dense
+                    ></q-checkbox>
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('Pages.GuildPage.Useful.ReportsNotifyAboutUnwantedUsers') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
             </div>
-          </div>
-        </q-card-section>
-      </q-card>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
+    </div>
+
+    <div class="col-12">
+      <q-list class="bg-dark-1 overflow-hidden rounded-borders">
+        <q-expansion-item>
+          <template #header>
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                {{ $t('Pages.GuildPage.Moderation.Mutes') }}
+              </q-item-label>
+            </q-item-section>
+          </template>
+
+          <q-card class="bg-dark-1" flat>
+            <div class="q-pa-md">
+              <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+                <q-item tag="label">
+                  <q-item-section side>
+                    <q-checkbox v-model="guild.moderation.mutes.rar" dense></q-checkbox>
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('Pages.GuildPage.Moderation.MutesRAR') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </div>
+
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12">
+                  <div>
+                    {{ $t('Pages.GuildPage.Moderation.MutesRARStrict') }}
+                  </div>
+
+                  <q-select
+                    v-model="guild.moderation.mutes.rar_strict"
+                    :options="guild.rolesUnmanaged"
+                    option-label="name"
+                    option-value="id"
+                    :disable="!guild.moderation.mutes.rar"
+                    use-chips
+                    class="q-pt-sm"
+                    multiple
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                  >
+                    <template #selected-item="{ opt, index, removeAtIndex }">
+                      <q-chip
+                        square
+                        :label="opt.name ?? opt"
+                        size="sm"
+                        :style="`background: ${opt.color}`"
+                        removable
+                        @remove="removeAtIndex(index)"
+                      ></q-chip>
+                    </template>
+
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item
+                        clickable
+                        @click="toggleOption(opt)"
+                        :active="selected"
+                        :disable="opt.higher"
+                        active-class="menu-item--active"
+                      >
+                        <q-item-section>
+                          <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
     </div>
 
     <div class="col-12">
@@ -464,6 +797,7 @@ import profanityImg from 'src/assets/profanity.svg'
 import slowdownImg from 'src/assets/slowdown.svg'
 import tagsImg from 'src/assets/tags.svg'
 import unlinkImg from 'src/assets/unlink.svg'
+import DAMERule from 'src/components/dialogs/DAMERule.vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsModeration',
@@ -502,6 +836,40 @@ export default defineComponent({
         .onOk(caseType => {
           this.guild.moderation.case_log.types[caseType.name] = { ...caseType.config }
         })
+    },
+    dameRuleDialog(componentProps) {
+      return this.$q
+        .dialog({
+          component: DAMERule,
+          componentProps
+        })
+        .onOk(payload => {
+          const { mode, dameRule } = payload
+
+          if (mode === 'CREATE') {
+            this.guild.moderation.dame_rules.push(dameRule)
+          }
+
+          if (mode === 'UPDATE') {
+            const index = this.guild.moderation.dame_rules.findIndex(v => v.id === dameRule.id)
+
+            this.guild.moderation.dame_rules[index] = dameRule
+          }
+
+          if (mode === 'DELETE') {
+            const index = this.guild.moderation.dame_rules.findIndex(v => v.id === dameRule.id)
+
+            this.guild.moderation.dame_rules.splice(index, 1)
+          }
+        })
+    },
+    getDameRuleIcon(type) {
+      if (type === 1) return 'r_filter_alt'
+      if (type === 3) return 'r_dynamic_feed'
+      if (type === 4) return 'r_filter_1'
+      if (type === 5) return 'r_alternate_email'
+      if (type === 6) return 'r_assignment_ind'
+      return 'r_question_mark'
     },
     autoModDialog(name) {
       let component

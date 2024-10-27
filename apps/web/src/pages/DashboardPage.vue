@@ -86,7 +86,10 @@ const getMe = async () => {
     return true
   } catch (err) {
     if (err.response?.status === 401) {
-      await router.push({ path: '/auth' })
+      await router.push({
+        path: '/auth',
+        query: { returnTo: encodeURIComponent(`${location.pathname}${location.search}`) }
+      })
     } else {
       const error = handleAxiosError(err)
 

@@ -48,8 +48,8 @@ const routes = [
                 component: () => import('src/pages/StatePage.vue')
             },
             {
-                path: 'patrons',
-                component: () => import('src/pages/PatronsPage.vue')
+                path: 'diamond',
+                component: () => import('src/pages/DiamondPage.vue')
             }
         ],
         beforeEnter: to => {

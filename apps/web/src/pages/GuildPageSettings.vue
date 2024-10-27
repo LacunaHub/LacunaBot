@@ -43,7 +43,7 @@
             <div class="col-12 lt-md">
               <q-card class="bg-dark-1" flat>
                 <q-list padding>
-                  <q-item clickable @click="openLacunaDiamondDialog">
+                  <q-item clickable :to="`/guilds/${guildId}/settings/diamond`" active-class="nav-item--active">
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         <span class="q-mr-xs">Lacuna Diamond</span>
@@ -115,7 +115,7 @@
             <div class="col-12 gt-sm">
               <q-card class="bg-dark-1" flat>
                 <q-list padding>
-                  <q-item clickable @click="openLacunaDiamondDialog">
+                  <q-item clickable :to="`/guilds/${guildId}/settings/diamond`" active-class="nav-item--active">
                     <q-item-section>
                       <q-item-label class="text-subtitle1">
                         <span class="q-mr-xs">Lacuna Diamond</span>
@@ -238,7 +238,6 @@ import shieldImg from 'src/assets/shield.svg'
 import slashCommandImg from 'src/assets/slash-command.svg'
 import { interfaces } from 'src/boot/axios'
 import ChangeLog from 'src/components/dialogs/ChangeLog.vue'
-import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import UserSurvey from 'src/components/dialogs/UserSurvey.vue'
 import { useReleaseNotesCache } from 'src/stores/ReleaseNotesCache'
 import { useGuildStore } from 'src/stores/guild'
@@ -395,12 +394,6 @@ const updateSettings = async () => {
   }
 }
 
-const openLacunaDiamondDialog = () => {
-  return $q.dialog({
-    component: LacunaDiamond
-  })
-}
-
 const downloadLogs = async () => {
   try {
     const { data } = await interfaces.guilds.getLogs(guild._id)
@@ -438,6 +431,7 @@ onMounted(async () => {
     (current, before) => {
       const isNotTrackableChanges =
         JSON.stringify(before.modules.custom_commands) !== JSON.stringify(current.modules.custom_commands) ||
+        JSON.stringify(before.moderation.dame_rules) !== JSON.stringify(current.moderation.dame_rules) ||
         JSON.stringify(before.modules.subscriptions.telegram) !==
           JSON.stringify(current.modules.subscriptions.telegram) ||
         JSON.stringify(before.modules.subscriptions.twitch) !== JSON.stringify(current.modules.subscriptions.twitch) ||

@@ -484,7 +484,7 @@ function resolveCustomBehaviorComponents(rawComponents) {
 }
 
 export function getLocale() {
-    return (localStorage.getItem('locale') ?? navigator.languages?.[0] ?? navigator.language ?? 'en').split('-')[0]
+    return (localStorage.getItem('locale') ?? navigator.language ?? navigator.languages?.[0] ?? 'en').split('-')[0]
 }
 
 export function getDefaultAvatarURL(id) {
@@ -492,7 +492,21 @@ export function getDefaultAvatarURL(id) {
 }
 
 export function getGuildIconURL(guildId, icon) {
-    return guildId && icon ? `https://cdn.discordapp.com/icons/${guildId}/${icon}.png` : getDefaultAvatarURL(guildId)
+    if (guildId && icon) {
+        const ext = icon.startsWith('a_') ? 'gif' : 'png'
+        return `https://cdn.discordapp.com/icons/${guildId}/${icon}.${ext}`
+    }
+
+    return getDefaultAvatarURL(guildId)
+}
+
+export function getUserAvatarURL(userId, avatar) {
+    if (userId && avatar) {
+        const ext = avatar.startsWith('a_') ? 'gif' : 'png'
+        return `https://cdn.discordapp.com/avatars/${userId}/${avatar}.${ext}`
+    }
+
+    return getDefaultAvatarURL(userId)
 }
 
 export function handleAxiosError(error) {
@@ -529,6 +543,16 @@ export function splitRelativeTime(locale, value, unit) {
         .join('')
 }
 
+/**
+ * @param {number} value
+ * @param {Intl.RelativeTimeFormatUnit} unit
+ * @returns string
+ */
+export function pluralTime(value, unit) {
+    const relativeTime = new Intl.RelativeTimeFormat(getLocale(), { numeric: 'always' })
+    return relativeTime.formatToParts(value, unit).pop().value.trim()
+}
+
 export function openPopupWindow({ url, title, w, h }) {
     const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX
     const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY
@@ -561,4 +585,28 @@ export function openPopupWindow({ url, title, w, h }) {
 
     if (window.focus) newWindow.focus()
     return newWindow
+}
+
+export function chunkArray(array, length) {
+    if (!Array.isArray(array)) throw new TypeError('IS_NOT_ARRAY')
+    if (typeof length != 'number') throw new TypeError('LENGTH_IS_NOT_INTEGER')
+
+    const arr = []
+
+    for (let i = 0; i < array.length; i += length) {
+        arr.push(array.slice(i, i + length))
+    }
+
+    return arr
+}
+
+export function isEven(number) {
+    return number % 2 === 0
+}
+
+export function frameNumber(value, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) {
+    if (typeof value !== 'number' || isNaN(value)) value = min
+    else if (value < min) value = min
+    else if (value > max) value = max
+    return value
 }

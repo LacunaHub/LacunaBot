@@ -370,6 +370,24 @@ export const localeStringsMap = {
     sortOrders: {
         Asc: 'Commands.LeadersCommand.Options.Order.ChoiceAsc',
         Desc: 'Commands.LeadersCommand.Options.Order.ChoiceDesc'
+    },
+    dameTriggers: {
+        1: 'Pages.GuildPage.Moderation.DAMETriggerKeyword',
+        3: 'Pages.GuildPage.Moderation.DAMETriggerSpam',
+        4: 'Pages.GuildPage.Moderation.DAMETriggerKeywordPreset',
+        5: 'Pages.GuildPage.Moderation.DAMETriggerMentionSpam',
+        6: 'Pages.GuildPage.Moderation.DAMETriggerMemberProfile'
+    },
+    dameActions: {
+        1: 'Pages.GuildPage.Moderation.DAMEBlockMessage',
+        2: 'Pages.GuildPage.Moderation.DAMESendAlert',
+        3: 'CaseLog.Actions.Mute',
+        4: 'Pages.GuildPage.Moderation.DAMEBlockMemberInteractions',
+        101: 'CaseLog.Actions.Ban',
+        102: 'CaseLog.Actions.Kick',
+        103: 'CaseLog.Actions.Warn',
+        104: 'CaseLog.Actions.ModifyRoles',
+        105: 'CaseLog.Actions.SendMessage'
     }
 }
 
@@ -551,16 +569,6 @@ export const lacunaDiamondPlanComparison = [
     {
         categoryName: 'Pages.GuildPage.NavNames.Subscriptions',
         features: [
-            {
-                name: 'Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber',
-                free: { value: '1', type: 'text' },
-                diamond: { value: '10', type: 'text' }
-            },
-            {
-                name: 'Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber',
-                free: { value: '1', type: 'text' },
-                diamond: { value: '10', type: 'text' }
-            },
             {
                 name: 'Components.LacunaDiamond.PlanComparisonFeatures.SocialPlatformNumber',
                 free: { value: '1', type: 'text' },
