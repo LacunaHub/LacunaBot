@@ -270,7 +270,7 @@
           <template #header>
             <q-item-section>
               <q-item-label class="text-subtitle1">
-                {{ $t('AI Mod') }}
+                {{ $t('Pages.GuildPage.Moderation.AIMod') }}
               </q-item-label>
 
               <q-item-label class="text--secondary">
@@ -290,11 +290,11 @@
               <div class="row q-col-gutter-md">
                 <div class="col-12">
                   <div>
-                    {{ $t('Информационный канал') }}
+                    {{ $t('Pages.GuildPage.Moderation.AIModInfoChannel') }}
                   </div>
 
                   <div class="text--secondary">
-                    {{ $t('В выбранный канал будет отправляться информация о нарушениях') }}
+                    {{ $t('Pages.GuildPage.Moderation.AIModInfoChannelDescription') }}
                   </div>
 
                   <q-select
@@ -453,6 +453,52 @@
                       </q-item>
                     </template>
                   </q-select>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
+    </div>
+
+    <div class="col-12">
+      <q-list class="bg-dark-1 overflow-hidden rounded-borders">
+        <q-expansion-item>
+          <template #header>
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                {{ $t('Pages.GuildPage.Moderation.DAME') }}
+              </q-item-label>
+
+              <q-item-label class="text--secondary">
+                <q-badge class="q-mr-xs" color="primary">
+                  <span>NEW</span>
+                </q-badge>
+              </q-item-label>
+            </q-item-section>
+          </template>
+
+          <q-card class="bg-dark-1" flat>
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div v-for="(dameRule, i) in guild.moderation.dame_rules" :key="i" class="col-12 col-sm-6 col-md-4">
+                  <q-card class="bg-dark-2" flat>
+                    <q-item @click="dameRuleDialog({ dameRuleProp: dameRule })" class="q-pa-md" clickable>
+                      <q-item-section>
+                        <q-item-label class="ellipsis">
+                          {{ dameRule.name }}
+                        </q-item-label>
+                      </q-item-section>
+
+                      <q-item-section side>
+                        <q-avatar rounded color="dark-3" :icon="getDameRuleIcon(dameRule.trigger_type)" />
+                      </q-item-section>
+                    </q-item>
+                  </q-card>
+                </div>
+
+                <div class="col-12">
+                  <q-btn @click="dameRuleDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
                 </div>
               </div>
             </q-card-section>
@@ -751,6 +797,7 @@ import profanityImg from 'src/assets/profanity.svg'
 import slowdownImg from 'src/assets/slowdown.svg'
 import tagsImg from 'src/assets/tags.svg'
 import unlinkImg from 'src/assets/unlink.svg'
+import DAMERule from 'src/components/dialogs/DAMERule.vue'
 
 export default defineComponent({
   name: 'GuildPageSettingsModeration',
@@ -789,6 +836,40 @@ export default defineComponent({
         .onOk(caseType => {
           this.guild.moderation.case_log.types[caseType.name] = { ...caseType.config }
         })
+    },
+    dameRuleDialog(componentProps) {
+      return this.$q
+        .dialog({
+          component: DAMERule,
+          componentProps
+        })
+        .onOk(payload => {
+          const { mode, dameRule } = payload
+
+          if (mode === 'CREATE') {
+            this.guild.moderation.dame_rules.push(dameRule)
+          }
+
+          if (mode === 'UPDATE') {
+            const index = this.guild.moderation.dame_rules.findIndex(v => v.id === dameRule.id)
+
+            this.guild.moderation.dame_rules[index] = dameRule
+          }
+
+          if (mode === 'DELETE') {
+            const index = this.guild.moderation.dame_rules.findIndex(v => v.id === dameRule.id)
+
+            this.guild.moderation.dame_rules.splice(index, 1)
+          }
+        })
+    },
+    getDameRuleIcon(type) {
+      if (type === 1) return 'r_filter_alt'
+      if (type === 3) return 'r_dynamic_feed'
+      if (type === 4) return 'r_filter_1'
+      if (type === 5) return 'r_alternate_email'
+      if (type === 6) return 'r_assignment_ind'
+      return 'r_question_mark'
     },
     autoModDialog(name) {
       let component

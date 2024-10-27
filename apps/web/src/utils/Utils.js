@@ -493,7 +493,7 @@ export function getDefaultAvatarURL(id) {
 
 export function getGuildIconURL(guildId, icon) {
     if (guildId && icon) {
-        const ext = avatar.startsWith('a_') ? 'gif' : 'png'
+        const ext = icon.startsWith('a_') ? 'gif' : 'png'
         return `https://cdn.discordapp.com/icons/${guildId}/${icon}.${ext}`
     }
 
@@ -541,6 +541,16 @@ export function splitRelativeTime(locale, value, unit) {
         .slice(1)
         .map(v => v.value)
         .join('')
+}
+
+/**
+ * @param {number} value
+ * @param {Intl.RelativeTimeFormatUnit} unit
+ * @returns string
+ */
+export function pluralTime(value, unit) {
+    const relativeTime = new Intl.RelativeTimeFormat(getLocale(), { numeric: 'always' })
+    return relativeTime.formatToParts(value, unit).pop().value.trim()
 }
 
 export function openPopupWindow({ url, title, w, h }) {
@@ -592,4 +602,11 @@ export function chunkArray(array, length) {
 
 export function isEven(number) {
     return number % 2 === 0
+}
+
+export function frameNumber(value, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) {
+    if (typeof value !== 'number' || isNaN(value)) value = min
+    else if (value < min) value = min
+    else if (value > max) value = max
+    return value
 }

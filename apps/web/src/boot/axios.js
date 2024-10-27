@@ -91,6 +91,15 @@ const interfaces = {
         updateCustomCommand(guildId, commandId, data) {
             return api.patch(`/guilds/${guildId}/settings/custom-commands/${commandId}`, data, configureRequest())
         },
+        createDAMERule(guildId, data) {
+            return api.post(`/guilds/${guildId}/settings/dame-rules`, data, configureRequest())
+        },
+        deleteDAMERule(guildId, ruleId) {
+            return api.delete(`/guilds/${guildId}/settings/dame-rules/${ruleId}`, configureRequest())
+        },
+        updateDAMERule(guildId, ruleId, data) {
+            return api.patch(`/guilds/${guildId}/settings/dame-rules/${ruleId}`, data, configureRequest())
+        },
         createInteractiveMessage(guildId, data) {
             return api.post(`/guilds/${guildId}/settings/interactive-messages`, data, configureRequest())
         },

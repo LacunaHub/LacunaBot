@@ -431,6 +431,7 @@ onMounted(async () => {
     (current, before) => {
       const isNotTrackableChanges =
         JSON.stringify(before.modules.custom_commands) !== JSON.stringify(current.modules.custom_commands) ||
+        JSON.stringify(before.moderation.dame_rules) !== JSON.stringify(current.moderation.dame_rules) ||
         JSON.stringify(before.modules.subscriptions.telegram) !==
           JSON.stringify(current.modules.subscriptions.telegram) ||
         JSON.stringify(before.modules.subscriptions.twitch) !== JSON.stringify(current.modules.subscriptions.twitch) ||
