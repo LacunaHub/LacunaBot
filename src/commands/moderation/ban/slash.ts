@@ -18,7 +18,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.InvalidUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.InvalidUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -29,7 +29,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (mention.id == interaction.member.id) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.YouCannotBanYourself', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.YouCannotBanYourself', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -40,7 +40,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention.bannable) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.CannotBanThisUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.CannotBanThisUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -51,7 +51,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.respect_hierarchy && mention.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -62,7 +62,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.BanMembers)) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -73,7 +73,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -122,7 +122,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await createCaseLogEntry(interaction.guild, { type: 'BanAdd', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.BanCommand.Texts.UserHasBeenBanned', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.BanCommand.Texts.UserHasBeenBanned', {
             username: `**${interaction.member.displayName}**`,
             target: `**${mention.user.tag}**`
         })}`

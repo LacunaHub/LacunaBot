@@ -16,7 +16,8 @@ const options: CommandOptions = {
             type: ApplicationCommandOptionType.String,
             name: 'Commands.Options.Duration',
             description: 'Commands.BanCommand.Options.Duration.Description',
-            required: false
+            required: false,
+            autocomplete: true
         },
         {
             type: ApplicationCommandOptionType.String,

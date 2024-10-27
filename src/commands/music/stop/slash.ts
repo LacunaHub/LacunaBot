@@ -9,7 +9,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!player) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.PlaybackIsNotStarted', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -20,7 +20,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (player.voiceChannelId !== interaction.member.voice.channelId) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -31,7 +31,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await player.destroy()
     await interaction.reply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.StopCommand.Texts.PlaybackHasBeenStopped', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.StopCommand.Texts.PlaybackHasBeenStopped', {
             username: `**${interaction.member.displayName}**`
         })}`
     })

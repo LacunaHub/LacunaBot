@@ -4,14 +4,16 @@ import {
     AnySelectMenuInteraction,
     AutocompleteInteraction,
     ButtonInteraction,
-    ButtonStyle,
     ChatInputCommandInteraction,
     Events,
     Message,
     MessageContextMenuCommandInteraction,
     ModalSubmitInteraction,
+    parseEmoji,
     UserContextMenuCommandInteraction
 } from 'discord.js'
+import moment from 'moment'
+import ms from 'ms'
 import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
@@ -20,7 +22,7 @@ import Automation from '../../modules/Automation'
 import CustomCommand from '../../modules/CustomCommand'
 import InteractiveMessages from '../../modules/InteractiveMessages'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
-import { onPressReportButton, onSelectReportOption } from '../../modules/Moderation/Reports'
+import Reports from '../../modules/Moderation/Reports'
 
 const handler = async (
     self: Lacuna,
@@ -79,7 +81,7 @@ const handler = async (
             if (message?.id === interaction.message?.id) {
                 if (interaction.member.voice.channel?.id !== player.voiceChannelId) {
                     await interaction.reply({
-                        content: `${self.staticEmojis.ERROR} | ${self.i18n.t(
+                        content: `${self.staticEmojis.Cross} | ${self.i18n.t(
                             server.locale,
                             'Commands.PlayCommand.Texts.YouAreNotConnectedToVoiceChannel',
                             {
@@ -122,7 +124,7 @@ const handler = async (
 
                 if (interaction.customId === playPauseButton.customId) {
                     await player.pause(!player.paused)
-                    ;(playPauseButton as any).data.emoji = { name: player.paused ? '▶️' : '⏸️' }
+                    ;(playPauseButton as any).data.emoji = parseEmoji(player.paused ? self.staticEmojis.Play : self.staticEmojis.Pause)
                 }
 
                 if (interaction.customId === nextButton.customId) {
@@ -131,13 +133,13 @@ const handler = async (
 
                 if (interaction.customId === repeatButton.customId) {
                     if (player.queueRepeat) {
-                        ;(repeatButton as any).data.emoji = { name: '🔂' }
+                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.RepeatOne)
                         player.setRepeatMode('TRACK')
                     } else if (player.trackRepeat) {
-                        ;(repeatButton as any).data.emoji = { name: '➡️' }
+                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.ArrowRight)
                         player.setRepeatMode('OFF')
                     } else {
-                        ;(repeatButton as any).data.emoji = { name: '🔁' }
+                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.Repeat)
                         player.setRepeatMode('QUEUE')
                     }
                 }
@@ -152,10 +154,10 @@ const handler = async (
 
                 if (interaction.customId === shufflePlayButton.customId) {
                     if (player.shufflePlay) {
-                        ;(shufflePlayButton as any).data.style = ButtonStyle.Secondary
+                        ;(shufflePlayButton as any).data.emoji = parseEmoji(self.staticEmojis.Shuffle)
                         player.setShufflePlay(false)
                     } else {
-                        ;(shufflePlayButton as any).data.style = ButtonStyle.Success
+                        ;(shufflePlayButton as any).data.emoji = parseEmoji(self.staticEmojis.ShuffleOn)
                         player.setShufflePlay(true)
                     }
                 }
@@ -199,7 +201,7 @@ const handler = async (
         }
 
         if (/R\-\w+\-\d+/.test(interaction.customId)) {
-            await onPressReportButton(self, server, interaction)
+            await Reports.handleButtonClick(self, server, interaction)
 
             return true
         }
@@ -217,7 +219,7 @@ const handler = async (
         await InteractiveMessages.handleSelectMenuSelection(self, server, interaction)
 
         if (interaction.isStringSelectMenu() && /R\-\w+\-\d+/.test(interaction.customId)) {
-            await onSelectReportOption(self, server, interaction)
+            await Reports.handleOptionSelect(self, server, interaction)
 
             return true
         }
@@ -306,6 +308,33 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
                         }
                     })
                     .slice(0, 25)
+            )
+        }
+    }
+
+    if (['ban', 'mute', 'giveaway', 'temprole'].includes(interaction.commandName) && option?.name === 'duration') {
+        const timeouts = ['1m', '5m', '10m', '30m', '1h', '2h', '5h', '12h', '24h', '2d', '1w', '2w', '4w']
+        let duration = option?.value && ms(option.value) ? ms(option.value) : null
+
+        if (duration) {
+            await interaction.respond([
+                {
+                    name: moment(Date.now() + duration)
+                        .locale(server.locale)
+                        .fromNow(true),
+                    value: ms(duration)
+                }
+            ])
+        } else {
+            await interaction.respond(
+                timeouts.map(v => {
+                    return {
+                        name: moment(Date.now() + ms(v))
+                            .locale(server.locale)
+                            .fromNow(true),
+                        value: v
+                    }
+                })
             )
         }
     }

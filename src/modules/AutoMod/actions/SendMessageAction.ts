@@ -5,7 +5,7 @@ import {
     ServerModerationAutoModSwearFilter,
     ServerModerationAutoModUsersSlowdown
 } from '@lacunahub/lacuna-database-driver'
-import { Message } from 'discord.js'
+import { GuildTextBasedChannel, Message } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import Replacer from '../../Replacer'
 import { ActionOptions } from './BanAction'
@@ -17,7 +17,7 @@ export default async function sendMessageAction(self: Lacuna, server: ServerDocu
         const replacer = new Replacer(server.premium.available, { message: message, guild: message.guild, member: message.member }),
             messagePayload = await replacer.replaceTemplateMessage(config.send_message)
 
-        await message.channel.send(messagePayload)
+        await (message.channel as GuildTextBasedChannel).send(messagePayload)
     } catch (err) {
         await self.logger.handleError({ module: 'AutoMod', action: 'SendMessage', error: err, guild_id: message.guildId })
     }

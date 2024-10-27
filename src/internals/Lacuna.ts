@@ -1,13 +1,12 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { EnvData, ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { LavalunaManager } from '@lacunahub/lavaluna.js'
 import { ClusterShardClient, ClusterShardClientOptions } from '@lacunahub/letsfrag'
-import { Collection, PermissionsBitField, parseEmoji } from 'discord.js'
-import { readdirSync } from 'fs'
+import { Collection, Guild, PermissionsBitField } from 'discord.js'
+import { readdirSync, readFileSync } from 'fs'
 import { Isolate } from 'isolated-vm'
 import { os } from 'node-os-utils'
 import db from '../database'
 import i18n from '../i18n'
-import Utils from '../internals/utility/Utils'
 import logger from './Logger'
 import { Command, CommandOptions } from './structures/Command'
 import Event, { EventOptions } from './structures/Event'
@@ -28,33 +27,17 @@ export default class Lacuna extends ClusterShardClient {
     public tempbans = new Collection<string, TemporaryBan>()
     public temproles = new Collection<string, TemporaryRole>()
     public i18n: typeof i18n
-    public utils: typeof Utils
     public PermissionFlags: typeof PermissionsBitField.Flags
 
-    public get staticEmojis() {
-        const OK = '<:OK:905724948453134349>'
-        const ERROR = '<:ERROR:905724969827315732>'
-        const DIAMOND = '<:DIAMOND:905707582042288178>'
-        const SPOTIFY = '<:SPOTIFY:1056946964543066112>'
-        const YANDEXMUSIC = '<:YANDEXMUSIC:1056946926110638090>'
-        const SOUNDCLOUD = '<:SOUNDCLOUD:1056946989834719352>'
-
-        return {
-            OK,
-            ERROR,
-            DIAMOND,
-            SPOTIFY,
-            YANDEXMUSIC,
-            SOUNDCLOUD,
-            details: {
-                OK: parseEmoji(OK),
-                ERROR: parseEmoji(ERROR),
-                DIAMOND: parseEmoji(DIAMOND),
-                SPOTIFY: parseEmoji(SPOTIFY),
-                YANDEXMUSIC: parseEmoji(YANDEXMUSIC),
-                SOUNDCLOUD: parseEmoji(SOUNDCLOUD)
-            }
-        }
+    public get staticEmojis(): Record<string, string> {
+        return Object.assign(
+            {},
+            ...this.application.emojis.cache.map(v => {
+                return {
+                    [v.name]: v.toString()
+                }
+            })
+        )
     }
 
     constructor(options?: ClusterShardClientOptions) {
@@ -67,8 +50,6 @@ export default class Lacuna extends ClusterShardClient {
         this.db = db
 
         this.i18n = i18n
-
-        this.utils = Utils
 
         this.PermissionFlags = PermissionsBitField.Flags
 
@@ -96,6 +77,9 @@ export default class Lacuna extends ClusterShardClient {
         this.logger.log('[Lacuna] Connected to database')
 
         this.rest.on('rateLimited', rateLimitData => this.logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`))
+        this.rest.on('invalidRequestWarning', invalidRequestInfo =>
+            this.logger.warn(`[DiscordInvalidRequestWarning] ${JSON.stringify(invalidRequestInfo)}`)
+        )
 
         await this.login(process.env.LCN_DISCORD_CLIENT_TOKEN)
         this.logger.log('[Lacuna] Connected to Discord client')
@@ -105,6 +89,8 @@ export default class Lacuna extends ClusterShardClient {
 
         this.application = await this.application.fetch()
         this.logger.log('[Lacuna] Discord client application fetched')
+        await this.application.emojis.fetch()
+        this.logger.log('[Lacuna] Application emojis fetched')
 
         handleGiveawayEntries(this)
         handleTemporaryBanEntries(this)
@@ -123,7 +109,18 @@ export default class Lacuna extends ClusterShardClient {
         })
     }
 
-    async updateApplicationCommands(server: ServerDocument) {
+    public async getEnv() {
+        let env: EnvData & { _updated_at: number } = this.cache.get('environment')
+
+        if (!env || Date.now() - env._updated_at > 300_000) {
+            const dbEnv = await this.db.getEnv()
+            env = { ...dbEnv, _updated_at: Date.now() }
+        }
+
+        return env
+    }
+
+    public async updateApplicationCommands(server: ServerDocument) {
         const commands = await this.application.commands.set(
             server.modules.custom_commands.map(i => i.command),
             server._id
@@ -150,7 +147,22 @@ export default class Lacuna extends ClusterShardClient {
         return commands
     }
 
-    loadCommands() {
+    public async fetchGuild(guild: Guild) {
+        const lastFetchedAt = this.cache.get(`last-guild-fetch-${guild.id}`) ?? 0
+
+        if (
+            typeof guild.approximatePresenceCount !== 'number' ||
+            typeof guild.approximateMemberCount !== 'number' ||
+            Date.now() - lastFetchedAt > 1000 * 60 * 60
+        ) {
+            this.cache.set(`last-guild-fetch-${guild.id}`, Date.now())
+            return await guild.fetch()
+        }
+
+        return guild
+    }
+
+    public loadCommands() {
         this.logger.log('[Lacuna] Loading commands...')
 
         const directories: string[] = readdirSync('./dist/commands', { withFileTypes: true })
@@ -178,7 +190,7 @@ export default class Lacuna extends ClusterShardClient {
         this.logger.log(`[Lacuna] Loaded ${amount} commands from ${directories.length} categories`)
     }
 
-    loadEvents(initial = false) {
+    public loadEvents(initial = false) {
         this.logger.log('[Lacuna]', initial ? 'Loading initial events...' : 'Loading events...')
 
         const directories: string[] = readdirSync('./dist/events', { withFileTypes: true })
@@ -205,6 +217,26 @@ export default class Lacuna extends ClusterShardClient {
         }
 
         this.logger.log(`[Lacuna] Loaded ${amount} events of ${total}`)
+    }
+
+    public loadEmojis() {
+        this.logger.log('[Lacuna] Loading emojis...')
+
+        const files = readdirSync('./assets/emojis', { withFileTypes: true }).filter(v => v.isFile())
+        const emojis = files.map(v => {
+            const ext = v.name.split('.').pop(),
+                name = v.name.slice(0, -`.${ext}`.length)
+
+            return {
+                name,
+                extension: ext,
+                image: readFileSync(`./assets/emojis/${v.name}`)
+            }
+        })
+
+        this.logger.log(`[Lacuna] Loaded ${emojis.length} emojis`)
+
+        return emojis
     }
 }
 

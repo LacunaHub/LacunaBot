@@ -1,5 +1,5 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, Message } from 'discord.js'
+import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, GuildTextBasedChannel, Message, User } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import { generateSimpleId } from '../../../internals/utility/Utils'
 import { createCaseLogEntry } from '../../Moderation/CaseLog'
@@ -16,14 +16,27 @@ export default async function warnUserAction(
     options: WarnUserActionOptions
 ) {
     const target = options.target,
-        executor = options.executor,
+        executor = options.executor instanceof GuildMember ? options.executor.user : options.executor,
         reason = options.reason
     const timestamp = Date.now()
 
     const violator = server.moderation.warnings.violators.find(v => v.user_id === target.id),
         penalty = server.moderation.warnings.penalties.find(v => (violator ? v.penalties == violator.violations.length + 1 : v.penalties == 1))
 
-    if (!violator) {
+    if (violator) {
+        await self.db.servers.updateOne(
+            { _id: signal.guild.id, 'moderation.warnings.violators.user_id': target.id },
+            {
+                $push: {
+                    'moderation.warnings.violators.$.violations': {
+                        id: generateSimpleId(5),
+                        timestamp: timestamp,
+                        reason: reason ?? null
+                    }
+                }
+            }
+        )
+    } else {
         await self.db.servers.updateOne(
             { _id: signal.guild.id },
             {
@@ -41,22 +54,9 @@ export default async function warnUserAction(
                 }
             }
         )
-    } else {
-        await self.db.servers.updateOne(
-            { _id: signal.guild.id, 'moderation.warnings.violators.user_id': target.id },
-            {
-                $push: {
-                    'moderation.warnings.violators.$.violations': {
-                        id: generateSimpleId(5),
-                        timestamp: timestamp,
-                        reason: reason ?? null
-                    }
-                }
-            }
-        )
     }
 
-    await createCaseLogEntry(signal.guild, { type: 'WarnAdd', target: target.user, executor: executor.user, reason })
+    await createCaseLogEntry(signal.guild, { type: 'WarnAdd', target: target.user, executor, reason })
 
     if (penalty) {
         const optBan = penalty.options.includes('ACTION_BAN'),
@@ -80,7 +80,7 @@ export default async function warnUserAction(
                     }),
                     messagePayload = await replacer.replaceTemplateMessage(penalty.send_message)
 
-                await signal.channel.send(messagePayload)
+                await (signal.channel as GuildTextBasedChannel).send(messagePayload)
             } catch (err) {
                 await self.logger.handleError({ module: 'WarningPenalty', action: 'SendMessage', error: err, guild_id: signal.guildId })
             }
@@ -121,7 +121,7 @@ export default async function warnUserAction(
         try {
             await target.send(messagePayload)
         } catch (err) {
-            await self.logger.handleError({ module: 'Warnings', action: 'SendDirectMessage', error: err, guild_id: signal.guildId })
+            await self.logger.handleError({ module: 'Warnings', action: 'SendDirectMessage', error: err, guild_id: signal.guild.id })
         }
 
         self.emit('moduleExecution', {
@@ -136,6 +136,6 @@ export default async function warnUserAction(
 
 export interface WarnUserActionOptions {
     target: GuildMember
-    executor: GuildMember
+    executor: GuildMember | User
     reason?: string
 }

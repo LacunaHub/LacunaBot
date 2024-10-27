@@ -1,12 +1,11 @@
-import { PaymentAmount, PaymentStatus, PaymentType, Product } from '@lacunahub/lacuna-database-driver'
+import { PaymentAmount, PaymentStatus, PaymentType, Product, Snowflake, SnowflakeUtils } from '@lacunahub/lacuna-database-driver'
 import fetch from 'node-fetch'
 import { HATEOASLink, PayPalAPI } from '.'
 import { PaymentData } from '../..'
 import database from '../../../../../database'
-import { generateSnowflake } from '../../../../utility/Snowflake'
 
 export class PayPalOrder {
-    public paymentId: string
+    public paymentId: Snowflake
     public amount: PaymentAmount
     public payerId: string
     public comment: string
@@ -14,7 +13,7 @@ export class PayPalOrder {
     public refId: string
 
     constructor(data: PaymentData) {
-        this.paymentId = generateSnowflake()
+        this.paymentId = SnowflakeUtils.generate()
 
         this.amount = data.amount
 

@@ -1,5 +1,5 @@
-import KeyvRedis from '@keyv/redis'
 import { Database } from '@lacunahub/lacuna-database-driver'
+import { RedisStoreAdapter } from '@lacunahub/letsfrag'
 
 export default new Database({
     uri: process.env.LCN_DB_URI,
@@ -17,4 +17,4 @@ export default new Database({
     }
 })
 
-export const redis = new KeyvRedis(process.env.LCN_REDIS_URI)
+export const redisStore = new RedisStoreAdapter(process.env.LCN_REDIS_URI).setMaxListeners(0)

@@ -8,6 +8,7 @@ import koaLogger from 'koa-logger'
 import database from '../database'
 import Logger from '../internals/Logger'
 import ReleaseNotesLogger from './modules/ReleaseNotesLogger'
+import ReportsChecker from './modules/ReportsChecker'
 import Statistics from './modules/Statistics'
 import { handleDiamondGuilds } from './modules/billing/utility/DiamondGuild'
 import { handlePatrons } from './modules/billing/utility/Patron'
@@ -84,6 +85,7 @@ app.listen(process.env.LCN_API_PORT, () => {
     Statistics.createCollectionSchedule()
     YouTubeAlerts.createRefreshmentSchedule()
     ReleaseNotesLogger.createSchedule()
+    ReportsChecker.createSchedule()
 })
 
 process.on('uncaughtException', Logger.error)

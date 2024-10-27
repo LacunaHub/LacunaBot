@@ -5,7 +5,7 @@ import Logger from '../../internals/Logger'
 
 export async function getReleaseNotes() {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/LacunaHub/Docs/master/other/change-log.md', { method: 'GET' })
+        const response = await fetch('https://raw.githubusercontent.com/LacunaHub/LacunaDocs/master/docs/other/change-log.mdx', { method: 'GET' })
 
         if (response.ok) {
             const content = await response.text(),

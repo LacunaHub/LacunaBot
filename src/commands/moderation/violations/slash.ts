@@ -25,7 +25,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!violator || !violator.violations.length) {
             await interaction.editReply({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.ViolationsCommand.Texts.ThisUserHasNoViolations', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.ViolationsCommand.Texts.ThisUserHasNoViolations', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })
@@ -66,7 +66,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         if (!violators.length) {
             await interaction.editReply({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.ViolationsCommand.Texts.NoOneHasAnyViolations', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.ViolationsCommand.Texts.NoOneHasAnyViolations', {
                     username: `**${interaction.member.displayName}**`
                 })}`
             })

@@ -1,13 +1,12 @@
-import { SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@lacunahub/lacuna-database-driver'
+import { Snowflake, SnowflakeUtils, SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@lacunahub/lacuna-database-driver'
 import { APIGuildMember } from 'discord.js'
 import { SubscriptionData, addDiamond } from '..'
 import database from '../../../../database'
 import { supportServerId } from '../../../../internals/utility/Constants'
 import DiscordUtils from '../../../utility/DiscordUtils'
-import { generateSnowflake } from '../../../utility/Snowflake'
 
 export class DiscordRolesCheckout {
-    public subscriptionId: string
+    public subscriptionId: Snowflake
     public subscriberId: string
     public productId: SubscriptionMetadataProduct
     public refId: string
@@ -16,7 +15,7 @@ export class DiscordRolesCheckout {
     public maxActiveSubscriptions: number
 
     constructor(data: SubscriptionData, subscriptionMethod: string, roleIds: string[], maxActiveSubscriptions?: number) {
-        this.subscriptionId = generateSnowflake()
+        this.subscriptionId = SnowflakeUtils.generate()
 
         this.subscriberId = data.subscriberId
 

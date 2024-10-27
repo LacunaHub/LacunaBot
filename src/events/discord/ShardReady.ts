@@ -65,6 +65,13 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
 
             self.logger.log('[DiscordShardReady] Commands and role connections have been overwritten due to a version change')
         }
+
+        const emojis = self.loadEmojis(),
+            appEmojis = await self.application.emojis.fetch(),
+            emojisToCreate = emojis.filter(v => !appEmojis.some(vv => v.name === vv.name))
+
+        for (const emoji of emojisToCreate) await self.application.emojis.create({ name: emoji.name, attachment: emoji.image })
+        self.logger.log(`[DiscordShardReady] Created ${emojisToCreate.length} emojis`)
     }
 
     self.logger.info(`[DiscordShardReady] Shard #${id} of cluster #${self.cluster.id} is ready`)

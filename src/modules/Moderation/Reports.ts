@@ -1,12 +1,15 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import {
+    ReportType,
+    ServerDocument,
+    UserReportDocument,
+    UserReportMetadataCategory,
+    UserReportMetadataRecommendedAction
+} from '@lacunahub/lacuna-database-driver'
 import { BaseGuildTextChannel, ButtonInteraction, EmbedBuilder, GuildMember, StringSelectMenuInteraction } from 'discord.js'
 import ms from 'ms'
+import Moderation from '.'
 import Lacuna from '../../internals/Lacuna'
-import { capitalizeFirstLetter } from '../../internals/utility/Utils'
-import banAction from '../AutoMod/actions/BanAction'
-import kickAction from '../AutoMod/actions/KickAction'
-import muteAction from '../AutoMod/actions/MuteAction'
-import warnUserAction from '../AutoMod/actions/WarnUserAction'
+import { capitalizeFirstLetter, truncateString } from '../../internals/utility/Utils'
 
 const QuickActionLocales = {
     BAN: 'CaseLog.CaseTypes.BanAdd',
@@ -15,7 +18,7 @@ const QuickActionLocales = {
     WARN: 'CaseLog.CaseTypes.WarnAdd'
 }
 
-export async function onPressReportButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
+async function handleButtonClick(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
     const [, action, user_id] = interaction.customId.split('-')
 
@@ -31,7 +34,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
     if (!member) {
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.UnknownUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.UnknownUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -45,7 +48,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
     if (action === 'SKIP') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.ModerateMembers)) {
             await interaction.followUp({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.CommandExecutionDenied', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
@@ -66,7 +69,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
                 : 'Commands.WarnCommand.SubCommands.AddCommand.Texts.YouCannotWarnYourself'
 
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t(message, { username: `**${interaction.member.displayName}**` })}`,
+            content: `${self.staticEmojis.Cross} | ${t(message, { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -75,7 +78,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
     if (server.moderation.respect_hierarchy && member.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -89,7 +92,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
         member.permissions.has(self.PermissionFlags[action == 'KICK' ? 'KickMembers' : 'ModerateMembers'])
     ) {
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -102,7 +105,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
     if (member.roles.cache.some(v => server.moderation.unmoderated_roles.includes(v.id))) {
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -116,7 +119,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
     if (action === 'KICK') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.KickMembers)) {
             await interaction.followUp({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.CommandExecutionDenied', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
@@ -127,7 +130,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
 
         if (!member.kickable) {
             await interaction.followUp({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.KickCommand.Texts.CannotKickThisUser', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.KickCommand.Texts.CannotKickThisUser', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
@@ -136,13 +139,13 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             return false
         }
 
-        await kickAction(self, { guild: interaction.guild, target: member, reason })
+        await Moderation.kickUser(self, server, interaction.guild, { target: member, executor: interaction.user, reason })
     }
 
     if (action === 'WARN') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.ModerateMembers)) {
             await interaction.followUp({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.CommandExecutionDenied', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
@@ -151,7 +154,12 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
             return false
         }
 
-        await warnUserAction(self, server, interaction, { target: member, executor: interaction.member, reason })
+        await Moderation.warnUser(self, server, interaction.guild, {
+            target: member,
+            executor: interaction.user,
+            reason,
+            channel: interaction.channel
+        })
     }
 
     closeReason += `: ${t(QuickActionLocales[action])}`
@@ -166,7 +174,7 @@ export async function onPressReportButton(self: Lacuna, server: ServerDocument, 
     })
 }
 
-export async function onSelectReportOption(self: Lacuna, server: ServerDocument, interaction: StringSelectMenuInteraction<'cached'>) {
+async function handleOptionSelect(self: Lacuna, server: ServerDocument, interaction: StringSelectMenuInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
     const [, action, user_id] = interaction.customId.split('-')
 
@@ -183,7 +191,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
     if (!member) {
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.UnknownUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.UnknownUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -198,7 +206,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
         const message = action === 'BAN' ? 'Commands.BanCommand.Texts.YouCannotBanYourself' : 'Commands.MuteCommand.Texts.YouCannotMuteYourself'
 
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t(message, { username: `**${interaction.member.displayName}**` })}`,
+            content: `${self.staticEmojis.Cross} | ${t(message, { username: `**${interaction.member.displayName}**` })}`,
             ephemeral: true
         })
 
@@ -207,7 +215,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
     if (server.moderation.respect_hierarchy && member.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -221,7 +229,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
         member.permissions.has(self.PermissionFlags[action == 'BAN' ? 'BanMembers' : 'ModerateMembers'])
     ) {
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -234,7 +242,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
     if (member.roles.cache.some(v => server.moderation.unmoderated_roles.includes(v.id))) {
         await interaction.followUp({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -248,7 +256,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
     if (action === 'BAN') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.BanMembers)) {
             await interaction.followUp({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.CommandExecutionDenied', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
@@ -259,7 +267,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
         if (!member.bannable) {
             await interaction.followUp({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.CannotBanThisUser', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.CannotBanThisUser', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
@@ -268,18 +276,18 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        await banAction(self, server, {
-            config: { ban_timeout: duration === 'indefinitely' ? null : ms(duration) / 1000 } as any,
-            guild: interaction.guild,
+        await Moderation.banUser(self, server, interaction.guild, {
             target: member,
-            reason
+            executor: interaction.user,
+            reason,
+            durationSeconds: duration === 'indefinitely' ? null : ms(duration) / 1000
         })
     }
 
     if (action === 'MUTE') {
         if (!interaction.memberPermissions.has(self.PermissionFlags.ModerateMembers)) {
             await interaction.followUp({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.CommandExecutionDenied', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.CommandExecutionDenied', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
@@ -290,7 +298,7 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
 
         if (!member.manageable) {
             await interaction.followUp({
-                content: `${self.staticEmojis.ERROR} | ${t('Commands.MuteCommand.Texts.CannotMuteThisUser', {
+                content: `${self.staticEmojis.Cross} | ${t('Commands.MuteCommand.Texts.CannotMuteThisUser', {
                     username: `**${interaction.member.displayName}**`
                 })}`,
                 ephemeral: true
@@ -299,11 +307,11 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        await muteAction(self, server, {
-            config: { mute_timeout: ms(duration) / 1000 } as any,
-            guild: interaction.guild,
+        await Moderation.muteUser(self, server, interaction.guild, {
             target: member,
-            reason
+            executor: interaction.user,
+            reason,
+            durationSeconds: ms(duration) / 1000
         })
     }
 
@@ -319,66 +327,90 @@ export async function onSelectReportOption(self: Lacuna, server: ServerDocument,
     })
 }
 
-export async function checkReportsOnGuildMemberAdd(self: Lacuna, server: ServerDocument, member: GuildMember) {
+async function handleGuildMemberAdd(self: Lacuna, server: ServerDocument, member: GuildMember) {
     if (!server.modules.reports.notify_about_unwanted_users) return false
 
     const t = self.i18n.t.bind(null, server.locale)
-    const user = await self.db.users.findOne({ _id: member.id })
+    const userReports = (await self.db.reports.find({
+        type: ReportType.User,
+        accused_id: member.id,
+        checked_at: { $ne: null },
+        'metadata.category': { $exists: true, $ne: UserReportMetadataCategory.Meaningless }
+    })) as UserReportDocument[]
 
-    if (!user?.reports?.length) return false
+    if (!userReports.length) return false
+    if (!server.modules.reports.active || !server.modules.reports.channel_id) return false
 
-    if (server.modules.reports.active && server.modules.reports.channel_id) {
-        const channel = member.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
+    const channel = member.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
+    if (!channel) return false
 
-        if (channel) {
-            const last24h = user.reports.filter(i => Date.now() - i.created_at < ms('24h')),
-                last7d = user.reports.filter(i => Date.now() - i.created_at < ms('7d')),
-                last10Reports = user.reports.slice(Math.max(user.reports.length - 10, 0)).sort((a, b) => b.created_at - a.created_at)
+    const last24h = userReports.filter(i => Date.now() - i.created_at < ms('24h')),
+        last7d = userReports.filter(i => Date.now() - i.created_at < ms('7d')),
+        last10Reports = userReports.slice(Math.max(userReports.length - 10, 0)).sort((a, b) => b.created_at - a.created_at)
+    const recommendedActions = [
+        ...new Set(
+            userReports
+                .filter(v => v.metadata.recommended_action !== UserReportMetadataRecommendedAction.Nothing)
+                .map(v => v.metadata.recommended_action)
+        )
+    ]
 
-            const embed = new EmbedBuilder()
-                .setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL() })
-                .setDescription(t('Commands.ReportCommand.Texts.PotentiallyUnwantedUser'))
-                .addFields([
-                    {
-                        name: t('Commands.ReportCommand.Texts.ReportCount'),
-                        value: user.reports.length.toString(),
-                        inline: true
-                    },
-                    {
-                        name: t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours'),
-                        value: last24h.length.toString(),
-                        inline: true
-                    },
-                    {
-                        name: t('Commands.ViolationsCommand.Texts.ViolationsIn7Days'),
-                        value: last7d.length.toString(),
-                        inline: true
-                    },
-                    {
-                        name: t('Commands.ReportCommand.Texts.RecentReports'),
-                        value: '\u200B'
-                    },
-                    ...last10Reports.map(i => {
-                        return {
-                            name: `<t:${Math.round(i.created_at / 1000)}:R>`,
-                            value: i.reason
-                        }
-                    })
-                ])
-                .setColor('#FFA726')
+    const embed = new EmbedBuilder()
+        .setAuthor({ name: member.user.tag, iconURL: member.user.displayAvatarURL() })
+        .setDescription(t('Commands.ReportCommand.Texts.PotentiallyUnwantedUser'))
+        .addFields([
+            {
+                name: t('Commands.ReportCommand.Texts.ReportCount'),
+                value: userReports.length.toString(),
+                inline: true
+            },
+            {
+                name: t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours'),
+                value: last24h.length.toString(),
+                inline: true
+            },
+            {
+                name: t('Commands.ViolationsCommand.Texts.ViolationsIn7Days'),
+                value: last7d.length.toString(),
+                inline: true
+            },
+            ...last10Reports.map(v => {
+                let reportTypeTitle = `Commands.ReportCommand.Texts.ReportTypes.${UserReportMetadataCategory[v.metadata.category]}.Title`,
+                    reportTypeDescription = `Commands.ReportCommand.Texts.ReportTypes.${UserReportMetadataCategory[v.metadata.category]}.Description`
 
-            try {
-                await channel.send({ embeds: [embed] })
-            } catch (err) {
-                await self.logger.handleError({
-                    module: 'Reports',
-                    action: 'SendNotificationAboutUnwantedUser',
-                    error: err,
-                    guild_id: member.guild.id
-                })
-            }
-        }
+                if (v.metadata.category === UserReportMetadataCategory.Other) {
+                    reportTypeTitle = 'Common.Other'
+                    reportTypeDescription = null
+                }
+
+                return {
+                    name: `**${t(reportTypeTitle)}**` + (reportTypeDescription ? `: ${t(reportTypeDescription)}` : ''),
+                    value: `${truncateString(v.content, 720)} <t:${Math.round(v.created_at / 1000)}:R>`
+                }
+            })
+        ])
+        .setColor('#FFA726')
+
+    if (recommendedActions.length) {
+        embed.setFooter({
+            text: `${t('Commands.ReportCommand.Texts.RecommendedActions')}: ${recommendedActions
+                .map(v => t(`CaseLog.Actions.${UserReportMetadataRecommendedAction[v]}`).toLowerCase())
+                .join(', ')}`
+        })
     }
+
+    try {
+        await channel.send({ embeds: [embed] })
+    } catch (err) {
+        await self.logger.handleError({
+            module: 'Reports',
+            action: 'SendNotificationAboutUnwantedUser',
+            error: err,
+            guild_id: member.guild.id
+        })
+    }
+
+    return true
 }
 
 async function markReportAsClosed(interaction: ButtonInteraction | StringSelectMenuInteraction, reason: string) {
@@ -393,6 +425,7 @@ async function markReportAsClosed(interaction: ButtonInteraction | StringSelectM
 }
 
 export default {
-    onPressReportButton,
-    onSelectReportOption
+    handleButtonClick,
+    handleOptionSelect,
+    handleGuildMemberAdd
 }

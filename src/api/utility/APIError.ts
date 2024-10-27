@@ -23,6 +23,7 @@ export const apiErrors = {
     1012: 'Unknown interactive message',
     1013: 'Unknown interactive reaction',
     1014: 'Unknown social alert subscription',
+    1015: 'Unknown DAME rule',
     1017: 'Unknown auto voice',
     1018: 'Unknown payment',
     1019: 'Unknown payment tier',
@@ -86,5 +87,8 @@ export const apiErrors = {
     5018: 'Cannot delete a YouTube subscription',
     5019: 'Cannot get support server information',
     5020: 'Cannot exchange the code',
-    5021: 'Cannot get server information'
+    5021: 'Cannot get server information',
+    5022: 'Cannot create a DAME rule',
+    5023: 'Cannot update a DAME rule',
+    5024: 'Cannot delete a DAME rule'
 }

@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ReportType, ServerDocument } from '@lacunahub/lacuna-database-driver'
 import {
     ActionRowBuilder,
     BaseGuildTextChannel,
@@ -44,8 +44,8 @@ export default async (
 
     if (!mention || mention.user.bot) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidUser', {
-                username: `**${interaction.member['displayName']}**`
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.InvalidUser', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -55,8 +55,8 @@ export default async (
 
     if (!reason || reason.length < 20) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.InvalidReason', {
-                username: `**${interaction.member['displayName']}**`
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.InvalidReason', {
+                username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
         })
@@ -66,63 +66,47 @@ export default async (
 
     await interaction.deferReply({ ephemeral: true })
 
-    const mentionUser = await self.db.users.fetch(
-        { _id: mention.id },
-        {
-            user: {
-                username: mention.user.username,
-                avatar: mention.user.avatar,
-                flags: mention.user.flags?.bitfield ?? 0,
-                global_name: mention.user.globalName
-            }
-        }
-    )
+    const report = await self.db.reports.findOne({
+        complainant_id: interaction.user.id,
+        accused_id: mention.id,
+        created_at: { $gt: Date.now() - ms('24h') }
+    })
 
-    const report = mentionUser.reports.find(i => i.sender_id === interaction.user.id)
-
-    if (report && Date.now() - report.created_at < ms('24h')) {
+    if (report) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouRecentlyReportedThisUser', {
-                username: `**${interaction.member['displayName']}**`
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.YouRecentlyReportedThisUser', {
+                username: `**${interaction.member.displayName}**`
             })}`
         })
 
         return false
     }
 
-    const reportCount = await self.db.users.countDocuments({
-        'reports.sender_id': interaction.user.id,
-        'reports.created_at': { $gt: Date.now() - ms('24h') }
+    const reportCount = await self.db.reports.countDocuments({
+        type: ReportType.User,
+        complainant_id: interaction.user.id,
+        created_at: { $gt: Date.now() - ms('24h') }
     })
 
     if (reportCount >= 3) {
         await interaction.editReply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.ReportCommand.Texts.YouHaveToManySubmittedReports', {
-                username: `**${interaction.member['displayName']}**`
+            content: `${self.staticEmojis.Cross} | ${t('Commands.ReportCommand.Texts.YouHaveToManySubmittedReports', {
+                username: `**${interaction.member.displayName}**`
             })}`
         })
 
         return false
     }
 
-    await self.db.users.updateOne(
-        { _id: mention.id },
-        {
-            $push: {
-                reports: {
-                    $each: [
-                        {
-                            sender_id: interaction.user.id,
-                            guild_id: interaction.guildId,
-                            reason,
-                            created_at: Date.now()
-                        }
-                    ],
-                    $slice: -100
-                }
-            }
+    await self.db.reports.create({
+        type: ReportType.User,
+        complainant_id: interaction.user.id,
+        accused_id: mention.id,
+        content: reason,
+        metadata: {
+            from_guild_id: interaction.guildId
         }
-    )
+    })
 
     if (server.modules.reports.active && server.modules.reports.channel_id) {
         const channel = interaction.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
@@ -199,7 +183,7 @@ export default async (
 
                 try {
                     await channel.send({
-                        content: t('Commands.ReportCommand.Texts.ReceivedCompliantAboutUser', { username: `<@${mention.id}> (${mention.user.tag})` }),
+                        content: t('Commands.ReportCommand.Texts.ReceivedReportAboutUser', { username: `<@${mention.id}> (${mention.user.tag})` }),
                         embeds: [embed],
                         components: rows
                     })
@@ -211,7 +195,7 @@ export default async (
     }
 
     await interaction.editReply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.ReportCommand.Texts.ReportSubmitted', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.ReportCommand.Texts.ReportSubmitted', {
             username: `**${interaction.member.displayName}**`
         })}`
     })

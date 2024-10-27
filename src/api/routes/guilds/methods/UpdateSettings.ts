@@ -2,7 +2,7 @@ import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { APIGuildMember, APIUser, parseEmoji } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
-import { lavalinkSources } from '../../../../internals/utility/Constants'
+import { lavalinkSources, supportServerId } from '../../../../internals/utility/Constants'
 import { dotNotateObject } from '../../../../internals/utility/Utils'
 import { borderRadiuses, textAligns, textDecorations, textSizes, textStyles, textTransforms } from '../../../../modules/ImageGenerator'
 import APIError from '../../../utility/APIError'
@@ -24,6 +24,8 @@ export default async function updateSettings(ctx: Context) {
         ctx.throw(406, new APIError(2004))
     }
 
+    const env = await database.getEnv(),
+        aiModClosedBetaServerIds = [supportServerId, ...(env.aiClosedBetaServerIds ?? [])]
     server = await setSettings(server, data, currentUser.id)
 
     ctx.status = 200
@@ -51,7 +53,9 @@ export default async function updateSettings(ctx: Context) {
             mutes: {
                 rar: server.moderation.mutes.rar,
                 rar_strict: server.moderation.mutes.rar_strict
-            }
+            },
+            ai_mod: aiModClosedBetaServerIds.includes(server._id) ? server.moderation.ai_mod : null,
+            dame_rules: server.moderation.dame_rules
         },
         modules: {
             welcome: server.modules.welcome,
@@ -893,6 +897,33 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
                 JSON.stringify(data.moderation.mutes.rar_strict) !== JSON.stringify(guild.moderation.mutes.rar_strict)
             ) {
                 updateData['moderation.mutes.rar_strict'] = data.moderation.mutes.rar_strict
+            }
+        }
+
+        if (data.moderation.ai_mod) {
+            if (typeof data.moderation.ai_mod.active === 'boolean' && data.moderation.ai_mod.active !== guild.moderation.ai_mod.active) {
+                updateData['moderation.ai_mod.active'] = data.moderation.ai_mod.active
+            }
+
+            if (
+                (typeof data.moderation.ai_mod.log_channel_id === 'string' || data.moderation.ai_mod.log_channel_id === null) &&
+                data.moderation.ai_mod.log_channel_id !== guild.moderation.ai_mod.log_channel_id
+            ) {
+                updateData['moderation.ai_mod.log_channel_id'] = data.moderation.ai_mod.log_channel_id
+            }
+
+            if (
+                Array.isArray(data.moderation.ai_mod.ignored_channels) &&
+                JSON.stringify(data.moderation.ai_mod.ignored_channels) !== JSON.stringify(guild.moderation.ai_mod.ignored_channels)
+            ) {
+                updateData['moderation.ai_mod.ignored_channels'] = data.moderation.ai_mod.ignored_channels
+            }
+
+            if (
+                Array.isArray(data.moderation.ai_mod.ignored_roles) &&
+                JSON.stringify(data.moderation.ai_mod.ignored_roles) !== JSON.stringify(guild.moderation.ai_mod.ignored_roles)
+            ) {
+                updateData['moderation.ai_mod.ignored_roles'] = data.moderation.ai_mod.ignored_roles
             }
         }
     }

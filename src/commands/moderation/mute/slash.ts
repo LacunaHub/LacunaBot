@@ -17,7 +17,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.MuteCommand.Texts.InvalidUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.MuteCommand.Texts.InvalidUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -28,7 +28,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (mention.id == interaction.user.id) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.MuteCommand.Texts.YouCannotMuteYourself', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.MuteCommand.Texts.YouCannotMuteYourself', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -39,7 +39,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (!mention.manageable) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.MuteCommand.Texts.CannotMuteThisUser', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.MuteCommand.Texts.CannotMuteThisUser', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -50,7 +50,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.respect_hierarchy && mention.roles.highest.position > interaction.member.roles.highest.position) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -61,7 +61,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.ModerateMembers)) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -72,7 +72,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (mention.roles.cache.some(i => server.moderation.unmoderated_roles.includes(i.id))) {
         await interaction.reply({
-            content: `${self.staticEmojis.ERROR} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
+            content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserHasUnmoderatedRoles', {
                 username: `**${interaction.member.displayName}**`
             })}`,
             ephemeral: true
@@ -143,7 +143,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await createCaseLogEntry(interaction.guild, { type: 'MuteAdd', target: mention.user, executor: interaction.user, reason })
     await interaction.editReply({
-        content: `${self.staticEmojis.OK} | ${t('Commands.MuteCommand.Texts.UserHasBeenMuted', {
+        content: `${self.staticEmojis.Check} | ${t('Commands.MuteCommand.Texts.UserHasBeenMuted', {
             username: `**${interaction.member.displayName}**`,
             target: `**${mention.user.tag}**`
         })}`
