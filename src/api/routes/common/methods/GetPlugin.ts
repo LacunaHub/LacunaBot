@@ -1,6 +1,8 @@
 import { ServerModulesAutomation, ServerModulesCustomCommand } from '@lacunahub/lacuna-database-driver'
+import { languages } from '@lacunahub/lacuna-locale'
 import { Context } from 'koa'
 import database from '../../../../database'
+import { isObject, parseJSON } from '../../../../internals/utility/Utils'
 import APIError from '../../../utility/APIError'
 import { FileContent, Repository, TreeFile, getFileContents, getRepository, getRepositoryTree } from '../../../utility/GitHubAPI'
 
@@ -57,10 +59,41 @@ export default async function getPlugin(ctx: Context) {
         ctx.throw(404, new APIError(1, 'Plugin description not found'))
     }
 
+    const manifest = parseJSON(manifestContent.content)
+    const readmeFileLocales = repoTreeFiles.filter(v => /README_\w{2}\.md/.test(v.path)),
+        readmeContentLocales = readmeFileLocales.map(v => {
+            const locale = v.path.match(/README_(\w{2})\.md/)[1],
+                content = repoFileContents.find(v => v.sha === v.sha)
+
+            return { locale, content }
+        })
+
+    function formatL10ns(val: any) {
+        if (!isObject(val)) return {}
+        const l10ns: Record<string, string> = {}
+
+        for (const key of Object.keys(val)) {
+            const value = val[key]
+            if (!languages.some(v => v.code === key)) continue
+            if (typeof value !== 'string' || value.length <= 0) continue
+            l10ns[key] = value
+        }
+
+        return l10ns
+    }
+
     ctx.status = 200
     ctx.body = {
-        manifest: JSON.parse(manifestContent.content),
+        name: manifest?.name,
+        name_l10ns: formatL10ns(manifest?.name_l10ns),
+        summary: manifest?.description || manifest?.summary,
+        summary_l10ns: formatL10ns(manifest?.summary_l10ns),
         description: readmeContent.content,
+        description_l10ns: Object.assign(
+            {},
+            readmeContentLocales.filter(v => languages.some(vv => v.locale === vv.code)).map(v => ({ [v.locale]: v.content }))
+        ),
+        version: manifest?.version,
         puzzles: repoTreeFiles
             .filter(v => v.path.startsWith('puzzles/') && repoFileContents.some(vv => vv.sha === v.sha))
             .map(v => {
