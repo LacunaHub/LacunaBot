@@ -521,3 +521,7 @@ export function parseJSON<T = any>(text: string, reviver?: (this: any, key: stri
         return null
     }
 }
+
+export function isObject(value: any): boolean {
+    return typeof value === 'object' && !Array.isArray(value) && value !== null
+}
