@@ -25,7 +25,7 @@ import {
 } from 'discord.js'
 import i18n from '../../i18n'
 import Lacuna from '../Lacuna'
-import { normalizeCommandOption } from '../utility/Utils'
+import { normalizeCommandOption, truncateString } from '../utility/Utils'
 
 export class Command {
     public self: Lacuna
@@ -277,15 +277,21 @@ export class Command {
     public static buildJSON(type: CommandBuildJSONType, command: Command) {
         const tEn = i18n.t.bind(null, 'en'),
             tRu = i18n.t.bind(null, 'ru'),
-            tUk = i18n.t.bind(null, 'uk')
+            tUk = i18n.t.bind(null, 'uk'),
+            tFr = i18n.t.bind(null, 'fr'),
+            tDe = i18n.t.bind(null, 'de'),
+            tPl = i18n.t.bind(null, 'pl')
 
         if (type === CommandBuildJSONType.Slash) {
             const slashCommand = new SlashCommandBuilder()
                 .setName(command.name)
-                .setDescription(tEn(command.description))
+                .setDescription(truncateString(tEn(command.description)))
                 .setDescriptionLocalizations({
-                    ru: tRu(command.description),
-                    uk: tUk(command.description)
+                    ru: truncateString(tRu(command.description)),
+                    uk: truncateString(tUk(command.description)),
+                    fr: truncateString(tFr(command.description)),
+                    de: truncateString(tDe(command.description)),
+                    pl: truncateString(tPl(command.description))
                 })
                 .setDefaultMemberPermissions(command.defaultMemberPermissions)
                 .setNSFW(command.nsfw)
@@ -298,20 +304,29 @@ export class Command {
                     const name = normalizeCommandOption(tEn(opt.name)),
                         localizedNames = {
                             ru: normalizeCommandOption(tRu(opt.name)),
-                            uk: normalizeCommandOption(tUk(opt.name))
+                            uk: normalizeCommandOption(tUk(opt.name)),
+                            fr: normalizeCommandOption(tFr(opt.name)),
+                            de: normalizeCommandOption(tDe(opt.name)),
+                            pl: normalizeCommandOption(tPl(opt.name))
                         }
-                    const description = tEn(opt.description),
+                    const description = truncateString(tEn(opt.description)),
                         localizedDescriptions = {
-                            ru: tRu(opt.description),
-                            uk: tUk(opt.description)
+                            ru: truncateString(tRu(opt.description)),
+                            uk: truncateString(tUk(opt.description)),
+                            fr: truncateString(tFr(opt.description)),
+                            de: truncateString(tDe(opt.description)),
+                            pl: truncateString(tPl(opt.description))
                         }
                     const localizeChoices = (choices: (CommandStringOptionChoice | CommandNumericOptionChoice)[]) => {
                         return choices.map(v => {
                             return {
-                                name: tEn(v.name),
+                                name: truncateString(tEn(v.name)),
                                 name_localizations: {
-                                    ru: tRu(v.name),
-                                    uk: tUk(v.name)
+                                    ru: truncateString(tRu(v.name)),
+                                    uk: truncateString(tUk(v.name)),
+                                    fr: truncateString(tFr(v.name)),
+                                    de: truncateString(tDe(v.name)),
+                                    pl: truncateString(tPl(v.name))
                                 },
                                 value: v.value as any
                             }
@@ -422,10 +437,13 @@ export class Command {
                 if (option.type === ApplicationCommandOptionType.Subcommand) {
                     const subcommandBuilder = new SlashCommandSubcommandBuilder()
                         .setName(option.name)
-                        .setDescription(tEn(option.description))
+                        .setDescription(truncateString(tEn(option.description)))
                         .setDescriptionLocalizations({
-                            ru: tRu(option.description),
-                            uk: tUk(option.description)
+                            ru: truncateString(tRu(option.description)),
+                            uk: truncateString(tUk(option.description)),
+                            fr: truncateString(tFr(option.description)),
+                            de: truncateString(tDe(option.description)),
+                            pl: truncateString(tPl(option.description))
                         })
 
                     for (const opt of option.options) {
@@ -443,10 +461,13 @@ export class Command {
         } else if (type === CommandBuildJSONType.UserContextMenu || type === CommandBuildJSONType.MessageContextMenu) {
             const contextMenuCommand = new ContextMenuCommandBuilder()
                 .setType(type === CommandBuildJSONType.UserContextMenu ? ApplicationCommandType.User : ApplicationCommandType.Message)
-                .setName(tEn(command.prettyName))
+                .setName(truncateString(tEn(command.prettyName), 32))
                 .setNameLocalizations({
-                    ru: tRu(command.prettyName),
-                    uk: tUk(command.prettyName)
+                    ru: truncateString(tRu(command.prettyName), 32),
+                    uk: truncateString(tUk(command.prettyName), 32),
+                    fr: truncateString(tFr(command.prettyName), 32),
+                    de: truncateString(tDe(command.prettyName), 32),
+                    pl: truncateString(tPl(command.prettyName), 32)
                 })
                 .setDefaultMemberPermissions(command.defaultMemberPermissions)
 
