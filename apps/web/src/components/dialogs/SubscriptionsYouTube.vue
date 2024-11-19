@@ -1,207 +1,219 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Components.Subscriptions.ChannelName') }}
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card q-dialog-card-md bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Components.Subscriptions.ChannelName') }}
+              </div>
+
+              <q-select
+                v-if="mode === 'CREATE'"
+                v-model="youtube.channel"
+                :options="foundChannels"
+                option-label="name"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                hide-dropdown-icon
+                use-input
+                fill-input
+                hide-selected
+                input-debounce="1000"
+                @filter="getChannels"
+              >
+                <template #loading>
+                  <q-spinner-dots color="white"></q-spinner-dots>
+                </template>
+
+                <template #prepend>
+                  <q-avatar v-if="youtube.channel">
+                    <img :src="youtube.channel.thumbnail" :alt="youtube.channel.name" />
+                  </q-avatar>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section avatar>
+                      <q-avatar>
+                        <img :src="opt.thumbnail" :alt="opt.name" />
+                      </q-avatar>
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label>
+                        {{ opt.name }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+
+              <q-input
+                v-if="mode === 'UPDATE'"
+                :model-value="youtube.channel_name"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                disable
+                readonly
+              >
+                <template #prepend>
+                  <q-avatar>
+                    <img :src="youtube.channel_thumbnail_url" :alt="youtube.channel_name" />
+                  </q-avatar>
+                </template>
+              </q-input>
             </div>
 
-            <q-select
-              v-if="mode === 'CREATE'"
-              v-model="youtube.channel"
-              :options="foundChannels"
-              option-label="name"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              hide-dropdown-icon
-              use-input
-              fill-input
-              hide-selected
-              input-debounce="1000"
-              @filter="getChannels"
-            >
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
+            <div class="col-12">
+              <div>
+                {{ $t('Components.Subscriptions.NotificationsChannel') }}
+              </div>
 
-              <template #prepend>
-                <q-avatar v-if="youtube.channel">
-                  <img :src="youtube.channel.thumbnail" :alt="youtube.channel.name" />
-                </q-avatar>
-              </template>
+              <q-select
+                v-model="youtube.notification_channel_id"
+                :options="guild.channelsText"
+                option-label="name"
+                option-value="id"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt }">
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                </template>
 
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section avatar>
-                    <q-avatar>
-                      <img :src="opt.thumbnail" :alt="opt.name" />
-                    </q-avatar>
-                  </q-item-section>
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section avatar>
+                      <q-icon :name="opt.icon"></q-icon>
+                    </q-item-section>
 
-                  <q-item-section>
-                    <q-item-label>
-                      {{ opt.name }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
+                    <q-item-section>
+                      <q-item-label>
+                        {{ opt.name }}
+                      </q-item-label>
 
-            <q-input
-              v-if="mode === 'UPDATE'"
-              :model-value="youtube.channel_name"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              disable
-              readonly
-            >
-              <template #prepend>
-                <q-avatar>
-                  <img :src="youtube.channel_thumbnail_url" :alt="youtube.channel_name" />
-                </q-avatar>
-              </template>
-            </q-input>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Components.Subscriptions.NotificationsChannel') }}
+                      <q-item-label class="text--secondary">
+                        {{ opt.parentName }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
             </div>
-
-            <q-select
-              v-model="youtube.notification_channel_id"
-              :options="guild.channelsText"
-              option-label="name"
-              option-value="id"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            >
-              <template #selected-item="{ opt }">
-                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section avatar>
-                    <q-icon :name="opt.icon"></q-icon>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>
-                      {{ opt.name }}
-                    </q-item-label>
-
-                    <q-item-label class="text--secondary">
-                      {{ opt.parentName }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
           </div>
+        </q-card-section>
+
+        <div class="q-pa-md">
+          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+            <q-item tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="youtube.options" val="CREATE_THREAD" dense></q-checkbox>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('Components.Subscriptions.CreateThread') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item v-if="guild.channelsAnnouncement.some(i => i.id === youtube.notification_channel_id)" tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="youtube.options" val="CROSSPOST_MESSAGE" dense></q-checkbox>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('Components.Subscriptions.CrosspostMessage') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
         </div>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Components.Subscriptions.NotificationsText') }}
+              </div>
+
+              <MessageEditor
+                :message="youtube.notification_message"
+                avl-replacers="subs"
+                disable-embed
+                class="q-pt-sm"
+              />
+            </div>
+          </div>
+        </q-card-section>
       </q-card-section>
 
-      <div class="q-pa-md">
-        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-          <q-item tag="label">
-            <q-item-section side>
-              <q-checkbox v-model="youtube.options" val="CREATE_THREAD" dense></q-checkbox>
-            </q-item-section>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            v-if="mode === 'CREATE'"
+            class="full-width"
+            :label="$t('Common.Add')"
+            :disable="!isValid"
+            :loading="confirmLoading"
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn>
 
-            <q-item-section>
-              <q-item-label>
-                {{ $t('Components.Subscriptions.CreateThread') }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+          <q-btn-dropdown
+            v-if="mode === 'UPDATE'"
+            class="full-width"
+            :label="$t('Common.Done')"
+            :disable="!isValid"
+            :loading="confirmLoading"
+            split
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <q-list>
+              <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
+                <q-item-section class="text-negative">
+                  <q-item-label>
+                    {{ $t('Common.Delete') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
 
-          <q-item v-if="guild.channelsAnnouncement.some(i => i.id === youtube.notification_channel_id)" tag="label">
-            <q-item-section side>
-              <q-checkbox v-model="youtube.options" val="CROSSPOST_MESSAGE" dense></q-checkbox>
-            </q-item-section>
-
-            <q-item-section>
-              <q-item-label>
-                {{ $t('Components.Subscriptions.CrosspostMessage') }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </div>
-
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Components.Subscriptions.NotificationsText') }}
-            </div>
-
-            <MessageEditor :message="youtube.notification_message" avl-replacers="subs" disable-embed class="q-pt-sm" />
-          </div>
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn-dropdown>
         </div>
-      </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
-
-          <div class="col-6">
-            <q-btn
-              v-if="mode === 'CREATE'"
-              class="full-width"
-              :label="$t('Common.Add')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn>
-
-            <q-btn-dropdown
-              v-if="mode === 'UPDATE'"
-              class="full-width"
-              :label="$t('Common.Done')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              split
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <q-list dense>
-                <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
-                  <q-item-section class="text-negative">
-                    <q-item-label>
-                      {{ $t('Common.Delete') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn-dropdown>
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

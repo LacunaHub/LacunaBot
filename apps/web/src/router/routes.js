@@ -36,7 +36,7 @@ const routes = [
                     { path: 'subscriptions', component: () => import('src/pages/GuildPageSettingsSubscriptions.vue') },
                     { path: 'voice-channels', component: () => import('src/pages/GuildPageSettingsVoiceChannels.vue') },
                     { path: 'utility', component: () => import('src/pages/GuildPageSettingsUtility.vue') },
-                    { path: 'change-log', component: () => import('src/pages/GuildPageSettingsChangeLog.vue') },
+                    { path: 'audit-log', component: () => import('src/pages/GuildPageSettingsAuditLog.vue') },
                     {
                         path: 'custom-behavior',
                         component: () => import('src/pages/GuildPageSettingsCustomBehavior.vue')

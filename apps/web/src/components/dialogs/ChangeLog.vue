@@ -1,28 +1,36 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="q-dialog-card bg-dark-1 overflow-hidden" flat style="width: 720px">
-      <q-item class="q-py-md rounded-t-lg">
-        <q-item-section>
-          <q-item-label class="text-subtitle1 text-uppercase">
-            {{ $t('Components.Header.ReleaseNotes') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card q-dialog-card-md bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-item class="q-py-md rounded-t-lg">
+          <q-item-section>
+            <q-item-label class="text-subtitle1">
+              {{ $t('Components.Header.ReleaseNotes') }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
 
-      <q-card-section>
-        <q-select v-model="selectedVersion" :options="versionList" filled dense hide-bottom-space></q-select>
+        <q-card-section>
+          <q-select v-model="selectedVersion" :options="versionList" filled dense hide-bottom-space></q-select>
+
+          <div v-html="releaseNotesCache.parseContent(versionChanges.content)"></div>
+        </q-card-section>
       </q-card-section>
 
-      <q-card-section
-        v-html="releaseNotesCache.parseContent(versionChanges.content)"
-        class="q-dialog-card-body"
-      ></q-card-section>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div v-if="$q.screen.lt.sm" class="col-12">
+          <div style="height: 36px"></div>
+        </div>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
+        <div class="col-12">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

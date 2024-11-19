@@ -1,103 +1,110 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Common.Name') }}
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card q-dialog-card-md bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Common.Name') }}
+              </div>
+
+              <q-input
+                v-model="component.action.show_modal.title"
+                class="q-pt-sm"
+                :maxlength="100"
+                filled
+                dense
+                hide-bottom-space
+              ></q-input>
             </div>
 
-            <q-input
-              v-model="component.action.show_modal.title"
-              class="q-pt-sm"
-              :maxlength="100"
-              filled
-              dense
-              hide-bottom-space
-            ></q-input>
-          </div>
+            <div class="col-12">
+              <div>
+                {{ $t('Common.Identifier') }}
+              </div>
 
-          <div class="col-12">
-            <div>
-              {{ $t('Common.Identifier') }}
+              <q-input
+                v-model="component.action.show_modal.customId"
+                class="q-pt-sm"
+                :maxlength="100"
+                filled
+                dense
+                hide-bottom-space
+              ></q-input>
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div v-for="(row, i) in component.action.show_modal.components" :key="i" class="col-12">
+              <q-item
+                v-for="(field, ii) in row"
+                :key="ii"
+                class="bg-dark-2 cursor-pointer rounded-borders"
+                clickable
+                @click="fieldDialog(field, i)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ field.label }}
+                  </q-item-label>
+
+                  <q-item-label class="text--secondary">
+                    {{ field.style }}
+                  </q-item-label>
+                </q-item-section>
+
+                <q-item-section side>
+                  <q-btn
+                    @click="removeField(i)"
+                    :label="$t('Common.Remove')"
+                    color="negative"
+                    flat
+                    no-caps
+                    unelevated
+                  ></q-btn>
+                </q-item-section>
+              </q-item>
             </div>
 
-            <q-input
-              v-model="component.action.show_modal.customId"
-              class="q-pt-sm"
-              :maxlength="100"
-              filled
-              dense
-              hide-bottom-space
-            ></q-input>
+            <div class="col-12">
+              <q-btn
+                class="full-width dashed-border"
+                :label="$t('Components.MessageEditor.AddEmbedField')"
+                @click="addField"
+                :disable="component.action.show_modal.components.length >= 5"
+                unelevated
+                no-caps
+              />
+            </div>
           </div>
-        </div>
+        </q-card-section>
       </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div v-for="(row, i) in component.action.show_modal.components" :key="i" class="col-12">
-            <q-item
-              v-for="(field, ii) in row"
-              :key="ii"
-              class="bg-dark-2 cursor-pointer rounded-borders"
-              clickable
-              @click="fieldDialog(field, i)"
-            >
-              <q-item-section>
-                <q-item-label>
-                  {{ field.label }}
-                </q-item-label>
-
-                <q-item-label class="text--secondary">
-                  {{ field.style }}
-                </q-item-label>
-              </q-item-section>
-
-              <q-item-section side>
-                <q-btn
-                  @click="removeField(i)"
-                  :label="$t('Common.Remove')"
-                  color="negative"
-                  flat
-                  no-caps
-                  unelevated
-                ></q-btn>
-              </q-item-section>
-            </q-item>
-          </div>
-
-          <div class="col-12">
-            <q-btn
-              class="full-width dashed-border"
-              :label="$t('Components.MessageEditor.AddEmbedField')"
-              @click="addField"
-              :disable="component.action.show_modal.components.length >= 5"
-              unelevated
-              no-caps
-            />
-          </div>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            class="full-width"
+            :label="$t('Common.Done')"
+            unelevated
+            no-caps
+            color="primary"
+            :disable="!isValid"
+            @click="onConfirm"
+          />
         </div>
-      </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
-
-          <div class="col-6">
-            <q-btn
-              class="full-width"
-              :label="$t('Common.Done')"
-              unelevated
-              no-caps
-              color="primary"
-              :disable="!isValid"
-              @click="onConfirm"
-            />
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

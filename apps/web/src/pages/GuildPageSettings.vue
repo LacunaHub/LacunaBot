@@ -24,8 +24,9 @@
 
                 <q-card-section>
                   <q-btn
-                    class="full-width"
-                    color="primary"
+                    class="full-width update-settings-btn"
+                    :class="{ animated: updateSettingsAnimated, headShake: updateSettingsAnimated }"
+                    :color="updateSettingsColor"
                     push
                     :label="$t('Common.Save')"
                     @click="updateSettings"
@@ -40,174 +41,78 @@
               </q-card>
             </div>
 
-            <div class="col-12 lt-md">
-              <q-card class="bg-dark-1" flat>
-                <q-list padding>
-                  <q-item clickable :to="`/guilds/${guildId}/settings/diamond`" active-class="nav-item--active">
-                    <q-item-section>
-                      <q-item-label class="text-subtitle1">
-                        <span class="q-mr-xs">Lacuna Diamond</span>
-
-                        <q-badge v-if="hasDiamondDiscount" color="primary">
-                          <span>SALE</span>
-                        </q-badge>
-                      </q-item-label>
-                    </q-item-section>
-
-                    <q-item-section avatar side>
-                      <q-avatar square size="24px">
-                        <img src="~assets/lacuna-diamond.svg" />
-                      </q-avatar>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item
-                    clickable
-                    :to="`/guilds/${guildId}/settings/web-page`"
-                    active-class="nav-item--active"
-                    style="display: none"
-                  >
-                    <q-item-section class="text-subtitle1">Web page</q-item-section>
-
-                    <q-item-section avatar side>
-                      <q-avatar square size="24px">
-                        <img src="~assets/lacuna-sphere.svg" />
-                      </q-avatar>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-card>
-            </div>
-
-            <div class="col-12 lt-md">
-              <q-tabs
-                class="bg-dark-1 rounded-borders"
-                no-caps
-                active-class="nav-item--active"
-                indicator-color="transparent"
-              >
+            <div v-if="$q.screen.lt.md" class="col-12">
+              <q-tabs class="bg-dark-1 rounded-borders" no-caps indicator-color="transparent" outside-arrows>
                 <q-route-tab
-                  v-for="item in navItems"
+                  v-for="item in navItems.flat()"
                   :key="item.path"
-                  :to="`/guilds/${guildId}/${item.path}`"
+                  active-class="nav-item--active"
+                  exact
                   :label="item.name"
-                  :icon="`img:${item.icon}`"
+                  :icon="item.image ? `img:${item.image}` : item.icon"
+                  :to="item.path ? `/guilds/${guildId}/${item.path}` : null"
+                  @click="item.action"
                 >
-                  <q-badge v-if="item.new" color="primary" floating>
-                    <span>NEW</span>
+                  <q-badge v-for="badge in item.badges" :key="badge.name" :color="badge.color" floating>
+                    <span>{{ badge.name }}</span>
                   </q-badge>
                 </q-route-tab>
-
-                <q-route-tab
-                  :to="`/guilds/${guildId}/settings/change-log`"
-                  :label="$t('Pages.GuildPage.NavNames.ChangeLog')"
-                  :icon="`img:${editPenImg}`"
-                ></q-route-tab>
-
-                <q-tab
-                  :label="$t('Pages.GuildPage.NavNames.DownloadLogs')"
-                  :icon="`img:${logsImg}`"
-                  @click="downloadLogs"
-                ></q-tab>
               </q-tabs>
             </div>
 
-            <div class="col-12 gt-sm">
-              <q-card class="bg-dark-1" flat>
-                <q-list padding>
-                  <q-item clickable :to="`/guilds/${guildId}/settings/diamond`" active-class="nav-item--active">
-                    <q-item-section>
-                      <q-item-label class="text-subtitle1">
-                        <span class="q-mr-xs">Lacuna Diamond</span>
+            <div v-if="$q.screen.gt.sm" class="col-12">
+              <!-- <q-list class="bg-dark-1 overflow-hidden rounded-borders q-my-md">
+                <q-item
+                  clickable
+                  :to="`/guilds/${guildId}/settings/web-page`"
+                  active-class="nav-item--active"
+                  style="display: none"
+                >
+                  <q-item-section class="text-subtitle1">Web page</q-item-section>
 
-                        <q-badge v-if="hasDiamondDiscount" color="primary">
-                          <span>SALE</span>
-                        </q-badge>
-                      </q-item-label>
-                    </q-item-section>
+                  <q-item-section avatar side>
+                    <q-avatar square size="24px">
+                      <img src="~assets/lacuna-sphere.svg" />
+                    </q-avatar>
+                  </q-item-section>
+                </q-item>
+              </q-list> -->
 
-                    <q-item-section avatar side>
-                      <q-avatar square size="24px">
-                        <img src="~assets/lacuna-diamond.svg" />
-                      </q-avatar>
-                    </q-item-section>
-                  </q-item>
+              <q-list v-for="(group, i) in navItems" :key="i" class="bg-dark-1 overflow-hidden rounded-borders q-mb-md">
+                <q-item
+                  v-for="item in group"
+                  :key="item.name"
+                  clickable
+                  active-class="nav-item--active"
+                  exact
+                  :to="item.path ? `/guilds/${guildId}/${item.path}` : null"
+                  @click="item.action"
+                >
+                  <q-item-section>
+                    <q-item-label class="text-subtitle1">
+                      <span class="q-mr-xs">
+                        {{ item.name }}
+                      </span>
 
-                  <q-item
-                    clickable
-                    :to="`/guilds/${guildId}/settings/web-page`"
-                    active-class="nav-item--active"
-                    style="display: none"
-                  >
-                    <q-item-section class="text-subtitle1">Web page</q-item-section>
+                      <q-badge v-for="badge in item.badges" :key="badge.name" :color="badge.color">
+                        <span>{{ badge.name }}</span>
+                      </q-badge>
+                    </q-item-label>
+                  </q-item-section>
 
-                    <q-item-section avatar side>
-                      <q-avatar square size="24px">
-                        <img src="~assets/lacuna-sphere.svg" />
-                      </q-avatar>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
+                  <q-item-section avatar side>
+                    <q-avatar v-if="item.image" square size="24px">
+                      <img :src="item.image" :alt="item.name" />
+                    </q-avatar>
 
-                <q-separator inset></q-separator>
-
-                <q-list padding>
-                  <q-item
-                    v-for="item in navItems"
-                    :key="item.path"
-                    clickable
-                    :to="`/guilds/${guildId}/${item.path}`"
-                    :active="$route.path.endsWith(item.path)"
-                    active-class="nav-item--active"
-                  >
-                    <q-item-section>
-                      <q-item-label class="text-subtitle1">
-                        <span class="q-mr-xs">
-                          {{ item.name }}
-                        </span>
-
-                        <q-badge v-if="item.new" color="primary">
-                          <span>NEW</span>
-                        </q-badge>
-                      </q-item-label>
-                    </q-item-section>
-
-                    <q-item-section avatar side>
-                      <q-avatar square size="24px">
-                        <img :src="item.icon" :alt="item.name" />
-                      </q-avatar>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-
-                <q-separator inset></q-separator>
-
-                <q-list padding>
-                  <q-item clickable :to="`/guilds/${guildId}/settings/change-log`" active-class="nav-item--active">
-                    <q-item-section class="text-subtitle1">
-                      {{ $t('Pages.GuildPage.NavNames.ChangeLog') }}
-                    </q-item-section>
-
-                    <q-item-section avatar side>
-                      <q-avatar square size="24px">
-                        <img src="~assets/edit-pen.svg" />
-                      </q-avatar>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item clickable active-class="nav-item--active" @click="downloadLogs">
-                    <q-item-section class="text-subtitle1">
-                      {{ $t('Pages.GuildPage.NavNames.DownloadLogs') }}
-                    </q-item-section>
-
-                    <q-item-section avatar side>
-                      <q-avatar square size="24px">
-                        <img src="~assets/logs.svg" />
-                      </q-avatar>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-card>
+                    <q-icon
+                      v-if="item.icon"
+                      :class="$route.path.endsWith(item.path) ? '' : 'text--secondary'"
+                      :name="item.icon"
+                    ></q-icon>
+                  </q-item-section>
+                </q-item>
+              </q-list>
             </div>
           </div>
         </div>
@@ -226,22 +131,14 @@
 
 <script setup>
 import { useMeta, useQuasar } from 'quasar'
-import activitiesImg from 'src/assets/activities.svg'
-import bellImg from 'src/assets/bell.svg'
-import boxImg from 'src/assets/box.svg'
-import controlPanelImg from 'src/assets/control-panel.svg'
-import editPenImg from 'src/assets/edit-pen.svg'
-import karaokeImg from 'src/assets/karaoke.svg'
-import layersImg from 'src/assets/layers.svg'
-import logsImg from 'src/assets/logs.svg'
-import shieldImg from 'src/assets/shield.svg'
-import slashCommandImg from 'src/assets/slash-command.svg'
 import { interfaces } from 'src/boot/axios'
 import ChangeLog from 'src/components/dialogs/ChangeLog.vue'
 import UserSurvey from 'src/components/dialogs/UserSurvey.vue'
+import RollFailSound from 'src/sounds/bg3-roll-fail.mp3'
+import RollPassSound from 'src/sounds/bg3-roll-pass.mp3'
 import { useReleaseNotesCache } from 'src/stores/ReleaseNotesCache'
 import { useGuildStore } from 'src/stores/guild'
-import { decimalToHex, handleAxiosError, objectDifferences } from 'src/utils/Utils'
+import { decimalToHex, handleAxiosError, objectDifferences, sleep } from 'src/utils/Utils'
 import { computed, onMounted, ref, watch } from 'vue'
 import { event } from 'vue-gtag'
 import { useI18n } from 'vue-i18n'
@@ -259,7 +156,9 @@ const guildId = route.params.guild_id,
   documentTitle = ref(null)
 const freezedGuild = ref({}),
   isGuildChanged = ref(false),
-  updateSettingsLoading = ref(false)
+  updateSettingsLoading = ref(false),
+  updateSettingsColor = ref('primary'),
+  updateSettingsAnimated = ref(false)
 
 const guildClone = computed(() => {
     return JSON.parse(
@@ -277,36 +176,81 @@ const guildClone = computed(() => {
   }),
   hasDiamondDiscount = ref(false)
 
+const downloadLogs = async () => {
+  try {
+    const { data } = await interfaces.guilds.getLogs(guild._id)
+    const href = URL.createObjectURL(new Blob([data.data])),
+      link = document.createElement('a')
+
+    link.href = href
+    link.setAttribute('download', data.file_name)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(href)
+    event('guild_download_logs', { event_category: 'utility' })
+  } catch (err) {
+    const error = handleAxiosError(err)
+
+    $q.notify({
+      message: error.message,
+      classes: 'q-notification-custom',
+      color: 'black',
+      icon: 'error',
+      iconColor: 'negative',
+      timeout: 5000
+    })
+  }
+}
+
 const navItems = [
-  { name: t('Pages.GuildPage.NavNames.General'), path: 'settings', icon: controlPanelImg },
-  {
-    name: t('Pages.GuildPage.NavNames.Commands'),
-    path: 'settings/commands',
-    icon: slashCommandImg
-  },
-  {
-    name: t('Pages.GuildPage.NavNames.Moderation'),
-    path: 'settings/moderation',
-    icon: shieldImg
-  },
-  { name: t('Pages.GuildPage.NavNames.CustomBehavior'), path: 'settings/custom-behavior', icon: boxImg },
-  {
-    name: t('Pages.GuildPage.NavNames.Activities'),
-    path: 'settings/activities',
-    icon: activitiesImg
-  },
-  {
-    name: t('Pages.GuildPage.NavNames.Subscriptions'),
-    path: 'settings/subscriptions',
-    icon: bellImg
-  },
-  {
-    name: t('Pages.GuildPage.NavNames.VoiceChannels'),
-    path: 'settings/voice-channels',
-    icon: karaokeImg
-  },
-  { name: t('Pages.GuildPage.NavNames.Utility'), path: 'settings/utility', icon: layersImg }
+  [
+    {
+      name: 'Lacuna Diamond',
+      path: 'settings/diamond',
+      icon: 'r_diamond'
+    }
+  ],
+  [
+    { name: t('Pages.GuildPage.NavNames.General'), path: 'settings', icon: 'r_category' },
+    {
+      name: t('Pages.GuildPage.NavNames.Commands'),
+      path: 'settings/commands',
+      icon: 'r_terminal'
+    },
+    {
+      name: t('Pages.GuildPage.NavNames.Moderation'),
+      path: 'settings/moderation',
+      icon: 'r_gpp_good'
+    },
+    { name: t('Pages.GuildPage.NavNames.CustomBehavior'), path: 'settings/custom-behavior', icon: 'r_extension' },
+    {
+      name: t('Pages.GuildPage.NavNames.Activities'),
+      path: 'settings/activities',
+      icon: 'r_rocket_launch'
+    },
+    {
+      name: t('Pages.GuildPage.NavNames.Subscriptions'),
+      path: 'settings/subscriptions',
+      icon: 'r_notifications_active'
+    },
+    {
+      name: t('Pages.GuildPage.NavNames.VoiceChannels'),
+      path: 'settings/voice-channels',
+      icon: 'r_settings_voice'
+    },
+    { name: t('Pages.GuildPage.NavNames.Utility'), path: 'settings/utility', icon: 'r_layers' }
+  ],
+  [
+    { name: t('Pages.GuildPage.NavNames.ChangeLog'), path: 'settings/audit-log', icon: 'r_history' },
+    { name: t('Pages.GuildPage.NavNames.DownloadLogs'), action: downloadLogs, icon: 'r_text_snippet' }
+  ]
 ]
+
+const rollPass = new Audio(RollPassSound),
+  rollFail = new Audio(RollFailSound)
+rollPass.volume = 0.5
+rollFail.volume = 0.5
 
 useMeta(() => {
   return {
@@ -369,10 +313,38 @@ const updateSettings = async () => {
   updateSettingsLoading.value = true
   const updateData = objectDifferences(guildClone.value, freezedGuild.value)
 
+  const rollD20 = () => Math.floor(Math.random() * 20) + 1
+  const onRollFail = () => {
+    updateSettingsColor.value = 'red'
+    updateSettingsAnimated.value = true
+    setTimeout(() => {
+      updateSettingsColor.value = 'primary'
+      updateSettingsAnimated.value = false
+    }, 1000)
+  }
+
   try {
+    const d20 = rollD20(),
+      d20Pass = d20 === 20
+
+    if (d20Pass) {
+      const rollFailed = rollD20() < 15 ? true : false
+      if (rollFailed) {
+        await sleep()
+        await rollFail.play()
+        onRollFail()
+        event('d20_roll_fail', { event_category: 'easter_eggs' })
+
+        throw new Error('Perception Failed')
+      }
+
+      event('d20_roll_pass', { event_category: 'easter_eggs' })
+    }
+
     const response = await interfaces.guilds.updateSettings(guildId, { data: updateData }),
       { data } = response
 
+    if (d20Pass) await rollPass.play()
     guild.$patch({ ...data })
     setTimeout(() => {
       isGuildChanged.value = false
@@ -391,33 +363,6 @@ const updateSettings = async () => {
     })
   } finally {
     updateSettingsLoading.value = false
-  }
-}
-
-const downloadLogs = async () => {
-  try {
-    const { data } = await interfaces.guilds.getLogs(guild._id)
-    const href = URL.createObjectURL(new Blob([data.data])),
-      link = document.createElement('a')
-
-    link.href = href
-    link.setAttribute('download', data.file_name)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(href)
-    event('guild_download_logs', { event_category: 'utility' })
-  } catch (err) {
-    const error = handleAxiosError(err)
-
-    $q.notify({
-      message: error.message,
-      classes: 'q-notification-custom',
-      color: 'black',
-      icon: 'error',
-      iconColor: 'negative',
-      timeout: 5000
-    })
   }
 }
 
@@ -515,7 +460,11 @@ window.onbeforeunload = () => (isGuildChanged.value ? true : null)
 
 <style lang="scss" scoped>
 .nav-item--active {
-  color: white;
-  background: $secondary;
+  color: $almost-white-1;
+  background: $dark-3;
+}
+
+.update-settings-btn {
+  transition: 0.2s ease-out;
 }
 </style>

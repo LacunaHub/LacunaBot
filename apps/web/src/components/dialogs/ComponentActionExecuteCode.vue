@@ -6,39 +6,33 @@
     transition-hide="jump-up"
     no-esc-dismiss
     no-shake
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
   >
-    <q-card class="bg-dark-1" flat style="width: 1280px; max-width: 90vw">
-      <q-card-section class="q-pa-none">
-        <div class="row q-col-gutter-md">
-          <div class="col-12 full-height">
-            <vue-monaco-editor
-              v-model:value="component.action.execute_code.code"
-              theme="vs-dark"
-              height="70vh"
-              language="javascript"
-              :options="editorOptions"
-            ></vue-monaco-editor>
-          </div>
+    <q-card class="q-dialog-card bg-dark-1 overflow-hidden" flat>
+      <vue-monaco-editor
+        v-model:value="component.action.execute_code.code"
+        theme="vs-dark"
+        :height="$q.screen.lt.sm ? 'calc(100vh - 120px)' : '70vh'"
+        language="javascript"
+        :options="editorOptions"
+      ></vue-monaco-editor>
+
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            class="full-width"
+            :label="$t('Common.Done')"
+            unelevated
+            no-caps
+            color="primary"
+            :disable="!isValid"
+            @click="onConfirm"
+          />
         </div>
-      </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
-
-          <div class="col-6">
-            <q-btn
-              class="full-width"
-              :label="$t('Common.Done')"
-              unelevated
-              no-caps
-              color="primary"
-              :disable="!isValid"
-              @click="onConfirm"
-            />
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

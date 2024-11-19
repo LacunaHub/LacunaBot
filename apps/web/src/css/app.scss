@@ -89,21 +89,23 @@ em.gradient {
 /* OTHER */
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
+  width: 18px;
   background: transparent;
+  overflow: visible;
+  border-radius: $border-radius-lg;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: black;
-  border-radius: 8px;
+  background-color: $dark-3;
+  background-clip: padding-box;
+  border: 4px solid transparent;
+  border-radius: $border-radius-xl;
+  transition: background-color 0.28s ease-in-out;
+  -webkit-transition: background-color 0.28s ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba($color: #000000, $alpha: 0.4);
+  background-color: $primary;
 }
 
 /* TRANSITIONS & ANIMATIONS */

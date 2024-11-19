@@ -393,7 +393,7 @@ export default defineComponent({
 }
 
 .nav-item--active {
-  color: white;
+  color: $almost-white-1;
   background: $secondary;
 }
 </style>

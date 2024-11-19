@@ -1,163 +1,208 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="q-dialog-card bg-dark-1" flat style="width: 1000px">
-      <q-tabs
-        v-model="currentTab"
-        class="bg-dark-2"
-        align="justify"
-        active-bg-color="secondary"
-        indicator-color="transparent"
-        no-caps
-      >
-        <q-tab name="general" :label="$t('Pages.GuildPage.NavNames.General')" style="width: 50%"></q-tab>
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-tabs
+          v-model="currentTab"
+          class="bg-dark-2"
+          align="justify"
+          active-bg-color="secondary"
+          indicator-color="transparent"
+          no-caps
+        >
+          <q-tab name="general" :label="$t('Pages.GuildPage.NavNames.General')" style="width: 50%"></q-tab>
 
-        <q-tab name="components" :label="$t('Common.Components')" style="width: 50%"></q-tab>
-      </q-tabs>
+          <q-tab name="components" :label="$t('Common.Components')" style="width: 50%"></q-tab>
+        </q-tabs>
 
-      <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
-        <q-tab-panel name="general" class="q-pa-none">
-          <q-card-section v-if="mode === 'CREATE'">
-            <div class="row q-col-gutter-md">
-              <div class="col-12">
-                <q-btn
-                  class="full-width"
-                  :label="$t('Common.Import')"
-                  unelevated
-                  no-caps
-                  color="secondary"
-                  @click="importAutomationDialog"
-                />
-              </div>
-            </div>
-          </q-card-section>
-
-          <q-card-section>
-            <div class="row q-col-gutter-md">
-              <div class="col-12">
-                <div>
-                  {{ $t('Common.Name') }}
+        <q-tab-panels v-model="currentTab" class="bg-dark-1" animated>
+          <q-tab-panel name="general" class="q-pa-none">
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12 hidden">
+                  <q-file
+                    v-model="automationFile"
+                    ref="automationFileInput"
+                    class="q-pt-sm"
+                    accept=".json"
+                    filled
+                    dense
+                    hide-bottom-space
+                    @update:model-value="onImport"
+                  ></q-file>
                 </div>
 
-                <q-input
-                  v-model.trim="automation.name"
-                  class="q-pt-sm"
-                  :maxlength="32"
-                  filled
-                  dense
-                  hide-bottom-space
-                ></q-input>
-              </div>
+                <div class="col-12">
+                  <div>
+                    {{ $t('Common.Name') }}
+                  </div>
 
-              <div class="col-12">
-                <div>
-                  {{ $t('Components.Automation.Trigger') }}
+                  <q-input
+                    v-model.trim="automation.name"
+                    class="q-pt-sm"
+                    :maxlength="32"
+                    filled
+                    dense
+                    hide-bottom-space
+                  ></q-input>
                 </div>
 
-                <q-select
-                  v-model="automation.trigger"
-                  :options="triggers"
-                  class="q-pt-sm"
-                  filled
-                  dense
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                >
-                  <template #option="{ opt, toggleOption, selected }">
-                    <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                      <q-item-section>
-                        <q-item-label>
-                          {{ $t(localeStringsMap.automationTriggers[opt]) }}
-                        </q-item-label>
+                <div class="col-12">
+                  <div>
+                    {{ $t('Components.Automation.Trigger') }}
+                  </div>
 
-                        <q-item-label class="text--secondary" caption>
-                          {{ opt }}
-                        </q-item-label>
-                      </q-item-section>
-                    </q-item>
-                  </template>
+                  <q-select
+                    v-model="automation.trigger"
+                    :options="triggers"
+                    class="q-pt-sm"
+                    filled
+                    dense
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                  >
+                    <template #option="{ opt, toggleOption, selected }">
+                      <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                        <q-item-section>
+                          <q-item-label>
+                            {{ $t(localeStringsMap.automationTriggers[opt]) }}
+                          </q-item-label>
 
-                  <template #selected-item="{ opt }">
-                    <span>
-                      {{ $t(localeStringsMap.automationTriggers[opt]) }}
-                    </span>
-                  </template>
-                </q-select>
+                          <q-item-label class="text--secondary" caption>
+                            {{ opt }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+
+                    <template #selected-item="{ opt }">
+                      <span>
+                        {{ $t(localeStringsMap.automationTriggers[opt]) }}
+                      </span>
+                    </template>
+                  </q-select>
+                </div>
               </div>
+            </q-card-section>
+
+            <div class="q-pa-md">
+              <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+                <q-item tag="label">
+                  <q-item-section side>
+                    <q-checkbox v-model="automation.options" val="DISABLED" dense></q-checkbox>
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>
+                      {{ $t('Common.Disable') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
             </div>
-          </q-card-section>
+          </q-tab-panel>
 
-          <div class="q-pa-md">
-            <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-              <q-item tag="label">
-                <q-item-section side>
-                  <q-checkbox v-model="automation.options" val="DISABLED" dense></q-checkbox>
-                </q-item-section>
+          <q-tab-panel name="components" class="q-pa-none">
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-12 col-md-6">
+                  <q-btn-dropdown
+                    class="full-width"
+                    :label="$t('Components.CustomCommand.AddCondition')"
+                    color="dark-2"
+                    no-caps
+                    unelevated
+                  >
+                    <q-list>
+                      <q-item
+                        v-for="condition in conditions"
+                        :key="condition"
+                        clickable
+                        v-close-popup
+                        @click="addCondition(condition)"
+                        :disable="isComponentLimitReached(`CONDITION:${condition}`)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ $t(localeStringsMap.customBehaviorComponents[condition]) }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-btn-dropdown>
+                </div>
 
-                <q-item-section>
-                  <q-item-label>
-                    {{ $t('Common.Disable') }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-        </q-tab-panel>
+                <div class="col-12 col-md-6">
+                  <q-btn-dropdown
+                    class="full-width"
+                    :label="$t('Components.CustomCommand.AddAction')"
+                    color="dark-2"
+                    no-caps
+                    unelevated
+                  >
+                    <q-list>
+                      <q-item
+                        v-for="(action, i) in actions.sort()"
+                        :key="i"
+                        clickable
+                        v-close-popup
+                        @click="addAction(action)"
+                        :disable="isComponentLimitReached(`ACTION:${action}`)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ $t(localeStringsMap.customBehaviorComponents[action]) }}
+                          </q-item-label>
+                        </q-item-section>
 
-        <q-tab-panel name="components" class="q-pa-none">
-          <q-card-section>
-            <div class="row q-col-gutter-md">
-              <div class="col-12 col-md-6">
-                <q-btn-dropdown
-                  class="full-width"
-                  :label="$t('Components.CustomCommand.AddCondition')"
-                  color="dark-2"
-                  no-caps
-                  unelevated
-                >
-                  <q-list>
-                    <q-item
-                      v-for="condition in conditions"
-                      :key="condition"
-                      clickable
-                      v-close-popup
-                      @click="addCondition(condition)"
-                      :disable="isComponentLimitReached(`CONDITION:${condition}`)"
-                    >
-                      <q-item-section>
-                        <q-item-label>
-                          {{ $t(localeStringsMap.customBehaviorComponents[condition]) }}
-                        </q-item-label>
-                      </q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-btn-dropdown>
+                        <q-item-section v-if="action === 'EXECUTE_CODE'" avatar side>
+                          <q-avatar size="24px">
+                            <img src="~assets/lacuna-diamond.svg" />
+
+                            <q-tooltip
+                              class="bg-black text-body2"
+                              anchor="top middle"
+                              self="bottom middle"
+                              transition-show=""
+                              transition-hide=""
+                            >
+                              Only with Lacuna Diamond
+                            </q-tooltip>
+                          </q-avatar>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-btn-dropdown>
+                </div>
               </div>
+            </q-card-section>
 
-              <div class="col-12 col-md-6">
-                <q-btn-dropdown
-                  class="full-width"
-                  :label="$t('Components.CustomCommand.AddAction')"
-                  color="dark-2"
-                  no-caps
-                  unelevated
-                >
-                  <q-list>
-                    <q-item
-                      v-for="(action, i) in actions.sort()"
-                      :key="i"
-                      clickable
-                      v-close-popup
-                      @click="addAction(action)"
-                      :disable="isComponentLimitReached(`ACTION:${action}`)"
-                    >
+            <q-card-section v-if="automation.components.length">
+              <div class="row q-col-gutter-md">
+                <div v-for="(component, i) in automation.components" :key="i" class="col-12">
+                  <q-card flat bordered class="bg-transparent">
+                    <q-item class="rounded-t-lg" clickable @click="componentDialog(component, i)">
                       <q-item-section>
-                        <q-item-label>
-                          {{ $t(localeStringsMap.customBehaviorComponents[action]) }}
+                        <q-item-label class="text-subtitle1">
+                          {{
+                            $t(
+                              localeStringsMap.customBehaviorComponents[
+                                component.condition?.type ?? component.action?.type
+                              ]
+                            )
+                          }}
                         </q-item-label>
                       </q-item-section>
 
-                      <q-item-section v-if="action === 'EXECUTE_CODE'" avatar side>
+                      <q-item-section v-if="component.action?.type === 'EXECUTE_CODE'" avatar side>
                         <q-avatar size="24px">
                           <img src="~assets/lacuna-diamond.svg" />
 
@@ -173,127 +218,97 @@
                         </q-avatar>
                       </q-item-section>
                     </q-item>
-                  </q-list>
-                </q-btn-dropdown>
+
+                    <q-card-actions align="left">
+                      <q-btn icon="arrow_upward" flat no-caps unelevated @click="moveComponent(i, 0)"></q-btn>
+
+                      <q-btn icon="arrow_downward" flat no-caps unelevated @click="moveComponent(i, 1)"></q-btn>
+
+                      <q-space></q-space>
+
+                      <q-btn
+                        color="negative"
+                        flat
+                        icon="delete"
+                        no-caps
+                        unelevated
+                        @click="automation.components.splice(i, 1)"
+                      ></q-btn>
+                    </q-card-actions>
+                  </q-card>
+                </div>
               </div>
-            </div>
-          </q-card-section>
+            </q-card-section>
+          </q-tab-panel>
+        </q-tab-panels>
+      </q-card-section>
 
-          <q-card-section v-if="automation.components.length">
-            <div class="row q-col-gutter-md">
-              <div v-for="(component, i) in automation.components" :key="i" class="col-12">
-                <q-card flat bordered class="bg-transparent">
-                  <q-item class="rounded-t-lg" clickable @click="componentDialog(component, i)">
-                    <q-item-section>
-                      <q-item-label class="text-subtitle1">
-                        {{
-                          $t(
-                            localeStringsMap.customBehaviorComponents[
-                              component.condition?.type ?? component.action?.type
-                            ]
-                          )
-                        }}
-                      </q-item-label>
-                    </q-item-section>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn-dropdown
+            v-if="mode === 'CREATE'"
+            class="full-width"
+            :label="$t('Common.Add')"
+            :loading="confirmLoading"
+            split
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <q-list>
+              <q-item clickable v-close-popup @click="automationFileInput.pickFiles()" :disable="confirmLoading">
+                <q-item-section>
+                  <q-item-label>
+                    {{ $t('Common.Import') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
 
-                    <q-item-section v-if="component.action?.type === 'EXECUTE_CODE'" avatar side>
-                      <q-avatar size="24px">
-                        <img src="~assets/lacuna-diamond.svg" />
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn-dropdown>
 
-                        <q-tooltip
-                          class="bg-black text-body2"
-                          anchor="top middle"
-                          self="bottom middle"
-                          transition-show=""
-                          transition-hide=""
-                        >
-                          Only with Lacuna Diamond
-                        </q-tooltip>
-                      </q-avatar>
-                    </q-item-section>
-                  </q-item>
+          <q-btn-dropdown
+            v-if="mode === 'UPDATE'"
+            class="full-width"
+            :label="$t('Common.Done')"
+            :disable="!isValid"
+            :loading="confirmLoading"
+            split
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <q-list>
+              <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
+                <q-item-section class="text-negative">
+                  <q-item-label>
+                    {{ $t('Common.Delete') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
 
-                  <q-card-actions align="left">
-                    <q-btn icon="arrow_upward" flat no-caps unelevated @click="moveComponent(i, 0)"></q-btn>
+              <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
+                <q-item-section>
+                  <q-item-label>
+                    {{ $t('Common.Export') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
 
-                    <q-btn icon="arrow_downward" flat no-caps unelevated @click="moveComponent(i, 1)"></q-btn>
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn-dropdown>
+        </div>
 
-                    <q-space></q-space>
-
-                    <q-btn
-                      color="negative"
-                      flat
-                      icon="delete"
-                      no-caps
-                      unelevated
-                      @click="automation.components.splice(i, 1)"
-                    ></q-btn>
-                  </q-card-actions>
-                </q-card>
-              </div>
-            </div>
-          </q-card-section>
-        </q-tab-panel>
-      </q-tab-panels>
-
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
-
-          <div class="col-6">
-            <q-btn
-              v-if="mode === 'CREATE'"
-              class="full-width"
-              :label="$t('Common.Add')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn>
-
-            <q-btn-dropdown
-              v-if="mode === 'UPDATE'"
-              class="full-width"
-              :label="$t('Common.Done')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              split
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <q-list>
-                <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
-                  <q-item-section class="text-negative">
-                    <q-item-label>
-                      {{ $t('Common.Delete') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-
-                <q-item clickable v-close-popup @click="onExport" :disable="confirmLoading">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ $t('Common.Export') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn-dropdown>
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>
@@ -304,10 +319,9 @@
 import { useDialogPluginComponent } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { customCommandComponentLimits, localeStringsMap } from 'src/utils/Constants'
-import { suid } from 'src/utils/Utils'
+import { resolveAutomationJSON, suid } from 'src/utils/Utils'
 import { computed, defineComponent, ref } from 'vue'
 import { event } from 'vue-gtag'
-import AutomationTaskImport from './AutomationTaskImport.vue'
 import ComponentActionExecuteCode from './ComponentActionExecuteCode.vue'
 import ComponentActionForwardToCommand from './ComponentActionForwardToCommand.vue'
 import ComponentActionModifyRoles from './ComponentActionModifyRoles.vue'
@@ -350,7 +364,8 @@ export default defineComponent({
 
     const confirmLoading = ref(false),
       currentTab = ref('general'),
-      automationFile = ref(null)
+      automationFile = ref(null),
+      automationFileInput = ref(null)
 
     const isValid = computed(() => {
       return Boolean(automation.value.name && automation.value.trigger && automation.value.components.length)
@@ -366,6 +381,7 @@ export default defineComponent({
       confirmLoading,
       currentTab,
       automationFile,
+      automationFileInput,
 
       isValid,
       localeStringsMap,
@@ -420,15 +436,6 @@ export default defineComponent({
   },
 
   methods: {
-    importAutomationDialog() {
-      this.$q
-        .dialog({
-          component: AutomationTaskImport
-        })
-        .onOk(({ automation }) => {
-          this.automation = automation
-        })
-    },
     addCondition(type) {
       if (this.isComponentLimitReached(`CONDITION:${type}`)) return
 
@@ -624,6 +631,26 @@ export default defineComponent({
 
       this.automation.components.splice(from, 1)
       this.automation.components.splice(position, 0, component)
+    },
+    onImport(file) {
+      if (this.mode !== 'CREATE') return
+
+      const reader = new FileReader()
+
+      reader.onload = e => {
+        let json
+
+        try {
+          json = JSON.parse(e.target.result)
+        } catch (err) {
+          json = null
+        }
+
+        event('import_custom_automation', { event_category: 'utility' })
+        this.automationFile = resolveAutomationJSON(json)
+      }
+
+      reader.readAsText(file)
     },
     onExport() {
       if (this.mode !== 'UPDATE') return

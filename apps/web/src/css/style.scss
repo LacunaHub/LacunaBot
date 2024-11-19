@@ -149,13 +149,37 @@
 }
 
 .q-dialog-card {
-  max-width: 90vw !important;
-  overflow: hidden;
+  max-width: 100vw !important;
+  width: 1000px;
+
+  @media (max-width: $breakpoint-sm-min) {
+    min-width: 100vw;
+  }
 }
 
-.q-dialog-card-body {
-  max-height: 75vh;
-  overflow: auto;
+.q-dialog-card-sm {
+  width: 500px !important;
+}
+
+.q-dialog-card-md {
+  width: 750px !important;
+}
+
+.q-dialog-card-content {
+  padding: 0 !important;
+
+  @media (max-width: $breakpoint-sm-min) {
+    min-height: calc(100% - 120px);
+  }
+}
+
+.q-dialog-card-actions {
+  position: sticky;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background-color: $dark-1;
+  mask-image: linear-gradient(to bottom, transparent, $dark-1 24%);
 }
 
 .cursor-help {

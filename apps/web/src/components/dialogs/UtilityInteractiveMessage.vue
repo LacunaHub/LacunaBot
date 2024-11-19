@@ -1,270 +1,277 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="bg-dark-1" flat style="width: 900px; max-width: 90vw">
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div v-if="mode === 'CREATE'" class="col-12">
-            <div>
-              {{ $t('Commands.OptionTypes.Channel') }}
-            </div>
-
-            <q-select
-              v-model="im.channel_id"
-              :options="guild.channelsText"
-              option-label="name"
-              option-value="id"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            >
-              <template #selected-item="{ opt }">
-                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section avatar>
-                    <q-icon :name="opt.icon"></q-icon>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>
-                      {{ opt.name }}
-                    </q-item-label>
-
-                    <q-item-label class="text--secondary">
-                      {{ opt.parentName }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
-            </div>
-
-            <MessageEditor :message="im.message" hide-replacers hide-code-snippets class="q-pt-sm" />
-          </div>
-        </div>
-      </q-card-section>
-
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Components.InteractiveMessage.ActionRows') }}
-            </div>
-          </div>
-
-          <div class="col-12" v-for="(row, i) in im.components" :key="i">
-            <q-card flat bordered class="bg-transparent">
-              <q-card-section v-if="row[0].type === 'BUTTON'">
-                <div class="row q-col-gutter-sm">
-                  <div class="col-auto" v-for="(button, ii) in row" :key="button.id">
-                    <q-chip
-                      class="full-width no-shadow"
-                      square
-                      :label="button.appearance.label"
-                      :style="{ background: buttonStyles[button.appearance.style] }"
-                      clickable
-                      removable
-                      @click="buttonDialog(button, i)"
-                      @remove="row.length == 1 ? im.components.splice(i, 1) : row.splice(ii, 1)"
-                    ></q-chip>
-                  </div>
-
-                  <div v-if="row.length < 5" class="col-auto">
-                    <q-chip
-                      class="dashed-border no-shadow full-width"
-                      outline
-                      square
-                      clickable
-                      @click="addButtonComponent(i)"
-                    >
-                      <q-icon name="add" size="24px"></q-icon>
-                    </q-chip>
-                  </div>
-                </div>
-              </q-card-section>
-
-              <q-card-section v-if="row[0].type === 'SELECT_MENU'">
-                <div class="row q-col-gutter-md">
-                  <div class="col-12">
-                    <div>
-                      {{ $t('Components.InteractiveMessage.SelectMenuPlaceholder') }}
-                    </div>
-
-                    <q-input
-                      v-model="row[0].placeholder"
-                      class="q-pt-sm"
-                      :maxlength="32"
-                      filled
-                      dense
-                      hide-bottom-space
-                    ></q-input>
-                  </div>
-
-                  <div class="col-12">
-                    <div class="row q-col-gutter-sm">
-                      <div class="col-auto" v-for="(option, ii) in row[0]._options" :key="ii">
-                        <q-chip
-                          class="full-width no-shadow"
-                          square
-                          :label="option.appearance.label"
-                          clickable
-                          removable
-                          @click="optionDialog(option, i)"
-                          @remove="
-                            row[0]._options.length == 1 ? im.components.splice(i, 1) : row[0]._options.splice(ii, 1)
-                          "
-                        ></q-chip>
-                      </div>
-
-                      <div v-if="row[0]._options.length < 25" class="col-auto">
-                        <q-chip
-                          class="dashed-border no-shadow full-width"
-                          outline
-                          square
-                          clickable
-                          @click="addSelectMenuOption(i)"
-                        >
-                          <q-icon name="add" size="24px"></q-icon>
-                        </q-chip>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </q-card-section>
-
-              <q-card-actions align="right">
-                <q-btn
-                  @click="im.components.splice(i, 1)"
-                  :label="$t('Common.Remove')"
-                  color="negative"
-                  flat
-                  no-caps
-                  unelevated
-                ></q-btn>
-              </q-card-actions>
-            </q-card>
-          </div>
-
-          <div v-if="im.components.length < 5" class="col-12">
-            <q-btn-dropdown class="full-width dashed-border" icon="add" flat>
-              <q-list>
-                <q-item clickable v-close-popup @click="addActionRow('BUTTON')">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ $t('Components.InteractiveMessage.ActionRowButtons') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-
-                <q-item clickable v-close-popup @click="addActionRow('SELECT_MENU')">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ $t('Components.InteractiveMessage.ActionRowSelectMenu') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-btn-dropdown>
-          </div>
-        </div>
-      </q-card-section>
-
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Common.Reactions') }}
-            </div>
-
-            <div class="row q-col-gutter-sm q-pt-sm">
-              <div class="col-auto" v-for="(reaction, i) in im.reactions" :key="i">
-                <q-chip
-                  class="full-width no-shadow"
-                  square
-                  :label="reaction.emoji.id ? `:${reaction.emoji.name}:` : reaction.emoji.name"
-                  clickable
-                  removable
-                  @click="reactionDialog(reaction)"
-                  @remove="im.reactions.splice(i, 1)"
-                ></q-chip>
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div v-if="mode === 'CREATE'" class="col-12">
+              <div>
+                {{ $t('Commands.OptionTypes.Channel') }}
               </div>
 
-              <div v-if="im.reactions.length < 10" class="col-auto">
-                <q-chip
-                  class="dashed-border no-shadow full-width"
-                  outline
-                  square
-                  clickable
-                  @click="emojiPickerModal = true"
-                >
-                  <q-icon name="add" size="24px"></q-icon>
-                </q-chip>
+              <q-select
+                v-model="im.channel_id"
+                :options="guild.channelsText"
+                option-label="name"
+                option-value="id"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt }">
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section avatar>
+                      <q-icon :name="opt.icon"></q-icon>
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label>
+                        {{ opt.name }}
+                      </q-item-label>
+
+                      <q-item-label class="text--secondary">
+                        {{ opt.parentName }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+
+            <div class="col-12">
+              <div>
+                {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
+              </div>
+
+              <MessageEditor :message="im.message" hide-replacers hide-code-snippets class="q-pt-sm" />
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Components.InteractiveMessage.ActionRows') }}
+              </div>
+            </div>
+
+            <div class="col-12" v-for="(row, i) in im.components" :key="i">
+              <q-card flat bordered class="bg-transparent">
+                <q-card-section v-if="row[0].type === 'BUTTON'">
+                  <div class="row q-col-gutter-sm">
+                    <div class="col-auto" v-for="(button, ii) in row" :key="button.id">
+                      <q-chip
+                        class="full-width no-shadow"
+                        square
+                        :label="button.appearance.label"
+                        :style="{ background: buttonStyles[button.appearance.style] }"
+                        clickable
+                        removable
+                        @click="buttonDialog(button, i)"
+                        @remove="row.length == 1 ? im.components.splice(i, 1) : row.splice(ii, 1)"
+                      ></q-chip>
+                    </div>
+
+                    <div v-if="row.length < 5" class="col-auto">
+                      <q-chip
+                        class="dashed-border no-shadow full-width"
+                        outline
+                        square
+                        clickable
+                        @click="addButtonComponent(i)"
+                      >
+                        <q-icon name="add" size="24px"></q-icon>
+                      </q-chip>
+                    </div>
+                  </div>
+                </q-card-section>
+
+                <q-card-section v-if="row[0].type === 'SELECT_MENU'">
+                  <div class="row q-col-gutter-md">
+                    <div class="col-12">
+                      <div>
+                        {{ $t('Components.InteractiveMessage.SelectMenuPlaceholder') }}
+                      </div>
+
+                      <q-input
+                        v-model="row[0].placeholder"
+                        class="q-pt-sm"
+                        :maxlength="32"
+                        filled
+                        dense
+                        hide-bottom-space
+                      ></q-input>
+                    </div>
+
+                    <div class="col-12">
+                      <div class="row q-col-gutter-sm">
+                        <div class="col-auto" v-for="(option, ii) in row[0]._options" :key="ii">
+                          <q-chip
+                            class="full-width no-shadow"
+                            square
+                            :label="option.appearance.label"
+                            clickable
+                            removable
+                            @click="optionDialog(option, i)"
+                            @remove="
+                              row[0]._options.length == 1 ? im.components.splice(i, 1) : row[0]._options.splice(ii, 1)
+                            "
+                          ></q-chip>
+                        </div>
+
+                        <div v-if="row[0]._options.length < 25" class="col-auto">
+                          <q-chip
+                            class="dashed-border no-shadow full-width"
+                            outline
+                            square
+                            clickable
+                            @click="addSelectMenuOption(i)"
+                          >
+                            <q-icon name="add" size="24px"></q-icon>
+                          </q-chip>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </q-card-section>
+
+                <q-card-actions align="right">
+                  <q-btn
+                    @click="im.components.splice(i, 1)"
+                    :label="$t('Common.Remove')"
+                    color="negative"
+                    flat
+                    no-caps
+                    unelevated
+                  ></q-btn>
+                </q-card-actions>
+              </q-card>
+            </div>
+
+            <div v-if="im.components.length < 5" class="col-12">
+              <q-btn-dropdown class="full-width dashed-border" icon="add" flat>
+                <q-list>
+                  <q-item clickable v-close-popup @click="addActionRow('BUTTON')">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ $t('Components.InteractiveMessage.ActionRowButtons') }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item clickable v-close-popup @click="addActionRow('SELECT_MENU')">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ $t('Components.InteractiveMessage.ActionRowSelectMenu') }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown>
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Common.Reactions') }}
+              </div>
+
+              <div class="row q-col-gutter-sm q-pt-sm">
+                <div class="col-auto" v-for="(reaction, i) in im.reactions" :key="i">
+                  <q-chip
+                    class="full-width no-shadow"
+                    square
+                    :label="reaction.emoji.id ? `:${reaction.emoji.name}:` : reaction.emoji.name"
+                    clickable
+                    removable
+                    @click="reactionDialog(reaction)"
+                    @remove="im.reactions.splice(i, 1)"
+                  ></q-chip>
+                </div>
+
+                <div v-if="im.reactions.length < 10" class="col-auto">
+                  <q-chip
+                    class="dashed-border no-shadow full-width"
+                    outline
+                    square
+                    clickable
+                    @click="emojiPickerModal = true"
+                  >
+                    <q-icon name="add" size="24px"></q-icon>
+                  </q-chip>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </q-card-section>
       </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            v-if="mode === 'CREATE'"
+            class="full-width"
+            :label="$t('Common.Add')"
+            :disable="!isValid"
+            :loading="confirmLoading"
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn>
 
-          <div class="col-6">
-            <q-btn
-              v-if="mode === 'CREATE'"
-              class="full-width"
-              :label="$t('Common.Add')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn>
+          <q-btn-dropdown
+            v-if="mode === 'UPDATE'"
+            class="full-width"
+            :label="$t('Common.Done')"
+            :disable="!isValid"
+            :loading="confirmLoading"
+            split
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <q-list>
+              <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
+                <q-item-section class="text-negative">
+                  <q-item-label>
+                    {{ $t('Common.Delete') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
 
-            <q-btn-dropdown
-              v-if="mode === 'UPDATE'"
-              class="full-width"
-              :label="$t('Common.Done')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              split
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <q-list dense>
-                <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
-                  <q-item-section class="text-negative">
-                    <q-item-label>
-                      {{ $t('Common.Delete') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn-dropdown>
+        </div>
 
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn-dropdown>
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

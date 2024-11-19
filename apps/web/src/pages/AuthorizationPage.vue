@@ -1,6 +1,6 @@
 <template>
-  <div class="fullscreen bg-dark-2 text-white q-pa-md flex flex-center">
-    <q-card class="q-dialog-card bg-dark-1 overflow-hidden" flat style="width: 512px">
+  <div class="fullscreen bg-dark-2 text-white flex flex-center">
+    <q-card :class="`bg-dark-1 ${$q.screen.lt.sm ? 'full-height full-width' : ''}`" flat style="width: 500px">
       <q-toolbar class="q-pa-md text-center">
         <q-toolbar-title>
           <q-avatar size="60px">
@@ -54,24 +54,22 @@
         </q-list>
       </div>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <q-btn
-              class="full-width"
-              :label="$t('Components.Header.Login')"
-              unelevated
-              no-caps
-              color="primary"
-              push
-              @click="onConfirm"
-              :loading="confirmLoading"
-            >
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn>
-          </div>
+      <q-card-section :class="`row reverse q-col-gutter-md ${$q.screen.lt.sm ? 'pin-bottom' : ''}`">
+        <div class="col-12">
+          <q-btn
+            class="full-width"
+            :label="$t('Components.Header.Login')"
+            unelevated
+            no-caps
+            color="primary"
+            push
+            @click="onConfirm"
+            :loading="confirmLoading"
+          >
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn>
         </div>
       </q-card-section>
     </q-card>
@@ -210,3 +208,12 @@ const onConfirm = async () => {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.pin-bottom {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+</style>

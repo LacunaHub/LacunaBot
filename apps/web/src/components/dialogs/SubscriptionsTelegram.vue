@@ -1,285 +1,292 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section v-if="mode === 'CREATE'">
-        <q-banner class="bg-dark-2" dense>
-          <i18n-t keypath="Components.Subscriptions.TelegramHelpNote" tag="span">
-            <template #botLink>
-              <a class="origin" href="https://t.me/VoidLacunaBot" target="_blank">@VoidLacunaBot</a>
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card q-dialog-card-md bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section v-if="mode === 'CREATE'">
+          <q-banner class="bg-dark-2 rounded-borders" dense>
+            <i18n-t keypath="Components.Subscriptions.TelegramHelpNote" tag="span">
+              <template #botLink>
+                <a class="origin" href="https://t.me/VoidLacunaBot" target="_blank">@VoidLacunaBot</a>
+              </template>
+            </i18n-t>
+
+            <template #avatar>
+              <q-icon name="info" color="info"></q-icon>
             </template>
-          </i18n-t>
+          </q-banner>
+        </q-card-section>
 
-          <template #avatar>
-            <q-icon name="info" color="info"></q-icon>
-          </template>
-        </q-banner>
-      </q-card-section>
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Components.Subscriptions.ChannelName') }}
+              </div>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Components.Subscriptions.ChannelName') }}
+              <div v-if="mode === 'CREATE'" class="text--secondary">
+                {{ $t('Components.Subscriptions.TelegramChannelNameDescription') }}
+              </div>
+
+              <q-select
+                v-if="mode === 'CREATE'"
+                v-model="telegram.channel"
+                :options="foundChannels"
+                option-label="name"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                hide-dropdown-icon
+                use-input
+                fill-input
+                hide-selected
+                input-debounce="1000"
+                @filter="getChannels"
+              >
+                <template #loading>
+                  <q-spinner-dots color="white"></q-spinner-dots>
+                </template>
+
+                <template v-slot:prepend>
+                  <q-icon name="alternate_email" />
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ opt.name }}
+                      </q-item-label>
+
+                      <q-item-label class="text--secondary">
+                        {{ opt.username }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+
+              <q-input
+                v-if="mode === 'UPDATE'"
+                :model-value="telegram.channel_name"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                disable
+                readonly
+              >
+              </q-input>
             </div>
 
-            <div v-if="mode === 'CREATE'" class="text--secondary">
-              {{ $t('Components.Subscriptions.TelegramChannelNameDescription') }}
+            <div class="col-12">
+              <div>
+                {{ $t('Components.Subscriptions.NotificationsChannel') }}
+              </div>
+
+              <q-select
+                v-model="telegram.notification_channel_id"
+                :options="guild.channelsText"
+                option-label="name"
+                option-value="id"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt }">
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section avatar>
+                      <q-icon :name="opt.icon"></q-icon>
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label>
+                        {{ opt.name }}
+                      </q-item-label>
+
+                      <q-item-label class="text--secondary">
+                        {{ opt.parentName }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
             </div>
-
-            <q-select
-              v-if="mode === 'CREATE'"
-              v-model="telegram.channel"
-              :options="foundChannels"
-              option-label="name"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              hide-dropdown-icon
-              use-input
-              fill-input
-              hide-selected
-              input-debounce="1000"
-              @filter="getChannels"
-            >
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-
-              <template v-slot:prepend>
-                <q-icon name="alternate_email" />
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ opt.name }}
-                    </q-item-label>
-
-                    <q-item-label class="text--secondary">
-                      {{ opt.username }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-
-            <q-input
-              v-if="mode === 'UPDATE'"
-              :model-value="telegram.channel_name"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              disable
-              readonly
-            >
-            </q-input>
           </div>
+        </q-card-section>
 
-          <div class="col-12">
-            <div>
-              {{ $t('Components.Subscriptions.NotificationsChannel') }}
-            </div>
-
-            <q-select
-              v-model="telegram.notification_channel_id"
-              :options="guild.channelsText"
-              option-label="name"
-              option-value="id"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            >
-              <template #selected-item="{ opt }">
-                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section avatar>
-                    <q-icon :name="opt.icon"></q-icon>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>
-                      {{ opt.name }}
-                    </q-item-label>
-
-                    <q-item-label class="text--secondary">
-                      {{ opt.parentName }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-        </div>
-      </q-card-section>
-
-      <div class="q-pa-md">
-        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-          <q-item tag="label">
-            <q-item-section side>
-              <q-checkbox v-model="telegram.options" val="MENTION_EVERYONE" dense></q-checkbox>
-            </q-item-section>
-
-            <q-item-section>
-              <q-item-label>
-                {{ $t('Common.DiscordPermissions.MentionEveryone') }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-expansion-item tag="label">
-            <template #header>
+        <div class="q-pa-md">
+          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+            <q-item tag="label">
               <q-item-section side>
-                <q-checkbox
-                  v-model="telegram.options"
-                  val="MENTION_ROLES"
-                  dense
-                  @update:model-value="onSelectOption"
-                ></q-checkbox>
+                <q-checkbox v-model="telegram.options" val="MENTION_EVERYONE" dense></q-checkbox>
               </q-item-section>
 
               <q-item-section>
                 <q-item-label>
-                  {{ $t('Components.Subscriptions.MentionRoles') }}
+                  {{ $t('Common.DiscordPermissions.MentionEveryone') }}
                 </q-item-label>
               </q-item-section>
-            </template>
+            </q-item>
 
-            <q-card class="bg-dark-1 no-border-radius" bordered>
-              <q-card-section>
-                <div class="row q-col-gutter-md">
-                  <div class="col-12">
-                    <q-select
-                      v-if="telegram.options.includes('MENTION_ROLES')"
-                      v-model="telegram.role_mentions"
-                      :options="guild.roles"
-                      option-label="name"
-                      option-value="id"
-                      use-chips
-                      multiple
-                      filled
-                      dense
-                      hide-bottom-space
-                      emit-value
-                      map-options
-                      :max-values="3"
-                    >
-                      <template #selected-item="{ opt, index, removeAtIndex }">
-                        <q-chip
-                          square
-                          :label="opt.name ?? opt"
-                          size="sm"
-                          :style="`background: ${opt.color}`"
-                          removable
-                          @remove="removeAtIndex(index)"
-                        ></q-chip>
-                      </template>
+            <q-expansion-item tag="label">
+              <template #header>
+                <q-item-section side>
+                  <q-checkbox
+                    v-model="telegram.options"
+                    val="MENTION_ROLES"
+                    dense
+                    @update:model-value="onSelectOption"
+                  ></q-checkbox>
+                </q-item-section>
 
-                      <template #option="{ opt, toggleOption, selected }">
-                        <q-item
-                          clickable
-                          @click="toggleOption(opt)"
-                          :active="selected"
-                          active-class="menu-item--active"
-                        >
-                          <q-item-section>
-                            <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                          </q-item-section>
-                        </q-item>
-                      </template>
-                    </q-select>
+                <q-item-section>
+                  <q-item-label>
+                    {{ $t('Components.Subscriptions.MentionRoles') }}
+                  </q-item-label>
+                </q-item-section>
+              </template>
 
-                    <q-select v-else disable filled dense hide-bottom-space></q-select>
+              <q-card class="bg-dark-1 no-border-radius" bordered>
+                <q-card-section>
+                  <div class="row q-col-gutter-md">
+                    <div class="col-12">
+                      <q-select
+                        v-if="telegram.options.includes('MENTION_ROLES')"
+                        v-model="telegram.role_mentions"
+                        :options="guild.roles"
+                        option-label="name"
+                        option-value="id"
+                        use-chips
+                        multiple
+                        filled
+                        dense
+                        hide-bottom-space
+                        emit-value
+                        map-options
+                        :max-values="3"
+                      >
+                        <template #selected-item="{ opt, index, removeAtIndex }">
+                          <q-chip
+                            square
+                            :label="opt.name ?? opt"
+                            size="sm"
+                            :style="`background: ${opt.color}`"
+                            removable
+                            @remove="removeAtIndex(index)"
+                          ></q-chip>
+                        </template>
+
+                        <template #option="{ opt, toggleOption, selected }">
+                          <q-item
+                            clickable
+                            @click="toggleOption(opt)"
+                            :active="selected"
+                            active-class="menu-item--active"
+                          >
+                            <q-item-section>
+                              <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </template>
+                      </q-select>
+
+                      <q-select v-else disable filled dense hide-bottom-space></q-select>
+                    </div>
                   </div>
-                </div>
-              </q-card-section>
-            </q-card>
-          </q-expansion-item>
+                </q-card-section>
+              </q-card>
+            </q-expansion-item>
 
-          <q-item tag="label">
-            <q-item-section side>
-              <q-checkbox v-model="telegram.options" val="CREATE_THREAD" dense></q-checkbox>
-            </q-item-section>
+            <q-item tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="telegram.options" val="CREATE_THREAD" dense></q-checkbox>
+              </q-item-section>
 
-            <q-item-section>
-              <q-item-label>
-                {{ $t('Components.Subscriptions.CreateThread') }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('Components.Subscriptions.CreateThread') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
 
-          <q-item v-if="guild.channelsAnnouncement.some(i => i.id === telegram.notification_channel_id)" tag="label">
-            <q-item-section side>
-              <q-checkbox v-model="telegram.options" val="CROSSPOST_MESSAGE" dense></q-checkbox>
-            </q-item-section>
+            <q-item v-if="guild.channelsAnnouncement.some(i => i.id === telegram.notification_channel_id)" tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="telegram.options" val="CROSSPOST_MESSAGE" dense></q-checkbox>
+              </q-item-section>
 
-            <q-item-section>
-              <q-item-label>
-                {{ $t('Components.Subscriptions.CrosspostMessage') }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </div>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('Components.Subscriptions.CrosspostMessage') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+      </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            v-if="mode === 'CREATE'"
+            class="full-width"
+            :label="$t('Common.Add')"
+            :disable="!isValid"
+            :loading="confirmLoading"
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn>
 
-          <div class="col-6">
-            <q-btn
-              v-if="mode === 'CREATE'"
-              class="full-width"
-              :label="$t('Common.Add')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn>
+          <q-btn-dropdown
+            v-if="mode === 'UPDATE'"
+            class="full-width"
+            :label="$t('Common.Done')"
+            :disable="!isValid"
+            :loading="confirmLoading"
+            split
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <q-list>
+              <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
+                <q-item-section class="text-negative">
+                  <q-item-label>
+                    {{ $t('Common.Delete') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
 
-            <q-btn-dropdown
-              v-if="mode === 'UPDATE'"
-              class="full-width"
-              :label="$t('Common.Done')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              split
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <q-list dense>
-                <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
-                  <q-item-section class="text-negative">
-                    <q-item-label>
-                      {{ $t('Common.Delete') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn-dropdown>
+        </div>
 
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn-dropdown>
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

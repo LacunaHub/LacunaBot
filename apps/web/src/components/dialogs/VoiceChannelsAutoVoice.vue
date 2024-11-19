@@ -1,383 +1,390 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Commands.OptionTypes.Channel') }}
-            </div>
-            <div class="text--secondary">
-              {{ $t('Components.AutoVoice.VoiceChannelDescription') }}
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card q-dialog-card-md bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Commands.OptionTypes.Channel') }}
+              </div>
+              <div class="text--secondary">
+                {{ $t('Components.AutoVoice.VoiceChannelDescription') }}
+              </div>
+
+              <q-select
+                v-if="mode === 'CREATE'"
+                v-model="autoVoice.channel_id"
+                :options="unusedVoiceChannels"
+                option-label="name"
+                option-value="id"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+                @update:model-value="onSelectVoiceChannel"
+              >
+                <template #selected-item="{ opt }">
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section avatar>
+                      <q-icon :name="opt.icon"></q-icon>
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label>
+                        {{ opt.name }}
+                      </q-item-label>
+
+                      <q-item-label class="text--secondary">
+                        {{ opt.parentName }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+
+              <q-select
+                v-if="mode === 'UPDATE'"
+                :model-value="autoVoice.channel_id"
+                :options="guild.channelsVoice"
+                option-label="name"
+                option-value="id"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+                disable
+                readonly
+              >
+                <template #selected-item="{ opt }">
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                </template>
+              </q-select>
             </div>
 
-            <q-select
-              v-if="mode === 'CREATE'"
-              v-model="autoVoice.channel_id"
-              :options="unusedVoiceChannels"
-              option-label="name"
-              option-value="id"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-              @update:model-value="onSelectVoiceChannel"
+            <div class="col-12">
+              <div>
+                {{ $t('Components.AutoVoice.DefaultName') }}
+              </div>
+
+              <q-input
+                v-model.trim="autoVoice.default.name"
+                class="q-pt-sm"
+                :maxlength="100"
+                filled
+                dense
+                hide-bottom-space
+              ></q-input>
+            </div>
+
+            <div class="col-12">
+              <div>
+                {{ $t('Components.AutoVoice.DefaultUserLimit') }}
+              </div>
+
+              <q-slider
+                v-model.number="autoVoice.default.limit"
+                class="q-pt-sm q-px-sm"
+                :min="0"
+                :max="99"
+                label
+              ></q-slider>
+            </div>
+
+            <div class="col-12">
+              <div>
+                {{ $t('Components.AutoVoice.DefaultCategory') }}
+              </div>
+
+              <q-select
+                v-model="autoVoice.default.category_id"
+                :options="guild.channelsCategory"
+                option-label="name"
+                option-value="id"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt }">
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section avatar>
+                      <q-icon :name="opt.icon"></q-icon>
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label>
+                        {{ opt.name }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+
+            <div class="col-12">
+              <div>
+                {{ $t('Components.AutoVoice.DefaultPosition') }}
+              </div>
+              <div class="text--secondary">
+                {{ $t('Components.AutoVoice.DefaultPositionDescription') }}
+              </div>
+
+              <q-select
+                v-model="autoVoice.default.position"
+                :options="['TOP', 'BOTTOM']"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+              >
+                <template #selected-item="{ opt }">
+                  <span>
+                    {{ $t(localeStringsMap.autoVoicePositions[opt]) }}
+                  </span>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ $t(localeStringsMap.autoVoicePositions[opt]) }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+          </div>
+        </q-card-section>
+
+        <div class="q-pa-md">
+          <div>
+            {{ $t('Components.AutoVoice.OwnerPermissions') }}
+          </div>
+          <div class="text--secondary">
+            {{ $t('Components.AutoVoice.OwnerPermissionsDescription') }}
+          </div>
+          <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
+            <q-item
+              v-for="permission in ownerPermissions"
+              :key="permission.key"
+              @click="onChangePermissions(permission.bit)"
+              tag="label"
             >
-              <template #selected-item="{ opt }">
-                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section avatar>
-                    <q-icon :name="opt.icon"></q-icon>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>
-                      {{ opt.name }}
-                    </q-item-label>
-
-                    <q-item-label class="text--secondary">
-                      {{ opt.parentName }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-
-            <q-select
-              v-if="mode === 'UPDATE'"
-              :model-value="autoVoice.channel_id"
-              :options="guild.channelsVoice"
-              option-label="name"
-              option-value="id"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-              disable
-              readonly
-            >
-              <template #selected-item="{ opt }">
-                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Components.AutoVoice.DefaultName') }}
-            </div>
-
-            <q-input
-              v-model.trim="autoVoice.default.name"
-              class="q-pt-sm"
-              :maxlength="100"
-              filled
-              dense
-              hide-bottom-space
-            ></q-input>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Components.AutoVoice.DefaultUserLimit') }}
-            </div>
-
-            <q-slider
-              v-model.number="autoVoice.default.limit"
-              class="q-pt-sm q-px-sm"
-              :min="0"
-              :max="99"
-              label
-            ></q-slider>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Components.AutoVoice.DefaultCategory') }}
-            </div>
-
-            <q-select
-              v-model="autoVoice.default.category_id"
-              :options="guild.channelsCategory"
-              option-label="name"
-              option-value="id"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            >
-              <template #selected-item="{ opt }">
-                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section avatar>
-                    <q-icon :name="opt.icon"></q-icon>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>
-                      {{ opt.name }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Components.AutoVoice.DefaultPosition') }}
-            </div>
-            <div class="text--secondary">
-              {{ $t('Components.AutoVoice.DefaultPositionDescription') }}
-            </div>
-
-            <q-select
-              v-model="autoVoice.default.position"
-              :options="['TOP', 'BOTTOM']"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-            >
-              <template #selected-item="{ opt }">
-                <span>
-                  {{ $t(localeStringsMap.autoVoicePositions[opt]) }}
-                </span>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ $t(localeStringsMap.autoVoicePositions[opt]) }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
+              <q-item-section side>
+                <q-checkbox :model-value="hasPermission(permission.bit)" dense></q-checkbox>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>
+                  {{ $t(localeStringsMap.discordPermissions[permission.key]) }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
         </div>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Common.AllowedRoles') }}
+              </div>
+
+              <q-select
+                v-model="autoVoice.allowed_roles"
+                :options="guild.roles"
+                option-label="name"
+                option-value="id"
+                use-chips
+                class="q-pt-sm"
+                multiple
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt, index, removeAtIndex }">
+                  <q-chip
+                    square
+                    :label="opt.name ?? opt"
+                    size="sm"
+                    :style="`background: ${opt.color}`"
+                    removable
+                    @remove="removeAtIndex(index)"
+                  ></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section>
+                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+
+            <div class="col-12">
+              <div>
+                {{ $t('Common.BlockedRoles') }}
+              </div>
+
+              <q-select
+                v-model="autoVoice.blocked_roles"
+                :options="guild.roles"
+                option-label="name"
+                option-value="id"
+                use-chips
+                class="q-pt-sm"
+                multiple
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt, index, removeAtIndex }">
+                  <q-chip
+                    square
+                    :label="opt.name ?? opt"
+                    size="sm"
+                    :style="`background: ${opt.color}`"
+                    removable
+                    @remove="removeAtIndex(index)"
+                  ></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section>
+                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Components.AutoVoice.ModeratorRoles') }}
+              </div>
+              <div class="text--secondary">
+                {{ $t('Components.AutoVoice.ModeratorRolesDescription') }}
+              </div>
+
+              <q-select
+                v-model="autoVoice.moderator_roles"
+                :options="guild.roles"
+                option-label="name"
+                option-value="id"
+                use-chips
+                class="q-pt-sm"
+                multiple
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt, index, removeAtIndex }">
+                  <q-chip
+                    square
+                    :label="opt.name ?? opt"
+                    size="sm"
+                    :style="`background: ${opt.color}`"
+                    removable
+                    @remove="removeAtIndex(index)"
+                  ></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section>
+                      <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+          </div>
+        </q-card-section>
       </q-card-section>
 
-      <div class="q-pa-md">
-        <div>
-          {{ $t('Components.AutoVoice.OwnerPermissions') }}
-        </div>
-        <div class="text--secondary">
-          {{ $t('Components.AutoVoice.OwnerPermissionsDescription') }}
-        </div>
-        <q-list class="bg-dark-2 overflow-hidden rounded-borders q-mt-sm">
-          <q-item
-            v-for="permission in ownerPermissions"
-            :key="permission.key"
-            @click="onChangePermissions(permission.bit)"
-            tag="label"
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            v-if="mode === 'CREATE'"
+            class="full-width"
+            :label="$t('Common.Add')"
+            :disable="!isValid"
+            :loading="confirmLoading"
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
           >
-            <q-item-section side>
-              <q-checkbox :model-value="hasPermission(permission.bit)" dense></q-checkbox>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>
-                {{ $t(localeStringsMap.discordPermissions[permission.key]) }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </div>
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Common.AllowedRoles') }}
-            </div>
+          <q-btn-dropdown
+            v-if="mode === 'UPDATE'"
+            class="full-width"
+            :label="$t('Common.Done')"
+            :disable="!isValid"
+            :loading="confirmLoading"
+            split
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <q-list>
+              <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
+                <q-item-section class="text-negative">
+                  <q-item-label>
+                    {{ $t('Common.Delete') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
 
-            <q-select
-              v-model="autoVoice.allowed_roles"
-              :options="guild.roles"
-              option-label="name"
-              option-value="id"
-              use-chips
-              class="q-pt-sm"
-              multiple
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            >
-              <template #selected-item="{ opt, index, removeAtIndex }">
-                <q-chip
-                  square
-                  :label="opt.name ?? opt"
-                  size="sm"
-                  :style="`background: ${opt.color}`"
-                  removable
-                  @remove="removeAtIndex(index)"
-                ></q-chip>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section>
-                    <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Common.BlockedRoles') }}
-            </div>
-
-            <q-select
-              v-model="autoVoice.blocked_roles"
-              :options="guild.roles"
-              option-label="name"
-              option-value="id"
-              use-chips
-              class="q-pt-sm"
-              multiple
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            >
-              <template #selected-item="{ opt, index, removeAtIndex }">
-                <q-chip
-                  square
-                  :label="opt.name ?? opt"
-                  size="sm"
-                  :style="`background: ${opt.color}`"
-                  removable
-                  @remove="removeAtIndex(index)"
-                ></q-chip>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section>
-                    <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn-dropdown>
         </div>
-      </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Components.AutoVoice.ModeratorRoles') }}
-            </div>
-            <div class="text--secondary">
-              {{ $t('Components.AutoVoice.ModeratorRolesDescription') }}
-            </div>
-
-            <q-select
-              v-model="autoVoice.moderator_roles"
-              :options="guild.roles"
-              option-label="name"
-              option-value="id"
-              use-chips
-              class="q-pt-sm"
-              multiple
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            >
-              <template #selected-item="{ opt, index, removeAtIndex }">
-                <q-chip
-                  square
-                  :label="opt.name ?? opt"
-                  size="sm"
-                  :style="`background: ${opt.color}`"
-                  removable
-                  @remove="removeAtIndex(index)"
-                ></q-chip>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section>
-                    <q-item-label :style="`color: ${opt.color}`">{{ opt.name }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-        </div>
-      </q-card-section>
-
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
-
-          <div class="col-6">
-            <q-btn
-              v-if="mode === 'CREATE'"
-              class="full-width"
-              :label="$t('Common.Add')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn>
-
-            <q-btn-dropdown
-              v-if="mode === 'UPDATE'"
-              class="full-width"
-              :label="$t('Common.Done')"
-              :disable="!isValid"
-              :loading="confirmLoading"
-              split
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <q-list dense>
-                <q-item clickable v-close-popup @click="onDelete" :disable="confirmLoading">
-                  <q-item-section class="text-negative">
-                    <q-item-label>
-                      {{ $t('Common.Delete') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn-dropdown>
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

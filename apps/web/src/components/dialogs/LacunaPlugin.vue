@@ -1,120 +1,133 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="q-dialog-card bg-dark-1" flat style="width: 1000px">
-      <q-item class="q-py-md">
-        <q-item-section avatar style="min-width: 48px">
-          <q-avatar size="48px">
-            <img :src="props.plugin.owner_avatar_url" />
-          </q-avatar>
-        </q-item-section>
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-item class="q-py-md">
+          <q-item-section avatar style="min-width: 48px">
+            <q-avatar size="48px">
+              <img :src="props.plugin.owner_avatar_url" />
+            </q-avatar>
+          </q-item-section>
 
-        <q-item-section>
-          <q-item-label class="ellipsis">
-            {{ props.plugin.full_name }}
-          </q-item-label>
+          <q-item-section>
+            <q-item-label class="ellipsis">
+              {{ props.plugin.full_name }}
+            </q-item-label>
 
-          <q-item-label class="text--secondary ellipsis">
-            {{ props.plugin.description }}
-          </q-item-label>
-        </q-item-section>
+            <q-item-label class="text--secondary ellipsis">
+              <q-skeleton v-if="pageLoading" type="text" width="25%" height="18px" />
+              <span v-else>
+                {{ plugin.summary_l10ns[i18n.locale.value] || plugin.summary || props.plugin.description }}
+              </span>
+            </q-item-label>
+          </q-item-section>
 
-        <q-item-section side>
-          <q-btn
-            icon="fab fa-github"
-            round
-            unelevated
-            no-caps
-            :href="`https://github.com/${props.plugin.full_name}`"
-            target="_blank"
-          />
-        </q-item-section>
-      </q-item>
+          <q-item-section side>
+            <q-btn
+              icon="fab fa-github"
+              round
+              unelevated
+              no-caps
+              :href="`https://github.com/${props.plugin.full_name}`"
+              target="_blank"
+            />
+          </q-item-section>
+        </q-item>
 
-      <q-card-section>
-        <div v-if="pageLoading" class="row q-col-gutter-md">
-          <div class="col-12 flex justify-between items-center">
-            <q-skeleton type="text" width="25%" height="32px" />
-            <q-skeleton type="text" width="32px" />
-          </div>
-
-          <div class="col-12">
-            <q-card class="bg-dark-2" flat>
-              <q-card-section>
-                <q-skeleton type="text" width="25%" height="32px" />
-                <q-skeleton type="text" width="90%" />
-                <q-skeleton type="text" width="40%" />
-                <q-skeleton type="text" width="100%" />
-                <div class="q-my-md"></div>
-                <q-skeleton type="text" width="35%" height="32px" />
-                <q-skeleton type="text" width="80%" />
-              </q-card-section>
-            </q-card>
-          </div>
-
-          <div class="col-12">
-            <q-card class="bg-dark-2" flat>
-              <q-card-section>
-                <q-skeleton type="rect" width="100%" height="80px" />
-              </q-card-section>
-            </q-card>
-          </div>
-        </div>
-
-        <div v-else class="row q-col-gutter-md">
-          <div class="col-12 flex justify-between items-center">
-            <div class="text-h6">
-              {{ plugin.manifest.name }}
+        <q-card-section>
+          <div v-if="pageLoading" class="row q-col-gutter-md">
+            <div class="col-12 flex justify-between items-center">
+              <q-skeleton type="text" width="25%" height="32px" />
+              <q-skeleton type="text" width="32px" />
             </div>
 
-            <div class="text--secondary">v{{ plugin.manifest.version }}</div>
+            <div class="col-12">
+              <q-card class="bg-dark-2" flat>
+                <q-card-section>
+                  <q-skeleton type="text" width="25%" height="32px" />
+                  <q-skeleton type="text" width="90%" />
+                  <q-skeleton type="text" width="40%" />
+                  <q-skeleton type="text" width="100%" />
+                  <div class="q-my-md"></div>
+                  <q-skeleton type="text" width="35%" height="32px" />
+                  <q-skeleton type="text" width="80%" />
+                </q-card-section>
+              </q-card>
+            </div>
+
+            <div class="col-12">
+              <q-card class="bg-dark-2" flat>
+                <q-card-section>
+                  <q-skeleton type="rect" width="100%" height="80px" />
+                </q-card-section>
+              </q-card>
+            </div>
           </div>
 
-          <div class="col-12">
-            <q-card class="bg-dark-2" flat>
-              <q-card-section>
-                <article class="markdown-body" v-html="parseMarkdown(plugin.description)"></article>
-              </q-card-section>
-            </q-card>
-          </div>
+          <div v-else class="row q-col-gutter-md">
+            <div class="col-12 flex justify-between items-center">
+              <div class="text-h6">
+                {{ plugin.name_l10ns[i18n.locale.value] || plugin.name || $t('Common.None') }}
+              </div>
 
-          <div class="col-12">
-            <q-card class="bg-dark-2" flat>
-              <q-card-section>
-                <q-tree :nodes="pluginPuzzlesTree" node-key="label">
-                  <template #default-body="{ node }">
-                    <span class="text--secondary">
-                      {{ node.description }}
-                    </span>
-                  </template>
-                </q-tree>
-              </q-card-section>
-            </q-card>
+              <div class="text--secondary">v{{ plugin.version || '0.0.1' }}</div>
+            </div>
+
+            <div class="col-12">
+              <q-card class="bg-dark-2" flat>
+                <q-card-section>
+                  <article
+                    class="markdown-body"
+                    v-html="parseMarkdown(plugin.description_l10ns[i18n.locale.value] || plugin.description)"
+                  ></article>
+                </q-card-section>
+              </q-card>
+            </div>
+
+            <div class="col-12">
+              <q-card class="bg-dark-2" flat>
+                <q-card-section>
+                  <q-tree :nodes="pluginPuzzlesTree" node-key="label">
+                    <template #default-body="{ node }">
+                      <span class="text--secondary">
+                        {{ node.description }}
+                      </span>
+                    </template>
+                  </q-tree>
+                </q-card-section>
+              </q-card>
+            </div>
           </div>
-        </div>
+        </q-card-section>
       </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            class="full-width"
+            :label="$t('Common.Add')"
+            unelevated
+            @click="onConfirm"
+            :disable="pageLoading"
+            :loading="confirmLoading"
+            no-caps
+            color="primary"
+          >
+            <template #loading>
+              <q-spinner-dots color="white"></q-spinner-dots>
+            </template>
+          </q-btn>
+        </div>
 
-          <div class="col-6">
-            <q-btn
-              class="full-width"
-              :label="$t('Common.Add')"
-              unelevated
-              @click="onConfirm"
-              :disable="pageLoading"
-              :loading="confirmLoading"
-              no-caps
-              color="primary"
-            >
-              <template #loading>
-                <q-spinner-dots color="white"></q-spinner-dots>
-              </template>
-            </q-btn>
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>
@@ -140,7 +153,7 @@ const props = defineProps({
 
 const $q = useQuasar(),
   { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
-const { t: $t } = useI18n()
+const i18n = useI18n()
 
 const pageLoading = ref(true)
 const guild = useGuildStore()
@@ -154,11 +167,15 @@ const pluginCache = usePluginCacheStore(),
         label: 'trigger' in v.data ? v.data.name : v.data.command.name,
         icon: v.type === 'AUTOMATION' ? 'bolt' : 'reply',
         description:
-          'trigger' in v.data ? $t(localeStringsMap.automationTriggers[v.data.trigger]) : v.data.command.description,
+          'trigger' in v.data
+            ? i18n.t(localeStringsMap.automationTriggers[v.data.trigger])
+            : v.data.command.description,
         children: v.data.components.map(vv => {
           return {
             icon: vv.type === 'ACTION' ? 'donut_large' : 'filter_alt',
-            label: $t(localeStringsMap.customBehaviorComponents['action' in vv ? vv.action.type : vv.condition.type])
+            label: i18n.t(
+              localeStringsMap.customBehaviorComponents['action' in vv ? vv.action.type : vv.condition.type]
+            )
           }
         })
       }
