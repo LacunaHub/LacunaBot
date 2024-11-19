@@ -63,7 +63,13 @@
         <q-list v-if="method === 'Tokens'" class="bg-dark-2 overflow-hidden rounded-borders q-ma-md">
           <q-expansion-item :label="$t('Components.LacunaDiamond.FAQ.Q4')" group="default" expand-separator>
             <q-card class="bg-dark-1 no-border-radius" bordered>
-              <q-card-section v-html="parseMarkdown($t('Components.LacunaDiamond.FAQ.A4'))"></q-card-section>
+              <q-card-section
+                v-html="
+                  parseMarkdown(
+                    $t('Components.LacunaDiamond.FAQ.A4', { topggLink: 'https://top.gg/bot/740585412560420914/vote' })
+                  )
+                "
+              ></q-card-section>
             </q-card>
           </q-expansion-item>
         </q-list>
