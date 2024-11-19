@@ -610,3 +610,7 @@ export function frameNumber(value, min = Number.MIN_SAFE_INTEGER, max = Number.M
     else if (value > max) value = max
     return value
 }
+
+export function sleep(ms = 2000) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}

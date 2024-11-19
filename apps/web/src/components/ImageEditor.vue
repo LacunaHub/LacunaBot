@@ -18,30 +18,16 @@
   <q-card-section>
     <div class="row q-col-gutter-md">
       <div class="col-12">
-        <q-card class="bg-dark-2" flat>
-          <q-card-section v-if="!$q.screen.gt.sm">
-            <q-banner class="bg-dark-1 rounded-borders" dense>
-              <span>
-                На маленьких экранах положение элементов на холсте может сильно отличаться, поэтому рекомендуется
-                активировать режим "Версия для ПК" в настройках или увеличить масштаб страницы.
-              </span>
-
-              <template #avatar>
-                <q-icon name="info" color="info"></q-icon>
-              </template>
-            </q-banner>
-          </q-card-section>
-
-          <q-card-section class="flex flex-center">
+        <q-card class="bg-transparent" flat>
+          <q-card-section ref="imageCanvasParent" class="flex flex-center q-pa-none">
             <div
-              :class="`rounded-borders relative-position image-canvas ${disable ? 'disabled' : ''}`"
+              :class="`rounded-borders relative-position image-canvas ${disable ? 'disabled' : ''} bordered-block`"
               :style="{
                 height: `${image.height}px`,
                 width: `${image.width}px`,
-                maxHeight: '1080px',
-                maxWidth: '100%',
                 backgroundColor: image.background.color,
-                overflow: 'hidden'
+                overflow: 'hidden',
+                zoom: Math.min(icpWidth / image.width, 1)
               }"
             >
               <q-img
@@ -717,6 +703,7 @@
 </template>
 
 <script setup>
+import { useElementSize } from '@vueuse/core'
 import { useQuasar } from 'quasar'
 import { useGuildStore } from 'src/stores/guild'
 import { allowedImageHosts, localeStringsMap } from 'src/utils/Constants'
@@ -755,6 +742,9 @@ const emit = defineEmits(['change'])
 
 const $q = useQuasar()
 const guild = useGuildStore()
+
+const imageCanvasParent = ref(null),
+  { width: icpWidth } = useElementSize(imageCanvasParent)
 
 const image = ref({
   active: false,

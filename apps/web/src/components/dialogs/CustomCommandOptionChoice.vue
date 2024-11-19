@@ -1,58 +1,65 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Components.CustomCommand.CommandArgumentChoiceName') }}
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card q-dialog-card-md bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Components.CustomCommand.CommandArgumentChoiceName') }}
+              </div>
+
+              <q-input
+                v-model.trim="choice.name"
+                class="q-pt-sm"
+                :maxlength="100"
+                filled
+                dense
+                hide-bottom-space
+              ></q-input>
             </div>
 
-            <q-input
-              v-model.trim="choice.name"
-              class="q-pt-sm"
-              :maxlength="100"
-              filled
-              dense
-              hide-bottom-space
-            ></q-input>
-          </div>
+            <div class="col-12">
+              <div>
+                {{ $t('Components.CustomCommand.CommandArgumentChoiceValue') }}
+              </div>
 
-          <div class="col-12">
-            <div>
-              {{ $t('Components.CustomCommand.CommandArgumentChoiceValue') }}
+              <q-input
+                v-model="choice.value"
+                class="q-pt-sm"
+                :maxlength="100"
+                filled
+                dense
+                hide-bottom-space
+                @update:model-value="onChangeValue"
+              ></q-input>
             </div>
-
-            <q-input
-              v-model="choice.value"
-              class="q-pt-sm"
-              :maxlength="100"
-              filled
-              dense
-              hide-bottom-space
-              @update:model-value="onChangeValue"
-            ></q-input>
           </div>
-        </div>
+        </q-card-section>
       </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            class="full-width"
+            :label="$t('Common.Done')"
+            unelevated
+            no-caps
+            color="primary"
+            :disable="!isValid"
+            @click="onConfirm"
+          />
+        </div>
 
-          <div class="col-6">
-            <q-btn
-              class="full-width"
-              :label="$t('Common.Done')"
-              unelevated
-              no-caps
-              color="primary"
-              :disable="!isValid"
-              @click="onConfirm"
-            />
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

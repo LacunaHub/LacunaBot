@@ -1,81 +1,88 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Components.CustomCommand.ModifyWalletAmount') }}
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card q-dialog-card-md bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Components.CustomCommand.ModifyWalletAmount') }}
+              </div>
+
+              <q-input
+                v-model.trim="component.action.modify_wallet.amount"
+                class="q-pt-sm"
+                :maxlength="256"
+                filled
+                dense
+                hide-bottom-space
+                autogrow
+              ></q-input>
             </div>
 
-            <q-input
-              v-model.trim="component.action.modify_wallet.amount"
-              class="q-pt-sm"
-              :maxlength="256"
-              filled
-              dense
-              hide-bottom-space
-              autogrow
-            ></q-input>
+            <div class="col-12">
+              <div>
+                {{ $t('Components.CustomCommand.ModifyRolesUserId') }}
+              </div>
+              <div class="text--secondary">
+                {{ $t('Components.CustomCommand.ModifyWalletUserIdDescription') }}
+              </div>
+
+              <q-input
+                v-model.trim="component.action.modify_wallet.user_id"
+                class="q-pt-sm"
+                :maxlength="256"
+                filled
+                dense
+                hide-bottom-space
+                autogrow
+              ></q-input>
+            </div>
+
+            <div class="col-12">
+              <div>
+                {{ $t('Components.CustomCommand.ModifyWalletCurrencyId') }}
+              </div>
+              <div class="text--secondary">
+                {{ $t('Components.CustomCommand.ModifyWalletCurrencyIdDescription') }}
+              </div>
+
+              <q-input
+                v-model.trim="component.action.modify_wallet.currency_id"
+                class="q-pt-sm"
+                :maxlength="256"
+                filled
+                dense
+                hide-bottom-space
+                autogrow
+              ></q-input>
+            </div>
           </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Components.CustomCommand.ModifyRolesUserId') }}
-            </div>
-            <div class="text--secondary">
-              {{ $t('Components.CustomCommand.ModifyWalletUserIdDescription') }}
-            </div>
-
-            <q-input
-              v-model.trim="component.action.modify_wallet.user_id"
-              class="q-pt-sm"
-              :maxlength="256"
-              filled
-              dense
-              hide-bottom-space
-              autogrow
-            ></q-input>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Components.CustomCommand.ModifyWalletCurrencyId') }}
-            </div>
-            <div class="text--secondary">
-              {{ $t('Components.CustomCommand.ModifyWalletCurrencyIdDescription') }}
-            </div>
-
-            <q-input
-              v-model.trim="component.action.modify_wallet.currency_id"
-              class="q-pt-sm"
-              :maxlength="256"
-              filled
-              dense
-              hide-bottom-space
-              autogrow
-            ></q-input>
-          </div>
-        </div>
+        </q-card-section>
       </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            class="full-width"
+            :label="$t('Common.Done')"
+            unelevated
+            no-caps
+            color="primary"
+            :disable="!isValid"
+            @click="onConfirm"
+          />
+        </div>
 
-          <div class="col-6">
-            <q-btn
-              class="full-width"
-              :label="$t('Common.Done')"
-              unelevated
-              no-caps
-              color="primary"
-              :disable="!isValid"
-              @click="onConfirm"
-            />
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

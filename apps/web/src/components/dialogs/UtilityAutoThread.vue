@@ -1,182 +1,203 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Commands.OptionTypes.Channel') }}
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card q-dialog-card-md bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Commands.OptionTypes.Channel') }}
+              </div>
+
+              <q-select
+                v-if="mode === 'CREATE'"
+                v-model="autoThread.channel_id"
+                :options="unusedTextChannels"
+                option-label="name"
+                option-value="id"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+              >
+                <template #selected-item="{ opt }">
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section avatar>
+                      <q-icon :name="opt.icon"></q-icon>
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label>
+                        {{ opt.name }}
+                      </q-item-label>
+
+                      <q-item-label class="text--secondary">
+                        {{ opt.parentName }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+
+              <q-select
+                v-if="mode === 'UPDATE'"
+                :model-value="autoThread.channel_id"
+                :options="guild.channelsText"
+                option-label="name"
+                option-value="id"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                emit-value
+                map-options
+                disable
+                readonly
+              >
+                <template #selected-item="{ opt }">
+                  <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
+                </template>
+              </q-select>
             </div>
 
-            <q-select
-              v-if="mode === 'CREATE'"
-              v-model="autoThread.channel_id"
-              :options="unusedTextChannels"
-              option-label="name"
-              option-value="id"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-            >
-              <template #selected-item="{ opt }">
-                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
-              </template>
+            <div class="col-12">
+              <div>
+                {{ $t('Components.AutoThread.ThreadName') }}
+              </div>
 
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section avatar>
-                    <q-icon :name="opt.icon"></q-icon>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>
-                      {{ opt.name }}
-                    </q-item-label>
-
-                    <q-item-label class="text--secondary">
-                      {{ opt.parentName }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-
-            <q-select
-              v-if="mode === 'UPDATE'"
-              :model-value="autoThread.channel_id"
-              :options="guild.channelsText"
-              option-label="name"
-              option-value="id"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              emit-value
-              map-options
-              disable
-              readonly
-            >
-              <template #selected-item="{ opt }">
-                <q-chip color="dark-1" square :label="opt.name ?? opt" :icon="opt.icon" size="sm"></q-chip>
-              </template>
-            </q-select>
+              <q-input
+                v-model.trim="autoThread.name"
+                class="q-pt-sm"
+                :maxlength="100"
+                filled
+                dense
+                hide-bottom-space
+              ></q-input>
+            </div>
           </div>
+        </q-card-section>
 
-          <div class="col-12">
-            <div>
-              {{ $t('Components.AutoThread.ThreadName') }}
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Components.AutoReaction.TextMatches') }}
+              </div>
+              <div class="text--secondary">
+                {{ $t('Components.AutoReaction.TextMatchesDescription') }}
+              </div>
+
+              <q-select
+                v-model="autoThread.matches"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                hide-dropdown-icon
+                use-input
+                use-chips
+                new-value-mode="add-unique"
+                multiple
+              >
+                <template #selected-item="{ opt, index, removeAtIndex }">
+                  <q-chip
+                    color="dark-1"
+                    square
+                    :label="opt"
+                    size="sm"
+                    removable
+                    @remove="removeAtIndex(index)"
+                  ></q-chip>
+                </template>
+              </q-select>
             </div>
 
-            <q-input
-              v-model.trim="autoThread.name"
-              class="q-pt-sm"
-              :maxlength="100"
-              filled
-              dense
-              hide-bottom-space
-            ></q-input>
+            <div class="col-12">
+              <div>
+                {{ $t('Components.AutoReaction.ExcludedTextMatches') }}
+              </div>
+              <div class="text--secondary">
+                {{ $t('Components.AutoReaction.ExcludedTextMatchesDescription') }}
+              </div>
+
+              <q-select
+                v-model="autoThread.exclude_matches"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                hide-dropdown-icon
+                use-input
+                use-chips
+                new-value-mode="add-unique"
+                multiple
+              >
+                <template #selected-item="{ opt, index, removeAtIndex }">
+                  <q-chip
+                    color="dark-1"
+                    square
+                    :label="opt"
+                    size="sm"
+                    removable
+                    @remove="removeAtIndex(index)"
+                  ></q-chip>
+                </template>
+              </q-select>
+            </div>
           </div>
-        </div>
+        </q-card-section>
       </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Components.AutoReaction.TextMatches') }}
-            </div>
-            <div class="text--secondary">
-              {{ $t('Components.AutoReaction.TextMatchesDescription') }}
-            </div>
-
-            <q-select
-              v-model="autoThread.matches"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              hide-dropdown-icon
-              use-input
-              use-chips
-              new-value-mode="add-unique"
-              multiple
-            >
-              <template #selected-item="{ opt, index, removeAtIndex }">
-                <q-chip color="dark-1" square :label="opt" size="sm" removable @remove="removeAtIndex(index)"></q-chip>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Components.AutoReaction.ExcludedTextMatches') }}
-            </div>
-            <div class="text--secondary">
-              {{ $t('Components.AutoReaction.ExcludedTextMatchesDescription') }}
-            </div>
-
-            <q-select
-              v-model="autoThread.exclude_matches"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              hide-dropdown-icon
-              use-input
-              use-chips
-              new-value-mode="add-unique"
-              multiple
-            >
-              <template #selected-item="{ opt, index, removeAtIndex }">
-                <q-chip color="dark-1" square :label="opt" size="sm" removable @remove="removeAtIndex(index)"></q-chip>
-              </template>
-            </q-select>
-          </div>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            v-if="mode === 'CREATE'"
+            class="full-width"
+            :label="$t('Common.Add')"
+            :disable="!isValid"
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          />
+          <q-btn-dropdown
+            v-if="mode === 'UPDATE'"
+            class="full-width"
+            :label="$t('Common.Done')"
+            :disable="!isValid"
+            split
+            unelevated
+            no-caps
+            color="primary"
+            @click="onConfirm"
+          >
+            <q-list>
+              <q-item clickable v-close-popup @click="onDelete">
+                <q-item-section class="text-negative">
+                  <q-item-label>
+                    {{ $t('Common.Delete') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
         </div>
-      </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
-
-          <div class="col-6">
-            <q-btn
-              v-if="mode === 'CREATE'"
-              class="full-width"
-              :label="$t('Common.Add')"
-              :disable="!isValid"
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            />
-            <q-btn-dropdown
-              v-if="mode === 'UPDATE'"
-              class="full-width"
-              :label="$t('Common.Done')"
-              :disable="!isValid"
-              split
-              unelevated
-              no-caps
-              color="primary"
-              @click="onConfirm"
-            >
-              <q-list dense>
-                <q-item clickable v-close-popup @click="onDelete">
-                  <q-item-section class="text-negative">
-                    <q-item-label>
-                      {{ $t('Common.Delete') }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-btn-dropdown>
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>

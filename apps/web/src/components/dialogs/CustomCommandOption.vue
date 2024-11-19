@@ -1,138 +1,145 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDismiss" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="bg-dark-1" flat style="width: 800px; max-width: 90vw">
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-9">
-            <div>
-              {{ $t('Components.CustomCommand.CommandArgumentName') }}
-            </div>
-
-            <q-input
-              v-model.trim="option.name"
-              class="q-pt-sm"
-              :maxlength="32"
-              filled
-              dense
-              hide-bottom-space
-            ></q-input>
-          </div>
-
-          <div class="col-3">
-            <div>
-              {{ $t('Components.CustomCommand.CommandArgumentType') }}
-            </div>
-
-            <q-select
-              v-model="option.type"
-              :options="optionTypes"
-              option-label="name"
-              class="q-pt-sm"
-              filled
-              dense
-              hide-bottom-space
-              map-options
-              emit-value
-              @update:model-value="onChangeOptionType"
-            >
-              <template #selected-item="{ opt }">
-                <span class="text-uppercase">
-                  {{ $t(localeStringsMap.commandOptionTypes[opt.name]) }}
-                </span>
-              </template>
-
-              <template #option="{ opt, toggleOption, selected }">
-                <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
-                  <q-item-section>
-                    <q-item-label class="text-uppercase">
-                      {{ $t(localeStringsMap.commandOptionTypes[opt.name]) }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12">
-            <div>
-              {{ $t('Components.CustomCommand.CommandArgumentDescription') }}
-            </div>
-
-            <q-input
-              v-model.trim="option.description"
-              class="q-pt-sm"
-              :maxlength="100"
-              filled
-              dense
-              hide-bottom-space
-            ></q-input>
-          </div>
-        </div>
-      </q-card-section>
-
-      <div class="q-pa-md">
-        <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-          <q-item tag="label">
-            <q-item-section side>
-              <q-checkbox v-model="option.required" dense></q-checkbox>
-            </q-item-section>
-
-            <q-item-section>
-              <q-item-label>
-                {{ $t('Commands.HelpCommand.Texts.CommandArgumentRequired') }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </div>
-
-      <q-card-section v-if="[3, 4, 10].includes(option.type) && option.choices">
-        <div class="row q-col-gutter-md">
-          <div class="col-12">
-            <div>
-              {{ $t('Components.CustomCommand.CommandArgumentChoices') }}
-            </div>
-
-            <div class="row q-col-gutter-sm q-pt-sm">
-              <div class="col-auto" v-for="(choice, i) in option.choices" :key="i">
-                <q-chip
-                  class="full-width no-shadow"
-                  square
-                  :label="choice.name"
-                  clickable
-                  removable
-                  @click="choiceDialog(choice)"
-                  @remove="option.choices.splice(i, 1)"
-                ></q-chip>
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card q-dialog-card-md bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-9">
+              <div>
+                {{ $t('Components.CustomCommand.CommandArgumentName') }}
               </div>
 
-              <div v-if="option.choices.length < 25" class="col-auto">
-                <q-chip class="dashed-border no-shadow full-width" outline square clickable @click="choiceDialog()">
-                  <q-icon name="add" size="24px"></q-icon>
-                </q-chip>
+              <q-input
+                v-model.trim="option.name"
+                class="q-pt-sm"
+                :maxlength="32"
+                filled
+                dense
+                hide-bottom-space
+              ></q-input>
+            </div>
+
+            <div class="col-3">
+              <div>
+                {{ $t('Components.CustomCommand.CommandArgumentType') }}
+              </div>
+
+              <q-select
+                v-model="option.type"
+                :options="optionTypes"
+                option-label="name"
+                class="q-pt-sm"
+                filled
+                dense
+                hide-bottom-space
+                map-options
+                emit-value
+                @update:model-value="onChangeOptionType"
+              >
+                <template #selected-item="{ opt }">
+                  <span class="text-uppercase">
+                    {{ $t(localeStringsMap.commandOptionTypes[opt.name]) }}
+                  </span>
+                </template>
+
+                <template #option="{ opt, toggleOption, selected }">
+                  <q-item clickable @click="toggleOption(opt)" :active="selected" active-class="menu-item--active">
+                    <q-item-section>
+                      <q-item-label class="text-uppercase">
+                        {{ $t(localeStringsMap.commandOptionTypes[opt.name]) }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+
+            <div class="col-12">
+              <div>
+                {{ $t('Components.CustomCommand.CommandArgumentDescription') }}
+              </div>
+
+              <q-input
+                v-model.trim="option.description"
+                class="q-pt-sm"
+                :maxlength="100"
+                filled
+                dense
+                hide-bottom-space
+              ></q-input>
+            </div>
+          </div>
+        </q-card-section>
+
+        <div class="q-pa-md">
+          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+            <q-item tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="option.required" dense></q-checkbox>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('Commands.HelpCommand.Texts.CommandArgumentRequired') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+
+        <q-card-section v-if="[3, 4, 10].includes(option.type) && option.choices">
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Components.CustomCommand.CommandArgumentChoices') }}
+              </div>
+
+              <div class="row q-col-gutter-sm q-pt-sm">
+                <div class="col-auto" v-for="(choice, i) in option.choices" :key="i">
+                  <q-chip
+                    class="full-width no-shadow"
+                    square
+                    :label="choice.name"
+                    clickable
+                    removable
+                    @click="choiceDialog(choice)"
+                    @remove="option.choices.splice(i, 1)"
+                  ></q-chip>
+                </div>
+
+                <div v-if="option.choices.length < 25" class="col-auto">
+                  <q-chip class="dashed-border no-shadow full-width" outline square clickable @click="choiceDialog()">
+                    <q-icon name="add" size="24px"></q-icon>
+                  </q-chip>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </q-card-section>
       </q-card-section>
 
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
-          </div>
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn
+            class="full-width"
+            :label="$t('Common.Done')"
+            unelevated
+            no-caps
+            color="primary"
+            :disable="!isValid"
+            @click="onConfirm"
+          />
+        </div>
 
-          <div class="col-6">
-            <q-btn
-              class="full-width"
-              :label="$t('Common.Done')"
-              unelevated
-              no-caps
-              color="primary"
-              :disable="!isValid"
-              @click="onConfirm"
-            />
-          </div>
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
         </div>
       </q-card-section>
     </q-card>
