@@ -547,7 +547,7 @@
               <q-card class="bg-dark-1 no-border-radius" bordered>
                 <q-card-section>
                   <div class="row q-col-gutter-md">
-                    <div class="col-12">
+                    <div v-if="dameRule.trigger_type !== 6" class="col-12">
                       <div>
                         {{ $t('Common.IgnoredChannels') }}
                       </div>
