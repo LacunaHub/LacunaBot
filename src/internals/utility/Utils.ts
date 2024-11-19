@@ -126,7 +126,7 @@ export function parseCommandArguments(string: string): string[] {
 }
 
 export function normalizeCommandOption(option: string) {
-    return option.replace(/[^-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]/gu, '-')
+    return truncateString(option.replace(/[^-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]/gu, '-').toLowerCase(), 32)
 }
 
 export function resolveObjectPath(path: string, object: {}): any {
@@ -520,4 +520,8 @@ export function parseJSON<T = any>(text: string, reviver?: (this: any, key: stri
     } catch (err) {
         return null
     }
+}
+
+export function isObject(value: any): boolean {
+    return typeof value === 'object' && !Array.isArray(value) && value !== null
 }

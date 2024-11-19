@@ -1,4 +1,5 @@
 import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { languages } from '@lacunahub/lacuna-locale'
 import { APIGuildMember, APIUser, parseEmoji } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'
@@ -89,7 +90,7 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
     const updateData = {}
 
     if (typeof data.locale === 'string' && data.locale !== guild.locale) {
-        if (['en', 'ru', 'uk'].includes(data.locale)) {
+        if (languages.some(v => v.code === data.locale)) {
             updateData['locale'] = data.locale
         }
     }
