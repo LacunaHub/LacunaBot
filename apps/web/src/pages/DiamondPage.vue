@@ -129,6 +129,9 @@
                 <div v-if="feature.free.type === 'text'" class="text-subtitle1">
                   {{ feature.free.value }}
                 </div>
+                <div v-if="feature.free.type === 'number'" class="text-subtitle1">
+                  {{ numbro(feature.free.value).format({ thousandSeparated: true }) }}
+                </div>
                 <q-icon v-if="feature.free.type === 'icon'" :name="feature.free.value" class="text-subtitle1"></q-icon>
                 <q-icon
                   v-if="feature.free.type === 'boolean'"
@@ -140,6 +143,9 @@
               <td class="text-center text-primary" style="min-width: 140px; width: 30%">
                 <div v-if="feature.diamond.type === 'text'" class="text-subtitle1">
                   {{ feature.diamond.value }}
+                </div>
+                <div v-if="feature.diamond.type === 'number'" class="text-subtitle1">
+                  {{ numbro(feature.diamond.value).format({ thousandSeparated: true }) }}
                 </div>
                 <q-icon
                   v-if="feature.diamond.type === 'icon'"
@@ -212,6 +218,7 @@
 import { useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import { DateTime } from 'src/boot/luxon'
+import { numbro } from 'src/boot/numbro'
 import PatronAvatar from 'src/components/PatronAvatar.vue'
 import { lacunaDiamondFeatures, lacunaDiamondPlanComparison } from 'src/utils/Constants'
 import { chunkArray, decimalToHex, getLocale, handleAxiosError, isEven } from 'src/utils/Utils'

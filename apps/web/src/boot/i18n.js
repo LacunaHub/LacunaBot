@@ -4,10 +4,11 @@ import { getLocale } from 'src/utils/Utils'
 import { createI18n } from 'vue-i18n'
 
 export default boot(({ app }) => {
+    const locale = getLocale()
     const i18n = createI18n({
         legacy: false,
-        locale: getLocale(),
-        fallbackLocale: 'ru',
+        locale,
+        fallbackLocale: 'en',
         globalInjection: true,
         messages,
 

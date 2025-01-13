@@ -52,16 +52,10 @@
             <q-item-label class="text-subtitle1">
               {{ $t('Pages.GuildPage.CustomBehavior.Automation') }}
             </q-item-label>
-
-            <q-item-label class="text--secondary">
-              <q-badge class="q-mr-xs" color="warning">
-                <span>BETA</span>
-              </q-badge>
-            </q-item-label>
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.automation.length }}/{{ guild.premium.available ? '20' : '5' }}</div>
+            <div>{{ guild.modules.automation.length }}/{{ guild.premium.available ? '20' : '2' }}</div>
           </q-item-section>
         </q-item>
 
@@ -213,7 +207,8 @@ import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import LacunaPlugin from 'src/components/dialogs/LacunaPlugin.vue'
 import { usePluginCacheStore } from 'src/stores/PluginCache'
 import { useGuildStore } from 'src/stores/guild'
-import { resolveAutomationJSON, resolveCustomCommandJSON } from 'src/utils/Utils'
+import { validateAutomation } from 'src/utils/json-validation/ValidateAutomation'
+import { validateCustomCommand } from 'src/utils/json-validation/ValidateCustomCommand'
 import { computed, onMounted, ref } from 'vue'
 
 const $q = useQuasar()
@@ -292,11 +287,16 @@ const automationDialog = componentProps => {
 
 const resolvePluginPuzzle = puzzle => {
   const isAutomation = puzzle.type === 'AUTOMATION'
-  const data = isAutomation ? resolveAutomationJSON(puzzle.data) : resolveCustomCommandJSON(puzzle.data)
+  const data = isAutomation ? validateAutomation(puzzle.data, true) : validateCustomCommand(puzzle.data, true)
+
+  if (!guild.premium.available) {
+    data.scripts = [{ name: null, language: 1, code: data.scripts.map(v => v.code).join('\n') }]
+  }
+
   const component = isAutomation ? AutomationTask : CustomCommand,
     componentProps = {
       modeProp: 'CREATE',
-      [`${isAutomation ? 'automationProp' : 'commandProp'}`]: data
+      [isAutomation ? 'automationProp' : 'commandProp']: data
     }
 
   return new Promise(resolve => {

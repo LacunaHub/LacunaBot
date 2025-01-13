@@ -86,6 +86,15 @@ em.gradient {
   justify-content: center;
 }
 
+.custom-behavior-script-editor .monaco-editor,
+.custom-behavior-script-editor .monaco-editor .overflow-guard {
+  border-radius: 0 0 $border-radius-lg $border-radius-lg;
+}
+
+.q-dialog-plugin .q-card__actions {
+  padding: $space-base;
+}
+
 /* OTHER */
 
 ::-webkit-scrollbar {

@@ -174,6 +174,8 @@ export const localeStringsMap = {
         INTERACTION_MODAL_SUBMIT: 'Components.Automation.TriggerNames.InteractionModalSubmit',
         MESSAGE_CREATE: 'Components.Automation.TriggerNames.MessageCreate',
         MESSAGE_DELETE: 'Logs.MessageDeleted',
+        MESSAGE_REACTION_ADD: 'Logs.MessageReactionAdded',
+        MESSAGE_REACTION_REMOVE: 'Logs.MessageReactionRemoved',
         MESSAGE_UPDATE: 'Logs.MessageUpdated',
         ROLE_MEMBER_ADD: 'Logs.RoleMemberAdded',
         ROLE_MEMBER_REMOVE: 'Logs.RoleMemberRemoved',
@@ -413,12 +415,6 @@ export const lacunaDiamondFeatures = [
         iconColors: 'primary:#121331,secondary:#00bcd4'
     },
     {
-        name: 'activities',
-        description: 'Components.LacunaDiamond.BonusActivitiesDescription',
-        icon: 'https://cdn.lordicon.com/qmcsqnle.json',
-        iconColors: 'primary:#ffc738,secondary:#b26836'
-    },
-    {
         name: 'respect',
         description: 'Components.LacunaDiamond.BonusRespectDescription',
         icon: 'https://cdn.lordicon.com/cmfqmqbx.json',
@@ -430,24 +426,24 @@ export const lacunaDiamondPlanComparison = [
         categoryName: 'Pages.GuildPage.NavNames.CustomBehavior',
         features: [
             {
-                name: 'Components.LacunaDiamond.PlanComparisonFeatures.ExecuteCode',
-                free: { value: false, type: 'boolean' },
-                diamond: { value: true, type: 'boolean' }
-            },
-            {
                 name: 'Components.LacunaDiamond.PlanComparisonFeatures.CustomCommandsNumber',
                 free: { value: '25', type: 'text' },
                 diamond: { value: '100', type: 'text' }
             },
             {
                 name: 'Components.LacunaDiamond.PlanComparisonFeatures.AutomationNumber',
-                free: { value: '5', type: 'text' },
+                free: { value: '2', type: 'text' },
                 diamond: { value: '20', type: 'text' }
             },
             {
-                name: 'Components.LacunaDiamond.PlanComparisonFeatures.AutomationSequentialExecutionsWithOneTrigger',
-                free: { value: '1', type: 'text' },
-                diamond: { value: '5', type: 'text' }
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.MaxNumberOfScripts',
+                free: { value: 1, type: 'number' },
+                diamond: { value: 10, type: 'number' }
+            },
+            {
+                name: 'Components.LacunaDiamond.PlanComparisonFeatures.MaxScriptSize',
+                free: { value: 2000, type: 'number' },
+                diamond: { value: 20000, type: 'number' }
             }
         ]
     },
@@ -591,4 +587,21 @@ export const lacunaDiamondPlanComparison = [
             }
         ]
     }
+]
+
+export const automationTriggers = [
+    'GUILD_MEMBER_ADD',
+    'GUILD_MEMBER_REMOVE',
+    'INTERACTION_BUTTON',
+    'INTERACTION_SELECT_MENU',
+    'INTERACTION_MODAL_SUBMIT',
+    'MESSAGE_CREATE',
+    'MESSAGE_DELETE',
+    'MESSAGE_REACTION_ADD',
+    'MESSAGE_REACTION_REMOVE',
+    'MESSAGE_UPDATE',
+    'ROLE_MEMBER_ADD',
+    'ROLE_MEMBER_REMOVE',
+    'VOICE_CONNECT',
+    'VOICE_DISCONNECT'
 ]

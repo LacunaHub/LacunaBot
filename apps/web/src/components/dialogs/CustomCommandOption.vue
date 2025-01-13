@@ -104,7 +104,7 @@
               <div class="row q-col-gutter-sm q-pt-sm">
                 <div class="col-auto" v-for="(choice, i) in option.choices" :key="i">
                   <q-chip
-                    class="full-width no-shadow"
+                    class="full-width no-shadow bg-dark-3"
                     square
                     :label="choice.name"
                     clickable

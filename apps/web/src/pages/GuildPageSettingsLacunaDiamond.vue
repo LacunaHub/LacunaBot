@@ -96,6 +96,9 @@
                   <div v-if="feature.free.type === 'text'" class="text-subtitle1">
                     {{ feature.free.value }}
                   </div>
+                  <div v-if="feature.free.type === 'number'" class="text-subtitle1">
+                    {{ numbro(feature.free.value).format({ thousandSeparated: true }) }}
+                  </div>
                   <q-icon
                     v-if="feature.free.type === 'icon'"
                     :name="feature.free.value"
@@ -111,6 +114,9 @@
                 <td class="text-center text-primary" style="min-width: 140px; width: 30%">
                   <div v-if="feature.diamond.type === 'text'" class="text-subtitle1">
                     {{ feature.diamond.value }}
+                  </div>
+                  <div v-if="feature.diamond.type === 'number'" class="text-subtitle1">
+                    {{ numbro(feature.diamond.value).format({ thousandSeparated: true }) }}
                   </div>
                   <q-icon
                     v-if="feature.diamond.type === 'icon'"
@@ -204,6 +210,7 @@ import discordNitroBoost from 'src/assets/discord-nitro-boost.svg'
 import lacunaLogo from 'src/assets/lacuna-logo.svg'
 import paypalLogo from 'src/assets/paypal-logo.svg'
 import { interfaces } from 'src/boot/axios'
+import { numbro } from 'src/boot/numbro'
 import LacunaDiamondMethodDirect from 'src/components/dialogs/LacunaDiamondMethodDirect.vue'
 import LacunaDiamondMethodDiscordRoles from 'src/components/dialogs/LacunaDiamondMethodDiscordRoles.vue'
 import LacunaDiamondTransfer from 'src/components/dialogs/LacunaDiamondTransfer.vue'

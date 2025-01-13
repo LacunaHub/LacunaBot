@@ -92,17 +92,23 @@
             </div>
 
             <div class="col-12">
-              <q-card class="bg-dark-2" flat>
-                <q-card-section>
-                  <q-tree :nodes="pluginPuzzlesTree" node-key="label">
-                    <template #default-body="{ node }">
-                      <span class="text--secondary">
-                        {{ node.description }}
-                      </span>
-                    </template>
-                  </q-tree>
-                </q-card-section>
-              </q-card>
+              <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+                <q-item v-for="(puzzle, i) in pluginPuzzles" :key="i" class="q-pa-md">
+                  <q-item-section side>
+                    <q-avatar rounded color="dark-3" :icon="puzzle.icon" />
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>
+                      {{ puzzle.label }}
+                    </q-item-label>
+
+                    <q-item-label class="text--secondary">
+                      {{ puzzle.description }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
             </div>
           </div>
         </q-card-section>
@@ -159,25 +165,17 @@ const pageLoading = ref(true)
 const guild = useGuildStore()
 const pluginCache = usePluginCacheStore(),
   plugin = ref(null),
-  pluginPuzzlesTree = computed(() => {
+  pluginPuzzles = computed(() => {
     if (!plugin.value) return []
 
-    return plugin.value.puzzles.map(v => {
+    return plugin.value.puzzles.map(puzzle => {
       return {
-        label: 'trigger' in v.data ? v.data.name : v.data.command.name,
-        icon: v.type === 'AUTOMATION' ? 'bolt' : 'reply',
+        label: 'trigger' in puzzle.data ? puzzle.data.name : puzzle.data.command.name,
         description:
-          'trigger' in v.data
-            ? i18n.t(localeStringsMap.automationTriggers[v.data.trigger])
-            : v.data.command.description,
-        children: v.data.components.map(vv => {
-          return {
-            icon: vv.type === 'ACTION' ? 'donut_large' : 'filter_alt',
-            label: i18n.t(
-              localeStringsMap.customBehaviorComponents['action' in vv ? vv.action.type : vv.condition.type]
-            )
-          }
-        })
+          'trigger' in puzzle.data
+            ? i18n.t(localeStringsMap.automationTriggers[puzzle.data.trigger])
+            : puzzle.data.command.description,
+        icon: puzzle.type === 'AUTOMATION' ? 'r_bolt' : 'r_terminal'
       }
     })
   })

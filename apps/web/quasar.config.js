@@ -79,7 +79,7 @@ module.exports = configure(function (ctx) {
             env: {
                 API: ctx.dev ? 'http://localhost:5810' : 'https://api.lacunabot.com',
                 GTAG: 'G-881ZHWECYQ',
-                MONACO_LIB: readFileSync(__dirname + '/src/utils/monaco-lib.d.ts', 'utf-8')
+                MEDITOR_LIB_LACUNA_CB: readFileSync(__dirname + '/src/utils/monaco-libs/lib.lacuna-cb.d.ts', 'utf-8')
             },
             // rawDefine: {}
             // ignorePublicFolder: true,
@@ -132,7 +132,7 @@ module.exports = configure(function (ctx) {
                 }
             },
 
-            lang: 'ru',
+            lang: 'en-US',
 
             // iconSet: 'material-icons', // Quasar icon set
             // lang: 'en-US', // Quasar language pack

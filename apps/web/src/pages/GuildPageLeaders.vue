@@ -70,10 +70,7 @@
       </div>
     </div>
 
-    <div
-      class="col-12 rounded-borders bordered-block overflow-auto q-mt-md q-pa-sm"
-      style="min-height: max-content; max-height: 50vh"
-    >
+    <div class="col-12 rounded-borders bordered-block overflow-auto q-mt-md q-pa-sm" style="max-height: 50vh">
       <div v-if="pageLoading" class="row q-col-gutter-sm">
         <div v-for="i in 10" :key="i" class="col-12">
           <q-skeleton class="rounded-borders" type="rect" height="136px"></q-skeleton>

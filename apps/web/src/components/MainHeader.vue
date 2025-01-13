@@ -348,6 +348,7 @@ export default defineComponent({
     },
     setLocale(locale) {
       this.$i18n.locale = locale
+      this.$numbro.setLanguage(locale, 'en')
       this.currentLocale = locale
       localStorage.setItem('locale', locale)
     },

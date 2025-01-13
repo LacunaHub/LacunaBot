@@ -27,6 +27,14 @@
             </div>
 
             <div class="col-12">
+              <q-input v-model="currency.id" class="q-pt-sm" filled dense hide-bottom-space readonly>
+                <template #prepend>
+                  <span class="text-body2">ID</span>
+                </template>
+              </q-input>
+            </div>
+
+            <div class="col-12">
               <div>
                 {{ $t('Components.EconomyCurrency.CurrencySymbol') }}
               </div>
