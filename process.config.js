@@ -14,11 +14,6 @@ if (isMaster) {
             name: 'api',
             script: './process.npm.js',
             args: 'run start:api'
-        },
-        {
-            name: 'bot',
-            script: './process.npm.js',
-            args: 'run start:bot'
         }
     )
 } else {

@@ -8,6 +8,7 @@ import { dotNotateObject } from '../../../../internals/utility/Utils'
 import { borderRadiuses, textAligns, textDecorations, textSizes, textStyles, textTransforms } from '../../../../modules/ImageGenerator'
 import APIError from '../../../utility/APIError'
 import DiscordUtils from '../../../utility/DiscordUtils'
+import { validateAutomation } from '../../../utility/validators/ValidateAutomation'
 
 export default async function updateSettings(ctx: Context) {
     const guildId: string = ctx.params.guildId
@@ -1492,7 +1493,15 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
             Array.isArray(data.modules.automation) &&
             JSON.stringify(data.modules.automation) !== JSON.stringify(guild.modules.automation)
         ) {
-            updateData['modules.automation'] = data.modules.automation
+            const ams = []
+
+            for (let automation of data.modules.automation) {
+                automation = validateAutomation(automation)
+                if (!automation) continue
+                ams.push(automation)
+            }
+
+            updateData['modules.automation'] = ams
         }
 
         if (data.modules.guild_image_rotation) {
