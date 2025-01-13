@@ -1,7 +1,7 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesAutomationTriggers } from '@lacunahub/lacuna-database-driver'
 import { VoiceState } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
-import Automation from '../../modules/Automation'
+import Automation from '../../modules/custom-behavior/Automation'
 import { voiceAssign as economyVoiceAssign, voiceUnassign as economyVoiceUnassign } from '../../modules/Economy'
 import Levels from '../../modules/Levels'
 import Logs from '../../modules/Logs'
@@ -36,7 +36,7 @@ const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
         }
     }
 
-    await Automation.handleEvent('VOICE_CONNECT', self, server, state)
+    await Automation.handleEvent(ServerModulesAutomationTriggers.VoiceConnect, self, server, state)
     await createTemporaryVoiceOnMove(self, server, before, state)
     await Levels.onVoiceDisconnect(self, server, before, before.channel)
     await Levels.onVoiceConnect(self, server, state)

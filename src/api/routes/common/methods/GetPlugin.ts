@@ -26,9 +26,10 @@ export default async function getPlugin(ctx: Context) {
         repoTreeFiles: TreeFile[] = [],
         repoFileContents: FileContent[] = []
 
-    const verifiedRepos: string[] = await database.qdb.get('verifiedPluginRepositories')
+    const verifiedRepos = await database.getVerifiedPluginRepositories(),
+        verifiedRepo = verifiedRepos.find(v => v.fullName === repoFullName)
 
-    if (!verifiedRepos.includes(repoFullName)) {
+    if (!verifiedRepo) {
         ctx.throw(404, new APIError(1009))
     }
 
@@ -36,7 +37,7 @@ export default async function getPlugin(ctx: Context) {
         repo = await getRepository(repoFullName)
         const repoTree = await getRepositoryTree({
             fullName: repo.full_name,
-            treeSHA: repo.default_branch,
+            treeSHA: verifiedRepo.sha || repo.default_branch,
             recursive: true
         })
         repoTreeFiles = repoTree.tree.filter(v => v.type === 'blob' && ['.json', '.md'].some(vv => v.path.endsWith(vv)))

@@ -1,14 +1,17 @@
-import { ServerDocument, ServerModulesCustomCommand } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Context } from 'koa'
 import database from '../../../../../database'
 import Logger from '../../../../../internals/Logger'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
+import { validateCustomCommand } from '../../../../utility/validators/ValidateCustomCommand'
 
 export default async function updateCustomCommand(ctx: Context) {
     const server: ServerDocument = ctx.state.server
     const commandId: string = ctx.params.cid,
-        data: ServerModulesCustomCommand = ctx.request.body
+        data = validateCustomCommand(ctx.request.body)
+
+    if (!data) ctx.throw(400, new APIError(4011))
 
     const command = server.modules.custom_commands.find(v => v.id === commandId)
     if (!command) ctx.throw(404, new APIError(1011))
@@ -33,17 +36,22 @@ export default async function updateCustomCommand(ctx: Context) {
         }
     }
 
-    await database.servers.updateOne(
-        { _id: server._id, 'modules.custom_commands.id': command.id },
-        {
-            $set: {
-                'modules.custom_commands.$.command': data.command,
-                'modules.custom_commands.$.components': data.components,
-                'modules.custom_commands.$.options': data.options,
-                'modules.custom_commands.$.throttling': data.throttling
-            }
-        }
-    )
+    const updateData = {
+        $set: {
+            'modules.custom_commands.$.options': data.options,
+            'modules.custom_commands.$.command': data.command
+        },
+        $unset: {}
+    }
+
+    if ('scripts' in data) {
+        updateData.$set['modules.custom_commands.$.scripts'] = data.scripts
+        updateData.$unset['modules.custom_commands.$.components'] = 1
+    } else if ('components' in data) updateData.$set['modules.custom_commands.$.components'] = data.components
+
+    if (data.throttling) updateData.$set['modules.custom_commands.$.throttling'] = data.throttling
+
+    await database.servers.updateOne({ _id: server._id, 'modules.custom_commands.id': command.id }, updateData)
 
     ctx.status = 200
     ctx.body = data

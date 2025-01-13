@@ -1,16 +1,16 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
-import { ChannelType, Events, Message, MessageType } from 'discord.js'
+import { ServerDocument, ServerModulesAutomationTriggers } from '@lacunahub/lacuna-database-driver'
+import { Events, Message, MessageType } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import AIMod from '../../modules/AIMod'
 import AutoMod from '../../modules/AutoMod'
-import Automation from '../../modules/Automation'
+import Automation from '../../modules/custom-behavior/Automation'
 import { messageCreate as addWalletCash } from '../../modules/Economy'
 import GuildImageRotation from '../../modules/GuildImageRotation'
 import Levels from '../../modules/Levels'
 import { addAutoReactions, createAutoThread } from '../../modules/Useful'
 
 const handler = async (self: Lacuna, message: Message) => {
-    if (message.author.bot || message.channel.type === ChannelType.DM) return false
+    if (message.author.bot || !message.inGuild()) return false
 
     const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
 
@@ -21,7 +21,7 @@ const handler = async (self: Lacuna, message: Message) => {
     }
 
     await self.fetchGuild(message.guild)
-    await Automation.handleEvent('MESSAGE_CREATE', self, server, message)
+    await Automation.handleEvent(ServerModulesAutomationTriggers.MessageCreate, self, server, message as Message<true>)
     await AIMod.handleMessageCreate(self, server, message)
 
     if ([MessageType.Default, MessageType.Reply].includes(message.type)) {

@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesAutomationTriggers } from '@lacunahub/lacuna-database-driver'
 import { SearchResult } from '@lacunahub/lavaluna.js'
 import {
     AnySelectMenuInteraction,
@@ -18,8 +18,8 @@ import Lacuna from '../../internals/Lacuna'
 import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
 import { lavalinkSources } from '../../internals/utility/Constants'
 import { debounce, truncateString } from '../../internals/utility/Utils'
-import Automation from '../../modules/Automation'
-import CustomCommand from '../../modules/CustomCommand'
+import Automation from '../../modules/custom-behavior/Automation'
+import CustomCommand from '../../modules/custom-behavior/CustomCommand'
 import InteractiveMessages from '../../modules/InteractiveMessages'
 import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
 import Reports from '../../modules/Moderation/Reports'
@@ -71,7 +71,7 @@ const handler = async (
 
     if (interaction.isButton()) {
         if (/UD\-.*/.test(interaction.customId)) {
-            await Automation.handleEvent('INTERACTION_BUTTON', self, server, interaction)
+            await Automation.handleEvent(ServerModulesAutomationTriggers.InteractionButton, self, server, interaction)
         }
 
         if (interaction.customId.startsWith('PLAYER')) {
@@ -213,7 +213,7 @@ const handler = async (
 
     if (interaction.isAnySelectMenu()) {
         if (/UD\-.*/.test(interaction.customId) && interaction.isStringSelectMenu()) {
-            await Automation.handleEvent('INTERACTION_SELECT_MENU', self, server, interaction)
+            await Automation.handleEvent(ServerModulesAutomationTriggers.InteractionSelectMenu, self, server, interaction)
         }
 
         await InteractiveMessages.handleSelectMenuSelection(self, server, interaction)
@@ -227,7 +227,7 @@ const handler = async (
 
     if (interaction.isModalSubmit()) {
         if (/UD\-.*/.test(interaction.customId)) {
-            await Automation.handleEvent('INTERACTION_MODAL_SUBMIT', self, server, interaction)
+            await Automation.handleEvent(ServerModulesAutomationTriggers.InteractionModalSubmit, self, server, interaction)
         }
 
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {

@@ -1,7 +1,7 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesAutomationTriggers } from '@lacunahub/lacuna-database-driver'
 import { VoiceState } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
-import Automation from '../../modules/Automation'
+import Automation from '../../modules/custom-behavior/Automation'
 import { voiceAssign as economyVoiceAssign } from '../../modules/Economy'
 import GuildImageRotation from '../../modules/GuildImageRotation'
 import Levels from '../../modules/Levels'
@@ -28,7 +28,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
     }
 
     await self.fetchGuild(state.guild)
-    await Automation.handleEvent('VOICE_CONNECT', self, server, state)
+    await Automation.handleEvent(ServerModulesAutomationTriggers.VoiceConnect, self, server, state)
     await createTemporaryVoice(self, server, state)
     await Levels.onVoiceConnect(self, server, state)
     await economyVoiceAssign(self, server, state)
