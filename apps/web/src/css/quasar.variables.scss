@@ -11,6 +11,7 @@
 // It's highly recommended to change the default colors
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
+@use 'sass:color';
 
 $primary: #b86eab;
 $secondary: #291c2b;
@@ -23,11 +24,11 @@ $warning: #ffa726;
 
 $dark-1: #0f0f12;
 $dark-2: #16151a;
-$dark-3: lighten($dark-2, 4%);
+$dark-3: color.adjust($dark-2, $lightness: 4%);
 
 $almost-white-1: #f4f4f4;
-$almost-white-2: darken($almost-white-1, 10%);
-$almost-white-3: darken($almost-white-1, 25%);
+$almost-white-2: color.adjust($almost-white-1, $lightness: -10%);
+$almost-white-3: color.adjust($almost-white-1, $lightness: -25%);
 
 $border-radius-sm: 2px;
 $border-radius-md: $border-radius-sm * 2;
