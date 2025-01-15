@@ -8,6 +8,7 @@ on:
 
 jobs:
     commit:
+        if: contains(fromJson('["patch", "minor", "major"]'), github.event.label.name)
         runs-on: self-hosted
 
         steps:
@@ -18,13 +19,13 @@ jobs:
             - name: Get semver
               id: semver
               run: |
-                  semver="patch"
+                  semver=""
 
-                  if [[ "${{ github.event.label.name }}" == *"minor"* ]]
-                  then
+                  if [[ "${{ github.event.label.name }}" == *"patch"* ]]; then
+                      semver='patch'
+                  elif [[ "${{ github.event.label.name }}" == *"minor"* ]]; then
                       semver='minor'
-                  elif [[ "${{ github.event.label.name }}" == *"major"* ]]
-                  then
+                  elif [[ "${{ github.event.label.name }}" == *"major"* ]]; then
                       semver='major'
                   fi
 
