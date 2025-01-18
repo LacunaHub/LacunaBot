@@ -1,4 +1,4 @@
-import { Node } from '@lacunahub/lavaluna.js'
+import { Node, Player } from '@lacunahub/lavaluna.js'
 import { BaseGuildTextChannel, BaseGuildVoiceChannel, Message } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
@@ -6,13 +6,17 @@ async function handler(self: Lacuna, node: Node) {
     const guildPlayers = (await self.db.qdb.get('guildPlayers')) as any
     const guildIds = Object.keys(guildPlayers ?? {})
 
+    const destroyPlayer = async (guildId: string, player?: Player) => {
+        await self.db.qdb.delete(`guildPlayers.${guildId}`)
+        if (player) player.destroy()
+    }
+
     for (const guildId of guildIds) {
         let player = self.lava.nodes.getPlayer(guildId)
         const guild = self.guilds.cache.get(guildId)
 
         if (!guild) {
-            if (player) player.destroy()
-
+            await destroyPlayer(guildId, player)
             continue
         }
 
@@ -30,8 +34,7 @@ async function handler(self: Lacuna, node: Node) {
         }
 
         if (!voiceChannel || !message || voiceChannel.members.size < 1) {
-            if (player) await player.destroy()
-
+            await destroyPlayer(guildId, player)
             continue
         }
 
@@ -49,8 +52,8 @@ async function handler(self: Lacuna, node: Node) {
 
         player.set('message', message)
         player.setVolume(guildPlayer.volume)
-        if (guildPlayer.trackRepeat) player.setTrackRepeat(guildPlayer.trackRepeat)
-        if (guildPlayer.queueRepeat) player.setQueueRepeat(guildPlayer.queueRepeat)
+        if (guildPlayer.trackRepeat) player.setRepeatMode('TRACK')
+        if (guildPlayer.queueRepeat) player.setRepeatMode('QUEUE')
 
         if (player.voiceChannelId) player.connect()
         else player.setVoiceChannelId(voiceChannel.id)

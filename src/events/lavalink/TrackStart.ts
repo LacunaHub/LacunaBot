@@ -21,7 +21,7 @@ async function handler(self: Lacuna, player: Player) {
             volume: player.volume,
             trackRepeat: player.trackRepeat,
             queueRepeat: player.queueRepeat,
-            queue: [player.queue.current, ...player.queue]
+            queue: [...player.queue]
         })
     } else {
         await self.db.qdb.delete(`guildPlayers.${player.guildId}`)
