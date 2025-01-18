@@ -121,7 +121,9 @@ onMounted(async () => {
     min-width: 100%;
   }
 
-  max-width: 50%;
-  min-width: 50%;
+  & {
+    max-width: 50%;
+    min-width: 50%;
+  }
 }
 </style>
