@@ -9,6 +9,9 @@ permissions:
     packages: read
     contents: read
 
+env:
+    GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}
+
 jobs:
     build:
         runs-on: self-hosted
@@ -21,7 +24,5 @@ jobs:
             - uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-            - name: Set GitHub Packages token
-              run: npm config set //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}
             - run: npm ci
             - run: npm run build
