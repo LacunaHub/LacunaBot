@@ -18,7 +18,11 @@ export default async function getPlugins(ctx: Context) {
     ctx.body = {
         total: repoSearch.total_count,
         data: repoSearch.items
-            .filter(v => verifiedRepos.includes(v.full_name))
+            .filter(v => {
+                if (v.archived) return false
+                if (verifiedRepos.some(vv => vv.fullName === v.full_name)) return true
+                return false
+            })
             .map(v => {
                 return {
                     name: v.name,

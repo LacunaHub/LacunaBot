@@ -26,7 +26,7 @@ const handler = async (self: Lacuna, player: Player) => {
                 await message.delete()
                 const playerMessage = await (message.channel as GuildTextBasedChannel).send({ embeds: [embed], components: message.components })
                 player.set('message', playerMessage)
-                self.db.qdb.set(`guildPlayers.${player.guildId}.messageId`, message.id)
+                self.db.qdb.set(`guildPlayers.${player.guildId}.messageId`, playerMessage.id)
             }
         } catch (err) {
             await self.logger.handleError({ module: 'MusicTrackEnd', action: 'RecreatePlayerMessage', error: err, guild_id: player.guildId })

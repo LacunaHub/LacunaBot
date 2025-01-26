@@ -1,4 +1,4 @@
-import { EnvData, ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { EnvData, ServerDocument, ServerModulesCustomCommand } from '@lacunahub/lacuna-database-driver'
 import { LavalunaManager } from '@lacunahub/lavaluna.js'
 import { ClusterShardClient, ClusterShardClientOptions } from '@lacunahub/letsfrag'
 import { Collection, Guild, PermissionsBitField } from 'discord.js'
@@ -131,14 +131,11 @@ export default class Lacuna extends ClusterShardClient {
             {
                 $set: {
                     'modules.custom_commands': commands.map(i => {
-                        const custom = server.modules.custom_commands.find(ii => ii.command.name === i.name)
+                        const custom = server.modules.custom_commands.find(ii => ii.command.name === i.name),
+                            data: ServerModulesCustomCommand = { ...custom }
 
-                        return {
-                            id: i.id,
-                            options: custom.options,
-                            components: custom.components,
-                            command: custom.command
-                        }
+                        data.id = i.id
+                        return data
                     })
                 }
             }

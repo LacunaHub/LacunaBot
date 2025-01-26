@@ -1,9 +1,9 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesAutomationTriggers } from '@lacunahub/lacuna-database-driver'
 import { Events, GuildMember } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import { activePatronRoleId, supportServerId } from '../../internals/utility/Constants'
 import AutoMod from '../../modules/AutoMod'
-import Automation from '../../modules/Automation'
+import Automation from '../../modules/custom-behavior/Automation'
 import Greeting from '../../modules/Greeting'
 import GuildImageRotation from '../../modules/GuildImageRotation'
 import Logs from '../../modules/Logs'
@@ -20,7 +20,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
         await Greeting.restoreNicknameAndRoles(self, server, member)
     }
 
-    await Automation.handleEvent('GUILD_MEMBER_ADD', self, server, member)
+    await Automation.handleEvent(ServerModulesAutomationTriggers.GuildMemberAdd, self, server, member)
     await Reports.handleGuildMemberAdd(self, server, member)
     await AutoMod.moderateNicknames(self, server, member)
     await AutoMod.moderateNewbies(self, server, member)

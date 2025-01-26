@@ -9,6 +9,9 @@ permissions:
     packages: read
     contents: read
 
+env:
+    GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}
+
 jobs:
     build:
         runs-on: self-hosted
@@ -22,6 +25,4 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
             - run: npm ci
-              env:
-                GH_PKG_TOKEN: ${{ secrets.GH_PKG_TOKEN }}
             - run: npm run build
