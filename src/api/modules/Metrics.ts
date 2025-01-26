@@ -1,3 +1,5 @@
+import fetch from 'node-fetch'
+import { Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 import { Gauge, Registry } from 'prom-client'
 
 export const register = new Registry()
@@ -85,6 +87,61 @@ export const lavaNodePlayingPlayersCounter = new Gauge({
     registers: [register],
     labelNames: ['node']
 })
+
+export function scheduleUpdateListingStats() {
+    const rule = new RecurrenceRule()
+    rule.minute = new Range(0, 59, 10)
+
+    const updateListingStats = async (guildCount: number) => {
+        const requestConfigs = [
+            {
+                url: `https://top.gg/api/bots/${process.env.LCN_DISCORD_CLIENT_ID}/stats`,
+                headers: {
+                    Authorization: process.env.LCN_TOP_GG_API_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ server_count: guildCount })
+            },
+            {
+                url: `https://discord.bots.gg/api/v1/bots/${process.env.LCN_DISCORD_CLIENT_ID}/stats`,
+                headers: {
+                    Authorization: process.env.LCN_BOTS_GG_API_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ guildCount: guildCount })
+            }
+        ]
+
+        const responses: Array<{ url: string; response: fetch.Response }> = []
+        for (const config of requestConfigs) {
+            try {
+                const response = await fetch(config.url, {
+                    method: 'POST',
+                    headers: config.headers,
+                    body: config.body
+                })
+
+                responses.push({ url: config.url, response })
+            } catch (err) {
+                continue
+            }
+        }
+
+        return responses
+    }
+
+    const job = scheduleJob(rule, async () => {
+        const guildCount = await guildCounter.get()
+        if (!guildCount.values.length) return null
+
+        const totalGuilds = guildCount.values.find(v => !v.labels.label)?.value
+        if (typeof totalGuilds !== 'number' && process.env.NODE_ENV === 'development') return null
+
+        return await updateListingStats(totalGuilds)
+    })
+
+    return job
+}
 
 export interface BotMetrics {
     hostname: string
