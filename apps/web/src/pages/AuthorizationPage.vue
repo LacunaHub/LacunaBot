@@ -137,16 +137,27 @@ const onConfirm = async () => {
       return
     }
 
-    const listener = async event => {
-      window.onmessage = null
+    let listener
+    const detachListener = () => window.removeEventListener('message', listener)
+    listener = async event => {
+      if (event.source !== popup) return
+
+      const payload = event?.data
+      if (!payload || typeof payload !== 'object' || !payload.code) return
+
+      detachListener()
       popup.close()
       popupAutoClosed = true
 
       try {
-        const { data: exCode } = await interfaces.auth.exchangeCode(event.data.code, query.get('redirect_uri'))
-        const cookieOptions = { expires: new Date(Date.now() + exCode.expires_in * 1000), httpOnly: false, path: '/' }
+        const { data: exCode } = await interfaces.auth.exchangeCode(payload.code, query.get('redirect_uri'))
+        const cookieOptions = {
+          expires: new Date(Date.now() + exCode.expires_in * 1000),
+          httpOnly: false,
+          path: '/'
+        }
 
-        if (event.data.state !== auth.state) throw new Error('Invalid state')
+        if (payload.state !== auth.state) throw new Error('Invalid state')
 
         $q.cookies.set('access_token', exCode.access_token, cookieOptions)
         $q.cookies.set('refresh_token', exCode.refresh_token, { httpOnly: false, path: '/' })
@@ -182,11 +193,11 @@ const onConfirm = async () => {
       }
     }
 
-    window.onmessage = listener
+    window.addEventListener('message', listener)
 
     const interval = setInterval(() => {
       if (popup.closed) {
-        window.onmessage = null
+        detachListener()
         clearInterval(interval)
 
         if (!popupAutoClosed) confirmLoading.value = false
