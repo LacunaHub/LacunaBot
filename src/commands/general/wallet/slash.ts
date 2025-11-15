@@ -85,7 +85,7 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     const amount = interaction.options?.getInteger('amount')
     const currency = interaction.options?.getString('currency')
 
-    if (!mention) {
+    if (!mention || mention.user.bot) {
         await interaction.reply({
             content: `${self.staticEmojis.Cross} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidUser', {
                 username: `**${interaction.member.displayName}**`
