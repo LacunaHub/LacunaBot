@@ -31,7 +31,7 @@
                     :label="$t('Common.Save')"
                     @click="updateSettings"
                     :loading="updateSettingsLoading"
-                    :disable="!isGuildChanged"
+                    :disable="!isGuildChanged || hasInvalidFields()"
                   >
                     <template #loading>
                       <q-spinner-dots color="white"></q-spinner-dots>
@@ -252,6 +252,19 @@ const rollPass = new Audio(RollPassSound),
 rollPass.volume = 0.5
 rollFail.volume = 0.5
 
+const rollD20 = () => Math.floor(Math.random() * 20) + 1
+
+const onRollFail = () => {
+  updateSettingsColor.value = 'red'
+  updateSettingsAnimated.value = true
+  setTimeout(() => {
+    updateSettingsColor.value = 'primary'
+    updateSettingsAnimated.value = false
+  }, 1000)
+}
+
+const hasInvalidFields = () => !!document.querySelector('.q-field--error')
+
 useMeta(() => {
   return {
     title: documentTitle.value,
@@ -310,18 +323,10 @@ const getSettings = async () => {
 }
 
 const updateSettings = async () => {
+  if (hasInvalidFields()) return
+
   updateSettingsLoading.value = true
   const updateData = objectDifferences(guildClone.value, freezedGuild.value)
-
-  const rollD20 = () => Math.floor(Math.random() * 20) + 1
-  const onRollFail = () => {
-    updateSettingsColor.value = 'red'
-    updateSettingsAnimated.value = true
-    setTimeout(() => {
-      updateSettingsColor.value = 'primary'
-      updateSettingsAnimated.value = false
-    }, 1000)
-  }
 
   try {
     const d20 = rollD20(),
