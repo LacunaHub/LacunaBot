@@ -1,3 +1,4 @@
+import { ServerDocument } from '@lacunahub/lacuna-database-driver'
 import { Player } from '@lacunahub/lavaluna.js'
 import { Message } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
@@ -5,6 +6,7 @@ import Lacuna from '../../internals/Lacuna'
 const handler = async (self: Lacuna, player: Player) => {
     const message = player.get<Message>('message'),
         timeout = player.get<NodeJS.Timeout>('timeout')
+    const server: ServerDocument = await self.db.servers.fetch({ _id: player.options.guildId })
 
     if (message) {
         try {
@@ -21,6 +23,16 @@ const handler = async (self: Lacuna, player: Player) => {
 
     if (timeout) {
         clearTimeout(timeout)
+    }
+
+    /**
+     * Remove voice channel status if enabled in settings.
+     * TODO: Use a proper method when discord.js has one.
+     */
+    if (server.modules.music.voice_status.enabled && player.node.connected) {
+        self.rest.put(`/channels/${player.options.voiceChannelId}/voice-status`, {
+            body: { status: '' }
+        })
     }
 
     player.set('message', null)
