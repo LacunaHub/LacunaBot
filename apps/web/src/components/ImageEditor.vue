@@ -221,6 +221,9 @@
             ></q-input>
             <div v-if="getCdnWarning(image.background.url)" class="text-warning text-body2 q-pt-xs">
               {{ getCdnWarning(image.background.url) }}
+              <a href="https://docs.lacunabot.com/useful/banner-rotation#image-elements-image" target="_blank">
+                {{ $t('Pages.LandingPage.LearnMore') }}
+              </a>
             </div>
           </div>
         </div>
@@ -718,8 +721,8 @@ import { allowedImageHosts, localeStringsMap } from 'src/utils/Constants'
 import { suid } from 'src/utils/Utils'
 import { computed, ref, watch } from 'vue'
 import VueDragResize from 'vue-drag-resize/src/components/vue-drag-resize.vue'
-import LacunaDiamond from './dialogs/LacunaDiamond.vue'
 import { useI18n } from 'vue-i18n'
+import LacunaDiamond from './dialogs/LacunaDiamond.vue'
 
 const props = defineProps({
   image: {
