@@ -33,7 +33,7 @@ async function handler(self: Lacuna, player: Player) {
     await self.logger.appendServerLog(player.guildId, {
         level: 'LOG',
         module: 'Music',
-        action: 'TrackEnd',
+        action: 'TrackStart',
         message: `Track "${track.info.author} - ${track.info.title}" is playing now`
     })
 
