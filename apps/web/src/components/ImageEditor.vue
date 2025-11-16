@@ -213,11 +213,15 @@
               v-model.trim="image.background.url"
               :disable="disable"
               type="url"
-              class="q-pt-sm"
+              :rules="[validateImageUrl]"
+              class="q-pt-sm no-underline"
               filled
               dense
               hide-bottom-space
             ></q-input>
+            <div v-if="getCdnWarning(image.background.url)" class="text-warning text-body2 q-pt-xs">
+              {{ getCdnWarning(image.background.url) }}
+            </div>
           </div>
         </div>
       </div>
@@ -593,11 +597,15 @@
                                   v-model.trim="element.url"
                                   :disable="disable"
                                   type="url"
-                                  class="q-pt-sm"
+                                  :rules="[validateImageUrl]"
+                                  class="q-pt-sm no-underline"
                                   filled
                                   dense
                                   hide-bottom-space
                                 ></q-input>
+                                <div v-if="getCdnWarning(element.url)" class="text-warning text-body2 q-pt-xs">
+                                  {{ getCdnWarning(element.url) }}
+                                </div>
                               </div>
 
                               <div class="col-12 col-md-6">
@@ -711,6 +719,7 @@ import { suid } from 'src/utils/Utils'
 import { computed, ref, watch } from 'vue'
 import VueDragResize from 'vue-drag-resize/src/components/vue-drag-resize.vue'
 import LacunaDiamond from './dialogs/LacunaDiamond.vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   image: {
@@ -741,6 +750,7 @@ const props = defineProps({
 const emit = defineEmits(['change'])
 
 const $q = useQuasar()
+const { t } = useI18n()
 const guild = useGuildStore()
 
 const imageCanvasParent = ref(null),
@@ -757,6 +767,54 @@ const image = ref({
   elements: [],
   ...JSON.parse(JSON.stringify(props.image))
 })
+
+const allowedImageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp']
+
+const isTemplateValue = value => typeof value === 'string' && value.includes('{') && value.includes('}')
+
+const isAllowedImageUrl = value => {
+  try {
+    const url = new URL(value)
+
+    if (!allowedImageHosts.includes(url.hostname)) return false
+
+    return allowedImageExtensions.some(ext => url.pathname.toLowerCase().endsWith(ext))
+  } catch {
+    return false
+  }
+}
+
+const validateImageUrl = value => {
+  if (!value) return true
+  if (isTemplateValue(value)) return true
+
+  if (!isAllowedImageUrl(value)) {
+    const extensions = allowedImageExtensions.join(', ')
+    const key = 'Components.ImageEditor.AllowedImageError'
+    return t(key, {
+      hosts: allowedImageHosts.join(', '),
+      extensions
+    })
+  }
+
+  return true
+}
+
+const getCdnWarning = value => {
+  if (!value) return ''
+
+  try {
+    const url = new URL(value)
+
+    if (url.hostname === 'cdn.discordapp.com' || url.hostname === 'media.discordapp.net') {
+      return t('Components.ImageEditor.DiscordCdnWarning')
+    }
+  } catch {
+    return ''
+  }
+
+  return ''
+}
 
 const disable = computed(() => {
   return props.disable || !image.value.active
@@ -929,3 +987,14 @@ watch(
   { deep: true }
 )
 </script>
+
+<style scoped lang="scss">
+.no-underline:deep(.q-field__control) {
+  border-bottom: none;
+}
+
+.no-underline:deep(.q-field__control:before),
+.no-underline:deep(.q-field__control:after) {
+  border-bottom-color: transparent;
+}
+</style>

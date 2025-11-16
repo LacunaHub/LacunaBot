@@ -393,7 +393,7 @@ export const localeStringsMap = {
     }
 }
 
-export const allowedImageHosts = ['cdn.discordapp.com', 'i.imgur.com']
+export const allowedImageHosts = ['cdn.discordapp.com', 'media.discordapp.net', 'i.imgur.com']
 
 export const lacunaDiamondFeatures = [
     {
