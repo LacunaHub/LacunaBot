@@ -31,7 +31,7 @@ const handler = async (self: Lacuna, player: Player) => {
      * TODO: Use a proper permission instead of a BigInt when discord.js has one.
      */
     const selfHasStatusPermission = message.member.permissions.has(BigInt(281474976710656))
-    if (server.modules.music.voice_status.enabled && player.node.connected && selfHasStatusPermission) {
+    if (server.modules.music.voice_status.enabled && selfHasStatusPermission) {
         self.rest.put(`/channels/${player.options.voiceChannelId}/voice-status`, {
             body: { status: '' }
         })
