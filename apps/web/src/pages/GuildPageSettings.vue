@@ -284,10 +284,23 @@ useMeta(() => {
 
 const getSettings = async () => {
   try {
+    const prevVoiceStatus = guild.modules.music?.voice_status
     const response = await interfaces.guilds.getSettings(guildId),
       { data } = response
 
     guild.$patch(data)
+
+    const voiceStatusFromResponse = data.modules?.music?.voice_status
+    const voiceStatus =
+      voiceStatusFromResponse ??
+      prevVoiceStatus ?? {
+        enabled: false,
+        force_set: false
+      }
+    guild.modules.music.voice_status = {
+      enabled: typeof voiceStatus.enabled === 'boolean' ? voiceStatus.enabled : false,
+      force_set: typeof voiceStatus.force_set === 'boolean' ? voiceStatus.force_set : false
+    }
 
     for (const role of guild.guild.roles) {
       role.color = `#${decimalToHex(role.color || 10593445)}`

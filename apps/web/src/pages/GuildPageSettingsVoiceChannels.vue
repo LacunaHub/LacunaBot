@@ -81,6 +81,24 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
+
+            <q-item tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="voiceStatusEnabled" dense></q-checkbox>
+              </q-item-section>
+
+              <q-item-section>
+                <div class="row items-center no-wrap">
+                  <q-item-label>
+                    {{ $t('Pages.GuildPage.VoiceChannels.MusicSetVoiceStatus') }}
+                  </q-item-label>
+
+                  <q-badge class="q-ml-sm text-uppercase" color="warning">
+                    <span>{{ betaLabel }}</span>
+                  </q-badge>
+                </div>
+              </q-item-section>
+            </q-item>
           </q-list>
         </div>
 
@@ -335,16 +353,35 @@ import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import VoiceChannelsAutoVoice from 'src/components/dialogs/VoiceChannelsAutoVoice.vue'
 import VoiceChannelsVoiceRole from 'src/components/dialogs/VoiceChannelsVoiceRole.vue'
 import { useGuildStore } from 'src/stores/guild'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   name: 'GuildPageSettingsVoiceChannels',
 
   setup() {
     const guild = useGuildStore()
+    const { t } = useI18n()
+
+    const betaLabel = computed(() => {
+      const key = 'Common.Beta'
+      const value = t(key)
+
+      return value === key ? 'BETA' : value
+    })
+
+    const voiceStatusEnabled = computed({
+      get: () => guild.modules.music.voice_status?.enabled ?? false,
+      set: value => {
+        guild.modules.music.voice_status = guild.modules.music.voice_status || {}
+        guild.modules.music.voice_status.enabled = value
+      }
+    })
 
     return {
-      guild
+      guild,
+      betaLabel,
+      voiceStatusEnabled
     }
   },
 
