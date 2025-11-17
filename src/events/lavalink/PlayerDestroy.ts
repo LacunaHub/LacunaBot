@@ -28,8 +28,10 @@ const handler = async (self: Lacuna, player: Player) => {
     /**
      * Remove voice channel status if enabled in settings.
      * TODO: Use a proper method when discord.js has one.
+     * TODO: Use a proper permission instead of a BigInt when discord.js has one.
      */
-    if (server.modules.music.voice_status.enabled && player.node.connected) {
+    const selfHasStatusPermission = message.member.permissions.has(BigInt(281474976710656))
+    if (server.modules.music.voice_status.enabled && player.node.connected && selfHasStatusPermission) {
         self.rest.put(`/channels/${player.options.voiceChannelId}/voice-status`, {
             body: { status: '' }
         })

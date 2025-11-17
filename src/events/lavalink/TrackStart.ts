@@ -41,8 +41,10 @@ async function handler(self: Lacuna, player: Player) {
      * Set voice channel status if enabled in settings.
      * TODO: Use a proper method when discord.js has one.
      * TODO: Check for existing status when Discord's API allows it and respect the force_set setting.
+     * TODO: Use a proper permission instead of a BigInt when discord.js has one.
      */
-    if (server.modules.music.voice_status.enabled) {
+    const selfHasStatusPermission = message.member.permissions.has(BigInt(281474976710656))
+    if (server.modules.music.voice_status.enabled && selfHasStatusPermission) {
         self.rest.put(`/channels/${player.voiceChannelId}/voice-status`, {
             body: { status: `${track.info.author} - ${track.info.title}` }
         })
