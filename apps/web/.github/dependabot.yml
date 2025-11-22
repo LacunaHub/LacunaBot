@@ -4,10 +4,11 @@ updates:
       directory: '/'
       schedule:
           interval: 'weekly'
+      open-pull-requests-limit: 0
       ignore:
           - dependency-name: '@lacunahub/*'
           - dependency-name: '*'
-            update-types: ["version-update:semver-major"]
+            update-types: ['version-update:semver-major']
       target-branch: 'develop'
       labels:
           - 'dependencies'
