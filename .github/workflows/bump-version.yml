@@ -9,7 +9,7 @@ on:
 jobs:
     commit:
         if: ${{ contains(github.event.label.name, 'major') || contains(github.event.label.name, 'minor') || contains(github.event.label.name, 'patch') }}
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v3

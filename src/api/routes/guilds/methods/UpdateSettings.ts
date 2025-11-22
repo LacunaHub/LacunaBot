@@ -1390,6 +1390,25 @@ export async function setSettings(guild: ServerDocument, data: Partial<ServerDoc
             ) {
                 updateData['modules.music.default_source'] = data.modules.music.default_source
             }
+
+            // Voice status
+            if (data.modules.music.voice_status) {
+                // Check 'enabled' boolean
+                if (
+                    typeof data.modules.music.voice_status.enabled === 'boolean' &&
+                    data.modules.music.voice_status.enabled !== guild.modules.music.voice_status.enabled
+                ) {
+                    updateData['modules.music.voice_status.enabled'] = data.modules.music.voice_status.enabled
+                }
+
+                // Check 'force_set' boolean
+                if (
+                    typeof data.modules.music.voice_status.force_set === 'boolean' &&
+                    data.modules.music.voice_status.force_set !== guild.modules.music.voice_status.force_set
+                ) {
+                    updateData['modules.music.voice_status.force_set'] = data.modules.music.voice_status.force_set
+                }
+            }
         }
 
         if (data.modules.voice_manager) {
