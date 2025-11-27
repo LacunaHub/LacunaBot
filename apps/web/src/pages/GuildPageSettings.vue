@@ -31,7 +31,7 @@
                     :label="$t('Common.Save')"
                     @click="updateSettings"
                     :loading="updateSettingsLoading"
-                    :disable="!isGuildChanged || hasInvalidFields()"
+                    :disable="!isGuildChanged"
                   >
                     <template #loading>
                       <q-spinner-dots color="white"></q-spinner-dots>
@@ -263,7 +263,7 @@ const onRollFail = () => {
   }, 1000)
 }
 
-const hasInvalidFields = () => !!document.querySelector('.q-field--error')
+// const hasInvalidFields = () => false
 
 useMeta(() => {
   return {
@@ -291,8 +291,7 @@ const getSettings = async () => {
     guild.$patch(data)
 
     const voiceStatusFromResponse = data.modules?.music?.voice_status
-    const voiceStatus =
-      voiceStatusFromResponse ??
+    const voiceStatus = voiceStatusFromResponse ??
       prevVoiceStatus ?? {
         enabled: false,
         force_set: false
@@ -336,7 +335,7 @@ const getSettings = async () => {
 }
 
 const updateSettings = async () => {
-  if (hasInvalidFields()) return
+  // if (hasInvalidFields()) return
 
   updateSettingsLoading.value = true
   const updateData = objectDifferences(guildClone.value, freezedGuild.value)
