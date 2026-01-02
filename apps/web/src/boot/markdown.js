@@ -1,4 +1,4 @@
-import { toHTML } from 'discord-markdown'
+import { toHTML } from '@odiffey/discord-markdown'
 import { boot } from 'quasar/wrappers'
 
 export default boot(({ app }) => {

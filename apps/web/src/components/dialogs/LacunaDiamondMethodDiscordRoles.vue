@@ -107,13 +107,19 @@
             expand-separator
           >
             <q-card class="bg-dark-1 no-border-radius" bordered>
-              <q-card-section v-html="parseMarkdown($t('Components.LacunaDiamond.FAQ.A1'))"></q-card-section>
+              <q-card-section>
+                <div
+                  v-html="parseMarkdown($t('Components.LacunaDiamond.FAQ.A1', { platform: selectedPlatform }))"
+                ></div>
+              </q-card-section>
             </q-card>
           </q-expansion-item>
 
           <q-expansion-item :label="$t('Components.LacunaDiamond.FAQ.Q2')" group="default" expand-separator>
             <q-card class="bg-dark-1 no-border-radius" bordered>
-              <q-card-section v-html="parseMarkdown($t('Components.LacunaDiamond.FAQ.A2'))"></q-card-section>
+              <q-card-section>
+                <div v-html="parseMarkdown($t('Components.LacunaDiamond.FAQ.A2'))"></div>
+              </q-card-section>
             </q-card>
           </q-expansion-item>
 
@@ -124,7 +130,9 @@
             expand-separator
           >
             <q-card class="bg-dark-1 no-border-radius" bordered>
-              <q-card-section v-html="parseMarkdown($t('Components.LacunaDiamond.FAQ.A3'))"></q-card-section>
+              <q-card-section>
+                <div v-html="parseMarkdown($t('Components.LacunaDiamond.FAQ.A3'))"></div>
+              </q-card-section>
             </q-card>
           </q-expansion-item>
         </q-list>
@@ -158,11 +166,6 @@
 import { useDialogPluginComponent } from 'quasar'
 import { parseMarkdown } from 'src/utils/Markdown'
 import { ref } from 'vue'
-
-const a1 =
-  'Чтобы активировать Diamond, проверьте следующие моменты\n\n1. Привязан ли ваш аккаунт Discord к Patreon\n2. Присоединились ли вы к серверу поддержки и получили ли роль подписчика\n3. Нажали ли вы на кнопку проверки подписки\n\nЕсли после этих шагов проблема остаётся, свяжитесь с нами для дальнейшей помощи.'
-const a2 =
-  'Если у вас блокировка на сервере поддержки, активация Diamond будет невозможна, так как она требует наличия доступа к серверу. Рекомендуем связаться с администрацией сервера, чтобы разобраться с причиной блокировки и попытаться её снять.'
 
 defineEmits(useDialogPluginComponent.emits)
 const props = defineProps({

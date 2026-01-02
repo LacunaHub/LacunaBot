@@ -1,5 +1,3 @@
-/* eslint-env node */
-
 /*
  * This file runs in a Node context (it's NOT transpiled by Babel), so use only
  * the ES6 features that are supported by your Node version. https://node.green/
@@ -8,11 +6,15 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-const { configure } = require('quasar/wrappers')
-const path = require('path')
-const { readFileSync } = require('fs')
+import { readFileSync } from 'fs'
+import path from 'path'
+import { configure } from 'quasar/wrappers'
+import { fileURLToPath } from 'url'
 
-module.exports = configure(function (ctx) {
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+export default configure(function (ctx) {
     return {
         eslint: {
             // fix: true,
@@ -63,8 +65,8 @@ module.exports = configure(function (ctx) {
         // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
         build: {
             target: {
-                browser: ['es2020', 'chrome87', 'edge88', 'firefox78', 'safari14'],
-                node: 'node16'
+                browser: ['es2022', 'chrome109', 'firefox115', 'safari16'],
+                node: 'node22'
             },
 
             vueRouterMode: 'history', // available values: 'hash', 'history'
@@ -79,7 +81,10 @@ module.exports = configure(function (ctx) {
             env: {
                 API: ctx.dev ? 'http://localhost:5810' : 'https://api.lacunabot.com',
                 GTAG: 'G-881ZHWECYQ',
-                MEDITOR_LIB_LACUNA_CB: readFileSync(__dirname + '/src/utils/monaco-libs/lib.lacuna-cb.d.ts', 'utf-8')
+                MEDITOR_LIB_LACUNA_CB: readFileSync(
+                    path.join(__dirname, 'src/utils/monaco-libs/lib.lacuna-cb.d.ts'),
+                    'utf-8'
+                )
             },
             // rawDefine: {}
             // ignorePublicFolder: true,
@@ -90,22 +95,7 @@ module.exports = configure(function (ctx) {
 
             // extendViteConf (viteConf) {},
             // viteVuePluginOptions: {},
-
-            vitePlugins: [
-                [
-                    '@intlify/vite-plugin-vue-i18n',
-                    {
-                        // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
-                        // compositionOnly: false,
-
-                        runtimeOnly: ctx.dev,
-
-                        // you need to set i18n resource including paths !
-                        include: path.resolve(__dirname, './src/i18n/**')
-                    }
-                ]
-            ],
-
+            // vitePlugins: [],
             viteVuePluginOptions: {
                 template: {
                     compilerOptions: {

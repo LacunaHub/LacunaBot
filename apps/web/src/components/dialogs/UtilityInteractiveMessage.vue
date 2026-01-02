@@ -360,18 +360,18 @@ export default defineComponent({
     const isValid = computed(() => {
       return Boolean(
         im.value.channel_id &&
-          (im.value.message.content || im.value.message.embed.active) &&
-          (im.value.components.length || im.value.reactions.length) &&
-          im.value.components.flat().every(i => {
-            if (i.type == 'BUTTON')
-              return (
-                (i.appearance.label || i.appearance.emoji.name) &&
-                (i.options.length || (i.appearance.style == 'LINK' && i.appearance.url))
-              )
-            if (i.type == 'SELECT_MENU')
-              return i._options.length && i._options.every(ii => ii.options.length && ii.appearance.label)
-          }) &&
-          im.value.reactions.every(i => i.emoji.name && i.options.length)
+        (im.value.message.content || im.value.message.embed.active) &&
+        (im.value.components.length || im.value.reactions.length) &&
+        im.value.components.flat().every(i => {
+          if (i.type == 'BUTTON')
+            return (
+              (i.appearance.label || i.appearance.emoji.name) &&
+              (i.options.length || (i.appearance.style == 'LINK' && i.appearance.url))
+            )
+          if (i.type == 'SELECT_MENU')
+            return i._options.length && i._options.every(ii => ii.options.length && ii.appearance.label)
+        }) &&
+        im.value.reactions.every(i => i.emoji.name && i.options.length)
       )
     })
 

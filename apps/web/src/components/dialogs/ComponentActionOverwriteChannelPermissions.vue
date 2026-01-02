@@ -151,7 +151,7 @@ export default defineComponent({
     const isValid = computed(() => {
       return Boolean(
         component.value.action.overwrite_channel_permissions.channels.length &&
-          component.value.action.overwrite_channel_permissions.user_or_role
+        component.value.action.overwrite_channel_permissions.user_or_role
       )
     })
 

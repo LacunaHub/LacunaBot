@@ -1,6 +1,3 @@
-import { isArray, isEqual, isObject } from 'lodash/fp'
-import reduce from 'lodash/reduce'
-
 export function hashCode(str) {
     let hash = 0
 
@@ -105,20 +102,22 @@ export function suid(length) {
 }
 
 export function objectDifferences(object, base) {
-    return reduce(
-        object,
-        (result, value, key) => {
-            if (!isEqual(value, base[key])) {
-                result[key] =
-                    isObject(value) && isObject(base[key]) && !(isArray(value) && isArray(base[key]))
-                        ? objectDifferences(value, base[key])
-                        : value
-            }
+    return Object.entries(object).reduce((result, [key, value]) => {
+        const baseValue = base[key]
 
-            return result
-        },
-        {}
-    )
+        if (JSON.stringify(value) !== JSON.stringify(baseValue)) {
+            result[key] =
+                value !== null &&
+                typeof value === 'object' &&
+                baseValue !== null &&
+                typeof baseValue === 'object' &&
+                !(Array.isArray(value) || Array.isArray(baseValue))
+                    ? objectDifferences(value, baseValue)
+                    : value
+        }
+
+        return result
+    }, {})
 }
 
 export function getLocale() {

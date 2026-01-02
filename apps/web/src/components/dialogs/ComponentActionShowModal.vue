@@ -139,8 +139,8 @@ export default defineComponent({
     const isValid = computed(() => {
       return Boolean(
         component.value.action.show_modal.title &&
-          component.value.action.show_modal.customId &&
-          component.value.action.show_modal.components.length
+        component.value.action.show_modal.customId &&
+        component.value.action.show_modal.components.length
       )
     })
 

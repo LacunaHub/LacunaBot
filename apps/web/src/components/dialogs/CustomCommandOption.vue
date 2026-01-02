@@ -194,8 +194,8 @@ export default defineComponent({
     const isValid = computed(() => {
       return Boolean(
         optionTypes.value.some(i => i.value === option.value.type) &&
-          discordAppCommandNameRegexp.test(option.value.name) &&
-          option.value.description?.length
+        discordAppCommandNameRegexp.test(option.value.name) &&
+        option.value.description?.length
       )
     })
 

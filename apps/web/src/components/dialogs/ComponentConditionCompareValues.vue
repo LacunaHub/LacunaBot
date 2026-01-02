@@ -200,8 +200,8 @@ export default defineComponent({
     const isValid = computed(() => {
       return Boolean(
         component.value.condition.compare_values.operator &&
-          component.value.condition.compare_values.left &&
-          component.value.condition.compare_values.right
+        component.value.condition.compare_values.left &&
+        component.value.condition.compare_values.right
       )
     })
 

@@ -495,11 +495,11 @@ const confirmLoading = ref(false)
 const isValid = computed(() => {
   return Boolean(
     discordAppCommandNameRegexp.test(command.value.command.name) &&
-      !guild.guild.commands.some(i => i.name === command.value.command.name) &&
-      !guild.modules.custom_commands.some(
-        i => i.command.name === command.value.command.name && i.id !== command.value.id
-      ) &&
-      command.value.command.description
+    !guild.guild.commands.some(i => i.name === command.value.command.name) &&
+    !guild.modules.custom_commands.some(
+      i => i.command.name === command.value.command.name && i.id !== command.value.id
+    ) &&
+    command.value.command.description
   )
 })
 

@@ -36,7 +36,7 @@
                       <img src="~assets/spotify-logo.svg" />
                     </q-avatar>
 
-                    <div class="col-shrink">Spotify</div>
+                    <div class="col-shrink">{{ $t('Pages.GuildPage.VoiceChannels.MusicProviders.Spotify') }}</div>
                   </div>
                 </template>
 
@@ -46,7 +46,7 @@
                       <img src="~assets/yandex-music-logo.svg" />
                     </q-avatar>
 
-                    <div class="col-shrink">Yandex Music</div>
+                    <div class="col-shrink">{{ $t('Pages.GuildPage.VoiceChannels.MusicProviders.YandexMusic') }}</div>
                   </div>
                 </template>
 
@@ -56,7 +56,7 @@
                       <img src="~assets/soundcloud-logo.svg" />
                     </q-avatar>
 
-                    <div class="col-shrink">SoundCloud</div>
+                    <div class="col-shrink">{{ $t('Pages.GuildPage.VoiceChannels.MusicProviders.SoundCloud') }}</div>
                   </div>
                 </template>
               </q-btn-toggle>
