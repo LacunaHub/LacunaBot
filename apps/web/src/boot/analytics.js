@@ -1,18 +1,17 @@
-import { boot } from 'quasar/wrappers'
-import VueGtag from 'vue-gtag'
+import { boot } from 'quasar/wrappers';
+import { createGtag } from 'vue-gtag';
 
 export default boot(({ app, router }) => {
-    app.use(
-        VueGtag,
-        {
-            appName: 'Lacuna',
-            pageTrackerScreenviewEnabled: true,
-            config: {
-                id: process.env.GTAG
-            }
+    const gtag = createGtag({
+        property: {
+            id: process.env.GTAG
         },
-        router
-    )
-})
+        appName: 'Lacuna',
+        pageTracker: {
+            router,
+            useScreenview: true
+        }
+    })
 
-export { VueGtag }
+    app.use(gtag, router)
+})
