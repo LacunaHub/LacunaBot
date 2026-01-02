@@ -18,7 +18,7 @@
                   </q-item-section>
 
                   <q-item-section>
-                    <q-item-label>{{ guild.guild?.name ?? 'Unknown Guild Name' }}</q-item-label>
+                    <q-item-label class="ellipsis">{{ guild.guild?.name ?? 'Unknown Guild Name' }}</q-item-label>
                   </q-item-section>
                 </q-item>
 

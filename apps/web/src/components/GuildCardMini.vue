@@ -7,8 +7,8 @@
         </q-avatar>
       </q-item-section>
 
-      <q-item-section class="ellipsis">
-        <div>{{ name }}</div>
+      <q-item-section>
+        <q-item-label class="ellipsis">{{ name }}</q-item-label>
       </q-item-section>
     </q-item>
   </q-card>
