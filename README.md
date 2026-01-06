@@ -14,7 +14,7 @@
 
 # Требования
 
--   [Node.js](https://nodejs.org/en/download/package-manager) (v18 и выше)
+-   [Node.js](https://nodejs.org/en/download/package-manager) (v20 и выше)
 -   [MongoDB](https://www.mongodb.com/try/download/community)
 -   [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/)
 
