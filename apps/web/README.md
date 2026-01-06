@@ -1,43 +1,72 @@
-# Lacuna (website)
+# Lacuna Website
 
-Web Dashboard for Lacuna Discord bot
+Web Dashboard for the Lacuna Discord bot. Built with Vue 3 and Quasar Framework.
 
-## Install the dependencies
+## Tech Stack
+
+- **Framework:** Vue 3 with Composition API
+- **UI Framework:** Quasar 2
+- **Build Tool:** Vite (via @quasar/app-vite)
+- **State Management:** Pinia
+- **Routing:** vue-router
+- **Internationalization:** vue-i18n
+
+## Prerequisites
+
+- Node.js v22
+
+## Getting Started
+
+### Install Dependencies
 
 ```bash
-yarn
-# or
-npm install
+npm ci
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+### Development
+
+Start the development server with hot-reload:
 
 ```bash
 quasar dev
 ```
 
-### Lint the files
-
-```bash
-yarn lint
-# or
-npm run lint
-```
-
-### Format the files
-
-```bash
-yarn format
-# or
-npm run format
-```
-
-### Build the app for production
+### Production Build
 
 ```bash
 quasar build
 ```
 
-### Customize the configuration
+## Code Quality
 
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+### Lint
+
+```bash
+npm run lint
+```
+
+### Format
+
+```bash
+npm run format
+```
+
+## Project Structure
+
+```
+src/
+├── assets/          # Static assets (images, SVGs)
+├── boot/            # App initialization plugins
+├── components/      # Reusable Vue components
+│   └── dialogs/     # Dialog/modal components
+├── css/             # Global styles and fonts
+├── layouts/         # Page layout components
+├── pages/           # Route page components
+├── router/          # Vue Router configuration
+├── stores/          # Pinia stores
+└── utils/           # Utility functions
+```
+
+## Configuration
+
+See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js) for customization options.
