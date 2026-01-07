@@ -1,7 +1,6 @@
 import { ServerDocument } from '@/database/schemas/Servers'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import { hubSubscribe } from '../../../../modules/social-alerts/YouTubeAlerts'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
@@ -33,11 +32,11 @@ export default async function deleteYouTubeSubscription(ctx: Context) {
             await hubSubscribe(youtubeSubscription.channel_id, 'unsubscribe')
             await database.youtubeSubs.deleteOne({ _id: youtubeSubscription.channel_id })
         } catch (err) {
-            await Logger.handleError({
+            ctx.log.error({
                 module: 'YouTubeSubs',
                 action: 'DeleteSubscription',
-                error: err,
-                guild_id: server._id
+                err,
+                guildId: server._id
             })
 
             ctx.throw(500, new APIError(5018))
@@ -48,11 +47,11 @@ export default async function deleteYouTubeSubscription(ctx: Context) {
         try {
             await DiscordUtils.rest.delete(DiscordUtils.restRoutes.webhook(youtubeSubscription.webhook_id, youtubeSubscription.webhook_token))
         } catch (err) {
-            await Logger.handleError({
+            ctx.log.error({
                 module: 'YouTubeSubs',
                 action: 'DeleteWebhook',
-                error: err,
-                guild_id: server._id
+                err,
+                guildId: server._id
             })
         }
     }

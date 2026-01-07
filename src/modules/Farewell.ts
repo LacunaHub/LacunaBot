@@ -20,14 +20,14 @@ async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMe
             }
 
             self.emit('moduleExecution', {
-                module: 'Farewell',
-                guild: { id: member.guild.id, name: member.guild.name },
-                target: { id: member.id, name: member.user.tag }
+                guildId: member.guild.id,
+                targetId: member.id,
+                module: 'Farewell'
             })
 
             return true
         } catch (err) {
-            await self.logger.handleError({ module: 'Farewell', action: 'SendMessage', error: err, guild_id: member.guild.id })
+            self.logger.error({ module: 'Farewell', action: 'SendMessage', err, guildId: member.guild.id })
         }
     }
 
@@ -80,10 +80,10 @@ async function saveNicknameAndRoles(self: Lacuna, server: ServerDocument, member
         }
 
         self.emit('moduleExecution', {
+            guildId: member.guild.id,
+            targetId: member.id,
             module: 'Restoring',
-            category: 'SaveData',
-            guild: { id: member.guild.id, name: member.guild.name },
-            target: { id: member.id, name: member.user.tag }
+            category: 'SaveData'
         })
 
         return true

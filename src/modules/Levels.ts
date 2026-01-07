@@ -161,10 +161,10 @@ export async function onMessageCreate(self: Lacuna, server: ServerDocument, mess
     await updateAwards(self, server, message.member, userLevel)
 
     self.emit('moduleExecution', {
+        guildId: message.guildId,
+        targetId: message.author.id,
         module: 'Levels',
-        category: 'MessageCreate',
-        guild: { id: message.guild.id, name: message.guild.name },
-        target: { id: message.author.id, name: message.author.tag }
+        category: 'MessageCreate'
     })
 
     return true
@@ -226,10 +226,10 @@ export async function onVoiceConnect(self: Lacuna, server: ServerDocument, state
     }
 
     self.emit('moduleExecution', {
+        guildId: state.guild.id,
+        targetId: state.id,
         module: 'Levels',
-        category: 'VoiceConnect',
-        guild: { id: state.member.guild.id, name: state.member.guild.name },
-        target: { id: state.member.id, name: state.member.user.tag }
+        category: 'VoiceConnect'
     })
 
     return true
@@ -329,10 +329,10 @@ export async function onVoiceDisconnect(self: Lacuna, server: ServerDocument, st
             await updateAwards(self, server, member, userLevel)
 
             self.emit('moduleExecution', {
+                guildId: member.guild.id,
+                targetId: member.id,
                 module: 'Levels',
-                category: 'VoiceDisconnect',
-                guild: { id: member.guild.id, name: member.guild.name },
-                target: { id: member.id, name: member.user.tag }
+                category: 'VoiceDisconnect'
             })
         }
     }
@@ -417,18 +417,18 @@ export async function updateAwards(
                         }
                     }
                 } catch (err) {
-                    await self.logger.handleError({ module: 'Levels', action: 'SendAwardMessage', error: err, guild_id: server._id })
+                    self.logger.error({ module: 'Levels', action: 'SendAwardMessage', err, guildId: server._id })
                 }
             }
 
             self.emit('moduleExecution', {
+                guildId: member.guild.id,
+                targetId: member.id,
                 module: 'Levels',
-                category: 'AssignAward',
-                guild: { id: member.guild.id, name: member.guild.name },
-                target: { id: member.id, name: member.user.tag }
+                category: 'AssignAward'
             })
         } catch (err) {
-            await self.logger.handleError({ module: 'Levels', action: 'AssignAward', error: err, guild_id: server._id })
+            self.logger.error({ module: 'Levels', action: 'AssignAward', err, guildId: server._id })
         }
     }
 
@@ -459,14 +459,14 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, sig
                 }
             }
         } catch (err) {
-            await self.logger.handleError({ module: 'Levels', action: 'SendLevelUpMessage', error: err, guild_id: server._id })
+            self.logger.error({ module: 'Levels', action: 'SendLevelUpMessage', err, guildId: server._id })
         }
 
         self.emit('moduleExecution', {
+            guildId: signal.guild.id,
+            targetId: member.id,
             module: 'Levels',
-            category: 'LevelUpAlert',
-            guild: { id: signal.guild.id, name: signal.guild.name },
-            target: { id: member.id, name: member.user.tag }
+            category: 'LevelUpAlert'
         })
     }
 }

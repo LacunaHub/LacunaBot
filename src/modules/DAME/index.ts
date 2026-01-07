@@ -64,7 +64,7 @@ async function handleAutoModTrigger(
                     await targetMember.roles.remove(removeRoles)
                 }
             } catch (err) {
-                await self.logger.handleError({ module: 'DAME', action: 'ModifyRoles', error: err, guild_id: guild.id })
+                self.logger.error({ module: 'DAME', action: 'ModifyRoles', err, guildId: guild.id })
             }
         }
 
@@ -75,15 +75,15 @@ async function handleAutoModTrigger(
 
                 if (channel.isSendable()) await channel.send(messagePayload)
             } catch (err) {
-                await self.logger.handleError({ module: 'DAME', action: 'SendMessage', error: err, guild_id: guild.id })
+                self.logger.error({ module: 'DAME', action: 'SendMessage', err, guildId: guild.id })
             }
         }
     }
 
     self.emit('moduleExecution', {
-        module: 'DAME',
-        guild: { id: guild.id, name: guild.name },
-        target: { id: targetUser.id, name: targetUser.tag }
+        guildId: guild.id,
+        targetId: targetUser.id,
+        module: 'DAME'
     })
 
     return true

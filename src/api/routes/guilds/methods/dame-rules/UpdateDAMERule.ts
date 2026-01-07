@@ -2,7 +2,6 @@ import { ServerDocument, ServerModerationDAMERule, ServerModerationDAMERuleActio
 import { APIAutoModerationActionMetadata, APIAutoModerationRule } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
 
@@ -36,11 +35,11 @@ export default async function updateDAMERule(ctx: Context) {
                 }
             })) as any
         } catch (err) {
-            await Logger.handleError({
+            ctx.log.error({
                 module: 'DAMERules',
                 action: 'Update',
-                error: err,
-                guild_id: server._id
+                err,
+                guildId: server._id
             })
 
             ctx.throw(500, new APIError(5023, err.toString()))

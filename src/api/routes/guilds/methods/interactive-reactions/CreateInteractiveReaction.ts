@@ -2,7 +2,6 @@ import { ServerDocument, ServerModulesInteractiveReaction } from '@/database/sch
 import { parseEmoji } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import { generateSimpleId } from '../../../../../internals/utility/Utils'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
@@ -30,11 +29,11 @@ export default async function createInteractiveReaction(ctx: Context) {
     try {
         await DiscordUtils.rest.get(DiscordUtils.restRoutes.channelMessage(data.message.channel_id, data.message.id))
     } catch (err) {
-        await Logger.handleError({
+        ctx.log.error({
             module: 'InteractiveReactions',
             action: 'GetMessage',
-            error: err,
-            guild_id: server._id
+            err,
+            guildId: server._id
         })
 
         ctx.throw(404, new APIError(1004))
@@ -49,11 +48,11 @@ export default async function createInteractiveReaction(ctx: Context) {
             )
         )
     } catch (err) {
-        await Logger.handleError({
+        ctx.log.error({
             module: 'InteractiveReactions',
             action: 'CreateReaction',
-            error: err,
-            guild_id: server._id
+            err,
+            guildId: server._id
         })
 
         ctx.throw(500, new APIError(5008))

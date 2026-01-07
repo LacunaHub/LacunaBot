@@ -2,7 +2,6 @@ import { ServerDocument } from '@/database/schemas/Servers'
 import { APIWebhook, resolveImage } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import { eventSubSubscribe, eventSubUnsubscribe, getEventSubsByUserId, TwitchIncomingWebhook } from '../../../../modules/social-alerts/TwitchAlerts'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
@@ -24,11 +23,11 @@ export default async function createTwitchSubscription(ctx: Context) {
             }
         })) as any
     } catch (err) {
-        await Logger.handleError({
+        ctx.log.error({
             module: 'TwitchSubs',
             action: 'CreateWebhook',
-            error: err,
-            guild_id: server._id
+            err,
+            guildId: server._id
         })
 
         ctx.throw(500, new APIError(5009))

@@ -6,13 +6,10 @@ const handler = async (self: Lacuna, guild: Guild) => {
     const preferredLocale = guild.preferredLocale?.split('-')?.[0]
     const server: ServerDocument = await self.db.servers.fetch({ _id: guild.id }, { locale: self.i18n.isSupported(preferredLocale) as any })
 
-    self.logger.info(`${self.user.username}#${guild.shardId} added to guild ${guild.name} (${guild.id}) with ${guild.memberCount} members`)
-    await self.logger.telegram.info(
-        `${self.user.username}#${guild.shardId} added to guild ${guild.name} (${guild.id}) with ${guild.memberCount} members`
-    )
+    self.logger.info({ guildId: guild.id, memberCount: guild.memberCount }, 'added to guild')
 
     if (server.blocked) {
-        self.logger.info(`Guild ${guild.name} (${guild.id}) is blocked`)
+        self.logger.info({ guildId: guild.id }, 'leaving the guild due to a block')
 
         await guild.leave()
 
@@ -22,7 +19,7 @@ const handler = async (self: Lacuna, guild: Guild) => {
     try {
         await self.updateApplicationCommands(server)
     } catch (err) {
-        await self.logger.handleError({ module: 'GuildCreate', action: 'UpdateApplicationCommands', error: err, guild_id: guild.id })
+        self.logger.error({ module: 'GuildCreate', action: 'UpdateApplicationCommands', err, guildId: guild.id })
     }
 
     return true

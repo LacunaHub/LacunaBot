@@ -1,7 +1,7 @@
 import { ServerMessageTemplateImage } from '@/database/schemas/Servers'
+import Logger from '@/utility/Logger'
 import { SKRSContext2D as CanvasRenderingContext2D, Image, createCanvas, loadImage } from '@napi-rs/canvas'
 import database from '../database'
-import Logger from '../internals/Logger'
 import { capitalizeFirstLetter } from '../internals/utility/Utils'
 
 export const borderRadiuses = {
@@ -72,7 +72,7 @@ export async function generateImage(image: ServerMessageTemplateImage) {
             )
             ctx.restore()
         } catch (err) {
-            Logger.error('[ImageGenerator]', err)
+            Logger.error({ err }, 'image generator')
         }
     }
 
@@ -89,7 +89,7 @@ export async function generateImage(image: ServerMessageTemplateImage) {
 
                 elementImage = await loadImage(element.url)
             } catch (err) {
-                Logger.error('[ImageGenerator]', err)
+                Logger.error({ err }, 'image generator')
                 continue
             }
 

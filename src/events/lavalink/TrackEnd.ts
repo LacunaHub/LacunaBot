@@ -29,18 +29,12 @@ const handler = async (self: Lacuna, player: Player) => {
                 self.db.qdb.set(`guildPlayers.${player.guildId}.messageId`, playerMessage.id)
             }
         } catch (err) {
-            await self.logger.handleError({ module: 'MusicTrackEnd', action: 'RecreatePlayerMessage', error: err, guild_id: player.guildId })
+            self.logger.error({ module: 'MusicTrackEnd', action: 'RecreatePlayerMessage', err, guildId: player.guildId })
             player.set('message', null)
         }
     }
 
-    self.logger.log(`[LavaTrackEnd] Track playing for player ${player.guildId} ended`)
-    await self.logger.appendServerLog(player.guildId, {
-        level: 'LOG',
-        module: 'Music',
-        action: 'TrackEnd',
-        message: `Track "${track.info.author} - ${track.info.title}" has ended`
-    })
+    self.logger.info({ guildId: player.guildId }, 'player track ended')
 
     return true
 }

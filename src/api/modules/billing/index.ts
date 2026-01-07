@@ -1,8 +1,8 @@
+import Logger from '@/api/utility/Logger'
 import database, { DiamondProductTier, Product } from '@/database'
 import { PaymentAmount, PaymentDocument, PaymentType } from '@/database/schemas/Payments'
 import { ServerDocument } from '@/database/schemas/Servers'
 import { SubscriptionDocument, SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@/database/schemas/Subscriptions'
-import Logger from '../../../internals/Logger'
 import { activePatronRoleId, longTermPatronRoleId, supportServerId } from '../../../internals/utility/Constants'
 import DiscordUtils from '../../utility/DiscordUtils'
 import { DiamondGuild, diamondGuilds } from './utility/DiamondGuild'
@@ -25,7 +25,7 @@ export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, o
         const sBill = await database.subscriptions.findOne({ _id: sBillId })
 
         if (sBill) {
-            Logger.log(`[Billing] Guild ${server._id} has diamond via "${SubscriptionType[sBill.type]}"`)
+            Logger.info({ guildId: server._id, billId: sBill._id }, 'cancelling diamond subscription')
 
             await database.subscriptions.updateOne(
                 { _id: sBill._id },
@@ -37,7 +37,7 @@ export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, o
                 }
             )
 
-            Logger.log(`[Billing] Bill "${sBill._id}" with type "${SubscriptionType[sBill.type]}" for guild ${server._id} has been cancelled`)
+            Logger.info({ guildId: server._id, billId: sBill._id }, 'diamond subscription cancelled')
         }
     }
 
@@ -90,18 +90,18 @@ export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, o
     let diamondGuild = diamondGuilds.get(server._id)
 
     if (diamondGuild) {
-        Logger.log(`[Billing] Renewing Diamond for guild ${server._id}`)
+        Logger.info({ guildId: server._id }, 'renewing diamond')
         diamondGuild.cancel()
     }
 
     if (isSubscription) {
         if (bill.type === SubscriptionType.DiscordNitroBoost) {
-            Logger.log(`[Billing] Nitro Boost "${bill._id}" for guild ${server._id} successfully verified`)
+            Logger.info({ guildId: server._id, billId: bill._id }, 'nitro boost verified')
         } else {
-            Logger.log(`[Billing] Diamond Subscription "${bill._id}" for guild ${server._id} successfully verified`)
+            Logger.info({ guildId: server._id, billId: bill._id }, 'diamond subscription verified')
         }
     } else {
-        Logger.log(`[Billing] Bill "${bill._id}" for guild ${server._id} successfully charged`)
+        Logger.info({ guildId: server._id, billId: bill._id }, 'diamond payed')
     }
 
     diamondGuild = new DiamondGuild(server._id, until, bill._id, billType)
@@ -145,17 +145,17 @@ export async function addPremium(bill: PaymentDocument | SubscriptionDocument, u
         try {
             await DiscordUtils.rest.put(DiscordUtils.restRoutes.guildMemberRole(supportServerId, userId, role))
         } catch (err) {
-            await Logger.handleError({ module: 'Billing', action: 'AddPatronRoles', error: err })
+            Logger.error({ module: 'Billing', action: 'AddPatronRoles', err })
         }
     }
 
     const patron = patrons.get(userId)
 
     if (patron) {
-        Logger.log(`[Billing] Renewing patronage for user ${userId}`)
+        Logger.info({ billId: bill._id, userId }, 'renewing patronage')
         patron.cancel()
     } else {
-        Logger.log(`[Billing] User ${userId} became a Patron`)
+        Logger.info({ billId: bill._id }, 'new patron')
     }
 
     return new Patron(userId, until)

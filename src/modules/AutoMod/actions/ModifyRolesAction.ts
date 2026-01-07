@@ -11,7 +11,7 @@ export default async function modifyRolesAction(self: Lacuna, options: ActionOpt
             try {
                 await target.roles.add(editableRoles, reason)
             } catch (err) {
-                await self.logger.handleError({ module: 'AutoMod', action: 'AddRoles', error: err, guild_id: guild.id })
+                self.logger.error({ module: 'AutoMod', action: 'AddRoles', err, guildId: guild.id })
             }
         }
     }
@@ -23,7 +23,7 @@ export default async function modifyRolesAction(self: Lacuna, options: ActionOpt
             try {
                 await target.roles.remove(editableRoles, reason)
             } catch (err) {
-                await self.logger.handleError({ module: 'AutoMod', action: 'RemoveRoles', error: err, guild_id: guild.id })
+                self.logger.error({ module: 'AutoMod', action: 'RemoveRoles', err, guildId: guild.id })
             }
         }
     }

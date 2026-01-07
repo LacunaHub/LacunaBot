@@ -78,7 +78,7 @@ export default class TemporaryBan {
                 return await guild.bans.create(this.userId, { reason: this.reason })
             }
         } catch (err) {
-            await this.self.logger.handleError({ module: 'TemporaryBan', action: 'CreateBan', error: err, guild_id: this.guildId })
+            this.self.logger.error({ module: 'TemporaryBan', action: 'CreateBan', err, guildId: this.guildId })
         }
     }
 
@@ -90,7 +90,7 @@ export default class TemporaryBan {
                 return await guild.bans.remove(this.userId, reason)
             }
         } catch (err) {
-            await this.self.logger.handleError({ module: 'TemporaryBan', action: 'RemoveBan', error: err, guild_id: this.guildId })
+            this.self.logger.error({ module: 'TemporaryBan', action: 'RemoveBan', err, guildId: this.guildId })
         }
     }
 }
@@ -110,8 +110,7 @@ export async function handleEntries(self: Lacuna): Promise<number> {
         handledEntries += tempbans.length
     }
 
-    self.logger.log(`[TemporaryBan] Loaded ${handledEntries} temporary bans from ${servers.length} servers`)
-
+    self.logger.info({ count: handledEntries }, 'temporary bans loaded')
     return handledEntries
 }
 

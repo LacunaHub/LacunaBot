@@ -19,7 +19,7 @@ export default async function sendMessageAction(self: Lacuna, server: ServerDocu
 
         await (message.channel as GuildTextBasedChannel).send(messagePayload)
     } catch (err) {
-        await self.logger.handleError({ module: 'AutoMod', action: 'SendMessage', error: err, guild_id: message.guildId })
+        self.logger.error({ module: 'AutoMod', action: 'SendMessage', err, guildId: message.guildId })
     }
 }
 

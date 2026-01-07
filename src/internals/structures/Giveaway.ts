@@ -90,7 +90,7 @@ export default class Giveaway {
                 return await channel.messages.fetch({ message: this.messageId })
             }
         } catch (err) {
-            await this.self.logger.handleError({ module: 'Giveaways', action: 'FetchGiveawayMessage', error: err, guild_id: this.guildId })
+            this.self.logger.error({ module: 'Giveaways', action: 'FetchGiveawayMessage', err, guildId: this.guildId })
 
             await this.self.db.servers.updateOne(
                 { _id: this.guildId },
@@ -130,7 +130,7 @@ export default class Giveaway {
                     })
                 })
             } catch (err) {
-                await this.self.logger.handleError({ module: 'Giveaways', action: 'SendCongrats', error: err, guild_id: this.guildId })
+                this.self.logger.error({ module: 'Giveaways', action: 'SendCongrats', err, guildId: this.guildId })
             }
         } else {
             embed.setDescription(t('Commands.GiveawayCommand.SubCommands.EndCommand.Texts.NoGiveawayParticipants'))
@@ -139,7 +139,7 @@ export default class Giveaway {
         try {
             await message.edit({ embeds: [embed], components: [] })
         } catch (err) {
-            await this.self.logger.handleError({ module: 'Giveaways', action: 'UpdateGiveawayMessage', error: err, guild_id: this.guildId })
+            this.self.logger.error({ module: 'Giveaways', action: 'UpdateGiveawayMessage', err, guildId: this.guildId })
         }
 
         return true
@@ -210,8 +210,7 @@ export async function handleEntries(self: Lacuna) {
         handledEntries += giveaways.length
     }
 
-    self.logger.log(`[Giveaway] Loaded ${handledEntries} giveaways from ${servers.length} servers`)
-
+    self.logger.info({ count: handledEntries }, 'giveaways loaded')
     return handledEntries
 }
 

@@ -30,16 +30,16 @@ export default async function (self: Lacuna, server: ServerDocument, state: Voic
             try {
                 await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
-                await self.logger.handleError({ module: 'LogsVoiceConnect', action: 'SendMessageViaWebhook', error: err, guild_id: state.guild.id })
+                self.logger.error({ module: 'LogsVoiceConnect', action: 'SendMessageViaWebhook', err, guildId: state.guild.id })
 
                 return false
             }
 
             self.emit('moduleExecution', {
+                guildId: state.guild.id,
+                targetId: state.id,
                 module: 'Logs',
-                category: 'VoiceConnect',
-                guild: { id: state.guild.id, name: state.guild.name },
-                target: { id: state.member.id, name: state.member.user.tag }
+                category: 'VoiceConnect'
             })
 
             return true

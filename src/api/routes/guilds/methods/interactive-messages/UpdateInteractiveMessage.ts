@@ -2,7 +2,6 @@ import { ServerDocument, ServerModulesInteractiveMessage } from '@/database/sche
 import { EmbedBuilder, resolveColor } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
 import { resolveMessageComponents } from './CreateInteractiveMessage'
@@ -100,11 +99,11 @@ export default async function updateInteractiveMessage(ctx: Context) {
                 }
             )
         } catch (err) {
-            await Logger.handleError({
+            ctx.log.error({
                 module: 'InteractiveMessages',
                 action: 'UpdateMessage',
-                error: err,
-                guild_id: server._id
+                err,
+                guildId: server._id
             })
 
             ctx.throw(500, new APIError(5006))
