@@ -1,16 +1,7 @@
-import {
-    DiamondProductTier,
-    PaymentAmount,
-    PaymentDocument,
-    PaymentType,
-    Product,
-    ServerDocument,
-    SubscriptionDocument,
-    SubscriptionMetadataProduct,
-    SubscriptionStatus,
-    SubscriptionType
-} from '@lacunahub/lacuna-database-driver'
-import database from '../../../database'
+import database, { DiamondProductTier, Product } from '@/database'
+import { PaymentAmount, PaymentDocument, PaymentType } from '@/database/schemas/Payments'
+import { ServerDocument } from '@/database/schemas/Servers'
+import { SubscriptionDocument, SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@/database/schemas/Subscriptions'
 import Logger from '../../../internals/Logger'
 import { activePatronRoleId, longTermPatronRoleId, supportServerId } from '../../../internals/utility/Constants'
 import DiscordUtils from '../../utility/DiscordUtils'

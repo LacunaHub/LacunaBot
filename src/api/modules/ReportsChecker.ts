@@ -1,5 +1,5 @@
+import { ReportType, UserReportMetadataCategory, UserReportMetadataRecommendedAction } from '@/database/schemas/Reports'
 import { SchemaType } from '@google/generative-ai'
-import { ReportType, UserReportMetadataCategory, UserReportMetadataRecommendedAction } from '@lacunahub/lacuna-database-driver'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 import database from '../../database'
 import Logger from '../../internals/Logger'

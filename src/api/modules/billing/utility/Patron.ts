@@ -1,5 +1,5 @@
+import database from '@/database'
 import { Job, scheduleJob } from 'node-schedule'
-import database from '../../../../database'
 import Logger from '../../../../internals/Logger'
 import { activePatronRoleId, supportServerId } from '../../../../internals/utility/Constants'
 import DiscordUtils from '../../../utility/DiscordUtils'

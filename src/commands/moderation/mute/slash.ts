@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'

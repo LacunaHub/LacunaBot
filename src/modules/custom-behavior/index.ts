@@ -5,7 +5,7 @@ import {
     ServerModulesCustomCommandComponentConditionCompareValuesOperators,
     ServerModulesCustomCommandComponentConditionCompareValuesOptions,
     ServerModulesCustomCommandComponentConditionTypes
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import {
     APIEmbed,
     BaseGuildTextChannel,

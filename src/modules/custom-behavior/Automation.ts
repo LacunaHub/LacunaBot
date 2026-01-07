@@ -5,7 +5,7 @@ import {
     ServerModulesAutomationTriggers,
     ServerModulesCustomCommandScript,
     ServerModulesCustomCommandScriptLanguages
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import {
     AnySelectMenuInteraction,
     ButtonInteraction,

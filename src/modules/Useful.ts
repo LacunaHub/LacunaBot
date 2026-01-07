@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesAutoReaction, ServerModulesAutoThread } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesAutoReaction, ServerModulesAutoThread } from '@/database/schemas/Servers'
 import { Message, TextChannel } from 'discord.js'
 import { split } from 'unicode-default-word-boundary'
 import Lacuna from '../internals/Lacuna'

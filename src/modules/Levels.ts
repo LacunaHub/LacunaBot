@@ -1,5 +1,6 @@
-import { ServerDocument, ServerModulesLevelsAward, UserLevel } from '@lacunahub/lacuna-database-driver'
-import Canvas, { Image } from 'canvas'
+import { ServerDocument, ServerModulesLevelsAward } from '@/database/schemas/Servers'
+import { UserLevel } from '@/database/schemas/Users'
+import { createCanvas, Image, loadImage } from '@napi-rs/canvas'
 import {
     AttachmentBuilder,
     BaseGuildTextChannel,
@@ -503,7 +504,7 @@ export async function generateRankCard(
 
     await mention.user?.fetch()
 
-    const canvas = await Canvas.createCanvas(720, 256)
+    const canvas = createCanvas(720, 256)
     const ctx = canvas.getContext('2d')
 
     ctx.save()
@@ -511,7 +512,7 @@ export async function generateRankCard(
     let banner: Image
 
     try {
-        if (mention.user?.banner) banner = await Canvas.loadImage(mention.user?.bannerURL({ extension: 'png', size: 512 }))
+        if (mention.user?.banner) banner = await loadImage(mention.user?.bannerURL({ extension: 'png', size: 512 }))
     } catch (err) {
         banner = null
     }
@@ -549,7 +550,7 @@ export async function generateRankCard(
         ctx.restore()
     }
 
-    const avatar = await Canvas.loadImage(mention.user.displayAvatarURL({ extension: 'png' }))
+    const avatar = await loadImage(mention.user.displayAvatarURL({ extension: 'png' }))
 
     ctx.beginPath()
     ctx.arc(85, 85, 60, 0, Math.PI * 2, true)
@@ -601,8 +602,8 @@ export async function generateRankCard(
     ctx.lineTo(695, 85)
     ctx.stroke()
 
-    const messages = await Canvas.loadImage('./assets/messages.png')
-    const microphone = await Canvas.loadImage('./assets/microphone.png')
+    const messages = await loadImage('./assets/messages.png')
+    const microphone = await loadImage('./assets/microphone.png')
 
     ctx.font = '25px Gotham Pro Medium'
     ctx.fillStyle = '#ffffff'
@@ -651,7 +652,7 @@ export async function generateRankCard(
     ctx.textAlign = 'end'
     ctx.fillText(`${next_xp_format}`, 695, 205)
 
-    return new AttachmentBuilder(canvas.toBuffer(), { name: `lacuna-rank-${Date.now()}.png` })
+    return new AttachmentBuilder(canvas.toBuffer('image/png'), { name: `lacuna-rank-${Date.now()}.png` })
 }
 
 function neededXp(level: number): number {

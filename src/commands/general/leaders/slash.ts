@@ -1,4 +1,5 @@
-import { ServerDocument, UserLevel, UserWallet } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
+import { UserLevel, UserWallet } from '@/database/schemas/Users'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message } from 'discord.js'
 import numbro from 'numbro'
 import Lacuna from '../../../internals/Lacuna'

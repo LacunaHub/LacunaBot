@@ -1,4 +1,4 @@
-import { ServerDocument, ServerWebPageCategory, ServerWebPageSocialLinkType } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerWebPageCategory, ServerWebPageSocialLinkType } from '@/database/schemas/Servers'
 import { APIGuild, makeURLSearchParams } from 'discord.js'
 import { Context } from 'koa'
 import APIError from '../../../utility/APIError'

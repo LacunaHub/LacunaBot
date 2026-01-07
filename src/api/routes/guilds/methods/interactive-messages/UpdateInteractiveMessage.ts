@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesInteractiveMessage } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesInteractiveMessage } from '@/database/schemas/Servers'
 import { EmbedBuilder, resolveColor } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'

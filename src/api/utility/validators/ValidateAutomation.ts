@@ -1,4 +1,4 @@
-import { ServerModulesAutomation, ServerModulesAutomationOptions } from '@lacunahub/lacuna-database-driver'
+import { ServerModulesAutomation, ServerModulesAutomationOptions } from '@/database/schemas/Servers'
 import { isObject } from '../../../internals/utility/Utils'
 import { validateCustomBehaviorComponents, validateCustomBehaviorScripts } from './ValidateCustomCommand'
 

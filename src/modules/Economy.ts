@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesEconomyStoreItem } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesEconomyStoreItem } from '@/database/schemas/Servers'
 import { BaseGuildTextChannel, BaseGuildVoiceChannel, Collection, Guild, GuildMember, Message, VoiceState } from 'discord.js'
 import Lacuna from '../internals/Lacuna'
 import TemporaryRole from '../internals/structures/TemporaryRole'

@@ -1,4 +1,5 @@
-import { ReportType, ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ReportType } from '@/database/schemas/Reports'
+import { ServerDocument } from '@/database/schemas/Servers'
 import {
     ActionRowBuilder,
     BaseGuildTextChannel,

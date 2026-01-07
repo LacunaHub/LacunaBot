@@ -1,4 +1,4 @@
-import { ServerMessageTemplate } from '@lacunahub/lacuna-database-driver'
+import { ServerMessageTemplate } from '@/database/schemas/Servers'
 import { isObject } from '../../../internals/utility/Utils'
 
 export function validateTemplateMessage(template: ServerMessageTemplate) {

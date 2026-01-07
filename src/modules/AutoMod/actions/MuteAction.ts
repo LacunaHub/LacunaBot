@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import moment from 'moment'
 import ms from 'ms'
 import Lacuna from '../../../internals/Lacuna'

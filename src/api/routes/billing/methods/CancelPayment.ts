@@ -1,6 +1,6 @@
-import { PaymentStatus } from '@lacunahub/lacuna-database-driver'
+import database from '@/database'
+import { PaymentStatus } from '@/database/schemas/Payments'
 import { Context } from 'koa'
-import database from '../../../../database'
 import APIError from '../../../utility/APIError'
 
 export default async function cancelPayment(ctx: Context) {

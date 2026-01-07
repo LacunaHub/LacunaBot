@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Context } from 'koa'
 import database from '../../../../../database'
 import Logger from '../../../../../internals/Logger'

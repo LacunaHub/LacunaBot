@@ -1,8 +1,9 @@
-import { PaymentAmount, PaymentStatus, PaymentType, Product, Snowflake, SnowflakeUtils } from '@lacunahub/lacuna-database-driver'
+import database, { Product } from '@/database'
+import { PaymentAmount, PaymentStatus, PaymentType } from '@/database/schemas/Payments'
+import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
 import fetch from 'node-fetch'
 import { HATEOASLink, PayPalAPI, SubscriptionPlans } from '.'
 import { PaymentData } from '../..'
-import database from '../../../../../database'
 
 export class PayPalSubscription {
     public paymentId: Snowflake

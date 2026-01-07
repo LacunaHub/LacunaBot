@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesAutomationTriggers } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesAutomationTriggers } from '@/database/schemas/Servers'
 import { SearchResult } from '@lacunahub/lavaluna.js'
 import {
     AnySelectMenuInteraction,

@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModerationWarningsViolator } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModerationWarningsViolator } from '@/database/schemas/Servers'
 import {
     ActionRowBuilder,
     ButtonBuilder,

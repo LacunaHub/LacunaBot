@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { BaseGuildTextChannel, ButtonInteraction, Collection, EmbedBuilder } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import Lacuna from '../Lacuna'

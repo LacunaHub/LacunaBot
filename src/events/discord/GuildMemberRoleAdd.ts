@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesAutomationTriggers } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesAutomationTriggers } from '@/database/schemas/Servers'
 import { GuildMember, Role } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/custom-behavior/Automation'
