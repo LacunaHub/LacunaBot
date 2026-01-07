@@ -4,7 +4,7 @@ import {
     ServerModulesCustomCommandOptions,
     ServerModulesCustomCommandScript,
     ServerModulesCustomCommandScriptLanguages
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import { ApplicationCommandOptionType, BaseGuildTextChannel, ChatInputCommandInteraction, Team } from 'discord.js'
 import { Context, Isolate } from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'

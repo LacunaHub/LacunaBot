@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { languages } from '@lacunahub/lacuna-locale'
 import { APIGuildMember, APIUser, parseEmoji } from 'discord.js'
 import { Context } from 'koa'

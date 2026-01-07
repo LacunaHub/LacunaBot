@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModerationAutoModNicknames } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModerationAutoModNicknames } from '@/database/schemas/Servers'
 import { GuildMember } from 'discord.js'
 import { clean, isZalgo } from 'unzalgo'
 import Lacuna from '../../../internals/Lacuna'

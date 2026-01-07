@@ -2,7 +2,7 @@ import {
     ServerDocument,
     ServerModulesInteractiveMessageButtonComponent,
     ServerModulesInteractiveMessageSelectMenuComponent
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import { AnySelectMenuInteraction, ButtonInteraction, Collection, GuildChannel, GuildMember, MessageReaction, User } from 'discord.js'
 import Lacuna from '../internals/Lacuna'
 import { snakeToPascalCase } from '../internals/utility/Utils'

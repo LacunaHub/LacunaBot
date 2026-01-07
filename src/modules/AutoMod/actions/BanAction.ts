@@ -6,7 +6,7 @@ import {
     ServerModerationAutoModSwearFilter,
     ServerModerationAutoModUsersSlowdown,
     ServerModerationWarningsPenalty
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import { Guild, GuildMember } from 'discord.js'
 import moment from 'moment'
 import Lacuna from '../../../internals/Lacuna'

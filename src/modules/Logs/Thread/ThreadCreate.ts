@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry } from 'discord.js'
 import numbro from 'numbro'
 import { isRateLimited, LogEventData, sendLog } from '..'

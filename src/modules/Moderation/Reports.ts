@@ -1,10 +1,5 @@
-import {
-    ReportType,
-    ServerDocument,
-    UserReportDocument,
-    UserReportMetadataCategory,
-    UserReportMetadataRecommendedAction
-} from '@lacunahub/lacuna-database-driver'
+import { ReportType, UserReportDocument, UserReportMetadataCategory, UserReportMetadataRecommendedAction } from '@/database/schemas/Reports'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { BaseGuildTextChannel, ButtonInteraction, EmbedBuilder, GuildMember, StringSelectMenuInteraction } from 'discord.js'
 import ms from 'ms'
 import Moderation from '.'

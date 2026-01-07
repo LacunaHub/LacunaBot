@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry, GuildChannel } from 'discord.js'
 import { isRateLimited, LogEventData, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'

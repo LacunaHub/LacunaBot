@@ -1,4 +1,6 @@
-import { PaymentDocument, ServerDocument, SubscriptionDocument } from '@lacunahub/lacuna-database-driver'
+import { PaymentDocument } from '@/database/schemas/Payments'
+import { ServerDocument } from '@/database/schemas/Servers'
+import { SubscriptionDocument } from '@/database/schemas/Subscriptions'
 import { RESTAPIPartialCurrentUserGuild } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../database'

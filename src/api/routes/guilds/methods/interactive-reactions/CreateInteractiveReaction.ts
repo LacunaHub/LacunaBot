@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesInteractiveReaction } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesInteractiveReaction } from '@/database/schemas/Servers'
 import { parseEmoji } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'

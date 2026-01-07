@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { GuildMember } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import banAction from '../actions/BanAction'

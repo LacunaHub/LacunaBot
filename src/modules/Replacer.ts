@@ -1,4 +1,5 @@
-import { ServerMessageTemplateEmbed, ServerMessageTemplateImage, UserLevel, UserWallet } from '@lacunahub/lacuna-database-driver'
+import { ServerMessageTemplateEmbed, ServerMessageTemplateImage } from '@/database/schemas/Servers'
+import { UserLevel, UserWallet } from '@/database/schemas/Users'
 import { AttachmentBuilder, BaseGuildTextChannel, EmbedBuilder, Guild, GuildMember, Message, resolveColor } from 'discord.js'
 import moment from 'moment'
 import db from '../database'

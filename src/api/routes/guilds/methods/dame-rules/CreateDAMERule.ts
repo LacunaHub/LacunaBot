@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModerationDAMERule, ServerModerationDAMERuleActionType } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModerationDAMERule, ServerModerationDAMERuleActionType } from '@/database/schemas/Servers'
 import { APIAutoModerationActionMetadata, APIAutoModerationRule } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'

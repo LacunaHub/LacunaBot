@@ -1,6 +1,6 @@
 // DAME - Discord AutoMod Extension
 
-import { ServerDocument, ServerModerationDAMERuleActionType } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModerationDAMERuleActionType } from '@/database/schemas/Servers'
 import { AutoModerationRule, ForumChannel, GuildMember, GuildTextBasedChannel, MediaChannel } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import Moderation from '../Moderation'

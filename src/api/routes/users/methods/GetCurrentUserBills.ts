@@ -1,4 +1,5 @@
-import { PaymentMetadataProduct, PaymentStatus, PaymentType, SnowflakeUtils } from '@lacunahub/lacuna-database-driver'
+import { PaymentMetadataProduct, PaymentStatus, PaymentType } from '@/database/schemas/Payments'
+import { SnowflakeUtils } from '@/utility/SnowflakeUtils'
 import { Context } from 'koa'
 import database from '../../../../database'
 import { UserState } from '../../../utility/Authentication'

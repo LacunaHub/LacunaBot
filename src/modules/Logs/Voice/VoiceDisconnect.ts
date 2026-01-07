@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { BaseGuildTextChannel, EmbedBuilder, VoiceChannel, VoiceState } from 'discord.js'
 import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'

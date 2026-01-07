@@ -5,9 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "node ./clean.dist.js && tsc --build tsconfig.json",
-    "start": "node -r ./config.env.js .",
-    "start:api": "wait-on tcp:5565 && node -r ./config.env.js ./dist/api",
-    "start:bot": "node -r ./config.env.js ./dist/internals",
+    "start": "node -r ./config.env.js -r module-alias/register .",
+    "start:api": "wait-on tcp:5565 && node -r ./config.env.js -r module-alias/register ./dist/api",
+    "start:bot": "node -r ./config.env.js -r module-alias/register ./dist/internals",
     "dev": "npm run build && concurrently \"npm:start\" \"npm:start:api\" \"npm:start:bot\""
   },
   "repository": {
@@ -24,13 +24,12 @@
     "@google/generative-ai": "^0.17.0",
     "@koa/cors": "^5.0.0",
     "@koa/router": "^12.0.2",
-    "@lacunahub/lacuna-database-driver": "^1.1.8",
     "@lacunahub/lacuna-locale": "^1.1.4",
     "@lacunahub/lavaluna.js": "^1.0.2",
     "@lacunahub/letsfrag": "^1.0.0",
     "@lacunahub/logger": "^1.0.3",
+    "@napi-rs/canvas": "^0.1.88",
     "bufferutil": "^4.0.1",
-    "canvas": "^2.11.2",
     "discord.js": "^14.16.2",
     "dotenv": "^16.4.5",
     "isolated-vm": "^5.0.1",
@@ -40,6 +39,7 @@
     "koa-json": "^2.0.2",
     "koa-logger": "^3.2.1",
     "koa-ratelimit": "^5.1.0",
+    "module-alias": "^2.2.3",
     "moment": "^2.30.1",
     "mongoose": "^5.13.22",
     "ms": "^2.1.3",
@@ -77,5 +77,8 @@
     "concurrently": "^8.2.2",
     "typescript": "^5.6.3",
     "wait-on": "^7.2.0"
+  },
+  "_moduleAliases": {
+    "@": "dist"
   }
 }

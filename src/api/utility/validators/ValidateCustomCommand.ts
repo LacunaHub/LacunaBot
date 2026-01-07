@@ -12,7 +12,7 @@ import {
     ServerModulesCustomCommandOptions,
     ServerModulesCustomCommandScript,
     ServerModulesCustomCommandScriptLanguages
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import { isObject } from '../../../internals/utility/Utils'
 import { validateTemplateMessage } from './ValidateTemplateMessage'
 

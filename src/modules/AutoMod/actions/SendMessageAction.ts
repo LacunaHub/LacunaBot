@@ -4,7 +4,7 @@ import {
     ServerModerationAutoModLinksFilter,
     ServerModerationAutoModSwearFilter,
     ServerModerationAutoModUsersSlowdown
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import { GuildTextBasedChannel, Message } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import Replacer from '../../Replacer'

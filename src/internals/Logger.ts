@@ -1,4 +1,4 @@
-import { ServerLogEntry } from '@lacunahub/lacuna-database-driver'
+import { ServerLogEntry } from '@/database/schemas/Servers'
 import { Logger, TelegramLogger } from '@lacunahub/logger'
 import database from '../database'
 

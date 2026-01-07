@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesVoiceManagerAutoVoice } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesVoiceManagerAutoVoice } from '@/database/schemas/Servers'
 import { Context } from 'koa'
 import database from '../../../../../database'
 import APIError from '../../../../utility/APIError'

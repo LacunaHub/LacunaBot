@@ -3,7 +3,7 @@ import {
     ServerModulesInteractiveMessage,
     ServerModulesInteractiveMessageButtonComponent,
     ServerModulesInteractiveMessageSelectMenuComponent
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import {
     ActionRowBuilder,
     APIMessage,

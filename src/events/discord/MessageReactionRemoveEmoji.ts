@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesInteractiveReaction } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesInteractiveReaction } from '@/database/schemas/Servers'
 import { Events, MessageReaction } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 

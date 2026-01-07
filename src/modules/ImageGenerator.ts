@@ -1,5 +1,5 @@
-import { ServerMessageTemplateImage } from '@lacunahub/lacuna-database-driver'
-import { CanvasRenderingContext2D, Image, createCanvas, loadImage } from 'canvas'
+import { ServerMessageTemplateImage } from '@/database/schemas/Servers'
+import { SKRSContext2D as CanvasRenderingContext2D, Image, createCanvas, loadImage } from '@napi-rs/canvas'
 import database from '../database'
 import Logger from '../internals/Logger'
 import { capitalizeFirstLetter } from '../internals/utility/Utils'
@@ -157,7 +157,7 @@ export async function generateImage(image: ServerMessageTemplateImage) {
     }
 
     return {
-        buffer: canvas.toBuffer(),
+        buffer: canvas.toBuffer('image/png'),
         name: `lacuna-image-generator-${Date.now()}.png`
     }
 }

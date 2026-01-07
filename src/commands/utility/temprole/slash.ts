@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { ChatInputCommandInteraction, GuildMember, Role } from 'discord.js'
 import ms from 'ms'
 import Lacuna from '../../../internals/Lacuna'

@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModerationLogsTypeKey } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModerationLogsTypeKey } from '@/database/schemas/Servers'
 import { WebhookClient } from '@lacunahub/letsfrag'
 import { APIWebhook, Guild, MessagePayload, WebhookMessageCreateOptions, resolveImage } from 'discord.js'
 import DiscordUtils from '../../api/utility/DiscordUtils'
