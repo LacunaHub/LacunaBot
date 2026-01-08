@@ -1,4 +1,5 @@
 import { ServerDocument } from '@/database/schemas/Servers'
+import Logger from '@/utility/Logger'
 import {
     ActionRowBuilder,
     BaseGuildTextChannel,
@@ -17,7 +18,6 @@ import {
 import db from '../../database'
 import i18n from '../../i18n'
 import Lacuna from '../../internals/Lacuna'
-import Logger from '../../internals/Logger'
 import { capitalizeFirstLetter } from '../../internals/utility/Utils'
 
 export const CaseLogImages = {
@@ -82,7 +82,7 @@ export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessag
             ]
         })
     } catch (err) {
-        await Logger.handleError({ module: 'CaseLog', action: 'SendCaseMessage', error: err, guild_id: guild.id })
+        Logger.error({ module: 'CaseLog', action: 'SendCaseMessage', err, guildId: guild.id })
 
         return false
     }
@@ -97,11 +97,11 @@ export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessag
     )
 
     guild.client.emit('moduleExecution', {
+        guildId: guild.id,
+        targetId: options.target.id,
         module: 'Moderation',
         category: 'CaseLog',
-        label: options.type,
-        guild: { id: guild.id, name: guild.name },
-        target: { id: options.target.id, name: options.target.tag }
+        label: options.type
     })
 
     return true
@@ -165,11 +165,11 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
     })
 
     self.emit('moduleExecution', {
+        guildId: interaction.guildId,
+        targetId: interaction.user.id,
         module: 'Moderation',
         category: 'CaseLog',
-        label: 'ChangeReason',
-        guild: { id: interaction.guildId, name: interaction.guild.name },
-        target: { id: interaction.user.id, name: interaction.user.tag }
+        label: 'ChangeReason'
     })
 }
 

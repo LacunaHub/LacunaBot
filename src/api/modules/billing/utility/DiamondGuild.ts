@@ -1,10 +1,10 @@
+import Logger from '@/api/utility/Logger'
 import database from '@/database'
 import { PaymentDocument } from '@/database/schemas/Payments'
 import { SubscriptionDocument, SubscriptionStatus, SubscriptionType } from '@/database/schemas/Subscriptions'
 import { APIGuild } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import { addDiamond } from '..'
-import Logger from '../../../../internals/Logger'
 import { projectTeamRoleId, serverBoosterRoleId, subscribedPatronRoleId } from '../../../../internals/utility/Constants'
 import DiscordUtils from '../../../utility/DiscordUtils'
 import { isRolesMember } from '../providers/DiscordRoles'
@@ -92,7 +92,7 @@ export class DiamondGuild {
                 )
             }
 
-            Logger.info(`[DiamondGuild] Lacuna Diamond on guild ${this.guildId} was expired`)
+            Logger.info({ guildId: this.guildId, billId: this.billId }, 'diamond expired')
 
             try {
                 const guild = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guild(this.guildId))) as APIGuild
@@ -126,5 +126,5 @@ export async function handleDiamondGuilds() {
         new DiamondGuild(server._id, expires_at, billId, billType)
     }
 
-    Logger.log(`[DiamondGuild] Found ${servers.length} guilds with Lacuna Diamond`)
+    Logger.info({ count: servers.length }, 'servers with diamond loaded')
 }

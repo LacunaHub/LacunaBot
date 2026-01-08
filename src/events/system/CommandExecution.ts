@@ -1,8 +1,7 @@
 import Lacuna from '../../internals/Lacuna'
-import { capitalizeFirstLetter } from '../../internals/utility/Utils'
 
 const handler = async (self: Lacuna, data: CommandExecutionData) => {
-    const { command, subcommand, options, guild, channel, user } = data
+    const { guildId, channelId, userId, command, options } = data
     const commandStats: CommandStats = await self.db.qdb.get(`stats.commands.${command}`),
         isSystemCommand = self.commands.has(command)
 
@@ -10,11 +9,10 @@ const handler = async (self: Lacuna, data: CommandExecutionData) => {
         if (commandStats) {
             commandStats.usages.push({
                 timestamp: Date.now(),
-                subcommand: subcommand ?? null,
                 options: options ?? [],
-                guild_id: guild.id,
-                channel_id: channel.id,
-                user_id: user.id
+                guild_id: guildId,
+                channel_id: channelId,
+                user_id: userId
             })
             await self.db.qdb.set(
                 `stats.commands.${command}.usages`,
@@ -27,11 +25,10 @@ const handler = async (self: Lacuna, data: CommandExecutionData) => {
                 usages: [
                     {
                         timestamp: Date.now(),
-                        subcommand: subcommand ?? null,
                         options: options ?? [],
-                        guild_id: guild.id,
-                        channel_id: channel.id,
-                        user_id: user.id
+                        guild_id: guildId,
+                        channel_id: channelId,
+                        user_id: userId
                     }
                 ],
                 total_uses: 1
@@ -39,21 +36,7 @@ const handler = async (self: Lacuna, data: CommandExecutionData) => {
         }
     }
 
-    const capitalizedCommandName = capitalizeFirstLetter(command),
-        capitalizedSubcommandName = subcommand ? capitalizeFirstLetter(subcommand) : '',
-        commandOptions = options.map(i => i.options ?? i)
-
-    self.logger.log(
-        `[${capitalizedCommandName}${capitalizedSubcommandName}Command] Execution from (${guild.name}:${guild.id}) and (${channel.name}:${channel.id}) for (${user.name}:${user.id})`
-    )
-
-    await self.logger.appendServerLog(guild.id, {
-        level: 'LOG',
-        module: `${capitalizedCommandName}${capitalizedSubcommandName}Command`,
-        message:
-            `Executed in channel ${channel.id} for user ${user.id} ` +
-            (commandOptions.length ? `with options ${JSON.stringify(commandOptions)}` : 'without options')
-    })
+    self.logger.info({ guildId, channelId, userId, command, options }, 'command execution')
 }
 
 export default {
@@ -62,12 +45,11 @@ export default {
 }
 
 export interface CommandExecutionData {
+    guildId: string
+    channelId: string
+    userId: string
     command: string
-    subcommand?: string
     options?: any[]
-    guild: { name: string; id: string }
-    channel: { name: string; id: string }
-    user: { name: string; id: string }
 }
 
 export interface CommandStats {

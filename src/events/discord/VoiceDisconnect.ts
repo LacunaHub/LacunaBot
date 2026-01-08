@@ -50,7 +50,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
                 await state.member.roles.remove(voice_roles, 'Voice roles')
             }
         } catch (err) {
-            await self.logger.handleError({ module: 'VoiceRoles', action: 'RemoveRoles', error: err, guild_id: state.guild.id })
+            self.logger.error({ module: 'VoiceRoles', action: 'RemoveRoles', err, guildId: state.guild.id })
         }
     }
 

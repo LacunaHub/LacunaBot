@@ -7,7 +7,7 @@ export default async function deleteMessageAction(self: Lacuna, options: DeleteM
     try {
         await message.delete()
     } catch (err) {
-        await self.logger.handleError({ module: 'AutoMod', action: 'DeleteMessage', error: err, guild_id: message.guildId })
+        self.logger.error({ module: 'AutoMod', action: 'DeleteMessage', err, guildId: message.guildId })
     }
 }
 

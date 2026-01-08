@@ -63,7 +63,7 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
                 })
             )
 
-            self.logger.log('[DiscordShardReady] Commands and role connections have been overwritten due to a version change')
+            self.logger.info('version change has overwritten commands and role connections')
         }
 
         const emojis = self.loadEmojis(),
@@ -71,14 +71,13 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
             emojisToCreate = emojis.filter(v => !appEmojis.some(vv => v.name === vv.name))
 
         for (const emoji of emojisToCreate) await self.application.emojis.create({ name: emoji.name, attachment: emoji.image })
-        self.logger.log(`[DiscordShardReady] Created ${emojisToCreate.length} emojis`)
+        self.logger.info({ count: emojisToCreate.length }, 'created application emojis')
     }
 
-    self.logger.info(`[DiscordShardReady] Shard #${id} of cluster #${self.cluster.id} is ready`)
-    await self.logger.telegram.info(`\`[DiscordShardReady]\` Shard #${id} of cluster #${self.cluster.id} is ready`)
+    self.logger.info({ shardId: id }, 'shard ready')
 
     if (unavailableGuilds?.size) {
-        self.logger.warn(`[DiscordShardReady] Found unavailable guilds`, ...unavailableGuilds.keys())
+        self.logger.warn({ unavailableGuilds: unavailableGuilds.keys() }, 'unavailable guild found')
     }
 
     return true

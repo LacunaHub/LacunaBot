@@ -55,10 +55,10 @@ export default async function slowdownUsers(self: Lacuna, server: ServerDocument
         slowedUsers.delete(message.author.id)
 
         self.emit('moduleExecution', {
+            guildId: message.guildId,
+            targetId: message.author.id,
             module: 'AutoMod',
-            category: 'UsersSlowdown',
-            guild: { id: message.guild.id, name: message.guild.name },
-            target: { id: message.author.id, name: message.author.tag }
+            category: 'UsersSlowdown'
         })
 
         return true

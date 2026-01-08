@@ -25,16 +25,16 @@ export default async function (self: Lacuna, server: ServerDocument, data: Stick
     try {
         await sendLog(self, server, logChannel.id, { embeds: [embed] })
     } catch (err) {
-        await self.logger.handleError({ module: 'LogsStickerCreate', action: 'SendMessageViaWebhook', error: err, guild_id: guild.id })
+        self.logger.error({ module: 'LogsStickerCreate', action: 'SendMessageViaWebhook', err, guildId: guild.id })
 
         return false
     }
 
     self.emit('moduleExecution', {
+        guildId: guild.id,
+        targetId: sticker.id,
         module: 'Logs',
-        category: 'StickerCreate',
-        guild: { id: guild.id, name: guild.name },
-        target: { id: sticker.id, name: sticker.name }
+        category: 'StickerCreate'
     })
 
     return true

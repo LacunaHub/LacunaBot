@@ -78,7 +78,7 @@ export async function sendLog(self: Lacuna, server: ServerDocument, channelId: s
 
             webhook = new WebhookClient({ id: createdWebhook.id, token: createdWebhook.token }, { rest: { store: redisStore } })
         } catch (err) {
-            await self.logger.handleError({ module: 'Logs', action: 'CreateWebhook', error: err, guild_id: server._id })
+            self.logger.error({ module: 'Logs', action: 'CreateWebhook', err, guildId: server._id })
 
             // Disable logs that uses the specified channelId when this error occurs:
             // Maximum number of webhooks reached (15)

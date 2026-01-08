@@ -37,11 +37,11 @@ export default async function (self: Lacuna, server: ServerDocument, data: Emoji
         try {
             await sendLog(self, server, logChannel.id, { embeds: [embed] })
         } catch (err) {
-            await self.logger.handleError({
+            self.logger.error({
                 module: 'LogsEmojiUpdateName',
                 action: 'SendMessageViaWebhook',
-                error: err,
-                guild_id: emoji.guild.id
+                err,
+                guildId: emoji.guild.id
             })
 
             return false
@@ -49,10 +49,10 @@ export default async function (self: Lacuna, server: ServerDocument, data: Emoji
     }
 
     self.emit('moduleExecution', {
+        guildId: guild.id,
+        targetId: emoji.id,
         module: 'Logs',
-        category: 'EmojiUpdate',
-        guild: { id: guild.id, name: guild.name },
-        target: { id: emoji.id, name: emoji.name }
+        category: 'EmojiUpdate'
     })
 
     return true

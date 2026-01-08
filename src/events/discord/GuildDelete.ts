@@ -2,8 +2,7 @@ import { Events, Guild } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, guild: Guild) => {
-    self.logger.info(`${self.user.username} removed from guild ${guild.name} (${guild.id}) with ${guild.memberCount} members`)
-    await self.logger.telegram.info(`${self.user.username} removed from guild ${guild.name} (${guild.id}) with ${guild.memberCount} members`)
+    self.logger.info({ guildId: guild.id, memberCount: guild.memberCount }, 'removed from guild')
 
     const player = self.lava.nodes.getPlayer(guild.id)
 

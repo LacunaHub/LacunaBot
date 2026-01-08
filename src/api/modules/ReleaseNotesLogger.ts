@@ -1,7 +1,7 @@
+import Logger from '@/api/utility/Logger'
 import fetch from 'node-fetch'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 import database from '../../database'
-import Logger from '../../internals/Logger'
 
 export async function getReleaseNotes() {
     try {
@@ -29,9 +29,9 @@ export async function getReleaseNotes() {
             return releaseNotes
         }
 
-        throw new Error(`[ReleaseNotesLogger] Failed to get release notes with status code ${response.status}`)
+        throw new Error(`Failed to get release notes with status code ${response.status}`)
     } catch (err) {
-        Logger.error(err)
+        Logger.error({ err }, 'failed to get release notes')
     }
 }
 

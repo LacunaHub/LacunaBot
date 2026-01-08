@@ -1,6 +1,6 @@
+import Logger from '@/api/utility/Logger'
 import database from '@/database'
 import { Job, scheduleJob } from 'node-schedule'
-import Logger from '../../../../internals/Logger'
 import { activePatronRoleId, supportServerId } from '../../../../internals/utility/Constants'
 import DiscordUtils from '../../../utility/DiscordUtils'
 
@@ -37,7 +37,7 @@ export class Patron {
             await database.users.updateOne({ _id: this.userId }, { $set: { 'premium.available': false } })
             await DiscordUtils.rest.delete(DiscordUtils.restRoutes.guildMemberRole(supportServerId, this.userId, activePatronRoleId))
         } catch (err) {
-            await Logger.handleError({ module: 'Patron', action: 'ExpirePatronage', error: err })
+            Logger.error({ module: 'Patron', action: 'ExpirePatronage', err })
         }
     }
 
@@ -54,5 +54,5 @@ export async function handlePatrons() {
         new Patron(user._id, user.premium.expiration_timestamp)
     }
 
-    Logger.log(`[Patron] Found ${users.length} users with premium`)
+    Logger.info({ count: users.length }, 'users with patronage loaded')
 }

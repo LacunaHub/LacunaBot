@@ -33,18 +33,14 @@ export async function addAutoReactions(self: Lacuna, server: ServerDocument, mes
         try {
             await message.react(emoji.id || emoji.name)
         } catch (err) {
-            await self.logger.handleError({
-                module: 'AutoReactions',
-                error: err,
-                guild_id: message.guildId
-            })
+            self.logger.error({ module: 'AutoReactions', err, guildId: message.guildId })
         }
     }
 
     self.emit('moduleExecution', {
-        module: 'AutoReactions',
-        guild: { id: message.guild.id, name: message.guild.name },
-        target: { id: message.author.id, name: message.author.tag }
+        guildId: message.guildId,
+        targetId: message.author.id,
+        module: 'AutoReactions'
     })
 
     return true
@@ -83,15 +79,15 @@ export async function createAutoThread(self: Lacuna, server: ServerDocument, mes
             startMessage: message
         })
     } catch (err) {
-        await self.logger.handleError({ module: 'AutoThreads', action: 'CreateThread', error: err, guild_id: message.guildId })
+        self.logger.error({ module: 'AutoThreads', action: 'CreateThread', err, guildId: message.guildId })
 
         return false
     }
 
     self.emit('moduleExecution', {
-        module: 'AutoThreads',
-        guild: { id: message.guild.id, name: message.guild.name },
-        target: { id: message.author.id, name: message.author.tag }
+        guildId: message.guildId,
+        targetId: message.author.id,
+        module: 'AutoThreads'
     })
 
     return true

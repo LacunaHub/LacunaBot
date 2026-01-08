@@ -32,7 +32,7 @@ export default async function banAction(self: Lacuna, server: ServerDocument, op
         try {
             await guild.members.ban(target.id, { reason })
         } catch (err) {
-            await self.logger.handleError({ module: 'AutoMod', action: 'Ban', error: err, guild_id: guild.id })
+            self.logger.error({ module: 'AutoMod', action: 'Ban', err, guildId: guild.id })
         }
     }
 

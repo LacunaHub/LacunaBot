@@ -45,7 +45,7 @@ const handler = async (self: Lacuna, state: VoiceState) => {
                 await state.member.roles.add(voiceRoles, 'Voice roles')
             }
         } catch (err) {
-            await self.logger.handleError({ module: 'VoiceRoles', action: 'AddRoles', error: err, guild_id: state.guild.id })
+            self.logger.error({ module: 'VoiceRoles', action: 'AddRoles', err, guildId: state.guild.id })
         }
     }
 

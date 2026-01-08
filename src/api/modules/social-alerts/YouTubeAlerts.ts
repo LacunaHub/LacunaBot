@@ -1,16 +1,15 @@
+import Logger from '@/api/utility/Logger'
 import { makeURLSearchParams } from 'discord.js'
 import fetch from 'node-fetch'
 import { scheduleJob } from 'node-schedule'
 import database from '../../../database'
-import { handleModuleExecutionData } from '../../../events/system/ModuleExecution'
-import Logger from '../../../internals/Logger'
 import { truncateString } from '../../../internals/utility/Utils'
 import Replacer from '../../../modules/Replacer'
 import DiscordUtils from '../../utility/DiscordUtils'
 
 export async function searchChannels(term: string) {
     term = term.startsWith('UC') ? `channelId=${term}` : `q=${encodeURI(term)}`
-    Logger.log(`[YouTube] Searching channels with term "${term}"`)
+    Logger.info({ query: term }, 'searching youtube channels')
 
     const response = await fetch(
         `https://www.googleapis.com/youtube/v3/search?part=snippet&${term}&maxResults=15&type=channel&key=${process.env.LCN_GOOGLE_API_KEY}`,
@@ -23,12 +22,12 @@ export async function searchChannels(term: string) {
         const data: YouTubeSearchResponse = await response.json()
 
         if (data.items?.length) {
-            Logger.log(`[YouTube] Found ${data.items.length} channels for term "${term}"`)
+            Logger.info({ query: term, count: data.items.length }, 'youtube channels search complete')
 
             return data.items.map(item => ({ id: item.id.channelId, name: item.snippet.channelTitle, thumbnail: item.snippet.thumbnails.medium.url }))
         }
 
-        Logger.log(`[YouTUbe] Term "${term}" gave not search results`)
+        Logger.info({ query: term }, 'no youtube channels found')
 
         return []
     }
@@ -71,7 +70,7 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
     const subscription = await database.youtubeSubs.findOne({ _id: data.channelId })
 
     if (!subscription) {
-        Logger.log(`[YouTube] Database entry for subscription "${data.channelId}" not found`)
+        Logger.info({ sub: data }, 'database entry not found')
 
         try {
             await hubSubscribe(data.channelId, 'unsubscribe')
@@ -80,15 +79,15 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
         return
     }
 
+    Logger.info({ sub: data }, 'handling incoming notification')
+
     if (subscription.last_video_id == data.videoId) return null
     else await database.youtubeSubs.updateOne({ _id: data.channelId }, { $set: { last_video_id: data.videoId } })
-
-    Logger.info(`[YouTube] Handling incoming webhook from subscription "${data.channelId}"`)
 
     const subscribedGuilds = await database.servers.find({ 'modules.subscriptions.youtube.channel_id': data.channelId })
 
     if (!subscribedGuilds.length) {
-        Logger.log(`[YouTube] No subscribed guilds found for subscription "${data.channelId}"`)
+        Logger.info({ sub: data }, 'no subscribed guilds found')
 
         try {
             await hubSubscribe(data.channelId, 'unsubscribe')
@@ -100,7 +99,7 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
 
     const videoUrl = `https://www.youtube.com/watch?v=${data.videoId}`
 
-    Logger.log(`[YouTube] Sending notifications about video "${data.videoId}" to guilds ${subscribedGuilds.map(i => i._id).join(',')}`)
+    Logger.info({ sub: data, subGuilds: subscribedGuilds.map(i => i._id) }, 'sending notification')
 
     for (const guild of subscribedGuilds) {
         const guildSubscription = guild.modules.subscriptions.youtube
@@ -114,11 +113,11 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
         try {
             webhook = await DiscordUtils.rest.get(DiscordUtils.restRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
         } catch (err) {
-            await Logger.handleError({
+            Logger.error({
                 module: 'YouTube',
                 action: 'GetWebhook',
-                error: err,
-                guild_id: guild._id
+                err,
+                guildId: guild._id
             })
         }
 
@@ -130,11 +129,11 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
                     }
                 })
             } catch (err) {
-                await Logger.handleError({
+                Logger.error({
                     module: 'YouTube',
                     action: 'CreateWebhook',
-                    error: err,
-                    guild_id: guild._id
+                    err,
+                    guildId: guild._id
                 })
 
                 continue
@@ -181,19 +180,19 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
                 })
             }
         } catch (err) {
-            await Logger.handleError({
+            Logger.error({
                 module: 'YouTube',
                 action: 'SendNotificationMessage',
-                error: err,
-                guild_id: guild._id
+                err,
+                guildId: guild._id
             })
         }
 
-        handleModuleExecutionData({
-            module: 'YouTube',
+        Logger.info({
+            module: 'Telegram',
             category: 'SendNotification',
-            guild: { id: guild._id, name: 'Unknown' },
-            target: { id: guildSubscription.channel_id, name: guildSubscription.channel_name }
+            guildId: guild._id,
+            subId: guildSubscription.channel_id
         })
     }
 }

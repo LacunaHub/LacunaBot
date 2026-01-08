@@ -1,8 +1,7 @@
+import Logger from '@/api/utility/Logger'
 import { makeURLSearchParams } from 'discord.js'
 import fetch from 'node-fetch'
 import database from '../../../database'
-import { handleModuleExecutionData } from '../../../events/system/ModuleExecution'
-import Logger from '../../../internals/Logger'
 import { truncateString } from '../../../internals/utility/Utils'
 import Replacer from '../../../modules/Replacer'
 import DiscordUtils from '../../utility/DiscordUtils'
@@ -36,7 +35,7 @@ async function getAppAccessToken() {
 }
 
 export async function searchChannels(query: string) {
-    Logger.log(`[Twitch] Searching channels with query "${query}"`)
+    Logger.info({ query }, 'searching twitch channels')
 
     const twitchToken = await getAppAccessToken()
     const response = await fetch(`https://api.twitch.tv/helix/search/channels?query=${encodeURI(query)}`, {
@@ -51,7 +50,7 @@ export async function searchChannels(query: string) {
         const { data } = (await response.json()) as TwitchSearchResponse
 
         if (data?.length) {
-            Logger.log(`[Twitch] Found ${data.length} channels for query "${query}"`)
+            Logger.info({ query, count: data.length }, 'twitch channels search complete')
 
             return data.map(i => ({
                 id: i.id,
@@ -61,7 +60,7 @@ export async function searchChannels(query: string) {
             }))
         }
 
-        Logger.log(`[Twitch] Query "${query}" gave not search results`)
+        Logger.info({ query }, 'no twitch channels found')
 
         return []
     }
@@ -117,7 +116,7 @@ export async function getEventSubsByUserId(userId: string) {
 }
 
 export async function getStream(user_id: string) {
-    Logger.log(`[Twitch] Getting stream of user "${user_id}"`)
+    Logger.info({ subId: user_id }, 'getting twitch stream')
 
     const twitchToken = await getAppAccessToken()
     const res = await fetch(`https://api.twitch.tv/helix/streams?user_id=${user_id}`, {
@@ -133,7 +132,7 @@ export async function getStream(user_id: string) {
         const stream = data[0]
 
         if (stream) {
-            Logger.log(`[Twitch] Stream of user "${user_id}" found`)
+            Logger.info({ subId: user_id }, 'twitch stream found')
 
             return {
                 user_name: stream.user_name,
@@ -148,7 +147,7 @@ export async function getStream(user_id: string) {
         }
     }
 
-    Logger.log(`[Twitch] User "${user_id}" now offline`)
+    Logger.info({ subId: user_id }, 'twitch stream offline')
 }
 
 export async function handleIncomingWebhook(messageId: string, data: TwitchIncomingWebhook) {
@@ -156,7 +155,7 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
         const subscription = await database.twitchSubs.findOne({ _id: data.subscription.id })
 
         if (!subscription) {
-            Logger.log(`[Twitch] Database entry for subscription "${data.subscription.id}" not found`)
+            Logger.info({ sub: data }, 'database entry not found')
 
             try {
                 await eventSubUnsubscribe(data.subscription.id)
@@ -165,17 +164,17 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
             return null
         }
 
+        Logger.info({ sub: data }, 'handling incoming notification')
+
         if (subscription.last_eventsub_message_id == messageId) return null
         else await database.twitchSubs.updateOne({ _id: data.subscription.id }, { $set: { last_eventsub_message_id: messageId } })
-
-        Logger.log(`[Twitch] Handling incoming webhook from subscription "${data.subscription.id}"`)
 
         const subscribedGuilds = await database.servers.find({
             'modules.subscriptions.twitch.broadcaster_id': data.event.broadcaster_user_id
         })
 
         if (!subscribedGuilds.length) {
-            Logger.log(`[Twitch] No subscribed guilds found for subscription "${data.subscription.id}"`)
+            Logger.info({ sub: data }, 'no subscribed guilds found')
 
             try {
                 await eventSubUnsubscribe(data.subscription.id)
@@ -189,9 +188,7 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
 
         if (!stream) return null
 
-        Logger.log(
-            `[Twitch] Sending notifications about stream "${data.event.broadcaster_user_id}" to guilds ${subscribedGuilds.map(i => i._id).join(',')}`
-        )
+        Logger.info({ sub: data, subGuilds: subscribedGuilds.map(i => i._id) }, 'sending notification')
 
         for (const guild of subscribedGuilds) {
             const guildSubscription = guild.modules.subscriptions.twitch
@@ -205,11 +202,11 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
             try {
                 webhook = await DiscordUtils.rest.get(DiscordUtils.restRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
             } catch (err) {
-                await Logger.handleError({
+                Logger.error({
                     module: 'Twitch',
                     action: 'GetWebhook',
-                    error: err,
-                    guild_id: guild._id
+                    err,
+                    guildId: guild._id
                 })
             }
 
@@ -221,11 +218,11 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
                         }
                     })
                 } catch (err) {
-                    await Logger.handleError({
+                    Logger.error({
                         module: 'Twitch',
                         action: 'CreateWebhook',
-                        error: err,
-                        guild_id: guild._id
+                        err,
+                        guildId: guild._id
                     })
 
                     continue
@@ -287,19 +284,19 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
                     })
                 }
             } catch (err) {
-                await Logger.handleError({
+                Logger.error({
                     module: 'Twitch',
                     action: 'SendNotificationMessage',
-                    error: err,
-                    guild_id: guild._id
+                    err,
+                    guildId: guild._id
                 })
             }
 
-            handleModuleExecutionData({
-                module: 'Twitch',
+            Logger.info({
+                module: 'Telegram',
                 category: 'SendNotification',
-                guild: { id: guild._id, name: 'Unknown' },
-                target: { id: guildSubscription.broadcaster_id, name: guildSubscription.broadcaster_name }
+                guildId: guild._id,
+                subId: guildSubscription.broadcaster_id
             })
         }
     }

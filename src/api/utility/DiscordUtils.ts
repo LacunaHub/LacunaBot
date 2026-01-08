@@ -1,7 +1,7 @@
 import { RequestManager } from '@lacunahub/letsfrag'
 import { APIRole, Routes } from 'discord.js'
 import { redisStore } from '../../database'
-import Logger from '../../internals/Logger'
+import Logger from './Logger'
 
 const rest = new RequestManager({
     rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5,
@@ -9,7 +9,7 @@ const rest = new RequestManager({
 })
 
 rest.setToken(process.env.LCN_DISCORD_CLIENT_TOKEN)
-rest.on('rateLimited', rateLimitData => Logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`))
+rest.on('rateLimited', rateLimitInfo => Logger.warn({ rateLimitInfo }, 'rate limited'))
 
 export function compareRolePositions(first: APIRole, second: APIRole) {
     return first.position === second.position ? first.id.localeCompare(second.id) : first.position - second.position

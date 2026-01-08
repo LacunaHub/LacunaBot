@@ -3,7 +3,6 @@ import { APIWebhook, resolveImage } from 'discord.js'
 import { Context } from 'koa'
 import fetch from 'node-fetch'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import { TelegramFile } from '../../../../modules/social-alerts/TelegramAlerts'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
@@ -50,11 +49,11 @@ export default async function createTelegramSubscription(ctx: Context) {
             }
         })) as any
     } catch (err) {
-        await Logger.handleError({
+        ctx.log.error({
             module: 'TelegramSubs',
             action: 'CreateWebhook',
-            error: err,
-            guild_id: server._id
+            err,
+            guildId: server._id
         })
 
         ctx.throw(500, new APIError(5009))

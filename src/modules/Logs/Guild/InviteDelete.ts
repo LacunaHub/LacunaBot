@@ -26,16 +26,16 @@ export default async function (self: Lacuna, server: ServerDocument, invite: Inv
             try {
                 await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
-                await self.logger.handleError({ module: 'LogsInviteDelete', action: 'SendMessageViaWebhook', error: err, guild_id: invite.guild.id })
+                self.logger.error({ module: 'LogsInviteDelete', action: 'SendMessageViaWebhook', err, guildId: invite.guild.id })
 
                 return false
             }
 
             self.emit('moduleExecution', {
+                guildId: invite.guild.id,
+                targetId: invite.channelId,
                 module: 'Logs',
-                category: 'InviteDelete',
-                guild: { id: invite.guild.id, name: invite.guild.name },
-                target: { id: invite.channel.name, name: invite.code }
+                category: 'InviteDelete'
             })
 
             return true

@@ -271,7 +271,7 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
             }
         }
 
-        self.logger.log(`[AIModModule] Execution from (${message.guild.name}:${message.guildId})`, resultText)
+        self.logger.info({ guildId: message.guildId, response }, 'aimod result')
 
         return response
     }

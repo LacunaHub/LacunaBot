@@ -37,16 +37,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
             try {
                 await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
-                await self.logger.handleError({ module: 'LogsMessageUpdate', action: 'SendMessageViaWebhook', error: err, guild_id: message.guildId })
+                self.logger.error({ module: 'LogsMessageUpdate', action: 'SendMessageViaWebhook', err, guildId: message.guildId })
 
                 return false
             }
 
             self.emit('moduleExecution', {
+                guildId: message.guildId,
+                targetId: message.id,
                 module: 'Logs',
-                category: 'MessageUpdate',
-                guild: { id: message.guild.id, name: message.guild.name },
-                target: { id: message.author.id, name: message.author.tag }
+                category: 'MessageUpdate'
             })
 
             return true

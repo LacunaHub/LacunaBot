@@ -5,6 +5,7 @@ import {
     ServerModulesCustomCommandScript,
     ServerModulesCustomCommandScriptLanguages
 } from '@/database/schemas/Servers'
+import Logger from '@/utility/Logger'
 import { ApplicationCommandOptionType, BaseGuildTextChannel, ChatInputCommandInteraction, Team } from 'discord.js'
 import { Context, Isolate } from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'
@@ -19,7 +20,6 @@ import {
     serializeUser
 } from '.'
 import Lacuna from '../../internals/Lacuna'
-import logger from '../../internals/Logger'
 
 export default class CustomCommand {
     public command: ServerModulesCustomCommand
@@ -48,10 +48,7 @@ export default class CustomCommand {
                 .set(interaction.guildId, {
                     value: new Isolate({
                         memoryLimit: 8,
-                        onCatastrophicError(message) {
-                            logger.error('(Catastrophic Error):', message)
-                            logger.telegram.error('Catastrophic Error:', message)
-                        }
+                        onCatastrophicError: message => Logger.error({ message }, 'ivm catastrophic error')
                     }),
                     lastUsed: Date.now()
                 })
@@ -129,8 +126,9 @@ export default class CustomCommand {
 
         await this.throttle()
 
-        this.self.logger.telegram.info(
-            `Code Snippets (${this.interaction.guildId}:${this.interaction.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``
+        this.self.logger.info(
+            { guildId: this.interaction.guildId, userId: this.interaction.user.id, usedPatterns: this.usedPatterns },
+            'custom command execution'
         )
         this.self.emit('commandExecution', {
             command: this.interaction.commandName,

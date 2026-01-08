@@ -16,7 +16,6 @@ import {
 } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import { snakeToPascalCase } from '../../../../../internals/utility/Utils'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
@@ -70,11 +69,11 @@ export default async function createInteractiveMessage(ctx: Context) {
             body: message
         })) as any
     } catch (err) {
-        await Logger.handleError({
+        ctx.log.error({
             module: 'InteractiveMessages',
             action: 'SendMessage',
-            error: err,
-            guild_id: server._id
+            err,
+            guildId: server._id
         })
 
         ctx.throw(500, new APIError(5005))

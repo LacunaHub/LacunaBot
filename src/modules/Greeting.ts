@@ -20,14 +20,14 @@ async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMe
             }
 
             self.emit('moduleExecution', {
-                module: 'Greeting',
-                guild: { id: member.guild.id, name: member.guild.name },
-                target: { id: member.id, name: member.user.tag }
+                guildId: member.guild.id,
+                targetId: member.id,
+                module: 'Greeting'
             })
 
             return true
         } catch (err) {
-            await self.logger.handleError({ module: 'Greeting', action: 'SendMessage', error: err, guild_id: member.guild.id })
+            self.logger.error({ module: 'Greeting', action: 'SendMessage', err, guildId: member.guild.id })
         }
     }
 
@@ -45,15 +45,15 @@ async function addInitialRoles(self: Lacuna, server: ServerDocument, member: Gui
                 await member.roles.add(initialRoles, 'Greeting: Add initial roles')
 
                 self.emit('moduleExecution', {
+                    guildId: member.guild.id,
+                    targetId: member.id,
                     module: 'Greeting',
-                    category: 'InitialRoles',
-                    guild: { id: member.guild.id, name: member.guild.name },
-                    target: { id: member.id, name: member.user.tag }
+                    category: 'InitialRoles'
                 })
 
                 return true
             } catch (err) {
-                await self.logger.handleError({ module: 'Greeting', action: 'AddInitialRoles', error: err, guild_id: member.guild.id })
+                self.logger.error({ module: 'Greeting', action: 'AddInitialRoles', err, guildId: member.guild.id })
             }
         }
     }
@@ -73,7 +73,7 @@ async function restoreNicknameAndRoles(self: Lacuna, server: ServerDocument, mem
                 try {
                     await member.setNickname(data.nickname, 'Restoring: Restore nickname')
                 } catch (err) {
-                    await self.logger.handleError({ module: 'Restoring', action: 'SetNickname', error: err, guild_id: member.guild.id })
+                    self.logger.error({ module: 'Restoring', action: 'SetNickname', err, guildId: member.guild.id })
                 }
             }
 
@@ -85,7 +85,7 @@ async function restoreNicknameAndRoles(self: Lacuna, server: ServerDocument, mem
                     try {
                         await member.roles.add(restorableRoles, 'Restoring: Restore roles')
                     } catch (err) {
-                        await self.logger.handleError({ module: 'Restoring', action: 'AddRoles', error: err, guild_id: member.guild.id })
+                        self.logger.error({ module: 'Restoring', action: 'AddRoles', err, guildId: member.guild.id })
                     }
                 }
             }
@@ -102,10 +102,10 @@ async function restoreNicknameAndRoles(self: Lacuna, server: ServerDocument, mem
             )
 
             self.emit('moduleExecution', {
+                guildId: member.guild.id,
+                targetId: member.id,
                 module: 'Restoring',
-                category: 'RestoreData',
-                guild: { id: member.guild.id, name: member.guild.name },
-                target: { id: member.id, name: member.user.tag }
+                category: 'RestoreData'
             })
 
             return true

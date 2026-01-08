@@ -1,8 +1,7 @@
+import Logger from '@/api/utility/Logger'
 import { AttachmentBuilder, MessagePayload, makeURLSearchParams } from 'discord.js'
 import fetch from 'node-fetch'
 import database from '../../../database'
-import { handleModuleExecutionData } from '../../../events/system/ModuleExecution'
-import Logger from '../../../internals/Logger'
 import { truncateString } from '../../../internals/utility/Utils'
 import DiscordUtils from '../../utility/DiscordUtils'
 
@@ -46,28 +45,25 @@ export async function handleTelegramWebhook(data: TelegramWebhookData) {
     const subscription = await database.telegramSubs.findOne({ _id: data.channel_id })
 
     if (!subscription) {
-        Logger.log(`[Telegram] Database entry for subscription "${data.channel_id}" not found`)
-
+        Logger.info({ sub: data }, 'database entry not found')
         return
     }
 
+    Logger.info({ sub: data }, 'handling incoming notification')
     await database.telegramSubs.updateOne({ _id: data.channel_id }, { $set: { last_message_id: data.message_id } })
-
-    Logger.info(`[Telegram] Handling incoming webhook from subscription "${data.channel_id}"`)
 
     const subscribedGuilds = await database.servers.find({
         'modules.subscriptions.telegram.channel_id': data.channel_id
     })
 
     if (!subscribedGuilds.length) {
-        Logger.log(`[Telegram] No subscribed guilds found for subscription "${data.channel_id}"`)
-
+        Logger.info({ sub: data }, 'no subscribed guilds found')
         await database.telegramSubs.deleteOne({ _id: data.channel_id })
 
         return
     }
 
-    Logger.log(`[Telegram] Sending notifications about video "${data.message_id}" to guilds ${subscribedGuilds.map(i => i._id).join(',')}`)
+    Logger.info({ sub: data, subGuilds: subscribedGuilds.map(i => i._id) }, 'sending notification')
 
     for (const guild of subscribedGuilds) {
         const guildSubscription = guild.modules.subscriptions.telegram
@@ -81,11 +77,11 @@ export async function handleTelegramWebhook(data: TelegramWebhookData) {
         try {
             webhook = await DiscordUtils.rest.get(DiscordUtils.restRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
         } catch (err) {
-            Logger.handleError({
+            Logger.error({
                 module: 'Telegram',
                 action: 'GetWebhook',
-                error: err,
-                guild_id: guild._id
+                err,
+                guildId: guild._id
             })
         }
 
@@ -97,11 +93,11 @@ export async function handleTelegramWebhook(data: TelegramWebhookData) {
                     }
                 })
             } catch (err) {
-                await Logger.handleError({
+                Logger.error({
                     module: 'Telegram',
                     action: 'CreateWebhook',
-                    error: err,
-                    guild_id: guild._id
+                    err,
+                    guildId: guild._id
                 })
 
                 continue
@@ -161,19 +157,19 @@ export async function handleTelegramWebhook(data: TelegramWebhookData) {
                 })
             }
         } catch (err) {
-            await Logger.handleError({
+            Logger.error({
                 module: 'Telegram',
                 action: 'SendNotificationMessage',
-                error: err,
-                guild_id: guild._id
+                err,
+                guildId: guild._id
             })
         }
 
-        handleModuleExecutionData({
+        Logger.info({
             module: 'Telegram',
             category: 'SendNotification',
-            guild: { id: guild._id, name: 'Unknown' },
-            target: { id: guildSubscription.channel_id.toString(), name: guildSubscription.channel_name }
+            guildId: guild._id,
+            subId: guildSubscription.channel_id
         })
     }
 }

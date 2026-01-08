@@ -30,11 +30,11 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
             try {
                 await interaction.followUp({ ...messagePayload, ephemeral: true })
             } catch (err) {
-                await self.logger.handleError({
+                self.logger.error({
                     module: 'InteractiveMessages',
                     action: 'ButtonEphemeralReply',
-                    error: err,
-                    guild_id: interaction.guildId
+                    err,
+                    guildId: interaction.guildId
                 })
             }
         }
@@ -53,11 +53,11 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
                         await interaction.member.roles.add(addRoles, 'Interactive messages: Modify roles')
                     }
                 } catch (err) {
-                    await self.logger.handleError({
+                    self.logger.error({
                         module: 'InteractiveMessages',
                         action: 'ButtonModifyRolesAdd',
-                        error: err,
-                        guild_id: interaction.guildId
+                        err,
+                        guildId: interaction.guildId
                     })
                 }
             }
@@ -72,11 +72,11 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
                         await interaction.member.roles.remove(removeRoles, 'Interactive messages: Modify roles')
                     }
                 } catch (err) {
-                    await self.logger.handleError({
+                    self.logger.error({
                         module: 'InteractiveMessages',
                         action: 'ButtonModifyRolesRemove',
-                        error: err,
-                        guild_id: interaction.guildId
+                        err,
+                        guildId: interaction.guildId
                     })
                 }
             }
@@ -104,21 +104,21 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
                         })
                     }
                 } catch (err) {
-                    await self.logger.handleError({
+                    self.logger.error({
                         module: 'InteractiveMessages',
                         action: 'OverwriteChannelPermissions',
-                        error: err,
-                        guild_id: interaction.guildId
+                        err,
+                        guildId: interaction.guildId
                     })
                 }
             }
         }
 
         self.emit('moduleExecution', {
+            guildId: interaction.guildId,
+            targetId: interaction.member.id,
             module: 'InteractiveMessages',
-            category: 'Button',
-            guild: { id: interaction.guildId, name: interaction.guild.name },
-            target: { id: interaction.member.id, name: interaction.member.user.tag }
+            category: 'Button'
         })
     }
 }
@@ -148,11 +148,11 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
             try {
                 await interaction.followUp({ ...messagePayload, ephemeral: true })
             } catch (err) {
-                await self.logger.handleError({
+                self.logger.error({
                     module: 'InteractiveMessages',
                     action: 'SelectMenuEphemeralReply',
-                    error: err,
-                    guild_id: interaction.guildId
+                    err,
+                    guildId: interaction.guildId
                 })
             }
         }
@@ -171,11 +171,11 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
                         await interaction.member.roles.add(addRoles, 'Interactive messages: Modify roles')
                     }
                 } catch (err) {
-                    await self.logger.handleError({
+                    self.logger.error({
                         module: 'InteractiveMessages',
                         action: 'SelectMenuModifyRolesAdd',
-                        error: err,
-                        guild_id: interaction.guildId
+                        err,
+                        guildId: interaction.guildId
                     })
                 }
             }
@@ -190,11 +190,11 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
                         await interaction.member.roles.remove(removeRoles, 'Interactive messages: Modify roles')
                     }
                 } catch (err) {
-                    await self.logger.handleError({
+                    self.logger.error({
                         module: 'InteractiveMessages',
                         action: 'SelectMenuModifyRolesRemove',
-                        error: err,
-                        guild_id: interaction.guildId
+                        err,
+                        guildId: interaction.guildId
                     })
                 }
             }
@@ -222,21 +222,21 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
                         })
                     }
                 } catch (err) {
-                    await self.logger.handleError({
+                    self.logger.error({
                         module: 'InteractiveMessages',
                         action: 'SelectMenuOverwriteChannelPermissions',
-                        error: err,
-                        guild_id: interaction.guildId
+                        err,
+                        guildId: interaction.guildId
                     })
                 }
             }
         }
 
         self.emit('moduleExecution', {
+            guildId: interaction.guildId,
+            targetId: interaction.member.id,
             module: 'InteractiveMessages',
-            category: 'SelectMenu',
-            guild: { id: interaction.guildId, name: interaction.guild.name },
-            target: { id: interaction.member.id, name: interaction.member.user.tag }
+            category: 'SelectMenu'
         })
     }
 }
@@ -272,11 +272,11 @@ async function handleReactionAdd(self: Lacuna, server: ServerDocument, reaction:
                     await member.roles.remove(removeRoles, 'Interactive messages: Modify roles')
                 }
             } catch (err) {
-                await self.logger.handleError({
+                self.logger.error({
                     module: 'InteractiveMessages',
                     action: 'ReactionAddModifyRoles',
-                    error: err,
-                    guild_id: message.guildId
+                    err,
+                    guildId: message.guildId
                 })
             }
         }
@@ -300,11 +300,11 @@ async function handleReactionAdd(self: Lacuna, server: ServerDocument, reaction:
                             reason: 'Interactive messages: Overwrite channel permissions'
                         })
                     } catch (err) {
-                        await self.logger.handleError({
+                        self.logger.error({
                             module: 'InteractiveMessages',
                             action: 'ReactionAddOverwriteChannelPermissions',
-                            error: err,
-                            guild_id: message.guildId
+                            err,
+                            guildId: message.guildId
                         })
                     }
                 }
@@ -312,10 +312,10 @@ async function handleReactionAdd(self: Lacuna, server: ServerDocument, reaction:
         }
 
         self.emit('moduleExecution', {
+            guildId: message.guildId,
+            targetId: user.id,
             module: 'InteractiveMessages',
-            category: 'ReactionAdd',
-            guild: { id: message.guildId, name: message.guild.name },
-            target: { id: user.id, name: user.tag }
+            category: 'ReactionAdd'
         })
     }
 }
@@ -341,11 +341,11 @@ async function handleReactionRemove(self: Lacuna, server: ServerDocument, reacti
                     try {
                         await member.roles.remove(addRoles, 'Interactive messages: Modify roles')
                     } catch (err) {
-                        await self.logger.handleError({
+                        self.logger.error({
                             module: 'InteractiveMessages',
                             action: 'ReactionRemoveModifyRoles',
-                            error: err,
-                            guild_id: message.guildId
+                            err,
+                            guildId: message.guildId
                         })
                     }
                 }
@@ -358,11 +358,11 @@ async function handleReactionRemove(self: Lacuna, server: ServerDocument, reacti
                     try {
                         await member.roles.add(removeRoles, 'Interactive messages: Modify roles')
                     } catch (err) {
-                        await self.logger.handleError({
+                        self.logger.error({
                             module: 'InteractiveMessages',
                             action: 'ReactionRemoveModifyRoles',
-                            error: err,
-                            guild_id: message.guildId
+                            err,
+                            guildId: message.guildId
                         })
                     }
                 }
@@ -381,11 +381,11 @@ async function handleReactionRemove(self: Lacuna, server: ServerDocument, reacti
                     try {
                         await overwrites.delete('Interactive messages: Overwrite channel permissions')
                     } catch (err) {
-                        await self.logger.handleError({
+                        self.logger.error({
                             module: 'InteractiveMessages',
                             action: 'ReactionRemoveOverwriteChannelPermissions',
-                            error: err,
-                            guild_id: message.guildId
+                            err,
+                            guildId: message.guildId
                         })
                     }
                 }
@@ -393,10 +393,10 @@ async function handleReactionRemove(self: Lacuna, server: ServerDocument, reacti
         }
 
         self.emit('moduleExecution', {
+            guildId: message.guildId,
+            targetId: user.id,
             module: 'InteractiveMessages',
-            category: 'ReactionRemove',
-            guild: { id: message.guildId, name: message.guild.name },
-            target: { id: user.id, name: user.tag }
+            category: 'ReactionRemove'
         })
     }
 }

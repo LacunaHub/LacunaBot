@@ -1,5 +1,5 @@
+import Logger from '@/utility/Logger'
 import { messages } from '@lacunahub/lacuna-locale'
-import logger from '../internals/Logger'
 import { resolveObjectPath } from '../internals/utility/Utils'
 
 export function locale(locale: string): typeof messages.ru {
@@ -33,7 +33,7 @@ export function t(locale: string, key: string, params?: any[] | { [key: string]:
     const string = resolveObjectPath(key, messages[locale] ?? messages.ru) ?? resolveObjectPath(key, messages.ru) ?? key
 
     if (string === key) {
-        logger.warn(`[i18n] Missing localization string ${string}`)
+        Logger.warn({ string }, 'missing i18n string')
     }
 
     return format(string, params)

@@ -161,11 +161,11 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
     await markReportAsClosed(interaction, closeReason)
 
     self.emit('moduleExecution', {
+        guildId: interaction.guildId,
+        targetId: member.id,
         module: 'Moderation',
         category: 'Reports',
-        label: capitalizeFirstLetter(action.toLowerCase()),
-        guild: { id: interaction.guild.id, name: interaction.guild.name },
-        target: { id: member.id, name: member.user.tag }
+        label: capitalizeFirstLetter(action.toLowerCase())
     })
 }
 
@@ -314,11 +314,11 @@ async function handleOptionSelect(self: Lacuna, server: ServerDocument, interact
     await markReportAsClosed(interaction, closeReason)
 
     self.emit('moduleExecution', {
+        guildId: interaction.guildId,
+        targetId: member.id,
         module: 'Moderation',
         category: 'Reports',
-        label: capitalizeFirstLetter(action.toLowerCase()),
-        guild: { id: interaction.guild.id, name: interaction.guild.name },
-        target: { id: member.id, name: member.user.tag }
+        label: capitalizeFirstLetter(action.toLowerCase())
     })
 }
 
@@ -397,11 +397,11 @@ async function handleGuildMemberAdd(self: Lacuna, server: ServerDocument, member
     try {
         await channel.send({ embeds: [embed] })
     } catch (err) {
-        await self.logger.handleError({
+        self.logger.error({
             module: 'Reports',
             action: 'SendNotificationAboutUnwantedUser',
-            error: err,
-            guild_id: member.guild.id
+            err,
+            guildId: member.guild.id
         })
     }
 

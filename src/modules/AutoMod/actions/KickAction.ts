@@ -8,7 +8,7 @@ export default async function kickAction(self: Lacuna, options: KickActionOption
     try {
         await target.kick(reason)
     } catch (err) {
-        await self.logger.handleError({ module: 'AutoMod', action: 'Kick', error: err, guild_id: guild.id })
+        self.logger.error({ module: 'AutoMod', action: 'Kick', err, guildId: guild.id })
     }
 
     await createCaseLogEntry(guild, { type: 'Kick', target: target.user, executor: self.user, reason })
