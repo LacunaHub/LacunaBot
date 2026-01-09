@@ -1,7 +1,7 @@
+import { brokerClient, lava } from '@/api/utility/Managers'
+import Lacuna from '@/internals/Lacuna'
 import { TextBasedChannel } from 'discord.js'
 import { Context } from 'koa'
-import { lava, serverClient } from '../../..'
-import Lacuna from '../../../../internals/Lacuna'
 import {
     BotMetrics,
     channelCounter,
@@ -20,7 +20,7 @@ import {
 } from '../../../modules/Metrics'
 
 export default async function getMetrics(ctx: Context) {
-    const stats = await serverClient.broadcastEval<BotMetrics[][]>((self: Lacuna) => {
+    const stats = await brokerClient.broadcastEval<BotMetrics[][]>((self: Lacuna) => {
         const channels = self.channels.cache,
             textChannels = channels.filter(v => v.type === 0),
             voiceChannels = channels.filter(v => v.type === 2),

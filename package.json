@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node ./clean.dist.js && tsc --build tsconfig.json",
     "start": "node -r ./config.env.js -r module-alias/register ./dist/cluster-broker",
-    "start:api": "wait-on tcp:5565 && node -r ./config.env.js -r module-alias/register ./dist/api",
+    "start:api": "node -r ./config.env.js -r module-alias/register ./dist/api",
     "start:bot": "node -r ./config.env.js -r module-alias/register ./dist/cluster-manager",
     "dev": "npm run build && concurrently \"npm:start\" \"npm:start:api\" \"npm:start:bot\""
   },
@@ -26,7 +26,7 @@
     "@koa/router": "^12.0.2",
     "@lacunahub/lacuna-locale": "^1.1.4",
     "@lacunahub/lavaluna.js": "^1.0.2",
-    "@lacunahub/letsfrag": "^1.0.0",
+    "@lacunahub/letsfrag": "^2.0.0",
     "@napi-rs/canvas": "^0.1.88",
     "bufferutil": "^4.0.1",
     "discord.js": "^14.16.2",
@@ -79,8 +79,7 @@
     "@types/unzalgo": "^3.0.2",
     "@types/xml2js": "^0.4.14",
     "concurrently": "^8.2.2",
-    "typescript": "^5.6.3",
-    "wait-on": "^7.2.0"
+    "typescript": "^5.6.3"
   },
   "_moduleAliases": {
     "@": "dist"

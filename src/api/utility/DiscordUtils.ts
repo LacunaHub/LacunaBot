@@ -1,11 +1,8 @@
-import { RequestManager } from '@lacunahub/letsfrag'
-import { APIRole, Routes } from 'discord.js'
-import { redisStore } from '../../database'
+import { APIRole, REST, Routes } from 'discord.js'
 import Logger from './Logger'
 
-const rest = new RequestManager({
-    rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5,
-    store: redisStore
+const rest = new REST({
+    rejectOnRateLimit: rateLimitData => rateLimitData.timeToReset >= 1000 * 2.5
 })
 
 rest.setToken(process.env.LCN_DISCORD_CLIENT_TOKEN)
