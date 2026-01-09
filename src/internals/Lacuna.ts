@@ -2,8 +2,8 @@ import database, { EnvData } from '@/database'
 import { ServerDocument, ServerModulesCustomCommand } from '@/database/schemas/Servers'
 import Logger from '@/utility/Logger'
 import { LavalunaManager } from '@lacunahub/lavaluna.js'
-import { ClusterShardClient, ClusterShardClientOptions } from '@lacunahub/letsfrag'
-import { Collection, Guild, PermissionsBitField } from 'discord.js'
+import { ClusterShardClient } from '@lacunahub/letsfrag'
+import { ClientOptions, Collection, Guild, PermissionsBitField } from 'discord.js'
 import { readdirSync, readFileSync } from 'fs'
 import { Isolate } from 'isolated-vm'
 import { os } from 'node-os-utils'
@@ -40,7 +40,7 @@ export default class Lacuna extends ClusterShardClient {
         )
     }
 
-    constructor(options?: ClusterShardClientOptions) {
+    constructor(options?: ClientOptions) {
         super(options)
 
         this.hostname = os.hostname()
@@ -96,8 +96,8 @@ export default class Lacuna extends ClusterShardClient {
         handleTemporaryBanEntries(this)
         handleTemporaryRoleEntries(this)
 
-        process.on('unhandledRejection', this.logger.error)
-        process.on('uncaughtException', this.logger.error)
+        process.on('unhandledRejection', this.logger.error.bind(this.logger))
+        process.on('uncaughtException', this.logger.error.bind(this.logger))
     }
 
     public async getEnv() {

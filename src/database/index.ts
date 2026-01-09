@@ -1,4 +1,3 @@
-import { RedisStoreAdapter } from '@lacunahub/letsfrag'
 import { ConnectOptions, connect } from 'mongoose'
 import { Database as QDatabase, QuickMongoOptions } from 'quickmongo'
 import Payments, { PaymentAmountCurrencyCode, PaymentMetadataProduct } from './schemas/Payments'
@@ -230,8 +229,6 @@ export default new Database({
         }
     }
 })
-
-export const redisStore = new RedisStoreAdapter(process.env.LCN_REDIS_URI).setMaxListeners(0)
 
 export interface DatabaseOptions {
     uri: string
