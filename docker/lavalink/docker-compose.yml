@@ -1,0 +1,35 @@
+services:
+  lavalink:
+    image: ghcr.io/lavalink-devs/lavalink:4-alpine
+    container_name: lavalink
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Java heap size (4GB)
+      - _JAVA_OPTIONS=-Xmx4G
+    volumes:
+      # Mount application.yml template (uses environment variables)
+      - ./application.yml:/opt/Lavalink/application.yml:ro
+      # Persist plugins between restarts
+      - ./plugins/:/opt/Lavalink/plugins/
+      # Persist logs
+      - ./logs/:/opt/Lavalink/logs/
+    networks:
+      - lavalink
+    expose:
+      - '${SERVER_PORT:-2333}'
+    ports:
+      - '${CONTAINER_ADDRESS:-127.0.0.1}:${SERVER_PORT:-2333}:${SERVER_PORT:-2333}'
+    deploy:
+      resources:
+        limits:
+          memory: 5G
+        reservations:
+          memory: 4G
+    stop_grace_period: 30s
+
+networks:
+  lavalink:
+    name: lavalink
+    driver: bridge

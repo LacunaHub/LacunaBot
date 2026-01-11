@@ -1,0 +1,93 @@
+services:
+  broker:
+    image: ghcr.io/lacunahub/lacunabot:latest
+    container_name: lacuna-broker
+    restart: always
+    command: ['npm', 'run', 'start']
+    env_file:
+      - ../.env
+    environment:
+      - NODE_ENV=prod
+    volumes:
+      - ../logs:/app/logs
+    networks:
+      - lacuna
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    stop_grace_period: 30s
+
+  bot:
+    image: ghcr.io/lacunahub/lacunabot:latest
+    container_name: lacuna-bot
+    restart: always
+    command: ['npm', 'run', 'start:bot']
+    env_file:
+      - ../.env
+    environment:
+      - NODE_ENV=prod
+    volumes:
+      - ../logs:/app/logs
+    networks:
+      - lacuna
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+    stop_grace_period: 30s
+
+  api:
+    image: ghcr.io/lacunahub/lacunabot:latest
+    container_name: lacuna-api
+    restart: always
+    command: ['npm', 'run', 'start:api']
+    expose:
+      - '5810'
+    env_file:
+      - ../.env
+    environment:
+      - NODE_ENV=prod
+    volumes:
+      - ../logs:/app/logs
+    networks:
+      - lacuna
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    stop_grace_period: 30s
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/sites-available:/etc/nginx/sites-available:ro
+      - /etc/ssl/lacunabot.com.pem:/etc/nginx/ssl/lacunabot.com.pem:ro
+      - /etc/ssl/lacunabot.com.key:/etc/nginx/ssl/lacunabot.com.key:ro
+    depends_on:
+      - api
+    networks:
+      - lacuna
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+networks:
+  lacuna:
+    name: lacuna
+    driver: bridge
+    internal: false
