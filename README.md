@@ -4,47 +4,67 @@
 
 # Lacuna
 
-[![Сообщество](https://discord.com/api/guilds/740586549145763960/widget.png)](https://discord.gg/lacunabot)
-[![Статус](https://top.gg/api/widget/status/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
-[![Серверы](https://top.gg/api/widget/servers/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
-[![Голоса](https://top.gg/api/widget/upvotes/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
+[![Community](https://discord.com/api/guilds/740586549145763960/widget.png)](https://discord.gg/srfhGjbKce)
+[![Status](https://top.gg/api/widget/status/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
+[![Servers](https://top.gg/api/widget/servers/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
+[![Votes](https://top.gg/api/widget/upvotes/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
 [![Crowdin](https://badges.crowdin.net/lacuna/localized.svg)](https://crowdin.com/project/lacuna)
 
 </div>
 
-# Требования
+## Requirements
 
--   [Node.js](https://nodejs.org/en/download/package-manager) (v20 и выше)
--   [MongoDB](https://www.mongodb.com/try/download/community)
--   [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/)
+-   Node.js 22+
+-   MongoDB 7+
+-   Redis 7+
+-   Docker & Docker Compose (for containerized development)
 
-# Первоначальная настройка
+## Quick start
 
-1. Создать файл `.env` в корне проекта и заполнить его, взяв за основу `.env.example`.
-2. Установить зависимости проекта с помощью команды `npm ci`.
-    - Требуется `node-gyp` (см. [установка node-gyp](https://github.com/nodejs/node-gyp?tab=readme-ov-file#installation)).
-    - Для установки зависимостей из организации @lacunahub необходимо создать GitHub PAT (personal access token) с областью `read:packages` и поместить его в переменную среды с названием `GH_PKG_TOKEN`.
+1. Configure environment
 
-## Запуск приложения
+    ```bash
+    cp .env.example .env
+    # Edit .env with your configuration
+    ```
 
-1. Выполнить компиляцию с помощью команды `npm run build`.
-2. Затем запустить:
-    - Через команду `npm run dev` (удобно для разработки).
-    - Через команду `pm2 start process.config.js` (подходит для production).
-        - PM2 можно установить через команду `npm i pm2 -g`.
-        - В дополнение можно установить `pm2-logrotate` (`pm2 install pm2-logrotate`) для автоматической ротации логов.
-            - Конфигурация `pm2-logrotate`:
-                ```
-                pm2 set pm2-logrotate:max_size 24M
-                pm2 set pm2-logrotate:retain 30
-                pm2 set pm2-logrotate:dateFormat YYYY-MM-DD-HH-mm
-                ```
+2. Start infrastructure services
 
-# Ссылки
+    ```bash
+    # Setup MongoDB and Redis
+    cd docker
+    docker compose -f docker-compose.dev.yml up -d
 
--   [Сайт](https://lacunabot.com)
--   [Документация](https://docs.lacunabot.com)
--   [Discord](https://discord.gg/lacunabot)
+    # Setup Lavalink
+    cd lavalink
+    cp .env.example .env
+    # Edit .env with your configuration
+    docker compose up -d
+    ```
+
+3. Install dependencies and run
+
+    1. Install [`node-gyp`](https://github.com/nodejs/node-gyp?tab=readme-ov-file#installation)
+
+    2. Create a [GitHub Personal Access Token](https://github.com/settings/tokens/new) with `read:packages` scope
+    3. Save your token as an environment variable
+
+    ```bash
+    export GH_PKG_TOKEN=your_gh_pat
+    ```
+
+    4. Then run
+
+    ```bash
+    npm ci
+    npm run dev
+    ```
+
+# Links
+
+-   [Website](https://lacunabot.com)
+-   [Docs](https://docs.lacunabot.com)
+-   [Discord](https://discord.gg/srfhGjbKce)
 -   [Telegram](https://t.me/roviusistaken)
 -   [GitHub Discussions](https://github.com/orgs/LacunaHub/discussions)
 -   [Crowdin](https://crowdin.com/project/lacuna)

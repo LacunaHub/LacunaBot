@@ -49,7 +49,9 @@ database.connect()
 brokerClient.connect()
 lava.initialize()
 
-app.listen(process.env.LCN_API_PORT, () => {
+// listen on all interfaces
+// required inside a docker container
+app.listen(Number(process.env.LCN_API_PORT), '0.0.0.0').on('listening', () => {
     Logger.info({ port: process.env.LCN_API_PORT }, 'api started')
 
     handleDiamondGuilds()
