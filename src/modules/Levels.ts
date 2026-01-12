@@ -16,6 +16,7 @@ import {
 } from 'discord.js'
 import numbro from 'numbro'
 import Lacuna from '../internals/Lacuna'
+import { DirectMessages } from './DirectMessages'
 import { borderRadiuses, roundImage } from './ImageGenerator'
 import Replacer from './Replacer'
 
@@ -406,7 +407,7 @@ export async function updateAwards(
                         messagePayload = await replacer.replaceTemplateMessage(award.alert.message)
 
                     if (award.alert.format === 'DM') {
-                        await member.send(messagePayload)
+                        await DirectMessages.send(self, member, messagePayload)
                     }
 
                     if (award.alert.format === 'CHANNEL') {
@@ -448,7 +449,7 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, sig
             }
 
             if (alert.format === 'DM') {
-                await member.send(messagePayload)
+                await DirectMessages.send(self, member, messagePayload)
             }
 
             if (alert.format === 'CHANNEL') {

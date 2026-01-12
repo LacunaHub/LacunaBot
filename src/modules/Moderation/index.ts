@@ -5,6 +5,7 @@ import ms from 'ms'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
 import { generateSimpleId } from '../../internals/utility/Utils'
+import { DirectMessages } from '../DirectMessages'
 import Replacer from '../Replacer'
 import { createCaseLogEntry } from './CaseLog'
 
@@ -225,7 +226,7 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
             })
 
         try {
-            await target.send(messagePayload)
+            await DirectMessages.send(self, target, messagePayload)
         } catch (err) {
             self.logger.error({ module: 'Warnings', action: 'SendDirectMessage', err, guildId: guild.id })
         }

@@ -1,4 +1,5 @@
 import { ServerDocument } from '@/database/schemas/Servers'
+import { DirectMessages } from '@/modules/DirectMessages'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
@@ -98,7 +99,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.BAN_ADD.dm_message, { penalty: { reason } })
 
         try {
-            await mention.send(messagePayload)
+            await DirectMessages.send(self, mention, messagePayload)
         } catch (err) {
             self.logger.error({ module: 'BanCommand', action: 'SendDirectMessage', err, guildId: interaction.guildId })
         }

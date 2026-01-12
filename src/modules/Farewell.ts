@@ -1,6 +1,7 @@
 import { ServerDocument } from '@/database/schemas/Servers'
 import { BaseGuildTextChannel, GuildMember } from 'discord.js'
 import Lacuna from '../internals/Lacuna'
+import { DirectMessages } from './DirectMessages'
 import Replacer from './Replacer'
 
 async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMember) {
@@ -16,7 +17,7 @@ async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMe
 
                 channel && (await channel.send(messagePayload))
             } else if (server.modules.farewell.format === 'DM') {
-                await member.send(messagePayload)
+                await DirectMessages.send(self, member, messagePayload)
             }
 
             self.emit('moduleExecution', {
