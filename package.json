@@ -1,6 +1,6 @@
 {
   "name": "lacuna-bot",
-  "version": "4.14.1",
+  "version": "4.14.2",
   "description": "Feature-rich Discord bot",
   "scripts": {
     "build": "node ./clean.dist.js && tsc --build tsconfig.json",
