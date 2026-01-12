@@ -22,7 +22,6 @@ COPY clean.dist.js ./
 COPY config.env.js ./
 COPY src ./src
 COPY assets ./assets
-COPY build ./build
 
 # Build TypeScript
 RUN npm run build
@@ -53,7 +52,6 @@ RUN rm -f .npmrc
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/assets ./assets
-COPY --from=builder /app/build ./build
 
 # Create logs directory
 RUN mkdir -p logs
