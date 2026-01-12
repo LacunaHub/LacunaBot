@@ -1,8 +1,6 @@
-import { ServerDocument, ServerModerationLogsTypeKey } from '@lacunahub/lacuna-database-driver'
-import { WebhookClient } from '@lacunahub/letsfrag'
-import { APIWebhook, Guild, MessagePayload, WebhookMessageCreateOptions, resolveImage } from 'discord.js'
+import { ServerDocument, ServerModerationLogsTypeKey } from '@/database/schemas/Servers'
+import { APIWebhook, Guild, MessagePayload, resolveImage, WebhookClient, WebhookMessageCreateOptions } from 'discord.js'
 import DiscordUtils from '../../api/utility/DiscordUtils'
-import { redisStore } from '../../database'
 import Lacuna from '../../internals/Lacuna'
 import ChannelCreate from './Channel/ChannelCreate'
 import ChannelDelete from './Channel/ChannelDelete'
@@ -48,7 +46,7 @@ export async function sendLog(self: Lacuna, server: ServerDocument, channelId: s
     let webhook: WebhookClient
 
     if (channelWebhook) {
-        webhook = new WebhookClient({ id: channelWebhook.id, token: channelWebhook.token }, { rest: { store: redisStore } })
+        webhook = new WebhookClient({ id: channelWebhook.id, token: channelWebhook.token })
     }
 
     if (typeof webhook === 'undefined') {
@@ -76,9 +74,9 @@ export async function sendLog(self: Lacuna, server: ServerDocument, channelId: s
                 }
             )
 
-            webhook = new WebhookClient({ id: createdWebhook.id, token: createdWebhook.token }, { rest: { store: redisStore } })
+            webhook = new WebhookClient({ id: createdWebhook.id, token: createdWebhook.token })
         } catch (err) {
-            await self.logger.handleError({ module: 'Logs', action: 'CreateWebhook', error: err, guild_id: server._id })
+            self.logger.error({ module: 'Logs', action: 'CreateWebhook', err, guildId: server._id })
 
             // Disable logs that uses the specified channelId when this error occurs:
             // Maximum number of webhooks reached (15)

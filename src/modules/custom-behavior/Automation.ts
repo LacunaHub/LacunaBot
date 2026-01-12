@@ -5,7 +5,8 @@ import {
     ServerModulesAutomationTriggers,
     ServerModulesCustomCommandScript,
     ServerModulesCustomCommandScriptLanguages
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
+import Logger from '@/utility/Logger'
 import {
     AnySelectMenuInteraction,
     ButtonInteraction,
@@ -31,7 +32,6 @@ import {
     serializeVoiceState
 } from '.'
 import Lacuna from '../../internals/Lacuna'
-import Logger from '../../internals/Logger'
 import { snakeToPascalCase } from '../../internals/utility/Utils'
 
 export default class Automation {
@@ -64,10 +64,7 @@ export default class Automation {
                 .set(this.guild.id, {
                     value: new Isolate({
                         memoryLimit: 8,
-                        onCatastrophicError(message) {
-                            Logger.error('(Catastrophic Error):', message)
-                            Logger.telegram.error('Catastrophic Error:', message)
-                        }
+                        onCatastrophicError: message => Logger.error({ message }, 'ivm catastrophic error')
                     }),
                     lastUsed: Date.now()
                 })
@@ -121,14 +118,15 @@ export default class Automation {
             await this.executeScripts(ctx, [{ name: null, language: 1, code: script }])
         }
 
-        this.self.logger.telegram.info(
-            `Code Snippets (${this.guild.id}:${globalValues.member.user.id}):\n\`\`\`\n${this.usedPatterns.join('\n\n')}\n\`\`\``
+        this.self.logger.info(
+            { guildId: this.guild.id, userId: globalValues.member.user.id, usedPatterns: this.usedPatterns },
+            'automation execution'
         )
         this.self.emit('moduleExecution', {
+            guildId: this.guild.id,
+            targetId: globalValues.member.user.id,
             module: 'Automation',
-            category: snakeToPascalCase(this.automation.trigger),
-            guild: { id: this.guild.id, name: this.guild.name },
-            target: { id: globalValues.member.user.id, name: globalValues.member.user.username }
+            category: snakeToPascalCase(this.automation.trigger)
         })
 
         ctx.release()

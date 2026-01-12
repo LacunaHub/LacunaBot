@@ -1,7 +1,8 @@
-import { Snowflake, SnowflakeUtils, SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@lacunahub/lacuna-database-driver'
+import database from '@/database'
+import { SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@/database/schemas/Subscriptions'
+import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
 import { APIGuildMember } from 'discord.js'
 import { SubscriptionData, addDiamond } from '..'
-import database from '../../../../database'
 import { supportServerId } from '../../../../internals/utility/Constants'
 import DiscordUtils from '../../../utility/DiscordUtils'
 

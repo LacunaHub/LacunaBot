@@ -1,8 +1,8 @@
+import Logger from '@/api/utility/Logger'
+import { ReportType, UserReportMetadataCategory, UserReportMetadataRecommendedAction } from '@/database/schemas/Reports'
 import { SchemaType } from '@google/generative-ai'
-import { ReportType, UserReportMetadataCategory, UserReportMetadataRecommendedAction } from '@lacunahub/lacuna-database-driver'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 import database from '../../database'
-import Logger from '../../internals/Logger'
 import { parseJSON } from '../../internals/utility/Utils'
 import GeminiAPI, { defaultModelParams } from '../utility/GeminiAPI'
 
@@ -68,7 +68,7 @@ function createSchedule(): Job {
             lastReport = reports.pop()
 
         if (!lastReport) return null
-        if (reports.length) Logger.log('[ReportsChecker] Review of complaints against users has begun')
+        if (reports.length) Logger.info({ count: reports.length }, 'reviewing complaints')
 
         const chatSession = generativeModel.startChat({
             history: reports.map(v => {

@@ -1,4 +1,5 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
+import { DirectMessages } from '@/modules/DirectMessages'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
@@ -98,9 +99,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.BAN_ADD.dm_message, { penalty: { reason } })
 
         try {
-            await mention.send(messagePayload)
+            await DirectMessages.send(self, mention, messagePayload)
         } catch (err) {
-            await self.logger.handleError({ module: 'BanCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
+            self.logger.error({ module: 'BanCommand', action: 'SendDirectMessage', err, guildId: interaction.guildId })
         }
     }
 
@@ -116,7 +117,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         try {
             await interaction.guild.bans.create(mention.id, { reason: reason })
         } catch (err) {
-            await self.logger.handleError({ module: 'BanCommand', action: 'Ban', error: err, guild_id: interaction.guildId })
+            self.logger.error({ module: 'BanCommand', action: 'Ban', err, guildId: interaction.guildId })
         }
     }
 

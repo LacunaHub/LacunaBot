@@ -1,10 +1,11 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { ForumChannel, Guild, GuildMember, GuildTextBasedChannel, MediaChannel, User } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
 import Lacuna from '../../internals/Lacuna'
 import TemporaryBan from '../../internals/structures/TemporaryBan'
 import { generateSimpleId } from '../../internals/utility/Utils'
+import { DirectMessages } from '../DirectMessages'
 import Replacer from '../Replacer'
 import { createCaseLogEntry } from './CaseLog'
 
@@ -29,7 +30,7 @@ async function banUser(self: Lacuna, server: ServerDocument, guild: Guild, optio
         try {
             await guild.members.ban(target.id, { reason })
         } catch (err) {
-            await self.logger.handleError({ module: 'Moderation', action: 'Ban', error: err, guild_id: guild.id })
+            self.logger.error({ module: 'Moderation', action: 'Ban', err, guildId: guild.id })
 
             throw new Error(err)
         }
@@ -47,7 +48,7 @@ async function kickUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
     try {
         await target.kick(reason)
     } catch (err) {
-        await self.logger.handleError({ module: 'Moderation', action: 'Kick', error: err, guild_id: guild.id })
+        self.logger.error({ module: 'Moderation', action: 'Kick', err, guildId: guild.id })
 
         throw new Error(err)
     }
@@ -71,7 +72,7 @@ async function muteUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
     try {
         await target.disableCommunicationUntil(expiresAt, reason)
     } catch (err) {
-        await self.logger.handleError({ module: 'Moderation', action: 'Mute', error: err, guild_id: guild.id })
+        self.logger.error({ module: 'Moderation', action: 'Mute', err, guildId: guild.id })
 
         throw new Error(err)
     }
@@ -106,7 +107,7 @@ async function muteUserRemoveAllRoles(self: Lacuna, server: ServerDocument, targ
     try {
         await target.roles.set(strictRoles, 'Moderation: Remove all roles')
     } catch (err) {
-        await self.logger.handleError({ module: 'Moderation', action: 'MuteRemoveAllRoles', error: err, guild_id: server._id })
+        self.logger.error({ module: 'Moderation', action: 'MuteRemoveAllRoles', err, guildId: server._id })
 
         throw new Error(err)
     }
@@ -182,7 +183,7 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
                     await target.roles.remove(removeRoles)
                 }
             } catch (err) {
-                await self.logger.handleError({ module: 'Moderation', action: 'WarnUserModifyRoles', error: err, guild_id: guild.id })
+                self.logger.error({ module: 'Moderation', action: 'WarnUserModifyRoles', err, guildId: guild.id })
             }
         }
 
@@ -193,7 +194,7 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
 
                 if (channel?.isSendable()) await channel.send(messagePayload)
             } catch (err) {
-                await self.logger.handleError({ module: 'DAME', action: 'SendMessage', error: err, guild_id: guild.id })
+                self.logger.error({ module: 'DAME', action: 'SendMessage', err, guildId: guild.id })
             }
         }
 
@@ -211,10 +212,10 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
         }
 
         self.emit('moduleExecution', {
+            guildId: guild.id,
+            targetId: target.id,
             module: 'Moderation',
-            category: 'Warnings',
-            guild: { id: guild.id, name: guild.name },
-            target: { id: target.id, name: target.user.tag }
+            category: 'Warnings'
         })
     }
 
@@ -225,17 +226,17 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
             })
 
         try {
-            await target.send(messagePayload)
+            await DirectMessages.send(self, target, messagePayload)
         } catch (err) {
-            await self.logger.handleError({ module: 'Warnings', action: 'SendDirectMessage', error: err, guild_id: guild.id })
+            self.logger.error({ module: 'Warnings', action: 'SendDirectMessage', err, guildId: guild.id })
         }
 
         self.emit('moduleExecution', {
+            guildId: guild.id,
+            targetId: target.id,
             module: 'Moderation',
             category: 'Warnings',
-            label: 'SendDirectMessage',
-            guild: { id: guild.id, name: guild.name },
-            target: { id: target.id, name: target.user.tag }
+            label: 'SendDirectMessage'
         })
     }
 

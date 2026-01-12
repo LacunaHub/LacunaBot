@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Message } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import banAction from '../actions/BanAction'
@@ -43,10 +43,10 @@ export default async function moderateWords(self: Lacuna, server: ServerDocument
         if (optDeleteMessage) await deleteMessageAction(self, { message })
 
         self.emit('moduleExecution', {
+            guildId: message.guildId,
+            targetId: message.author.id,
             module: 'AutoMod',
-            category: 'SwearFilter',
-            guild: { id: message.guild.id, name: message.guild.name },
-            target: { id: message.author.id, name: message.author.tag }
+            category: 'SwearFilter'
         })
 
         return true

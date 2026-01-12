@@ -1,0 +1,30 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo-lacuna
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  redis:
+    image: redis:alpine
+    container_name: redis-lacuna
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+volumes:
+  mongo_data:
+  redis_data:

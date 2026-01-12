@@ -4,7 +4,7 @@ import {
     ServerModerationAutoModLinksFilter,
     ServerModerationAutoModSwearFilter,
     ServerModerationAutoModUsersSlowdown
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import { GuildTextBasedChannel, Message } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import Replacer from '../../Replacer'
@@ -19,7 +19,7 @@ export default async function sendMessageAction(self: Lacuna, server: ServerDocu
 
         await (message.channel as GuildTextBasedChannel).send(messagePayload)
     } catch (err) {
-        await self.logger.handleError({ module: 'AutoMod', action: 'SendMessage', error: err, guild_id: message.guildId })
+        self.logger.error({ module: 'AutoMod', action: 'SendMessage', err, guildId: message.guildId })
     }
 }
 

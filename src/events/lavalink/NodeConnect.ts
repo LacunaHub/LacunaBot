@@ -29,7 +29,7 @@ async function handler(self: Lacuna, node: Node) {
             try {
                 message = await textChannel.messages.fetch({ message: guildPlayer.messageId })
             } catch (err) {
-                await self.logger.handleError({ module: 'MusicNodeConnect', action: 'FetchPlayerMessage', error: err, guild_id: guildId })
+                self.logger.error({ module: 'MusicNodeConnect', action: 'FetchPlayerMessage', err, guildId: guildId })
             }
         }
 
@@ -61,7 +61,7 @@ async function handler(self: Lacuna, node: Node) {
         await player.play()
     }
 
-    self.logger.log(`[LavaNodeConnect] Successfully connected to ${node.options.name} node`)
+    self.logger.info({ nodeName: node.options.name }, 'connected to lavalink node')
 
     return true
 }

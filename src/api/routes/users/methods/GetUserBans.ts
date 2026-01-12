@@ -1,4 +1,4 @@
-import { ServerBanDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerBanDocument } from '@/database/schemas/ServerBans'
 import { Context } from 'koa'
 import { FilterQuery } from 'mongoose'
 import database from '../../../../database'

@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import moment from 'moment'
 import ms from 'ms'
 import Lacuna from '../../../internals/Lacuna'
@@ -15,7 +15,7 @@ export default async function muteAction(self: Lacuna, server: ServerDocument, o
     try {
         await target.disableCommunicationUntil(expiresAt, reason)
     } catch (err) {
-        await self.logger.handleError({ module: 'AutoMod', action: 'DisableCommunication', error: err, guild_id: guild.id })
+        self.logger.error({ module: 'AutoMod', action: 'DisableCommunication', err, guildId: guild.id })
     }
 
     await createCaseLogEntry(guild, { type: 'MuteAdd', target: target.user, executor: self.user, reason })
@@ -43,7 +43,7 @@ export default async function muteAction(self: Lacuna, server: ServerDocument, o
         try {
             await target.roles.set(strictRoles, reason)
         } catch (err) {
-            await self.logger.handleError({ module: 'AutoMod', action: 'MuteRemoveAllRoles', error: err, guild_id: guild.id })
+            self.logger.error({ module: 'AutoMod', action: 'MuteRemoveAllRoles', err, guildId: guild.id })
         }
     }
 }

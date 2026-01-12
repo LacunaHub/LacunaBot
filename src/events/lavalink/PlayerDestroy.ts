@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Player } from '@lacunahub/lavaluna.js'
 import { Message } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
@@ -12,11 +12,11 @@ const handler = async (self: Lacuna, player: Player) => {
         try {
             await message.edit({ components: [] })
         } catch (err) {
-            await self.logger.handleError({
+            self.logger.error({
                 module: 'MusicPlayerDestroy',
                 action: 'RemoveComponentsFromPlayerMessage',
-                error: err,
-                guild_id: player.guildId
+                err,
+                guildId: player.guildId
             })
         }
     }
@@ -41,13 +41,7 @@ const handler = async (self: Lacuna, player: Player) => {
     player.set('timeout', null)
     await self.db.qdb.delete(`guildPlayers.${player.guildId}`)
 
-    self.logger.log(`[LavaPlayerDestroy] Player ${player.guildId} destroyed`)
-    await self.logger.appendServerLog(player.guildId, {
-        level: 'LOG',
-        module: 'Music',
-        action: 'PlayerDestroy',
-        message: 'Player destroyed'
-    })
+    self.logger.info({ guildId: player.guildId }, 'player destroyed')
 
     return true
 }

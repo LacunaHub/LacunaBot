@@ -1,7 +1,6 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
 
@@ -32,11 +31,11 @@ export default async function updateYouTubeSubscription(ctx: Context) {
                 }
             })
         } catch (err) {
-            await Logger.handleError({
+            ctx.log.error({
                 module: 'YouTubeSubs',
                 action: 'UpdateWebhook',
-                error: err,
-                guild_id: server._id
+                err,
+                guildId: server._id
             })
         }
     }

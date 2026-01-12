@@ -1,6 +1,6 @@
-import { PaymentDocument, PaymentMetadataProduct, PaymentStatus } from '@lacunahub/lacuna-database-driver'
+import database from '@/database'
+import { PaymentDocument, PaymentMetadataProduct, PaymentStatus } from '@/database/schemas/Payments'
 import { Context } from 'koa'
-import database from '../../../../database'
 import { addDiamond } from '../../../modules/billing'
 import { APIOrder, captureOrder } from '../../../modules/billing/providers/PayPal/Order'
 import APIError from '../../../utility/APIError'

@@ -1,4 +1,5 @@
-import { ServerDocument, UserData, UserLevel, UserServerProfile, UserWallet } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
+import { UserData, UserLevel, UserServerProfile, UserWallet } from '@/database/schemas/Users'
 import { Context } from 'koa'
 import database from '../../../../database'
 import APIError from '../../../utility/APIError'

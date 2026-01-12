@@ -2,8 +2,7 @@ import { CloseEvent, Events } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, event: CloseEvent, id: number) {
-    self.logger.warn(`[DiscordShardDisconnect] Shard #${id} of cluster #${self.cluster.id} disconnected`)
-    await self.logger.telegram.warn(`\`[DiscordShardDisconnect]\` Shard #${id} of cluster #${self.cluster.id} disconnected`)
+    self.logger.warn({ shardId: id, event }, 'shard disconnected')
 
     return true
 }

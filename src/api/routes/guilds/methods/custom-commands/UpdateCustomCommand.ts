@@ -1,7 +1,6 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
 import { validateCustomCommand } from '../../../../utility/validators/ValidateCustomCommand'
@@ -25,11 +24,11 @@ export default async function updateCustomCommand(ctx: Context) {
                 }
             )
         } catch (err) {
-            await Logger.handleError({
+            ctx.log.error({
                 module: 'CustomCommands',
                 action: 'Update',
-                error: err,
-                guild_id: server._id
+                err,
+                guildId: server._id
             })
 
             ctx.throw(500, new APIError(5003))

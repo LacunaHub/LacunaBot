@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesAutomationTriggers } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesAutomationTriggers } from '@/database/schemas/Servers'
 import { VoiceChannel, VoiceState } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import Automation from '../../modules/custom-behavior/Automation'
@@ -50,7 +50,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
                 await state.member.roles.remove(voice_roles, 'Voice roles')
             }
         } catch (err) {
-            await self.logger.handleError({ module: 'VoiceRoles', action: 'RemoveRoles', error: err, guild_id: state.guild.id })
+            self.logger.error({ module: 'VoiceRoles', action: 'RemoveRoles', err, guildId: state.guild.id })
         }
     }
 

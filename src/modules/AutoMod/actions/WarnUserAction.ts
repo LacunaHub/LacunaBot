@@ -1,4 +1,5 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
+import { DirectMessages } from '@/modules/DirectMessages'
 import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, GuildTextBasedChannel, Message, User } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import { generateSimpleId } from '../../../internals/utility/Utils'
@@ -82,7 +83,7 @@ export default async function warnUserAction(
 
                 await (signal.channel as GuildTextBasedChannel).send(messagePayload)
             } catch (err) {
-                await self.logger.handleError({ module: 'WarningPenalty', action: 'SendMessage', error: err, guild_id: signal.guildId })
+                self.logger.error({ module: 'WarningPenalty', action: 'SendMessage', err, guildId: signal.guildId })
             }
         }
 
@@ -100,11 +101,11 @@ export default async function warnUserAction(
         }
 
         self.emit('moduleExecution', {
+            guildId: signal.guild.id,
+            targetId: target.id,
             module: 'Moderation',
             category: 'Warnings',
-            label: 'HandlePenalty',
-            guild: { id: signal.guild.id, name: signal.guild.name },
-            target: { id: target.id, name: target.user.tag }
+            label: 'HandlePenalty'
         })
     }
 
@@ -119,17 +120,17 @@ export default async function warnUserAction(
             })
 
         try {
-            await target.send(messagePayload)
+            await DirectMessages.send(self, target, messagePayload)
         } catch (err) {
-            await self.logger.handleError({ module: 'Warnings', action: 'SendDirectMessage', error: err, guild_id: signal.guild.id })
+            self.logger.error({ module: 'Warnings', action: 'SendDirectMessage', err, guildId: signal.guild.id })
         }
 
         self.emit('moduleExecution', {
+            guildId: signal.guild.id,
+            targetId: target.id,
             module: 'Moderation',
             category: 'Warnings',
-            label: 'SendDirectMessage',
-            guild: { id: signal.guild.id, name: signal.guild.name },
-            target: { id: target.id, name: target.user.tag }
+            label: 'SendDirectMessage'
         })
     }
 }

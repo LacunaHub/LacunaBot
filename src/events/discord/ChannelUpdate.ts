@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { ChannelType, DMChannel, Events, GuildChannel, PermissionsBitField } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
@@ -40,11 +40,11 @@ const handler = async (self: Lacuna, before: DMChannel | GuildChannel, channel: 
                         )
                     }
                 } catch (err) {
-                    await self.logger.handleError({
+                    self.logger.error({
                         module: 'TempVoices',
                         action: 'SetPermissionsForModeratorRoles',
-                        error: err,
-                        guild_id: channel.guild.id
+                        err,
+                        guildId: channel.guild.id
                     })
                 }
             }

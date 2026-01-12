@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { BaseGuildTextChannel, Collection, MessageReaction, User } from 'discord.js'
 import Lacuna from '../internals/Lacuna'
 
@@ -28,11 +28,11 @@ export async function handleReactionAdd(self: Lacuna, server: ServerDocument, re
                         { reason: 'Interactive Reactions' }
                     )
                 } catch (err) {
-                    await self.logger.handleError({
+                    self.logger.error({
                         module: 'InteractiveReactions',
                         action: 'CreatePermissionOverwrites',
-                        error: err,
-                        guild_id: message.guildId
+                        err,
+                        guildId: message.guildId
                     })
 
                     break
@@ -40,10 +40,10 @@ export async function handleReactionAdd(self: Lacuna, server: ServerDocument, re
             }
 
             self.emit('moduleExecution', {
+                guildId: message.guildId,
+                targetId: member.id,
                 module: 'InteractiveReactions',
-                label: 'ViewChannel',
-                guild: { id: message.guild.id, name: message.guild.name },
-                target: { id: member.id, name: member.user.tag }
+                label: 'ViewChannel'
             })
         }
 
@@ -78,19 +78,19 @@ export async function handleReactionAdd(self: Lacuna, server: ServerDocument, re
                 if (rolesToAdd.length) await member.roles.add(rolesToAdd, 'Interactive Reactions')
                 if (rolesToRemove.length) await member.roles.remove(rolesToRemove, 'Interactive Reactions')
             } catch (err) {
-                await self.logger.handleError({
+                self.logger.error({
                     module: 'InteractiveReactions',
                     action: 'Add',
-                    error: err,
-                    guild_id: message.guildId
+                    err,
+                    guildId: message.guildId
                 })
             }
 
             self.emit('moduleExecution', {
+                guildId: message.guildId,
+                targetId: member.id,
                 module: 'InteractiveReactions',
-                category: 'Add',
-                guild: { id: message.guild.id, name: message.guild.name },
-                target: { id: member.id, name: member.user.tag }
+                category: 'Add'
             })
         }
     }
@@ -126,11 +126,11 @@ export async function handleReactionRemove(self: Lacuna, server: ServerDocument,
                         await overwrites.delete('Interactive Reactions')
                     }
                 } catch (err) {
-                    await self.logger.handleError({
+                    self.logger.error({
                         module: 'InteractiveReactions',
                         action: 'DeletePermissionOverwrites',
-                        error: err,
-                        guild_id: message.guildId
+                        err,
+                        guildId: message.guildId
                     })
 
                     break
@@ -138,10 +138,10 @@ export async function handleReactionRemove(self: Lacuna, server: ServerDocument,
             }
 
             self.emit('moduleExecution', {
+                guildId: message.guildId,
+                targetId: member.id,
                 module: 'InteractiveReactions',
-                label: 'DeleteChannelOverwrites',
-                guild: { id: message.guild.id, name: message.guild.name },
-                target: { id: member.id, name: member.user.tag }
+                label: 'DeleteChannelOverwrites'
             })
         }
 
@@ -176,19 +176,19 @@ export async function handleReactionRemove(self: Lacuna, server: ServerDocument,
                 if (rolesToAdd.length) await member.roles.add(rolesToAdd, 'Interactive Reactions')
                 if (rolesToRemove.length) await member.roles.remove(rolesToRemove, 'Interactive Reactions')
             } catch (err) {
-                await self.logger.handleError({
+                self.logger.error({
                     module: 'InteractiveReactions',
                     action: 'Remove',
-                    error: err,
-                    guild_id: message.guildId
+                    err,
+                    guildId: message.guildId
                 })
             }
 
             self.emit('moduleExecution', {
+                guildId: message.guildId,
+                targetId: member.id,
                 module: `InteractiveReactions`,
-                category: 'Remove',
-                guild: { id: message.guild.id, name: message.guild.name },
-                target: { id: member.id, name: member.user.tag }
+                category: 'Remove'
             })
         }
     }

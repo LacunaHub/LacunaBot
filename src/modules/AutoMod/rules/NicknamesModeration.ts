@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModerationAutoModNicknames } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModerationAutoModNicknames } from '@/database/schemas/Servers'
 import { GuildMember } from 'discord.js'
 import { clean, isZalgo } from 'unzalgo'
 import Lacuna from '../../../internals/Lacuna'
@@ -29,14 +29,14 @@ export default async function moderateNicknames(self: Lacuna, server: ServerDocu
         try {
             await member.setNickname(nickname, reason)
         } catch (err) {
-            await self.logger.handleError({ module: 'AutoMod', action: 'SetNickname', error: err, guild_id: member.guild.id })
+            self.logger.error({ module: 'AutoMod', action: 'SetNickname', err, guildId: member.guild.id })
         }
 
         self.emit('moduleExecution', {
+            guildId: member.guild.id,
+            targetId: member.id,
             module: 'AutoMod',
-            category: 'NicknamesModeration',
-            guild: { id: member.guild.id, name: member.guild.name },
-            target: { id: member.id, name: member.user.tag }
+            category: 'NicknamesModeration'
         })
     }
 

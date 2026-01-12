@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { BaseGuildTextChannel, EmbedBuilder, VoiceState } from 'discord.js'
 import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
@@ -29,16 +29,16 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
             try {
                 await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
-                await self.logger.handleError({ module: 'LogsVoiceMove', action: 'SendMessageViaWebhook', error: err, guild_id: state.guild.id })
+                self.logger.error({ module: 'LogsVoiceMove', action: 'SendMessageViaWebhook', err, guildId: state.guild.id })
 
                 return false
             }
 
             self.emit('moduleExecution', {
+                guildId: state.guild.id,
+                targetId: state.id,
                 module: 'Logs',
-                category: 'VoiceMove',
-                guild: { id: state.guild.id, name: state.guild.name },
-                target: { id: state.member.id, name: state.member.user.tag }
+                category: 'VoiceMove'
             })
 
             return true

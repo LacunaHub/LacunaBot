@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import {
     ApplicationCommandOptionAllowedChannelTypes,
     ApplicationCommandOptionType,
@@ -153,6 +153,9 @@ export class Command {
         this.uses++
 
         this.self.emit('commandExecution', {
+            guildId: interaction.guild.id,
+            channelId: interaction.channelId,
+            userId: interaction.user.id,
             command: this.name,
             options:
                 interaction.options?.data?.map(v => {
@@ -165,10 +168,7 @@ export class Command {
                         }
 
                     return { name: v.name, type: v.type, value: v.value ?? null }
-                }) ?? [],
-            guild: { name: interaction.guild.name, id: interaction.guild.id },
-            channel: { name: interaction.channel.name, id: interaction.channelId },
-            user: { name: interaction.user.username, id: interaction.user.id }
+                }) ?? []
         })
 
         return true

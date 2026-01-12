@@ -5,7 +5,7 @@ import {
     ServerModulesCustomCommandComponentConditionCompareValuesOperators,
     ServerModulesCustomCommandComponentConditionCompareValuesOptions,
     ServerModulesCustomCommandComponentConditionTypes
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import {
     APIEmbed,
     BaseGuildTextChannel,
@@ -508,10 +508,10 @@ export async function runScript(instance: Automation | CustomCommand, ctx: Conte
             }
         }
 
-        await instance.self.logger.handleError({
+        instance.self.logger.error({
             module: 'Automation',
             action: 'ExecuteCodeAction',
-            error: error,
+            err: error,
             guild_id: instance.server._id
         })
 

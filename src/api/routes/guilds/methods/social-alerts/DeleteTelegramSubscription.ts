@@ -1,7 +1,6 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
 
@@ -35,11 +34,11 @@ export default async function deleteTelegramSubscription(ctx: Context) {
         try {
             await DiscordUtils.rest.delete(DiscordUtils.restRoutes.webhook(tgSubscription.webhook_id, tgSubscription.webhook_token))
         } catch (err) {
-            await Logger.handleError({
+            ctx.log.error({
                 module: 'TelegramSubs',
                 action: 'DeleteWebhook',
-                error: err,
-                guild_id: server._id
+                err,
+                guildId: server._id
             })
         }
     }

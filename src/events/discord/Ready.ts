@@ -36,8 +36,7 @@ const handler = async (self: Lacuna) => {
     self.loadEvents()
     self.lava.initialize()
 
-    self.logger.info(`[DiscordReady] ${self.user.username} is ready`)
-    await self.logger.telegram.info(`\`[DiscordReady]\` ${self.user.username} is ready`)
+    self.logger.info({ bot: self.user }, 'client ready')
 
     return true
 }

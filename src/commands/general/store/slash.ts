@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesEconomyStoreItem } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesEconomyStoreItem } from '@/database/schemas/Servers'
 import { ActionRowBuilder, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message, StringSelectMenuBuilder } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import { chunkArray } from '../../../internals/utility/Utils'

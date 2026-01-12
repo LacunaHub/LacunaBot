@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Player } from '@lacunahub/lavaluna.js'
 import { Message } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
@@ -29,13 +29,7 @@ async function handler(self: Lacuna, player: Player) {
         await self.db.qdb.delete(`guildPlayers.${player.guildId}`)
     }
 
-    self.logger.log(`[LavaTrackStart] Player ${player.guildId} playback started`)
-    await self.logger.appendServerLog(player.guildId, {
-        level: 'LOG',
-        module: 'Music',
-        action: 'TrackStart',
-        message: `Track "${track.info.author} - ${track.info.title}" is playing now`
-    })
+    self.logger.info({ guildId: player.guildId }, 'player playback started')
 
     /**
      * Set voice channel status if enabled in settings.

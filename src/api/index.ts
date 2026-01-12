@@ -1,12 +1,9 @@
 import koaCORS from '@koa/cors'
-import { LavalunaManager } from '@lacunahub/lavaluna.js'
-import { ServerClient } from '@lacunahub/letsfrag'
 import Koa from 'koa'
 import koaBody from 'koa-body'
 import koaJSON from 'koa-json'
-import koaLogger from 'koa-logger'
+import koaPinoLogger from 'koa-pino-logger'
 import database from '../database'
-import Logger from '../internals/Logger'
 import { scheduleUpdateListingStats } from './modules/Metrics'
 import ReleaseNotesLogger from './modules/ReleaseNotesLogger'
 import ReportsChecker from './modules/ReportsChecker'
@@ -14,41 +11,16 @@ import { handleDiamondGuilds } from './modules/billing/utility/DiamondGuild'
 import { handlePatrons } from './modules/billing/utility/Patron'
 import YouTubeAlerts from './modules/social-alerts/YouTubeAlerts'
 import routes from './routes'
+import Logger from './utility/Logger'
+import { brokerClient, lava } from './utility/Managers'
 import { passKnownReferrers } from './utility/Utils'
 
 const app = new Koa()
-const serverClient = new ServerClient(null, {
-    host: process.env.LCN_SERVER_HOST,
-    port: +process.env.LCN_SERVER_PORT,
-    authorization: process.env.LCN_SERVER_AUTHORIZATION,
-    type: 'api'
-})
-const lava = new LavalunaManager({
-    nodes: process.env.LCN_LAVALINK_NODES.split(',').map(v => {
-        const [name, hostname, port, password] = v.split(':')
-
-        return {
-            name,
-            hostname,
-            port: +port,
-            secure: +port === 443,
-            password,
-            reconnectRetryAmount: 100,
-            reconnectRetryDelay: 60000
-        }
-    }),
-    clientId: process.env.LCN_DISCORD_CLIENT_ID,
-    send: () => {}
-})
 
 app.use(koaBody({ jsonLimit: '50mb' }))
 app.use(koaJSON())
 app.use(koaCORS({ credentials: true, exposeHeaders: ['Content-Disposition'] }))
-app.use(
-    koaLogger({
-        transporter: str => Logger.log(str)
-    })
-)
+app.use(koaPinoLogger({ logger: Logger }))
 
 app.proxy = process.env.LCN_ROOT_DOMAIN !== 'localhost'
 app.keys = ['discord_oauth_state']
@@ -74,11 +46,13 @@ app.use(routes.users.routes()).use(routes.users.allowedMethods())
 app.use(routes.webhooks.routes()).use(routes.webhooks.allowedMethods())
 
 database.connect()
-serverClient.connect()
+brokerClient.connect()
 lava.initialize()
 
-app.listen(process.env.LCN_API_PORT, () => {
-    Logger.info(`API started on port ${process.env.LCN_API_PORT}`)
+// listen on all interfaces
+// required inside a docker container
+app.listen(Number(process.env.LCN_API_PORT), '0.0.0.0').on('listening', () => {
+    Logger.info({ port: process.env.LCN_API_PORT }, 'api started')
 
     handleDiamondGuilds()
     handlePatrons()
@@ -88,7 +62,5 @@ app.listen(process.env.LCN_API_PORT, () => {
     ReportsChecker.createSchedule()
 })
 
-process.on('uncaughtException', Logger.error)
-process.on('unhandledRejection', Logger.error)
-
-export { app, lava, serverClient }
+process.on('uncaughtException', Logger.error.bind(Logger))
+process.on('unhandledRejection', Logger.error.bind(Logger))

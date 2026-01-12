@@ -1,4 +1,5 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
+import { DirectMessages } from '@/modules/DirectMessages'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
@@ -83,16 +84,16 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.KICK.dm_message, { penalty: { reason } })
 
         try {
-            await mention.send(messagePayload)
+            await DirectMessages.send(self, mention, messagePayload)
         } catch (err) {
-            await self.logger.handleError({ module: 'KickCommand', action: 'SendDirectMessage', error: err, guild_id: interaction.guildId })
+            self.logger.error({ module: 'KickCommand', action: 'SendDirectMessage', err, guildId: interaction.guildId })
         }
     }
 
     try {
         await mention.kick(reason)
     } catch (err) {
-        await self.logger.handleError({ module: 'KickCommand', action: 'Kick', error: err, guild_id: interaction.guildId })
+        self.logger.error({ module: 'KickCommand', action: 'Kick', err, guildId: interaction.guildId })
     }
 
     await createCaseLogEntry(interaction.guild, { type: 'Kick', target: mention.user, executor: interaction.user, reason })

@@ -1,7 +1,6 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
 
@@ -15,11 +14,11 @@ export default async function deleteCustomCommand(ctx: Context) {
     try {
         await DiscordUtils.rest.delete(DiscordUtils.restRoutes.applicationGuildCommand(process.env.LCN_DISCORD_CLIENT_ID, server._id, command.id))
     } catch (err) {
-        await Logger.handleError({
+        ctx.log.error({
             module: 'CustomCommands',
             action: 'Delete',
-            error: err,
-            guild_id: server._id
+            err,
+            guildId: server._id
         })
 
         ctx.throw(500, new APIError(5004))

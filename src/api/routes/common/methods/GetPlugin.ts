@@ -1,4 +1,4 @@
-import { ServerModulesAutomation, ServerModulesCustomCommand } from '@lacunahub/lacuna-database-driver'
+import { ServerModulesAutomation, ServerModulesCustomCommand } from '@/database/schemas/Servers'
 import { languages } from '@lacunahub/lacuna-locale'
 import { Context } from 'koa'
 import database from '../../../../database'

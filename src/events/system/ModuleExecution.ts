@@ -1,51 +1,10 @@
 import Lacuna from '../../internals/Lacuna'
-import logger from '../../internals/Logger'
 
 const handler = async (self: Lacuna, data: ModuleExecutionData) => {
-    await handleModuleExecutionData(data)
+    const { guildId, targetId, module, category, label } = data
+    self.logger.info({ guildId, targetId, module, category, label }, 'module execution')
 
     return true
-}
-
-export async function handleModuleExecutionData(data: ModuleExecutionData) {
-    const { module, category, label, guild, target } = data
-    // const moduleStats = qdb.get(`stats.modules.${module}`)
-
-    // if (moduleStats) {
-    //     qdb.push(`stats.modules.${module}.data`, {
-    //         timestamp: Date.now(),
-    //         category,
-    //         label: label ?? null,
-    //         guild_id: guild.id,
-    //         target_id: target.id
-    //     })
-    //     qdb.add(`stats.modules.${module}.total_uses`, 1)
-    // } else {
-    //     qdb.set(`stats.modules.${module}`, {
-    //         module,
-    //         data: [
-    //             {
-    //                 timestamp: Date.now(),
-    //                 category: category ?? null,
-    //                 label: label ?? null,
-    //                 guild_id: guild.id,
-    //                 target_id: target.id
-    //             }
-    //         ],
-    //         total_uses: 1
-    //     })
-    // }
-
-    logger.log(`[${module}${category ?? ''}${label ?? ''}Module] Execution from (${guild.name}:${guild.id}) for (${target.name}:${target.id})`)
-
-    if (!['Levels', 'Economy'].includes(module)) {
-        await logger.appendServerLog(guild.id, {
-            level: 'LOG',
-            module: module,
-            action: `${category ?? ''}${label ?? ''}` || null,
-            message: `Executed with details ${JSON.stringify(target)}`
-        })
-    }
 }
 
 export default {
@@ -54,9 +13,9 @@ export default {
 }
 
 export interface ModuleExecutionData {
+    guildId: string
+    targetId: string
     module: string
     category?: string
     label?: string
-    guild: { name: string; id: string }
-    target: { name: string; id: string }
 }

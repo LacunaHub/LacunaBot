@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { BaseGuildTextChannel, Collection, EmbedBuilder, Message } from 'discord.js'
 import { isRateLimited, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
@@ -31,21 +31,21 @@ export default async function (self: Lacuna, server: ServerDocument, messages: C
             try {
                 await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
-                await self.logger.handleError({
+                self.logger.error({
                     module: 'LogsMessageDeleteBulk',
                     action: 'SendMessageViaWebhook',
-                    error: err,
-                    guild_id: message.guildId
+                    err,
+                    guildId: message.guildId
                 })
 
                 return false
             }
 
             self.emit('moduleExecution', {
+                guildId: message.guildId,
+                targetId: message.id,
                 module: 'Logs',
-                category: 'MessageDeleteBulk',
-                guild: { id: message.guild.id, name: message.guild.name },
-                target: { id: message.author ? message.author.id : message.id, name: message.author ? message.author.tag : message.type }
+                category: 'MessageDeleteBulk'
             })
 
             return true

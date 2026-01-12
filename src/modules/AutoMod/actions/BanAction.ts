@@ -6,7 +6,7 @@ import {
     ServerModerationAutoModSwearFilter,
     ServerModerationAutoModUsersSlowdown,
     ServerModerationWarningsPenalty
-} from '@lacunahub/lacuna-database-driver'
+} from '@/database/schemas/Servers'
 import { Guild, GuildMember } from 'discord.js'
 import moment from 'moment'
 import Lacuna from '../../../internals/Lacuna'
@@ -32,7 +32,7 @@ export default async function banAction(self: Lacuna, server: ServerDocument, op
         try {
             await guild.members.ban(target.id, { reason })
         } catch (err) {
-            await self.logger.handleError({ module: 'AutoMod', action: 'Ban', error: err, guild_id: guild.id })
+            self.logger.error({ module: 'AutoMod', action: 'Ban', err, guildId: guild.id })
         }
     }
 

@@ -1,4 +1,4 @@
-import { ServerDocument, ServerModulesEconomyStoreItem } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument, ServerModulesEconomyStoreItem } from '@/database/schemas/Servers'
 import { BaseGuildTextChannel, BaseGuildVoiceChannel, Collection, Guild, GuildMember, Message, VoiceState } from 'discord.js'
 import Lacuna from '../internals/Lacuna'
 import TemporaryRole from '../internals/structures/TemporaryRole'
@@ -97,10 +97,10 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
     }
 
     self.emit('moduleExecution', {
+        guildId: message.guildId,
+        targetId: message.author.id,
         module: 'Economy',
-        category: 'MessageCreate',
-        guild: { id: message.guild.id, name: message.guild.name },
-        target: { id: message.author.id, name: message.author.tag }
+        category: 'MessageCreate'
     })
 
     return true
@@ -147,10 +147,10 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
     }
 
     self.emit('moduleExecution', {
+        guildId: state.guild.id,
+        targetId: state.id,
         module: 'Economy',
-        category: 'VoiceAssign',
-        guild: { id: state.guild.id, name: state.guild.name },
-        target: { id: state.id, name: state.member.user.tag }
+        category: 'VoiceAssign'
     })
 
     return true
@@ -233,10 +233,10 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
         }
 
         self.emit('moduleExecution', {
+            guildId: member.guild.id,
+            targetId: member.id,
             module: 'Economy',
-            category: 'VoiceUnassign',
-            guild: { id: member.guild.id, name: member.guild.name },
-            target: { id: member.id, name: member.user.tag }
+            category: 'VoiceUnassign'
         })
     }
 }
@@ -281,7 +281,7 @@ export async function purchaseItem(item: ServerModulesEconomyStoreItem, self: La
                 try {
                     await channel.permissionOverwrites.create(member.id, { ViewChannel: true })
                 } catch (err) {
-                    await this.self.logger.handleError({ module: 'Economy', action: 'PurchaseItemCreateOverwrites', error: err, guild_id: guild.id })
+                    this.self.logger.error({ module: 'Economy', action: 'PurchaseItemCreateOverwrites', err, guildId: guild.id })
                 }
             }
         }
@@ -305,7 +305,7 @@ export async function purchaseItem(item: ServerModulesEconomyStoreItem, self: La
                 try {
                     await member.roles.add(roles)
                 } catch (err) {
-                    await this.self.logger.handleError({ module: 'Economy', action: 'PurchaseItemAddRoles', error: err, guild_id: guild.id })
+                    this.self.logger.error({ module: 'Economy', action: 'PurchaseItemAddRoles', err, guildId: guild.id })
                 }
             }
         }
@@ -346,10 +346,10 @@ export async function purchaseItem(item: ServerModulesEconomyStoreItem, self: La
         )
 
     self.emit('moduleExecution', {
+        guildId: guild.id,
+        targetId: item.id,
         module: 'Economy',
-        category: 'ItemPurchase',
-        guild: { id: guild.id, name: guild.name },
-        target: { id: item.id, name: item.name }
+        category: 'ItemPurchase'
     })
 
     return 'SUCCESS'

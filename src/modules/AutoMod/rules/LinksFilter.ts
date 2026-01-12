@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Collection, Invite, Message } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import banAction from '../actions/BanAction'
@@ -37,7 +37,7 @@ export default async function moderateLinks(self: Lacuna, server: ServerDocument
             try {
                 await message.delete()
             } catch (err) {
-                await self.logger.handleError({ module: 'AutoMod', action: 'LinksFilterDeleteLink', error: err, guild_id: message.guildId })
+                self.logger.error({ module: 'AutoMod', action: 'LinksFilterDeleteLink', err, guildId: message.guildId })
             }
 
             await doActions(self, server, message)
@@ -59,14 +59,14 @@ export default async function moderateLinks(self: Lacuna, server: ServerDocument
                 return guildInvites.some(vv => vv.code !== code)
             })
         } catch (err) {
-            await self.logger.handleError({ module: 'AutoMod', action: 'LinksFilterFetchInvites', error: err, guild_id: message.guildId })
+            self.logger.error({ module: 'AutoMod', action: 'LinksFilterFetchInvites', err, guildId: message.guildId })
         }
 
         if (isReferral) {
             try {
                 await message.delete()
             } catch (err) {
-                await self.logger.handleError({ module: 'AutoMod', action: 'LinksFilterDeleteInvite', error: err, guild_id: message.guildId })
+                self.logger.error({ module: 'AutoMod', action: 'LinksFilterDeleteInvite', err, guildId: message.guildId })
             }
 
             await doActions(self, server, message)
@@ -105,9 +105,9 @@ async function doActions(self: Lacuna, server: ServerDocument, message: Message)
     if (optDeleteMessage) await deleteMessageAction(self, { message })
 
     self.emit('moduleExecution', {
+        guildId: message.guildId,
+        targetId: message.author.id,
         module: 'AutoMod',
-        category: 'LinksFilter',
-        guild: { id: message.guild.id, name: message.guild.name },
-        target: { id: message.author.id, name: message.author.tag }
+        category: 'LinksFilter'
     })
 }

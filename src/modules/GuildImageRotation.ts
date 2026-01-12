@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Guild, GuildMember } from 'discord.js'
 import Lacuna from '../internals/Lacuna'
 import Replacer from './Replacer'
@@ -25,10 +25,10 @@ async function rotateBanner(self: Lacuna, server: ServerDocument, guild: Guild, 
         )
 
         self.emit('moduleExecution', {
+            guildId: guild.id,
+            targetId: guild.id,
             module: 'GuildImageRotation',
-            category: 'RotateBanner',
-            guild: { id: guild.id, name: guild.name },
-            target: { id: guild.id, name: guild.name }
+            category: 'RotateBanner'
         })
 
         return true
@@ -41,7 +41,7 @@ async function rotateBanner(self: Lacuna, server: ServerDocument, guild: Guild, 
                 }
             }
         )
-        await self.logger.handleError({ module: 'GuildImageRotation', action: 'RotateBanner', error: err, guild_id: guild.id })
+        self.logger.error({ module: 'GuildImageRotation', action: 'RotateBanner', err, guildId: guild.id })
     }
 
     return false

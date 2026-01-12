@@ -1,4 +1,5 @@
-import { ReportType, ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ReportType } from '@/database/schemas/Reports'
+import { ServerDocument } from '@/database/schemas/Servers'
 import {
     ActionRowBuilder,
     BaseGuildTextChannel,
@@ -136,7 +137,7 @@ export default async (
                 try {
                     await reportMessage.edit({ embeds: [embed] })
                 } catch (err) {
-                    await self.logger.handleError({ module: 'ReportCommand', action: 'EditReportMessage', error: err, guild_id: interaction.guildId })
+                    self.logger.error({ module: 'ReportCommand', action: 'EditReportMessage', err, guildId: interaction.guildId })
                 }
             } else {
                 const embed = new EmbedBuilder()
@@ -188,7 +189,7 @@ export default async (
                         components: rows
                     })
                 } catch (err) {
-                    await self.logger.handleError({ module: 'ReportCommand', action: 'SendReportMessage', error: err, guild_id: interaction.guildId })
+                    self.logger.error({ module: 'ReportCommand', action: 'SendReportMessage', err, guildId: interaction.guildId })
                 }
             }
         }

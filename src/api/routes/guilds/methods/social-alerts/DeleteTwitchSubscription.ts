@@ -1,7 +1,6 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import { eventSubUnsubscribe } from '../../../../modules/social-alerts/TwitchAlerts'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
@@ -35,11 +34,11 @@ export default async function deleteTwitchSubscription(ctx: Context) {
             await eventSubUnsubscribe(twitchSub?._id)
             await database.twitchSubs.deleteMany({ broadcaster_id: twitchSubscription.broadcaster_id })
         } catch (err) {
-            await Logger.handleError({
+            ctx.log.error({
                 module: 'TwitchSubs',
                 action: 'DeleteEventSub',
-                error: err,
-                guild_id: server._id
+                err,
+                guildId: server._id
             })
 
             ctx.throw(500, new APIError(5016))
@@ -50,11 +49,11 @@ export default async function deleteTwitchSubscription(ctx: Context) {
         try {
             await DiscordUtils.rest.delete(DiscordUtils.restRoutes.webhook(twitchSubscription.webhook_id, twitchSubscription.webhook_token))
         } catch (err) {
-            await Logger.handleError({
+            ctx.log.error({
                 module: 'TwitchSubs',
                 action: 'DeleteWebhook',
-                error: err,
-                guild_id: server._id
+                err,
+                guildId: server._id
             })
         }
     }

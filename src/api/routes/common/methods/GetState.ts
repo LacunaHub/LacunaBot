@@ -1,7 +1,7 @@
+import { brokerClient, lava } from '@/api/utility/Managers'
 import { HostData } from '@lacunahub/letsfrag'
 import { Context } from 'koa'
 import fetch from 'node-fetch'
-import { lava, serverClient } from '../../..'
 import database from '../../../../database'
 import Lacuna from '../../../../internals/Lacuna'
 
@@ -12,8 +12,8 @@ export default async function getState(ctx: Context) {
         clusters: BotStats[] = []
 
     try {
-        hosts = await serverClient.getHostsData()
-        const broadcastResponse = await serverClient.broadcastEval<BotStats[][]>((self: Lacuna) => {
+        hosts = await brokerClient.getHostsData()
+        const broadcastResponse = await brokerClient.broadcastEval<BotStats[][]>((self: Lacuna) => {
             return {
                 host: self.hostname,
                 clusterId: self.cluster.id,

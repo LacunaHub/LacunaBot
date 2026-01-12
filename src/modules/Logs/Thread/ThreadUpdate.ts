@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry } from 'discord.js'
 import numbro from 'numbro'
 import { isRateLimited, LogEventData, sendLog } from '..'
@@ -39,11 +39,11 @@ export default async function (self: Lacuna, server: ServerDocument, data: Threa
         try {
             await sendLog(self, server, logChannel.id, { embeds: [embed] })
         } catch (err) {
-            await self.logger.handleError({
+            self.logger.error({
                 module: 'LogsThreadUpdateName',
                 action: 'SendMessageViaWebhook',
-                error: err,
-                guild_id: guild.id
+                err,
+                guildId: guild.id
             })
 
             return false
@@ -78,11 +78,11 @@ export default async function (self: Lacuna, server: ServerDocument, data: Threa
         try {
             await sendLog(self, server, logChannel.id, { embeds: [embed] })
         } catch (err) {
-            await self.logger.handleError({
+            self.logger.error({
                 module: 'LogsThreadUpdateAutoArchiveDuration',
                 action: 'SendMessageViaWebhook',
-                error: err,
-                guild_id: guild.id
+                err,
+                guildId: guild.id
             })
 
             return false
@@ -90,10 +90,10 @@ export default async function (self: Lacuna, server: ServerDocument, data: Threa
     }
 
     self.emit('moduleExecution', {
+        guildId: guild.id,
+        targetId: thread.id,
         module: 'Logs',
-        category: 'ThreadUpdate',
-        guild: { id: guild.id, name: guild.name },
-        target: { id: thread.id, name: thread.name }
+        category: 'ThreadUpdate'
     })
 
     return true

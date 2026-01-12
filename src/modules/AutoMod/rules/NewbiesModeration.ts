@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { GuildMember } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import banAction from '../actions/BanAction'
@@ -33,10 +33,10 @@ export default async function moderateNewbies(self: Lacuna, server: ServerDocume
         if (optMute && !optBan && !optKick) await muteAction(self, server, { config, guild: member.guild, target: member, reason })
 
         self.emit('moduleExecution', {
+            guildId: member.guild.id,
+            targetId: member.id,
             module: 'AutoMod',
-            category: 'NewbiesModeration',
-            guild: { id: member.guild.id, name: member.guild.name },
-            target: { id: member.id, name: member.user.tag }
+            category: 'NewbiesModeration'
         })
 
         return true

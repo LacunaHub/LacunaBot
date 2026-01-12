@@ -1,6 +1,7 @@
-import { DiamondProductTier, PaymentType, SubscriptionType } from '@lacunahub/lacuna-database-driver'
+import database, { DiamondProductTier } from '@/database'
+import { PaymentType } from '@/database/schemas/Payments'
+import { SubscriptionType } from '@/database/schemas/Subscriptions'
 import { Context } from 'koa'
-import database from '../../../../database'
 
 export default async function getProducts(ctx: Context) {
     const products = await database.getProducts(),

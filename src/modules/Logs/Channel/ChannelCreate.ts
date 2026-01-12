@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry, GuildChannel } from 'discord.js'
 import { isRateLimited, LogEventData, sendLog } from '..'
 import Lacuna from '../../../internals/Lacuna'
@@ -29,16 +29,16 @@ export default async function (self: Lacuna, server: ServerDocument, data: Chann
     try {
         await sendLog(self, server, logChannel.id, { embeds: [embed] })
     } catch (err) {
-        await self.logger.handleError({ module: 'LogsChannelCreate', action: 'SendMessageViaWebhook', error: err, guild_id: channel.guildId })
+        self.logger.error({ module: 'LogsChannelCreate', action: 'SendMessageViaWebhook', err, guildId: channel.guildId })
 
         return false
     }
 
     self.emit('moduleExecution', {
+        guildId: guild.id,
+        targetId: channel.id,
         module: 'Logs',
-        category: 'ChannelCreate',
-        guild: { id: guild.id, name: guild.name },
-        target: { id: channel.id, name: channel.name }
+        category: 'ChannelCreate'
     })
 
     return true

@@ -1,4 +1,4 @@
-import { ReportDocument, ReportType, UserReportMetadataCategory } from '@lacunahub/lacuna-database-driver'
+import { ReportDocument, ReportType, UserReportMetadataCategory } from '@/database/schemas/Reports'
 import { Context } from 'koa'
 import { FilterQuery } from 'mongoose'
 import database from '../../../../database'

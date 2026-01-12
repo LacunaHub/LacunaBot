@@ -1,4 +1,4 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { Collection, Events, Message } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 import Logs from '../../modules/Logs'

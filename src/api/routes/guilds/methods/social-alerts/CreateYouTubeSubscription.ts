@@ -1,8 +1,7 @@
-import { ServerDocument } from '@lacunahub/lacuna-database-driver'
+import { ServerDocument } from '@/database/schemas/Servers'
 import { APIWebhook, resolveImage } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import Logger from '../../../../../internals/Logger'
 import { hubSubscribe } from '../../../../modules/social-alerts/YouTubeAlerts'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
@@ -24,11 +23,11 @@ export default async function createYouTubeSubscription(ctx: Context) {
             }
         })) as any
     } catch (err) {
-        await Logger.handleError({
+        ctx.log.error({
             module: 'YouTubeSubs',
             action: 'CreateWebhook',
-            error: err,
-            guild_id: server._id
+            err,
+            guildId: server._id
         })
 
         ctx.throw(500, new APIError(5009))

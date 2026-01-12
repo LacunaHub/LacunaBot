@@ -1,5 +1,6 @@
+import { ServerDocument } from '@/database/schemas/Servers'
+import { ViolationJudgement, ViolationSeverityLevels } from '@/database/schemas/ViolativeMessages'
 import { SchemaType } from '@google/generative-ai'
-import { ServerDocument, ViolationJudgement, ViolationSeverityLevels } from '@lacunahub/lacuna-database-driver'
 import { Attachment, BaseGuildTextChannel, EmbedBuilder, messageLink as getMessageLink, Message, MessageType, resolveFile } from 'discord.js'
 import GeminiAPI, { defaultModelParams } from '../../api/utility/GeminiAPI'
 import database from '../../database'
@@ -270,7 +271,7 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
             }
         }
 
-        self.logger.log(`[AIModModule] Execution from (${message.guild.name}:${message.guildId})`, resultText)
+        self.logger.info({ guildId: message.guildId, response }, 'aimod result')
 
         return response
     }

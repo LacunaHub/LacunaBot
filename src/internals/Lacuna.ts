@@ -1,13 +1,13 @@
-import { EnvData, ServerDocument, ServerModulesCustomCommand } from '@lacunahub/lacuna-database-driver'
+import database, { EnvData } from '@/database'
+import { ServerDocument, ServerModulesCustomCommand } from '@/database/schemas/Servers'
+import Logger from '@/utility/Logger'
 import { LavalunaManager } from '@lacunahub/lavaluna.js'
-import { ClusterShardClient, ClusterShardClientOptions } from '@lacunahub/letsfrag'
-import { Collection, Guild, PermissionsBitField } from 'discord.js'
+import { ClusterShardClient } from '@lacunahub/letsfrag'
+import { ClientOptions, Collection, Guild, PermissionsBitField } from 'discord.js'
 import { readdirSync, readFileSync } from 'fs'
 import { Isolate } from 'isolated-vm'
 import { os } from 'node-os-utils'
-import db from '../database'
 import i18n from '../i18n'
-import logger from './Logger'
 import { Command, CommandOptions } from './structures/Command'
 import Event, { EventOptions } from './structures/Event'
 import Giveaway, { handleEntries as handleGiveawayEntries } from './structures/Giveaway'
@@ -16,8 +16,8 @@ import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './st
 
 export default class Lacuna extends ClusterShardClient {
     public hostname: string
-    public logger: typeof logger
-    public db: typeof db
+    public logger: typeof Logger
+    public db: typeof database
     public cache = new Map<string, any>()
     public commands = new Collection<string, Command>()
     public events = new Collection<string, Event>()
@@ -40,14 +40,14 @@ export default class Lacuna extends ClusterShardClient {
         )
     }
 
-    constructor(options?: ClusterShardClientOptions) {
+    constructor(options?: ClientOptions) {
         super(options)
 
         this.hostname = os.hostname()
 
-        this.logger = logger
+        this.logger = Logger.child({ app: 'bot', clusterId: this.cluster.id })
 
-        this.db = db
+        this.db = database
 
         this.i18n = i18n
 
@@ -74,7 +74,7 @@ export default class Lacuna extends ClusterShardClient {
 
     async start() {
         await this.db.connect()
-        this.logger.log('[Lacuna] Connected to database')
+        this.logger.info('connected to database')
 
         this.rest.on('rateLimited', rateLimitData => this.logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`))
         this.rest.on('invalidRequestWarning', invalidRequestInfo =>
@@ -82,31 +82,22 @@ export default class Lacuna extends ClusterShardClient {
         )
 
         await this.login(process.env.LCN_DISCORD_CLIENT_TOKEN)
-        this.logger.log('[Lacuna] Connected to Discord client')
+        this.logger.info('connected to discord')
 
         this.loadEvents(true)
         this.loadCommands()
 
         this.application = await this.application.fetch()
-        this.logger.log('[Lacuna] Discord client application fetched')
+        this.logger.info('discord application fetched')
         await this.application.emojis.fetch()
-        this.logger.log('[Lacuna] Application emojis fetched')
+        this.logger.info('discord application emojis fetched')
 
         handleGiveawayEntries(this)
         handleTemporaryBanEntries(this)
         handleTemporaryRoleEntries(this)
 
-        process.on('unhandledRejection', error => {
-            const err = (error as any)?.stack ?? (error as any).message
-
-            this.logger.error('[UnhandledRejection]', err)
-        })
-
-        process.on('uncaughtException', error => {
-            const err = (error as any)?.stack ?? (error as any).message
-
-            this.logger.error('[UncaughtException]', err)
-        })
+        process.on('unhandledRejection', this.logger.error.bind(this.logger))
+        process.on('uncaughtException', this.logger.error.bind(this.logger))
     }
 
     public async getEnv() {
@@ -160,7 +151,7 @@ export default class Lacuna extends ClusterShardClient {
     }
 
     public loadCommands() {
-        this.logger.log('[Lacuna] Loading commands...')
+        this.logger.debug('loading commands')
 
         const directories: string[] = readdirSync('./dist/commands', { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())
@@ -184,11 +175,11 @@ export default class Lacuna extends ClusterShardClient {
             amount += dirs.length
         }
 
-        this.logger.log(`[Lacuna] Loaded ${amount} commands from ${directories.length} categories`)
+        this.logger.info({ count: amount, categoryCount: directories.length }, 'commands loaded')
     }
 
     public loadEvents(initial = false) {
-        this.logger.log('[Lacuna]', initial ? 'Loading initial events...' : 'Loading events...')
+        this.logger.debug(initial ? 'loading initial events' : 'loading events')
 
         const directories: string[] = readdirSync('./dist/events', { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())
@@ -213,11 +204,11 @@ export default class Lacuna extends ClusterShardClient {
             total += files.length
         }
 
-        this.logger.log(`[Lacuna] Loaded ${amount} events of ${total}`)
+        this.logger.info({ count: amount }, 'events loaded')
     }
 
     public loadEmojis() {
-        this.logger.log('[Lacuna] Loading emojis...')
+        this.logger.debug('loading emojis')
 
         const files = readdirSync('./assets/emojis', { withFileTypes: true }).filter(v => v.isFile())
         const emojis = files.map(v => {
@@ -231,8 +222,7 @@ export default class Lacuna extends ClusterShardClient {
             }
         })
 
-        this.logger.log(`[Lacuna] Loaded ${emojis.length} emojis`)
-
+        this.logger.info({ count: emojis.length }, 'emojis loaded')
         return emojis
     }
 }
