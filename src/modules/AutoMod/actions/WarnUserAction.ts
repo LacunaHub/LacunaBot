@@ -1,4 +1,5 @@
 import { ServerDocument } from '@/database/schemas/Servers'
+import { DirectMessages } from '@/modules/DirectMessages'
 import { ButtonInteraction, ChatInputCommandInteraction, GuildMember, GuildTextBasedChannel, Message, User } from 'discord.js'
 import Lacuna from '../../../internals/Lacuna'
 import { generateSimpleId } from '../../../internals/utility/Utils'
@@ -119,7 +120,7 @@ export default async function warnUserAction(
             })
 
         try {
-            await target.send(messagePayload)
+            await DirectMessages.send(self, target, messagePayload)
         } catch (err) {
             self.logger.error({ module: 'Warnings', action: 'SendDirectMessage', err, guildId: signal.guild.id })
         }
