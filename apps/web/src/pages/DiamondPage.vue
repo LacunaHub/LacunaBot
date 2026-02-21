@@ -323,13 +323,13 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 #diamond-page-container {
-  @media (max-width: $breakpoint-md-max) {
-    max-width: 100%;
-    min-width: 100%;
-  }
+  width: 100%;
+  max-width: 100%;
 
-  max-width: 50%;
-  min-width: 50%;
+  @media (min-width: $breakpoint-lg-min) {
+    max-width: 50%;
+    min-width: 50%;
+  }
 }
 
 .diamond-page-title {
