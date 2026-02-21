@@ -315,7 +315,7 @@
 
               <q-select
                 v-model="guild.modules.levels.level_up_alerts.format"
-                :options="['DM', 'CHANNEL', 'CURRENT_CHANNEL']"
+                :options="['CHANNEL', 'CURRENT_CHANNEL']"
                 :disable="
                   (!guild.modules.levels.active && !guild.modules.levels.voice) ||
                   !guild.modules.levels.level_up_alerts.active

@@ -129,7 +129,7 @@
 
               <q-select
                 v-model="guild.modules.welcome.format"
-                :options="['DM', 'CHANNEL']"
+                :options="['CHANNEL']"
                 :disable="!guild.modules.welcome.active"
                 class="q-pt-sm"
                 filled
@@ -396,7 +396,7 @@
 
               <q-select
                 v-model="guild.modules.farewell.format"
-                :options="['DM', 'CHANNEL']"
+                :options="['CHANNEL']"
                 :disable="!guild.modules.farewell.active"
                 class="q-pt-sm"
                 filled

@@ -220,7 +220,7 @@
 
                       <q-select
                         v-model="award.alert.format"
-                        :options="['DM', 'CHANNEL']"
+                        :options="['CHANNEL']"
                         :disable="!award.alert.active"
                         class="q-pt-sm"
                         filled
@@ -391,7 +391,7 @@ const award = ref({
     remove_references: [],
     alert: {
       active: false,
-      format: 'DM',
+      format: 'CHANNEL',
       channel_id: null,
       message: {
         content: '',
