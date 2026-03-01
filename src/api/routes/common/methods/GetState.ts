@@ -1,45 +1,24 @@
 import { brokerClient, lava } from '@/api/utility/Managers'
-import { HostData } from '@lacunahub/letsfrag'
+import { indexToLetter } from '@/internals/utility/Utils'
+import { BrokerMessageDataMap, BrokerMessageType } from '@lacunahub/letsfrag'
 import { Context } from 'koa'
 import fetch from 'node-fetch'
 import database from '../../../../database'
-import Lacuna from '../../../../internals/Lacuna'
 
 export default async function getState(ctx: Context) {
     const version = await database.qdb.get('version'),
         issues: string[] = await getIssues()
-    let hosts: HostData[] = [],
-        clusters: BotStats[] = []
+    let stats: BrokerMessageDataMap[BrokerMessageType.RequestStatsResult] = {
+        readyAt: null,
+        clients: [],
+        managers: [],
+        shardCount: 0,
+        shardsPerManager: 0
+    }
 
     try {
-        hosts = await brokerClient.getHostsData()
-        const broadcastResponse = await brokerClient.broadcastEval<BotStats[][]>((self: Lacuna) => {
-            return {
-                host: self.hostname,
-                clusterId: self.cluster.id,
-                guilds: self.guilds.cache.size,
-                users: self.guilds.cache.reduce((x, y) => (x += y.memberCount), 0),
-                cachedUsers: self.users.cache.size,
-                channels: self.channels.cache.size,
-                latency: self.ws.ping,
-                uptime: self.uptime
-            }
-        })
-
-        clusters = broadcastResponse.flat().sort((a, b) => a.clusterId - b.clusterId)
+        stats = await brokerClient.request({ type: BrokerMessageType.RequestStats })
     } catch (err) {}
-
-    if (hosts.length < +process.env.LCN_SERVER_HOST_COUNT) {
-        issues.push('Not all hosts are connected.')
-    }
-
-    for (const host of hosts) {
-        const hostClusters = clusters.filter(v => v.host === host.hostname)
-
-        if (hostClusters.length < host.clusters.length) {
-            issues.push(`Not all shards have a connection to host **${host.hostname}**.`)
-        }
-    }
 
     const lavaNodes = [...lava.nodes.cache.values()].map(v => {
         return {
@@ -65,30 +44,33 @@ export default async function getState(ctx: Context) {
         }
     }
 
-    const charts = await getTimeseries(Date.now())
+    const clusters = stats.managers.flatMap((v, i) => {
+        const host = indexToLetter(i).toUpperCase()
+        return v.clusters.map(vv => ({ ...vv, host }))
+    })
 
     ctx.status = 200
     ctx.body = {
         version,
         issues,
-        guilds: clusters.reduce((a, b) => (a += b.guilds), 0) || 0,
-        users: clusters.reduce((a, b) => (a += b.users), 0) || 0,
-        cached_users: clusters.reduce((a, b) => (a += b.cachedUsers), 0) || 0,
-        channels: clusters.reduce((a, b) => (a += b.channels), 0) || 0,
+        guilds: clusters.reduce((a, b) => (a += b.guildCount), 0) || 0,
+        users: clusters.reduce((a, b) => (a += b.userCount), 0) || 0,
+        cached_users: clusters.reduce((a, b) => (a += b.cachedUserCount), 0) || 0,
+        channels: clusters.reduce((a, b) => (a += b.channelCount), 0) || 0,
         shards: clusters.map(v => {
             return {
                 host: v.host,
-                cluster_id: v.clusterId,
-                guilds: v.guilds,
-                users: v.users,
-                cached_users: v.cachedUsers,
-                channels: v.channels,
-                latency: v.latency,
+                id: v.id,
+                guilds: v.guildCount,
+                users: v.userCount,
+                cached_users: v.cachedUserCount,
+                channels: v.channelCount,
+                latency: v.wsPing,
                 uptime: v.uptime
             }
         }),
         players: lavaNodes,
-        charts: charts || {}
+        charts: {}
     }
 }
 
@@ -109,137 +91,4 @@ async function getIssues(): Promise<string[]> {
     } catch (err) {
         return []
     }
-}
-
-async function getTimeseries(to: number, from?: number) {
-    if (typeof from !== 'number') from = to - 1000 * 60 * 60 * 12
-
-    const queries = [
-        {
-            refId: 'guilds',
-            expr: 'lcn_guild_counter{shard="", label=""}'
-        },
-        {
-            refId: 'avgLatency',
-            expr: 'avg(lcn_ws_ping)'
-        }
-    ]
-
-    try {
-        const response = await fetch(`${process.env.LCN_GRAFANA_URL}/api/ds/query`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${process.env.LCN_GRAFANA_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    queries: queries.map(v => {
-                        return {
-                            datasource: {
-                                type: 'prometheus',
-                                uid: process.env.LCN_GRAFANA_DATASOURCE_UID
-                            },
-                            ...v
-                        }
-                    }),
-                    from: from.toString(),
-                    to: to.toString()
-                })
-            }),
-            data: GrafanaQueryResponse = await response.json()
-
-        const frames = queries.map(v => {
-            const frame = data.results[v.refId].frames.find(vv => vv.schema.refId === v.refId)
-            return { refId: v.refId, ...frame }
-        })
-
-        let timeseries: Record<string, Array<number[]>> = {}
-        for (const frame of frames) {
-            const value: Array<number[]> = []
-
-            for (let i = 0; i < frame.data.values[0].length; i++) {
-                const timestamp = frame.data.values[0][i],
-                    data = frame.data.values[1][i]
-
-                value.push([timestamp, data])
-            }
-
-            timeseries[frame.refId] = value
-        }
-
-        return timeseries
-    } catch (err) {}
-}
-
-export interface BotStats {
-    host: string
-    clusterId: number
-    guilds: number
-    users: number
-    cachedUsers: number
-    channels: number
-    latency: number
-    uptime: number
-}
-
-interface GrafanaQueryResponse {
-    results: Record<string, GrafanaQuery>
-}
-
-interface GrafanaQuery {
-    error?: string
-    errorSource?: string
-    status: number
-    frames: GrafanaQueryFrame[]
-}
-
-interface GrafanaQueryFrame {
-    schema: GrafanaQueryFrameSchema
-    data: GrafanaQueryFrameData
-}
-
-interface GrafanaQueryFrameSchema {
-    refId: string
-    meta: GrafanaQueryFrameSchemaMeta
-    fields: GrafanaQueryFrameSchemaField[]
-}
-
-interface GrafanaQueryFrameSchemaMeta {
-    type: string
-    typeVersion: number[]
-    custom: GrafanaQueryFrameSchemaMetaCustom
-    executedQueryString: string
-}
-
-interface GrafanaQueryFrameSchemaMetaCustom {
-    resultType: string
-}
-
-interface GrafanaQueryFrameSchemaField {
-    name: string
-    type: string
-    typeInfo: GrafanaQueryFrameSchemaFieldTypeInfo
-    config: GrafanaQueryFrameSchemaFieldConfig
-    labels?: GrafanaQueryFrameSchemaFieldLabels
-}
-
-interface GrafanaQueryFrameSchemaFieldTypeInfo {
-    frame: string
-    [key: string]: any
-}
-
-interface GrafanaQueryFrameSchemaFieldConfig {
-    interval: number
-    displayNameFromDS?: string
-    [key: string]: any
-}
-
-interface GrafanaQueryFrameSchemaFieldLabels {
-    __name__: string
-    instance: string
-    job: string
-}
-
-interface GrafanaQueryFrameData {
-    values: Array<number[]>
 }

@@ -1,26 +1,25 @@
 import Logger from '@/utility/Logger'
 import { ClusterManager } from '@lacunahub/letsfrag'
-import { mem } from 'node-os-utils'
 import { join } from 'path'
 
 const logger = Logger.child({ app: 'cluster-manager' })
-const clusterCount = Math.round(mem.totalMem() / (1024 * 1024 * 1024))
 
 const clusterManager = new ClusterManager(join(__dirname, '..', 'internals', 'Client.js'), {
     brokerClient: {
-        type: 'bot',
-        redis: process.env.LCN_REDIS_URI
-    },
-    mode: 'fork',
-    clusterCount: process.env.NODE_ENV === 'development' ? -1 : clusterCount,
-    autoRespawn: true,
-    spawnDelay: 10_000
+        redisURI: process.env.LCN_REDIS_URI
+    }
 })
 
-clusterManager.on('clusterCreate', cluster => logger.info({ clusterId: cluster.id, clusterShards: cluster.shards }, 'cluster create'))
-clusterManager.on('ready', manager => logger.info({ clusters: manager.clusters, shards: manager.shards }, 'cluster manager ready'))
+clusterManager.on('ready', () => logger.info('cluster manager ready'))
+clusterManager.on('error', err => logger.error({ err }, 'cluster manager error'))
+clusterManager.on('register', () => logger.info('cluster manager registration'))
+clusterManager.on('clusterCreate', cluster => logger.info({ id: cluster.id, shardList: cluster.shardList }, 'cluster creation'))
+clusterManager.on('clusterReady', cluster => logger.info({ id: cluster.id, shardList: cluster.shardList }, 'cluster ready'))
+clusterManager.on('clusterDeath', cluster => logger.warn({ id: cluster.id, shardList: cluster.shardList }, 'cluster death'))
+clusterManager.on('clusterTimeout', cluster => logger.warn({ id: cluster.id, shardList: cluster.shardList }, 'cluster timeout'))
+clusterManager.on('clusterUnhealthy', cluster => logger.warn({ id: cluster.id }, 'unhealthy cluster'))
 
 process.on('uncaughtException', logger.error.bind(logger))
 process.on('unhandledRejection', logger.error.bind(logger))
 
-clusterManager.spawn()
+clusterManager.register()
