@@ -1,9 +1,9 @@
 import { LavalunaManager } from '@lacunahub/lavaluna.js'
-import { BrokerClient } from '@lacunahub/letsfrag'
+import { BrokerClient, BrokerClientType } from '@lacunahub/letsfrag'
 
 export const brokerClient = new BrokerClient(null, {
-    type: 'custom',
-    redis: process.env.LCN_REDIS_URI
+    type: BrokerClientType.Custom,
+    redisURI: process.env.LCN_REDIS_URI
 })
 
 export const lava = new LavalunaManager({

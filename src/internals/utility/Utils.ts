@@ -140,7 +140,7 @@ export function resolveObjectPath(path: string, object: {}): any {
 
 export function dotNotateObject(object: {}, target?: {}, prefix?: string): {} {
     if (object == null || typeof object != 'object') throw new TypeError('OBJECT_IS_NOT_OBJECT')
-    ;(target = target || {}), (prefix = prefix || '')
+    ;((target = target || {}), (prefix = prefix || ''))
 
     Object.keys(object).forEach(key => {
         if (typeof object[key] === 'object' && object[key] !== null && !Array.isArray(object[key])) {
@@ -524,4 +524,8 @@ export function parseJSON<T = any>(text: string, reviver?: (this: any, key: stri
 
 export function isObject(value: any): boolean {
     return typeof value === 'object' && !Array.isArray(value) && value !== null
+}
+
+export function indexToLetter(index: number) {
+    return 'abcdefghijklmnopqrstuvwxyz'.split('').at(index)
 }

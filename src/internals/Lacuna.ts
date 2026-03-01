@@ -2,7 +2,7 @@ import database, { EnvData } from '@/database'
 import { ServerDocument, ServerModulesCustomCommand } from '@/database/schemas/Servers'
 import Logger from '@/utility/Logger'
 import { LavalunaManager } from '@lacunahub/lavaluna.js'
-import { ClusterShardClient } from '@lacunahub/letsfrag'
+import { ClusterClient } from '@lacunahub/letsfrag'
 import { ClientOptions, Collection, Guild, PermissionsBitField } from 'discord.js'
 import { readdirSync, readFileSync } from 'fs'
 import { Isolate } from 'isolated-vm'
@@ -14,7 +14,7 @@ import Giveaway, { handleEntries as handleGiveawayEntries } from './structures/G
 import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './structures/TemporaryBan'
 import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole'
 
-export default class Lacuna extends ClusterShardClient {
+export default class Lacuna extends ClusterClient {
     public hostname: string
     public logger: typeof Logger
     public db: typeof database

@@ -4,7 +4,6 @@ import koaBody from 'koa-body'
 import koaJSON from 'koa-json'
 import koaPinoLogger from 'koa-pino-logger'
 import database from '../database'
-import { scheduleUpdateListingStats } from './modules/Metrics'
 import ReleaseNotesLogger from './modules/ReleaseNotesLogger'
 import ReportsChecker from './modules/ReportsChecker'
 import { handleDiamondGuilds } from './modules/billing/utility/DiamondGuild'
@@ -56,7 +55,6 @@ app.listen(Number(process.env.LCN_API_PORT), '0.0.0.0').on('listening', () => {
 
     handleDiamondGuilds()
     handlePatrons()
-    scheduleUpdateListingStats()
     YouTubeAlerts.createRefreshmentSchedule()
     ReleaseNotesLogger.createSchedule()
     ReportsChecker.createSchedule()
