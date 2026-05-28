@@ -242,7 +242,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'INSUFFICIENT_FUNDS') {
                 await i.followUp({
-                    content: `${self.staticEmojis.Cross} | ${t('Command.StoreCommand.Texts.InsufficientFundsToPurchaseItem', {
+                    content: `${self.staticEmojis.Cross} | ${t('Commands.StoreCommand.Texts.InsufficientFundsToPurchaseItem', {
                         username: `**${interaction.member.displayName}**`
                     })}`,
                     ephemeral: true
@@ -251,7 +251,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
 
             if (result == 'PURCHASED') {
                 await i.followUp({
-                    content: `${self.staticEmojis.Cross} | ${t('Command.StoreCommand.Texts.ItemPreviouslyPurchased', {
+                    content: `${self.staticEmojis.Cross} | ${t('Commands.StoreCommand.Texts.ItemPreviouslyPurchased', {
                         username: `**${interaction.member.displayName}**`
                     })}`,
                     ephemeral: true
@@ -267,7 +267,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
                         await i.followUp({ ...messagePayload, ephemeral: true })
                     } catch (err) {
                         await i.followUp({
-                            content: `${self.staticEmojis.Check} | ${t('Command.StoreCommand.Texts.UserHasPurchasedItem', {
+                            content: `${self.staticEmojis.Check} | ${t('Commands.StoreCommand.Texts.UserHasPurchasedItem', {
                                 username: `**${interaction.member.displayName}**`,
                                 item: `**${item.name}**`
                             })}`,
@@ -276,7 +276,7 @@ export async function itemsSlash(self: Lacuna, server: ServerDocument, interacti
                     }
                 } else {
                     await i.followUp({
-                        content: `${self.staticEmojis.Check} | ${t('Command.StoreCommand.Texts.UserHasPurchasedItem', {
+                        content: `${self.staticEmojis.Check} | ${t('Commands.StoreCommand.Texts.UserHasPurchasedItem', {
                             username: `**${interaction.member.displayName}**`,
                             item: `**${item.name}**`
                         })}`,
