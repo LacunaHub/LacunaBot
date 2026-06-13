@@ -1,0 +1,17 @@
+{
+  "name": "lacunabot",
+  "private": true,
+  "scripts": {
+    "format": "prettier . --write --config .prettierrc",
+    "format:check": "prettier . --check --config .prettierrc"
+  },
+  "packageManager": "pnpm@10.30.3",
+  "devDependencies": {
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  }
+}

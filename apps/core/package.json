@@ -8,16 +8,6 @@
     "start:bot": "node -r ./config.env.js -r module-alias/register ./dist/cluster-manager",
     "dev": "npm run build && concurrently \"npm:start\" \"npm:start:api\" \"npm:start:bot\""
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/LacunaHub/Discord.git"
-  },
-  "author": "Lacuna (https://github.com/LacunaHub)",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/LacunaHub/Discord/issues"
-  },
-  "homepage": "https://github.com/LacunaHub/Discord#readme",
   "dependencies": {
     "@google/generative-ai": "^0.17.0",
     "@koa/cors": "^5.0.0",
