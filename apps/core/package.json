@@ -1,7 +1,6 @@
 {
-  "name": "lacuna-bot",
-  "version": "4.14.2",
-  "description": "Feature-rich Discord bot",
+  "name": "@lacunabot/core",
+  "private": true,
   "scripts": {
     "build": "node ./clean.dist.js && tsc --build tsconfig.json",
     "start": "node -r ./config.env.js -r module-alias/register ./dist/cluster-broker",
