@@ -1,5 +1,6 @@
 import { ServerDocument, ServerModerationLogsTypeKey } from '@/database/schemas/Servers'
-import { APIWebhook, Guild, MessagePayload, resolveImage, WebhookClient, WebhookMessageCreateOptions } from 'discord.js'
+import { bufferToDataURL, fetchFile } from '@/internals/utility/Utils'
+import { APIWebhook, Guild, MessagePayload, WebhookClient, WebhookMessageCreateOptions } from 'discord.js'
 import DiscordUtils from '../../api/utility/DiscordUtils'
 import Lacuna from '../../internals/Lacuna'
 import ChannelCreate from './Channel/ChannelCreate'
@@ -41,7 +42,12 @@ import VoiceServerUnmute from './Voice/VoiceServerUnmute'
 
 const rateLimitCache = new Map()
 
-export async function sendLog(self: Lacuna, server: ServerDocument, channelId: string, message: MessagePayload | WebhookMessageCreateOptions) {
+export async function sendLog(
+    self: Lacuna,
+    server: ServerDocument,
+    channelId: string,
+    message: MessagePayload | WebhookMessageCreateOptions
+) {
     const channelWebhook = server.moderation.logs.webhooks.find(i => i.channel_id === channelId)
     let webhook: WebhookClient
 
@@ -51,10 +57,12 @@ export async function sendLog(self: Lacuna, server: ServerDocument, channelId: s
 
     if (typeof webhook === 'undefined') {
         try {
+            const avatarFile = await fetchFile(self.user.displayAvatarURL())
+
             const createdWebhook = (await self.rest.post(DiscordUtils.restRoutes.channelWebhooks(channelId), {
                 body: {
                     name: self.user.username,
-                    avatar: await resolveImage(self.user.displayAvatarURL())
+                    avatar: bufferToDataURL(avatarFile.data, avatarFile.mimeType)
                 },
                 headers: {
                     'X-Audit-Log-Reason': 'Logs: No webhook for the logs'
@@ -139,7 +147,9 @@ export function isRateLimited(guildId: string, premium: boolean) {
     }
 
     if (!rateLimit) {
-        rateLimit = rateLimitCache.set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: premium ? 19 : 4 }).get(guildId)
+        rateLimit = rateLimitCache
+            .set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: premium ? 19 : 4 })
+            .get(guildId)
 
         return false
     }

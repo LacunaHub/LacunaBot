@@ -1,12 +1,19 @@
 import { ServerDocument } from '@/database/schemas/Servers'
 import { ViolationJudgement, ViolationSeverityLevels } from '@/database/schemas/ViolativeMessages'
 import { SchemaType } from '@google/generative-ai'
-import { Attachment, BaseGuildTextChannel, EmbedBuilder, messageLink as getMessageLink, Message, MessageType, resolveFile } from 'discord.js'
+import {
+    Attachment,
+    BaseGuildTextChannel,
+    EmbedBuilder,
+    messageLink as getMessageLink,
+    Message,
+    MessageType
+} from 'discord.js'
 import GeminiAPI, { defaultModelParams } from '../../api/utility/GeminiAPI'
 import database from '../../database'
 import Lacuna from '../../internals/Lacuna'
 import { supportServerId } from '../../internals/utility/Constants'
-import { capitalizeFirstLetter, parseJSON } from '../../internals/utility/Utils'
+import { capitalizeFirstLetter, fetchFile, parseJSON } from '../../internals/utility/Utils'
 
 const violationCategories = [
     'Spam',
@@ -97,7 +104,14 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
     if ((message.channel as BaseGuildTextChannel)?.nsfw) return false
     if (
         server.moderation.deny_moderate_users_with_mp &&
-        message.member.permissions.any(['Administrator', 'BanMembers', 'KickMembers', 'ManageMessages', 'ManageRoles', 'ModerateMembers']) &&
+        message.member.permissions.any([
+            'Administrator',
+            'BanMembers',
+            'KickMembers',
+            'ManageMessages',
+            'ManageRoles',
+            'ModerateMembers'
+        ]) &&
         process.env.NODE_ENV !== 'development'
     )
         return false
@@ -198,7 +212,9 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
         messages.push(lastMessage)
 
         if (Array.isArray(response.messages_with_violations)) {
-            const messagesWithViolations = messages.filter(v => response.messages_with_violations.some(vv => vv.message_id === v.id))
+            const messagesWithViolations = messages.filter(v =>
+                response.messages_with_violations.some(vv => vv.message_id === v.id)
+            )
             const violations = messagesWithViolations.map(v => {
                 const messageJudgement = response.messages_with_violations.find(vv => vv.message_id === v.id),
                     messageLink = getMessageLink(v.channel_id, v.id, message.guildId)
@@ -207,8 +223,10 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
                 if (violationCategoryIndex === -1) return null
 
                 let recommendedActions = []
-                if (messageJudgement.violation_judgement) recommendedActions.push(t(`CaseLog.Actions.${messageJudgement.violation_judgement}`))
-                if (messageJudgement.message_should_be_deleted) recommendedActions.push(t('CaseLog.Actions.DeleteMessage'))
+                if (messageJudgement.violation_judgement)
+                    recommendedActions.push(t(`CaseLog.Actions.${messageJudgement.violation_judgement}`))
+                if (messageJudgement.message_should_be_deleted)
+                    recommendedActions.push(t('CaseLog.Actions.DeleteMessage'))
 
                 return {
                     embed: new EmbedBuilder()
@@ -231,7 +249,9 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
                             },
                             {
                                 name: t('AIMod.ViolationSeverityLevel'),
-                                value: t(`AIMod.ViolationSeverityLevels.${messageJudgement.violation_severity_level ?? 'None'}`),
+                                value: t(
+                                    `AIMod.ViolationSeverityLevels.${messageJudgement.violation_severity_level ?? 'None'}`
+                                ),
                                 inline: true
                             },
                             {
@@ -260,7 +280,9 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
                         violation_severity_level: messageJudgement.violation_severity_level
                             ? ViolationSeverityLevels[messageJudgement.violation_severity_level]
                             : null,
-                        violation_judgement: messageJudgement.violation_judgement ? ViolationJudgement[messageJudgement.violation_judgement] : null
+                        violation_judgement: messageJudgement.violation_judgement
+                            ? ViolationJudgement[messageJudgement.violation_judgement]
+                            : null
                     }
                 }
             })
@@ -303,7 +325,7 @@ async function resolveAttachedFiles(attachments: Attachment[]) {
         attachments
             .filter(v => v.contentType.includes('image/'))
             .map(async v => {
-                const file = await resolveFile(v.url)
+                const file = await fetchFile(v.url)
 
                 return {
                     mimeType: v.contentType,

@@ -1,8 +1,14 @@
 import { ServerDocument } from '@/database/schemas/Servers'
-import { APIWebhook, resolveImage } from 'discord.js'
+import { bufferToDataURL } from '@/internals/utility/Utils'
+import { APIWebhook } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'
-import { eventSubSubscribe, eventSubUnsubscribe, getEventSubsByUserId, TwitchIncomingWebhook } from '../../../../modules/social-alerts/TwitchAlerts'
+import {
+    eventSubSubscribe,
+    eventSubUnsubscribe,
+    getEventSubsByUserId,
+    TwitchIncomingWebhook
+} from '../../../../modules/social-alerts/TwitchAlerts'
 import APIError from '../../../../utility/APIError'
 import DiscordUtils from '../../../../utility/DiscordUtils'
 
@@ -12,14 +18,15 @@ export default async function createTwitchSubscription(ctx: Context) {
 
     if (server.modules.subscriptions.twitch.length >= 1 && !server.premium.available) ctx.throw(402, new APIError(3007))
     if (server.modules.subscriptions.twitch.length >= 10) ctx.throw(406, new APIError(3008))
-    if (server.modules.subscriptions.twitch.some(v => v.broadcaster_id === data.broadcaster.id)) ctx.throw(409, new APIError(2005))
+    if (server.modules.subscriptions.twitch.some(v => v.broadcaster_id === data.broadcaster.id))
+        ctx.throw(409, new APIError(2005))
 
     let webhook: APIWebhook
     try {
         webhook = (await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelWebhooks(data.notification_channel_id), {
             body: {
                 name: data.broadcaster.name,
-                avatar: await resolveImage(data.broadcaster.thumbnail)
+                avatar: bufferToDataURL(data.broadcaster.thumbnail)
             }
         })) as any
     } catch (err) {

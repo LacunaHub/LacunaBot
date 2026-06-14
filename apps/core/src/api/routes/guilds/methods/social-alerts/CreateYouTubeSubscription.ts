@@ -1,5 +1,6 @@
 import { ServerDocument } from '@/database/schemas/Servers'
-import { APIWebhook, resolveImage } from 'discord.js'
+import { bufferToDataURL } from '@/internals/utility/Utils'
+import { APIWebhook } from 'discord.js'
 import { Context } from 'koa'
 import database from '../../../../../database'
 import { hubSubscribe } from '../../../../modules/social-alerts/YouTubeAlerts'
@@ -10,16 +11,18 @@ export default async function createYouTubeSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server
     const data = ctx.request.body
 
-    if (server.modules.subscriptions.youtube.length >= 1 && !server.premium.available) ctx.throw(402, new APIError(3007))
+    if (server.modules.subscriptions.youtube.length >= 1 && !server.premium.available)
+        ctx.throw(402, new APIError(3007))
     if (server.modules.subscriptions.youtube.length >= 10) ctx.throw(406, new APIError(3008))
-    if (server.modules.subscriptions.youtube.some(v => v.channel_id === data.channel.id)) ctx.throw(409, new APIError(2005))
+    if (server.modules.subscriptions.youtube.some(v => v.channel_id === data.channel.id))
+        ctx.throw(409, new APIError(2005))
 
     let webhook: APIWebhook
     try {
         webhook = (await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelWebhooks(data.notification_channel_id), {
             body: {
                 name: data.channel.name,
-                avatar: await resolveImage(data.channel.thumbnail)
+                avatar: bufferToDataURL(data.channel.thumbnail)
             }
         })) as any
     } catch (err) {

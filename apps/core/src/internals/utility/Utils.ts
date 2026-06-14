@@ -169,7 +169,11 @@ export function createEnum(keys: any[]): {} {
 export function shadeColor(color: string, amount: number): string {
     return (
         '#' +
-        color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substring(-2))
+        color
+            .replace(/^#/, '')
+            .replace(/../g, color =>
+                ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substring(-2)
+            )
     )
 }
 
@@ -247,7 +251,8 @@ export function transformMessageComponents(components: any[][]) {
 
                         if (typeof component.customId === 'string') button.setCustomId(`UD-${component.customId}`)
                         button.setDisabled(Boolean(component.disabled))
-                        if (component.emoji && component.emoji?.name) button.setEmoji(component.emoji.id ? component.emoji : component.emoji.name)
+                        if (component.emoji && component.emoji?.name)
+                            button.setEmoji(component.emoji.id ? component.emoji : component.emoji.name)
                         if (typeof component.label === 'string') button.setLabel(component.label)
                         button.setStyle(ButtonStyle[component.style] as any)
                         if (typeof component.url === 'string') button.setURL(component.url)
@@ -361,7 +366,11 @@ export function transformModalComponents(components: any[][]) {
  * // Check for pending invocations.
  * const status = debounced.pending() ? "Pending..." : "Ready"
  */
-export function debounce(func: Function, wait: number = 0, options?: { leading: boolean; maxWait: number; trailing: boolean }): Function {
+export function debounce(
+    func: Function,
+    wait: number = 0,
+    options?: { leading: boolean; maxWait: number; trailing: boolean }
+): Function {
     let lastArgs: any,
         lastThis: any,
         maxWait: any,
@@ -429,7 +438,12 @@ export function debounce(func: Function, wait: number = 0, options?: { leading: 
         // Either this is the first call, activity has stopped and we're at the
         // trailing edge, the system time has gone backwards and we're treating
         // it as the trailing edge, or we've hit the `maxWait` limit.
-        return lastCallTime === undefined || timeSinceLastCall >= wait || timeSinceLastCall < 0 || (maxing && timeSinceLastInvoke >= maxWait)
+        return (
+            lastCallTime === undefined ||
+            timeSinceLastCall >= wait ||
+            timeSinceLastCall < 0 ||
+            (maxing && timeSinceLastInvoke >= maxWait)
+        )
     }
 
     function timerExpired() {
@@ -528,4 +542,16 @@ export function isObject(value: any): boolean {
 
 export function indexToLetter(index: number) {
     return 'abcdefghijklmnopqrstuvwxyz'.split('').at(index)
+}
+
+export function bufferToDataURL(buffer: Buffer, mimeType: string = 'image/png') {
+    const base64 = buffer.toString('base64')
+    return `data:${mimeType};base64,${base64}`
+}
+
+export async function fetchFile(url: string) {
+    const res = await fetch(url),
+        buffer = Buffer.from(await res.arrayBuffer())
+
+    return { data: buffer, mimeType: res.headers.get('content-type') }
 }

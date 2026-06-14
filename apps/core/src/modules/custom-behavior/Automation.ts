@@ -45,7 +45,12 @@ export default class Automation {
     public usedFunctions: string[]
     public isolate: Isolate
 
-    constructor(self: Lacuna, server: ServerDocument, automation: ServerModulesAutomation, eventParams: AutomationEventParams) {
+    constructor(
+        self: Lacuna,
+        server: ServerDocument,
+        automation: ServerModulesAutomation,
+        eventParams: AutomationEventParams
+    ) {
         this.self = self
 
         this.server = server
@@ -87,7 +92,13 @@ export default class Automation {
             interaction: interaction
                 ? {
                       customId: interaction.customId,
-                      fields: 'fields' in interaction ? interaction.fields.fields.map(v => ({ customId: v.customId, value: v.value })) : undefined,
+                      fields:
+                          'fields' in interaction
+                              ? interaction.fields.fields.map(v => ({
+                                    customId: v.customId,
+                                    value: 'value' in v ? v.value : null
+                                }))
+                              : undefined,
                       guildLocale: interaction.guildLocale,
                       id: interaction.id,
                       locale: interaction.locale,

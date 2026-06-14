@@ -1,5 +1,12 @@
 import { ServerDocument } from '@/database/schemas/Servers'
-import { BaseGuildTextChannel, ButtonInteraction, Collection, EmbedBuilder } from 'discord.js'
+import {
+    ActionRow,
+    BaseGuildTextChannel,
+    ButtonInteraction,
+    Collection,
+    EmbedBuilder,
+    MessageActionRowComponent
+} from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
 import Lacuna from '../Lacuna'
 
@@ -116,10 +123,14 @@ export default class Giveaway {
         const embed = new EmbedBuilder(message.embeds[0].toJSON()).setColor('#EF5350')
 
         if (this.participants.size) {
-            const winners = this.participants.randomKey(this.numberOfWinners > this.participants.size ? this.participants.size : this.numberOfWinners)
+            const winners = this.participants.randomKey(
+                this.numberOfWinners > this.participants.size ? this.participants.size : this.numberOfWinners
+            )
 
             embed.setDescription(
-                t('Commands.GiveawayCommand.SubCommands.EndCommand.Texts.GiveawayWinners', { winners: winners.map(w => `<@${w}>`).join(', ') })
+                t('Commands.GiveawayCommand.SubCommands.EndCommand.Texts.GiveawayWinners', {
+                    winners: winners.map(w => `<@${w}>`).join(', ')
+                })
             )
 
             try {
@@ -155,10 +166,13 @@ export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument
 
         if (giveaway.participants.has(interaction.user.id)) {
             await interaction.reply({
-                content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouAreAlreadyInGiveaway', {
-                    username: `**${interaction.user.username}**`,
-                    giveaway: `**${giveaway.prize}**`
-                })}`,
+                content: `${self.staticEmojis.Cross} | ${t(
+                    'Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouAreAlreadyInGiveaway',
+                    {
+                        username: `**${interaction.user.username}**`,
+                        giveaway: `**${giveaway.prize}**`
+                    }
+                )}`,
                 ephemeral: true
             })
         } else {
@@ -173,16 +187,19 @@ export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument
             )
 
             const message = await giveaway.getMessage(),
-                rows = message.components
+                rows = message.components as ActionRow<MessageActionRowComponent>[]
             rows[0].components[0].data['emoji'] = { name: '🎉' }
             rows[0].components[0].data['label'] = giveaway.participants.size.toString()
 
             await message.edit({ components: rows })
             await interaction.reply({
-                content: `${self.staticEmojis.Check} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouHaveParticipatedInGiveaway', {
-                    username: `**${interaction.user.username}**`,
-                    giveaway: `**${giveaway.prize}**`
-                })}`,
+                content: `${self.staticEmojis.Check} | ${t(
+                    'Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouHaveParticipatedInGiveaway',
+                    {
+                        username: `**${interaction.user.username}**`,
+                        giveaway: `**${giveaway.prize}**`
+                    }
+                )}`,
                 ephemeral: true
             })
         }

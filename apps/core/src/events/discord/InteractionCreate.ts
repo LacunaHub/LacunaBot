@@ -1,12 +1,14 @@
 import { ServerDocument, ServerModulesAutomationTriggers } from '@/database/schemas/Servers'
 import { SearchResult } from '@lacunahub/lavaluna.js'
 import {
+    ActionRow,
     AnySelectMenuInteraction,
     AutocompleteInteraction,
     ButtonInteraction,
     ChatInputCommandInteraction,
     Events,
     Message,
+    MessageActionRowComponent,
     MessageContextMenuCommandInteraction,
     ModalSubmitInteraction,
     parseEmoji,
@@ -61,7 +63,9 @@ const handler = async (
 
     if (interaction.isContextMenuCommand()) {
         const command = self.commands.find(
-            v => (v.isUserContextCommand || v.isMessageContextCommand) && self.i18n.t('en', v.prettyName) === interaction.commandName
+            v =>
+                (v.isUserContextCommand || v.isMessageContextCommand) &&
+                self.i18n.t('en', v.prettyName) === interaction.commandName
         )
 
         if (command) {
@@ -94,7 +98,7 @@ const handler = async (
                     return false
                 }
 
-                const rows = message.components
+                const rows = message.components as ActionRow<MessageActionRowComponent>[]
 
                 const shufflePlayButton = rows[0].components[0],
                     previousButton = rows[0].components[1],
@@ -124,7 +128,9 @@ const handler = async (
 
                 if (interaction.customId === playPauseButton.customId) {
                     await player.pause(!player.paused)
-                    ;(playPauseButton as any).data.emoji = parseEmoji(player.paused ? self.staticEmojis.Play : self.staticEmojis.Pause)
+                    ;(playPauseButton as any).data.emoji = parseEmoji(
+                        player.paused ? self.staticEmojis.Play : self.staticEmojis.Pause
+                    )
                 }
 
                 if (interaction.customId === nextButton.customId) {
@@ -213,7 +219,12 @@ const handler = async (
 
     if (interaction.isAnySelectMenu()) {
         if (/UD\-.*/.test(interaction.customId) && interaction.isStringSelectMenu()) {
-            await Automation.handleEvent(ServerModulesAutomationTriggers.InteractionSelectMenu, self, server, interaction)
+            await Automation.handleEvent(
+                ServerModulesAutomationTriggers.InteractionSelectMenu,
+                self,
+                server,
+                interaction
+            )
         }
 
         await InteractiveMessages.handleSelectMenuSelection(self, server, interaction)
@@ -227,7 +238,12 @@ const handler = async (
 
     if (interaction.isModalSubmit()) {
         if (/UD\-.*/.test(interaction.customId)) {
-            await Automation.handleEvent(ServerModulesAutomationTriggers.InteractionModalSubmit, self, server, interaction)
+            await Automation.handleEvent(
+                ServerModulesAutomationTriggers.InteractionModalSubmit,
+                self,
+                server,
+                interaction
+            )
         }
 
         if (/CL\-REASON\-\d+/.test(interaction.customId)) {
@@ -284,7 +300,9 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
 
     if (['wallet', 'activities'].includes(interaction.commandName)) {
         if (option?.name === 'currency') {
-            const currencies = server.modules.economy.currencies.filter(i => [i.id, i.name, i.symbol].some(ii => ii.includes(option?.value)))
+            const currencies = server.modules.economy.currencies.filter(i =>
+                [i.id, i.name, i.symbol].some(ii => ii.includes(option?.value))
+            )
 
             await interaction.respond(
                 currencies.map(i => {
@@ -297,13 +315,17 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
         }
 
         if (option?.name === 'award') {
-            const awards = server.modules.levels.awards.filter(v => [v.id, v.references.join()].some(vv => vv.includes(option?.value)))
+            const awards = server.modules.levels.awards.filter(v =>
+                [v.id, v.references.join()].some(vv => vv.includes(option?.value))
+            )
 
             await interaction.respond(
                 awards
                     .map(v => {
                         return {
-                            name: truncateString(v.references.map(vv => interaction.guild.roles.cache.get(vv)?.name ?? vv).join(', ')),
+                            name: truncateString(
+                                v.references.map(vv => interaction.guild.roles.cache.get(vv)?.name ?? vv).join(', ')
+                            ),
                             value: v.id
                         }
                     })
@@ -344,7 +366,9 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
             await interaction.guild.bans.fetch({ limit: 100, cache: true })
         }
 
-        const bans = interaction.guild.bans.cache.filter(i => [i.user.id, i.user.tag].some(ii => ii.includes(option?.value)))
+        const bans = interaction.guild.bans.cache.filter(i =>
+            [i.user.id, i.user.tag].some(ii => ii.includes(option?.value))
+        )
 
         await interaction.respond(
             bans

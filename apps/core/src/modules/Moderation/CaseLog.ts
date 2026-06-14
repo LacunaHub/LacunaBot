@@ -11,6 +11,7 @@ import {
     ModalActionRowComponentBuilder,
     ModalBuilder,
     ModalSubmitInteraction,
+    PartialUser,
     TextInputBuilder,
     TextInputStyle,
     User
@@ -50,7 +51,10 @@ export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessag
 
     const t = i18n.t.bind(null, server.locale)
     const caseId = server.moderation.case_log.case_count + 1,
-        executor = typeof options.executor === 'string' ? options.executor : `<@${options.executor.id}> (${options.executor.tag})`
+        executor =
+            typeof options.executor === 'string'
+                ? options.executor
+                : `<@${options.executor.id}> (${options.executor.tag})`
 
     try {
         await caseLog.send({
@@ -77,7 +81,10 @@ export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessag
             ],
             components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder().setCustomId(`CL-REASON-${caseId}`).setLabel(t('CaseLog.ChangeReason')).setStyle(ButtonStyle.Secondary)
+                    new ButtonBuilder()
+                        .setCustomId(`CL-REASON-${caseId}`)
+                        .setLabel(t('CaseLog.ChangeReason'))
+                        .setStyle(ButtonStyle.Secondary)
                 )
             ]
         })
@@ -138,14 +145,22 @@ export async function onPressChangeReasonButton(self: Lacuna, server: ServerDocu
     await interaction.showModal(modal)
 }
 
-export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocument, interaction: ModalSubmitInteraction) {
+export async function onSubmitChangeReasonModal(
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ModalSubmitInteraction
+) {
     const reason = interaction.fields.getTextInputValue('CL-REASON').trim()
 
     if (!reason) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.InvalidReason', {
-                username: `**${interaction.user.username}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${self.i18n.t(
+                server.locale,
+                'Commands.ReasonCommand.Texts.InvalidReason',
+                {
+                    username: `**${interaction.user.username}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -158,9 +173,13 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
     await interaction.message.edit({ embeds: [embed] })
 
     await interaction.reply({
-        content: `${self.staticEmojis.Check} | ${self.i18n.t(server.locale, 'Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged', {
-            username: `**${interaction.user.username}**`
-        })}`,
+        content: `${self.staticEmojis.Check} | ${self.i18n.t(
+            server.locale,
+            'Commands.ReasonCommand.Texts.CaseReasonHasBeenChanged',
+            {
+                username: `**${interaction.user.username}**`
+            }
+        )}`,
         ephemeral: true
     })
 
@@ -176,8 +195,16 @@ export async function onSubmitChangeReasonModal(self: Lacuna, server: ServerDocu
 export interface CreateCaseMessageOptions {
     type: CaseMessageType
     target?: User
-    executor: User | string
+    executor: User | PartialUser | string
     reason?: string
 }
 
-export type CaseMessageType = 'BanAdd' | 'BanRemove' | 'Kick' | 'MuteAdd' | 'MuteRemove' | 'PruneMessages' | 'WarnAdd' | 'WarnRemove'
+export type CaseMessageType =
+    | 'BanAdd'
+    | 'BanRemove'
+    | 'Kick'
+    | 'MuteAdd'
+    | 'MuteRemove'
+    | 'PruneMessages'
+    | 'WarnAdd'
+    | 'WarnRemove'

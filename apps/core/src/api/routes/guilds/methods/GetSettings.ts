@@ -6,7 +6,9 @@ import {
     APIGuildChannel,
     APIGuildMember,
     APIRole,
+    APISortableChannel,
     ChannelType,
+    GuildChannelType,
     PermissionsBitField,
     RESTAPIPartialCurrentUserGuild,
     makeURLSearchParams
@@ -26,14 +28,16 @@ export default async function getSettings(ctx: Context) {
     let selfMember: APIGuildMember
 
     try {
-        selfMember = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildMember(guildId, process.env.LCN_DISCORD_CLIENT_ID))) as any
+        selfMember = (await DiscordUtils.rest.get(
+            DiscordUtils.restRoutes.guildMember(guildId, process.env.LCN_DISCORD_CLIENT_ID)
+        )) as any
     } catch (err) {}
 
     if (!selfMember) {
         ctx.throw(406, new APIError(2004))
     }
 
-    let guildChannels: APIGuildChannel<any>[] = [],
+    let guildChannels: (APIGuildChannel & APISortableChannel)[] = [],
         guildRoles: APIRole[] = [],
         guildEmojis: APIEmoji[] = [],
         guildAutoModRules: APIAutoModerationRule[] = [],
@@ -43,16 +47,23 @@ export default async function getSettings(ctx: Context) {
         guildChannels = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildChannels(guildId))) as any
         guildRoles = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildRoles(guildId))) as any
         guildEmojis = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildEmojis(guildId))) as any
-        guildAutoModRules = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildAutoModerationRules(guildId))) as any
-        selfCommands = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.applicationCommands(process.env.LCN_DISCORD_CLIENT_ID), {
-            query: makeURLSearchParams({ with_localizations: true }) as any
-        })) as any
+        guildAutoModRules = (await DiscordUtils.rest.get(
+            DiscordUtils.restRoutes.guildAutoModerationRules(guildId)
+        )) as any
+        selfCommands = (await DiscordUtils.rest.get(
+            DiscordUtils.restRoutes.applicationCommands(process.env.LCN_DISCORD_CLIENT_ID),
+            {
+                query: makeURLSearchParams({ with_localizations: true }) as any
+            }
+        )) as any
     } catch (err) {}
 
     const selfRoles = guildRoles
         .sort((a, b) => a.position - b.position)
         .filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.LCN_DISCORD_CLIENT_ID)
-    const selfHighestRole = selfRoles.length ? selfRoles.reduce((x, y) => (DiscordUtils.compareRolePositions(x, y) ? y : x), selfRoles[0]) : null
+    const selfHighestRole = selfRoles.length
+        ? selfRoles.reduce((x, y) => (DiscordUtils.compareRolePositions(x, y) ? y : x), selfRoles[0])
+        : null
     const selfPermissions = selfRoles.reduce((x, y) => x | BigInt(y.permissions), 0n)
 
     const channels = guildChannels

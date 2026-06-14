@@ -1,5 +1,5 @@
 import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
-import { APIGuild } from 'discord-api-types/v10'
+import { APIGuild } from 'discord.js'
 import { Document, model, Schema } from 'mongoose'
 
 const schema = new Schema<GuildDocument>(

@@ -19,7 +19,7 @@ const app = new Koa()
 app.use(koaBody({ jsonLimit: '50mb' }))
 app.use(koaJSON())
 app.use(koaCORS({ credentials: true, exposeHeaders: ['Content-Disposition'] }))
-app.use(koaPinoLogger({ logger: Logger }))
+app.use(koaPinoLogger({ logger: Logger as any }))
 
 app.proxy = process.env.LCN_ROOT_DOMAIN !== 'localhost'
 app.keys = ['discord_oauth_state']

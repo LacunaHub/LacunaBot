@@ -1,7 +1,7 @@
 import database, { EnvData } from '@/database'
 import { ServerDocument, ServerModulesCustomCommand } from '@/database/schemas/Servers'
 import Logger from '@/utility/Logger'
-import { LavalunaManager } from '@lacunahub/lavaluna.js'
+import { Lavaluna } from '@lacunahub/lavaluna.js'
 import { ClusterClient } from '@lacunahub/letsfrag'
 import { ClientOptions, Collection, Guild, PermissionsBitField } from 'discord.js'
 import { readdirSync, readFileSync } from 'fs'
@@ -21,7 +21,7 @@ export default class Lacuna extends ClusterClient {
     public cache = new Map<string, any>()
     public commands = new Collection<string, Command>()
     public events = new Collection<string, Event>()
-    public lava: LavalunaManager | null = null
+    public lava: Lavaluna | null = null
     public isolates = new Collection<string, IsolateState>()
     public giveaways = new Collection<string, Giveaway>()
     public tempbans = new Collection<string, TemporaryBan>()
@@ -56,27 +56,32 @@ export default class Lacuna extends ClusterClient {
         this.start()
 
         // Sweep unused isolates
-        setInterval(() => {
-            const currentDate = Date.now()
+        setInterval(
+            () => {
+                const currentDate = Date.now()
 
-            this.isolates.sweep(v => {
-                const { lastUsed, value } = v
-                const shouldSweep = Math.floor(currentDate - lastUsed) > 1000 * 60 * 60
+                this.isolates.sweep(v => {
+                    const { lastUsed, value } = v
+                    const shouldSweep = Math.floor(currentDate - lastUsed) > 1000 * 60 * 60
 
-                if (shouldSweep) {
-                    if (!value.isDisposed) value.dispose()
-                }
+                    if (shouldSweep) {
+                        if (!value.isDisposed) value.dispose()
+                    }
 
-                return shouldSweep
-            })
-        }, 1000 * 60 * 30)
+                    return shouldSweep
+                })
+            },
+            1000 * 60 * 30
+        )
     }
 
     async start() {
         await this.db.connect()
         this.logger.info('connected to database')
 
-        this.rest.on('rateLimited', rateLimitData => this.logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`))
+        this.rest.on('rateLimited', rateLimitData =>
+            this.logger.warn(`[DiscordRateLimited] ${JSON.stringify(rateLimitData)}`)
+        )
         this.rest.on('invalidRequestWarning', invalidRequestInfo =>
             this.logger.warn(`[DiscordInvalidRequestWarning] ${JSON.stringify(invalidRequestInfo)}`)
         )

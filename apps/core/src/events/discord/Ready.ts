@@ -1,9 +1,9 @@
-import { LavalunaManager } from '@lacunahub/lavaluna.js'
+import { Lavaluna } from '@lacunahub/lavaluna.js'
 import { Events } from 'discord.js'
 import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna) => {
-    self.lava = new LavalunaManager({
+    self.lava = new Lavaluna({
         nodes: process.env.LCN_LAVALINK_NODES.split(',').map(v => {
             const [name, hostname, port, password] = v.split(':')
 
