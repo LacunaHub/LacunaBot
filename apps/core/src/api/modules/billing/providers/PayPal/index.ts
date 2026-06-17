@@ -1,4 +1,5 @@
-export const PayPalAPI = process.env.NODE_ENV === 'development' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com'
+export const PayPalAPI =
+    process.env.NODE_ENV === 'development' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com'
 export const SubscriptionPlans =
     process.env.NODE_ENV === 'development'
         ? {

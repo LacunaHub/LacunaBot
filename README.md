@@ -14,10 +14,10 @@
 
 ## Requirements
 
--   Node.js 22+
--   MongoDB 7+
--   Redis 7+
--   Docker & Docker Compose (for containerized development)
+- Node.js 22+
+- MongoDB 7+
+- Redis 7+
+- Docker & Docker Compose (for containerized development)
 
 ## Quick start
 
@@ -62,9 +62,9 @@
 
 # Links
 
--   [Website](https://lacunabot.com)
--   [Docs](https://docs.lacunabot.com)
--   [Discord](https://discord.gg/srfhGjbKce)
--   [Telegram](https://t.me/roviusistaken)
--   [GitHub Discussions](https://github.com/orgs/LacunaHub/discussions)
--   [Crowdin](https://crowdin.com/project/lacuna)
+- [Website](https://lacunabot.com)
+- [Docs](https://docs.lacunabot.com)
+- [Discord](https://discord.gg/srfhGjbKce)
+- [Telegram](https://t.me/roviusistaken)
+- [GitHub Discussions](https://github.com/orgs/LacunaHub/discussions)
+- [Crowdin](https://crowdin.com/project/lacuna)

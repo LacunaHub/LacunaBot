@@ -537,10 +537,20 @@ export class DiffMatchPatch {
                             commonLength = this.commonPrefix(textInsert, textDelete)
 
                             if (commonLength !== 0) {
-                                if (pointer - countDelete - countInsert > 0 && diffs[pointer - countDelete - countInsert - 1]![0] === DIFF_EQUAL) {
-                                    diffs[pointer - countDelete - countInsert - 1]![1] += textInsert.substring(0, commonLength)
+                                if (
+                                    pointer - countDelete - countInsert > 0 &&
+                                    diffs[pointer - countDelete - countInsert - 1]![0] === DIFF_EQUAL
+                                ) {
+                                    diffs[pointer - countDelete - countInsert - 1]![1] += textInsert.substring(
+                                        0,
+                                        commonLength
+                                    )
                                 } else {
-                                    diffs.splice(0, 0, new Diff(DIFF_EQUAL, textInsert.substring(0, commonLength)).toArray())
+                                    diffs.splice(
+                                        0,
+                                        0,
+                                        new Diff(DIFF_EQUAL, textInsert.substring(0, commonLength)).toArray()
+                                    )
                                     pointer++
                                 }
                                 textInsert = textInsert.substring(commonLength)
@@ -550,7 +560,8 @@ export class DiffMatchPatch {
                             // Factor out any common suffixies.
                             commonLength = this.commonSuffix(textInsert, textDelete)
                             if (commonLength !== 0) {
-                                diffs[pointer]![1] = textInsert.substring(textInsert.length - commonLength) + diffs[pointer]![1]
+                                diffs[pointer]![1] =
+                                    textInsert.substring(textInsert.length - commonLength) + diffs[pointer]![1]
                                 textInsert = textInsert.substring(0, textInsert.length - commonLength)
                                 textDelete = textDelete.substring(0, textDelete.length - commonLength)
                             }
@@ -597,17 +608,22 @@ export class DiffMatchPatch {
         while (pointer < diffs.length - 1) {
             if (diffs[pointer - 1]![0] === DIFF_EQUAL && diffs[pointer + 1]![0] === DIFF_EQUAL) {
                 // This is a single edit surrounded by equalities.
-                if (diffs[pointer]![1].substring(diffs[pointer]![1].length - diffs[pointer - 1]![1].length) === diffs[pointer - 1]![1]) {
+                if (
+                    diffs[pointer]![1].substring(diffs[pointer]![1].length - diffs[pointer - 1]![1].length) ===
+                    diffs[pointer - 1]![1]
+                ) {
                     // Shift the edit over the previous equality.
                     diffs[pointer]![1] =
-                        diffs[pointer - 1]![1] + diffs[pointer]![1].substring(0, diffs[pointer]![1].length - diffs[pointer - 1]![1].length)
+                        diffs[pointer - 1]![1] +
+                        diffs[pointer]![1].substring(0, diffs[pointer]![1].length - diffs[pointer - 1]![1].length)
                     diffs[pointer + 1]![1] = diffs[pointer - 1]![1] + diffs[pointer + 1]![1]
                     diffs.splice(pointer - 1, 1)
                     changes = true
                 } else if (diffs[pointer]![1].substring(0, diffs[pointer + 1]![1].length) === diffs[pointer + 1]![1]) {
                     // Shift the edit over the next equality.
                     diffs[pointer - 1]![1] += diffs[pointer + 1]![1]
-                    diffs[pointer]![1] = diffs[pointer]![1].substring(diffs[pointer + 1]![1].length) + diffs[pointer + 1]![1]
+                    diffs[pointer]![1] =
+                        diffs[pointer]![1].substring(diffs[pointer + 1]![1].length) + diffs[pointer + 1]![1]
                     diffs.splice(pointer + 1, 1)
                     changes = true
                 }
@@ -872,7 +888,11 @@ export class DiffMatchPatch {
                 }
 
                 let y2 = x2 - k2
-                while (x2 < text1_length && y2 < text2_length && text1.charAt(text1_length - x2 - 1) === text2.charAt(text2_length - y2 - 1)) {
+                while (
+                    x2 < text1_length &&
+                    y2 < text2_length &&
+                    text1.charAt(text1_length - x2 - 1) === text2.charAt(text2_length - y2 - 1)
+                ) {
                     x2++
                     y2++
                 }
