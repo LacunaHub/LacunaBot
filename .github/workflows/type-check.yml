@@ -1,11 +1,11 @@
-name: Build
+name: Type Check
 
 on:
   pull_request:
     branches: [main]
 
 jobs:
-  build:
+  format:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,4 +25,4 @@ jobs:
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+      - run: pnpm type-check
