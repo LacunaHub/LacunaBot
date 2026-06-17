@@ -1,5 +1,9 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import Logger from '@/utility/Logger'
+import db from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import i18n from '@/i18n/index.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { capitalizeFirstLetter } from '@/internals/utility/Utils.js'
+import Logger from '@/utility/Logger.js'
 import {
     ActionRowBuilder,
     BaseGuildTextChannel,
@@ -8,18 +12,14 @@ import {
     ButtonStyle,
     EmbedBuilder,
     Guild,
-    ModalActionRowComponentBuilder,
+    type ModalActionRowComponentBuilder,
     ModalBuilder,
     ModalSubmitInteraction,
-    PartialUser,
+    type PartialUser,
     TextInputBuilder,
     TextInputStyle,
     User
 } from 'discord.js'
-import db from '../../database'
-import i18n from '../../i18n'
-import Lacuna from '../../internals/Lacuna'
-import { capitalizeFirstLetter } from '../../internals/utility/Utils'
 
 export const CaseLogImages = {
     BanAdd: 'https://i.imgur.com/qI02Ivf.png',
@@ -44,10 +44,11 @@ export const CaseLogTypesCompatibility = {
 }
 
 export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessageOptions) {
-    const server = await db.servers.findOne({ _id: guild.id })
-    const caseLog = guild.channels.cache.get(server.moderation.case_log.channel_id) as BaseGuildTextChannel
+    const server = await db.servers.findOne({ _id: guild.id }).orFail()
+    const caseLog = guild.channels.cache.get(server.moderation.case_log.channel_id!) as BaseGuildTextChannel
 
-    if (!caseLog || !server.moderation.case_log.types[CaseLogTypesCompatibility[options.type]].active) return false
+    if (!caseLog || !(server.moderation.case_log.types as any)[CaseLogTypesCompatibility[options.type]].active)
+        return false
 
     const t = i18n.t.bind(null, server.locale)
     const caseId = server.moderation.case_log.case_count + 1,
@@ -105,7 +106,7 @@ export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessag
 
     guild.client.emit('moduleExecution', {
         guildId: guild.id,
-        targetId: options.target.id,
+        targetId: options.target!.id,
         module: 'Moderation',
         category: 'CaseLog',
         label: options.type
@@ -115,7 +116,7 @@ export async function createCaseLogEntry(guild: Guild, options: CreateCaseMessag
 }
 
 export async function onPressChangeReasonButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
-    if (!interaction.memberPermissions.has(self.PermissionFlags.ManageMessages)) {
+    if (!interaction.memberPermissions?.has(self.PermissionFlags.ManageMessages)) {
         await interaction.reply({
             content: `${self.staticEmojis.Cross} | ${self.i18n.t(server.locale, 'Commands.CommandExecutionDenied', {
                 username: `**${interaction.user.username}**`
@@ -167,10 +168,10 @@ export async function onSubmitChangeReasonModal(
         return false
     }
 
-    const embed = new EmbedBuilder(interaction.message.embeds[0].toJSON())
-    embed.data.fields[2].value = reason
+    const embed = new EmbedBuilder(interaction.message!.embeds![0]!.toJSON())
+    embed.data.fields![2]!.value = reason
 
-    await interaction.message.edit({ embeds: [embed] })
+    await interaction.message?.edit({ embeds: [embed] })
 
     await interaction.reply({
         content: `${self.staticEmojis.Check} | ${self.i18n.t(
@@ -196,7 +197,7 @@ export interface CreateCaseMessageOptions {
     type: CaseMessageType
     target?: User
     executor: User | PartialUser | string
-    reason?: string
+    reason?: string | null
 }
 
 export type CaseMessageType =

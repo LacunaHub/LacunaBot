@@ -1,11 +1,11 @@
 // DAME - Discord AutoMod Extension
 
-import { ServerDocument, ServerModerationDAMERuleActionType } from '@/database/schemas/Servers'
-import { AutoModerationRule, ForumChannel, GuildMember, GuildTextBasedChannel, MediaChannel } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import Moderation from '../Moderation'
-import { createCaseLogEntry } from '../Moderation/CaseLog'
-import Replacer from '../Replacer'
+import { type ServerDocument, ServerModerationDAMERuleActionType } from '@/database/schemas/Servers.js'
+import { AutoModerationRule, ForumChannel, GuildMember, type GuildTextBasedChannel, MediaChannel } from 'discord.js'
+import Lacuna from '../../internals/Lacuna.js'
+import { createCaseLogEntry } from '../Moderation/CaseLog.js'
+import Moderation from '../Moderation/index.js'
+import Replacer from '../Replacer.js'
 
 async function handleAutoModTrigger(
     self: Lacuna,
@@ -38,14 +38,19 @@ async function handleAutoModTrigger(
         }
 
         if (action.type === ServerModerationDAMERuleActionType.Ban)
-            await Moderation.banUser(self, server, guild, { target: targetMember, durationSeconds: action.metadata.duration_seconds, reason })
+            await Moderation.banUser(self, server, guild, {
+                target: targetMember,
+                durationSeconds: action.metadata.duration_seconds ?? null,
+                reason
+            })
 
-        if (action.type === ServerModerationDAMERuleActionType.Kick) await Moderation.kickUser(self, server, guild, { target: targetMember, reason })
+        if (action.type === ServerModerationDAMERuleActionType.Kick)
+            await Moderation.kickUser(self, server, guild, { target: targetMember, reason })
 
         if (action.type === ServerModerationDAMERuleActionType.Warn) {
             await Moderation.warnUser(self, server, guild, {
                 target: targetMember,
-                executor: self.user,
+                executor: self.user as any,
                 reason,
                 channel
             })
@@ -71,7 +76,7 @@ async function handleAutoModTrigger(
         if (action.type === ServerModerationDAMERuleActionType.SendMessage) {
             try {
                 const replacer = new Replacer(server.premium.available, { guild, member: targetMember }),
-                    messagePayload = await replacer.replaceTemplateMessage(action.metadata.message)
+                    messagePayload = await replacer.replaceTemplateMessage(action.metadata.message!)
 
                 if (channel.isSendable()) await channel.send(messagePayload)
             } catch (err) {

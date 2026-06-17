@@ -1,8 +1,8 @@
-import { PaymentMetadataProduct, PaymentStatus, PaymentType } from '@/database/schemas/Payments'
-import { SnowflakeUtils } from '@/utility/SnowflakeUtils'
-import { Context } from 'koa'
-import database from '../../../../database'
-import { UserState } from '../../../utility/Authentication'
+import { type UserState } from '@/api/utility/Authentication.js'
+import database from '@/database/index.js'
+import { PaymentMetadataProduct, PaymentStatus, PaymentType } from '@/database/schemas/Payments.js'
+import { SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
+import { type Context } from 'koa'
 
 export default async function getCurrentUserBills(ctx: Context) {
     const currentUser: UserState = ctx.state.user,

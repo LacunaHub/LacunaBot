@@ -1,15 +1,15 @@
-import { ServerDocument, ServerModulesAutomationTriggers } from '@/database/schemas/Servers'
+import { ServerModulesAutomationTriggers } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import Automation from '@/modules/custom-behavior/Automation.js'
+import Farewell from '@/modules/Farewell.js'
+import GuildImageRotation from '@/modules/GuildImageRotation.js'
+import Logs from '@/modules/Logs/index.js'
 import { Events, GuildMember } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import Automation from '../../modules/custom-behavior/Automation'
-import Farewell from '../../modules/Farewell'
-import GuildImageRotation from '../../modules/GuildImageRotation'
-import Logs from '../../modules/Logs'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
     if (!member || !member.guild) return false
 
-    const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
+    const server = await self.db.servers.fetch({ _id: member.guild.id })
 
     await self.fetchGuild(member.guild)
     await Farewell.sendMessage(self, server, member)

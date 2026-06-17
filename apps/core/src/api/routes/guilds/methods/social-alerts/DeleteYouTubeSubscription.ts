@@ -1,9 +1,9 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import { hubSubscribe } from '../../../../modules/social-alerts/YouTubeAlerts'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
+import { hubSubscribe } from '@/api/modules/social-alerts/YouTubeAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type Context } from 'koa'
 
 export default async function deleteYouTubeSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -45,7 +45,9 @@ export default async function deleteYouTubeSubscription(ctx: Context) {
 
     if (youtubeSubscription.webhook_id) {
         try {
-            await DiscordUtils.rest.delete(DiscordUtils.restRoutes.webhook(youtubeSubscription.webhook_id, youtubeSubscription.webhook_token))
+            await DiscordUtils.rest.delete(
+                DiscordUtils.restRoutes.webhook(youtubeSubscription.webhook_id, youtubeSubscription.webhook_token)
+            )
         } catch (err) {
             ctx.log.error({
                 module: 'YouTubeSubs',

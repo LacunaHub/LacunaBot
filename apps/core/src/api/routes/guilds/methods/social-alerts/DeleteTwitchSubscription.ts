@@ -1,9 +1,9 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import { eventSubUnsubscribe } from '../../../../modules/social-alerts/TwitchAlerts'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
+import { eventSubUnsubscribe } from '@/api/modules/social-alerts/TwitchAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type Context } from 'koa'
 
 export default async function deleteTwitchSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -28,7 +28,9 @@ export default async function deleteTwitchSubscription(ctx: Context) {
     })
 
     if (!subscribedGuilds.length) {
-        const twitchSub = await database.twitchSubs.findOne({ broadcaster_id: twitchSubscription.broadcaster_id })
+        const twitchSub = await database.twitchSubs
+            .findOne({ broadcaster_id: twitchSubscription.broadcaster_id })
+            .orFail()
 
         try {
             await eventSubUnsubscribe(twitchSub?._id)
@@ -47,7 +49,9 @@ export default async function deleteTwitchSubscription(ctx: Context) {
 
     if (twitchSubscription.webhook_id) {
         try {
-            await DiscordUtils.rest.delete(DiscordUtils.restRoutes.webhook(twitchSubscription.webhook_id, twitchSubscription.webhook_token))
+            await DiscordUtils.rest.delete(
+                DiscordUtils.restRoutes.webhook(twitchSubscription.webhook_id, twitchSubscription.webhook_token)
+            )
         } catch (err) {
             ctx.log.error({
                 module: 'TwitchSubs',

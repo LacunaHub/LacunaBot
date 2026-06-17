@@ -1,13 +1,14 @@
 import {
-    ServerDocument,
-    ServerModulesCustomCommand,
+    type ServerDocument,
+    type ServerModulesCustomCommand,
     ServerModulesCustomCommandOptions,
-    ServerModulesCustomCommandScript,
+    type ServerModulesCustomCommandScript,
     ServerModulesCustomCommandScriptLanguages
-} from '@/database/schemas/Servers'
-import Logger from '@/utility/Logger'
-import { ApplicationCommandOptionType, BaseGuildTextChannel, ChatInputCommandInteraction, Team } from 'discord.js'
-import { Context, Isolate } from 'isolated-vm'
+} from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import Logger from '@/utility/Logger.js'
+import { ApplicationCommandOptionType, BaseGuildTextChannel, ChatInputCommandInteraction } from 'discord.js'
+import IVM from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'
 import {
     convertComponentsToScript,
@@ -18,8 +19,7 @@ import {
     serializeMember,
     serializeRole,
     serializeUser
-} from '.'
-import Lacuna from '../../internals/Lacuna'
+} from './index.js'
 
 export default class CustomCommand {
     public command: ServerModulesCustomCommand
@@ -29,9 +29,14 @@ export default class CustomCommand {
     public storage: QDatabase
     public usedPatterns: string[]
     public usedFunctions: string[]
-    public isolate: Isolate
+    public isolate: IVM.Isolate
 
-    constructor(command: ServerModulesCustomCommand, self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
+    constructor(
+        command: ServerModulesCustomCommand,
+        self: Lacuna,
+        server: ServerDocument,
+        interaction: ChatInputCommandInteraction<'cached'>
+    ) {
         this.command = command
 
         this.self = self
@@ -46,13 +51,13 @@ export default class CustomCommand {
             this.self.isolates.get(interaction.guildId) ??
             this.self.isolates
                 .set(interaction.guildId, {
-                    value: new Isolate({
+                    value: new IVM.Isolate({
                         memoryLimit: 8,
                         onCatastrophicError: message => Logger.error({ message }, 'ivm catastrophic error')
                     }),
                     lastUsed: Date.now()
                 })
-                .get(interaction.guildId)
+                .get(interaction.guildId)!
 
         isolateState.lastUsed = Date.now()
         this.isolate = isolateState.value
@@ -71,17 +76,17 @@ export default class CustomCommand {
                 id: commandId,
                 name: commandName,
                 options: options.data.map(i => {
-                    let user, channel, role
+                    let userOpt, channelOpt, roleOpt
 
-                    if (i.type === ApplicationCommandOptionType.User) user = options.getUser(i.name)
-                    if (i.type === ApplicationCommandOptionType.Channel) channel = options.getChannel(i.name)
-                    if (i.type === ApplicationCommandOptionType.Role) role = options.getRole(i.name)
+                    if (i.type === ApplicationCommandOptionType.User) userOpt = options.getUser(i.name)
+                    if (i.type === ApplicationCommandOptionType.Channel) channelOpt = options.getChannel(i.name)
+                    if (i.type === ApplicationCommandOptionType.Role) roleOpt = options.getRole(i.name)
 
                     return {
-                        channel: channel ? serializeChannel(channel) : undefined,
+                        channel: channelOpt ? serializeChannel(channelOpt as any) : undefined,
                         name: i.name,
-                        role: role ? serializeRole(role) : undefined,
-                        user: user ? serializeUser(user) : undefined,
+                        role: roleOpt ? serializeRole(roleOpt) : undefined,
+                        user: userOpt ? serializeUser(userOpt) : undefined,
                         value: i.value
                     }
                 })
@@ -113,7 +118,7 @@ export default class CustomCommand {
         const globalValues = await this.getGlobalValues()
 
         for (const smartValue of Object.keys(globalValues)) {
-            ctx.global.setSync(smartValue, globalValues[smartValue], { copy: true })
+            ctx.global.setSync(smartValue, (globalValues as any)[smartValue], { copy: true })
         }
 
         extendStorage(this, ctx, this.server._id)
@@ -143,7 +148,7 @@ export default class CustomCommand {
         return true
     }
 
-    private async executeScripts(ctx: Context, scripts: ServerModulesCustomCommandScript[]) {
+    private async executeScripts(ctx: IVM.Context, scripts: ServerModulesCustomCommandScript[]) {
         scripts = scripts
             .filter(v => v.language === ServerModulesCustomCommandScriptLanguages.JavaScript && v.code.length > 0)
             .slice(0, this.server.premium.available ? 10 : 1)
@@ -170,7 +175,9 @@ export default class CustomCommand {
                 path = `${this.interaction.guildId}.channels.${this.interaction.channelId}`
             }
 
-            const throttled = (await this.self.db.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)) as any
+            const throttled = (await this.self.db.qdb.get(
+                `throttling.customCommands.${this.command.id}.${path}`
+            )) as any
 
             if (throttled?.retry_after - Date.now() > 0) {
                 return {
@@ -194,8 +201,6 @@ export default class CustomCommand {
     }
 
     private async throttle() {
-        if ((this.self.application.owner as Team).members.some(m => m.id === this.interaction.user.id)) return false
-
         if (this.command.options.includes(ServerModulesCustomCommandOptions.Throttling)) {
             let path = `${this.interaction.guildId}.users.${this.interaction.user.id}`
 
@@ -211,7 +216,7 @@ export default class CustomCommand {
             if (!throttled) {
                 await this.self.db.qdb.set(`throttling.customCommands.${this.command.id}.${path}`, {
                     retry_after: Date.now(),
-                    remaining: this.command.throttling.max_uses
+                    remaining: Number(this.command.throttling?.max_uses)
                 })
 
                 throttled = (await this.self.db.qdb.get(`throttling.customCommands.${this.command.id}.${path}`)) as any
@@ -223,15 +228,19 @@ export default class CustomCommand {
             if (throttled.remaining <= 0) {
                 await this.self.db.qdb.set(
                     `throttling.customCommands.${this.command.id}.${path}.retry_after`,
-                    Date.now() + this.command.throttling.timeout * 1000
+                    Date.now() + Number(this.command.throttling?.timeout) * 1000
                 )
                 await this.self.db.qdb.set(`throttling.customCommands.${this.command.id}.${path}.remaining`, -1)
             }
         } else {
-            const has = await this.self.db.qdb.has(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)
+            const has = await this.self.db.qdb.has(
+                `throttling.customCommands.${this.command.id}.${this.interaction.guildId}`
+            )
 
             if (has) {
-                await this.self.db.qdb.delete(`throttling.customCommands.${this.command.id}.${this.interaction.guildId}`)
+                await this.self.db.qdb.delete(
+                    `throttling.customCommands.${this.command.id}.${this.interaction.guildId}`
+                )
             }
         }
     }

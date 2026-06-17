@@ -1,14 +1,16 @@
-import { APIAutoModerationRule, AutoModerationRule, Events, Routes } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
+import Lacuna from '@/internals/Lacuna.js'
+import { type APIAutoModerationRule, AutoModerationRule, Events, Routes } from 'discord.js'
 
 export default {
     name: Events.AutoModerationRuleCreate,
     handler: async (self: Lacuna, autoModRule: AutoModerationRule) => {
         const server = await self.db.servers.findOne({ _id: autoModRule.guild.id })
         if (!server || server.blocked) return false
-        if (autoModRule.creatorId === self.user.id) return false
+        if (autoModRule.creatorId === self.user!.id) return false
 
-        const apiAutoModRule = (await self.rest.get(Routes.guildAutoModerationRule(server._id, autoModRule.id))) as APIAutoModerationRule
+        const apiAutoModRule = (await self.rest.get(
+            Routes.guildAutoModerationRule(server._id, autoModRule.id)
+        )) as APIAutoModerationRule
 
         await self.db.servers.updateOne(
             { _id: server._id },

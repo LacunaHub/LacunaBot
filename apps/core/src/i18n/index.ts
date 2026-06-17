@@ -1,9 +1,9 @@
-import Logger from '@/utility/Logger'
+import { resolveObjectPath } from '@/internals/utility/Utils.js'
+import Logger from '@/utility/Logger.js'
 import { messages } from '@lacunahub/lacuna-locale'
-import { resolveObjectPath } from '../internals/utility/Utils'
 
-export function locale(locale: string): typeof messages.ru {
-    return messages[locale] ?? messages.ru
+export function locale(locale: string) {
+    return messages[locale] ?? messages.ru!
 }
 
 export function format(string: string, params?: any[] | { [key: string]: any }) {
@@ -15,9 +15,7 @@ export function format(string: string, params?: any[] | { [key: string]: any }) 
 
             string = string.replace(pattern, () => params[index])
         }
-    }
-
-    if (typeof params === 'object' && params !== null) {
+    } else if (typeof params === 'object' && params !== null) {
         for (const key of Object.keys(params)) {
             const regexp = new RegExp(`{${key}}`, 'gi')
 
@@ -29,8 +27,9 @@ export function format(string: string, params?: any[] | { [key: string]: any }) 
 }
 
 export function t(locale: string, key: string, params?: any[] | { [key: string]: any }) {
-    locale = locale.split('-')[0]
-    const string = resolveObjectPath(key, messages[locale] ?? messages.ru) ?? resolveObjectPath(key, messages.ru) ?? key
+    locale = locale.split('-')[0]!
+    const string =
+        resolveObjectPath(key, messages[locale] ?? messages.ru!) ?? resolveObjectPath(key, messages.ru!) ?? key
 
     if (string === key) {
         Logger.warn({ string }, 'missing i18n string')
@@ -48,7 +47,8 @@ export function t(locale: string, key: string, params?: any[] | { [key: string]:
  */
 export function pluralize(locale: string, key: string, count: number) {
     const pluralRules = new Intl.PluralRules(locale)
-    const string = resolveObjectPath(key, messages[locale] ?? messages.ru) ?? resolveObjectPath(key, messages.ru) ?? key
+    const string =
+        resolveObjectPath(key, messages[locale] ?? messages.ru!) ?? resolveObjectPath(key, messages.ru!) ?? key
     const stringParts = string.split(/\s*\|\s*/)
     const grammaticalNumber = pluralRules.select(count)
 

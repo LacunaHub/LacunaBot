@@ -1,7 +1,7 @@
-import database, { DiamondProductTier } from '@/database'
-import { PaymentType } from '@/database/schemas/Payments'
-import { SubscriptionType } from '@/database/schemas/Subscriptions'
-import { Context } from 'koa'
+import database, { DiamondProductTier } from '@/database/index.js'
+import { PaymentType } from '@/database/schemas/Payments.js'
+import { SubscriptionType } from '@/database/schemas/Subscriptions.js'
+import { type Context } from 'koa'
 
 export default async function getProducts(ctx: Context) {
     const products = await database.getProducts(),
@@ -9,11 +9,15 @@ export default async function getProducts(ctx: Context) {
     const paymentMethods = []
 
     if (!env.paypalDisabled) paymentMethods.push({ name: 'PayPal', value: PaymentType[PaymentType.PayPal] })
-    if (!env.patreonDisabled) paymentMethods.push({ name: 'Patreon', value: SubscriptionType[SubscriptionType.Patreon] })
+    if (!env.patreonDisabled)
+        paymentMethods.push({ name: 'Patreon', value: SubscriptionType[SubscriptionType.Patreon] })
     if (!env.boostyDisabled) paymentMethods.push({ name: 'Boosty', value: SubscriptionType[SubscriptionType.Boosty] })
     if (!env.diamondForTokensDisabled) paymentMethods.push({ name: 'Tokens', value: PaymentType[PaymentType.Tokens] })
     if (!env.diamondForBoostsDisabled)
-        paymentMethods.push({ name: 'Discord Nitro Boost', value: SubscriptionType[SubscriptionType.DiscordNitroBoost] })
+        paymentMethods.push({
+            name: 'Discord Nitro Boost',
+            value: SubscriptionType[SubscriptionType.DiscordNitroBoost]
+        })
 
     ctx.status = 200
     ctx.body = {
@@ -52,5 +56,6 @@ function convertTierToDuration(tier: DiamondProductTier): number {
         TwelveMonths: year
     }
 
+    // @ts-ignore
     return tiersMap[DiamondProductTier[tier]]
 }

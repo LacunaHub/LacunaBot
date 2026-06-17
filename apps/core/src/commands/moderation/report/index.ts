@@ -1,7 +1,7 @@
+import { CommandGroup, type CommandOptions } from '@/internals/structures/Command.js'
 import { ApplicationCommandOptionType } from 'discord.js'
-import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
-import slash from './slash'
-import user from './user'
+import slash from './slash.js'
+import user from './user.js'
 
 const options: CommandOptions = {
     prettyName: 'Commands.ReportCommand.Name',

@@ -1,9 +1,9 @@
-import { Snowflake } from '@/utility/SnowflakeUtils'
-import { Document, model, Schema } from 'mongoose'
+import { type Snowflake } from '@/utility/SnowflakeUtils.js'
+import mongoose from 'mongoose'
 
-export default model<SubscriptionDocument>(
+export default mongoose.model<SubscriptionDocument>(
     'subscriptions',
-    new Schema<SubscriptionDocument>(
+    new mongoose.Schema<SubscriptionDocument>(
         {
             _id: { type: String },
             type: { type: Number, required: true },
@@ -20,7 +20,7 @@ export default model<SubscriptionDocument>(
     )
 )
 
-export interface SubscriptionDocument extends Document {
+export interface SubscriptionDocument extends mongoose.Document {
     _id: Snowflake
     type: SubscriptionType
     status: SubscriptionStatus

@@ -1,18 +1,18 @@
-import database from '@/database'
-import { PaymentDocument, PaymentMetadataProduct, PaymentStatus } from '@/database/schemas/Payments'
-import { Context } from 'koa'
-import { addDiamond } from '../../../modules/billing'
-import { APIOrder, captureOrder } from '../../../modules/billing/providers/PayPal/Order'
-import APIError from '../../../utility/APIError'
+import { addDiamond } from '@/api/modules/billing/index.js'
+import { type APIOrder, captureOrder } from '@/api/modules/billing/providers/PayPal/Order.js'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
+import { type PaymentDocument, PaymentMetadataProduct, PaymentStatus } from '@/database/schemas/Payments.js'
+import { type Context } from 'koa'
 
 export default async function chargePayment(ctx: Context) {
     const token = ctx.query.token as string,
         subscriptionId = ctx.query.subscription_id
 
-    let payment: PaymentDocument
+    let payment!: PaymentDocument
 
     if (typeof subscriptionId !== 'undefined') {
-        payment = await database.payments.findOne({ 'metadata.provider_external_id': subscriptionId })
+        payment = await database.payments.findOne({ 'metadata.provider_external_id': subscriptionId }).orFail()
     } else {
         const payerId = ctx.query.PayerID
 
@@ -32,7 +32,7 @@ export default async function chargePayment(ctx: Context) {
             ctx.throw(402, new APIError(5014))
         }
 
-        payment = await database.payments.findOne({ 'metadata.provider_external_id': order.id })
+        payment = await database.payments.findOne({ 'metadata.provider_external_id': order.id }).orFail()
     }
 
     if (!payment) {

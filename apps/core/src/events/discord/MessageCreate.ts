@@ -1,18 +1,18 @@
-import { ServerDocument, ServerModulesAutomationTriggers } from '@/database/schemas/Servers'
+import { ServerModulesAutomationTriggers } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import AIMod from '@/modules/AIMod/index.js'
+import AutoMod from '@/modules/AutoMod/index.js'
+import Automation from '@/modules/custom-behavior/Automation.js'
+import { messageCreate as addWalletCash } from '@/modules/Economy.js'
+import GuildImageRotation from '@/modules/GuildImageRotation.js'
+import Levels from '@/modules/Levels.js'
+import { addAutoReactions, createAutoThread } from '@/modules/Useful.js'
 import { Events, Message, MessageType } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import AIMod from '../../modules/AIMod'
-import AutoMod from '../../modules/AutoMod'
-import Automation from '../../modules/custom-behavior/Automation'
-import { messageCreate as addWalletCash } from '../../modules/Economy'
-import GuildImageRotation from '../../modules/GuildImageRotation'
-import Levels from '../../modules/Levels'
-import { addAutoReactions, createAutoThread } from '../../modules/Useful'
 
 const handler = async (self: Lacuna, message: Message) => {
     if (message.author.bot || !message.inGuild()) return false
 
-    const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
+    const server = await self.db.servers.fetch({ _id: message.guild.id })
 
     if (server.blocked) {
         await message.guild.leave()
@@ -31,12 +31,12 @@ const handler = async (self: Lacuna, message: Message) => {
 
     await AutoMod.moderateCaps(self, server, message)
     await AutoMod.moderateLinks(self, server, message)
-    await AutoMod.moderateNicknames(self, server, message.member)
+    await AutoMod.moderateNicknames(self, server, message.member!)
     await AutoMod.moderateWords(self, server, message)
     await AutoMod.slowdownUsers(self, server, message)
     await addAutoReactions(self, server, message)
     await createAutoThread(self, server, message)
-    await GuildImageRotation.rotateBanner(self, server, message.guild, message.member)
+    await GuildImageRotation.rotateBanner(self, server, message.guild, message.member!)
 
     return true
 }

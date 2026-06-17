@@ -1,5 +1,5 @@
+import Lacuna from '@/internals/Lacuna.js'
 import { AutoModerationActionExecution, Events } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
 
 export default {
     name: Events.AutoModerationActionExecution,

@@ -1,10 +1,27 @@
-import { ServerMessageTemplateEmbed, ServerMessageTemplateImage } from '@/database/schemas/Servers'
-import { UserLevel, UserWallet } from '@/database/schemas/Users'
-import { AttachmentBuilder, BaseGuildTextChannel, EmbedBuilder, Guild, GuildMember, Message, resolveColor } from 'discord.js'
+import db from '@/database/index.js'
+import { type ServerMessageTemplate, type ServerMessageTemplateImage } from '@/database/schemas/Servers.js'
+import { type UserLevel, type UserWallet, type WalletCurrency } from '@/database/schemas/Users.js'
+import { escapeRegexp, resolveObjectPath } from '@/internals/utility/Utils.js'
+import {
+    AttachmentBuilder,
+    BaseGuildTextChannel,
+    EmbedBuilder,
+    Guild,
+    GuildMember,
+    Message,
+    resolveColor
+} from 'discord.js'
+import { evaluate } from 'mathjs'
 import moment from 'moment'
-import db from '../database'
-import { escapeRegexp, resolveObjectPath } from '../internals/utility/Utils'
-import { borderRadiuses, generateImage, textAligns, textDecorations, textSizes, textStyles, textTransforms } from './ImageGenerator'
+import {
+    borderRadiuses,
+    generateImage,
+    textAligns,
+    textDecorations,
+    textSizes,
+    textStyles,
+    textTransforms
+} from './ImageGenerator.js'
 
 const availableCodeSnippets = {
     CHOOSE: (...args: string[]) => {
@@ -17,7 +34,7 @@ const availableCodeSnippets = {
     DATE: (...args: string[]) => {
         let timestamp = Number(args[0]),
             format = args[1],
-            utc = args[2],
+            utc = args[2] || '',
             locale = args[3]
 
         if (typeof timestamp !== 'number' || isNaN(timestamp)) timestamp = Date.now()
@@ -51,12 +68,11 @@ const availableCodeSnippets = {
             digits = Number(args[1])
 
         if (typeof expression !== 'string') throw new TypeError()
+        if (expression.length > 200) throw new Error()
         if (typeof digits !== 'number' || digits < 0 || digits > 20 || isNaN(digits)) digits = 0
 
         expression = expression.match(/(?:[0-9\-\+\*\/\^\(\)])+/g) || []
-
-        let result = eval(expression.join(' '))
-
+        let result = evaluate(expression.join(' '))
         if (typeof result !== 'number') result = Number(result)
 
         return result.toFixed(digits)
@@ -73,6 +89,7 @@ const availableCodeSnippets = {
         if (locale == 'ru') {
             const cases = [2, 0, 1, 1, 1, 2]
 
+            // @ts-ignore
             return titles[number % 100 > 4 && number % 100 < 20 ? 2 : cases[number % 10 < 5 ? number % 10 : 5]]
         }
 
@@ -95,7 +112,8 @@ const availableCodeSnippets = {
             replacement = args[2],
             flags = args[3]
 
-        if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string') throw new TypeError()
+        if (typeof str !== 'string' || typeof search !== 'string' || typeof replacement !== 'string')
+            throw new TypeError()
         if (!flags || !flags.split('').some(flag => ['g', 'i'].includes(flag))) flags = 'g'
 
         const regex = new RegExp(`${search}`, flags)
@@ -134,7 +152,7 @@ export default class Replacer {
     public premium: boolean
     public shapers: IReplacerShapers
 
-    constructor(premium: boolean, shapers?: IReplacerShapers) {
+    constructor(premium: boolean, shapers: IReplacerShapers = {}) {
         this.premium = premium
         this.shapers = shapers
     }
@@ -143,7 +161,9 @@ export default class Replacer {
      * Get all values enclosed in {...} from the string.
      */
     getReplacers(string: string): string[] {
-        return (string.match(/{(?!-)\s*[^{}]+\s*}/gi) || []).map((replacer: string) => replacer.replace(/{|}/g, '').trim())
+        return (string.match(/{(?!-)\s*[^{}]+\s*}/gi) || []).map((replacer: string) =>
+            replacer.replace(/{|}/g, '').trim()
+        )
     }
 
     /**
@@ -153,18 +173,18 @@ export default class Replacer {
         return (string.match(/{\-\s*[A-Z]+\([^{}]*\)\s*\-}/g) || [])
             .map((snippet: string) => {
                 snippet = snippet.replace(/{-|-}/g, '').trim()
-                const name = snippet.match(/^[A-Z]+/).toString(),
+                const name = snippet.match(/^[A-Z]+/)?.toString() ?? '',
                     args = snippet
                         .match(/\([^{}]*\)$/)
-                        .toString()
-                        .replace(/^\(/, '')
-                        .replace(/\)$/, '')
+                        ?.toString()
+                        ?.replace(/^\(/, '')
+                        ?.replace(/\)$/, '')
 
                 if (Object.keys(availableCodeSnippets).includes(name)) {
-                    return { name: name, args: args, fn: availableCodeSnippets[name] }
+                    return { name: name, args: args || '', fn: (availableCodeSnippets as any)[name] }
                 }
             })
-            .filter(i => i)
+            .filter(i => typeof i !== 'undefined')
     }
 
     /**
@@ -175,13 +195,13 @@ export default class Replacer {
             guild = this.shapers?.guild,
             member = this.shapers?.member
 
-        let memberActivity: { level: UserLevel; wallet: UserWallet }, guildOwner: GuildMember
+        let memberActivity!: { level: UserLevel | null; wallet: UserWallet | null }, guildOwner!: GuildMember
 
         if (member) {
             const userDoc = await db.users.findOne({ _id: member.id })
             memberActivity = {
-                level: userDoc?.activities?.levels?.find?.(i => i.guild_id === guild.id),
-                wallet: userDoc?.activities?.wallets?.find?.(i => i.guild_id === guild.id)
+                level: userDoc?.activities?.levels?.find?.(i => i.guild_id === guild?.id) ?? null,
+                wallet: userDoc?.activities?.wallets?.find?.(i => i.guild_id === guild?.id) ?? null
             }
         }
 
@@ -249,7 +269,9 @@ export default class Replacer {
                 level: {
                     rank: memberActivity?.level?.experience?.level ?? 0,
                     current_xp: memberActivity?.level?.experience?.current ?? 0,
-                    need_xp: memberActivity?.level ? 150 + memberActivity.level.experience.level * memberActivity.level.experience.level * 8 : 0,
+                    need_xp: memberActivity?.level
+                        ? 150 + memberActivity.level.experience.level * memberActivity.level.experience.level * 8
+                        : 0,
                     remaining_xp: memberActivity?.level
                         ? Math.round(
                               150 +
@@ -292,7 +314,7 @@ export default class Replacer {
                         ...(memberActivity?.wallet?.currencies
                             ?.reduce?.((x, y) => {
                                 return y.id === 'DEFAULT' ? [y, ...x] : [...x, y]
-                            }, [])
+                            }, [] as WalletCurrency[])
                             ?.map?.(i => i.amount) ?? [0])
                     }
                 )
@@ -303,7 +325,7 @@ export default class Replacer {
                     name: (message?.channel as BaseGuildTextChannel)?.name,
                     id: message?.channel?.id,
                     mention: `<#${message?.channel?.id ?? '1'}>`,
-                    parent_id: message?.channel?.['parent_id'],
+                    parent_id: message?.channel?.parentId,
                     position: (message?.channel as BaseGuildTextChannel)?.rawPosition,
                     type: message?.channel?.type
                 },
@@ -368,14 +390,14 @@ export default class Replacer {
                     ),
                     channels: Object.assign(
                         {},
-                        ...(message?.mentions?.channels?.map?.((v, k, col) => {
+                        ...(message?.mentions?.channels?.map((v, k, col) => {
                             return {
                                 [[...col.keys()].indexOf(k)]: {
                                     mention: `<#${v.id}>`,
                                     id: v.id,
-                                    name: v['name'],
-                                    parent_id: v['parent_id'],
-                                    position: v['rawPosition'],
+                                    name: (v as any).name,
+                                    parent_id: (v as any).parentId,
+                                    position: (v as any).rawPosition,
                                     type: v.type
                                 }
                             }
@@ -411,7 +433,7 @@ export default class Replacer {
                 else raws[i] = value
             }
 
-            string = string.replace(regexp, () => raws.find(i => i))
+            string = string.replace(regexp, () => raws.find(i => i)!)
         }
 
         const codeSnippets = this.getCodeSnippets(string)
@@ -423,7 +445,7 @@ export default class Replacer {
 
             try {
                 res = snippet.fn(...snippet.args.split(/;\s{0,1}/))
-            } catch (err) {
+            } catch (err: any) {
                 res = `\`${snippet.name}#${err.name}\``
             }
 
@@ -437,34 +459,52 @@ export default class Replacer {
      * Replace replacers and code snippets in the template message and return message payload with content and embeds.
      */
     async replaceTemplateMessage(
-        template: { content: string; embed?: ServerMessageTemplateEmbed; image?: ServerMessageTemplateImage },
+        template: ServerMessageTemplate & { image?: ServerMessageTemplateImage },
         customReplacements: IReplacerCustomShapers = {}
     ) {
-        const content = await this.replace(template.content, customReplacements)
+        const content = await this.replace(template.content || '', customReplacements)
         let embed = {},
-            attachment: { buffer: Buffer; name: string }
+            attachment!: { buffer: Buffer; name: string }
 
         if (template.embed && template.embed.active) {
-            const imageURL = template.embed.image.url ? await this.replace(template.embed.image.url, customReplacements) : null,
-                footerIconURL = template.embed.footer.icon_url ? await this.replace(template.embed.footer.icon_url, customReplacements) : null,
-                thumbnailURL = template.embed.thumbnail.url ? await this.replace(template.embed.thumbnail.url, customReplacements) : null,
-                avatarIconURL = template.embed.author.icon_url ? await this.replace(template.embed.author.icon_url, customReplacements) : null
+            const imageURL = template.embed.image.url
+                    ? await this.replace(template.embed.image.url, customReplacements)
+                    : null,
+                footerIconURL = template.embed.footer.icon_url
+                    ? await this.replace(template.embed.footer.icon_url, customReplacements)
+                    : null,
+                thumbnailURL = template.embed.thumbnail.url
+                    ? await this.replace(template.embed.thumbnail.url, customReplacements)
+                    : null,
+                avatarIconURL = template.embed.author.icon_url
+                    ? await this.replace(template.embed.author.icon_url, customReplacements)
+                    : null
 
             embed = {
                 title: template.embed.title ? await this.replace(template.embed.title, customReplacements) : null,
-                description: template.embed.description ? await this.replace(template.embed.description, customReplacements) : null,
+                description: template.embed.description
+                    ? await this.replace(template.embed.description, customReplacements)
+                    : null,
                 url: template.embed.url ? await this.replace(template.embed.url, customReplacements) : null,
-                timestamp: template.embed.timestamp ? Number(await this.replace(template.embed.timestamp, customReplacements)) : null,
+                timestamp: template.embed.timestamp
+                    ? Number(await this.replace(template.embed.timestamp, customReplacements))
+                    : null,
                 color: template.embed.color ? resolveColor(template.embed.color as any) : null,
                 footer: {
-                    text: template.embed.footer.text ? await this.replace(template.embed.footer.text, customReplacements) : null,
+                    text: template.embed.footer.text
+                        ? await this.replace(template.embed.footer.text, customReplacements)
+                        : null,
                     icon_url: footerIconURL
                 },
                 image: imageURL ? { url: imageURL } : null,
                 thumbnail: thumbnailURL ? { url: thumbnailURL } : null,
                 author: {
-                    name: template.embed.author.name ? await this.replace(template.embed.author.name, customReplacements) : null,
-                    url: template.embed.author.url ? await this.replace(template.embed.author.url, customReplacements) : null,
+                    name: template.embed.author.name
+                        ? await this.replace(template.embed.author.name, customReplacements)
+                        : null,
+                    url: template.embed.author.url
+                        ? await this.replace(template.embed.author.url, customReplacements)
+                        : null,
                     icon_url: avatarIconURL
                 },
                 fields: template.embed.fields.length
@@ -484,8 +524,14 @@ export default class Replacer {
         if (template.image && template.image.active) {
             const tImage = template.image
             const image = {
-                height: typeof tImage?.height === 'number' && tImage.height <= 1920 && tImage.height >= 256 ? tImage.height : 256,
-                width: typeof tImage?.width === 'number' && tImage.width <= 1920 && tImage.width >= 256 ? tImage.width : 720,
+                height:
+                    typeof tImage?.height === 'number' && tImage.height <= 1920 && tImage.height >= 256
+                        ? tImage.height
+                        : 256,
+                width:
+                    typeof tImage?.width === 'number' && tImage.width <= 1920 && tImage.width >= 256
+                        ? tImage.width
+                        : 720,
                 background: {
                     color: tImage?.background?.color ?? '#16151a',
                     url: tImage?.background?.url ? await this.replace(tImage.background.url, customReplacements) : null
@@ -497,15 +543,24 @@ export default class Replacer {
                                   type: v.type,
                                   posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
                                   posY: typeof v.posY === 'number' && v.posY <= 9999 && v.posY >= -9999 ? v.posY : 0,
-                                  height: typeof v.height === 'number' && v.height <= 9999 && v.height >= -9999 ? v.height : 50,
-                                  width: typeof v.width === 'number' && v.width <= 9999 && v.width >= -9999 ? v.width : 50
-                              }
+                                  height:
+                                      typeof v.height === 'number' && v.height <= 9999 && v.height >= -9999
+                                          ? v.height
+                                          : 50,
+                                  width:
+                                      typeof v.width === 'number' && v.width <= 9999 && v.width >= -9999 ? v.width : 50
+                              } as typeof v
 
-                              if (v.type === 'IMAGE') {
-                                  element['url'] = v.url ? await this.replace(v.url, customReplacements) : null
-                                  element['border_radius'] = Object.keys(borderRadiuses).includes(v.border_radius) ? v.border_radius : 'none'
-                              } else if (v.type === 'TEXT') {
-                                  element['value'] = typeof v.value === 'string' ? await this.replace(v.value, customReplacements) : 'Text'
+                              if (element.type === 'IMAGE' && v.type === 'IMAGE') {
+                                  element.url = v.url ? await this.replace(v.url, customReplacements) : ''
+                                  element.border_radius = Object.keys(borderRadiuses).includes(v.border_radius)
+                                      ? v.border_radius
+                                      : 'none'
+                              } else if (element.type === 'TEXT' && v.type === 'TEXT') {
+                                  element['value'] =
+                                      typeof v.value === 'string'
+                                          ? await this.replace(v.value, customReplacements)
+                                          : 'Text'
                                   element['color'] = v.color ?? 'rgba(255,255,255,1)'
                                   element['size'] = Object.keys(textSizes).includes(v.size) ? v.size : 'body2'
                                   element['style'] = textStyles.includes(v.style) ? v.style : 'normal'
@@ -534,9 +589,9 @@ export default class Replacer {
 }
 
 export interface IReplacerShapers {
-    guild: Guild
+    guild?: Guild
     member?: GuildMember
-    message?: Message
+    message?: Message<true> | null
 }
 
 export interface IReplacerCustomShapers {

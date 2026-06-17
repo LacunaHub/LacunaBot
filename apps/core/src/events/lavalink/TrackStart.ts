@@ -1,13 +1,12 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import Lacuna from '@/internals/Lacuna.js'
 import { Player } from '@lacunahub/lavaluna.js'
 import { Message } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, player: Player) {
-    const message = player.get<Message>('message'),
+    const message = player.get<Message<true>>('message'),
         timeout = player.get<NodeJS.Timeout>('timeout'),
-        track = player.queue.current
-    const server: ServerDocument = await self.db.servers.fetch({ _id: message.guild.id })
+        track = player.queue.current!
+    const server = await self.db.servers.fetch({ _id: message.guild.id })
 
     if (timeout) {
         clearTimeout(timeout)
@@ -37,7 +36,7 @@ async function handler(self: Lacuna, player: Player) {
      * TODO: Check for existing status when Discord's API allows it and respect the force_set setting.
      * TODO: Use a proper permission instead of a BigInt when discord.js has one.
      */
-    const selfHasStatusPermission = message.member.permissions.has(BigInt(281474976710656))
+    const selfHasStatusPermission = message.member!.permissions.has(BigInt(281474976710656))
     if (server.modules.music.voice_status.enabled && selfHasStatusPermission) {
         self.rest.put(`/channels/${player.voiceChannelId}/voice-status`, {
             body: { status: `${track.info.author} - ${track.info.title}` }

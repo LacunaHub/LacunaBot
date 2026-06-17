@@ -1,24 +1,24 @@
+import Lacuna from '@/internals/Lacuna.js'
 import { Lavaluna } from '@lacunahub/lavaluna.js'
 import { Events } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna) => {
     self.lava = new Lavaluna({
-        nodes: process.env.LCN_LAVALINK_NODES.split(',').map(v => {
+        nodes: process.env.LCN_LAVALINK_NODES!.split(',').map(v => {
             const [name, hostname, port, password] = v.split(':')
 
             return {
-                name,
-                hostname,
-                port: +port,
-                secure: +port === 443,
-                password,
+                name: name!,
+                hostname: hostname!,
+                port: +port!,
+                secure: +port! === 443,
+                password: password!,
                 reconnectRetryAmount: 100,
                 reconnectRetryDelay: 60000
             }
         }),
-        clientId: self.user.id,
-        clientName: `${self.user.username}#${self.cluster.id}`,
+        clientId: self.user!.id,
+        clientName: `${self.user!.username}#${self.cluster.id}`,
         send(id, payload) {
             const guild = self.guilds.cache.get(id)
             guild && guild.shard.send(payload)

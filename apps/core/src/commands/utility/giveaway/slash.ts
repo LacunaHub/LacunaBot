@@ -1,11 +1,15 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import Giveaway from '@/internals/structures/Giveaway.js'
+import { truncateString } from '@/internals/utility/Utils.js'
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import ms from 'ms'
-import Lacuna from '../../../internals/Lacuna'
-import Giveaway from '../../../internals/structures/Giveaway'
-import { truncateString } from '../../../internals/utility/Utils'
 
-export async function createSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
+export async function createSlash(
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'>
+) {
     const t = self.i18n.t.bind(null, server.locale)
 
     let prize = interaction.options?.getString('prize')
@@ -17,9 +21,12 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!prize) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidPrize', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidPrize',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -28,9 +35,12 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 
     if (!duration) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidDuration', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidDuration',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -42,9 +52,12 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 
     if (numberOfWinners && (numberOfWinners < 1 || numberOfWinners > 50)) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidWinnerCount', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.InvalidWinnerCount',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -53,9 +66,12 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
 
     if (self.giveaways.filter(i => i.guildId === interaction.guildId).size >= 20) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.MaxActiveGiveawaysReached', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.MaxActiveGiveawaysReached',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -68,21 +84,37 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
     const expiresAt = Date.now() + duration
 
     const embed = new EmbedBuilder()
-        .setTitle(t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.GiveawaySponsoredBy', { sponsor: truncateString(sponsor, 64) }))
+        .setTitle(
+            t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.GiveawaySponsoredBy', {
+                sponsor: truncateString(sponsor, 64)
+            })
+        )
         .setDescription(
             t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.GiveawayWillBeOverIn', {
                 relativeTime: `<t:${Math.round(expiresAt / 1000)}:R>`
             })
         )
         .addFields([
-            { name: t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.WinningPrize'), value: prize, inline: true },
-            { name: t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.WinnerCount'), value: numberOfWinners.toString(), inline: true }
+            {
+                name: t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.WinningPrize'),
+                value: prize,
+                inline: true
+            },
+            {
+                name: t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.WinnerCount'),
+                value: numberOfWinners.toString(),
+                inline: true
+            }
         ])
         .setColor(0x43b581)
 
-    const message = await interaction.channel.send({ embeds: [embed] })
+    const message = await interaction.channel!.send({ embeds: [embed] })
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId(`GIVEAWAY-${message.id}`).setStyle(ButtonStyle.Success).setEmoji('🎉').setLabel('0')
+        new ButtonBuilder()
+            .setCustomId(`GIVEAWAY-${message.id}`)
+            .setStyle(ButtonStyle.Success)
+            .setEmoji('🎉')
+            .setLabel('0')
     )
 
     await message.edit({ components: [row] })
@@ -100,24 +132,34 @@ export async function createSlash(self: Lacuna, server: ServerDocument, interact
     })
 
     await interaction.editReply({
-        content: `${self.staticEmojis.Check} | ${t('Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.GiveawayHasBeenCreated', {
-            username: `**${interaction.member.displayName}**`
-        })}`
+        content: `${self.staticEmojis.Check} | ${t(
+            'Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.GiveawayHasBeenCreated',
+            {
+                username: `**${interaction.member.displayName}**`
+            }
+        )}`
     })
 
     return true
 }
 
-export async function endSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
+export async function endSlash(
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'>
+) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const message_id = interaction.options?.getString('message-id')
 
     if (!message_id) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.InvalidMessageId', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.GiveawayCommand.SubCommands.RerollCommand.InvalidMessageId',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -139,9 +181,12 @@ export async function endSlash(self: Lacuna, server: ServerDocument, interaction
             })
         } else {
             await interaction.editReply({
-                content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound', {
-                    username: `**${interaction.member.displayName}**`
-                })}`
+                content: `${self.staticEmojis.Cross} | ${t(
+                    'Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound',
+                    {
+                        username: `**${interaction.member.displayName}**`
+                    }
+                )}`
             })
 
             return false
@@ -152,9 +197,12 @@ export async function endSlash(self: Lacuna, server: ServerDocument, interaction
 
     if (giveawayMessage && !giveawayMessage.components.length) {
         await interaction.editReply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound', {
-                username: `**${interaction.member.displayName}**`
-            })}`
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`
         })
 
         return false
@@ -166,16 +214,23 @@ export async function endSlash(self: Lacuna, server: ServerDocument, interaction
     return true
 }
 
-export async function rerollSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
+export async function rerollSlash(
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'>
+) {
     const t = self.i18n.t.bind(null, server.locale)
 
     const messageId = interaction.options?.getString('message-id')
 
     if (!messageId) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.InvalidMessageId', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.GiveawayCommand.SubCommands.RerollCommand.InvalidMessageId',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -197,9 +252,12 @@ export async function rerollSlash(self: Lacuna, server: ServerDocument, interact
             })
         } else {
             await interaction.editReply({
-                content: `${self.staticEmojis.Cross} | ${t('Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound', {
-                    username: `**${interaction.member.displayName}**`
-                })}`
+                content: `${self.staticEmojis.Cross} | ${t(
+                    'Commands.GiveawayCommand.SubCommands.RerollCommand.GiveawayNotFound',
+                    {
+                        username: `**${interaction.member.displayName}**`
+                    }
+                )}`
             })
 
             return false

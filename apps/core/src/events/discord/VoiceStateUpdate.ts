@@ -1,5 +1,5 @@
+import Lacuna from '@/internals/Lacuna.js'
 import { Events, VoiceState } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
     if (!before.channelId && state.channelId) {

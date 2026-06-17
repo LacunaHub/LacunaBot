@@ -19,7 +19,7 @@ export async function searchRepositories(options: SearchRepositoriesOptions): Pr
 
         throw new Error(`Failed to search repositories with status code ${response.status}`)
     } catch (err) {
-        throw new Error(err)
+        throw new Error(err as any)
     }
 }
 
@@ -42,7 +42,7 @@ export async function getRepository(fullName: string): Promise<Repository> {
 
         throw new Error(`Failed to get repository with status code ${response.status}`)
     } catch (err) {
-        throw new Error(err)
+        throw new Error(err as any)
     }
 }
 
@@ -53,12 +53,15 @@ export async function getRepositoryTree(options: GetRepositoryTreeOptions): Prom
     const [owner, repo] = options.fullName.split('/')
 
     try {
-        const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${options.treeSHA}?recursive=${!!options.recursive}`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
+        const response = await fetch(
+            `https://api.github.com/repos/${owner}/${repo}/git/trees/${options.treeSHA}?recursive=${!!options.recursive}`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
+                }
             }
-        })
+        )
 
         if (response.ok) {
             return await response.json()
@@ -66,7 +69,7 @@ export async function getRepositoryTree(options: GetRepositoryTreeOptions): Prom
 
         throw new Error(`Failed to get repository tree with status code ${response.status}`)
     } catch (err) {
-        throw new Error(err)
+        throw new Error(err as any)
     }
 }
 
@@ -87,7 +90,7 @@ export async function getFileContent(file: TreeFile): Promise<FileContent> {
 
         throw new Error(`Failed to get file content with status code ${response.status}`)
     } catch (err) {
-        throw new Error(err)
+        throw new Error(err as any)
     }
 }
 
@@ -101,7 +104,7 @@ export async function getFileContents(files: TreeFile[]): Promise<FileContent[]>
 
             contents.push(content)
         } catch (err) {
-            throw new Error(err)
+            throw new Error(err as any)
         }
     }
 

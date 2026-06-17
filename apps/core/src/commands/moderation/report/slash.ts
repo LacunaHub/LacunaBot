@@ -1,5 +1,6 @@
-import { ReportType } from '@/database/schemas/Reports'
-import { ServerDocument } from '@/database/schemas/Servers'
+import { ReportType } from '@/database/schemas/Reports.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import {
     ActionRowBuilder,
     BaseGuildTextChannel,
@@ -15,7 +16,6 @@ import {
 } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
-import Lacuna from '../../../internals/Lacuna'
 
 export default async (
     self: Lacuna,
@@ -24,12 +24,12 @@ export default async (
 ) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    let mention: GuildMember
-    let reason: string
+    let mention!: GuildMember
+    let reason!: string
 
     if (interaction.isChatInputCommand()) {
         mention = interaction.options?.getMember('user') as GuildMember
-        reason = interaction.options?.getString('reason')
+        reason = interaction.options?.getString('reason')!
     }
 
     if (interaction.isModalSubmit()) {
@@ -113,21 +113,25 @@ export default async (
         const channel = interaction.guild.channels.cache.get(server.modules.reports.channel_id) as BaseGuildTextChannel
 
         if (channel) {
-            let reportMessages: Collection<string, Message>, reportMessage: Message
+            let reportMessages!: Collection<string, Message>, reportMessage!: Message
 
             try {
                 reportMessages = await channel.messages.fetch({ limit: 50, cache: false })
                 reportMessage = reportMessages?.find(i => {
-                    return i.author.id === self.user.id && i.embeds[0]?.footer?.text?.startsWith(`ID: ${mention.id}`) && i.components.length
-                })
+                    return (
+                        i.author.id === self.user!.id &&
+                        i.embeds[0]?.footer?.text?.startsWith(`ID: ${mention.id}`) &&
+                        i.components.length
+                    )
+                })!
             } catch (err) {}
 
             if (reportMessage) {
-                const embed = new EmbedBuilder(reportMessage.embeds[0])
-                const fields = embed.data.fields.length === 25 ? embed.data.fields.slice(1, 25) : embed.data.fields
+                const embed = new EmbedBuilder(reportMessage.embeds[0] as any)
+                const fields = embed.data.fields?.length === 25 ? embed.data.fields.slice(1, 25) : embed.data.fields
 
                 embed.setFields([
-                    ...fields,
+                    ...(fields ?? []),
                     {
                         name: `<t:${Math.round(Date.now() / 1000)}:R>`,
                         value: `<@${interaction.user.id}> (${interaction.user.tag})\n\n${reason}`
@@ -137,7 +141,12 @@ export default async (
                 try {
                     await reportMessage.edit({ embeds: [embed] })
                 } catch (err) {
-                    self.logger.error({ module: 'ReportCommand', action: 'EditReportMessage', err, guildId: interaction.guildId })
+                    self.logger.error({
+                        module: 'ReportCommand',
+                        action: 'EditReportMessage',
+                        err,
+                        guildId: interaction.guildId
+                    })
                 }
             } else {
                 const embed = new EmbedBuilder()
@@ -150,7 +159,19 @@ export default async (
                     ])
                     .setFooter({ text: `ID: ${mention.id}` })
 
-                const selectMenuOptions = ['indefinitely', '10m', '30m', '1h', '2h', '5h', '12h', '1d', '3d', '7d', '14d'].map(i => {
+                const selectMenuOptions = [
+                    'indefinitely',
+                    '10m',
+                    '30m',
+                    '1h',
+                    '2h',
+                    '5h',
+                    '12h',
+                    '1d',
+                    '3d',
+                    '7d',
+                    '14d'
+                ].map(i => {
                     return {
                         label:
                             i === 'indefinitely'
@@ -164,9 +185,18 @@ export default async (
 
                 const rows = [
                     new ActionRowBuilder<ButtonBuilder>().addComponents(
-                        new ButtonBuilder().setCustomId(`R-KICK-${mention.id}`).setLabel(t('CaseLog.Actions.Kick')).setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder().setCustomId(`R-WARN-${mention.id}`).setLabel(t('CaseLog.Actions.Warn')).setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder().setCustomId(`R-SKIP-${mention.id}`).setLabel(t('Common.Close')).setStyle(ButtonStyle.Secondary)
+                        new ButtonBuilder()
+                            .setCustomId(`R-KICK-${mention.id}`)
+                            .setLabel(t('CaseLog.Actions.Kick'))
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                            .setCustomId(`R-WARN-${mention.id}`)
+                            .setLabel(t('CaseLog.Actions.Warn'))
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                            .setCustomId(`R-SKIP-${mention.id}`)
+                            .setLabel(t('Common.Close'))
+                            .setStyle(ButtonStyle.Secondary)
                     ),
                     new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                         new StringSelectMenuBuilder()
@@ -184,12 +214,19 @@ export default async (
 
                 try {
                     await channel.send({
-                        content: t('Commands.ReportCommand.Texts.ReceivedReportAboutUser', { username: `<@${mention.id}> (${mention.user.tag})` }),
+                        content: t('Commands.ReportCommand.Texts.ReceivedReportAboutUser', {
+                            username: `<@${mention.id}> (${mention.user.tag})`
+                        }),
                         embeds: [embed],
                         components: rows
                     })
                 } catch (err) {
-                    self.logger.error({ module: 'ReportCommand', action: 'SendReportMessage', err, guildId: interaction.guildId })
+                    self.logger.error({
+                        module: 'ReportCommand',
+                        action: 'SendReportMessage',
+                        err,
+                        guildId: interaction.guildId
+                    })
                 }
             }
         }

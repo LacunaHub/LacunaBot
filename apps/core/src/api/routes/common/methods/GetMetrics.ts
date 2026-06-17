@@ -1,7 +1,3 @@
-import { brokerClient, lava } from '@/api/utility/Managers'
-import { indexToLetter } from '@/internals/utility/Utils'
-import { BrokerMessageDataMap, BrokerMessageType } from '@lacunahub/letsfrag'
-import { Context } from 'koa'
 import {
     channelCounter,
     emojiCounter,
@@ -15,11 +11,15 @@ import {
     voiceConnectionCounter,
     wsPingGauge,
     wsStatusGauge
-} from '../../../modules/Metrics'
+} from '@/api/modules/Metrics.js'
+import { brokerClient, lava } from '@/api/utility/Managers.js'
+import { indexToLetter } from '@/internals/utility/Utils.js'
+import { type BrokerMessageDataMap, BrokerMessageType } from '@lacunahub/letsfrag'
+import { type Context } from 'koa'
 
 export default async function getMetrics(ctx: Context) {
     let stats: BrokerMessageDataMap[BrokerMessageType.RequestStatsResult] = {
-        readyAt: null,
+        readyAt: 0,
         clients: [],
         managers: [],
         shardCount: 0,
@@ -41,7 +41,7 @@ export default async function getMetrics(ctx: Context) {
     } catch (err) {}
 
     const clusters = stats.managers.flatMap((v, i) => {
-        const host = indexToLetter(i).toUpperCase()
+        const host = indexToLetter(i)!.toUpperCase()
         return v.clusters.map(vv => ({ ...vv, host }))
     })
 
@@ -64,9 +64,9 @@ export default async function getMetrics(ctx: Context) {
     }
 
     for (const node of lavaNodes) {
-        lavaNodeLoadGauge.set({ node: node.id }, node.cpu_load)
-        lavaNodePlayersCounter.set({ node: node.id }, node.players.total)
-        lavaNodePlayingPlayersCounter.set({ node: node.id }, node.players.playing)
+        lavaNodeLoadGauge.set({ node: node.id! }, node.cpu_load)
+        lavaNodePlayersCounter.set({ node: node.id! }, node.players.total)
+        lavaNodePlayingPlayersCounter.set({ node: node.id! }, node.players.playing)
     }
 
     ctx.status = 200

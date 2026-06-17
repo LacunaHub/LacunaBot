@@ -1,6 +1,6 @@
-import { Document, FilterQuery, Model, model, Schema } from 'mongoose'
+import mongoose, { type FilterQuery } from 'mongoose'
 
-const schema = new Schema<UserDocument, UserModel>(
+const schema = new mongoose.Schema<UserDocument, UserModel>(
     {
         _id: { type: String },
         user: {
@@ -123,7 +123,7 @@ schema.static(
             )
         }
 
-        const updateData = {}
+        const updateData: mongoose.FilterQuery<UserDocument> = {}
 
         if (userServerProfile.accent_color !== member.accent_color) {
             userServerProfile.accent_color = updateData['accent_color'] = member.accent_color
@@ -138,10 +138,13 @@ schema.static(
         }
 
         if (Object.keys(updateData).length) {
-            const data = Object.keys(updateData).reduce((x, y) => {
-                x[`server_profiles.$.${y}`] = updateData[y]
-                return x
-            }, {})
+            const data = Object.keys(updateData).reduce(
+                (x, y) => {
+                    x[`server_profiles.$.${y}`] = updateData[y]
+                    return x
+                },
+                {} as Record<string, any>
+            )
 
             if (typeof data === 'object' && data !== null) {
                 await this.updateOne(
@@ -157,9 +160,9 @@ schema.static(
     }
 )
 
-export default model<UserDocument, UserModel>('users', schema)
+export default mongoose.model<UserDocument, UserModel>('users', schema)
 
-export interface UserDocument extends Document {
+export interface UserDocument extends mongoose.Document {
     _id: string
     user: UserData
     premium: {
@@ -182,9 +185,9 @@ export interface UserData {
     username: string
     /** @deprecated */
     discriminator?: string | null
-    avatar: string
+    avatar: string | null
     flags: number
-    global_name: string
+    global_name: string | null
     email?: string | null
 }
 
@@ -197,9 +200,9 @@ export interface UserLevel {
     }
     activity: {
         total_messages: number
-        last_message_at: number
+        last_message_at: number | null
         total_voice_time: number
-        voice_connected_at: number
+        voice_connected_at: number | null
     }
     received_awards?: string[]
 }
@@ -243,8 +246,8 @@ export interface UserServerProfile {
     nickname: string | null
 }
 
-export interface UserModel extends Model<UserDocument> {
-    fetch(filter: FilterQuery<UserDocument>, defaultValues?: Partial<UserDocument>): Promise<UserDocument>
+export interface UserModel extends mongoose.Model<UserDocument> {
+    fetch(filter: mongoose.FilterQuery<UserDocument>, defaultValues?: Partial<UserDocument>): Promise<UserDocument>
     fetchLevel(user: UserDocument, guildId: string): Promise<UserLevel>
     fetchWallet(user: UserDocument, guildId: string): Promise<UserWallet>
     fetchServerProfile(

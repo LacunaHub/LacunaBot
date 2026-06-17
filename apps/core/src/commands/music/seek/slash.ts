@@ -1,12 +1,16 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { hmsToMS } from '@/internals/utility/Utils.js'
 import { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js'
 import numbro from 'numbro'
-import Lacuna from '../../../internals/Lacuna'
-import { hmsToMS } from '../../../internals/utility/Utils'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>) => {
+export default async (
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>
+) => {
     const t = self.i18n.t.bind(null, server.locale)
-    const player = self.lava.nodes.getPlayer(interaction.guild.id)
+    const player = self.lava!.nodes.getPlayer(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({
@@ -30,7 +34,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    const currentTrack = player.queue.current
+    const currentTrack = player.queue.current!
 
     if (!currentTrack.info.isSeekable || typeof currentTrack.info.length !== 'number') {
         await interaction.reply({
@@ -46,7 +50,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     let seekPosition: number = 0
 
     if (interaction.isChatInputCommand()) {
-        const timeOption = interaction.options?.getString('time') ?? numbro((player.position + 5000) / 1000).format({ output: 'time' })
+        const timeOption =
+            // @ts-expect-error
+            interaction.options?.getString('time') ?? numbro((player.position + 5000) / 1000).format({ output: 'time' })
         seekPosition = hmsToMS(timeOption)
 
         if (!seekPosition || isNaN(seekPosition)) seekPosition = player.position + 5000
@@ -63,6 +69,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await interaction.editReply({
         content: `${self.staticEmojis.Check} | ${t('Commands.SeekCommand.Texts.TrackRewoundToPosition', {
             username: `**${interaction.member.displayName}**`,
+            // @ts-expect-error
             time: numbro(seekPosition / 1000).format({ output: 'time' })
         })}`
     })

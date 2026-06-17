@@ -1,9 +1,9 @@
-import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
-import { Document, model, Schema } from 'mongoose'
+import { type Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
+import mongoose from 'mongoose'
 
-export default model<ReportDocument>(
+export default mongoose.model<ReportDocument>(
     'reports',
-    new Schema<ReportDocument>(
+    new mongoose.Schema<ReportDocument>(
         {
             _id: { type: String, default: SnowflakeUtils.generate },
             type: { type: Number, required: true },
@@ -15,6 +15,7 @@ export default model<ReportDocument>(
             created_at: {
                 type: Number,
                 default: function () {
+                    // @ts-expect-error
                     return SnowflakeUtils.getTimestamp(this._id)
                 }
             }
@@ -25,13 +26,13 @@ export default model<ReportDocument>(
 
 export type ReportDocument = GuildReportDocument | UserReportDocument
 
-export interface BaseReportDocument extends Document {
+export interface BaseReportDocument extends mongoose.Document {
     _id: Snowflake
     type: ReportType
     complainant_id: string
     accused_id: string
     content: string
-    checked_at: number
+    checked_at: number | null
     metadata: Record<string, any>
     created_at: number
 }

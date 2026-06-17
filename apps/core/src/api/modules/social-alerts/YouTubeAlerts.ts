@@ -1,11 +1,11 @@
-import Logger from '@/api/utility/Logger'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import Logger from '@/api/utility/Logger.js'
+import database from '@/database/index.js'
+import { truncateString } from '@/internals/utility/Utils.js'
+import Replacer from '@/modules/Replacer.js'
 import { makeURLSearchParams } from 'discord.js'
 import fetch from 'node-fetch'
 import { scheduleJob } from 'node-schedule'
-import database from '../../../database'
-import { truncateString } from '../../../internals/utility/Utils'
-import Replacer from '../../../modules/Replacer'
-import DiscordUtils from '../../utility/DiscordUtils'
 
 export async function searchChannels(term: string) {
     term = term.startsWith('UC') ? `channelId=${term}` : `q=${encodeURI(term)}`
@@ -24,7 +24,11 @@ export async function searchChannels(term: string) {
         if (data.items?.length) {
             Logger.info({ query: term, count: data.items.length }, 'youtube channels search complete')
 
-            return data.items.map(item => ({ id: item.id.channelId, name: item.snippet.channelTitle, thumbnail: item.snippet.thumbnails.medium.url }))
+            return data.items.map(item => ({
+                id: item.id.channelId,
+                name: item.snippet.channelTitle,
+                thumbnail: item.snippet.thumbnails.medium.url
+            }))
         }
 
         Logger.info({ query: term }, 'no youtube channels found')
@@ -47,7 +51,7 @@ export function hubSubscribe(channelId: string, mode: string = 'subscribe') {
             'hub.callback': `${process.env.LCN_API_URL}/subscriptions/youtube/hubbub-webhook`,
             'hub.topic': topicUrl,
             'hub.mode': mode,
-            'hub.secret': process.env.LCN_YOUTUBE_HMAC_SECRET,
+            'hub.secret': process.env.LCN_YOUTUBE_HMAC_SECRET!,
             'hub.lease_seconds': '604800',
             'hub.verify': 'async'
         }) as any
@@ -56,7 +60,9 @@ export function hubSubscribe(channelId: string, mode: string = 'subscribe') {
 
 export function createRefreshmentSchedule() {
     const job = scheduleJob('hub-refresh-subs', { hour: 0, minute: 0 }, async () => {
-        const subs = (await database.youtubeSubs.find({})).filter(sub => sub.expiration_timestamp - Date.now() < 129_600_000)
+        const subs = (await database.youtubeSubs.find({})).filter(
+            sub => sub.expiration_timestamp - Date.now() < 129_600_000
+        )
 
         subs.forEach((sub, i) => {
             setTimeout(() => hubSubscribe(sub._id), i * 1500)
@@ -111,7 +117,9 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
         let webhook: any
 
         try {
-            webhook = await DiscordUtils.rest.get(DiscordUtils.restRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
+            webhook = await DiscordUtils.rest.get(
+                DiscordUtils.restRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)
+            )
         } catch (err) {
             Logger.error({
                 module: 'YouTube',
@@ -123,11 +131,14 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
 
         if (!webhook) {
             try {
-                webhook = await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
-                    body: {
-                        name: data.channelName
+                webhook = await DiscordUtils.rest.post(
+                    DiscordUtils.restRoutes.channelWebhooks(guildSubscription.notification_channel_id),
+                    {
+                        body: {
+                            name: data.channelName
+                        }
                     }
-                })
+                )
             } catch (err) {
                 Logger.error({
                     module: 'YouTube',
@@ -161,15 +172,24 @@ export async function handleHubBubWebhook(data: HubBubWebhookData) {
         }
 
         try {
-            const message: any = await DiscordUtils.rest.post(DiscordUtils.restRoutes.webhook(webhook.id, webhook.token), {
-                body: {
-                    content: hasVideoUrl ? notificationText : notificationText ? `${notificationText}\n${videoUrl}` : videoUrl
-                },
-                query: makeURLSearchParams({ wait: true }) as any
-            })
+            const message: any = await DiscordUtils.rest.post(
+                DiscordUtils.restRoutes.webhook(webhook.id, webhook.token),
+                {
+                    body: {
+                        content: hasVideoUrl
+                            ? notificationText
+                            : notificationText
+                              ? `${notificationText}\n${videoUrl}`
+                              : videoUrl
+                    },
+                    query: makeURLSearchParams({ wait: true }) as any
+                }
+            )
 
             if (guildSubscription.options?.includes?.('CROSSPOST_MESSAGE')) {
-                await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelMessageCrosspost(message.channel_id, message.id))
+                await DiscordUtils.rest.post(
+                    DiscordUtils.restRoutes.channelMessageCrosspost(message.channel_id, message.id)
+                )
             }
 
             if (guildSubscription.options?.includes?.('CREATE_THREAD')) {

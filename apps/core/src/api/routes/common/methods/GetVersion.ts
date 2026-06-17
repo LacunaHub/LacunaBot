@@ -1,5 +1,5 @@
-import { Context } from 'koa'
-import database from '../../../../database'
+import database from '@/database/index.js'
+import { type Context } from 'koa'
 
 export default async function getVersion(ctx: Context) {
     const version: string = await database.qdb.get('version')

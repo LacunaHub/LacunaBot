@@ -1,11 +1,11 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { bufferToDataURL } from '@/internals/utility/Utils'
-import { APIWebhook } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import { hubSubscribe } from '../../../../modules/social-alerts/YouTubeAlerts'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
+import { hubSubscribe } from '@/api/modules/social-alerts/YouTubeAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { bufferToDataURL } from '@/internals/utility/Utils.js'
+import { type APIWebhook } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function createYouTubeSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server

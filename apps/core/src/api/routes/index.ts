@@ -1,11 +1,11 @@
-import auth from './auth'
-import authorize from './authorize'
-import billing from './billing'
-import common from './common'
-import guilds from './guilds'
-import state from './state'
-import users from './users'
-import webhooks from './webhooks'
+import auth from './auth/index.js'
+import authorize from './authorize/index.js'
+import billing from './billing/index.js'
+import common from './common/index.js'
+import guilds from './guilds/index.js'
+import state from './state/index.js'
+import users from './users/index.js'
+import webhooks from './webhooks/index.js'
 
 export default {
     auth,

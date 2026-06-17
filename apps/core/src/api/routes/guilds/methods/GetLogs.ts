@@ -1,5 +1,5 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { Context } from 'koa'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type Context } from 'koa'
 
 export default async function getLogs(ctx: Context) {
     const guildId: string = ctx.params.guildId,

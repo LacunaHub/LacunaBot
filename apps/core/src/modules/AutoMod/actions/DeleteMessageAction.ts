@@ -1,5 +1,5 @@
-import Lacuna from '../../../internals/Lacuna'
-import { SendMessageActionOptions } from './SendMessageAction'
+import Lacuna from '@/internals/Lacuna.js'
+import { type SendMessageActionOptions } from './SendMessageAction.js'
 
 export default async function deleteMessageAction(self: Lacuna, options: DeleteMessageActionOptions) {
     const { message } = options

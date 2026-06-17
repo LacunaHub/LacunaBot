@@ -1,9 +1,15 @@
-import { APIGuildMember, APIUser, PermissionsBitField, RESTAPIPartialCurrentUserGuild, UserFlags } from 'discord.js'
-import { Context, Next } from 'koa'
-import database from '../../database'
-import APIError from './APIError'
-import { oauth2 } from './DiscordOAuth2'
-import DiscordUtils from './DiscordUtils'
+import database from '@/database/index.js'
+import {
+    type APIGuildMember,
+    type APIUser,
+    PermissionsBitField,
+    type RESTAPIPartialCurrentUserGuild,
+    UserFlags
+} from 'discord.js'
+import { type Context, type Next } from 'koa'
+import APIError from './APIError.js'
+import { oauth2 } from './DiscordOAuth2.js'
+import DiscordUtils from './DiscordUtils.js'
 
 export async function authenticate(ctx: Context, next: Next): Promise<void> {
     const accessToken = ctx.request.headers.authorization
@@ -12,7 +18,7 @@ export async function authenticate(ctx: Context, next: Next): Promise<void> {
         ctx.throw(401, new APIError(4001))
     }
 
-    let currentUser: APIUser
+    let currentUser!: APIUser
 
     try {
         currentUser = await oauth2.getUser(accessToken)
@@ -34,11 +40,11 @@ export async function authenticate(ctx: Context, next: Next): Promise<void> {
 }
 
 export async function checkPermissions(ctx: Context, next: Next): Promise<void> {
-    const accessToken = ctx.request.headers.authorization
+    const accessToken = ctx.request.headers.authorization!
     const guildId: string = ctx.params.guildId
     const currentUser: UserState = ctx.state.user
 
-    let currentUserGuilds: RESTAPIPartialCurrentUserGuild[]
+    let currentUserGuilds: RESTAPIPartialCurrentUserGuild[] = []
     try {
         currentUserGuilds = await oauth2.getUserGuilds(accessToken)
     } catch (err) {}
@@ -77,7 +83,7 @@ export async function isBotExpert(guildId: string, userId: string): Promise<bool
     if (server.bot_experts.includes(userId)) {
         return true
     } else {
-        let member: APIGuildMember
+        let member!: APIGuildMember
 
         try {
             member = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildMember(guildId, userId))) as any
@@ -93,7 +99,7 @@ export async function identify(ctx: Context, next: Next) {
     const accessToken = ctx.request.headers.authorization
     if (!accessToken) return await next()
 
-    let currentUser: APIUser
+    let currentUser!: APIUser
 
     try {
         currentUser = await oauth2.getUser(accessToken)
@@ -115,13 +121,13 @@ export async function identify(ctx: Context, next: Next) {
 }
 
 export async function isGuildMember(guildId: string, userId: string) {
-    let member: APIGuildMember
+    let member!: APIGuildMember
 
     try {
         member = (await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildMember(guildId, userId))) as any
     } catch (err) {}
 
-    return !!member
+    return Boolean(member)
 }
 
 export interface UserState {

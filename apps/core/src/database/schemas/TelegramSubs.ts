@@ -1,8 +1,8 @@
-import { Document, Schema, model } from 'mongoose'
+import mongoose from 'mongoose'
 
-export default model<TelegramSubDocument>(
+export default mongoose.model<TelegramSubDocument>(
     'telegram-subs',
-    new Schema<TelegramSubDocument>(
+    new mongoose.Schema<TelegramSubDocument>(
         {
             _id: { type: Number },
             channel_title: { type: String, required: true },
@@ -14,7 +14,7 @@ export default model<TelegramSubDocument>(
     )
 )
 
-export interface TelegramSubDocument extends Document {
+export interface TelegramSubDocument extends mongoose.Document {
     _id: number
     channel_title: string
     channel_username: string

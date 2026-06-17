@@ -1,23 +1,23 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { removeDiscordPatterns, splitStringCase } from '@/internals/utility/Utils.js'
 import { Message } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import { removeDiscordPatterns, splitStringCase } from '../../../internals/utility/Utils'
-import banAction from '../actions/BanAction'
-import deleteMessageAction from '../actions/DeleteMessageAction'
-import kickAction from '../actions/KickAction'
-import modifyRolesAction from '../actions/ModifyRolesAction'
-import muteAction from '../actions/MuteAction'
-import sendMessageAction from '../actions/SendMessageAction'
-import warnUserAction from '../actions/WarnUserAction'
+import banAction from '../actions/BanAction.js'
+import deleteMessageAction from '../actions/DeleteMessageAction.js'
+import kickAction from '../actions/KickAction.js'
+import modifyRolesAction from '../actions/ModifyRolesAction.js'
+import muteAction from '../actions/MuteAction.js'
+import sendMessageAction from '../actions/SendMessageAction.js'
+import warnUserAction from '../actions/WarnUserAction.js'
 
-export default async function moderateCaps(self: Lacuna, server: ServerDocument, message: Message) {
+export default async function moderateCaps(self: Lacuna, server: ServerDocument, message: Message<true>) {
     const reason = 'AutoMod: Anti-Caps'
     const config = server.moderation.automoder.anti_caps
 
     if (!config.active) return false
     if (config.ignored.channels.includes(message.channel.id)) return false
 
-    const target = message.member,
+    const target = message.member!,
         configPermissions = BigInt(config.ignored.permissions.reduce((x, y) => x | y, 0))
 
     if (target.permissions.any(configPermissions, false)) return false
@@ -35,11 +35,19 @@ export default async function moderateCaps(self: Lacuna, server: ServerDocument,
             optSendMessage = config.options.includes('ACTION_SEND_MESSAGE'),
             optDeleteMessage = config.options.includes('ACTION_DELETE_MESSAGE')
 
-        if (optBan && !optKick && !optMute) await banAction(self, server, { config, guild: message.guild, target: message.member, reason })
-        if (optKick && !optBan && !optMute) await kickAction(self, { guild: message.guild, target: message.member, reason })
-        if (optModifyRoles && !optBan && !optKick) modifyRolesAction(self, { config, guild: message.guild, target: message.member, reason })
-        if (optMute && !optBan && !optKick) await muteAction(self, server, { config, guild: message.guild, target: message.member, reason })
-        if (optWarn) await warnUserAction(self, server, message, { target: message.member, executor: message.guild.members.me, reason })
+        if (optBan && !optKick && !optMute)
+            await banAction(self, server, { config, guild: message.guild, target, reason })
+        if (optKick && !optBan && !optMute) await kickAction(self, { guild: message.guild, target, reason })
+        if (optModifyRoles && !optBan && !optKick)
+            modifyRolesAction(self, { config, guild: message.guild, target, reason })
+        if (optMute && !optBan && !optKick)
+            await muteAction(self, server, { config, guild: message.guild, target, reason })
+        if (optWarn)
+            await warnUserAction(self, server, message, {
+                target,
+                executor: message.guild.members.me!,
+                reason
+            })
         if (optSendMessage) await sendMessageAction(self, server, { config, message })
         if (optDeleteMessage) await deleteMessageAction(self, { message })
 

@@ -1,23 +1,31 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { BaseGuildTextChannel, EmbedBuilder, VoiceState } from 'discord.js'
-import { isRateLimited, sendLog } from '..'
-import Lacuna from '../../../internals/Lacuna'
+import { isRateLimited, sendLog } from '../index.js'
 
-export default async function (self: Lacuna, server: ServerDocument, before: VoiceState, state: VoiceState): Promise<boolean> {
+export default async function (
+    self: Lacuna,
+    server: ServerDocument,
+    before: VoiceState,
+    state: VoiceState
+): Promise<boolean> {
     if (server.moderation.logs.types.voice_disconnect.active) {
         if (isRateLimited(server._id, server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
-        const logChannel = state.guild.channels.cache.get(server.moderation.logs.types.voice_move.channel_id) as BaseGuildTextChannel
-        const isOk = logChannel && logChannel.permissionsFor(state.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
+        const logChannel = state.guild.channels.cache.get(
+            server.moderation.logs.types.voice_move.channel_id!
+        ) as BaseGuildTextChannel
+        const isOk =
+            logChannel && logChannel.permissionsFor(state.guild.members.me!).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.VoiceMove'))
                 .setDescription(
                     t('Logs.VoiceMoveTemplate', {
-                        username: `<@${state.id}> (${state.member.user.tag})`,
+                        username: `<@${state.id}> (${state.member?.user?.tag})`,
                         from: `<#${before.channelId}>`,
                         to: `<#${state.channelId}>`
                     })
@@ -29,7 +37,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Voi
             try {
                 await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
-                self.logger.error({ module: 'LogsVoiceMove', action: 'SendMessageViaWebhook', err, guildId: state.guild.id })
+                self.logger.error({
+                    module: 'LogsVoiceMove',
+                    action: 'SendMessageViaWebhook',
+                    err,
+                    guildId: state.guild.id
+                })
 
                 return false
             }

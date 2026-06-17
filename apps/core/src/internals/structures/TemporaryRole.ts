@@ -1,8 +1,8 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { generateSimpleId } from '@/internals/utility/Utils.js'
 import { GuildMember } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
-import Lacuna from '../Lacuna'
-import { generateSimpleId } from '../utility/Utils'
 
 export default class TemporaryRole {
     public self: Lacuna
@@ -11,7 +11,7 @@ export default class TemporaryRole {
     public role_id: string
     public unique_id: string
     public expires: Date
-    public schedule: Job
+    public schedule: Job | null
 
     constructor(self: Lacuna, options: TemporaryRoleOptions) {
         this.self = self
@@ -44,13 +44,14 @@ export default class TemporaryRole {
     }
 
     get guild() {
-        return this.self.guilds.cache.get(this.guild_id)
+        return this.self.guilds.cache.get(this.guild_id)!
     }
 
     async getMember(): Promise<GuildMember> {
-        let member: GuildMember
+        let member!: GuildMember
 
         try {
+            // @ts-ignore
             member = await this.guild.members.fetch({ user: this.user_id })
         } catch (err) {
             this.self.logger.error({ module: 'TemporaryRole', action: 'FetchGuildMember', err, guildId: this.guild_id })
@@ -102,7 +103,7 @@ export default class TemporaryRole {
     async delete() {
         await this.removeRole()
         await this.deleteEntry()
-        this.schedule.cancel()
+        this.schedule!.cancel()
         this.self.temproles.delete(this.id)
     }
 
@@ -136,7 +137,10 @@ export default class TemporaryRole {
 
 export async function handleEntries(self: Lacuna): Promise<number> {
     const guilds: string[] = self.guilds.cache.map(g => g.id)
-    const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'moderation.roles.temporary.0': { $exists: true } })
+    const servers: ServerDocument[] = await self.db.servers.find({
+        _id: { $in: guilds },
+        'moderation.roles.temporary.0': { $exists: true }
+    })
 
     let entries = 0
 

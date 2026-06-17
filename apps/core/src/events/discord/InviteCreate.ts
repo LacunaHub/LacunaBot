@@ -1,10 +1,9 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import Lacuna from '@/internals/Lacuna.js'
+import Logs from '@/modules/Logs/index.js'
 import { Events, Invite } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import Logs from '../../modules/Logs'
 
 const handler = async (self: Lacuna, invite: Invite) => {
-    const server: ServerDocument = await self.db.servers.findOne({ _id: invite.guild.id })
+    const server = await self.db.servers.findOne({ _id: invite.guild!.id })
 
     if (!server) return false
 

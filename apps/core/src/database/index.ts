@@ -1,19 +1,19 @@
-import { ConnectOptions, connect } from 'mongoose'
-import { Database as QDatabase, QuickMongoOptions } from 'quickmongo'
-import Payments, { PaymentAmountCurrencyCode, PaymentMetadataProduct } from './schemas/Payments'
-import Reports from './schemas/Reports'
-import ServerBans from './schemas/ServerBans'
-import Servers from './schemas/Servers'
-import Subscriptions from './schemas/Subscriptions'
-import TelegramSubs from './schemas/TelegramSubs'
-import TwitchSubs from './schemas/TwitchSubs'
-import Users from './schemas/Users'
-import ViolativeMessages from './schemas/ViolativeMessages'
-import YouTubeSubs from './schemas/YouTubeSubs'
+import mongoose from 'mongoose'
+import { Database as QDatabase, type QuickMongoOptions } from 'quickmongo'
+import Payments, { type PaymentAmountCurrencyCode, PaymentMetadataProduct } from './schemas/Payments.js'
+import Reports from './schemas/Reports.js'
+import ServerBans from './schemas/ServerBans.js'
+import Servers from './schemas/Servers.js'
+import Subscriptions from './schemas/Subscriptions.js'
+import TelegramSubs from './schemas/TelegramSubs.js'
+import TwitchSubs from './schemas/TwitchSubs.js'
+import Users from './schemas/Users.js'
+import ViolativeMessages from './schemas/ViolativeMessages.js'
+import YouTubeSubs from './schemas/YouTubeSubs.js'
 
 class Database {
-    public db: typeof import('mongoose')
-    public qdb: QDatabase
+    public db!: typeof mongoose
+    public qdb!: QDatabase
 
     public payments = Payments
     public reports = Reports
@@ -29,7 +29,7 @@ class Database {
     constructor(public options: DatabaseOptions) {}
 
     public async connect(): Promise<this> {
-        this.db = await connect(this.options.uri, this.options.options)
+        this.db = (await mongoose.connect(this.options.uri, this.options.options)) as any
         this.qdb = new QDatabase(this.options.qdb.uri, this.options.qdb.options)
         this.qdb.connect()
 
@@ -185,7 +185,7 @@ class Database {
 
         return repos.map(v => {
             const [fullName, sha] = v.split('@')
-            return { fullName, sha }
+            return { fullName: fullName!, sha: sha! }
         })
     }
 
@@ -215,14 +215,14 @@ class Database {
 }
 
 export default new Database({
-    uri: process.env.LCN_DB_URI,
+    uri: process.env.LCN_DB_URI!,
     options: {
         dbName: 'lacuna',
         useNewUrlParser: true,
         useUnifiedTopology: true
     },
     qdb: {
-        uri: process.env.LCN_DB_URI,
+        uri: process.env.LCN_DB_URI!,
         options: {
             dbName: 'lcnqm',
             collectionName: 'internal-storage'
@@ -232,7 +232,7 @@ export default new Database({
 
 export interface DatabaseOptions {
     uri: string
-    options: ConnectOptions
+    options: mongoose.ConnectOptions
     qdb: {
         uri: string
         options: QuickMongoOptions

@@ -1,13 +1,13 @@
-import { PaymentDocument } from '@/database/schemas/Payments'
-import { ServerDocument } from '@/database/schemas/Servers'
-import { SubscriptionDocument } from '@/database/schemas/Subscriptions'
-import { RESTAPIPartialCurrentUserGuild } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../database'
-import { addDiamond } from '../../../modules/billing'
-import { diamondGuilds } from '../../../modules/billing/utility/DiamondGuild'
-import APIError from '../../../utility/APIError'
-import { oauth2 } from '../../../utility/DiscordOAuth2'
+import { addDiamond } from '@/api/modules/billing/index.js'
+import { diamondGuilds } from '@/api/modules/billing/utility/DiamondGuild.js'
+import APIError from '@/api/utility/APIError.js'
+import { oauth2 } from '@/api/utility/DiscordOAuth2.js'
+import database from '@/database/index.js'
+import { type PaymentDocument } from '@/database/schemas/Payments.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type SubscriptionDocument } from '@/database/schemas/Subscriptions.js'
+import { type RESTAPIPartialCurrentUserGuild } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function transferDiamond(ctx: Context) {
     const guildId = ctx.params.guildId,
@@ -16,7 +16,7 @@ export default async function transferDiamond(ctx: Context) {
     let userGuilds: RESTAPIPartialCurrentUserGuild[] = []
 
     try {
-        userGuilds = await oauth2.getUserGuilds(ctx.request.headers.authorization)
+        userGuilds = await oauth2.getUserGuilds(ctx.request.headers.authorization!)
     } catch (err) {
         ctx.throw(400, new APIError(5001))
     }
@@ -31,12 +31,12 @@ export default async function transferDiamond(ctx: Context) {
     if (!server.premium.available || !server.premium.charged_via) ctx.throw(402, new APIError(2001))
 
     const [sBillType, sBillId] = server.premium.charged_via?.split(':') ?? []
-    let bill: PaymentDocument | SubscriptionDocument
+    let bill!: PaymentDocument | SubscriptionDocument
 
     if (sBillType === 'Payment') {
-        bill = await database.payments.findOne({ _id: sBillId })
+        bill = await database.payments.findOne({ _id: sBillId! }).orFail()
     } else if (sBillType === 'Subscription') {
-        bill = await database.subscriptions.findOne({ _id: sBillId })
+        bill = await database.subscriptions.findOne({ _id: sBillId! }).orFail()
     }
 
     if (!bill) {
@@ -86,7 +86,7 @@ export default async function transferDiamond(ctx: Context) {
         diamondGuild.cancel()
     }
 
-    await addDiamond(bill, { until: server.premium.expires_at })
+    await addDiamond(bill, { until: server.premium.expires_at! })
 
     ctx.status = 204
 }

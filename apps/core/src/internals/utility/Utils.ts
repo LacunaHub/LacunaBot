@@ -1,10 +1,10 @@
 import {
-    APIEmbed,
+    type APIEmbed,
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
     EmbedBuilder,
-    ModalActionRowComponentBuilder,
+    type ModalActionRowComponentBuilder,
     StringSelectMenuBuilder,
     TextInputBuilder,
     TextInputStyle
@@ -114,7 +114,7 @@ export function parseCommandArguments(string: string): string[] {
             arg = str.slice(3, str.indexOf('```', 3))
             str = str.slice(str.indexOf('```', 3) + 3)
         } else {
-            arg = str.split(/\s+/g)[0].trim()
+            arg = str.split(/\s+/g)[0]!.trim()
             str = str.slice(arg.length)
         }
 
@@ -129,7 +129,7 @@ export function normalizeCommandOption(option: string) {
     return truncateString(option.replace(/[^-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]/gu, '-').toLowerCase(), 32)
 }
 
-export function resolveObjectPath(path: string, object: {}): any {
+export function resolveObjectPath(path: string, object: Record<string, any>): any {
     if (typeof path != 'string') throw new TypeError('PATH_IS_NOT_STRING')
     if (object === null || typeof object != 'object') throw new TypeError('OBJECT_IS_NOT_OBJECT')
 
@@ -138,7 +138,7 @@ export function resolveObjectPath(path: string, object: {}): any {
     }, object)
 }
 
-export function dotNotateObject(object: {}, target?: {}, prefix?: string): {} {
+export function dotNotateObject(object: Record<string, any>, target?: Record<string, any>, prefix?: string): {} {
     if (object == null || typeof object != 'object') throw new TypeError('OBJECT_IS_NOT_OBJECT')
     ;((target = target || {}), (prefix = prefix || ''))
 
@@ -154,7 +154,7 @@ export function dotNotateObject(object: {}, target?: {}, prefix?: string): {} {
 }
 
 export function createEnum(keys: any[]): {} {
-    const obj = {}
+    const obj: Record<string, any> = {}
 
     for (const [index, key] of keys.entries()) {
         if (key === null) continue
@@ -245,34 +245,38 @@ export function transformMessageComponents(components: any[][]) {
     return components.slice(0, 5).map(row => {
         return new ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>()
             .addComponents(
-                row.map(component => {
-                    if (component.type === 'Button') {
-                        const button = new ButtonBuilder()
+                row
+                    .map(component => {
+                        if (component.type === 'Button') {
+                            const button = new ButtonBuilder()
 
-                        if (typeof component.customId === 'string') button.setCustomId(`UD-${component.customId}`)
-                        button.setDisabled(Boolean(component.disabled))
-                        if (component.emoji && component.emoji?.name)
-                            button.setEmoji(component.emoji.id ? component.emoji : component.emoji.name)
-                        if (typeof component.label === 'string') button.setLabel(component.label)
-                        button.setStyle(ButtonStyle[component.style] as any)
-                        if (typeof component.url === 'string') button.setURL(component.url)
+                            if (typeof component.customId === 'string') button.setCustomId(`UD-${component.customId}`)
+                            button.setDisabled(Boolean(component.disabled))
+                            if (component.emoji && component.emoji?.name)
+                                button.setEmoji(component.emoji.id ? component.emoji : component.emoji.name)
+                            if (typeof component.label === 'string') button.setLabel(component.label)
+                            button.setStyle(ButtonStyle[component.style] as any)
+                            if (typeof component.url === 'string') button.setURL(component.url)
 
-                        return button
-                    }
+                            return button
+                        }
 
-                    if (component.type === 'SelectMenu') {
-                        const selectMenu = new StringSelectMenuBuilder()
+                        if (component.type === 'SelectMenu') {
+                            const selectMenu = new StringSelectMenuBuilder()
 
-                        if (typeof component.customId === 'string') selectMenu.setCustomId(`UD-${component.customId}`)
-                        selectMenu.setDisabled(Boolean(component.disabled))
-                        if (typeof component.maxValues === 'number') selectMenu.setMaxValues(component.maxValues)
-                        if (typeof component.minValues === 'number') selectMenu.setMinValues(component.minValues)
-                        selectMenu.setOptions(...component.options)
-                        if (typeof component.placeholder === 'string') selectMenu.setPlaceholder(component.placeholder)
+                            if (typeof component.customId === 'string')
+                                selectMenu.setCustomId(`UD-${component.customId}`)
+                            selectMenu.setDisabled(Boolean(component.disabled))
+                            if (typeof component.maxValues === 'number') selectMenu.setMaxValues(component.maxValues)
+                            if (typeof component.minValues === 'number') selectMenu.setMinValues(component.minValues)
+                            selectMenu.setOptions(...component.options)
+                            if (typeof component.placeholder === 'string')
+                                selectMenu.setPlaceholder(component.placeholder)
 
-                        return selectMenu
-                    }
-                })
+                            return selectMenu
+                        }
+                    })
+                    .filter(v => typeof v !== 'undefined')
             )
             .toJSON()
     })
@@ -495,6 +499,7 @@ export function debounce(
         const isInvoking = shouldInvoke(time)
 
         lastArgs = args
+        // @ts-ignore
         lastThis = this
         lastCallTime = time
 
@@ -532,7 +537,7 @@ export function parseJSON<T = any>(text: string, reviver?: (this: any, key: stri
     try {
         return JSON.parse(text, reviver)
     } catch (err) {
-        return null
+        return {} as T
     }
 }
 

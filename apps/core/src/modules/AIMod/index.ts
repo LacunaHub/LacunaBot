@@ -1,6 +1,11 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { ViolationJudgement, ViolationSeverityLevels } from '@/database/schemas/ViolativeMessages'
-import { SchemaType } from '@google/generative-ai'
+import GeminiAPI, { defaultModelParams } from '@/api/utility/GeminiAPI.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { ViolationJudgement, ViolationSeverityLevels } from '@/database/schemas/ViolativeMessages.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { supportServerId } from '@/internals/utility/Constants.js'
+import { capitalizeFirstLetter, fetchFile, parseJSON } from '@/internals/utility/Utils.js'
+import { SchemaType, type GenerativeContentBlob, type Part } from '@google/generative-ai'
 import {
     Attachment,
     BaseGuildTextChannel,
@@ -9,11 +14,6 @@ import {
     Message,
     MessageType
 } from 'discord.js'
-import GeminiAPI, { defaultModelParams } from '../../api/utility/GeminiAPI'
-import database from '../../database'
-import Lacuna from '../../internals/Lacuna'
-import { supportServerId } from '../../internals/utility/Constants'
-import { capitalizeFirstLetter, fetchFile, parseJSON } from '../../internals/utility/Utils'
 
 const violationCategories = [
     'Spam',
@@ -92,7 +92,7 @@ const generativeModel = GeminiAPI.getGenerativeModel({
         'You are a Discord Moderator with extensive experience in monitoring and reviewing social media messages. Your primary role is to ensure that community guidelines are upheld, while maintaining a positive and secure environment for all users. You are adept at identifying problematic content quickly and effectively, making sure that your evaluations are fair and justified.\n\nYour task is to analyze a set of social media messages for compliance with community guidelines. Here are the details you need to keep in mind:\n- Community guidelines for reference: https://discord.com/guidelines\n- Specific issues to look for (e.g., unauthorized advertising, spam, hate speech, nationalism, politically charged content)\n- Ignore links from well-known sites (e.g., google.com, reddit.com, x.com, etc.)\n\nFor each message that violates community guidelines, please summarize the issue, recommend its removal, and outline the specific guideline it breaches. If a message does not violate any rules, please remove it from consideration and exclude it from the messages_with_violations list. Additionally, any links present within the messages should be checked for security risks, and any potential threats must be reported.\n\nWhen summarizing the violations or justifying the compliance of a message, make sure to be clear and concise.'
 })
 
-async function handleMessageCreate(self: Lacuna, server: ServerDocument, message: Message) {
+async function handleMessageCreate(self: Lacuna, server: ServerDocument, message: Message<true>) {
     const env = await self.getEnv()
     if (env.aiModDisabled) return false
     if (![supportServerId, ...(env.aiClosedBetaServerIds ?? [])].includes(message.guildId)) return false
@@ -100,11 +100,11 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
     if (!server.moderation.ai_mod.active || !server.moderation.ai_mod.log_channel_id) return false
     if (![MessageType.Default, MessageType.Reply].includes(message.type)) return false
     if (server.moderation.ai_mod.ignored_channels.includes(message.channelId)) return false
-    if (message.member.roles.cache.some(v => server.moderation.ai_mod.ignored_roles.includes(v.id))) return false
+    if (message.member!.roles.cache.some(v => server.moderation.ai_mod.ignored_roles.includes(v.id))) return false
     if ((message.channel as BaseGuildTextChannel)?.nsfw) return false
     if (
         server.moderation.deny_moderate_users_with_mp &&
-        message.member.permissions.any([
+        message.member!.permissions.any([
             'Administrator',
             'BanMembers',
             'KickMembers',
@@ -183,7 +183,7 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
         const chatSession = generativeModel.startChat({
             history: await Promise.all(
                 messages.map(async v => {
-                    const parts = []
+                    const parts: Part[] = []
 
                     if (v.content)
                         parts.push({
@@ -191,7 +191,7 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
                         })
                     if (v.attachments.length) {
                         const attachments = await resolveAttachedFiles(v.attachments)
-                        parts.push(attachments.map(vv => ({ inlineData: { ...vv } })))
+                        parts.push(...attachments.map(vv => ({ inlineData: { ...vv } })))
                     }
 
                     return { role: 'user', parts }
@@ -211,81 +211,87 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
 
         messages.push(lastMessage)
 
-        if (Array.isArray(response.messages_with_violations)) {
+        if (
+            typeof response.messages_with_violations !== 'undefined' &&
+            Array.isArray(response.messages_with_violations)
+        ) {
             const messagesWithViolations = messages.filter(v =>
-                response.messages_with_violations.some(vv => vv.message_id === v.id)
+                response.messages_with_violations!.some(vv => vv.message_id === v.id)
             )
-            const violations = messagesWithViolations.map(v => {
-                const messageJudgement = response.messages_with_violations.find(vv => vv.message_id === v.id),
-                    messageLink = getMessageLink(v.channel_id, v.id, message.guildId)
+            const violations = messagesWithViolations
+                .map(v => {
+                    const messageJudgement = response.messages_with_violations!.find(vv => vv.message_id === v.id),
+                        messageLink = getMessageLink(v.channel_id, v.id, message.guildId)
+                    if (!messageJudgement) return null
 
-                const violationCategoryIndex = violationCategories.indexOf(messageJudgement.violation_category)
-                if (violationCategoryIndex === -1) return null
+                    const violationCategoryIndex = violationCategories.indexOf(messageJudgement.violation_category!)
+                    if (violationCategoryIndex === -1) return null
 
-                let recommendedActions = []
-                if (messageJudgement.violation_judgement)
-                    recommendedActions.push(t(`CaseLog.Actions.${messageJudgement.violation_judgement}`))
-                if (messageJudgement.message_should_be_deleted)
-                    recommendedActions.push(t('CaseLog.Actions.DeleteMessage'))
+                    let recommendedActions = []
+                    if (messageJudgement.violation_judgement)
+                        recommendedActions.push(t(`CaseLog.Actions.${messageJudgement.violation_judgement}`))
+                    if (messageJudgement.message_should_be_deleted)
+                        recommendedActions.push(t('CaseLog.Actions.DeleteMessage'))
 
-                return {
-                    embed: new EmbedBuilder()
-                        .setTitle(t(`AIMod.ViolationCategories.${violationCategoryIndex}`))
-                        .addFields([
-                            {
-                                name: t('Logs.MessageAuthor'),
-                                value: `<@${v.author_id}> (${v.author_username})`,
-                                inline: true
-                            },
-                            {
-                                name: t('Commands.OptionTypes.Channel'),
-                                value: messageLink,
-                                inline: true
-                            },
-                            {
-                                name: '\u200B',
-                                value: '\u200B',
-                                inline: true
-                            },
-                            {
-                                name: t('AIMod.ViolationSeverityLevel'),
-                                value: t(
-                                    `AIMod.ViolationSeverityLevels.${messageJudgement.violation_severity_level ?? 'None'}`
-                                ),
-                                inline: true
-                            },
-                            {
-                                name: t('Commands.ReportCommand.Texts.RecommendedActions'),
-                                value: capitalizeFirstLetter(recommendedActions.join(', ').toLowerCase()) || '-',
-                                inline: true
-                            },
-                            {
-                                name: '\u200B',
-                                value: '\u200B',
-                                inline: true
-                            }
-                        ])
-                        .setTimestamp(v.created_at)
-                        .setColor(
-                            messageJudgement.violation_severity_level
-                                ? `#${violationSeverityColors[messageJudgement.violation_severity_level]}`
+                    return {
+                        embed: new EmbedBuilder()
+                            .setTitle(t(`AIMod.ViolationCategories.${violationCategoryIndex}`))
+                            .addFields([
+                                {
+                                    name: t('Logs.MessageAuthor'),
+                                    value: `<@${v.author_id}> (${v.author_username})`,
+                                    inline: true
+                                },
+                                {
+                                    name: t('Commands.OptionTypes.Channel'),
+                                    value: messageLink,
+                                    inline: true
+                                },
+                                {
+                                    name: '\u200B',
+                                    value: '\u200B',
+                                    inline: true
+                                },
+                                {
+                                    name: t('AIMod.ViolationSeverityLevel'),
+                                    value: t(
+                                        `AIMod.ViolationSeverityLevels.${messageJudgement.violation_severity_level ?? 'None'}`
+                                    ),
+                                    inline: true
+                                },
+                                {
+                                    name: t('Commands.ReportCommand.Texts.RecommendedActions'),
+                                    value: capitalizeFirstLetter(recommendedActions.join(', ').toLowerCase()) || '-',
+                                    inline: true
+                                },
+                                {
+                                    name: '\u200B',
+                                    value: '\u200B',
+                                    inline: true
+                                }
+                            ])
+                            .setTimestamp(v.created_at)
+                            .setColor(
+                                messageJudgement.violation_severity_level
+                                    ? `#${violationSeverityColors[messageJudgement.violation_severity_level]}`
+                                    : null
+                            ),
+                        document: {
+                            server_id: message.guildId,
+                            author_id: v.author_id,
+                            message_id: v.id,
+                            channel_id: v.channel_id,
+                            violation_category: violationCategoryIndex,
+                            violation_severity_level: messageJudgement.violation_severity_level
+                                ? ViolationSeverityLevels[messageJudgement.violation_severity_level]
+                                : null,
+                            violation_judgement: messageJudgement.violation_judgement
+                                ? ViolationJudgement[messageJudgement.violation_judgement]
                                 : null
-                        ),
-                    document: {
-                        server_id: message.guildId,
-                        author_id: v.author_id,
-                        message_id: v.id,
-                        channel_id: v.channel_id,
-                        violation_category: violationCategoryIndex,
-                        violation_severity_level: messageJudgement.violation_severity_level
-                            ? ViolationSeverityLevels[messageJudgement.violation_severity_level]
-                            : null,
-                        violation_judgement: messageJudgement.violation_judgement
-                            ? ViolationJudgement[messageJudgement.violation_judgement]
-                            : null
+                        }
                     }
-                }
-            })
+                })
+                .filter(v => v !== null)
 
             if (violations.length) {
                 await logChannel.send({ embeds: violations.map(v => v.embed) })
@@ -304,12 +310,12 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
             pool = messagePools
                 .set(guildId, {
                     messages: [],
-                    last_message_created_at: null,
+                    last_message_created_at: 0,
                     timeout: null
                 })
                 .get(guildId)
 
-        return pool
+        return pool!
     }
 
     function clearPoolTimeout() {
@@ -320,15 +326,15 @@ async function handleMessageCreate(self: Lacuna, server: ServerDocument, message
     }
 }
 
-async function resolveAttachedFiles(attachments: Attachment[]) {
+async function resolveAttachedFiles(attachments: Attachment[]): Promise<GenerativeContentBlob[]> {
     return await Promise.all(
         attachments
-            .filter(v => v.contentType.includes('image/'))
+            .filter(v => v.contentType?.includes('image/'))
             .map(async v => {
                 const file = await fetchFile(v.url)
 
                 return {
-                    mimeType: v.contentType,
+                    mimeType: v.contentType!,
                     data: file.data.toString('base64')
                 }
             })
@@ -342,7 +348,7 @@ export default {
 
 export interface AIModMessagePool {
     messages: AIModMessagePoolMessage[]
-    last_message_created_at: number | null
+    last_message_created_at: number
     timeout: NodeJS.Timeout | null
 }
 

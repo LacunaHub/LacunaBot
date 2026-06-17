@@ -1,16 +1,16 @@
-import { ServerDocument, ServerModulesAutomationTriggers } from '@/database/schemas/Servers'
+import { ServerModulesAutomationTriggers } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { activePatronRoleId, supportServerId } from '@/internals/utility/Constants.js'
+import AutoMod from '@/modules/AutoMod/index.js'
+import Automation from '@/modules/custom-behavior/Automation.js'
+import Greeting from '@/modules/Greeting.js'
+import GuildImageRotation from '@/modules/GuildImageRotation.js'
+import Logs from '@/modules/Logs/index.js'
+import Reports from '@/modules/Moderation/Reports.js'
 import { Events, GuildMember } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import { activePatronRoleId, supportServerId } from '../../internals/utility/Constants'
-import AutoMod from '../../modules/AutoMod'
-import Automation from '../../modules/custom-behavior/Automation'
-import Greeting from '../../modules/Greeting'
-import GuildImageRotation from '../../modules/GuildImageRotation'
-import Logs from '../../modules/Logs'
-import Reports from '../../modules/Moderation/Reports'
 
 const handler = async (self: Lacuna, member: GuildMember) => {
-    const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
+    const server = await self.db.servers.fetch({ _id: member.guild.id })
 
     await self.fetchGuild(member.guild)
     await Greeting.sendMessage(self, server, member)

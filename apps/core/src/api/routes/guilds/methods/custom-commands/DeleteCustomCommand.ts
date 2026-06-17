@@ -1,8 +1,8 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type Context } from 'koa'
 
 export default async function deleteCustomCommand(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -12,7 +12,9 @@ export default async function deleteCustomCommand(ctx: Context) {
     if (!command) ctx.throw(404, new APIError(1011))
 
     try {
-        await DiscordUtils.rest.delete(DiscordUtils.restRoutes.applicationGuildCommand(process.env.LCN_DISCORD_CLIENT_ID, server._id, command.id))
+        await DiscordUtils.rest.delete(
+            DiscordUtils.restRoutes.applicationGuildCommand(process.env.LCN_DISCORD_CLIENT_ID!, server._id, command.id)
+        )
     } catch (err) {
         ctx.log.error({
             module: 'CustomCommands',

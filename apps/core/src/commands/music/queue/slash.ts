@@ -1,4 +1,6 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { chunkArray, generateSimpleId } from '@/internals/utility/Utils.js'
 import { Queue } from '@lacunahub/lavaluna.js'
 import {
     ActionRowBuilder,
@@ -8,15 +10,14 @@ import {
     ChatInputCommandInteraction,
     Message,
     StringSelectMenuBuilder,
-    StringSelectMenuInteraction
+    StringSelectMenuInteraction,
+    type SelectMenuComponentOptionData
 } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import { chunkArray, generateSimpleId } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const player = self.lava.nodes.getPlayer(interaction.guild.id)
+    const player = self.lava!.nodes.getPlayer(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({
@@ -44,13 +45,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     const chunks: Queue[] = chunkArray(player.queue, 25)
     let page: number = 0
-    const selectMenuOptions = []
+    const selectMenuOptions: SelectMenuComponentOptionData[][] = []
 
     for (const chunk of chunks) {
         const currentSelectMenuOptions = []
 
         for (const track of chunk) {
-            const isCurrent = player.queue.current.encoded === track.encoded
+            const isCurrent = player.queue.current!.encoded === track.encoded
 
             currentSelectMenuOptions.push({
                 label: track.info.title,
@@ -89,7 +90,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 new StringSelectMenuBuilder()
                     .setCustomId('QUEUE-SELECT-TRACK')
                     .setPlaceholder(t('Commands.QueueCommand.Texts.SelectTrackToPlay'))
-                    .addOptions(selectMenuOptions[page])
+                    .addOptions(selectMenuOptions[page]!)
             ),
             ...rows
         ]
@@ -104,7 +105,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         if (v.isStringSelectMenu() && v.customId === 'QUEUE-SELECT-TRACK') {
             await v.deferUpdate()
 
-            const trackId = v.values[0],
+            const trackId = v.values[0]!,
                 trackIndex = player.queue.findIndex(vv => vv.info.identifier === trackId.split(':')[0])
 
             if (trackIndex !== -1) {
@@ -126,7 +127,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     break
             }
 
-            rows[0].components[1].setLabel(t('Common.Pagination', { current: page + 1, total: chunks.length }))
+            rows[0]!.components[1]!.setLabel(t('Common.Pagination', { current: page + 1, total: chunks.length }))
 
             await v.deferUpdate()
             await v.editReply({
@@ -135,7 +136,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                         new StringSelectMenuBuilder()
                             .setCustomId('QUEUE-SELECT-TRACK')
                             .setPlaceholder(t('Commands.QueueCommand.Texts.SelectTrackToPlay'))
-                            .addOptions(selectMenuOptions[page])
+                            .addOptions(selectMenuOptions[page]!)
                     ),
                     ...rows
                 ]

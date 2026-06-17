@@ -1,10 +1,12 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import Lacuna from '@/internals/Lacuna.js'
 import { Events, Guild } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, guild: Guild) => {
-    const preferredLocale = guild.preferredLocale?.split('-')?.[0]
-    const server: ServerDocument = await self.db.servers.fetch({ _id: guild.id }, { locale: self.i18n.isSupported(preferredLocale) as any })
+    const preferredLocale = guild.preferredLocale?.split('-')?.[0]!
+    const server = await self.db.servers.fetch(
+        { _id: guild.id },
+        { locale: self.i18n.isSupported(preferredLocale) as any }
+    )
 
     self.logger.info({ guildId: guild.id, memberCount: guild.memberCount }, 'added to guild')
 

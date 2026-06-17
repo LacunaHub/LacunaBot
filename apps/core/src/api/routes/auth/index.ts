@@ -1,8 +1,8 @@
 import Router from '@koa/router'
-import { createRateLimit } from '../../utility/Utils'
-import exchangeCode from './methods/ExchangeCode'
-import getAuthURI from './methods/GetAuthURI'
-import getBotAuthURI from './methods/GetBotAuthURI'
+import { createRateLimit } from '../../utility/Utils.js'
+import exchangeCode from './methods/ExchangeCode.js'
+import getAuthURI from './methods/GetAuthURI.js'
+import getBotAuthURI from './methods/GetBotAuthURI.js'
 
 const router = new Router({ prefix: '/auth', methods: ['GET'] })
 

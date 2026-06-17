@@ -1,10 +1,10 @@
-import database from '@/database'
-import { SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@/database/schemas/Subscriptions'
-import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
-import { APIGuildMember } from 'discord.js'
-import { SubscriptionData, addDiamond } from '..'
-import { supportServerId } from '../../../../internals/utility/Constants'
-import DiscordUtils from '../../../utility/DiscordUtils'
+import database from '@/database/index.js'
+import { SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@/database/schemas/Subscriptions.js'
+import { type Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
+import { type APIGuildMember } from 'discord.js'
+import { supportServerId } from '../../../../internals/utility/Constants.js'
+import DiscordUtils from '../../../utility/DiscordUtils.js'
+import { type SubscriptionData, addDiamond } from '../index.js'
 
 export class DiscordRolesCheckout {
     public subscriptionId: Snowflake
@@ -15,7 +15,12 @@ export class DiscordRolesCheckout {
     public roleIds: string[]
     public maxActiveSubscriptions: number
 
-    constructor(data: SubscriptionData, subscriptionMethod: string, roleIds: string[], maxActiveSubscriptions?: number) {
+    constructor(
+        data: SubscriptionData,
+        subscriptionMethod: string,
+        roleIds: string[],
+        maxActiveSubscriptions?: number
+    ) {
         this.subscriptionId = SnowflakeUtils.generate()
 
         this.subscriberId = data.subscriberId
@@ -24,6 +29,7 @@ export class DiscordRolesCheckout {
 
         this.refId = data.refId
 
+        // @ts-ignore
         this.type = SubscriptionType[subscriptionMethod]
 
         this.roleIds = roleIds

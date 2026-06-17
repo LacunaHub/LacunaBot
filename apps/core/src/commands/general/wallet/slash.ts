@@ -1,8 +1,12 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { ChatInputCommandInteraction, EmbedBuilder, GuildMember } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
 
-export async function balanceSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
+export async function balanceSlash(
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'>
+) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {
@@ -33,7 +37,9 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     }
 
     const embed = new EmbedBuilder().setAuthor({
-        name: t('Commands.WalletCommand.SubCommands.BalanceCommand.Texts.WalletBalanceOfUser', { username: mention.displayName }),
+        name: t('Commands.WalletCommand.SubCommands.BalanceCommand.Texts.WalletBalanceOfUser', {
+            username: mention.displayName
+        }),
         iconURL: mention.displayAvatarURL()
     })
 
@@ -43,7 +49,8 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     for (const c of wallet.currencies) {
         const currency = server.modules.economy.currencies.find(i => i.id === c.id)
 
-        if (currency) embed.addFields([{ name: currency.name, value: `${c.amount.toFixed(2)}${currency.symbol}`, inline: true }])
+        if (currency)
+            embed.addFields([{ name: currency.name, value: `${c.amount.toFixed(2)}${currency.symbol}`, inline: true }])
     }
 
     await interaction.reply({ embeds: [embed] })
@@ -51,7 +58,11 @@ export async function balanceSlash(self: Lacuna, server: ServerDocument, interac
     return true
 }
 
-export async function transferSlash(self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) {
+export async function transferSlash(
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'>
+) {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.economy.active) {
@@ -68,7 +79,9 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     const isNotAllowedRole =
             server.modules.economy.transfer.allowed_roles.length &&
             !interaction.member.roles.cache.some(i => server.modules.economy.transfer.allowed_roles.includes(i.id)),
-        isBlockedRole = interaction.member.roles.cache.some(i => server.modules.economy.transfer.blocked_roles.includes(i.id))
+        isBlockedRole = interaction.member.roles.cache.some(i =>
+            server.modules.economy.transfer.blocked_roles.includes(i.id)
+        )
 
     if (isNotAllowedRole || isBlockedRole) {
         await interaction.reply({
@@ -87,9 +100,12 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!mention || mention.user.bot) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidUser', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidUser',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -98,9 +114,12 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!amount) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidAmount', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.WalletCommand.SubCommands.TransferCommand.Texts.InvalidAmount',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -127,9 +146,12 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (!transaction_currency || transaction_currency.amount < amount) {
         await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.NoSuchAmountOfFunds', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
+            content: `${self.staticEmojis.Cross} | ${t(
+                'Commands.WalletCommand.SubCommands.TransferCommand.Texts.NoSuchAmountOfFunds',
+                {
+                    username: `**${interaction.member.displayName}**`
+                }
+            )}`,
             ephemeral: true
         })
 
@@ -150,7 +172,10 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     const mentionWallet = await self.db.users.fetchWallet(mentionUser, interaction.guildId)
 
     await self.db.users.updateOne(
-        { _id: interaction.user.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } },
+        {
+            _id: interaction.user.id,
+            'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } }
+        },
         {
             $inc: {
                 'activities.wallets.$[guild].currencies.$[currency].amount': -amount
@@ -175,7 +200,10 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
 
     if (mentionWallet.currencies.some(c => c.id === currency_id)) {
         await self.db.users.updateOne(
-            { _id: mention.id, 'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } } },
+            {
+                _id: mention.id,
+                'activities.wallets': { $elemMatch: { guild_id: interaction.guildId, 'currencies.id': currency_id } }
+            },
             {
                 $inc: {
                     'activities.wallets.$[guild].currencies.$[currency].amount': amount
@@ -224,11 +252,14 @@ export async function transferSlash(self: Lacuna, server: ServerDocument, intera
     }
 
     await interaction.reply({
-        content: `${self.staticEmojis.Check} | ${t('Commands.WalletCommand.SubCommands.TransferCommand.Texts.SuccessfulFundsTransfer', {
-            username: `**${interaction.member.displayName}**`,
-            amount: `**${amount}${server.modules.economy.currencies.find(c => c.id == currency_id).symbol}**`,
-            target: `**${mention.displayName}**`
-        })}`,
+        content: `${self.staticEmojis.Check} | ${t(
+            'Commands.WalletCommand.SubCommands.TransferCommand.Texts.SuccessfulFundsTransfer',
+            {
+                username: `**${interaction.member.displayName}**`,
+                amount: `**${amount}${server.modules.economy.currencies.find(c => c.id == currency_id)!.symbol}**`,
+                target: `**${mention.displayName}**`
+            }
+        )}`,
         ephemeral: true
     })
 

@@ -1,9 +1,13 @@
-import { ServerDocument, ServerModerationDAMERule, ServerModerationDAMERuleActionType } from '@/database/schemas/Servers'
-import { APIAutoModerationActionMetadata, APIAutoModerationRule } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import {
+    type ServerDocument,
+    type ServerModerationDAMERule,
+    ServerModerationDAMERuleActionType
+} from '@/database/schemas/Servers.js'
+import { type APIAutoModerationActionMetadata, type APIAutoModerationRule } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function updateDAMERule(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -16,24 +20,30 @@ export default async function updateDAMERule(ctx: Context) {
     if (JSON.stringify(data) !== JSON.stringify(dameRule)) {
         let apiAutoModRule: APIAutoModerationRule
         try {
-            apiAutoModRule = (await DiscordUtils.rest.patch(DiscordUtils.restRoutes.guildAutoModerationRule(server._id, dameRule.id), {
-                body: {
-                    ...data,
-                    actions: data.actions
-                        .filter(v => v.type < 101)
-                        .map(v => {
-                            const metadata: APIAutoModerationActionMetadata = {}
-                            if (v.type === ServerModerationDAMERuleActionType.BlockMessage) metadata.custom_message = v.metadata.custom_message
-                            if (v.type === ServerModerationDAMERuleActionType.SendAlertMessage) metadata.channel_id = v.metadata.channel_id
-                            if (v.type === ServerModerationDAMERuleActionType.Timeout) metadata.duration_seconds = v.metadata.duration_seconds
+            apiAutoModRule = (await DiscordUtils.rest.patch(
+                DiscordUtils.restRoutes.guildAutoModerationRule(server._id, dameRule.id),
+                {
+                    body: {
+                        ...data,
+                        actions: data.actions
+                            .filter(v => v.type < 101)
+                            .map(v => {
+                                const metadata: APIAutoModerationActionMetadata = {}
+                                if (v.type === ServerModerationDAMERuleActionType.BlockMessage)
+                                    metadata.custom_message = v.metadata.custom_message!
+                                if (v.type === ServerModerationDAMERuleActionType.SendAlertMessage)
+                                    metadata.channel_id = v.metadata.channel_id!
+                                if (v.type === ServerModerationDAMERuleActionType.Timeout)
+                                    metadata.duration_seconds = v.metadata.duration_seconds!
 
-                            return {
-                                type: v.type,
-                                metadata
-                            }
-                        })
+                                return {
+                                    type: v.type,
+                                    metadata
+                                }
+                            })
+                    }
                 }
-            })) as any
+            )) as any
         } catch (err) {
             ctx.log.error({
                 module: 'DAMERules',
@@ -42,7 +52,7 @@ export default async function updateDAMERule(ctx: Context) {
                 guildId: server._id
             })
 
-            ctx.throw(500, new APIError(5023, err.toString()))
+            ctx.throw(500, new APIError(5023, (err as any).toString()))
         }
 
         data = {

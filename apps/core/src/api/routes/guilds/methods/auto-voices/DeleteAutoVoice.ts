@@ -1,7 +1,7 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import APIError from '../../../../utility/APIError'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type Context } from 'koa'
 
 export default async function deleteAutoVoice(ctx: Context) {
     const server: ServerDocument = ctx.state.server

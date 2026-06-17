@@ -1,17 +1,17 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { ForumChannel, Guild, GuildMember, GuildTextBasedChannel, MediaChannel, User } from 'discord.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import TemporaryBan from '@/internals/structures/TemporaryBan.js'
+import { generateSimpleId } from '@/internals/utility/Utils.js'
+import { ForumChannel, Guild, GuildMember, type GuildTextBasedChannel, MediaChannel, User } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
-import Lacuna from '../../internals/Lacuna'
-import TemporaryBan from '../../internals/structures/TemporaryBan'
-import { generateSimpleId } from '../../internals/utility/Utils'
-import { DirectMessages } from '../DirectMessages'
-import Replacer from '../Replacer'
-import { createCaseLogEntry } from './CaseLog'
+import { DirectMessages } from '../DirectMessages.js'
+import Replacer from '../Replacer.js'
+import { createCaseLogEntry } from './CaseLog.js'
 
 async function banUser(self: Lacuna, server: ServerDocument, guild: Guild, options: ModerateUserOptionsWithDuration) {
     const { target, durationSeconds } = options,
-        executor = options.executor ?? self.user
+        executor = options.executor ?? self.user!
     let reason = options.reason
 
     if (typeof durationSeconds === 'number' && durationSeconds > 0) {
@@ -28,32 +28,42 @@ async function banUser(self: Lacuna, server: ServerDocument, guild: Guild, optio
         })
     } else {
         try {
-            await guild.members.ban(target.id, { reason })
-        } catch (err) {
+            await guild.members.ban(target.id, { reason: reason as any })
+        } catch (err: any) {
             self.logger.error({ module: 'Moderation', action: 'Ban', err, guildId: guild.id })
 
             throw new Error(err)
         }
     }
 
-    await createCaseLogEntry(guild, { type: 'BanAdd', target: target.user, executor, reason })
+    await createCaseLogEntry(guild, {
+        type: 'BanAdd',
+        target: target.user,
+        executor: executor as any,
+        reason: reason as any
+    })
 
     return true
 }
 
-async function kickUser(self: Lacuna, server: ServerDocument, guild: Guild, options: ModerateUserOptions) {
+async function kickUser(self: Lacuna, _server: ServerDocument, guild: Guild, options: ModerateUserOptions) {
     const { target, reason } = options,
         executor = options.executor ?? self.user
 
     try {
         await target.kick(reason)
-    } catch (err) {
+    } catch (err: any) {
         self.logger.error({ module: 'Moderation', action: 'Kick', err, guildId: guild.id })
 
         throw new Error(err)
     }
 
-    await createCaseLogEntry(guild, { type: 'Kick', target: target.user, executor, reason })
+    await createCaseLogEntry(guild, {
+        type: 'Kick',
+        target: target.user,
+        executor: executor as any,
+        reason: reason as any
+    })
 
     return true
 }
@@ -71,13 +81,18 @@ async function muteUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
 
     try {
         await target.disableCommunicationUntil(expiresAt, reason)
-    } catch (err) {
+    } catch (err: any) {
         self.logger.error({ module: 'Moderation', action: 'Mute', err, guildId: guild.id })
 
         throw new Error(err)
     }
 
-    await createCaseLogEntry(guild, { type: 'MuteAdd', target: target.user, executor, reason })
+    await createCaseLogEntry(guild, {
+        type: 'MuteAdd',
+        target: target.user,
+        executor: executor as any,
+        reason: reason as any
+    })
     await muteUserRemoveAllRoles(self, server, target)
 
     return true
@@ -106,7 +121,7 @@ async function muteUserRemoveAllRoles(self: Lacuna, server: ServerDocument, targ
 
     try {
         await target.roles.set(strictRoles, 'Moderation: Remove all roles')
-    } catch (err) {
+    } catch (err: any) {
         self.logger.error({ module: 'Moderation', action: 'MuteRemoveAllRoles', err, guildId: server._id })
 
         throw new Error(err)
@@ -119,7 +134,9 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
     const { target, executor, reason, channel } = options
     const dateNow = Date.now()
     const violator = server.moderation.warnings.violators.find(v => v.user_id === target.id),
-        warningPenalty = server.moderation.warnings.penalties.find(v => (violator ? v.penalties == violator.violations.length + 1 : v.penalties == 1))
+        warningPenalty = server.moderation.warnings.penalties.find(v =>
+            violator ? v.penalties == violator.violations.length + 1 : v.penalties == 1
+        )
 
     if (violator) {
         await self.db.servers.updateOne(
@@ -154,7 +171,12 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
         )
     }
 
-    await createCaseLogEntry(guild, { type: 'WarnAdd', target: target.user, executor, reason })
+    await createCaseLogEntry(guild, {
+        type: 'WarnAdd',
+        target: target.user,
+        executor: executor as any,
+        reason: reason as any
+    })
 
     if (warningPenalty) {
         const hasBanAction = warningPenalty.options.includes('ACTION_BAN'),
@@ -165,10 +187,21 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
             hasResetViolationsAction = warningPenalty.options.includes('ACTION_RESET_VIOLATIONS')
 
         if (hasBanAction && !hasKickAAction && !hasMuteAction)
-            await banUser(self, server, guild, { target, executor, reason, durationSeconds: warningPenalty.ban_timeout })
-        if (hasKickAAction && !hasBanAction && !hasMuteAction) await kickUser(self, server, guild, { target, executor, reason })
+            await banUser(self, server, guild, {
+                target,
+                executor,
+                reason,
+                durationSeconds: warningPenalty.ban_timeout
+            } as any)
+        if (hasKickAAction && !hasBanAction && !hasMuteAction)
+            await kickUser(self, server, guild, { target, executor, reason } as any)
         if (hasMuteAction && !hasBanAction && !hasKickAAction)
-            await muteUser(self, server, guild, { target, executor, reason, durationSeconds: warningPenalty.mute_timeout })
+            await muteUser(self, server, guild, {
+                target,
+                executor,
+                reason,
+                durationSeconds: warningPenalty.mute_timeout
+            } as any)
 
         if (hasModifyRolesAction && !hasBanAction && !hasKickAAction) {
             const addRoles = warningPenalty.modify_roles?.add ?? [],
@@ -190,7 +223,7 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
         if (hasSendMessageAction) {
             try {
                 const replacer = new Replacer(server.premium.available, { guild, member: target }),
-                    messagePayload = await replacer.replaceTemplateMessage(warningPenalty.send_message)
+                    messagePayload = await replacer.replaceTemplateMessage(warningPenalty.send_message!)
 
                 if (channel?.isSendable()) await channel.send(messagePayload)
             } catch (err) {
@@ -221,12 +254,15 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
 
     if (server.moderation.case_log.types.WARN_ADD.active) {
         const replacer = new Replacer(server.premium.available, { guild, member: target }),
-            messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.WARN_ADD.dm_message, {
-                penalty: { reason: reason ?? '-' }
-            })
+            messagePayload = await replacer.replaceTemplateMessage(
+                server.moderation.case_log.types.WARN_ADD.dm_message,
+                {
+                    penalty: { reason: reason ?? '-' }
+                }
+            )
 
         try {
-            await DirectMessages.send(self, target, messagePayload)
+            DirectMessages.send(self, target, messagePayload)
         } catch (err) {
             self.logger.error({ module: 'Warnings', action: 'SendDirectMessage', err, guildId: guild.id })
         }
@@ -258,7 +294,7 @@ export interface ModerateUserOptions {
 }
 
 export interface ModerateUserOptionsWithDuration extends ModerateUserOptions {
-    durationSeconds?: number
+    durationSeconds?: number | null
 }
 
 export interface ModerateUserOptionsWithChannel extends ModerateUserOptions {

@@ -1,12 +1,12 @@
-import Logger from '@/api/utility/Logger'
-import { AttachmentBuilder, MessagePayload, makeURLSearchParams } from 'discord.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import Logger from '@/api/utility/Logger.js'
+import database from '@/database/index.js'
+import { truncateString } from '@/internals/utility/Utils.js'
+import { MessagePayload, makeURLSearchParams } from 'discord.js'
 import fetch from 'node-fetch'
-import database from '../../../database'
-import { truncateString } from '../../../internals/utility/Utils'
-import DiscordUtils from '../../utility/DiscordUtils'
 
 const telegramBaseApiUrl = `https://api.telegram.org/bot${process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN}`
-const [telegramBotId] = process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN.split(':')
+const [telegramBotId] = process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN!.split(':')
 
 export async function searchChannels(query: string) {
     if (isNaN(query as any)) {
@@ -21,7 +21,9 @@ export async function searchChannels(query: string) {
 
             if (chat.type !== 'channel') return null
 
-            const getChatMemberResponse = await fetch(`${telegramBaseApiUrl}/getChatMember?chat_id=${chat.id}&user_id=${telegramBotId}`)
+            const getChatMemberResponse = await fetch(
+                `${telegramBaseApiUrl}/getChatMember?chat_id=${chat.id}&user_id=${telegramBotId}`
+            )
 
             if (getChatMemberResponse.ok) {
                 const member: TelegramChatMemberAdministrator = (await getChatMemberResponse.json()).result
@@ -75,7 +77,9 @@ export async function handleTelegramWebhook(data: TelegramWebhookData) {
         let webhook: any
 
         try {
-            webhook = await DiscordUtils.rest.get(DiscordUtils.restRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
+            webhook = await DiscordUtils.rest.get(
+                DiscordUtils.restRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)
+            )
         } catch (err) {
             Logger.error({
                 module: 'Telegram',
@@ -87,11 +91,14 @@ export async function handleTelegramWebhook(data: TelegramWebhookData) {
 
         if (!webhook) {
             try {
-                webhook = await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
-                    body: {
-                        name: `@${data.channel_username}`
+                webhook = await DiscordUtils.rest.post(
+                    DiscordUtils.restRoutes.channelWebhooks(guildSubscription.notification_channel_id),
+                    {
+                        body: {
+                            name: `@${data.channel_username}`
+                        }
                     }
-                })
+                )
             } catch (err) {
                 Logger.error({
                     module: 'Telegram',
@@ -130,23 +137,26 @@ export async function handleTelegramWebhook(data: TelegramWebhookData) {
             content += `\n\n${mentions.join(' ')}`
         }
 
-        const files = data.file
-            ? [await MessagePayload.resolveFile(new AttachmentBuilder(Buffer.from(data.file.buffer.data), { name: `file.${data.file.type.ext}` }))]
-            : []
+        const files = data.file ? [await MessagePayload.resolveFile(Buffer.from(data.file.buffer.data))] : []
 
         if (!data.text && !files) content += `\n${data.post_link}`
 
         try {
-            const message: any = await DiscordUtils.rest.post(DiscordUtils.restRoutes.webhook(webhook.id, webhook.token), {
-                body: {
-                    content
-                },
-                files,
-                query: makeURLSearchParams({ wait: true }) as any
-            })
+            const message: any = await DiscordUtils.rest.post(
+                DiscordUtils.restRoutes.webhook(webhook.id, webhook.token),
+                {
+                    body: {
+                        content
+                    },
+                    files,
+                    query: makeURLSearchParams({ wait: true }) as any
+                }
+            )
 
             if (guildSubscription.options.includes('CROSSPOST_MESSAGE')) {
-                await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelMessageCrosspost(message.channel_id, message.id))
+                await DiscordUtils.rest.post(
+                    DiscordUtils.restRoutes.channelMessageCrosspost(message.channel_id, message.id)
+                )
             }
 
             if (guildSubscription.options.includes('CREATE_THREAD')) {

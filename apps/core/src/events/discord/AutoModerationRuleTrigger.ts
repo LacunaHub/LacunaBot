@@ -1,6 +1,6 @@
+import Lacuna from '@/internals/Lacuna.js'
+import DAME, { type GuildTextChannel } from '@/modules/DAME/index.js'
 import { AutoModerationRule, GuildMember } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import DAME, { GuildTextChannel } from '../../modules/DAME'
 
 export default {
     name: 'autoModerationRuleTrigger',

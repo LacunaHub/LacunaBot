@@ -1,8 +1,8 @@
-import { ServerDocument, ServerWebPageCategory, ServerWebPageSocialLinkType } from '@/database/schemas/Servers'
-import { APIGuild, makeURLSearchParams } from 'discord.js'
-import { Context } from 'koa'
-import APIError from '../../../utility/APIError'
-import DiscordUtils from '../../../utility/DiscordUtils'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import { type ServerDocument, ServerWebPageCategory, ServerWebPageSocialLinkType } from '@/database/schemas/Servers.js'
+import { type APIGuild, makeURLSearchParams } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function getGuild(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -16,7 +16,7 @@ export default async function getGuild(ctx: Context) {
         ctx.throw(500, new APIError(5021))
     }
 
-    const webPage = {
+    const webPage: Record<string, any> = {
         categories: [],
         summary: null,
         description: null,
@@ -27,7 +27,10 @@ export default async function getGuild(ctx: Context) {
         webPage.categories = server.web_page.categories.map(v => ServerWebPageCategory[v])
         webPage.summary = server.web_page.summary
         webPage.description = server.web_page.description
-        webPage.social_links = server.web_page.social_links.map(v => ({ type: ServerWebPageSocialLinkType[v.type], url: v.url }))
+        webPage.social_links = server.web_page.social_links.map(v => ({
+            type: ServerWebPageSocialLinkType[v.type],
+            url: v.url
+        }))
     }
 
     ctx.status = 200
@@ -36,7 +39,9 @@ export default async function getGuild(ctx: Context) {
         name: guild.name,
         icon_url: guild.icon ? DiscordUtils.rest.cdn.icon(guild.id, guild.icon, { size: 256 }) : null,
         splash_url: guild.splash ? DiscordUtils.rest.cdn.splash(guild.id, guild.splash, { size: 1024 }) : null,
-        discovery_splash_url: guild.discovery_splash ? DiscordUtils.rest.cdn.discoverySplash(guild.id, guild.discovery_splash, { size: 1024 }) : null,
+        discovery_splash_url: guild.discovery_splash
+            ? DiscordUtils.rest.cdn.discoverySplash(guild.id, guild.discovery_splash, { size: 1024 })
+            : null,
         owner_id: guild.owner_id,
         role_count: guild.roles.length,
         emoji_count: guild.emojis.length,

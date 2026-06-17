@@ -1,18 +1,18 @@
 import koaCORS from '@koa/cors'
 import Koa from 'koa'
-import koaBody from 'koa-body'
+import { koaBody } from 'koa-body'
 import koaJSON from 'koa-json'
 import koaPinoLogger from 'koa-pino-logger'
-import database from '../database'
-import ReleaseNotesLogger from './modules/ReleaseNotesLogger'
-import ReportsChecker from './modules/ReportsChecker'
-import { handleDiamondGuilds } from './modules/billing/utility/DiamondGuild'
-import { handlePatrons } from './modules/billing/utility/Patron'
-import YouTubeAlerts from './modules/social-alerts/YouTubeAlerts'
-import routes from './routes'
-import Logger from './utility/Logger'
-import { brokerClient, lava } from './utility/Managers'
-import { passKnownReferrers } from './utility/Utils'
+import database from '../database/index.js'
+import ReleaseNotesLogger from './modules/ReleaseNotesLogger.js'
+import ReportsChecker from './modules/ReportsChecker.js'
+import { handleDiamondGuilds } from './modules/billing/utility/DiamondGuild.js'
+import { handlePatrons } from './modules/billing/utility/Patron.js'
+import YouTubeAlerts from './modules/social-alerts/YouTubeAlerts.js'
+import routes from './routes/index.js'
+import Logger from './utility/Logger.js'
+import { brokerClient, lava } from './utility/Managers.js'
+import { passKnownReferrers } from './utility/Utils.js'
 
 const app = new Koa()
 
@@ -28,8 +28,9 @@ app.use(async (ctx, next) => {
     try {
         await next()
     } catch (err) {
-        ctx.status = err.status || 500
-        ctx.body = { code: err.code || 1, message: err.message || 'Unknown error' }
+        const error = err as any
+        ctx.status = error.status || 500
+        ctx.body = { code: error.code || 1, message: error.message || 'Unknown error' }
 
         ctx.app.emit('error', err, ctx)
     }

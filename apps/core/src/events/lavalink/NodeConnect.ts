@@ -1,6 +1,6 @@
+import Lacuna from '@/internals/Lacuna.js'
 import { Node, Player } from '@lacunahub/lavaluna.js'
 import { BaseGuildTextChannel, BaseGuildVoiceChannel, Message } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
 
 async function handler(self: Lacuna, node: Node) {
     const guildPlayers = (await self.db.qdb.get('guildPlayers')) as any
@@ -12,7 +12,7 @@ async function handler(self: Lacuna, node: Node) {
     }
 
     for (const guildId of guildIds) {
-        let player = self.lava.nodes.getPlayer(guildId)
+        let player = self.lava!.nodes.getPlayer(guildId)
         const guild = self.guilds.cache.get(guildId)
 
         if (!guild) {
@@ -21,9 +21,9 @@ async function handler(self: Lacuna, node: Node) {
         }
 
         const guildPlayer = guildPlayers[guildId]
-        const voiceChannel = guild.channels.cache.get(guildPlayer.voiceChannelId) as BaseGuildVoiceChannel,
-            textChannel = guild.channels.cache.get(guildPlayer.textChannelId) as BaseGuildTextChannel
-        let message: Message
+        const voiceChannel = guild.channels.cache.get(guildPlayer.voiceChannelId) as unknown as BaseGuildVoiceChannel,
+            textChannel = guild.channels.cache.get(guildPlayer.textChannelId) as unknown as BaseGuildTextChannel
+        let message!: Message
 
         if (textChannel?.messages) {
             try {
@@ -38,7 +38,7 @@ async function handler(self: Lacuna, node: Node) {
             continue
         }
 
-        player = self.lava.nodes.createPlayer({
+        player = self.lava!.nodes.createPlayer({
             guildId: guild.id,
             voiceChannelId: voiceChannel.id,
             textChannelId: textChannel.id,

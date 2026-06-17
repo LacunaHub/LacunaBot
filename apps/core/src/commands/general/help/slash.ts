@@ -1,4 +1,12 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import {
+    CommandGroup,
+    type CommandOption,
+    type CommandSubcommandGroupOption,
+    type CommandSubcommandOption
+} from '@/internals/structures/Command.js'
+import { commandOptionTypes } from '@/internals/utility/Constants.js'
 import {
     ActionRowBuilder,
     ApplicationCommandOptionType,
@@ -8,14 +16,11 @@ import {
     EmbedBuilder,
     PermissionsBitField
 } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import { CommandGroup, CommandOption, CommandSubcommandGroupOption, CommandSubcommandOption } from '../../../internals/structures/Command'
-import { commandOptionTypes } from '../../../internals/utility/Constants'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const commandName: string = interaction.options?.getString('command')
+    const commandName: string = interaction.options?.getString('command')!
 
     if (!commandName) {
         const commands = self.commands.filter(c => !c.private && !(c.premium && !server.premium.available))
@@ -48,19 +53,37 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 .setStyle(ButtonStyle.Link)
                 .setLabel(t('Commands.HelpCommand.Texts.ControlPanel'))
                 .setURL(`${process.env.LCN_WEBSITE_URL}/guilds/${interaction.guildId}/settings`),
-            new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(t('Components.Header.Docs')).setURL(`https://docs.${process.env.LCN_ROOT_DOMAIN}`)
+            new ButtonBuilder()
+                .setStyle(ButtonStyle.Link)
+                .setLabel(t('Components.Header.Docs'))
+                .setURL(`https://docs.lacunabot.com`)
         )
 
         if (categories.general.size)
-            embedFields.push({ name: t('Commands.Categories.General'), value: categories.general.map(v => `\`${v.name}\``).join(', ') })
+            embedFields.push({
+                name: t('Commands.Categories.General'),
+                value: categories.general.map(v => `\`${v.name}\``).join(', ')
+            })
         if (categories.moderation.size)
-            embedFields.push({ name: t('Commands.Categories.Moderation'), value: categories.moderation.map(v => `\`${v.name}\``).join(', ') })
+            embedFields.push({
+                name: t('Commands.Categories.Moderation'),
+                value: categories.moderation.map(v => `\`${v.name}\``).join(', ')
+            })
         if (categories.music.size)
-            embedFields.push({ name: t('Commands.Categories.Music'), value: categories.music.map(v => `\`${v.name}\``).join(', ') })
+            embedFields.push({
+                name: t('Commands.Categories.Music'),
+                value: categories.music.map(v => `\`${v.name}\``).join(', ')
+            })
         if (categories.utility.size)
-            embedFields.push({ name: t('Commands.Categories.Useful'), value: categories.utility.map(v => `\`${v.name}\``).join(', ') })
+            embedFields.push({
+                name: t('Commands.Categories.Useful'),
+                value: categories.utility.map(v => `\`${v.name}\``).join(', ')
+            })
         if (customCommand.length)
-            embedFields.push({ name: t('Commands.Categories.Custom'), value: customCommand.map(v => `\`${v.name}\``).join(', ') })
+            embedFields.push({
+                name: t('Commands.Categories.Custom'),
+                value: customCommand.map(v => `\`${v.name}\``).join(', ')
+            })
 
         embed.addFields(embedFields)
 
@@ -87,7 +110,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
             if (command.selfPermissions || command.defaultMemberPermissions) {
                 const self_permissions = command.selfPermissions
-                    ? `${t('Commands.HelpCommand.Texts.CommandPermissionsForBot')}\n- ${new PermissionsBitField(BigInt(command.selfPermissions))
+                    ? `${t('Commands.HelpCommand.Texts.CommandPermissionsForBot')}\n- ${new PermissionsBitField(
+                          BigInt(command.selfPermissions)
+                      )
                           .toArray()
                           .map(p => t(`Common.DiscordPermissions.${p}`))
                           .join('\n- ')}`
@@ -102,7 +127,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     : `~~${t('Commands.HelpCommand.Texts.CommandPermissionsForAuthor')}~~`
 
                 embed.addFields([
-                    { name: t('Commands.HelpCommand.Texts.CommandRequiredPermissions'), value: `${self_permissions}\n${user_permissions}` }
+                    {
+                        name: t('Commands.HelpCommand.Texts.CommandRequiredPermissions'),
+                        value: `${self_permissions}\n${user_permissions}`
+                    }
                 ])
             }
 
@@ -111,7 +139,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     .map(v => {
                         if (v.type === ApplicationCommandOptionType.Subcommand) {
                             const args = v.options
-                                ? v.options.map(vv => `${vv.required ? '<' : '['}${t(vv.name)}${vv.required ? '>' : ']'}`).join(' ')
+                                ? v.options
+                                      .map(vv => `${vv.required ? '<' : '['}${t(vv.name)}${vv.required ? '>' : ']'}`)
+                                      .join(' ')
                                 : null
 
                             return `\`/${command.name} ${v.name}${args ? ` ${args}` : ''}\`: ${t(v.description)?.toLowerCase()}`
@@ -135,7 +165,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                                                   : t('Commands.HelpCommand.Texts.CommandArgumentOptional')
                                           }` +
                                           `\n- ${t('Commands.HelpCommand.Texts.CommandArgumentType', {
-                                              type: t(`Commands.OptionTypes.${commandOptionTypes[vv.type]}`)?.toLowerCase()
+                                              type: t(
+                                                  `Commands.OptionTypes.${(commandOptionTypes as any)[vv.type]}`
+                                              )?.toLowerCase()
                                           })}`
                                       )
                                   })
@@ -146,10 +178,15 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                     })
 
                     embed.addFields([{ name: t('Commands.HelpCommand.Texts.CommandUsage'), value: usage }])
-                    embed.addFields([...subcommands.map(v => ({ name: `${command.name} ${v.name}`, value: v.value }))])
+                    embed.addFields([...subcommands.map(v => ({ name: `${command.name} ${v.name}`, value: v.value! }))])
                 } else if (command.options.every(v => v.type === ApplicationCommandOptionType.SubcommandGroup)) {
                 } else {
-                    const args = (command.options as Exclude<CommandOption, CommandSubcommandOption | CommandSubcommandGroupOption>[])
+                    const args = (
+                        command.options as Exclude<
+                            CommandOption,
+                            CommandSubcommandOption | CommandSubcommandGroupOption
+                        >[]
+                    )
                         .map(v => {
                             return (
                                 `\`${v.required ? '<' : '['}${t(v.name)}${v.required ? '>' : ']'}\`: ${t(v.description)}` +
@@ -159,7 +196,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                                         : t('Commands.HelpCommand.Texts.CommandArgumentOptional')
                                 }` +
                                 `\n- ${t('Commands.HelpCommand.Texts.CommandArgumentType', {
-                                    type: t(`Commands.OptionTypes.${commandOptionTypes[v.type]}`)?.toLowerCase()
+                                    type: t(
+                                        `Commands.OptionTypes.${(commandOptionTypes as any)[v.type]}`
+                                    )?.toLowerCase()
                                 })}`
                             )
                         })
@@ -199,7 +238,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                                     : t('Commands.HelpCommand.Texts.CommandArgumentOptional')
                             }` +
                             `\n- ${t('Commands.HelpCommand.Texts.CommandArgumentType', {
-                                type: t(`Commands.OptionTypes.${commandOptionTypes[opt.type]}`)?.toLowerCase()
+                                type: t(`Commands.OptionTypes.${(commandOptionTypes as any)[opt.type]}`)?.toLowerCase()
                             })}`
                         )
                     })

@@ -1,4 +1,4 @@
-import Lacuna from '../Lacuna'
+import Lacuna from '@/internals/Lacuna.js'
 
 export default class Event {
     public self: Lacuna
@@ -18,7 +18,9 @@ export default class Event {
 
         this.handler = options.handler
 
-        this.once ? this.self.once(this.name, this.handler.bind(null, this.self)) : this.self.on(this.name, this.handler.bind(null, this.self))
+        this.once
+            ? this.self.once(this.name, this.handler.bind(null, this.self))
+            : this.self.on(this.name, this.handler.bind(null, this.self))
 
         this.self.events.set(this.name, this)
     }

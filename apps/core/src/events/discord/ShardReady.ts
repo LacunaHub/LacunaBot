@@ -1,7 +1,7 @@
+import Lacuna from '@/internals/Lacuna.js'
+import { Command, CommandBuildJSONType } from '@/internals/structures/Command.js'
+import RoleConnectionMetadata from '@/internals/utility/RoleConnectionMetadata.js'
 import { Events } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import { Command, CommandBuildJSONType } from '../../internals/structures/Command'
-import RoleConnectionMetadata from '../../internals/utility/RoleConnectionMetadata'
 
 const { version } = require('../../../package.json')
 
@@ -17,12 +17,18 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
                 tUk = self.i18n.t.bind(null, 'uk')
 
             const commands = [
-                ...self.commands.filter(v => v.isSlashCommand).map(v => Command.buildJSON(CommandBuildJSONType.Slash, v)),
-                ...self.commands.filter(v => v.isUserContextCommand).map(v => Command.buildJSON(CommandBuildJSONType.UserContextMenu, v)),
-                ...self.commands.filter(v => v.isMessageContextCommand).map(v => Command.buildJSON(CommandBuildJSONType.MessageContextMenu, v))
+                ...self.commands
+                    .filter(v => v.isSlashCommand)
+                    .map(v => Command.buildJSON(CommandBuildJSONType.Slash, v)),
+                ...self.commands
+                    .filter(v => v.isUserContextCommand)
+                    .map(v => Command.buildJSON(CommandBuildJSONType.UserContextMenu, v)),
+                ...self.commands
+                    .filter(v => v.isMessageContextCommand)
+                    .map(v => Command.buildJSON(CommandBuildJSONType.MessageContextMenu, v))
             ]
 
-            await self.application.commands.set(commands as any)
+            await self.application!.commands.set(commands as any)
             await self.db.qdb.set(
                 'commands',
                 self.commands
@@ -44,7 +50,7 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
                     })
             )
 
-            await self.application.editRoleConnectionMetadataRecords(
+            await self.application!.editRoleConnectionMetadataRecords(
                 RoleConnectionMetadata.map(i => {
                     return {
                         key: i.key,
@@ -67,10 +73,11 @@ const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>)
         }
 
         const emojis = self.loadEmojis(),
-            appEmojis = await self.application.emojis.fetch(),
+            appEmojis = await self.application!.emojis.fetch(),
             emojisToCreate = emojis.filter(v => !appEmojis.some(vv => v.name === vv.name))
 
-        for (const emoji of emojisToCreate) await self.application.emojis.create({ name: emoji.name, attachment: emoji.image })
+        for (const emoji of emojisToCreate)
+            await self.application!.emojis.create({ name: emoji.name, attachment: emoji.image })
         self.logger.info({ count: emojisToCreate.length }, 'created application emojis')
     }
 

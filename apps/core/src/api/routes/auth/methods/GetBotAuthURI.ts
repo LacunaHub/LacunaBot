@@ -1,6 +1,6 @@
+import { oauth2 } from '@/api/utility/DiscordOAuth2.js'
 import { PermissionsBitField } from 'discord.js'
-import { Context } from 'koa'
-import { oauth2 } from '../../../utility/DiscordOAuth2'
+import { type Context } from 'koa'
 
 export default async function getBotAuthURI(ctx: Context) {
     const url = new URL(oauth2.baseAuthorizationURL)

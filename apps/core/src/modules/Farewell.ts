@@ -1,8 +1,8 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { BaseGuildTextChannel, GuildMember } from 'discord.js'
-import Lacuna from '../internals/Lacuna'
-import { DirectMessages } from './DirectMessages'
-import Replacer from './Replacer'
+import { DirectMessages } from './DirectMessages.js'
+import Replacer from './Replacer.js'
 
 async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMember) {
     if (member.user.bot) return false
@@ -13,11 +13,13 @@ async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMe
                 messagePayload = await replacer.replaceTemplateMessage(server.modules.farewell.message)
 
             if (server.modules.farewell.format === 'CHANNEL') {
-                const channel = member.guild.channels.cache.get(server.modules.farewell.channel_id) as BaseGuildTextChannel
+                const channel = member.guild.channels.cache.get(
+                    server.modules.farewell.channel_id
+                ) as BaseGuildTextChannel
 
                 channel && (await channel.send(messagePayload))
             } else if (server.modules.farewell.format === 'DM') {
-                await DirectMessages.send(self, member, messagePayload)
+                DirectMessages.send(self, member, messagePayload)
             }
 
             self.emit('moduleExecution', {
@@ -59,7 +61,9 @@ async function saveNicknameAndRoles(self: Lacuna, server: ServerDocument, member
                 {
                     $set: {
                         'restoring_data.$.timestamp': Date.now(),
-                        'restoring_data.$.roles': member.roles.cache.filter(i => i.id !== member.guild.id).map(i => i.id),
+                        'restoring_data.$.roles': member.roles.cache
+                            .filter(i => i.id !== member.guild.id)
+                            .map(i => i.id),
                         'restoring_data.$.nickname': member.nickname
                     }
                 }

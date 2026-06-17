@@ -1,6 +1,6 @@
-import { Document, FilterQuery, Model, Schema, model } from 'mongoose'
+import mongoose, { type FilterQuery } from 'mongoose'
 
-const schema = new Schema<ServerDocument, ServerModel>(
+const schema = new mongoose.Schema<ServerDocument, ServerModel>(
     {
         _id: { type: String },
         locale: { type: String, default: 'en' },
@@ -852,9 +852,9 @@ schema.static(
     }
 )
 
-export default model<ServerDocument, ServerModel>('servers', schema)
+export default mongoose.model<ServerDocument, ServerModel>('servers', schema)
 
-export interface ServerDocument extends Document {
+export interface ServerDocument extends mongoose.Document {
     _id: string
     locale: ServerLocale
     premium: ServerPremium
@@ -870,8 +870,11 @@ export interface ServerDocument extends Document {
     logs: ServerLogEntry[]
 }
 
-export interface ServerModel extends Model<ServerDocument> {
-    fetch(filter: FilterQuery<ServerDocument>, defaultValues?: Partial<ServerDocument>): Promise<ServerDocument>
+export interface ServerModel extends mongoose.Model<ServerDocument> {
+    fetch(
+        filter: mongoose.FilterQuery<ServerDocument>,
+        defaultValues?: Partial<ServerDocument>
+    ): Promise<ServerDocument>
 }
 
 export type ServerLocale = 'en' | 'ru'
@@ -964,31 +967,31 @@ export interface ServerModerationCaseLogType {
 }
 
 export interface ServerMessageTemplate {
-    content: string
+    content: string | null
     embed: ServerMessageTemplateEmbed
 }
 
 export interface ServerMessageTemplateEmbed {
     active: boolean
-    title?: string
-    description?: string
-    url?: string
-    timestamp?: string
-    color?: string
+    title: string | null
+    description: string | null
+    url: string | null
+    timestamp: string | null
+    color: string | null
     footer: {
-        text?: string
-        icon_url?: string
+        text: string | null
+        icon_url: string | null
     }
     image: {
-        url?: string
+        url: string | null
     }
     thumbnail: {
-        url?: string
+        url: string | null
     }
     author: {
-        name?: string
-        url?: string
-        icon_url?: string
+        name: string | null
+        url: string | null
+        icon_url: string | null
     }
     fields: ServerMessageTemplateEmbedFields[]
 }
@@ -1846,7 +1849,7 @@ export interface ServerModulesCustomCommandComponentConditionCompareValues {
     operator: ServerModulesCustomCommandComponentConditionCompareValuesOperators
     left: string
     right: string
-    false_reply?: ServerMessageTemplate
+    false_reply: ServerMessageTemplate | null
 }
 
 export enum ServerModulesCustomCommandComponentConditionCompareValuesOptions {

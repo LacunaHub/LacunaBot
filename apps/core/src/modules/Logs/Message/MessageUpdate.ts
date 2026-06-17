@@ -1,18 +1,26 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { DiffMatchPatch } from '@/internals/utility/DiffMatchPatch.js'
+import { truncateString } from '@/internals/utility/Utils.js'
 import { BaseGuildTextChannel, EmbedBuilder, Message, escapeMarkdown } from 'discord.js'
-import { isRateLimited, sendLog } from '..'
-import Lacuna from '../../../internals/Lacuna'
-import { DiffMatchPatch } from '../../../internals/utility/DiffMatchPatch'
-import { truncateString } from '../../../internals/utility/Utils'
+import { isRateLimited, sendLog } from '../index.js'
 
-export default async function (self: Lacuna, server: ServerDocument, before: Message, message: Message): Promise<boolean> {
+export default async function (
+    self: Lacuna,
+    server: ServerDocument,
+    before: Message,
+    message: Message<true>
+): Promise<boolean> {
     if (server.moderation.logs.types.message_update.active) {
         if (isRateLimited(server._id, server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
-        const logChannel = message.guild.channels.cache.get(server.moderation.logs.types.message_update.channel_id) as BaseGuildTextChannel
-        const isOk = logChannel && logChannel.permissionsFor(message.guild.members.me).has(self.PermissionFlags.ManageWebhooks)
+        const logChannel = message.guild.channels.cache.get(
+            server.moderation.logs.types.message_update.channel_id!
+        ) as BaseGuildTextChannel
+        const isOk =
+            logChannel && logChannel.permissionsFor(message.guild.members.me!).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk && before.content !== message.content) {
             const contentBefore = truncateString(escapeMarkdown(before.content ?? ''), 800),
@@ -24,7 +32,11 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
             const embed = new EmbedBuilder()
                 .setTitle(t('Logs.MessageUpdated'))
                 .addFields([
-                    { name: t('Logs.MessageAuthor'), value: `<@${message.author.id}> (${message.author.username})`, inline: true },
+                    {
+                        name: t('Logs.MessageAuthor'),
+                        value: `<@${message.author.id}> (${message.author.username})`,
+                        inline: true
+                    },
                     { name: t('Commands.OptionTypes.Channel'), value: `<#${message.channel.id}>`, inline: true },
                     { name: t('Logs.MessageContent'), value: diff || `\`[${t('Commands.OptionTypes.Attachment')}]\`` }
                 ])
@@ -37,7 +49,12 @@ export default async function (self: Lacuna, server: ServerDocument, before: Mes
             try {
                 await sendLog(self, server, logChannel.id, { embeds: [embed] })
             } catch (err) {
-                self.logger.error({ module: 'LogsMessageUpdate', action: 'SendMessageViaWebhook', err, guildId: message.guildId })
+                self.logger.error({
+                    module: 'LogsMessageUpdate',
+                    action: 'SendMessageViaWebhook',
+                    err,
+                    guildId: message.guildId
+                })
 
                 return false
             }

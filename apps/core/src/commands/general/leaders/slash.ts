@@ -1,24 +1,38 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { UserLevel, UserWallet } from '@/database/schemas/Users'
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message } from 'discord.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type UserLevel, type UserWallet } from '@/database/schemas/Users.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { chunkArray } from '@/internals/utility/Utils.js'
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ChatInputCommandInteraction,
+    ComponentType,
+    EmbedBuilder,
+    Message,
+    type APIEmbedField
+} from 'discord.js'
 import numbro from 'numbro'
-import Lacuna from '../../../internals/Lacuna'
-import { chunkArray } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
     const locale = self.i18n.locale(server.locale)
 
     let sorting = interaction.options?.getInteger('sorting') ?? 1
-    let page: number = interaction.options?.getInteger('page') ? interaction.options.getInteger('page') - 1 : 0
+    let page: number = interaction.options?.getInteger('page') ? interaction.options.getInteger('page')! - 1 : 0
 
-    const fields = []
+    const fields: APIEmbedField[][] = []
     let chunks: Array<UserLevel[] | UserWallet[]> = []
-    const sorting_choices = [locale.Commands.LeadersCommand.Options.Sorting.ChoiceLevel, locale.Commands.LeadersCommand.Options.Sorting.ChoiceBalance]
+    const sorting_choices = [
+        locale.Commands.LeadersCommand.Options.Sorting.ChoiceLevel,
+        locale.Commands.LeadersCommand.Options.Sorting.ChoiceBalance
+    ]
 
     if (sorting > sorting_choices.length || sorting < 1) sorting = 1
 
-    const embed = new EmbedBuilder().setTitle(t('Commands.LeadersCommand.Texts.ServerLeadersBy', { sortBy: sorting_choices[sorting - 1] }))
+    const embed = new EmbedBuilder().setTitle(
+        t('Commands.LeadersCommand.Texts.ServerLeadersBy', { sortBy: sorting_choices[sorting - 1] })
+    )
 
     await interaction.deferReply({ ephemeral: true })
 
@@ -48,23 +62,30 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        const sorted = activities.sort((a, b) => b.experience.total - a.experience.total)
+        const sorted = activities.sort((a, b) => Number(b.experience?.total) - Number(a.experience?.total))
         chunks = chunkArray(sorted, 9)
 
         for (const chunk of chunks) {
-            const current = []
+            const current: APIEmbedField[] = []
 
             for (const level of chunk as UserLevel[]) {
                 const index = sorted.indexOf(level as any)
 
                 const currentXp =
                     level.experience.current >= 1000
-                        ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 1 }).toUpperCase()
+                        ? // @ts-expect-error
+                          numbro(Math.floor(level.experience.current))
+                              .format({ average: true, mantissa: 1 })
+                              .toUpperCase()
                         : level.experience.current.toFixed(1)
                 const totalXp =
                     level.experience.total >= 1000
-                        ? numbro(Math.floor(level.experience.total)).format({ average: true, mantissa: 1 }).toUpperCase()
+                        ? // @ts-expect-error
+                          numbro(Math.floor(level.experience.total))
+                              .format({ average: true, mantissa: 1 })
+                              .toUpperCase()
                         : level.experience.total.toFixed(1)
+                // @ts-expect-error
                 const voiceTime = numbro(level.activity.total_voice_time).format({ output: 'time' })
 
                 current.push({
@@ -91,10 +112,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        const activities = (await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId })).map(i => ({
-            user: { id: i._id, ...i.user },
-            ...i.activities.wallets.find(i => i.guild_id === interaction.guildId)
-        }))
+        const activities = (await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId })).map(
+            i => ({
+                user: { id: i._id, ...i.user },
+                ...i.activities.wallets.find(i => i.guild_id === interaction.guildId)
+            })
+        )
 
         if (!activities?.length) {
             await interaction.editReply({
@@ -106,11 +129,15 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        const sorted = activities.sort((a, b) => b.currencies.reduce((x, y) => x + y.amount, 0) - a.currencies.reduce((x, y) => x + y.amount, 0))
+        const sorted = activities.sort(
+            (a, b) =>
+                Number(b.currencies?.reduce((x, y) => x + y.amount, 0)) -
+                Number(a.currencies?.reduce((x, y) => x + y.amount, 0))
+        )
         chunks = chunkArray(sorted, 9)
 
         for (const chunk of chunks) {
-            const current = []
+            const current: APIEmbedField[] = []
 
             for (const wallet of chunk as UserWallet[]) {
                 const index = sorted.indexOf(wallet as any)
@@ -152,10 +179,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             .setURL(`${process.env.LCN_WEBSITE_URL}/guilds/${interaction.guildId}/leaders`)
     )
 
-    const field = fields[page]
+    const field = fields[page]!
 
     const message = (await interaction.editReply({
-        embeds: [embed.setFields(field).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
+        embeds: [
+            embed
+                .setFields(field)
+                .setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })
+        ],
         components: [row]
     })) as Message
 
@@ -176,10 +207,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
 
         await i.deferUpdate()
-        const field = fields[page]
+        const field = fields[page]!
 
         await i.editReply({
-            embeds: [embed.setFields(field).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
+            embeds: [
+                embed
+                    .setFields(field)
+                    .setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })
+            ],
             components: [row]
         })
 

@@ -3,6 +3,7 @@ export default class APIError extends Error {
 
     constructor(code?: number, message?: string) {
         code = code ?? 1
+        // @ts-ignore
         message = message ?? apiErrors[code] ?? 'Unknown error'
 
         super(message)

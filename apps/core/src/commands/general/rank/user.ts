@@ -1,9 +1,13 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { generateRankCard } from '@/modules/Levels.js'
 import { AttachmentBuilder, UserContextMenuCommandInteraction } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import { generateRankCard } from '../../../modules/Levels'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: UserContextMenuCommandInteraction<'cached'>) => {
+export default async (
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: UserContextMenuCommandInteraction<'cached'>
+) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     if (!server.modules.levels.active && !server.modules.levels.voice) {

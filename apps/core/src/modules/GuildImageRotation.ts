@@ -1,20 +1,24 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { Guild, GuildMember } from 'discord.js'
-import Lacuna from '../internals/Lacuna'
-import Replacer from './Replacer'
+import Replacer from './Replacer.js'
 
 async function rotateBanner(self: Lacuna, server: ServerDocument, guild: Guild, member?: GuildMember) {
     if (!server.modules.guild_image_rotation.banner.active) return false
 
     const rotationThrottle = server.premium.available ? 1000 * 60 * 2 : 1000 * 60 * 60
 
-    if (rotationThrottle > Date.now() - server.modules.guild_image_rotation.banner.last_updated_timestamp) return false
+    if (rotationThrottle > Date.now() - Number(server.modules.guild_image_rotation.banner.last_updated_timestamp))
+        return false
 
     try {
-        const replacer = new Replacer(server.premium.available, { guild, member }),
-            { files } = await replacer.replaceTemplateMessage({ content: '', image: server.modules.guild_image_rotation.banner.image })
+        const replacer = new Replacer(server.premium.available, { guild, member } as any),
+            { files } = await replacer.replaceTemplateMessage({
+                content: '',
+                image: server.modules.guild_image_rotation.banner.image
+            } as any)
 
-        await guild.setBanner(files[0].attachment as Buffer, 'Banner Rotation')
+        await guild.setBanner(files![0]!.attachment as Buffer, 'Banner Rotation')
         await self.db.servers.updateOne(
             { _id: guild.id },
             {

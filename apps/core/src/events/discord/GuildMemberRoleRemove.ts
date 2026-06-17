@@ -1,7 +1,7 @@
-import { ServerModulesAutomationTriggers } from '@/database/schemas/Servers'
+import { ServerModulesAutomationTriggers } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import Automation from '@/modules/custom-behavior/Automation.js'
 import { GuildMember, Role } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import Automation from '../../modules/custom-behavior/Automation'
 
 const handler = async (self: Lacuna, member: GuildMember, roles: Role[]) => {
     const server = await self.db.servers.fetch({ _id: member.guild.id })

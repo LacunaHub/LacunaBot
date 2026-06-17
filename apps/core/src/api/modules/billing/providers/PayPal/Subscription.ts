@@ -1,9 +1,9 @@
-import database, { Product } from '@/database'
-import { PaymentAmount, PaymentStatus, PaymentType } from '@/database/schemas/Payments'
-import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
+import database, { type Product } from '@/database/index.js'
+import { type PaymentAmount, PaymentStatus, PaymentType } from '@/database/schemas/Payments.js'
+import { type Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
 import fetch from 'node-fetch'
-import { HATEOASLink, PayPalAPI, SubscriptionPlans } from '.'
-import { PaymentData } from '../..'
+import { type PaymentData } from '../../index.js'
+import { type HATEOASLink, PayPalAPI, SubscriptionPlans } from './index.js'
 
 export class PayPalSubscription {
     public paymentId: Snowflake
@@ -72,7 +72,7 @@ export class PayPalSubscription {
 
             return await response.json()
         } catch (err) {
-            throw new Error(err)
+            throw new Error(err as any)
         }
     }
 }

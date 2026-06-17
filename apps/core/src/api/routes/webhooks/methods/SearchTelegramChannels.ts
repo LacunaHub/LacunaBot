@@ -1,7 +1,7 @@
-import { Context } from 'koa'
-import database from '../../../../database'
-import { searchChannels } from '../../../modules/social-alerts/TelegramAlerts'
-import APIError from '../../../utility/APIError'
+import { searchChannels } from '@/api/modules/social-alerts/TelegramAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
+import { type Context } from 'koa'
 
 export default async function searchTelegramChannels(ctx: Context) {
     const guildId = ctx.query.gid as string
@@ -16,7 +16,7 @@ export default async function searchTelegramChannels(ctx: Context) {
     }
 
     const channel = await searchChannels(query)
-    const added = server.modules.subscriptions.telegram.some(i => i.channel_id === channel.id)
+    const added = server.modules.subscriptions.telegram.some(i => i.channel_id === channel?.id)
 
     ctx.status = 200
     ctx.body = channel && !added ? [channel] : []

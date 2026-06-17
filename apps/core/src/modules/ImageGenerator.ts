@@ -1,8 +1,8 @@
-import { ServerMessageTemplateImage } from '@/database/schemas/Servers'
-import Logger from '@/utility/Logger'
-import { SKRSContext2D as CanvasRenderingContext2D, Image, createCanvas, loadImage } from '@napi-rs/canvas'
-import database from '../database'
-import { capitalizeFirstLetter } from '../internals/utility/Utils'
+import database from '@/database/index.js'
+import { type ServerMessageTemplateImage } from '@/database/schemas/Servers.js'
+import { capitalizeFirstLetter } from '@/internals/utility/Utils.js'
+import Logger from '@/utility/Logger.js'
+import { type SKRSContext2D as CanvasRenderingContext2D, Image, createCanvas, loadImage } from '@napi-rs/canvas'
 
 export const borderRadiuses = {
     none: 0,
@@ -37,13 +37,23 @@ export async function generateImage(image: ServerMessageTemplateImage) {
 
     ctx.save()
 
-    ctx.fillStyle = image.background.color
-    ctx.strokeStyle = image.background.color
+    ctx.fillStyle = String(image.background.color)
+    ctx.strokeStyle = String(image.background.color)
     ctx.fillRect(image.width, image.height, image.width, image.height)
     ctx.lineJoin = 'round'
     ctx.lineWidth = borderRadiuses.lg
-    ctx.strokeRect(borderRadiuses.lg / 2, borderRadiuses.lg / 2, image.width - borderRadiuses.lg, image.height - borderRadiuses.lg)
-    ctx.fillRect(borderRadiuses.lg / 2, borderRadiuses.lg / 2, image.width - borderRadiuses.lg, image.height - borderRadiuses.lg)
+    ctx.strokeRect(
+        borderRadiuses.lg / 2,
+        borderRadiuses.lg / 2,
+        image.width - borderRadiuses.lg,
+        image.height - borderRadiuses.lg
+    )
+    ctx.fillRect(
+        borderRadiuses.lg / 2,
+        borderRadiuses.lg / 2,
+        image.width - borderRadiuses.lg,
+        image.height - borderRadiuses.lg
+    )
 
     const { allowedImageHosts } = await database.getInternalData()
 
@@ -102,7 +112,14 @@ export async function generateImage(image: ServerMessageTemplateImage) {
                     ctx.closePath()
                     ctx.clip()
                 } else {
-                    roundImage(ctx, element.posX, element.posY, element.width, element.height, borderRadiuses[element.border_radius])
+                    roundImage(
+                        ctx,
+                        element.posX,
+                        element.posY,
+                        element.width,
+                        element.height,
+                        borderRadiuses[element.border_radius]
+                    )
                     ctx.clip()
                 }
 
@@ -162,7 +179,14 @@ export async function generateImage(image: ServerMessageTemplateImage) {
     }
 }
 
-export function roundImage(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
+export function roundImage(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number
+) {
     ctx.beginPath()
     ctx.moveTo(x + radius, y)
     ctx.lineTo(x + width - radius, y)
@@ -176,7 +200,16 @@ export function roundImage(ctx: CanvasRenderingContext2D, x: number, y: number, 
     ctx.closePath()
 }
 
-function drawImageProp(ctx: CanvasRenderingContext2D, img: Image, x: number, y: number, w: number, h: number, offsetX?: number, offsetY?: number) {
+function drawImageProp(
+    ctx: CanvasRenderingContext2D,
+    img: Image,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    offsetX?: number,
+    offsetY?: number
+) {
     if (arguments.length === 2) {
         x = y = 0
         w = ctx.canvas.width
@@ -227,40 +260,47 @@ function drawImageProp(ctx: CanvasRenderingContext2D, img: Image, x: number, y: 
     ctx.drawImage(img, cx, cy, cw, ch, x, y, w, h)
 }
 
-function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
-    // First, start by splitting all of our text into words, but splitting it into an array split by spaces
-    let words = text.split(' ')
-    let line = '' // This will store the text of the current line
-    let testLine = '' // This will store the text when we add a word, to test if it's too long
-    let lineArray = [] // This is an array of lines, which the function will return
+// function wrapText(
+//     ctx: CanvasRenderingContext2D,
+//     text: string,
+//     x: number,
+//     y: number,
+//     maxWidth: number,
+//     lineHeight: number
+// ) {
+//     // First, start by splitting all of our text into words, but splitting it into an array split by spaces
+//     let words = text.split(' ')
+//     let line = '' // This will store the text of the current line
+//     let testLine = '' // This will store the text when we add a word, to test if it's too long
+//     let lineArray = [] // This is an array of lines, which the function will return
 
-    // Lets iterate over each word
-    for (var n = 0; n < words.length; n++) {
-        // Create a test line, and measure it..
-        testLine += `${words[n]} `
-        let metrics = ctx.measureText(testLine)
-        let testWidth = metrics.width
-        // If the width of this test line is more than the max width
-        if (testWidth > maxWidth && n > 0) {
-            // Then the line is finished, push the current line into "lineArray"
-            lineArray.push([line, x, y])
-            // Increase the line height, so a new line is started
-            y += lineHeight
-            // Update line and test line to use this word as the first word on the next line
-            line = `${words[n]} `
-            testLine = `${words[n]} `
-        } else {
-            // If the test line is still less than the max width, then add the word to the current line
-            line += `${words[n]} `
-        }
-        // If we never reach the full max width, then there is only one line.. so push it into the lineArray so we return something
-        if (n === words.length - 1) {
-            lineArray.push([line, x, y])
-        }
-    }
-    // Return the line array
-    return lineArray
-}
+//     // Lets iterate over each word
+//     for (var n = 0; n < words.length; n++) {
+//         // Create a test line, and measure it..
+//         testLine += `${words[n]} `
+//         let metrics = ctx.measureText(testLine)
+//         let testWidth = metrics.width
+//         // If the width of this test line is more than the max width
+//         if (testWidth > maxWidth && n > 0) {
+//             // Then the line is finished, push the current line into "lineArray"
+//             lineArray.push([line, x, y])
+//             // Increase the line height, so a new line is started
+//             y += lineHeight
+//             // Update line and test line to use this word as the first word on the next line
+//             line = `${words[n]} `
+//             testLine = `${words[n]} `
+//         } else {
+//             // If the test line is still less than the max width, then add the word to the current line
+//             line += `${words[n]} `
+//         }
+//         // If we never reach the full max width, then there is only one line.. so push it into the lineArray so we return something
+//         if (n === words.length - 1) {
+//             lineArray.push([line, x, y])
+//         }
+//     }
+//     // Return the line array
+//     return lineArray
+// }
 
 export function fittingString(ctx: CanvasRenderingContext2D, string: string, maxWidth: number) {
     let width = ctx.measureText(string).width

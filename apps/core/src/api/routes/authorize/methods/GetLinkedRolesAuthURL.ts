@@ -1,6 +1,6 @@
+import { oauth2 } from '@/api/utility/DiscordOAuth2.js'
 import { OAuth2Scopes } from 'discord.js'
-import { Context } from 'koa'
-import { oauth2 } from '../../../utility/DiscordOAuth2'
+import { type Context } from 'koa'
 
 export default async function getLinkedRolesAuthURL(ctx: Context) {
     const { url, state } = oauth2.getOAuthURL(

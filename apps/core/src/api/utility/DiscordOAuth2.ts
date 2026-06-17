@@ -1,12 +1,12 @@
 import { randomUUID } from 'crypto'
 import {
-    APIApplicationRoleConnection,
+    type APIApplicationRoleConnection,
     OAuth2Scopes,
-    RESTAPIPartialCurrentUserGuild,
-    RESTGetAPICurrentUserResult,
-    RESTGetAPIOAuth2CurrentAuthorizationResult,
-    RESTPostOAuth2AccessTokenResult,
-    RESTPostOAuth2RefreshTokenResult
+    type RESTAPIPartialCurrentUserGuild,
+    type RESTGetAPICurrentUserResult,
+    type RESTGetAPIOAuth2CurrentAuthorizationResult,
+    type RESTPostOAuth2AccessTokenResult,
+    type RESTPostOAuth2RefreshTokenResult
 } from 'discord.js'
 import fetch from 'node-fetch'
 
@@ -70,7 +70,7 @@ export class DiscordOAuth2 {
 
             return await response.json()
         } catch (err) {
-            throw new Error(err)
+            throw new Error(err as any)
         }
     }
 
@@ -97,7 +97,7 @@ export class DiscordOAuth2 {
 
             return await response.json()
         } catch (err) {
-            throw new Error(err)
+            throw new Error(err as any)
         }
     }
 
@@ -116,7 +116,7 @@ export class DiscordOAuth2 {
 
             return await response.json()
         } catch (err) {
-            throw new Error(err)
+            throw new Error(err as any)
         }
     }
 
@@ -134,7 +134,7 @@ export class DiscordOAuth2 {
 
             return await response.json()
         } catch (err) {
-            throw new Error(err)
+            throw new Error(err as any)
         }
     }
 
@@ -154,7 +154,7 @@ export class DiscordOAuth2 {
 
             return await response.json()
         } catch (err) {
-            throw new Error(err)
+            throw new Error(err as any)
         }
     }
 
@@ -163,14 +163,17 @@ export class DiscordOAuth2 {
         roleConnection: Partial<APIApplicationRoleConnection>
     ): Promise<APIApplicationRoleConnection> {
         try {
-            const response = await fetch(`https://discord.com/api/users/@me/applications/${this.clientId}/role-connection`, {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(roleConnection)
-            })
+            const response = await fetch(
+                `https://discord.com/api/users/@me/applications/${this.clientId}/role-connection`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(roleConnection)
+                }
+            )
 
             if (!response.ok) {
                 throw new Error(`(${response.status} ${response.statusText}) Failed to update user role connection`)
@@ -178,9 +181,9 @@ export class DiscordOAuth2 {
 
             return await response.json()
         } catch (err) {
-            throw new Error(err)
+            throw new Error(err as any)
         }
     }
 }
 
-export const oauth2 = new DiscordOAuth2(process.env.LCN_DISCORD_CLIENT_ID, process.env.LCN_DISCORD_CLIENT_SECRET)
+export const oauth2 = new DiscordOAuth2(process.env.LCN_DISCORD_CLIENT_ID!, process.env.LCN_DISCORD_CLIENT_SECRET!)

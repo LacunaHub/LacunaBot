@@ -1,8 +1,8 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { BaseGuildTextChannel, GuildMember } from 'discord.js'
-import Lacuna from '../internals/Lacuna'
-import { DirectMessages } from './DirectMessages'
-import Replacer from './Replacer'
+import { DirectMessages } from './DirectMessages.js'
+import Replacer from './Replacer.js'
 
 async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMember) {
     if (member.user.bot) return false
@@ -13,11 +13,13 @@ async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMe
                 messagePayload = await replacer.replaceTemplateMessage(server.modules.welcome.message)
 
             if (server.modules.welcome.format === 'CHANNEL') {
-                const channel = member.guild.channels.cache.get(server.modules.welcome.channel_id) as BaseGuildTextChannel
+                const channel = member.guild.channels.cache.get(
+                    server.modules.welcome.channel_id
+                ) as BaseGuildTextChannel
 
                 channel && (await channel.send(messagePayload))
             } else if (server.modules.welcome.format === 'DM') {
-                await DirectMessages.send(self, member, messagePayload)
+                DirectMessages.send(self, member, messagePayload)
             }
 
             self.emit('moduleExecution', {
@@ -39,7 +41,9 @@ async function addInitialRoles(self: Lacuna, server: ServerDocument, member: Gui
     if (member.user.bot) return false
 
     if (server.modules.welcome.initial_roles.active) {
-        const initialRoles = member.guild.roles.cache.filter(v => v.editable && server.modules.welcome.initial_roles.roles.includes(v.id))
+        const initialRoles = member.guild.roles.cache.filter(
+            v => v.editable && server.modules.welcome.initial_roles.roles.includes(v.id)
+        )
 
         if (initialRoles.size) {
             try {
@@ -80,7 +84,9 @@ async function restoreNicknameAndRoles(self: Lacuna, server: ServerDocument, mem
 
             if (server.modules.restoring.restore_roles && data.roles.length) {
                 const strictRoles = server.modules.restoring.strict_roles,
-                    restorableRoles = member.guild.roles.cache.filter(r => r.editable && data.roles.includes(r.id) && !strictRoles.includes(r.id))
+                    restorableRoles = member.guild.roles.cache.filter(
+                        r => r.editable && data.roles.includes(r.id) && !strictRoles.includes(r.id)
+                    )
 
                 if (restorableRoles.size) {
                     try {

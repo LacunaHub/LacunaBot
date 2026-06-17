@@ -1,13 +1,13 @@
+import { authenticate } from '@/api/utility/Authentication.js'
+import { createRateLimit } from '@/api/utility/Utils.js'
 import Router from '@koa/router'
-import { authenticate } from '../../utility/Authentication'
-import { createRateLimit } from '../../utility/Utils'
-import getMetrics from './methods/GetMetrics'
-import getPlugin from './methods/GetPlugin'
-import getPlugins from './methods/GetPlugins'
-import getProducts from './methods/GetProducts'
-import getReleaseNotes from './methods/GetReleaseNotes'
-import getState from './methods/GetState'
-import getVersion from './methods/GetVersion'
+import getMetrics from './methods/GetMetrics.js'
+import getPlugin from './methods/GetPlugin.js'
+import getPlugins from './methods/GetPlugins.js'
+import getProducts from './methods/GetProducts.js'
+import getReleaseNotes from './methods/GetReleaseNotes.js'
+import getState from './methods/GetState.js'
+import getVersion from './methods/GetVersion.js'
 
 const router = new Router({ prefix: '/common', methods: ['GET'] })
 

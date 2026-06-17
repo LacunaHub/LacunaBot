@@ -1,15 +1,15 @@
-import Logger from '@/api/utility/Logger'
-import database from '@/database'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import Logger from '@/api/utility/Logger.js'
+import database from '@/database/index.js'
+import { activePatronRoleId, supportServerId } from '@/internals/utility/Constants.js'
 import { Job, scheduleJob } from 'node-schedule'
-import { activePatronRoleId, supportServerId } from '../../../../internals/utility/Constants'
-import DiscordUtils from '../../../utility/DiscordUtils'
 
 export const patrons = new Map<string, Patron>()
 
 export class Patron {
     public userId: string
     public expiresAt: number
-    public schedule: Job
+    public schedule: Job | null
 
     constructor(userId: string, expiresAt: number | Date) {
         this.userId = userId
@@ -35,14 +35,16 @@ export class Patron {
     async expire() {
         try {
             await database.users.updateOne({ _id: this.userId }, { $set: { 'premium.available': false } })
-            await DiscordUtils.rest.delete(DiscordUtils.restRoutes.guildMemberRole(supportServerId, this.userId, activePatronRoleId))
+            await DiscordUtils.rest.delete(
+                DiscordUtils.restRoutes.guildMemberRole(supportServerId, this.userId, activePatronRoleId)
+            )
         } catch (err) {
             Logger.error({ module: 'Patron', action: 'ExpirePatronage', err })
         }
     }
 
     cancel() {
-        this.schedule.cancel()
+        this.schedule!.cancel()
         patrons.delete(this.userId)
     }
 }

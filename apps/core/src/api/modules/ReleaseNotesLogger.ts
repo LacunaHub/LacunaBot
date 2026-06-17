@@ -1,17 +1,20 @@
-import Logger from '@/api/utility/Logger'
+import Logger from '@/api/utility/Logger.js'
+import database from '@/database/index.js'
 import fetch from 'node-fetch'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
-import database from '../../database'
 
 export async function getReleaseNotes() {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/LacunaHub/LacunaDocs/master/docs/other/change-log.mdx', { method: 'GET' })
+        const response = await fetch(
+            'https://raw.githubusercontent.com/LacunaHub/LacunaDocs/master/docs/other/change-log.mdx',
+            { method: 'GET' }
+        )
 
         if (response.ok) {
             const content = await response.text(),
                 headerRegexp = /###?\s\d+\.\d+[\.\d]*/
 
-            const versions = content.match(new RegExp(headerRegexp, 'g')),
+            const versions = content.match(new RegExp(headerRegexp, 'g'))!,
                 contentParts = content.split(headerRegexp)
             const releaseNotes: ReleaseNote[] = []
 
@@ -22,7 +25,7 @@ export async function getReleaseNotes() {
 
                 releaseNotes.push({
                     version: version.replace(/###?\s/, ''),
-                    content: contentParts[i].replace(/\d+\.\d+\.20\d+/, '').trim()
+                    content: contentParts[i]!.replace(/\d+\.\d+\.20\d+/, '').trim()
                 })
             }
 

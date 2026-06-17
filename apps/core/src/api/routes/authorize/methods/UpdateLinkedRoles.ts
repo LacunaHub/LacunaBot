@@ -1,6 +1,6 @@
-import { APIUser, RESTPostOAuth2AccessTokenResult, SnowflakeUtil } from 'discord.js'
-import { Context } from 'koa'
-import { oauth2 } from '../../../utility/DiscordOAuth2'
+import { oauth2 } from '@/api/utility/DiscordOAuth2.js'
+import { type APIUser, type RESTPostOAuth2AccessTokenResult, SnowflakeUtil } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function updateLinkedRoles(ctx: Context) {
     const code = ctx.query.code as string,
@@ -8,7 +8,9 @@ export default async function updateLinkedRoles(ctx: Context) {
         savedState = ctx.cookies.get('discord_oauth_state')
 
     if (state !== savedState) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Invalid state')}`)
+        ctx.redirect(
+            `${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Invalid state')}`
+        )
 
         return
     }
@@ -20,7 +22,9 @@ export default async function updateLinkedRoles(ctx: Context) {
         exchangedCode = await oauth2.exchangeCode(code, `${process.env.LCN_API_URL}/authorize/linked-roles/callback`)
         currentUser = await oauth2.getUser(exchangedCode.access_token)
     } catch (err) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Failed to exchange code')}`)
+        ctx.redirect(
+            `${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Failed to exchange code')}`
+        )
 
         return
     }
@@ -33,7 +37,9 @@ export default async function updateLinkedRoles(ctx: Context) {
             }
         })
     } catch (err) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Failed to update role connections')}`)
+        ctx.redirect(
+            `${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Failed to update role connections')}`
+        )
 
         return
     }

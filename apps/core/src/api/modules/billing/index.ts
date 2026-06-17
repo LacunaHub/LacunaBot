@@ -1,12 +1,17 @@
-import Logger from '@/api/utility/Logger'
-import database, { DiamondProductTier, Product } from '@/database'
-import { PaymentAmount, PaymentDocument, PaymentType } from '@/database/schemas/Payments'
-import { ServerDocument } from '@/database/schemas/Servers'
-import { SubscriptionDocument, SubscriptionMetadataProduct, SubscriptionStatus, SubscriptionType } from '@/database/schemas/Subscriptions'
-import { activePatronRoleId, longTermPatronRoleId, supportServerId } from '../../../internals/utility/Constants'
-import DiscordUtils from '../../utility/DiscordUtils'
-import { DiamondGuild, diamondGuilds } from './utility/DiamondGuild'
-import { Patron, patrons } from './utility/Patron'
+import Logger from '@/api/utility/Logger.js'
+import database, { DiamondProductTier, type Product } from '@/database/index.js'
+import { type PaymentAmount, type PaymentDocument, PaymentType } from '@/database/schemas/Payments.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import {
+    type SubscriptionDocument,
+    SubscriptionMetadataProduct,
+    SubscriptionStatus,
+    SubscriptionType
+} from '@/database/schemas/Subscriptions.js'
+import { activePatronRoleId, longTermPatronRoleId, supportServerId } from '../../../internals/utility/Constants.js'
+import DiscordUtils from '../../utility/DiscordUtils.js'
+import { DiamondGuild, diamondGuilds } from './utility/DiamondGuild.js'
+import { Patron, patrons } from './utility/Patron.js'
 
 export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, options: AddDiamondOptions = {}) {
     const isPayment = 'payer_id' in bill,
@@ -14,10 +19,10 @@ export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, o
     let { server, until } = options
 
     if (!server) {
-        server = await database.servers.findOne({ _id: bill.metadata.ref_id })
+        server = await database.servers.findOne({ _id: bill.metadata.ref_id }).orFail()
     }
 
-    const [sBillType, sBillId] = server.premium.charged_via?.split(':') ?? []
+    const [sBillType, sBillId] = server!.premium.charged_via?.split(':') ?? []
 
     // if the server has diamond via subscription
     // we need to set status to "Cancelled" for it
@@ -25,7 +30,7 @@ export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, o
         const sBill = await database.subscriptions.findOne({ _id: sBillId })
 
         if (sBill) {
-            Logger.info({ guildId: server._id, billId: sBill._id }, 'cancelling diamond subscription')
+            Logger.info({ guildId: server!._id, billId: sBill._id }, 'cancelling diamond subscription')
 
             await database.subscriptions.updateOne(
                 { _id: sBill._id },
@@ -37,12 +42,12 @@ export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, o
                 }
             )
 
-            Logger.info({ guildId: server._id, billId: sBill._id }, 'diamond subscription cancelled')
+            Logger.info({ guildId: server!._id, billId: sBill._id }, 'diamond subscription cancelled')
         }
     }
 
     if (typeof until !== 'number') {
-        const date = server.premium.expires_at ? new Date(server.premium.expires_at) : new Date()
+        const date = server!.premium.expires_at ? new Date(server!.premium.expires_at) : new Date()
 
         if (isSubscription) {
             until = date.setHours(date.getHours() + 6)
@@ -53,7 +58,7 @@ export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, o
                 until = date.setMonth(date.getMonth() + 1)
             }
         } else {
-            let monthCount: number
+            let monthCount: number = 0
 
             switch (bill.metadata.tier) {
                 case DiamondProductTier.OneMonth:
@@ -71,13 +76,12 @@ export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, o
         }
     }
 
-    let billType: 'Payment' | 'Subscription'
-
+    let billType!: 'Payment' | 'Subscription'
     if (isPayment) billType = 'Payment'
     else if (isSubscription) billType = 'Subscription'
 
     await database.servers.updateOne(
-        { _id: server._id },
+        { _id: server!._id },
         {
             $set: {
                 'premium.available': true,
@@ -87,25 +91,25 @@ export async function addDiamond(bill: PaymentDocument | SubscriptionDocument, o
         }
     )
 
-    let diamondGuild = diamondGuilds.get(server._id)
+    let diamondGuild = diamondGuilds.get(server!._id)
 
     if (diamondGuild) {
-        Logger.info({ guildId: server._id }, 'renewing diamond')
+        Logger.info({ guildId: server!._id }, 'renewing diamond')
         diamondGuild.cancel()
     }
 
     if (isSubscription) {
         if (bill.type === SubscriptionType.DiscordNitroBoost) {
-            Logger.info({ guildId: server._id, billId: bill._id }, 'nitro boost verified')
+            Logger.info({ guildId: server!._id, billId: bill._id }, 'nitro boost verified')
         } else {
-            Logger.info({ guildId: server._id, billId: bill._id }, 'diamond subscription verified')
+            Logger.info({ guildId: server!._id, billId: bill._id }, 'diamond subscription verified')
         }
     } else {
-        Logger.info({ guildId: server._id, billId: bill._id }, 'diamond payed')
+        Logger.info({ guildId: server!._id, billId: bill._id }, 'diamond payed')
     }
 
-    diamondGuild = new DiamondGuild(server._id, until, bill._id, billType)
-    const patron = await addPremium(bill, until)
+    diamondGuild = new DiamondGuild(server!._id, until!, bill._id, billType)
+    const patron = await addPremium(bill, until!)
 
     return { diamondGuild, patron }
 }
@@ -116,8 +120,7 @@ export async function addPremium(bill: PaymentDocument | SubscriptionDocument, u
 
     if (isSubscription && bill.type === SubscriptionType.DiscordNitroBoost) return null
 
-    let userId: string
-
+    let userId!: string
     if (isPayment) userId = bill.payer_id
     else if (isSubscription) userId = bill.subscriber_id
 
@@ -136,7 +139,7 @@ export async function addPremium(bill: PaymentDocument | SubscriptionDocument, u
         }
     )
 
-    const user = await database.users.findOne({ _id: userId })
+    const user = await database.users.findOne({ _id: userId }).orFail()
     const rolesToAdd = [activePatronRoleId]
 
     if (user.premium.for_how_long >= 60 * 60 * 24 * 365) rolesToAdd.push(longTermPatronRoleId)

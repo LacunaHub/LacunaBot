@@ -1,14 +1,14 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import {
     ActionRow,
     BaseGuildTextChannel,
     ButtonInteraction,
     Collection,
     EmbedBuilder,
-    MessageActionRowComponent
+    type MessageActionRowComponent
 } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
-import Lacuna from '../Lacuna'
 
 export default class Giveaway {
     public self: Lacuna
@@ -20,7 +20,7 @@ export default class Giveaway {
     public participants: Collection<string, string>
     public expiresAt: Date
     public locale: string
-    public schedule: Job
+    public schedule: Job | null
 
     constructor(self: Lacuna, options: GiveawayOptions) {
         this.self = self
@@ -82,7 +82,7 @@ export default class Giveaway {
     }
 
     async delete(scheduled: boolean = true) {
-        if (!scheduled) this.schedule.cancel()
+        if (!scheduled) this.schedule!.cancel()
 
         await this.updateMessage()
         this.self.giveaways.delete(this.messageId)
@@ -91,7 +91,7 @@ export default class Giveaway {
     async getMessage() {
         try {
             const guild = this.self.guilds.cache.get(this.guildId)
-            const channel = guild?.channels?.cache?.get(this.channelId) as BaseGuildTextChannel
+            const channel = guild?.channels?.cache?.get(this.channelId) as unknown as BaseGuildTextChannel
 
             if (guild && channel?.messages) {
                 return await channel.messages.fetch({ message: this.messageId })
@@ -120,7 +120,7 @@ export default class Giveaway {
         if (!message) return false
 
         const t = this.self.i18n.t.bind(null, this.locale)
-        const embed = new EmbedBuilder(message.embeds[0].toJSON()).setColor('#EF5350')
+        const embed = new EmbedBuilder(message.embeds[0]!.toJSON()).setColor('#EF5350')
 
         if (this.participants.size) {
             const winners = this.participants.randomKey(
@@ -159,7 +159,7 @@ export default class Giveaway {
 
 export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction) {
     const [, messageId] = interaction.customId.split('-')
-    const giveaway = self.giveaways.get(messageId)
+    const giveaway = self.giveaways.get(messageId!)
 
     if (giveaway && Date.now() < giveaway.expiresAt.getTime()) {
         const t = self.i18n.t.bind(null, server.locale)
@@ -178,7 +178,7 @@ export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument
         } else {
             giveaway.participants.set(interaction.user.id, interaction.user.id)
             await self.db.servers.updateOne(
-                { _id: interaction.guild.id, 'utility.giveaways.message_id': messageId },
+                { _id: interaction.guild!.id, 'utility.giveaways.message_id': messageId },
                 {
                     $push: {
                         'utility.giveaways.$.participants': interaction.user.id
@@ -187,11 +187,13 @@ export async function onPressGiveawayButton(self: Lacuna, server: ServerDocument
             )
 
             const message = await giveaway.getMessage(),
-                rows = message.components as ActionRow<MessageActionRowComponent>[]
+                rows = message?.components as ActionRow<MessageActionRowComponent>[]
+            // @ts-ignore
             rows[0].components[0].data['emoji'] = { name: '🎉' }
+            // @ts-ignore
             rows[0].components[0].data['label'] = giveaway.participants.size.toString()
 
-            await message.edit({ components: rows })
+            await message?.edit({ components: rows })
             await interaction.reply({
                 content: `${self.staticEmojis.Check} | ${t(
                     'Commands.GiveawayCommand.SubCommands.CreateCommand.Texts.YouHaveParticipatedInGiveaway',

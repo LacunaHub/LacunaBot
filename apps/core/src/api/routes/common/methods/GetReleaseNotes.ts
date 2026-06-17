@@ -1,6 +1,6 @@
-import { Context } from 'koa'
-import database from '../../../../database'
-import { ReleaseNote } from '../../../modules/ReleaseNotesLogger'
+import { type ReleaseNote } from '@/api/modules/ReleaseNotesLogger.js'
+import database from '@/database/index.js'
+import { type Context } from 'koa'
 
 export default async function getReleaseNotes(ctx: Context) {
     const releaseNotes: ReleaseNote[] = await database.qdb.get('releaseNotes')

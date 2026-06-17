@@ -1,17 +1,17 @@
 import {
-    ServerDocument,
-    ServerModerationAutoModAntiCaps,
-    ServerModerationAutoModLinksFilter,
-    ServerModerationAutoModNewbies,
-    ServerModerationAutoModSwearFilter,
-    ServerModerationAutoModUsersSlowdown,
-    ServerModerationWarningsPenalty
-} from '@/database/schemas/Servers'
+    type ServerDocument,
+    type ServerModerationAutoModAntiCaps,
+    type ServerModerationAutoModLinksFilter,
+    type ServerModerationAutoModNewbies,
+    type ServerModerationAutoModSwearFilter,
+    type ServerModerationAutoModUsersSlowdown,
+    type ServerModerationWarningsPenalty
+} from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import TemporaryBan from '@/internals/structures/TemporaryBan.js'
+import { createCaseLogEntry } from '@/modules/Moderation/CaseLog.js'
 import { Guild, GuildMember } from 'discord.js'
 import moment from 'moment'
-import Lacuna from '../../../internals/Lacuna'
-import TemporaryBan from '../../../internals/structures/TemporaryBan'
-import { createCaseLogEntry } from '../../Moderation/CaseLog'
 
 export default async function banAction(self: Lacuna, server: ServerDocument, options: ActionOptions) {
     const { config, guild, target } = options
@@ -36,7 +36,7 @@ export default async function banAction(self: Lacuna, server: ServerDocument, op
         }
     }
 
-    await createCaseLogEntry(guild, { type: 'BanAdd', target: target.user, executor: self.user, reason })
+    await createCaseLogEntry(guild, { type: 'BanAdd', target: target.user, executor: self.user as any, reason })
 }
 
 export interface ActionOptions {

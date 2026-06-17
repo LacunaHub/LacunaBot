@@ -1,10 +1,10 @@
-import Logger from '@/api/utility/Logger'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import Logger from '@/api/utility/Logger.js'
+import database from '@/database/index.js'
+import { truncateString } from '@/internals/utility/Utils.js'
+import Replacer from '@/modules/Replacer.js'
 import { makeURLSearchParams } from 'discord.js'
 import fetch from 'node-fetch'
-import database from '../../../database'
-import { truncateString } from '../../../internals/utility/Utils'
-import Replacer from '../../../modules/Replacer'
-import DiscordUtils from '../../utility/DiscordUtils'
 
 async function getAppAccessToken() {
     let token: any = await database.qdb.get('twitchAccessToken')
@@ -16,8 +16,8 @@ async function getAppAccessToken() {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: new URLSearchParams({
-                client_id: process.env.LCN_TWITCH_CLIENT_ID,
-                client_secret: process.env.LCN_TWITCH_CLIENT_SECRET,
+                client_id: process.env.LCN_TWITCH_CLIENT_ID!,
+                client_secret: process.env.LCN_TWITCH_CLIENT_SECRET!,
                 grant_type: 'client_credentials'
             })
         })
@@ -42,7 +42,7 @@ export async function searchChannels(query: string) {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID!
         }
     })
 
@@ -75,7 +75,7 @@ export async function eventSubSubscribe(type: string, user_id: string) {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID,
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID!,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -98,7 +98,7 @@ export async function eventSubUnsubscribe(subscription_id: string) {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID!
         }
     })
 }
@@ -110,7 +110,7 @@ export async function getEventSubsByUserId(userId: string) {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID!
         }
     })
 }
@@ -123,7 +123,7 @@ export async function getStream(user_id: string) {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${twitchToken}`,
-            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID
+            'Client-Id': process.env.LCN_TWITCH_CLIENT_ID!
         }
     })
 
@@ -167,7 +167,11 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
         Logger.info({ sub: data }, 'handling incoming notification')
 
         if (subscription.last_eventsub_message_id == messageId) return null
-        else await database.twitchSubs.updateOne({ _id: data.subscription.id }, { $set: { last_eventsub_message_id: messageId } })
+        else
+            await database.twitchSubs.updateOne(
+                { _id: data.subscription.id },
+                { $set: { last_eventsub_message_id: messageId } }
+            )
 
         const subscribedGuilds = await database.servers.find({
             'modules.subscriptions.twitch.broadcaster_id': data.event.broadcaster_user_id
@@ -200,7 +204,9 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
             let webhook: any
 
             try {
-                webhook = await DiscordUtils.rest.get(DiscordUtils.restRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token))
+                webhook = await DiscordUtils.rest.get(
+                    DiscordUtils.restRoutes.webhook(guildSubscription.webhook_id, guildSubscription.webhook_token)
+                )
             } catch (err) {
                 Logger.error({
                     module: 'Twitch',
@@ -212,11 +218,14 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
 
             if (!webhook) {
                 try {
-                    webhook = await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelWebhooks(guildSubscription.notification_channel_id), {
-                        body: {
-                            name: data.event.broadcaster_user_name
+                    webhook = await DiscordUtils.rest.post(
+                        DiscordUtils.restRoutes.channelWebhooks(guildSubscription.notification_channel_id),
+                        {
+                            body: {
+                                name: data.event.broadcaster_user_name
+                            }
                         }
-                    })
+                    )
                 } catch (err) {
                     Logger.error({
                         module: 'Twitch',
@@ -252,28 +261,33 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
             }
 
             try {
-                const message: any = await DiscordUtils.rest.post(DiscordUtils.restRoutes.webhook(webhook.id, webhook.token), {
-                    body: {
-                        content: notificationText,
-                        embeds: [
-                            {
-                                title: stream.title,
-                                description: stream.game,
-                                url: stream.url,
-                                thumbnail: { url: stream.game_image },
-                                image: {
-                                    url: guildSubscription.display_stream_preview
-                                        ? stream.preview
-                                        : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg'
+                const message: any = await DiscordUtils.rest.post(
+                    DiscordUtils.restRoutes.webhook(webhook.id, webhook.token),
+                    {
+                        body: {
+                            content: notificationText,
+                            embeds: [
+                                {
+                                    title: stream.title,
+                                    description: stream.game,
+                                    url: stream.url,
+                                    thumbnail: { url: stream.game_image },
+                                    image: {
+                                        url: guildSubscription.display_stream_preview
+                                            ? stream.preview
+                                            : 'https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg'
+                                    }
                                 }
-                            }
-                        ]
-                    },
-                    query: makeURLSearchParams({ wait: true }) as any
-                })
+                            ]
+                        },
+                        query: makeURLSearchParams({ wait: true }) as any
+                    }
+                )
 
                 if (guildSubscription.options?.includes?.('CROSSPOST_MESSAGE')) {
-                    await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelMessageCrosspost(message.channel_id, message.id))
+                    await DiscordUtils.rest.post(
+                        DiscordUtils.restRoutes.channelMessageCrosspost(message.channel_id, message.id)
+                    )
                 }
 
                 if (guildSubscription.options?.includes?.('CREATE_THREAD')) {

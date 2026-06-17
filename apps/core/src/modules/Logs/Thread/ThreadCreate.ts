@@ -1,8 +1,8 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry } from 'discord.js'
 import numbro from 'numbro'
-import { isRateLimited, LogEventData, sendLog } from '..'
-import Lacuna from '../../../internals/Lacuna'
+import { isRateLimited, type LogEventData, sendLog } from '../index.js'
 
 export default async function (self: Lacuna, server: ServerDocument, data: ThreadCreateLogEventData): Promise<boolean> {
     if (!server.moderation.logs.types.thread_create.active) return false
@@ -13,16 +13,24 @@ export default async function (self: Lacuna, server: ServerDocument, data: Threa
     const thread = auditLogEntry.target,
         executor = auditLogEntry.executor
 
-    const logChannel = guild.channels.cache.get(server.moderation.logs.types.thread_create.channel_id)
-    if (!logChannel || !logChannel.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)) return false
+    const logChannel = guild.channels.cache.get(server.moderation.logs.types.thread_create.channel_id!)
+    if (!logChannel || !logChannel.permissionsFor(guild.members.me!).has(self.PermissionFlags.ManageWebhooks))
+        return false
 
     const embed = new EmbedBuilder()
         .setTitle(t('Logs.ThreadCreated'))
-        .setDescription(t('Logs.ThreadCreatedTemplate', { username: `<@${executor?.id ?? '0'}>`, thread: `<#${thread.id}>` }))
+        .setDescription(
+            t('Logs.ThreadCreatedTemplate', { username: `<@${executor?.id ?? '0'}>`, thread: `<#${thread.id}>` })
+        )
         .addFields([
-            { name: t('Commands.OptionTypes.Channel'), value: thread.parentId ? `<#${thread.parentId}>` : '-', inline: true },
+            {
+                name: t('Commands.OptionTypes.Channel'),
+                value: thread.parentId ? `<#${thread.parentId}>` : '-',
+                inline: true
+            },
             {
                 name: t('Logs.ThreadAutoArchiveTime'),
+                // @ts-expect-error
                 value: numbro((thread.autoArchiveDuration as number) * 60).format({ output: 'time' }),
                 inline: true
             }

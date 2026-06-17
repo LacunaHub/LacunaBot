@@ -1,11 +1,11 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { ChatInputCommandInteraction } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const player = self.lava.nodes.getPlayer(interaction.guild.id)
+    const player = self.lava!.nodes.getPlayer(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({

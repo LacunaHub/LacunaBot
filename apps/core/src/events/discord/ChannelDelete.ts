@@ -1,16 +1,17 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import Lacuna from '@/internals/Lacuna.js'
 import { ChannelType, DMChannel, Events, GuildChannel } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
 
 const handler = async (self: Lacuna, channel: DMChannel | GuildChannel) => {
     if (channel.type === ChannelType.DM) return false
 
-    const server: ServerDocument = await self.db.servers.findOne({ _id: channel.guild.id })
+    const server = await self.db.servers.findOne({ _id: channel.guild.id })
     if (!server || server.blocked) return false
 
     if (channel.type === ChannelType.GuildVoice) {
         const autoVoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === channel.id)
-        const autoVoiceChildren = server.modules.voice_manager.autovoices.find(i => i.children.some(c => c.channel_id === channel.id))
+        const autoVoiceChildren = server.modules.voice_manager.autovoices.find(i =>
+            i.children.some(c => c.channel_id === channel.id)
+        )
         const tempVoice = autoVoiceChildren ? autoVoiceChildren.children.find(c => c.channel_id === channel.id) : null
 
         if (autoVoice) {

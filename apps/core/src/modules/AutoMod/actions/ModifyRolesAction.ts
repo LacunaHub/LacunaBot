@@ -1,11 +1,11 @@
-import Lacuna from '../../../internals/Lacuna'
-import { ActionOptions } from './BanAction'
+import Lacuna from '@/internals/Lacuna.js'
+import { type ActionOptions } from './BanAction.js'
 
 export default async function modifyRolesAction(self: Lacuna, options: ActionOptions) {
     const { config, guild, target, reason } = options
 
-    if (config.modify_roles?.add?.length) {
-        const editableRoles = guild.roles.cache.filter(v => v.editable && config.modify_roles.add.includes(v.id))
+    if (Array.isArray(config.modify_roles?.add)) {
+        const editableRoles = guild.roles.cache.filter(v => v.editable && config.modify_roles!.add.includes(v.id))
 
         if (editableRoles.size) {
             try {
@@ -16,8 +16,8 @@ export default async function modifyRolesAction(self: Lacuna, options: ActionOpt
         }
     }
 
-    if (config.modify_roles?.remove?.length) {
-        const editableRoles = guild.roles.cache.filter(v => v.editable && config.modify_roles.remove.includes(v.id))
+    if (Array.isArray(config.modify_roles?.remove)) {
+        const editableRoles = guild.roles.cache.filter(v => v.editable && config.modify_roles!.remove.includes(v.id))
 
         if (editableRoles.size) {
             try {

@@ -1,16 +1,16 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { UserData, UserLevel, UserServerProfile, UserWallet } from '@/database/schemas/Users'
-import { Context } from 'koa'
-import database from '../../../../database'
-import APIError from '../../../utility/APIError'
-import { isGuildMember, UserState } from '../../../utility/Authentication'
-import DiscordUtils from '../../../utility/DiscordUtils'
+import APIError from '@/api/utility/APIError.js'
+import { isGuildMember, type UserState } from '@/api/utility/Authentication.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type UserData, type UserLevel, type UserServerProfile, type UserWallet } from '@/database/schemas/Users.js'
+import { type Context } from 'koa'
 
 export default async function getLeaders(ctx: Context) {
     const server: ServerDocument = ctx.state.server
     const guildId = ctx.params.guildId
-    let page = Math.abs(+ctx.query.page || 0),
-        limit = Math.abs(+ctx.query.limit || 100),
+    let page = Math.abs(+ctx.query.page! || 0),
+        limit = Math.abs(+ctx.query.limit! || 100),
         sortBy = (ctx.query.sortBy as string) || 'Level',
         orderBy = (ctx.query.orderBy as string) || 'Desc'
 
@@ -37,7 +37,8 @@ export default async function getLeaders(ctx: Context) {
             break
     }
 
-    if (searchBy === 'activities.levels' && !server.modules.levels.active && !server.modules.levels.voice) ctx.throw(406, new APIError(4026))
+    if (searchBy === 'activities.levels' && !server.modules.levels.active && !server.modules.levels.voice)
+        ctx.throw(406, new APIError(4026))
     if (searchBy === 'activities.wallets' && !server.modules.economy.active) ctx.throw(406, new APIError(4027))
 
     if (!server.web_page.public_leaderboard) {
@@ -105,10 +106,12 @@ export default async function getLeaders(ctx: Context) {
     const results =
         aggregation?.results?.map((v, i, arr) => {
             const serverProfile = v.server_profiles?.find(vv => vv.guild_id === guildId)
-            let avatarURL: string = null
+            let avatarURL: string | null = null
 
-            if (typeof serverProfile?.avatar === 'string') avatarURL = DiscordUtils.rest.cdn.guildMemberAvatar(guildId, v._id, serverProfile.avatar)
-            if (typeof avatarURL !== 'string' && typeof v.user.avatar === 'string') avatarURL = DiscordUtils.rest.cdn.avatar(v._id, v.user.avatar)
+            if (typeof serverProfile?.avatar === 'string')
+                avatarURL = DiscordUtils.rest.cdn.guildMemberAvatar(guildId, v._id, serverProfile.avatar)
+            if (typeof avatarURL !== 'string' && typeof v.user.avatar === 'string')
+                avatarURL = DiscordUtils.rest.cdn.avatar(v._id, v.user.avatar)
 
             let rank = Math.min((page + 1) * limit, resultCount) - (arr.length - (i + 1))
             if (orderBy === 'Asc') rank = resultCount - (rank - 1)
@@ -120,7 +123,7 @@ export default async function getLeaders(ctx: Context) {
                 display_name: serverProfile?.nickname ?? v.user.global_name
             }
 
-            if ('experience' in v.data)
+            if ('experience' in v.data!)
                 return {
                     user,
                     rank,
@@ -133,16 +136,23 @@ export default async function getLeaders(ctx: Context) {
                     }
                 }
 
-            if ('currencies' in v.data)
+            if ('currencies' in v.data!)
                 return {
                     user,
                     rank,
-                    data: v.data.currencies.reduce((x, y) => {
-                        const currency = server.modules.economy.currencies.find(v => v.id === y.id)
+                    data: v.data.currencies.reduce(
+                        (x, y) => {
+                            const currency = server.modules.economy.currencies.find(v => v.id === y.id)
 
-                        x[y.id] = { currency_name: currency?.name ?? null, currency_symbol: currency?.symbol ?? null, amount: y.amount }
-                        return x
-                    }, {})
+                            x[y.id] = {
+                                currency_name: currency?.name ?? null,
+                                currency_symbol: currency?.symbol ?? null,
+                                amount: y.amount
+                            }
+                            return x
+                        },
+                        {} as Record<string, any>
+                    )
                 }
 
             return { user, rank }

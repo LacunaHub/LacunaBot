@@ -1,12 +1,12 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { bufferToDataURL } from '@/internals/utility/Utils'
-import { APIWebhook } from 'discord.js'
-import { Context } from 'koa'
+import { type TelegramFile } from '@/api/modules/social-alerts/TelegramAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { bufferToDataURL } from '@/internals/utility/Utils.js'
+import { type APIWebhook } from 'discord.js'
+import { type Context } from 'koa'
 import fetch from 'node-fetch'
-import database from '../../../../../database'
-import { TelegramFile } from '../../../../modules/social-alerts/TelegramAlerts'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
 
 export default async function createTelegramSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -18,7 +18,7 @@ export default async function createTelegramSubscription(ctx: Context) {
     if (server.modules.subscriptions.telegram.some(v => v.channel_id === data.channel.id))
         ctx.throw(409, new APIError(2005))
 
-    let webhook: APIWebhook, channelPhoto: Buffer
+    let webhook: APIWebhook, channelPhoto!: Buffer
     const tgChannel = {
         id: data.channel.id,
         title: data.channel.name ?? String(data.channel.id),

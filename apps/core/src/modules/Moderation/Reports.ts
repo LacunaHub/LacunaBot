@@ -1,10 +1,21 @@
-import { ReportType, UserReportDocument, UserReportMetadataCategory, UserReportMetadataRecommendedAction } from '@/database/schemas/Reports'
-import { ServerDocument } from '@/database/schemas/Servers'
-import { BaseGuildTextChannel, ButtonInteraction, EmbedBuilder, GuildMember, StringSelectMenuInteraction } from 'discord.js'
+import {
+    ReportType,
+    type UserReportDocument,
+    UserReportMetadataCategory,
+    UserReportMetadataRecommendedAction
+} from '@/database/schemas/Reports.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { capitalizeFirstLetter, truncateString } from '@/internals/utility/Utils.js'
+import {
+    BaseGuildTextChannel,
+    ButtonInteraction,
+    EmbedBuilder,
+    GuildMember,
+    StringSelectMenuInteraction
+} from 'discord.js'
 import ms from 'ms'
-import Moderation from '.'
-import Lacuna from '../../internals/Lacuna'
-import { capitalizeFirstLetter, truncateString } from '../../internals/utility/Utils'
+import Moderation from './index.js'
 
 const QuickActionLocales = {
     BAN: 'CaseLog.CaseTypes.BanAdd',
@@ -15,11 +26,13 @@ const QuickActionLocales = {
 
 async function handleButtonClick(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
     const t = self.i18n.t.bind(null, server.locale)
-    const [, action, user_id] = interaction.customId.split('-')
+    const [, action, user_id] = interaction.customId.split('-') as [string, string, string]
 
-    let member: GuildMember
+    let member!: GuildMember
     const reason = interaction.message.url
-    let closeReason = t('Commands.ReportCommand.Texts.ReportClosedBy', { username: `<@${interaction.user.id}> (${interaction.user.tag})` })
+    let closeReason = t('Commands.ReportCommand.Texts.ReportClosedBy', {
+        username: `<@${interaction.user.id}> (${interaction.user.tag})`
+    })
 
     await interaction.deferUpdate()
 
@@ -71,7 +84,10 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
         return false
     }
 
-    if (server.moderation.respect_hierarchy && member.roles.highest.position > interaction.member.roles.highest.position) {
+    if (
+        server.moderation.respect_hierarchy &&
+        member.roles.highest.position > interaction.member.roles.highest.position
+    ) {
         await interaction.followUp({
             content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
                 username: `**${interaction.member.displayName}**`
@@ -134,7 +150,11 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
             return false
         }
 
-        await Moderation.kickUser(self, server, interaction.guild, { target: member, executor: interaction.user, reason })
+        await Moderation.kickUser(self, server, interaction.guild, {
+            target: member,
+            executor: interaction.user,
+            reason
+        })
     }
 
     if (action === 'WARN') {
@@ -153,11 +173,11 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
             target: member,
             executor: interaction.user,
             reason,
-            channel: interaction.channel
+            channel: interaction.channel!
         })
     }
 
-    closeReason += `: ${t(QuickActionLocales[action])}`
+    closeReason += `: ${t((QuickActionLocales as any)[action])}`
     await markReportAsClosed(interaction, closeReason)
 
     self.emit('moduleExecution', {
@@ -169,14 +189,20 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
     })
 }
 
-async function handleOptionSelect(self: Lacuna, server: ServerDocument, interaction: StringSelectMenuInteraction<'cached'>) {
+async function handleOptionSelect(
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: StringSelectMenuInteraction<'cached'>
+) {
     const t = self.i18n.t.bind(null, server.locale)
-    const [, action, user_id] = interaction.customId.split('-')
+    const [, action, user_id] = interaction.customId.split('-') as [string, string, string]
 
-    let member: GuildMember
-    const duration = interaction.values[0]
+    let member!: GuildMember
+    const duration = interaction.values[0]!
     const reason = interaction.message.url
-    let closeReason = t('Commands.ReportCommand.Texts.ReportClosedBy', { username: `<@${interaction.user.id}> (${interaction.user.tag})` })
+    let closeReason = t('Commands.ReportCommand.Texts.ReportClosedBy', {
+        username: `<@${interaction.user.id}> (${interaction.user.tag})`
+    })
 
     await interaction.deferUpdate()
 
@@ -198,7 +224,10 @@ async function handleOptionSelect(self: Lacuna, server: ServerDocument, interact
     }
 
     if (member.id === interaction.user.id) {
-        const message = action === 'BAN' ? 'Commands.BanCommand.Texts.YouCannotBanYourself' : 'Commands.MuteCommand.Texts.YouCannotMuteYourself'
+        const message =
+            action === 'BAN'
+                ? 'Commands.BanCommand.Texts.YouCannotBanYourself'
+                : 'Commands.MuteCommand.Texts.YouCannotMuteYourself'
 
         await interaction.followUp({
             content: `${self.staticEmojis.Cross} | ${t(message, { username: `**${interaction.member.displayName}**` })}`,
@@ -208,7 +237,10 @@ async function handleOptionSelect(self: Lacuna, server: ServerDocument, interact
         return false
     }
 
-    if (server.moderation.respect_hierarchy && member.roles.highest.position > interaction.member.roles.highest.position) {
+    if (
+        server.moderation.respect_hierarchy &&
+        member.roles.highest.position > interaction.member.roles.highest.position
+    ) {
         await interaction.followUp({
             content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
                 username: `**${interaction.member.displayName}**`
@@ -310,7 +342,7 @@ async function handleOptionSelect(self: Lacuna, server: ServerDocument, interact
         })
     }
 
-    closeReason += `: ${t(QuickActionLocales[action])}`
+    closeReason += `: ${t((QuickActionLocales as any)[action])}`
     await markReportAsClosed(interaction, closeReason)
 
     self.emit('moduleExecution', {
@@ -341,7 +373,9 @@ async function handleGuildMemberAdd(self: Lacuna, server: ServerDocument, member
 
     const last24h = userReports.filter(i => Date.now() - i.created_at < ms('24h')),
         last7d = userReports.filter(i => Date.now() - i.created_at < ms('7d')),
-        last10Reports = userReports.slice(Math.max(userReports.length - 10, 0)).sort((a, b) => b.created_at - a.created_at)
+        last10Reports = userReports
+            .slice(Math.max(userReports.length - 10, 0))
+            .sort((a, b) => b.created_at - a.created_at)
     const recommendedActions = [
         ...new Set(
             userReports
@@ -370,12 +404,12 @@ async function handleGuildMemberAdd(self: Lacuna, server: ServerDocument, member
                 inline: true
             },
             ...last10Reports.map(v => {
-                let reportTypeTitle = `Commands.ReportCommand.Texts.ReportTypes.${UserReportMetadataCategory[v.metadata.category]}.Title`,
-                    reportTypeDescription = `Commands.ReportCommand.Texts.ReportTypes.${UserReportMetadataCategory[v.metadata.category]}.Description`
+                let reportTypeTitle = `Commands.ReportCommand.Texts.ReportTypes.${UserReportMetadataCategory[v.metadata.category!]}.Title`,
+                    reportTypeDescription = `Commands.ReportCommand.Texts.ReportTypes.${UserReportMetadataCategory[v.metadata.category!]}.Description`
 
                 if (v.metadata.category === UserReportMetadataCategory.Other) {
                     reportTypeTitle = 'Common.Other'
-                    reportTypeDescription = null
+                    reportTypeDescription = ''
                 }
 
                 return {
@@ -389,7 +423,7 @@ async function handleGuildMemberAdd(self: Lacuna, server: ServerDocument, member
     if (recommendedActions.length) {
         embed.setFooter({
             text: `${t('Commands.ReportCommand.Texts.RecommendedActions')}: ${recommendedActions
-                .map(v => t(`CaseLog.Actions.${UserReportMetadataRecommendedAction[v]}`).toLowerCase())
+                .map(v => t(`CaseLog.Actions.${UserReportMetadataRecommendedAction[v!]}`).toLowerCase())
                 .join(', ')}`
         })
     }
@@ -410,8 +444,8 @@ async function handleGuildMemberAdd(self: Lacuna, server: ServerDocument, member
 
 async function markReportAsClosed(interaction: ButtonInteraction | StringSelectMenuInteraction, reason: string) {
     try {
-        const message = await interaction.channel.messages.fetch({ message: interaction.message.id }),
-            embed = new EmbedBuilder(message.embeds[0])
+        const message = await interaction.channel!.messages.fetch({ message: interaction.message.id }),
+            embed = new EmbedBuilder(message.embeds[0] as any)
 
         embed.setDescription(reason)
 

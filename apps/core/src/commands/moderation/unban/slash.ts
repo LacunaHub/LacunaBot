@@ -1,7 +1,7 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { createCaseLogEntry } from '@/modules/Moderation/CaseLog.js'
 import { ChatInputCommandInteraction, GuildBan } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -22,7 +22,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     await interaction.deferReply({ ephemeral: true })
 
-    let userBan: GuildBan
+    let userBan!: GuildBan
 
     try {
         userBan = await interaction.guild.bans.fetch({ user: userId })
@@ -46,7 +46,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         await interaction.guild.bans.remove(userId, reason)
     }
 
-    await createCaseLogEntry(interaction.guild, { type: 'BanRemove', target: userBan.user, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, {
+        type: 'BanRemove',
+        target: userBan.user,
+        executor: interaction.user,
+        reason
+    })
     await interaction.editReply({
         content: `${self.staticEmojis.Check} | ${t('Commands.UnbanCommand.Texts.UserHasBeenUnbanned', {
             username: `**${interaction.member.displayName}**`,

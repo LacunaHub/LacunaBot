@@ -1,7 +1,7 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { createCaseLogEntry } from '@/modules/Moderation/CaseLog.js'
 import { BaseGuildTextChannel, ChatInputCommandInteraction } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -35,7 +35,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     await interaction.deferReply({ ephemeral: true })
 
     if (mention) {
-        let messages = await interaction.channel.messages.fetch({ limit: amount, cache: false })
+        let messages = await interaction.channel!.messages.fetch({ limit: amount, cache: false })
         messages = messages.filter(m => m.author.id === mention.id)
 
         const deleted = await (interaction.channel as BaseGuildTextChannel).bulkDelete(messages, true)
@@ -55,7 +55,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         })
     }
 
-    await createCaseLogEntry(interaction.guild, { type: 'PruneMessages', target: mention, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, {
+        type: 'PruneMessages',
+        target: mention!,
+        executor: interaction.user,
+        reason
+    })
 
     return true
 }

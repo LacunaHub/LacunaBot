@@ -1,14 +1,19 @@
-import { APIUser } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../database'
-import { PaymentData } from '../../../modules/billing'
-import { PayPalOrder } from '../../../modules/billing/providers/PayPal/Order'
-import { TokensCheckout } from '../../../modules/billing/providers/Tokens'
-import APIError from '../../../utility/APIError'
+import { type PaymentData } from '@/api/modules/billing/index.js'
+import { PayPalOrder } from '@/api/modules/billing/providers/PayPal/Order.js'
+import { TokensCheckout } from '@/api/modules/billing/providers/Tokens.js'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
+import { type APIUser } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function createPayment(ctx: Context) {
     const currentUser: Partial<APIUser> = ctx.state.user
-    const { product: selectedProduct, payment_method: paymentMethod, guild_id: guildId, guild_name: guildName } = ctx.request.body
+    const {
+        product: selectedProduct,
+        payment_method: paymentMethod,
+        guild_id: guildId,
+        guild_name: guildName
+    } = ctx.request.body
     const products = await database.getProducts(),
         product = products.find(v => v.tier === selectedProduct?.tier)
 
@@ -25,7 +30,7 @@ export default async function createPayment(ctx: Context) {
             currency_code: 'USD',
             value: 0
         },
-        payerId: currentUser.id,
+        payerId: currentUser.id!,
         comment: `Lacuna Diamond for ${guildName.slice(0, 32)} (${guildId})`,
         product,
         refId: guildId
@@ -54,13 +59,13 @@ export default async function createPayment(ctx: Context) {
         if (!price) ctx.throw(400, new APIError(4021))
 
         data.amount.value = price.sale_amount ? price.sale_amount : price.amount
-        const user = await database.users.findOne({ _id: currentUser.id })
+        const user = await database.users.findOne({ _id: currentUser.id! })
 
         if (!user) ctx.throw(404, new APIError(1001))
-        if (user.tokens <= data.amount.value) ctx.throw(400, new APIError(4023))
+        if (user.tokens! <= data.amount.value) ctx.throw(400, new APIError(4023))
 
-        const tokensCheckout = new TokensCheckout(data),
-            payment = await tokensCheckout.create()
+        const tokensCheckout = new TokensCheckout(data)
+        await tokensCheckout.create()
 
         ctx.status = 204
     } else {

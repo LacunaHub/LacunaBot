@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory, ModelParams } from '@google/generative-ai'
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory, type ModelParams } from '@google/generative-ai'
 
-export default new GoogleGenerativeAI(process.env.LCN_GEMINI_API_KEY)
+export default new GoogleGenerativeAI(process.env.LCN_GEMINI_API_KEY!)
 
 export const defaultModelParams: ModelParams = {
     model: 'gemini-1.5-flash',

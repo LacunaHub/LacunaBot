@@ -1,16 +1,24 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { BaseGuildTextChannel, EmbedBuilder, Guild, User } from 'discord.js'
-import { isRateLimited, sendLog } from '..'
-import Lacuna from '../../../internals/Lacuna'
+import { isRateLimited, sendLog } from '../index.js'
 
-export default async function (self: Lacuna, server: ServerDocument, guild: Guild, before: User, user: User): Promise<boolean> {
+export default async function (
+    self: Lacuna,
+    server: ServerDocument,
+    guild: Guild,
+    before: User,
+    user: User
+): Promise<boolean> {
     if (server.moderation.logs.types.user_update.active) {
         if (isRateLimited(server._id, server.premium.available)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 
-        const logChannel = guild.channels.cache.get(server.moderation.logs.types.user_update.channel_id) as BaseGuildTextChannel
-        const isOk = logChannel && logChannel.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)
+        const logChannel = guild.channels.cache.get(
+            server.moderation.logs.types.user_update.channel_id!
+        ) as BaseGuildTextChannel
+        const isOk = logChannel && logChannel.permissionsFor(guild.members.me!).has(self.PermissionFlags.ManageWebhooks)
 
         if (isOk) {
             if (before.username !== user.username) {

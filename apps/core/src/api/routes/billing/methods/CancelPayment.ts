@@ -1,7 +1,7 @@
-import database from '@/database'
-import { PaymentStatus } from '@/database/schemas/Payments'
-import { Context } from 'koa'
-import APIError from '../../../utility/APIError'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
+import { PaymentStatus } from '@/database/schemas/Payments.js'
+import { type Context } from 'koa'
 
 export default async function cancelPayment(ctx: Context) {
     const token = ctx.query.token as string

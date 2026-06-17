@@ -1,6 +1,6 @@
-import { Context } from 'koa'
-import database from '../../../../database'
-import APIError from '../../../utility/APIError'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
+import { type Context } from 'koa'
 
 export default async function handleYouTubeWebhookChallenge(ctx: Context) {
     const hubTopic = ctx.query['hub.topic'] as string,
@@ -12,7 +12,7 @@ export default async function handleYouTubeWebhookChallenge(ctx: Context) {
 
     const [, topicQuery] = hubTopic.split('?')
     const topicParams = new URLSearchParams(topicQuery)
-    const channelId = topicParams.get('channel_id')
+    const channelId = topicParams.get('channel_id')!
 
     if (hubMode === 'subscribe') {
         hubLeaseSeconds = isNaN(hubLeaseSeconds as any) ? null : (Number(hubLeaseSeconds) as any)
@@ -20,7 +20,10 @@ export default async function handleYouTubeWebhookChallenge(ctx: Context) {
 
         ctx.assert(hubLeaseSeconds && subscription, 404, new APIError())
 
-        await database.youtubeSubs.updateOne({ _id: channelId }, { $set: { expiration_timestamp: Date.now() + (hubLeaseSeconds as any) * 1000 } })
+        await database.youtubeSubs.updateOne(
+            { _id: channelId },
+            { $set: { expiration_timestamp: Date.now() + (hubLeaseSeconds as any) * 1000 } }
+        )
     }
 
     if (hubMode === 'unsubscribe') {

@@ -1,11 +1,11 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { DirectMessages } from '@/modules/DirectMessages'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { DirectMessages } from '@/modules/DirectMessages.js'
+import { createCaseLogEntry } from '@/modules/Moderation/CaseLog.js'
+import Replacer from '@/modules/Replacer.js'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
-import Lacuna from '../../../internals/Lacuna'
-import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
-import Replacer from '../../../modules/Replacer'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -49,7 +49,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (server.moderation.respect_hierarchy && mention.roles.highest.position > interaction.member.roles.highest.position) {
+    if (
+        server.moderation.respect_hierarchy &&
+        mention.roles.highest.position > interaction.member.roles.highest.position
+    ) {
         await interaction.reply({
             content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
                 username: `**${interaction.member.displayName}**`
@@ -60,7 +63,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (server.moderation.deny_moderate_users_with_mp && mention.permissions.has(self.PermissionFlags.ModerateMembers)) {
+    if (
+        server.moderation.deny_moderate_users_with_mp &&
+        mention.permissions.has(self.PermissionFlags.ModerateMembers)
+    ) {
         await interaction.reply({
             content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserIsModerator', {
                 username: `**${interaction.member.displayName}**`
@@ -133,7 +139,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.case_log.types.MUTE_ADD.active) {
         const replacer = new Replacer(server.premium.available, { guild: interaction.guild, member: mention }),
-            messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.MUTE_ADD.dm_message, { penalty: { reason } })
+            messagePayload = await replacer.replaceTemplateMessage(
+                server.moderation.case_log.types.MUTE_ADD.dm_message,
+                { penalty: { reason } }
+            )
 
         try {
             await DirectMessages.send(self, mention, messagePayload)
@@ -142,7 +151,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         }
     }
 
-    await createCaseLogEntry(interaction.guild, { type: 'MuteAdd', target: mention.user, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, {
+        type: 'MuteAdd',
+        target: mention.user,
+        executor: interaction.user,
+        reason
+    })
     await interaction.editReply({
         content: `${self.staticEmojis.Check} | ${t('Commands.MuteCommand.Texts.UserHasBeenMuted', {
             username: `**${interaction.member.displayName}**`,

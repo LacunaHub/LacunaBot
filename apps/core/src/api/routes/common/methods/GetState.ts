@@ -1,15 +1,14 @@
-import { brokerClient, lava } from '@/api/utility/Managers'
-import { indexToLetter } from '@/internals/utility/Utils'
-import { BrokerMessageDataMap, BrokerMessageType } from '@lacunahub/letsfrag'
-import { Context } from 'koa'
-import fetch from 'node-fetch'
-import database from '../../../../database'
+import { brokerClient, lava } from '@/api/utility/Managers.js'
+import database from '@/database/index.js'
+import { indexToLetter } from '@/internals/utility/Utils.js'
+import { type BrokerMessageDataMap, BrokerMessageType } from '@lacunahub/letsfrag'
+import { type Context } from 'koa'
 
 export default async function getState(ctx: Context) {
     const version = await database.qdb.get('version'),
-        issues: string[] = await getIssues()
+        issues: string[] = []
     let stats: BrokerMessageDataMap[BrokerMessageType.RequestStatsResult] = {
-        readyAt: null,
+        readyAt: 0,
         clients: [],
         managers: [],
         shardCount: 0,
@@ -45,7 +44,7 @@ export default async function getState(ctx: Context) {
     }
 
     const clusters = stats.managers.flatMap((v, i) => {
-        const host = indexToLetter(i).toUpperCase()
+        const host = indexToLetter(i)!.toUpperCase()
         return v.clusters.map(vv => ({ ...vv, host }))
     })
 
@@ -71,24 +70,5 @@ export default async function getState(ctx: Context) {
         }),
         players: lavaNodes,
         charts: {}
-    }
-}
-
-async function getIssues(): Promise<string[]> {
-    try {
-        const response = await fetch(`${process.env.LCN_GRAFANA_URL}/api/dashboards/uid/ddj44xrritrswb`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${process.env.LCN_GRAFANA_API_KEY}`
-            }
-        })
-
-        const data = await response.json(),
-            issuesPanel = data?.dashboard?.panels?.find(v => v.title === 'Issues')
-
-        if (!issuesPanel?.options?.content) return []
-        return issuesPanel?.options?.content?.split(/[\r\n]{1,}/)?.map(v => v.trim()) ?? []
-    } catch (err) {
-        return []
     }
 }

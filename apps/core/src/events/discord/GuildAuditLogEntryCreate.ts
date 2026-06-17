@@ -1,7 +1,16 @@
-import { APIAutoModerationRule, AuditLogEvent, Events, Guild, GuildAuditLogsEntry, Role, Routes, User } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import Logs from '../../modules/Logs'
-import { createCaseLogEntry } from '../../modules/Moderation/CaseLog'
+import Lacuna from '@/internals/Lacuna.js'
+import Logs from '@/modules/Logs/index.js'
+import { createCaseLogEntry } from '@/modules/Moderation/CaseLog.js'
+import {
+    type APIAutoModerationRule,
+    AuditLogEvent,
+    Events,
+    Guild,
+    GuildAuditLogsEntry,
+    Role,
+    Routes,
+    User
+} from 'discord.js'
 
 export default {
     name: Events.GuildAuditLogEntryCreate,
@@ -9,11 +18,12 @@ export default {
         const server = await self.db.servers.findOne({ _id: guild.id })
         if (!server || server.blocked) return false
 
-        if (auditLogEntry.executorId) auditLogEntry.executor = await self.users.fetch(auditLogEntry.executorId)
-        if (auditLogEntry.targetType === 'User' && auditLogEntry.targetId) auditLogEntry.target = await self.users.fetch(auditLogEntry.targetId)
+        if (auditLogEntry.executorId) auditLogEntry.executor = (await self.users.fetch(auditLogEntry.executorId)) as any
+        if (auditLogEntry.targetType === 'User' && auditLogEntry.targetId)
+            auditLogEntry.target = await self.users.fetch(auditLogEntry.targetId)
 
         if (auditLogEntry.action === AuditLogEvent.AutoModerationRuleDelete) {
-            if (auditLogEntry.executorId !== self.user.id) {
+            if (auditLogEntry.executorId !== self.user!.id) {
                 const dameRule = server.moderation.dame_rules.find(v => v.id === auditLogEntry.targetId)
                 if (dameRule) {
                     await self.db.servers.updateOne(
@@ -31,11 +41,11 @@ export default {
         }
 
         if (auditLogEntry.action === AuditLogEvent.AutoModerationRuleUpdate) {
-            if (auditLogEntry.executorId !== self.user.id) {
+            if (auditLogEntry.executorId !== self.user!.id) {
                 const dameRule = server.moderation.dame_rules.find(v => v.id === auditLogEntry.targetId)
                 if (dameRule) {
                     const apiAutoModRule = (await self.rest.get(
-                        Routes.guildAutoModerationRule(server._id, auditLogEntry.targetId)
+                        Routes.guildAutoModerationRule(server._id, auditLogEntry.targetId!)
                     )) as APIAutoModerationRule
 
                     await self.db.servers.updateOne(
@@ -46,7 +56,10 @@ export default {
                                 'moderation.dame_rules.$.event_type': apiAutoModRule.event_type,
                                 'moderation.dame_rules.$.trigger_type': apiAutoModRule.trigger_type,
                                 'moderation.dame_rules.$.trigger_metadata': apiAutoModRule.trigger_metadata,
-                                'moderation.dame_rules.$.actions': [...apiAutoModRule.actions, ...dameRule.actions.filter(v => v.type > 100)],
+                                'moderation.dame_rules.$.actions': [
+                                    ...apiAutoModRule.actions,
+                                    ...dameRule.actions.filter(v => v.type > 100)
+                                ],
                                 'moderation.dame_rules.$.enabled': apiAutoModRule.enabled,
                                 'moderation.dame_rules.$.exempt_roles': apiAutoModRule.exempt_roles,
                                 'moderation.dame_rules.$.exempt_channels': apiAutoModRule.exempt_channels
@@ -82,11 +95,11 @@ export default {
         }
 
         if (auditLogEntry.action === AuditLogEvent.MemberBanAdd) {
-            if (auditLogEntry.executorId !== self.user.id) {
+            if (auditLogEntry.executorId !== self.user!.id) {
                 await createCaseLogEntry(guild, {
                     type: 'BanAdd',
                     target: auditLogEntry.target as User,
-                    executor: auditLogEntry.executor,
+                    executor: auditLogEntry.executor!,
                     reason: auditLogEntry.reason
                 })
             }
@@ -101,28 +114,31 @@ export default {
         }
 
         if (auditLogEntry.action === AuditLogEvent.MemberBanRemove) {
-            if (auditLogEntry.executorId !== self.user.id) {
+            if (auditLogEntry.executorId !== self.user!.id) {
                 await createCaseLogEntry(guild, {
                     type: 'BanRemove',
                     target: auditLogEntry.target as User,
-                    executor: auditLogEntry.executor,
+                    executor: auditLogEntry.executor!,
                     reason: auditLogEntry.reason
                 })
             }
 
             const tempBan = self.tempbans.get(`${guild.id}:${auditLogEntry.targetId}`)
-            if (tempBan) await tempBan.delete(false, auditLogEntry.reason)
+            if (tempBan) await tempBan.delete(false, auditLogEntry.reason!)
 
-            await self.db.serverBans.updateMany({ guild_id: guild.id, user_id: auditLogEntry.targetId }, { $set: { removed_at: Date.now() } })
+            await self.db.serverBans.updateMany(
+                { guild_id: guild.id, user_id: auditLogEntry.targetId! },
+                { $set: { removed_at: Date.now() } }
+            )
             await Logs.GuildBanRemove(self, server, { guild, auditLogEntry: auditLogEntry as any })
         }
 
         if (auditLogEntry.action === AuditLogEvent.MemberKick) {
-            if (auditLogEntry.executorId !== self.user.id) {
+            if (auditLogEntry.executorId !== self.user!.id) {
                 await createCaseLogEntry(guild, {
                     type: 'Kick',
                     target: auditLogEntry.target as User,
-                    executor: auditLogEntry.executor,
+                    executor: auditLogEntry.executor!,
                     reason: auditLogEntry.reason
                 })
             }
@@ -132,11 +148,11 @@ export default {
             const communicationDisabledUntil = auditLogEntry.changes.find(v => v.key === 'communication_disabled_until')
 
             if (communicationDisabledUntil) {
-                if (auditLogEntry.executorId !== self.user.id) {
+                if (auditLogEntry.executorId !== self.user!.id) {
                     await createCaseLogEntry(guild, {
                         type: communicationDisabledUntil.new ? 'MuteAdd' : 'MuteRemove',
                         target: auditLogEntry.target as User,
-                        executor: auditLogEntry.executor,
+                        executor: auditLogEntry.executor!,
                         reason: auditLogEntry.reason
                     })
                 }
@@ -152,16 +168,20 @@ export default {
                 removedRoles: Role[] = []
 
             if ($add) {
-                addedRoles.push(...$add.new.map(v => guild.roles.cache.get(v.id)))
+                const roles =
+                    $add.new?.map(v => guild.roles.cache.get(v.id))?.filter(v => typeof v !== 'undefined') ?? []
+                addedRoles.push(...roles)
                 await Logs.GuildMemberRoleAdd(self, server, { guild, auditLogEntry: auditLogEntry as any })
             }
 
             if ($remove) {
-                removedRoles.push(...$remove.new.map(v => guild.roles.cache.get(v.id)))
+                const roles =
+                    $remove.new?.map(v => guild.roles.cache.get(v.id))?.filter(v => typeof v !== 'undefined') ?? []
+                removedRoles.push(...roles)
                 await Logs.GuildMemberRoleRemove(self, server, { guild, auditLogEntry: auditLogEntry as any })
             }
 
-            const targetMember = await guild.members.fetch({ user: auditLogEntry.targetId })
+            const targetMember = await guild.members.fetch({ user: auditLogEntry.targetId! })
 
             if (addedRoles.length) self.emit('guildMemberRoleAdd', targetMember, addedRoles)
             if (removedRoles.length) self.emit('guildMemberRoleRemove', targetMember, removedRoles)

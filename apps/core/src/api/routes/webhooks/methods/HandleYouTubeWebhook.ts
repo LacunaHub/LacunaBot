@@ -1,9 +1,9 @@
+import { handleHubBubWebhook } from '@/api/modules/social-alerts/YouTubeAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import { convertXml2Json } from '@/internals/utility/Utils.js'
 import { createHmac } from 'crypto'
-import { Context } from 'koa'
+import { type Context } from 'koa'
 import getRawBody from 'raw-body'
-import { convertXml2Json } from '../../../../internals/utility/Utils'
-import { handleHubBubWebhook } from '../../../modules/social-alerts/YouTubeAlerts'
-import APIError from '../../../utility/APIError'
 
 export default async function handleYouTubeWebhook(ctx: Context) {
     const hubSignature = ctx.request.headers['x-hub-signature'] as string
@@ -33,7 +33,7 @@ export default async function handleYouTubeWebhook(ctx: Context) {
 
     const [algorithm, hmac] = hubSignature.split('=')
 
-    const signature = createHmac(algorithm, process.env.LCN_YOUTUBE_HMAC_SECRET).update(rawBody).digest('hex')
+    const signature = createHmac(algorithm!, process.env.LCN_YOUTUBE_HMAC_SECRET!).update(rawBody).digest('hex')
 
     if (hmac !== signature) {
         ctx.status = 204

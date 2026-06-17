@@ -1,16 +1,16 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { bufferToDataURL } from '@/internals/utility/Utils'
-import { APIWebhook } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../../database'
 import {
     eventSubSubscribe,
     eventSubUnsubscribe,
     getEventSubsByUserId,
-    TwitchIncomingWebhook
-} from '../../../../modules/social-alerts/TwitchAlerts'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
+    type TwitchIncomingWebhook
+} from '@/api/modules/social-alerts/TwitchAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { bufferToDataURL } from '@/internals/utility/Utils.js'
+import { type APIWebhook } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function createTwitchSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -44,7 +44,7 @@ export default async function createTwitchSubscription(ctx: Context) {
 
     if (!twitchSub) {
         let eventSubResponse = await eventSubSubscribe('stream.online', data.broadcaster.id),
-            eventSub: TwitchIncomingWebhook['subscription']
+            eventSub!: TwitchIncomingWebhook['subscription']
 
         if (eventSubResponse.status === 409) {
             const getSubsResponse = await getEventSubsByUserId(data.broadcaster.id)

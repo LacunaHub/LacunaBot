@@ -1,15 +1,15 @@
-import database, { Product } from '@/database'
-import { PaymentAmount, PaymentStatus, PaymentType } from '@/database/schemas/Payments'
-import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
+import database, { type Product } from '@/database/index.js'
+import { type PaymentAmount, PaymentStatus, PaymentType } from '@/database/schemas/Payments.js'
+import { type Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
 import fetch from 'node-fetch'
-import { HATEOASLink, PayPalAPI } from '.'
-import { PaymentData } from '../..'
+import { type PaymentData } from '../../index.js'
+import { type HATEOASLink, PayPalAPI } from './index.js'
 
 export class PayPalOrder {
     public paymentId: Snowflake
     public amount: PaymentAmount
     public payerId: string
-    public comment: string
+    public comment: string | null
     public product: Product
     public refId: string
 
@@ -29,7 +29,7 @@ export class PayPalOrder {
 
     async create() {
         const price = this.product.prices.find(v => v.currency_code === this.amount.currency_code),
-            priceAmount = price.sale_amount ? price.sale_amount : price.amount
+            priceAmount = price!.sale_amount ? price!.sale_amount : price!.amount
 
         const order = await this.createOrder(priceAmount)
         const payment = await database.payments.create({
@@ -82,7 +82,7 @@ export class PayPalOrder {
 
             return await response.json()
         } catch (err) {
-            throw new Error(err)
+            throw new Error(err as any)
         }
     }
 }
@@ -99,7 +99,7 @@ export async function captureOrder(orderId: string): Promise<APIOrder> {
 
         return await response.json()
     } catch (err) {
-        throw new Error(err)
+        throw new Error(err as any)
     }
 }
 
@@ -108,7 +108,7 @@ export interface APIOrder {
     update_time: string
     id: string
     processing_instruction: APIOrderProcessingInstruction
-    purchase_units
+    purchase_units: any
     payment_source: object
     intent: APIOrderIntent
     payer: object

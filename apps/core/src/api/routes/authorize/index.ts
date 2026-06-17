@@ -1,9 +1,9 @@
 import Router from '@koa/router'
-import authorize from './methods/Authorize'
-import getAuthURL from './methods/GetAuthURL'
-import getBotAuthURL from './methods/GetBotAuthURL'
-import getLinkedRolesAuthURL from './methods/GetLinkedRolesAuthURL'
-import updateLinkedRoles from './methods/UpdateLinkedRoles'
+import authorize from './methods/Authorize.js'
+import getAuthURL from './methods/GetAuthURL.js'
+import getBotAuthURL from './methods/GetBotAuthURL.js'
+import getLinkedRolesAuthURL from './methods/GetLinkedRolesAuthURL.js'
+import updateLinkedRoles from './methods/UpdateLinkedRoles.js'
 
 const router = new Router({ prefix: '/authorize', methods: ['GET'] })
 

@@ -1,13 +1,13 @@
-import Logger from '@/api/utility/Logger'
-import database from '@/database'
-import { PaymentDocument } from '@/database/schemas/Payments'
-import { SubscriptionDocument, SubscriptionStatus, SubscriptionType } from '@/database/schemas/Subscriptions'
-import { APIGuild } from 'discord.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import Logger from '@/api/utility/Logger.js'
+import database from '@/database/index.js'
+import { type PaymentDocument } from '@/database/schemas/Payments.js'
+import { type SubscriptionDocument, SubscriptionStatus, SubscriptionType } from '@/database/schemas/Subscriptions.js'
+import { projectTeamRoleId, serverBoosterRoleId, subscribedPatronRoleId } from '@/internals/utility/Constants.js'
+import { type APIGuild } from 'discord.js'
 import { Job, scheduleJob } from 'node-schedule'
-import { addDiamond } from '..'
-import { projectTeamRoleId, serverBoosterRoleId, subscribedPatronRoleId } from '../../../../internals/utility/Constants'
-import DiscordUtils from '../../../utility/DiscordUtils'
-import { isRolesMember } from '../providers/DiscordRoles'
+import { addDiamond } from '../index.js'
+import { isRolesMember } from '../providers/DiscordRoles.js'
 
 export const diamondGuilds = new Map<string, DiamondGuild>()
 
@@ -16,7 +16,7 @@ export class DiamondGuild {
     public expiresAt: number
     public billId: string
     public billType: string
-    public schedule: Job
+    public schedule: Job | null
 
     constructor(guildId: string, expiresAt: number, billId: string, billType: string) {
         this.guildId = guildId
@@ -44,12 +44,12 @@ export class DiamondGuild {
     }
 
     async expire() {
-        let bill: PaymentDocument | SubscriptionDocument
+        let bill!: PaymentDocument | SubscriptionDocument
 
         if (this.billType === 'Payment') {
-            bill = await database.payments.findOne({ _id: this.billId })
+            bill = await database.payments.findOne({ _id: this.billId }).orFail()
         } else if (this.billType === 'Subscription') {
-            bill = await database.subscriptions.findOne({ _id: this.billId })
+            bill = await database.subscriptions.findOne({ _id: this.billId }).orFail()
         }
 
         let renewDiamond = false
@@ -105,7 +105,7 @@ export class DiamondGuild {
     }
 
     cancel() {
-        this.schedule.cancel()
+        this.schedule!.cancel()
         diamondGuilds.delete(this.guildId)
     }
 }
@@ -123,7 +123,7 @@ export async function handleDiamondGuilds() {
 
         if (diamondGuild) continue
 
-        new DiamondGuild(server._id, expires_at, billId, billType)
+        new DiamondGuild(server._id, expires_at!, billId!, billType!)
     }
 
     Logger.info({ count: servers.length }, 'servers with diamond loaded')

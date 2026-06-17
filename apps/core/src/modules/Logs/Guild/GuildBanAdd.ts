@@ -1,8 +1,8 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { capitalizeFirstLetter } from '@/internals/utility/Utils.js'
 import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry } from 'discord.js'
-import { isRateLimited, LogEventData, sendLog } from '..'
-import Lacuna from '../../../internals/Lacuna'
-import { capitalizeFirstLetter } from '../../../internals/utility/Utils'
+import { isRateLimited, type LogEventData, sendLog } from '../index.js'
 
 export default async function (self: Lacuna, server: ServerDocument, data: GuildBanAddLogEventData): Promise<boolean> {
     if (!server.moderation.logs.types.guild_ban_add.active) return false
@@ -10,11 +10,12 @@ export default async function (self: Lacuna, server: ServerDocument, data: Guild
 
     const t = self.i18n.t.bind(null, server.locale)
     const { guild, auditLogEntry } = data,
-        user = auditLogEntry.target,
+        user = auditLogEntry.target!,
         executor = auditLogEntry.executor
 
-    const logChannel = guild.channels.cache.get(server.moderation.logs.types.guild_ban_add.channel_id)
-    if (!logChannel || !logChannel.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)) return false
+    const logChannel = guild.channels.cache.get(server.moderation.logs.types.guild_ban_add.channel_id!)
+    if (!logChannel || !logChannel.permissionsFor(guild.members.me!).has(self.PermissionFlags.ManageWebhooks))
+        return false
 
     const embed = new EmbedBuilder()
         .setTitle(t('Logs.GuildBanAdded'))

@@ -1,8 +1,8 @@
-import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
-import { APIGuild } from 'discord.js'
-import { Document, model, Schema } from 'mongoose'
+import { type Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
+import { type APIGuild } from 'discord.js'
+import mongoose from 'mongoose'
 
-const schema = new Schema<GuildDocument>(
+const schema = new mongoose.Schema<GuildDocument>(
     {
         _id: { type: String, default: SnowflakeUtils.generate },
         data: {
@@ -49,6 +49,7 @@ const schema = new Schema<GuildDocument>(
         created_at: {
             type: Number,
             default: function () {
+                // @ts-expect-error
                 return SnowflakeUtils.getTimestamp(this._id)
             }
         },
@@ -58,9 +59,9 @@ const schema = new Schema<GuildDocument>(
     { versionKey: false }
 )
 
-export default model<GuildDocument>('guilds', schema)
+export default mongoose.model<GuildDocument>('guilds', schema)
 
-export interface GuildDocument extends Document {
+export interface GuildDocument extends mongoose.Document {
     _id: Snowflake
     data: APIGuild
     created_at: number

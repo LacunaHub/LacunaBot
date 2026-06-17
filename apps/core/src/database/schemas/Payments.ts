@@ -1,10 +1,10 @@
-import { Snowflake } from '@/utility/SnowflakeUtils'
-import { Document, model, Schema } from 'mongoose'
-import { DiamondProductTier } from '..'
+import { type Snowflake } from '@/utility/SnowflakeUtils.js'
+import mongoose from 'mongoose'
+import { DiamondProductTier } from '../index.js'
 
-export default model<PaymentDocument>(
+export default mongoose.model<PaymentDocument>(
     'payments',
-    new Schema<PaymentDocument>(
+    new mongoose.Schema<PaymentDocument>(
         {
             _id: { type: String },
             type: { type: Number, required: true },
@@ -27,7 +27,7 @@ export default model<PaymentDocument>(
     )
 )
 
-export interface PaymentDocument extends Document {
+export interface PaymentDocument extends mongoose.Document {
     _id: Snowflake
     type: PaymentType
     status: PaymentStatus

@@ -1,5 +1,5 @@
-import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
-import slash from './slash'
+import { CommandGroup, type CommandOptions } from '@/internals/structures/Command.js'
+import slash from './slash.js'
 
 const options: CommandOptions = {
     description: 'Commands.FilterCommand.Description',

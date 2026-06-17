@@ -1,10 +1,10 @@
-import { ServerDocument, ServerModulesInteractiveMessage } from '@/database/schemas/Servers'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument, type ServerModulesInteractiveMessage } from '@/database/schemas/Servers.js'
 import { EmbedBuilder, resolveColor } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
-import { resolveMessageComponents } from './CreateInteractiveMessage'
+import { type Context } from 'koa'
+import { resolveMessageComponents } from './CreateInteractiveMessage.js'
 
 export default async function updateInteractiveMessage(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -20,17 +20,22 @@ export default async function updateInteractiveMessage(ctx: Context) {
         embeds: interactiveMessage.message.embed.active
             ? [
                   new EmbedBuilder({
-                      title: interactiveMessage.message.embed.title,
-                      description: interactiveMessage.message.embed.description,
-                      url: interactiveMessage.message.embed.url,
-                      timestamp: interactiveMessage.message.embed.timestamp ? new Date(interactiveMessage.message.embed.timestamp) : null,
-                      color: interactiveMessage.message.embed.color ? resolveColor(interactiveMessage.message.embed.color as any) : null,
+                      title: interactiveMessage.message.embed.title ?? undefined,
+                      description: interactiveMessage.message.embed.description ?? undefined,
+                      url: interactiveMessage.message.embed.url ?? undefined,
+                      // @ts-ignore
+                      timestamp: interactiveMessage.message.embed.timestamp
+                          ? new Date(interactiveMessage.message.embed.timestamp)
+                          : null,
+                      color: interactiveMessage.message.embed.color
+                          ? resolveColor(interactiveMessage.message.embed.color as any)
+                          : undefined,
                       fields: interactiveMessage.message.embed.fields,
                       author: interactiveMessage.message.embed.author as any,
                       thumbnail: interactiveMessage.message.embed.thumbnail as any,
                       image: interactiveMessage.message.embed.image as any,
                       footer: interactiveMessage.message.embed.footer as any
-                  }).toJSON()
+                  } as any).toJSON()
               ]
             : [],
         components: resolveMessageComponents(interactiveMessage.components)
@@ -42,38 +47,57 @@ export default async function updateInteractiveMessage(ctx: Context) {
         message.embeds = data.message?.embed?.active
             ? [
                   new EmbedBuilder({
-                      title: data.message.embed.title ? data.message.embed.title : interactiveMessage.message.embed.title,
-                      description: data.message.embed.description ? data.message.embed.description : interactiveMessage.message.embed.description,
-                      url: data.message.embed.url ? data.message.embed.url : interactiveMessage.message.embed.url,
+                      title:
+                          (data.message.embed.title
+                              ? data.message.embed.title
+                              : interactiveMessage.message.embed.title) ?? undefined,
+                      description:
+                          (data.message.embed.description
+                              ? data.message.embed.description
+                              : interactiveMessage.message.embed.description) ?? undefined,
+                      url:
+                          (data.message.embed.url ? data.message.embed.url : interactiveMessage.message.embed.url) ??
+                          undefined,
+                      // @ts-ignore
                       timestamp: data.message.embed.timestamp
                           ? new Date(data.message.embed.timestamp)
                           : interactiveMessage.message.embed.timestamp
-                          ? new Date(interactiveMessage.message.embed.timestamp)
-                          : null,
+                            ? new Date(interactiveMessage.message.embed.timestamp)
+                            : undefined,
                       color: data.message.embed.color
                           ? data.message.embed.color
                               ? resolveColor(data.message.embed.color as any)
-                              : null
+                              : undefined
                           : interactiveMessage.message.embed.color
-                          ? resolveColor(interactiveMessage.message.embed.color as any)
-                          : null,
+                            ? resolveColor(interactiveMessage.message.embed.color as any)
+                            : undefined,
                       fields: data.message.embed.fields ?? interactiveMessage.message.embed.fields,
                       author: {
-                          name: data.message.embed.author?.name ? data.message.embed.author.name : interactiveMessage.message.embed.author.name,
-                          url: data.message.embed.author?.url ? data.message.embed.author.url : interactiveMessage.message.embed.author.url,
+                          name: data.message.embed.author?.name
+                              ? data.message.embed.author.name
+                              : interactiveMessage.message.embed.author.name!,
+                          url: data.message.embed.author?.url
+                              ? data.message.embed.author.url
+                              : interactiveMessage.message.embed.author.url!,
                           icon_url: data.message.embed.author?.icon_url
                               ? data.message.embed.author.icon_url
-                              : interactiveMessage.message.embed.author.icon_url
+                              : interactiveMessage.message.embed.author.icon_url!
                       },
-                      thumbnail: (data.message.embed.thumbnail ? data.message.embed.thumbnail : interactiveMessage.message.embed.thumbnail) as any,
-                      image: (data.message.embed.image ? data.message.embed.image : interactiveMessage.message.embed.image) as any,
+                      thumbnail: (data.message.embed.thumbnail
+                          ? data.message.embed.thumbnail
+                          : interactiveMessage.message.embed.thumbnail) as any,
+                      image: (data.message.embed.image
+                          ? data.message.embed.image
+                          : interactiveMessage.message.embed.image) as any,
                       footer: {
-                          text: data.message.embed.footer?.text ? data.message.embed.footer.text : interactiveMessage.message.embed.footer.text,
+                          text: data.message.embed.footer?.text
+                              ? data.message.embed.footer.text
+                              : interactiveMessage.message.embed.footer.text!,
                           icon_url: data.message.embed.footer?.icon_url
                               ? data.message.embed.footer.icon_url
-                              : interactiveMessage.message.embed.footer.icon_url
+                              : interactiveMessage.message.embed.footer.icon_url!
                       }
-                  }).toJSON()
+                  } as any).toJSON()
               ]
             : []
     }
@@ -85,9 +109,12 @@ export default async function updateInteractiveMessage(ctx: Context) {
 
     if (hasChanges) {
         try {
-            await DiscordUtils.rest.patch(DiscordUtils.restRoutes.channelMessage(interactiveMessage.channel_id, interactiveMessage.id), {
-                body: message
-            })
+            await DiscordUtils.rest.patch(
+                DiscordUtils.restRoutes.channelMessage(interactiveMessage.channel_id, interactiveMessage.id),
+                {
+                    body: message
+                }
+            )
 
             await database.servers.updateOne(
                 { _id: server._id, 'modules.interactive_messages.id': interactiveMessage.id },
@@ -120,7 +147,9 @@ export default async function updateInteractiveMessage(ctx: Context) {
                     DiscordUtils.restRoutes.channelMessageOwnReaction(
                         interactiveMessage.channel_id,
                         interactiveMessage.id,
-                        encodeURIComponent(reaction.emoji.id ? `${reaction.emoji.name}:${reaction.emoji.id}` : reaction.emoji.name)
+                        encodeURIComponent(
+                            reaction.emoji.id ? `${reaction.emoji.name}:${reaction.emoji.id}` : reaction.emoji.name
+                        )
                     )
                 )
             } catch (err) {
@@ -134,7 +163,9 @@ export default async function updateInteractiveMessage(ctx: Context) {
                     DiscordUtils.restRoutes.channelMessageOwnReaction(
                         interactiveMessage.channel_id,
                         interactiveMessage.id,
-                        encodeURIComponent(reaction.emoji.id ? `${reaction.emoji.name}:${reaction.emoji.id}` : reaction.emoji.name)
+                        encodeURIComponent(
+                            reaction.emoji.id ? `${reaction.emoji.name}:${reaction.emoji.id}` : reaction.emoji.name
+                        )
                     )
                 )
             } catch (err) {

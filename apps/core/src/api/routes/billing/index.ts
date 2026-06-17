@@ -1,9 +1,9 @@
+import { authenticate } from '@/api/utility/Authentication.js'
 import Router from '@koa/router'
-import { authenticate } from '../../utility/Authentication'
-import cancelPayment from './methods/CancelPayment'
-import chargePayment from './methods/ChargePayment'
-import createPayment from './methods/CreatePayment'
-import createSubscription from './methods/CreateSubscription'
+import cancelPayment from './methods/CancelPayment.js'
+import chargePayment from './methods/ChargePayment.js'
+import createPayment from './methods/CreatePayment.js'
+import createSubscription from './methods/CreateSubscription.js'
 
 const router = new Router({ prefix: '/billing', methods: ['GET', 'POST'] })
 

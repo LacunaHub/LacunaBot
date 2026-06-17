@@ -1,8 +1,8 @@
-import { Document, model, Schema } from 'mongoose'
+import mongoose from 'mongoose'
 
-export default model<YouTubeSubDocument>(
+export default mongoose.model<YouTubeSubDocument>(
     'youtube-subs',
-    new Schema<YouTubeSubDocument>(
+    new mongoose.Schema<YouTubeSubDocument>(
         {
             _id: { type: String, required: true },
             channel_name: { type: String, required: true },
@@ -15,7 +15,7 @@ export default model<YouTubeSubDocument>(
     )
 )
 
-export interface YouTubeSubDocument extends Document {
+export interface YouTubeSubDocument extends mongoose.Document {
     _id: string
     channel_name: string
     channel_thumbnail_url: string

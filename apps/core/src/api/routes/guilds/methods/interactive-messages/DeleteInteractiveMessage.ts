@@ -1,8 +1,8 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type Context } from 'koa'
 
 export default async function deleteInteractiveMessage(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -12,7 +12,9 @@ export default async function deleteInteractiveMessage(ctx: Context) {
     if (!interactiveMessage) ctx.throw(404, new APIError(1012))
 
     try {
-        await DiscordUtils.rest.delete(DiscordUtils.restRoutes.channelMessage(interactiveMessage.channel_id, interactiveMessage.id))
+        await DiscordUtils.rest.delete(
+            DiscordUtils.restRoutes.channelMessage(interactiveMessage.channel_id, interactiveMessage.id)
+        )
     } catch (err) {}
 
     await database.servers.updateOne(

@@ -1,6 +1,6 @@
+import { CommandGroup, type CommandOptions } from '@/internals/structures/Command.js'
 import { ApplicationCommandOptionType } from 'discord.js'
-import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
-import { balanceSlash, transferSlash } from './slash'
+import { balanceSlash, transferSlash } from './slash.js'
 
 const options: CommandOptions = {
     description: 'Commands.WalletCommand.Description',

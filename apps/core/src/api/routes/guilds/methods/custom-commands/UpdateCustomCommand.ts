@@ -1,9 +1,9 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
-import { validateCustomCommand } from '../../../../utility/validators/ValidateCustomCommand'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import { validateCustomCommand } from '@/api/utility/validators/ValidateCustomCommand.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type Context } from 'koa'
 
 export default async function updateCustomCommand(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -18,7 +18,11 @@ export default async function updateCustomCommand(ctx: Context) {
     if (JSON.stringify(data.command) !== JSON.stringify(command.command)) {
         try {
             await DiscordUtils.rest.patch(
-                DiscordUtils.restRoutes.applicationGuildCommand(process.env.LCN_DISCORD_CLIENT_ID, server._id, command.id),
+                DiscordUtils.restRoutes.applicationGuildCommand(
+                    process.env.LCN_DISCORD_CLIENT_ID!,
+                    server._id,
+                    command.id
+                ),
                 {
                     body: data.command
                 }
@@ -35,7 +39,7 @@ export default async function updateCustomCommand(ctx: Context) {
         }
     }
 
-    const updateData = {
+    const updateData: Record<string, any> = {
         $set: {
             'modules.custom_commands.$.options': data.options,
             'modules.custom_commands.$.command': data.command

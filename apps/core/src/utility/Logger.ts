@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { DestinationStream, multistream, pino, StreamEntry, transport } from 'pino'
+import { type DestinationStream, multistream, pino, type StreamEntry, transport } from 'pino'
 import pinoLoki from 'pino-loki'
 
 /**

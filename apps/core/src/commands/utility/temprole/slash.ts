@@ -1,9 +1,9 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import TemporaryRole from '@/internals/structures/TemporaryRole.js'
+import { generateSimpleId } from '@/internals/utility/Utils.js'
 import { ChatInputCommandInteraction, GuildMember, Role } from 'discord.js'
 import ms from 'ms'
-import Lacuna from '../../../internals/Lacuna'
-import TemporaryRole from '../../../internals/structures/TemporaryRole'
-import { generateSimpleId } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)

@@ -1,11 +1,15 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>) => {
+export default async (
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>
+) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const player = self.lava.nodes.getPlayer(interaction.guild.id)
+    const player = self.lava!.nodes.getPlayer(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({
@@ -18,10 +22,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    let volume: number
+    let volume!: number
 
     if (interaction.isChatInputCommand()) {
-        volume = interaction.options?.getInteger('volume')
+        volume = interaction.options?.getInteger('volume')!
     } else if (interaction.isButton()) {
         if (interaction.customId === 'PLAYER-VOLUME-DOWN') {
             volume = player.volume - 10

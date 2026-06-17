@@ -1,23 +1,31 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { BaseGuildTextChannel, Collection, MessageReaction, User } from 'discord.js'
-import Lacuna from '../internals/Lacuna'
 
-export async function handleReactionAdd(self: Lacuna, server: ServerDocument, reaction: MessageReaction, user: User): Promise<boolean> {
+export async function handleReactionAdd(
+    self: Lacuna,
+    server: ServerDocument,
+    reaction: MessageReaction,
+    user: User
+): Promise<boolean> {
     if (server.modules.reactions.length) {
         const message = reaction.message
         const interactiveReaction = server.modules.reactions
             .slice(0, server.premium.available ? 200 : 50)
-            .find(v => v.message.id === message.id && (v.emoji.id ? v.emoji.id === reaction.emoji.id : v.emoji.name === reaction.emoji.name))
+            .find(
+                v =>
+                    v.message.id === message.id &&
+                    (v.emoji.id ? v.emoji.id === reaction.emoji.id : v.emoji.name === reaction.emoji.name)
+            )
 
         if (!interactiveReaction) return false
 
-        const member = await message.guild.members.fetch(user.id)
+        const member = await message.guild!.members.fetch(user.id)
 
         if (interactiveReaction.type === 'CHANNEL') {
-            const channels = message.guild.channels.cache.filter(v => interactiveReaction.references.includes(v.id)) as Collection<
-                string,
-                BaseGuildTextChannel
-            >
+            const channels = message.guild!.channels.cache.filter(v =>
+                interactiveReaction.references.includes(v.id)
+            ) as Collection<string, BaseGuildTextChannel>
             if (!channels.size) return false
 
             for (const [, channel] of channels) {
@@ -49,7 +57,7 @@ export async function handleReactionAdd(self: Lacuna, server: ServerDocument, re
 
         if (interactiveReaction.type === 'ROLE') {
             let rolesToAdd = interactiveReaction.references,
-                rolesToRemove = []
+                rolesToRemove: string[] = []
 
             const isSingleIR = interactiveReaction.element.single || interactiveReaction.element.global_single,
                 isReverseIR = interactiveReaction.element.reverse
@@ -61,7 +69,11 @@ export async function handleReactionAdd(self: Lacuna, server: ServerDocument, re
 
             if (isSingleIR) {
                 const otherSingleIRs = server.modules.reactions
-                    .filter(v => v.id !== interactiveReaction.id && (v.element.global_single || (v.element.single && v.message.id === message.id)))
+                    .filter(
+                        v =>
+                            v.id !== interactiveReaction.id &&
+                            (v.element.global_single || (v.element.single && v.message.id === message.id))
+                    )
                     .flatMap(v => v.references)
                     .filter(v => member.roles.cache.has(v))
 
@@ -98,24 +110,30 @@ export async function handleReactionAdd(self: Lacuna, server: ServerDocument, re
     return false
 }
 
-export async function handleReactionRemove(self: Lacuna, server: ServerDocument, reaction: MessageReaction, user: User) {
+export async function handleReactionRemove(
+    self: Lacuna,
+    server: ServerDocument,
+    reaction: MessageReaction,
+    user: User
+) {
     if (server.modules.reactions.length) {
-        const t = self.i18n.t.bind(null, server.locale)
-
         const message = reaction.message
         const interactiveReaction = server.modules.reactions
             .slice(0, server.premium.available ? 200 : 50)
-            .find(v => v.message.id === message.id && (v.emoji.id ? v.emoji.id === reaction.emoji.id : v.emoji.name === reaction.emoji.name))
+            .find(
+                v =>
+                    v.message.id === message.id &&
+                    (v.emoji.id ? v.emoji.id === reaction.emoji.id : v.emoji.name === reaction.emoji.name)
+            )
 
         if (!interactiveReaction) return false
 
-        const member = await message.guild.members.fetch(user.id)
+        const member = await message.guild!.members.fetch(user.id)
 
         if (interactiveReaction.type === 'CHANNEL') {
-            const channels = message.guild.channels.cache.filter(v => interactiveReaction.references.includes(v.id)) as Collection<
-                string,
-                BaseGuildTextChannel
-            >
+            const channels = message.guild!.channels.cache.filter(v =>
+                interactiveReaction.references.includes(v.id)
+            ) as Collection<string, BaseGuildTextChannel>
             if (!channels.size) return false
 
             for (const [, channel] of channels) {
@@ -146,7 +164,7 @@ export async function handleReactionRemove(self: Lacuna, server: ServerDocument,
         }
 
         if (interactiveReaction.type === 'ROLE') {
-            let rolesToAdd = [],
+            let rolesToAdd: string[] = [],
                 rolesToRemove = interactiveReaction.references
 
             const isSingleIR = interactiveReaction.element.single || interactiveReaction.element.global_single,
@@ -159,7 +177,11 @@ export async function handleReactionRemove(self: Lacuna, server: ServerDocument,
 
             if (isSingleIR) {
                 const otherSingleIRs = server.modules.reactions
-                    .filter(v => v.id !== interactiveReaction.id && (v.element.global_single || (v.element.single && v.message.id === message.id)))
+                    .filter(
+                        v =>
+                            v.id !== interactiveReaction.id &&
+                            (v.element.global_single || (v.element.single && v.message.id === message.id))
+                    )
                     .flatMap(v => v.references)
                     .filter(v => member.roles.cache.has(v))
 

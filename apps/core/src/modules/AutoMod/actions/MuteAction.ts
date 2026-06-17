@@ -1,9 +1,9 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { createCaseLogEntry } from '@/modules/Moderation/CaseLog.js'
 import moment from 'moment'
 import ms from 'ms'
-import Lacuna from '../../../internals/Lacuna'
-import { createCaseLogEntry } from '../../Moderation/CaseLog'
-import { ActionOptions } from './BanAction'
+import { type ActionOptions } from './BanAction.js'
 
 export default async function muteAction(self: Lacuna, server: ServerDocument, options: ActionOptions) {
     const { config, guild, target } = options
@@ -18,7 +18,7 @@ export default async function muteAction(self: Lacuna, server: ServerDocument, o
         self.logger.error({ module: 'AutoMod', action: 'DisableCommunication', err, guildId: guild.id })
     }
 
-    await createCaseLogEntry(guild, { type: 'MuteAdd', target: target.user, executor: self.user, reason })
+    await createCaseLogEntry(guild, { type: 'MuteAdd', target: target.user, executor: self.user as any, reason })
 
     if (server.moderation.mutes.rar) {
         const currentRoles = target.roles.cache.filter(r => r.editable && r.id !== guild.id).map(r => r.id)

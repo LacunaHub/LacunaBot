@@ -1,5 +1,6 @@
-import { ServerDocument, ServerModulesLevelsAward } from '@/database/schemas/Servers'
-import { UserLevel } from '@/database/schemas/Users'
+import { type ServerDocument, type ServerModulesLevelsAward } from '@/database/schemas/Servers.js'
+import { type UserLevel } from '@/database/schemas/Users.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { createCanvas, Image, loadImage } from '@napi-rs/canvas'
 import {
     AttachmentBuilder,
@@ -9,16 +10,15 @@ import {
     Collection,
     ContextMenuCommandInteraction,
     GuildMember,
-    GuildTextBasedChannel,
+    type GuildTextBasedChannel,
     Message,
     Role,
     VoiceState
 } from 'discord.js'
 import numbro from 'numbro'
-import Lacuna from '../internals/Lacuna'
-import { DirectMessages } from './DirectMessages'
-import { borderRadiuses, roundImage } from './ImageGenerator'
-import Replacer from './Replacer'
+import { DirectMessages } from './DirectMessages.js'
+import { borderRadiuses, roundImage } from './ImageGenerator.js'
+import Replacer from './Replacer.js'
 
 export function hasRestrictedPermissions(options: IHasRestrictedPermissionsOptions) {
     const { channel, roles, allowedChannels, allowedRoles, blockedChannels, blockedRoles } = options
@@ -55,14 +55,14 @@ export function hasRestrictedPermissions(options: IHasRestrictedPermissionsOptio
     return false
 }
 
-export async function onMessageCreate(self: Lacuna, server: ServerDocument, message: Message): Promise<boolean> {
+export async function onMessageCreate(self: Lacuna, server: ServerDocument, message: Message<true>): Promise<boolean> {
     const { levels, activities } = server.modules
 
     if (!levels.active) return false
 
     const hasRestrictions = hasRestrictedPermissions({
         channel: message.channel as any,
-        roles: message.member.roles.cache,
+        roles: message.member!.roles.cache,
         allowedChannels: levels.allowed.channels,
         allowedRoles: levels.allowed.roles,
         blockedChannels: levels.blocked.channels,
@@ -84,13 +84,13 @@ export async function onMessageCreate(self: Lacuna, server: ServerDocument, mess
     )
 
     const userLevel = await self.db.users.fetchLevel(user, message.guildId)
-    if (Date.now() - userLevel.activity.last_message_at < 60000) return false
+    if (Date.now() - Number(userLevel.activity.last_message_at) < 60000) return false
 
     await self.db.users.fetchServerProfile(user, message.guildId, {
-        accent_color: message.member.displayColor,
-        avatar: message.member.avatar,
+        accent_color: message.member!.displayColor,
+        avatar: message.member!.avatar,
         banner: null,
-        nickname: message.member.nickname
+        nickname: message.member!.nickname
     })
 
     const currentXp: number = userLevel.experience.current
@@ -101,7 +101,7 @@ export async function onMessageCreate(self: Lacuna, server: ServerDocument, mess
         .filter(i => {
             const hasRestrictions = hasRestrictedPermissions({
                 channel: message.channel as any,
-                roles: message.member.roles.cache,
+                roles: message.member!.roles.cache,
                 allowedChannels: i.allowed_channels,
                 allowedRoles: i.allowed_roles,
                 blockedChannels: i.blocked_channels,
@@ -114,7 +114,7 @@ export async function onMessageCreate(self: Lacuna, server: ServerDocument, mess
         })
         .slice(0, server.premium.available ? 10 : 1)
 
-    const multiplier = multipliers.reduce((x, y) => x * (y.levels_text_multiplier / 100), 100) / 100
+    const multiplier = multipliers.reduce((x, y) => x * (Number(y.levels_text_multiplier) / 100), 100) / 100
     let points: number = Math.floor(Math.random() * 11) + 15 + currentLevel
 
     points *= multiplier || 1
@@ -139,7 +139,7 @@ export async function onMessageCreate(self: Lacuna, server: ServerDocument, mess
             }
         )
 
-        await sendLevelUpAlert(self, server, message, message.member)
+        await sendLevelUpAlert(self, server, message, message.member!)
     } else {
         userLevel.activity.last_message_at = Date.now()
         userLevel.activity.total_messages++
@@ -159,7 +159,7 @@ export async function onMessageCreate(self: Lacuna, server: ServerDocument, mess
         )
     }
 
-    await updateAwards(self, server, message.member, userLevel)
+    await updateAwards(self, server, message.member!, userLevel)
 
     self.emit('moduleExecution', {
         guildId: message.guildId,
@@ -177,15 +177,15 @@ export async function onVoiceConnect(self: Lacuna, server: ServerDocument, state
     if (!levels.voice) return false
     if (state.guild.afkChannelId === state.channelId) return false
 
-    const activeVoiceStates = state.guild.voiceStates.cache.filter(i => !i.member.user.bot && i.channelId).size
+    const activeVoiceStates = state.guild.voiceStates.cache.filter(i => !i.member!.user.bot && i.channelId).size
     if (activeVoiceStates >= 15 && !server.premium.available) return false
 
-    const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
+    const members = state.channel!.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
     if (members.size < 2) return false
 
     for (const [_, member] of members) {
         const hasRestrictions = hasRestrictedPermissions({
-            channel: state.channel,
+            channel: state.channel!,
             roles: member.roles.cache,
             allowedChannels: levels.allowed.channels,
             allowedRoles: levels.allowed.roles,
@@ -214,7 +214,10 @@ export async function onVoiceConnect(self: Lacuna, server: ServerDocument, state
             nickname: member.nickname
         })
 
-        if (!userLevel.activity.voice_connected_at || Date.now() - userLevel.activity.voice_connected_at > 1000 * 60 * 60 * 10) {
+        if (
+            !userLevel.activity.voice_connected_at ||
+            Date.now() - userLevel.activity.voice_connected_at > 1000 * 60 * 60 * 10
+        ) {
             await self.db.users.updateOne(
                 { _id: member.id, 'activities.levels.guild_id': server._id },
                 {
@@ -236,7 +239,12 @@ export async function onVoiceConnect(self: Lacuna, server: ServerDocument, state
     return true
 }
 
-export async function onVoiceDisconnect(self: Lacuna, server: ServerDocument, state: VoiceState, channel: BaseGuildVoiceChannel) {
+export async function onVoiceDisconnect(
+    self: Lacuna,
+    server: ServerDocument,
+    state: VoiceState,
+    channel: BaseGuildVoiceChannel
+) {
     if (!server.modules.levels.voice) return false
 
     const members = channel?.members?.filter?.(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
@@ -245,10 +253,16 @@ export async function onVoiceDisconnect(self: Lacuna, server: ServerDocument, st
         const targetMembers = members.size === 1 ? [state.member, members.first()] : [state.member]
 
         for (const member of targetMembers) {
+            if (!member) continue
+
             const user = await self.db.users.findOne({ _id: member.user.id }),
                 userLevel = user?.activities?.levels?.find(i => i.guild_id === server._id)
 
-            if (!userLevel?.activity?.voice_connected_at || Date.now() - userLevel.activity.voice_connected_at > 1000 * 60 * 60 * 10) continue
+            if (
+                !userLevel?.activity?.voice_connected_at ||
+                Date.now() - userLevel.activity.voice_connected_at > 1000 * 60 * 60 * 10
+            )
+                continue
 
             const currentXp: number = userLevel.experience.current
             const currentLevel: number = userLevel.experience.level,
@@ -271,7 +285,7 @@ export async function onVoiceDisconnect(self: Lacuna, server: ServerDocument, st
                 })
                 .slice(0, server.premium.available ? 10 : 1)
 
-            const multiplier = multipliers.reduce((x, y) => x * (y.levels_voice_multiplier / 100), 100) / 100
+            const multiplier = multipliers.reduce((x, y) => x * (Number(y.levels_voice_multiplier) / 100), 100) / 100
             const time: number = (Date.now() - userLevel.activity.voice_connected_at) / 1000
             let points: number =
                 ((time / 60) * (time / 60 / 60 <= 0 ? 1 : time / 60 / 60) + (5 / 100) * time) *
@@ -353,7 +367,7 @@ export async function updateAwards(
         const aValues = a.conditions ? Object.values(a.conditions) : [a.level, 0, 0],
             bValues = b.conditions ? Object.values(b.conditions) : [b.level, 0, 0]
 
-        return aValues.some((v, i) => v > bValues[i]) ? -1 : 1
+        return aValues.some((v, i) => v > bValues[i]!) ? -1 : 1
     })
 
     if (award) {
@@ -371,16 +385,16 @@ export async function updateAwards(
                 : userLevel.experience.level === v.level
         })
 
-        conditionsMet = !!award
-        isAwardReceived = award && userLevel.received_awards?.includes?.(award.id)
+        conditionsMet = Boolean(award)
+        isAwardReceived = Boolean(award && userLevel.received_awards?.includes?.(award.id))
     }
 
     if (conditionsMet) {
         if (isAwardReceived) return null
 
         try {
-            const rolesToAdd = award.references.filter(v => !member.roles.cache.has(v)),
-                rolesToRemove = award.remove_references?.filter?.(v => member.roles.cache.has(v)) ?? []
+            const rolesToAdd = award!.references.filter(v => !member.roles.cache.has(v)),
+                rolesToRemove = award!.remove_references?.filter?.(v => member.roles.cache.has(v)) ?? []
 
             if (rolesToAdd.length) {
                 await member.roles.add(rolesToAdd)
@@ -390,28 +404,28 @@ export async function updateAwards(
                 await member.roles.remove(rolesToRemove)
             }
 
-            if (!userLevel.received_awards?.includes?.(award.id)) {
+            if (!userLevel.received_awards?.includes?.(award!.id)) {
                 await self.db.users.updateOne(
                     { _id: member.id, 'activities.levels.guild_id': server._id },
                     {
                         $push: {
-                            'activities.levels.$.received_awards': award.id
+                            'activities.levels.$.received_awards': award!.id
                         }
                     }
                 )
             }
 
-            if (award.alert.active) {
+            if (award!.alert.active) {
                 try {
                     const replacer = new Replacer(server.premium.available, { guild: member.guild, member: member }),
-                        messagePayload = await replacer.replaceTemplateMessage(award.alert.message)
+                        messagePayload = await replacer.replaceTemplateMessage(award!.alert.message)
 
-                    if (award.alert.format === 'DM') {
-                        await DirectMessages.send(self, member, messagePayload)
+                    if (award!.alert.format === 'DM') {
+                        DirectMessages.send(self, member, messagePayload)
                     }
 
-                    if (award.alert.format === 'CHANNEL') {
-                        const channel = member.guild.channels.cache.get(award.alert.channel_id) as BaseGuildTextChannel
+                    if (award!.alert.format === 'CHANNEL') {
+                        const channel = member.guild.channels.cache.get(award!.alert.channel_id) as BaseGuildTextChannel
 
                         if (channel) {
                             await channel.send(messagePayload)
@@ -436,7 +450,12 @@ export async function updateAwards(
     return award
 }
 
-export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, signal: Message | VoiceState, member: GuildMember) {
+export async function sendLevelUpAlert(
+    self: Lacuna,
+    server: ServerDocument,
+    signal: Message<true> | VoiceState,
+    member: GuildMember
+) {
     const alert = server.modules.levels.level_up_alerts
 
     if (alert.active) {
@@ -449,7 +468,7 @@ export async function sendLevelUpAlert(self: Lacuna, server: ServerDocument, sig
             }
 
             if (alert.format === 'DM') {
-                await DirectMessages.send(self, member, messagePayload)
+                DirectMessages.send(self, member, messagePayload)
             }
 
             if (alert.format === 'CHANNEL') {
@@ -476,22 +495,22 @@ export async function generateRankCard(
     self: Lacuna,
     signal: ChatInputCommandInteraction | ContextMenuCommandInteraction
 ): Promise<AttachmentBuilder> {
-    let mention: GuildMember
+    let mention!: GuildMember
 
     if (signal.isChatInputCommand()) mention = (signal.options?.getMember('user') || signal.member) as GuildMember
-    if (signal.isContextMenuCommand()) mention = await signal.guild.members.fetch(signal.targetId)
+    if (signal.isContextMenuCommand()) mention = await signal.guild!.members.fetch(signal.targetId)
 
     const activities = (await self.db.users.find({ 'activities.levels.guild_id': signal.guildId })).map(i => ({
         user_id: i._id,
-        ...i.activities.levels.find(i => i.guild_id == signal.guildId)
+        ...i.activities.levels.find(i => i.guild_id === signal.guildId)
     }))
 
-    const sorted = activities.sort((a, b) => b.experience.total - a.experience.total)
-    let level = sorted.find(i => i.user_id == mention.id)
+    const sorted = activities.sort((a, b) => Number(b.experience?.total) - Number(a.experience?.total))
+    let level = sorted.find(i => i.user_id === mention.id)!
 
     if (!level) {
         level = {
-            guild_id: signal.guildId,
+            guild_id: signal.guildId!,
             experience: { total: 0, current: 0, level: 0 },
             activity: {
                 total_messages: 0,
@@ -510,10 +529,10 @@ export async function generateRankCard(
 
     ctx.save()
 
-    let banner: Image
+    let banner!: Image | null
 
     try {
-        if (mention.user?.banner) banner = await loadImage(mention.user?.bannerURL({ extension: 'png', size: 512 }))
+        if (mention.user?.banner) banner = await loadImage(mention.user!.bannerURL({ extension: 'png', size: 512 })!)
     } catch (err) {
         banner = null
     }
@@ -574,8 +593,8 @@ export async function generateRankCard(
     ctx.restore()
     ctx.globalAlpha = 1.0
 
-    const formula = 150 + level.experience.level * level.experience.level * 8
-    const percent = Math.floor((level.experience.current * 100) / formula)
+    const formula = 150 + Number(level.experience?.level) * Number(level.experience?.level) * 8
+    const percent = Math.floor((Number(level.experience?.current) * 100) / formula)
     const progress = Math.floor((650 * percent) / 100)
 
     ctx.strokeStyle = color
@@ -623,26 +642,32 @@ export async function generateRankCard(
     ctx.fillText('LV.', 160, 117)
     ctx.font = '25px Gotham Pro Medium'
     ctx.fillStyle = '#ffffff'
-    ctx.fillText(`${level.experience.level}`, 165 + m4.width, 117)
+    ctx.fillText(`${Number(level.experience?.level)}`, 165 + m4.width, 117)
     //ctx.drawImage(lvl, 160, 95, 25, 25)
 
     ctx.font = '22px Gotham Pro Medium'
     ctx.fillStyle = '#545B5F'
     ctx.textAlign = 'end'
-    const m3 = ctx.measureText(`${level.activity.total_messages}`)
-    ctx.fillText(`${level.activity.total_messages}`, 695, 117)
+    const m3 = ctx.measureText(`${Number(level.activity?.total_messages)}`)
+    ctx.fillText(`${Number(level.activity?.total_messages)}`, 695, 117)
     ctx.drawImage(messages, 690 - 25 - m3.width, 95, 25, 25)
 
-    const voice_time = numbro(level.activity.total_voice_time).format({ output: 'time' })
+    // @ts-expect-error
+    const voice_time = numbro(Number(level.activity?.total_voice_time)).format({ output: 'time' })
     const m5 = ctx.measureText(voice_time)
     ctx.fillText(voice_time, 620 - m3.width / 2, 117)
     ctx.drawImage(microphone, 615 - m3.width / 2 - 25 - m5.width, 95, 25, 25)
 
     const current_xp_format =
-        level.experience.current >= 1000
-            ? numbro(Math.floor(level.experience.current)).format({ average: true, mantissa: 2 }).toUpperCase()
-            : Math.floor(level.experience.current)
-    const next_xp_format = formula >= 1000 ? numbro(formula).format({ average: true, mantissa: 2 }).toUpperCase() : formula
+        Number(level.experience?.current) >= 1000
+            ? // @ts-expect-error
+              numbro(Math.floor(Number(level.experience?.current)))
+                  .format({ average: true, mantissa: 2 })
+                  .toUpperCase()
+            : Math.floor(Number(level.experience?.current))
+    const next_xp_format =
+        // @ts-expect-error
+        formula >= 1000 ? numbro(formula).format({ average: true, mantissa: 2 }).toUpperCase() : formula
 
     ctx.textBaseline = 'top'
     ctx.font = '20px Gotham Pro Medium'

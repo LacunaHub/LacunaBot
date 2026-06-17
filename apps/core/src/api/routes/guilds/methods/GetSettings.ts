@@ -1,31 +1,30 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { CommandGroup } from '@/internals/structures/Command.js'
+import { supportServerId } from '@/internals/utility/Constants.js'
 import {
-    APIApplicationCommand,
-    APIAutoModerationRule,
-    APIEmoji,
-    APIGuildChannel,
-    APIGuildMember,
-    APIRole,
-    APISortableChannel,
+    type APIApplicationCommand,
+    type APIAutoModerationRule,
+    type APIEmoji,
+    type APIGuildChannel,
+    type APIGuildMember,
+    type APIRole,
+    type APISortableChannel,
     ChannelType,
-    GuildChannelType,
     PermissionsBitField,
-    RESTAPIPartialCurrentUserGuild,
+    type RESTAPIPartialCurrentUserGuild,
     makeURLSearchParams
 } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../database'
-import { CommandGroup } from '../../../../internals/structures/Command'
-import { supportServerId } from '../../../../internals/utility/Constants'
-import APIError from '../../../utility/APIError'
-import DiscordUtils from '../../../utility/DiscordUtils'
+import { type Context } from 'koa'
 
 export default async function getSettings(ctx: Context) {
     const guildId: string = ctx.params.guildId,
         guild: RESTAPIPartialCurrentUserGuild = ctx.state.guild
     const server: ServerDocument = ctx.state.server
 
-    let selfMember: APIGuildMember
+    let selfMember!: APIGuildMember
 
     try {
         selfMember = (await DiscordUtils.rest.get(
@@ -51,7 +50,7 @@ export default async function getSettings(ctx: Context) {
             DiscordUtils.restRoutes.guildAutoModerationRules(guildId)
         )) as any
         selfCommands = (await DiscordUtils.rest.get(
-            DiscordUtils.restRoutes.applicationCommands(process.env.LCN_DISCORD_CLIENT_ID),
+            DiscordUtils.restRoutes.applicationCommands(process.env.LCN_DISCORD_CLIENT_ID!),
             {
                 query: makeURLSearchParams({ with_localizations: true }) as any
             }
@@ -62,7 +61,7 @@ export default async function getSettings(ctx: Context) {
         .sort((a, b) => a.position - b.position)
         .filter(r => selfMember.roles.includes(r.id) || r.tags?.bot_id == process.env.LCN_DISCORD_CLIENT_ID)
     const selfHighestRole = selfRoles.length
-        ? selfRoles.reduce((x, y) => (DiscordUtils.compareRolePositions(x, y) ? y : x), selfRoles[0])
+        ? selfRoles.reduce((x, y) => (DiscordUtils.compareRolePositions(x, y) ? y : x), selfRoles[0]!)
         : null
     const selfPermissions = selfRoles.reduce((x, y) => x | BigInt(y.permissions), 0n)
 
@@ -84,7 +83,7 @@ export default async function getSettings(ctx: Context) {
             return {
                 id: r.id,
                 name: r.name,
-                color: r.color,
+                color: r.colors.primary_color,
                 position: r.position,
                 managed: r.managed,
                 higher: !selfHighestRole || selfHighestRole.position <= r.position
@@ -99,7 +98,7 @@ export default async function getSettings(ctx: Context) {
         }
     })
 
-    const commandsCache = (await database.qdb.get('commands')) as any
+    const commandsCache = (await database.qdb.get('commands')) as Record<string, any>[]
     const env = await database.getEnv(),
         aiModClosedBetaServerIds = [supportServerId, ...(env.aiClosedBetaServerIds ?? [])]
 
@@ -152,9 +151,11 @@ export default async function getSettings(ctx: Context) {
                     const commandCache = commandsCache.find(ii => ii.name === i.name)
 
                     return {
+                        // @ts-ignore
                         name: i.name_localizations?.[server.locale] ?? i.name,
+                        // @ts-ignore
                         description: i.description_localizations?.[server.locale] ?? i.description,
-                        group: CommandGroup[commandCache?.group].toUpperCase()
+                        group: CommandGroup[commandCache?.group]!.toUpperCase()
                     }
                 })
         },

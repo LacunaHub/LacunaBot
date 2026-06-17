@@ -1,4 +1,4 @@
-import Lacuna from '../../internals/Lacuna'
+import Lacuna from '@/internals/Lacuna.js'
 
 const handler = async (self: Lacuna, data: CommandExecutionData) => {
     const { guildId, channelId, userId, command, options } = data

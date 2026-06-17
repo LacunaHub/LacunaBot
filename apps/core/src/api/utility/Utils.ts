@@ -1,7 +1,7 @@
-import { Context, Next } from 'koa'
+import database from '@/database/index.js'
+import { type Context, type Next } from 'koa'
 import koaRatelimit from 'koa-ratelimit'
-import database from '../../database'
-import APIError from './APIError'
+import APIError from './APIError.js'
 
 export async function passKnownReferrers(ctx: Context, next: Next): Promise<any> {
     const referer = ctx.request.headers.referer

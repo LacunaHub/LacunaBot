@@ -1,25 +1,27 @@
 import {
-    ServerDocument,
-    ServerModulesAutomation,
+    type ServerDocument,
+    type ServerModulesAutomation,
     ServerModulesAutomationOptions,
     ServerModulesAutomationTriggers,
-    ServerModulesCustomCommandScript,
+    type ServerModulesCustomCommandScript,
     ServerModulesCustomCommandScriptLanguages
-} from '@/database/schemas/Servers'
-import Logger from '@/utility/Logger'
+} from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { snakeToPascalCase } from '@/internals/utility/Utils.js'
+import Logger from '@/utility/Logger.js'
 import {
-    AnySelectMenuInteraction,
+    type AnySelectMenuInteraction,
     ButtonInteraction,
     Guild,
     GuildMember,
-    GuildTextBasedChannel,
+    type GuildTextBasedChannel,
     Message,
     MessageComponentInteraction,
     ModalSubmitInteraction,
     User,
     VoiceState
 } from 'discord.js'
-import { Context, Isolate } from 'isolated-vm'
+import IVM from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'
 import {
     convertComponentsToScript,
@@ -30,9 +32,7 @@ import {
     serializeMember,
     serializeMessage,
     serializeVoiceState
-} from '.'
-import Lacuna from '../../internals/Lacuna'
-import { snakeToPascalCase } from '../../internals/utility/Utils'
+} from './index.js'
 
 export default class Automation {
     public self: Lacuna
@@ -43,7 +43,7 @@ export default class Automation {
     public storage: QDatabase
     public usedPatterns: string[]
     public usedFunctions: string[]
-    public isolate: Isolate
+    public isolate: IVM.Isolate
 
     constructor(
         self: Lacuna,
@@ -67,13 +67,13 @@ export default class Automation {
             this.self.isolates.get(this.guild.id) ??
             this.self.isolates
                 .set(this.guild.id, {
-                    value: new Isolate({
+                    value: new IVM.Isolate({
                         memoryLimit: 8,
                         onCatastrophicError: message => Logger.error({ message }, 'ivm catastrophic error')
                     }),
                     lastUsed: Date.now()
                 })
-                .get(this.guild.id)
+                .get(this.guild.id)!
 
         isolateState.lastUsed = Date.now()
         this.isolate = isolateState.value
@@ -118,7 +118,7 @@ export default class Automation {
         const globalValues = await this.getGlobalValues()
 
         for (const value of Object.keys(globalValues)) {
-            ctx.global.setSync(value, globalValues[value], { copy: true })
+            ctx.global.setSync(value, (globalValues as any)[value], { copy: true })
         }
 
         extendStorage(this, ctx, this.server._id)
@@ -130,12 +130,12 @@ export default class Automation {
         }
 
         this.self.logger.info(
-            { guildId: this.guild.id, userId: globalValues.member.user.id, usedPatterns: this.usedPatterns },
+            { guildId: this.guild.id, userId: globalValues.member?.user?.id, usedPatterns: this.usedPatterns },
             'automation execution'
         )
         this.self.emit('moduleExecution', {
             guildId: this.guild.id,
-            targetId: globalValues.member.user.id,
+            targetId: globalValues.member?.user?.id,
             module: 'Automation',
             category: snakeToPascalCase(this.automation.trigger)
         })
@@ -145,7 +145,7 @@ export default class Automation {
         return true
     }
 
-    private async executeScripts(ctx: Context, scripts: ServerModulesCustomCommandScript[]) {
+    private async executeScripts(ctx: IVM.Context, scripts: ServerModulesCustomCommandScript[]) {
         scripts = scripts
             .filter(v => v.language === ServerModulesCustomCommandScriptLanguages.JavaScript && v.code.length > 0)
             .slice(0, this.server.premium.available ? 10 : 1)
@@ -178,19 +178,20 @@ export default class Automation {
 
         if (ams.length) {
             if ('customId' in signal) {
-                signal['customId' as any] = signal.customId.replace('UD-', '')
+                // @ts-ignore
+                signal['customId'] = signal.customId.replace('UD-', '')
             }
 
             const shouldOverwriteProps = !!Object.keys(options.overwriteSignalProps ?? {}).length
             if (shouldOverwriteProps) {
                 signal = Object.create(signal)
 
-                for (const prop of Object.keys(options.overwriteSignalProps)) {
-                    signal[prop] = options.overwriteSignalProps[prop]
+                for (const prop of Object.keys(options.overwriteSignalProps!)) {
+                    ;(signal as any)[prop] = options.overwriteSignalProps![prop]
                 }
             }
 
-            let eventParams: AutomationEventParams
+            let eventParams!: AutomationEventParams
             if ('avatar' in signal) {
                 eventParams = {
                     guild: signal.guild,
@@ -233,8 +234,8 @@ export default class Automation {
 
 export interface AutomationEventParams {
     guild: Guild
-    channel: GuildTextBasedChannel
-    member: GuildMember
+    channel: GuildTextBasedChannel | null
+    member: GuildMember | null
     interaction?: MessageComponentInteraction<'cached'> | ModalSubmitInteraction<'cached'>
     message?: Message<true>
     voiceState?: VoiceState

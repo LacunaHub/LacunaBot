@@ -1,5 +1,5 @@
-import { Context } from 'koa'
-import database from '../../../../database'
+import database from '@/database/index.js'
+import { type Context } from 'koa'
 
 export default async function getPatrons(ctx: Context) {
     const patrons = await database.users.find({ 'premium.last_charge_timestamp': { $ne: null } })

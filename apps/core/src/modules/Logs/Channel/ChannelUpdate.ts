@@ -1,10 +1,14 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { AuditLogEvent, EmbedBuilder, GuildAuditLogsEntry } from 'discord.js'
 import numbro from 'numbro'
-import { isRateLimited, LogEventData, sendLog } from '..'
-import Lacuna from '../../../internals/Lacuna'
+import { isRateLimited, type LogEventData, sendLog } from '../index.js'
 
-export default async function (self: Lacuna, server: ServerDocument, data: ChannelUpdateLogEventData): Promise<boolean> {
+export default async function (
+    self: Lacuna,
+    server: ServerDocument,
+    data: ChannelUpdateLogEventData
+): Promise<boolean> {
     if (!server.moderation.logs.types.channel_update.active) return false
     if (isRateLimited(server._id, server.premium.available)) return false
 
@@ -13,8 +17,9 @@ export default async function (self: Lacuna, server: ServerDocument, data: Chann
     const channel = auditLogEntry.target,
         executor = auditLogEntry.executor
 
-    const logChannel = guild.channels.cache.get(server.moderation.logs.types.channel_update.channel_id)
-    if (!logChannel || !logChannel.permissionsFor(guild.members.me).has(self.PermissionFlags.ManageWebhooks)) return false
+    const logChannel = guild.channels.cache.get(server.moderation.logs.types.channel_update.channel_id!)
+    if (!logChannel || !logChannel.permissionsFor(guild.members.me!).has(self.PermissionFlags.ManageWebhooks))
+        return false
 
     const nameChange = auditLogEntry.changes.find(v => v.key === 'name'),
         topicChange = auditLogEntry.changes.find(v => v.key === 'topic'),
@@ -96,12 +101,18 @@ export default async function (self: Lacuna, server: ServerDocument, data: Chann
             .setFields([
                 {
                     name: t('Logs.BeforeChange'),
-                    value: rateLimitPerUserChange.old ? numbro(rateLimitPerUserChange.old).format({ output: 'time' }) : '-',
+                    value: rateLimitPerUserChange.old
+                        ? // @ts-expect-error
+                          numbro(rateLimitPerUserChange.old).format({ output: 'time' })
+                        : '-',
                     inline: true
                 },
                 {
                     name: t('Logs.AfterChange'),
-                    value: rateLimitPerUserChange.new ? numbro(rateLimitPerUserChange.new).format({ output: 'time' }) : '-',
+                    value: rateLimitPerUserChange.new
+                        ? // @ts-expect-error
+                          numbro(rateLimitPerUserChange.new).format({ output: 'time' })
+                        : '-',
                     inline: true
                 }
             ])
@@ -133,8 +144,8 @@ export default async function (self: Lacuna, server: ServerDocument, data: Chann
                 })
             )
             .setFields([
-                { name: t('Logs.BeforeChange'), value: `${bitrateChange.old / 1000}kbps`, inline: true },
-                { name: t('Logs.AfterChange'), value: `${bitrateChange.new / 1000}kbps`, inline: true }
+                { name: t('Logs.BeforeChange'), value: `${Number(bitrateChange.old) / 1000}kbps`, inline: true },
+                { name: t('Logs.AfterChange'), value: `${Number(bitrateChange.new) / 1000}kbps`, inline: true }
             ])
             .setFooter({ text: `CID: ${channel.id}` })
             .setTimestamp()

@@ -1,9 +1,9 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { DirectMessages } from '@/modules/DirectMessages'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { DirectMessages } from '@/modules/DirectMessages.js'
+import { createCaseLogEntry } from '@/modules/Moderation/CaseLog.js'
+import Replacer from '@/modules/Replacer.js'
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import { createCaseLogEntry } from '../../../modules/Moderation/CaseLog'
-import Replacer from '../../../modules/Replacer'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -44,7 +44,10 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         return false
     }
 
-    if (server.moderation.respect_hierarchy && mention.roles.highest.position > interaction.member.roles.highest.position) {
+    if (
+        server.moderation.respect_hierarchy &&
+        mention.roles.highest.position > interaction.member.roles.highest.position
+    ) {
         await interaction.reply({
             content: `${self.staticEmojis.Cross} | ${t('Commands.BanCommand.Texts.UserRoleIsHigherThanYour', {
                 username: `**${interaction.member.displayName}**`
@@ -81,7 +84,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
     if (server.moderation.case_log.types.KICK.active) {
         const replacer = new Replacer(server.premium.available, { guild: interaction.guild, member: mention }),
-            messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.KICK.dm_message, { penalty: { reason } })
+            messagePayload = await replacer.replaceTemplateMessage(server.moderation.case_log.types.KICK.dm_message, {
+                penalty: { reason }
+            })
 
         try {
             await DirectMessages.send(self, mention, messagePayload)
@@ -96,7 +101,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
         self.logger.error({ module: 'KickCommand', action: 'Kick', err, guildId: interaction.guildId })
     }
 
-    await createCaseLogEntry(interaction.guild, { type: 'Kick', target: mention.user, executor: interaction.user, reason })
+    await createCaseLogEntry(interaction.guild, {
+        type: 'Kick',
+        target: mention.user,
+        executor: interaction.user,
+        reason
+    })
     await interaction.editReply({
         content: `${self.staticEmojis.Check} | ${t('Commands.KickCommand.Texts.UserHasBeenKicked', {
             username: `**${interaction.member.displayName}**`,

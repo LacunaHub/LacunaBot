@@ -1,17 +1,17 @@
-import { ServerDocument, ServerModerationWarningsViolator } from '@/database/schemas/Servers'
+import { type ServerDocument, type ServerModerationWarningsViolator } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { chunkArray, truncateString } from '@/internals/utility/Utils.js'
 import {
     ActionRowBuilder,
+    type APIEmbedField,
     ButtonBuilder,
     ButtonStyle,
     ChatInputCommandInteraction,
     ComponentType,
     EmbedBuilder,
-    EmbedField,
     GuildMember,
     Message
 } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import { chunkArray, truncateString } from '../../../internals/utility/Utils'
 
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
@@ -35,7 +35,9 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         const last24Hr = violator.violations.filter(v => Date.now() - v.timestamp < 86400000)
         const last7d = violator.violations.filter(v => Date.now() - v.timestamp < 604800000)
-        const last10Violations = violator.violations.slice(Math.max(violator.violations.length - 10, 0)).sort((a, b) => a.timestamp - b.timestamp)
+        const last10Violations = violator.violations
+            .slice(Math.max(violator.violations.length - 10, 0))
+            .sort((a, b) => a.timestamp - b.timestamp)
 
         const embed = new EmbedBuilder()
             .setAuthor({
@@ -43,9 +45,21 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 iconURL: mention.user.displayAvatarURL()
             })
             .addFields([
-                { name: t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours'), value: last24Hr.length.toString(), inline: true },
-                { name: t('Commands.ViolationsCommand.Texts.ViolationsIn7Days'), value: last7d.length.toString(), inline: true },
-                { name: t('Commands.ViolationsCommand.Texts.TotalViolations'), value: violator.violations.length.toString(), inline: true },
+                {
+                    name: t('Commands.ViolationsCommand.Texts.ViolationsIn24Hours'),
+                    value: last24Hr.length.toString(),
+                    inline: true
+                },
+                {
+                    name: t('Commands.ViolationsCommand.Texts.ViolationsIn7Days'),
+                    value: last7d.length.toString(),
+                    inline: true
+                },
+                {
+                    name: t('Commands.ViolationsCommand.Texts.TotalViolations'),
+                    value: violator.violations.length.toString(),
+                    inline: true
+                },
                 { name: t('Commands.ViolationsCommand.Texts.Last10Violations'), value: '\u200B' }
             ])
 
@@ -76,7 +90,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
 
         const chunks: ServerModerationWarningsViolator[][] = chunkArray(violators, 9)
         const embed = new EmbedBuilder().setTitle(t('Commands.ViolationsCommand.Texts.ListOfViolators')),
-            embedFields = []
+            embedFields: APIEmbedField[][] = []
 
         for (const chunk of chunks) {
             const current = []
@@ -108,10 +122,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 .setDisabled(embedFields.length == 1)
         )
 
-        const field = embedFields[page]
+        const field = embedFields[page]!
 
         const message = (await interaction.editReply({
-            embeds: [embed.setFields(field).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
+            embeds: [
+                embed
+                    .setFields(field)
+                    .setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })
+            ],
             components: [row]
         })) as Message
 
@@ -132,10 +150,14 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             }
 
             await i.deferUpdate()
-            const field: EmbedField[] = embedFields[page]
+            const field = embedFields[page]!
 
             await i.editReply({
-                embeds: [embed.setFields(field).setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })],
+                embeds: [
+                    embed
+                        .setFields(field)
+                        .setFooter({ text: t('Common.Pagination', { current: page + 1, total: chunks.length }) })
+                ],
                 components: [row]
             })
 

@@ -1,7 +1,7 @@
-import { Context } from 'koa'
-import database from '../../../../database'
-import { searchChannels } from '../../../modules/social-alerts/TwitchAlerts'
-import APIError from '../../../utility/APIError'
+import { searchChannels } from '@/api/modules/social-alerts/TwitchAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
+import { type Context } from 'koa'
 
 export default async function searchTwitchChannels(ctx: Context) {
     const guildId = ctx.query.gid as string,

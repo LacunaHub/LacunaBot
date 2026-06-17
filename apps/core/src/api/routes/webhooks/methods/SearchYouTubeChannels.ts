@@ -1,7 +1,7 @@
-import { Context } from 'koa'
-import database from '../../../../database'
-import { searchChannels } from '../../../modules/social-alerts/YouTubeAlerts'
-import APIError from '../../../utility/APIError'
+import { searchChannels } from '@/api/modules/social-alerts/YouTubeAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
+import { type Context } from 'koa'
 
 export default async function searchYouTubeChannels(ctx: Context) {
     const guildId = ctx.query.gid as string,

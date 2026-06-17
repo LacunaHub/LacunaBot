@@ -1,12 +1,17 @@
-import { ReportDocument, ReportType, UserReportDocument, UserReportMetadataCategory } from '@/database/schemas/Reports'
-import { Context } from 'koa'
-import { FilterQuery } from 'mongoose'
-import database from '../../../../database'
+import database from '@/database/index.js'
+import {
+    type ReportDocument,
+    ReportType,
+    type UserReportDocument,
+    UserReportMetadataCategory
+} from '@/database/schemas/Reports.js'
+import { type Context } from 'koa'
+import { type FilterQuery } from 'mongoose'
 
 export default async function getUserReports(ctx: Context) {
     const userId = ctx.params.userId
-    let page = Math.abs(+ctx.query.page || 0),
-        limit = Math.abs(+ctx.query.limit || 100)
+    let page = Math.abs(+ctx.query.page! || 0),
+        limit = Math.abs(+ctx.query.limit! || 100)
 
     if (limit < 2) limit = 2
     else if (limit > 100) limit = 100

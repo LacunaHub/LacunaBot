@@ -1,6 +1,6 @@
-import { Context } from 'koa'
-import database from '../../../../database'
-import APIError from '../../../utility/APIError'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
+import { type Context } from 'koa'
 
 export default async function handleTopGGWebhook(ctx: Context) {
     const authorization = ctx.request.headers['authorization'] as string

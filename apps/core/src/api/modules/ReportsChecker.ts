@@ -1,10 +1,14 @@
-import Logger from '@/api/utility/Logger'
-import { ReportType, UserReportMetadataCategory, UserReportMetadataRecommendedAction } from '@/database/schemas/Reports'
+import GeminiAPI, { defaultModelParams } from '@/api/utility/GeminiAPI.js'
+import Logger from '@/api/utility/Logger.js'
+import database from '@/database/index.js'
+import {
+    ReportType,
+    UserReportMetadataCategory,
+    UserReportMetadataRecommendedAction
+} from '@/database/schemas/Reports.js'
+import { parseJSON } from '@/internals/utility/Utils.js'
 import { SchemaType } from '@google/generative-ai'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
-import database from '../../database'
-import { parseJSON } from '../../internals/utility/Utils'
-import GeminiAPI, { defaultModelParams } from '../utility/GeminiAPI'
 
 const generativeModel = GeminiAPI.getGenerativeModel({
     ...defaultModelParams,
@@ -64,7 +68,10 @@ function createSchedule(): Job {
     rule.hour = new Range(0, 23, 6)
 
     return scheduleJob('reportsCheckerSchedule', rule, async () => {
-        const reports = await database.reports.find({ type: ReportType.User, checked_at: null }).sort({ created_at: 1 }).limit(15),
+        const reports = await database.reports
+                .find({ type: ReportType.User, checked_at: null })
+                .sort({ created_at: 1 })
+                .limit(15),
             lastReport = reports.pop()
 
         if (!lastReport) return null
@@ -96,8 +103,11 @@ function createSchedule(): Job {
                     {
                         $set: {
                             checked_at: Date.now(),
+                            // @ts-ignore
                             'metadata.category': UserReportMetadataCategory[report.category],
-                            'metadata.recommended_action': UserReportMetadataRecommendedAction[report.recommended_action]
+                            'metadata.recommended_action':
+                                // @ts-ignore
+                                UserReportMetadataRecommendedAction[report.recommended_action]
                         }
                     }
                 )

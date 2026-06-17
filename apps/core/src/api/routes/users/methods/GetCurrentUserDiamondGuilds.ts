@@ -1,9 +1,9 @@
-import { RESTAPIPartialCurrentUserGuild } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../database'
-import APIError from '../../../utility/APIError'
-import { UserState } from '../../../utility/Authentication'
-import { oauth2 } from '../../../utility/DiscordOAuth2'
+import APIError from '@/api/utility/APIError.js'
+import { type UserState } from '@/api/utility/Authentication.js'
+import { oauth2 } from '@/api/utility/DiscordOAuth2.js'
+import database from '@/database/index.js'
+import { type RESTAPIPartialCurrentUserGuild } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function getCurrentUserDiamondGuilds(ctx: Context) {
     const currentUser: UserState = ctx.state.user,
@@ -16,7 +16,7 @@ export default async function getCurrentUserDiamondGuilds(ctx: Context) {
     let guilds: RESTAPIPartialCurrentUserGuild[] = []
 
     try {
-        guilds = await oauth2.getUserGuilds(ctx.request.headers.authorization)
+        guilds = await oauth2.getUserGuilds(ctx.request.headers.authorization!)
     } catch (err) {}
 
     const servers = await database.servers.find({

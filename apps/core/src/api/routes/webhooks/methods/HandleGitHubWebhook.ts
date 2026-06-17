@@ -1,9 +1,9 @@
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import { newsChannelId, newsRoleId } from '@/internals/utility/Constants.js'
 import { createHmac, timingSafeEqual } from 'crypto'
-import { APIMessage, APIThreadChannel } from 'discord.js'
-import { Context, Next } from 'koa'
-import { newsChannelId, newsRoleId } from '../../../../internals/utility/Constants'
-import APIError from '../../../utility/APIError'
-import DiscordUtils from '../../../utility/DiscordUtils'
+import { type APIMessage, type APIThreadChannel } from 'discord.js'
+import { type Context, type Next } from 'koa'
 
 export default async function handleGitHubWebhook(ctx: Context) {
     const event = ctx.request.headers['x-github-event'] as string,
@@ -44,7 +44,9 @@ export async function verifyGitHubSignature(ctx: Context, next: Next) {
     const hubSignature = Buffer.from(ctx.request.headers['x-hub-signature-256'] as string, 'ascii'),
         data = ctx.request.body
 
-    const signature = createHmac('sha256', process.env.LCN_GITHUB_WEBHOOK_SECRET).update(JSON.stringify(data)).digest('hex')
+    const signature = createHmac('sha256', process.env.LCN_GITHUB_WEBHOOK_SECRET!)
+        .update(JSON.stringify(data))
+        .digest('hex')
 
     if (timingSafeEqual(Buffer.from(`sha256=${signature}`, 'ascii'), hubSignature)) {
         await next()

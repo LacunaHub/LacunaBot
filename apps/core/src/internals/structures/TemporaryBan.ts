@@ -1,14 +1,14 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { Job, scheduleJob } from 'node-schedule'
-import Lacuna from '../Lacuna'
 
 export default class TemporaryBan {
     public self: Lacuna
     public userId: string
     public guildId: string
     public expiresAt: Date
-    public reason?: string
-    public schedule: Job
+    public reason: string | null
+    public schedule: Job | null
 
     constructor(self: Lacuna, options: TemporaryBanOptions) {
         this.self = self
@@ -53,7 +53,7 @@ export default class TemporaryBan {
     }
 
     async delete(scheduled: boolean = true, reason?: string) {
-        if (!scheduled) this.schedule.cancel()
+        if (!scheduled) this.schedule!.cancel()
 
         await this.self.db.servers.updateOne(
             { _id: this.guildId },
@@ -75,7 +75,7 @@ export default class TemporaryBan {
             const guild = this.self.guilds.cache.get(this.guildId)
 
             if (guild) {
-                return await guild.bans.create(this.userId, { reason: this.reason })
+                return await guild.bans.create(this.userId, { reason: this.reason! })
             }
         } catch (err) {
             this.self.logger.error({ module: 'TemporaryBan', action: 'CreateBan', err, guildId: this.guildId })
@@ -97,14 +97,21 @@ export default class TemporaryBan {
 
 export async function handleEntries(self: Lacuna): Promise<number> {
     const guilds: string[] = self.guilds.cache.map(g => g.id)
-    const servers: ServerDocument[] = await self.db.servers.find({ _id: { $in: guilds }, 'moderation.tempbans.0': { $exists: true } })
+    const servers: ServerDocument[] = await self.db.servers.find({
+        _id: { $in: guilds },
+        'moderation.tempbans.0': { $exists: true }
+    })
     let handledEntries = 0
 
     for (const server of servers) {
         const tempbans = server.moderation.tempbans
 
         for (const ban of tempbans) {
-            new TemporaryBan(self, { user_id: ban.user_id, guild_id: server._id, expires_timestamp: ban.expires_timestamp })
+            new TemporaryBan(self, {
+                user_id: ban.user_id,
+                guild_id: server._id,
+                expires_timestamp: ban.expires_timestamp
+            })
         }
 
         handledEntries += tempbans.length

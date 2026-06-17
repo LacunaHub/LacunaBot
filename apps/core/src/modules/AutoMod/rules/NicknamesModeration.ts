@@ -1,9 +1,20 @@
-import { ServerDocument, ServerModerationAutoModNicknames } from '@/database/schemas/Servers'
+import { type ServerDocument, type ServerModerationAutoModNicknames } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { GuildMember } from 'discord.js'
 import { clean, isZalgo } from 'unzalgo'
-import Lacuna from '../../../internals/Lacuna'
 
-const predefinedNicknames = ['Foggy', 'Magnanimous', 'Taboo', 'Compulsive', 'Busy', 'Angry', 'Responsive', 'Amiable', 'Nice', 'Unexpected']
+const predefinedNicknames = [
+    'Foggy',
+    'Magnanimous',
+    'Taboo',
+    'Compulsive',
+    'Busy',
+    'Angry',
+    'Responsive',
+    'Amiable',
+    'Nice',
+    'Unexpected'
+]
 
 export default async function moderateNicknames(self: Lacuna, server: ServerDocument, member: GuildMember) {
     const reason = 'AutoMod: Nicknames moderation'
@@ -21,8 +32,7 @@ export default async function moderateNicknames(self: Lacuna, server: ServerDocu
 
     if (!nickname.length) {
         const random = Math.floor(Math.random() * predefinedNicknames.length)
-
-        nickname = predefinedNicknames[random]
+        nickname = predefinedNicknames[random]!
     }
 
     if (member.manageable && nickname !== member.displayName) {
@@ -51,7 +61,8 @@ function adjustNickname(config: ServerModerationAutoModNicknames, name: string):
 
     const split = name.split(/\s{1,}/)
 
-    if (regexps.special_characters.test(name) && config.options.includes('SPECIAL_CHARACTERS')) name = name.replace(regexps.special_characters, '')
+    if (regexps.special_characters.test(name) && config.options.includes('SPECIAL_CHARACTERS'))
+        name = name.replace(regexps.special_characters, '')
     if (isZalgo(name) && config.options.includes('ZALGO')) name = clean(name)
     if (config.options.includes('DIACRITICS')) name = name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
     if (regexps.emojis.test(name) && config.options.includes('EMOJIS')) name = name.replace(regexps.emojis, '')

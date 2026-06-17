@@ -1,10 +1,10 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { GuildMember } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import banAction from '../actions/BanAction'
-import kickAction from '../actions/KickAction'
-import modifyRolesAction from '../actions/ModifyRolesAction'
-import muteAction from '../actions/MuteAction'
+import banAction from '../actions/BanAction.js'
+import kickAction from '../actions/KickAction.js'
+import modifyRolesAction from '../actions/ModifyRolesAction.js'
+import muteAction from '../actions/MuteAction.js'
 
 export default async function moderateNewbies(self: Lacuna, server: ServerDocument, member: GuildMember) {
     const reason = 'AutoMod: Newbies moderation'
@@ -19,7 +19,8 @@ export default async function moderateNewbies(self: Lacuna, server: ServerDocume
     }
 
     const isNewbie =
-        (Date.now() - member.user.createdTimestamp) / 1000 < config.minimum_account_age.value * measures[config.minimum_account_age.measure]
+        (Date.now() - member.user.createdTimestamp) / 1000 <
+        config.minimum_account_age.value * measures[config.minimum_account_age.measure]
 
     if (isNewbie) {
         const optBan = config.options.includes('ACTION_BAN'),
@@ -27,10 +28,13 @@ export default async function moderateNewbies(self: Lacuna, server: ServerDocume
             optMute = config.options.includes('ACTION_MUTE'),
             optModifyRoles = config.options.includes('ACTION_MODIFY_ROLES')
 
-        if (optBan && !optKick && !optMute) await banAction(self, server, { config, guild: member.guild, target: member, reason })
+        if (optBan && !optKick && !optMute)
+            await banAction(self, server, { config, guild: member.guild, target: member, reason })
         if (optKick && !optBan && !optMute) await kickAction(self, { guild: member.guild, target: member, reason })
-        if (optModifyRoles && !optBan && !optKick) modifyRolesAction(self, { config, guild: member.guild, target: member, reason })
-        if (optMute && !optBan && !optKick) await muteAction(self, server, { config, guild: member.guild, target: member, reason })
+        if (optModifyRoles && !optBan && !optKick)
+            modifyRolesAction(self, { config, guild: member.guild, target: member, reason })
+        if (optMute && !optBan && !optKick)
+            await muteAction(self, server, { config, guild: member.guild, target: member, reason })
 
         self.emit('moduleExecution', {
             guildId: member.guild.id,

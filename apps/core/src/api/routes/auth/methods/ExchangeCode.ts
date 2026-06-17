@@ -1,10 +1,10 @@
-import { APIUser, OAuth2Scopes, RESTPostOAuth2AccessTokenResult, SnowflakeUtil } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../database'
-import { supportServerId } from '../../../../internals/utility/Constants'
-import APIError from '../../../utility/APIError'
-import { oauth2 } from '../../../utility/DiscordOAuth2'
-import DiscordUtils from '../../../utility/DiscordUtils'
+import APIError from '@/api/utility/APIError.js'
+import { oauth2 } from '@/api/utility/DiscordOAuth2.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { supportServerId } from '@/internals/utility/Constants.js'
+import { type APIUser, OAuth2Scopes, type RESTPostOAuth2AccessTokenResult, SnowflakeUtil } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function exchangeCode(ctx: Context) {
     const { code, redirect_uri: redirectURI } = ctx.request.body
@@ -20,7 +20,7 @@ export default async function exchangeCode(ctx: Context) {
     const userEntry = await database.users.findOne({ _id: currentUser.id })
 
     if (userEntry) {
-        const updateData = {}
+        const updateData: Record<string, any> = {}
 
         if (userEntry.user.username !== currentUser.username) {
             updateData['user.username'] = currentUser.username

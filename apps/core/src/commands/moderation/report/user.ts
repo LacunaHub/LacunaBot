@@ -1,16 +1,20 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { capitalizeFirstLetter } from '@/internals/utility/Utils.js'
 import {
     ActionRowBuilder,
-    ModalActionRowComponentBuilder,
+    type ModalActionRowComponentBuilder,
     ModalBuilder,
     TextInputBuilder,
     TextInputStyle,
     UserContextMenuCommandInteraction
 } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
-import { capitalizeFirstLetter } from '../../../internals/utility/Utils'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: UserContextMenuCommandInteraction<'cached'>) => {
+export default async (
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: UserContextMenuCommandInteraction<'cached'>
+) => {
     const t = self.i18n.t.bind(null, server.locale)
 
     self.cache.set(`REPORT-${interaction.targetId}-${interaction.user.id}`, {

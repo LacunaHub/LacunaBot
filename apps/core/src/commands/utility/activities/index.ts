@@ -1,6 +1,6 @@
+import { CommandGroup, type CommandOptions } from '@/internals/structures/Command.js'
 import { ApplicationCommandOptionType } from 'discord.js'
-import { CommandGroup, CommandOptions } from '../../../internals/structures/Command'
-import { assignLevelAward, resetLevelSlash, resetWalletSlash, setWalletBalanceSlash } from './slash'
+import { assignLevelAward, resetLevelSlash, resetWalletSlash, setWalletBalanceSlash } from './slash.js'
 
 const options: CommandOptions = {
     description: 'Commands.ActivitiesCommand.Description',
@@ -14,13 +14,15 @@ const options: CommandOptions = {
                 {
                     type: ApplicationCommandOptionType.User,
                     name: 'Commands.Options.User',
-                    description: 'Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Options.User.Description',
+                    description:
+                        'Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Options.User.Description',
                     required: true
                 },
                 {
                     type: ApplicationCommandOptionType.String,
                     name: 'Commands.Options.Award',
-                    description: 'Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Options.Award.Description',
+                    description:
+                        'Commands.ActivitiesCommand.SubCommands.AssignLevelAwardCommand.Options.Award.Description',
                     required: true,
                     autocomplete: true
                 }
@@ -40,7 +42,8 @@ const options: CommandOptions = {
                 {
                     type: ApplicationCommandOptionType.Integer,
                     name: 'Commands.Options.Amount',
-                    description: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Amount.Description',
+                    description:
+                        'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Amount.Description',
                     required: true,
                     minValue: -(Math.pow(2, 31) - 1),
                     maxValue: Math.pow(2, 31) - 1
@@ -48,14 +51,16 @@ const options: CommandOptions = {
                 {
                     type: ApplicationCommandOptionType.String,
                     name: 'Commands.Options.Currency',
-                    description: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Currency.Description',
+                    description:
+                        'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Currency.Description',
                     required: false,
                     autocomplete: true
                 },
                 {
                     type: ApplicationCommandOptionType.Integer,
                     name: 'Commands.Options.Operation',
-                    description: 'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Operation.Description',
+                    description:
+                        'Commands.ActivitiesCommand.SubCommands.SetWalletBalanceCommand.Options.Operation.Description',
                     required: false,
                     minValue: 1,
                     maxValue: 3,
@@ -90,7 +95,8 @@ const options: CommandOptions = {
                 {
                     type: ApplicationCommandOptionType.Integer,
                     name: 'Commands.Options.ResetAll',
-                    description: 'Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Options.ResetAll.Description',
+                    description:
+                        'Commands.ActivitiesCommand.SubCommands.ResetWalletCommand.Options.ResetAll.Description',
                     required: false,
                     minValue: 1,
                     maxValue: 2,
@@ -121,7 +127,8 @@ const options: CommandOptions = {
                 {
                     type: ApplicationCommandOptionType.Integer,
                     name: 'Commands.Options.ResetAll',
-                    description: 'Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Options.ResetAll.Description',
+                    description:
+                        'Commands.ActivitiesCommand.SubCommands.ResetLevelCommand.Options.ResetAll.Description',
                     required: false,
                     minValue: 1,
                     maxValue: 2,

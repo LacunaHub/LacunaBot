@@ -1,37 +1,37 @@
+import { findServer } from '@/api/utility/Middlewares.js'
+import { createRateLimit } from '@/api/utility/Utils.js'
 import Router from '@koa/router'
-import { authenticate, checkPermissions, identify } from '../../utility/Authentication'
-import { findServer } from '../../utility/Middlewares'
-import { createRateLimit } from '../../utility/Utils'
-import getGuild from './methods/GetGuild'
-import getLeaders from './methods/GetLeaders'
-import getLogs from './methods/GetLogs'
-import getSettings from './methods/GetSettings'
-import transferDiamond from './methods/TransferDiamond'
-import updateSettings from './methods/UpdateSettings'
-import createAutoVoice from './methods/auto-voices/CreateAutoVoice'
-import deleteAutoVoice from './methods/auto-voices/DeleteAutoVoice'
-import updateAutoVoice from './methods/auto-voices/UpdateAutoVoice'
-import createCustomCommand from './methods/custom-commands/CreateCustomCommand'
-import deleteCustomCommand from './methods/custom-commands/DeleteCustomCommand'
-import updateCustomCommand from './methods/custom-commands/UpdateCustomCommand'
-import createDAMERule from './methods/dame-rules/CreateDAMERule'
-import deleteDAMERule from './methods/dame-rules/DeleteDAMERule'
-import updateDAMERule from './methods/dame-rules/UpdateDAMERule'
-import createInteractiveMessage from './methods/interactive-messages/CreateInteractiveMessage'
-import deleteInteractiveMessage from './methods/interactive-messages/DeleteInteractiveMessage'
-import updateInteractiveMessage from './methods/interactive-messages/UpdateInteractiveMessage'
-import createInteractiveReaction from './methods/interactive-reactions/CreateInteractiveReaction'
-import deleteInteractiveReaction from './methods/interactive-reactions/DeleteInteractiveReaction'
-import updateInteractiveReaction from './methods/interactive-reactions/UpdateInteractiveReaction'
-import createTelegramSubscription from './methods/social-alerts/CreateTelegramSubscription'
-import createTwitchSubscription from './methods/social-alerts/CreateTwitchSubscription'
-import createYouTubeSubscription from './methods/social-alerts/CreateYouTubeSubscription'
-import deleteTelegramSubscription from './methods/social-alerts/DeleteTelegramSubscription'
-import deleteTwitchSubscription from './methods/social-alerts/DeleteTwitchSubscription'
-import deleteYouTubeSubscription from './methods/social-alerts/DeleteYouTubeSubscription'
-import updateTelegramSubscription from './methods/social-alerts/UpdateTelegramSubscription'
-import updateTwitchSubscription from './methods/social-alerts/UpdateTwitchSubscription'
-import updateYouTubeSubscription from './methods/social-alerts/UpdateYouTubeSubscription'
+import { authenticate, checkPermissions, identify } from '../../utility/Authentication.js'
+import getGuild from './methods/GetGuild.js'
+import getLeaders from './methods/GetLeaders.js'
+import getLogs from './methods/GetLogs.js'
+import getSettings from './methods/GetSettings.js'
+import transferDiamond from './methods/TransferDiamond.js'
+import updateSettings from './methods/UpdateSettings.js'
+import createAutoVoice from './methods/auto-voices/CreateAutoVoice.js'
+import deleteAutoVoice from './methods/auto-voices/DeleteAutoVoice.js'
+import updateAutoVoice from './methods/auto-voices/UpdateAutoVoice.js'
+import createCustomCommand from './methods/custom-commands/CreateCustomCommand.js'
+import deleteCustomCommand from './methods/custom-commands/DeleteCustomCommand.js'
+import updateCustomCommand from './methods/custom-commands/UpdateCustomCommand.js'
+import createDAMERule from './methods/dame-rules/CreateDAMERule.js'
+import deleteDAMERule from './methods/dame-rules/DeleteDAMERule.js'
+import updateDAMERule from './methods/dame-rules/UpdateDAMERule.js'
+import createInteractiveMessage from './methods/interactive-messages/CreateInteractiveMessage.js'
+import deleteInteractiveMessage from './methods/interactive-messages/DeleteInteractiveMessage.js'
+import updateInteractiveMessage from './methods/interactive-messages/UpdateInteractiveMessage.js'
+import createInteractiveReaction from './methods/interactive-reactions/CreateInteractiveReaction.js'
+import deleteInteractiveReaction from './methods/interactive-reactions/DeleteInteractiveReaction.js'
+import updateInteractiveReaction from './methods/interactive-reactions/UpdateInteractiveReaction.js'
+import createTelegramSubscription from './methods/social-alerts/CreateTelegramSubscription.js'
+import createTwitchSubscription from './methods/social-alerts/CreateTwitchSubscription.js'
+import createYouTubeSubscription from './methods/social-alerts/CreateYouTubeSubscription.js'
+import deleteTelegramSubscription from './methods/social-alerts/DeleteTelegramSubscription.js'
+import deleteTwitchSubscription from './methods/social-alerts/DeleteTwitchSubscription.js'
+import deleteYouTubeSubscription from './methods/social-alerts/DeleteYouTubeSubscription.js'
+import updateTelegramSubscription from './methods/social-alerts/UpdateTelegramSubscription.js'
+import updateTwitchSubscription from './methods/social-alerts/UpdateTwitchSubscription.js'
+import updateYouTubeSubscription from './methods/social-alerts/UpdateYouTubeSubscription.js'
 
 const router = new Router({ prefix: '/guilds' })
 
@@ -41,19 +41,89 @@ router.get('/:guildId/logs', createRateLimit(5), authenticate, checkPermissions,
 router.get('/:guildId/settings', createRateLimit(10), authenticate, checkPermissions, findServer, getSettings)
 router.post('/:guildId/settings', createRateLimit(10), authenticate, checkPermissions, findServer, updateSettings)
 
-router.post('/:guildId/settings/auto-voices', createRateLimit(5), authenticate, checkPermissions, findServer, createAutoVoice)
-router.delete('/:guildId/settings/auto-voices/:avId', createRateLimit(5), authenticate, checkPermissions, findServer, deleteAutoVoice)
-router.patch('/:guildId/settings/auto-voices/:avId', createRateLimit(5), authenticate, checkPermissions, findServer, updateAutoVoice)
+router.post(
+    '/:guildId/settings/auto-voices',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    createAutoVoice
+)
+router.delete(
+    '/:guildId/settings/auto-voices/:avId',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    deleteAutoVoice
+)
+router.patch(
+    '/:guildId/settings/auto-voices/:avId',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    updateAutoVoice
+)
 
-router.post('/:guildId/settings/custom-commands', createRateLimit(5), authenticate, checkPermissions, findServer, createCustomCommand)
-router.delete('/:guildId/settings/custom-commands/:cid', createRateLimit(5), authenticate, checkPermissions, findServer, deleteCustomCommand)
-router.patch('/:guildId/settings/custom-commands/:cid', createRateLimit(5), authenticate, checkPermissions, findServer, updateCustomCommand)
+router.post(
+    '/:guildId/settings/custom-commands',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    createCustomCommand
+)
+router.delete(
+    '/:guildId/settings/custom-commands/:cid',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    deleteCustomCommand
+)
+router.patch(
+    '/:guildId/settings/custom-commands/:cid',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    updateCustomCommand
+)
 
-router.post('/:guildId/settings/dame-rules', createRateLimit(5), authenticate, checkPermissions, findServer, createDAMERule)
-router.delete('/:guildId/settings/dame-rules/:ruleId', createRateLimit(5), authenticate, checkPermissions, findServer, deleteDAMERule)
-router.patch('/:guildId/settings/dame-rules/:ruleId', createRateLimit(5), authenticate, checkPermissions, findServer, updateDAMERule)
+router.post(
+    '/:guildId/settings/dame-rules',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    createDAMERule
+)
+router.delete(
+    '/:guildId/settings/dame-rules/:ruleId',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    deleteDAMERule
+)
+router.patch(
+    '/:guildId/settings/dame-rules/:ruleId',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    updateDAMERule
+)
 
-router.post('/:guildId/settings/interactive-messages', createRateLimit(5), authenticate, checkPermissions, findServer, createInteractiveMessage)
+router.post(
+    '/:guildId/settings/interactive-messages',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    createInteractiveMessage
+)
 router.delete(
     '/:guildId/settings/interactive-messages/:imId',
     createRateLimit(5),
@@ -71,7 +141,14 @@ router.patch(
     updateInteractiveMessage
 )
 
-router.post('/:guildId/settings/interactive-reactions', createRateLimit(5), authenticate, checkPermissions, findServer, createInteractiveReaction)
+router.post(
+    '/:guildId/settings/interactive-reactions',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    createInteractiveReaction
+)
 router.delete(
     '/:guildId/settings/interactive-reactions/:irId',
     createRateLimit(5),
@@ -89,9 +166,30 @@ router.patch(
     updateInteractiveReaction
 )
 
-router.post('/:guildId/settings/social-alerts/telegram', createRateLimit(5), authenticate, checkPermissions, findServer, createTelegramSubscription)
-router.post('/:guildId/settings/social-alerts/twitch', createRateLimit(5), authenticate, checkPermissions, findServer, createTwitchSubscription)
-router.post('/:guildId/settings/social-alerts/youtube', createRateLimit(5), authenticate, checkPermissions, findServer, createYouTubeSubscription)
+router.post(
+    '/:guildId/settings/social-alerts/telegram',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    createTelegramSubscription
+)
+router.post(
+    '/:guildId/settings/social-alerts/twitch',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    createTwitchSubscription
+)
+router.post(
+    '/:guildId/settings/social-alerts/youtube',
+    createRateLimit(5),
+    authenticate,
+    checkPermissions,
+    findServer,
+    createYouTubeSubscription
+)
 router.delete(
     '/:guildId/settings/social-alerts/telegram/:channelId',
     createRateLimit(5),
@@ -141,6 +239,12 @@ router.patch(
     updateYouTubeSubscription
 )
 
-router.post('/:guildId/transfer-diamond/:targetGuildId', createRateLimit(1, 1000 * 60 * 5), authenticate, findServer, transferDiamond)
+router.post(
+    '/:guildId/transfer-diamond/:targetGuildId',
+    createRateLimit(1, 1000 * 60 * 5),
+    authenticate,
+    findServer,
+    transferDiamond
+)
 
 export default router

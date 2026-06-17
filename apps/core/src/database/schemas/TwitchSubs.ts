@@ -1,8 +1,8 @@
-import { Document, model, Schema } from 'mongoose'
+import mongoose from 'mongoose'
 
-export default model<TwitchSubDocument>(
+export default mongoose.model<TwitchSubDocument>(
     'twitch-subs',
-    new Schema<TwitchSubDocument>(
+    new mongoose.Schema<TwitchSubDocument>(
         {
             _id: { type: String, required: true },
             broadcaster_id: { type: String, required: true },
@@ -16,7 +16,7 @@ export default model<TwitchSubDocument>(
     )
 )
 
-export interface TwitchSubDocument extends Document {
+export interface TwitchSubDocument extends mongoose.Document {
     _id: string
     broadcaster_id: string
     broadcaster_login: string

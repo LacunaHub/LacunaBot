@@ -1,15 +1,15 @@
-import { Context } from 'vm'
-import database from '../../../../database'
-import APIError from '../../../utility/APIError'
-import { SearchRepositoriesResponse, searchRepositories } from '../../../utility/GitHubAPI'
+import APIError from '@/api/utility/APIError.js'
+import { type SearchRepositoriesResponse, searchRepositories } from '@/api/utility/GitHubAPI.js'
+import database from '@/database/index.js'
+import { type Context } from 'vm'
 
 export default async function getPlugins(ctx: Context) {
-    let repoSearch: SearchRepositoriesResponse
+    let repoSearch!: SearchRepositoriesResponse
 
     try {
         repoSearch = await searchRepositories({ q: 'topic:lacuna-bot-plugin', sort: 'updated' })
     } catch (err) {
-        ctx.throw(500, new APIError(1, err.message))
+        ctx.throw(500, new APIError(1, (err as any).message))
     }
 
     const verifiedRepos = await database.getVerifiedPluginRepositories()

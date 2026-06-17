@@ -1,18 +1,20 @@
-import { ServerDocument, ServerModulesAutoReaction, ServerModulesAutoThread } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
 import { Message, TextChannel } from 'discord.js'
 import { split } from 'unicode-default-word-boundary'
-import Lacuna from '../internals/Lacuna'
-import Replacer from './Replacer'
+import Replacer from './Replacer.js'
 
 export async function addAutoReactions(self: Lacuna, server: ServerDocument, message: Message) {
-    const autoReaction: ServerModulesAutoReaction = server.modules.autoreactions
+    const autoReaction = server.modules.autoreactions
         .slice(0, server.premium.available ? 20 : 2)
         .find(i => i.channel_id === message.channel.id)
 
     if (!autoReaction) return false
 
     if (autoReaction.message_types?.length) {
-        const includesMessageType = autoReaction.message_types.map(v => AutoReactionMessageTypes[v]).includes(message.type)
+        const includesMessageType = autoReaction.message_types
+            .map(v => (AutoReactionMessageTypes as any)[v])
+            .includes(message.type)
         if (!includesMessageType) return false
     }
 
@@ -46,8 +48,8 @@ export async function addAutoReactions(self: Lacuna, server: ServerDocument, mes
     return true
 }
 
-export async function createAutoThread(self: Lacuna, server: ServerDocument, message: Message) {
-    const autoThread: ServerModulesAutoThread = server.modules.autothreads
+export async function createAutoThread(self: Lacuna, server: ServerDocument, message: Message<true>) {
+    const autoThread = server.modules.autothreads
         .slice(0, server.premium.available ? 20 : 2)
         .find(i => i.channel_id === message.channel.id)
 
@@ -68,7 +70,7 @@ export async function createAutoThread(self: Lacuna, server: ServerDocument, mes
 
     const replacer = new Replacer(server.premium.available, {
             guild: message.guild,
-            member: message.member,
+            member: message.member!,
             message: message
         }),
         name = await replacer.replace(autoThread.name)

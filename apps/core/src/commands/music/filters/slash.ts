@@ -1,10 +1,20 @@
-import { ServerDocument } from '@/database/schemas/Servers'
-import { ActionRowBuilder, ButtonInteraction, ChatInputCommandInteraction, Message, StringSelectMenuBuilder } from 'discord.js'
-import Lacuna from '../../../internals/Lacuna'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import {
+    ActionRowBuilder,
+    ButtonInteraction,
+    ChatInputCommandInteraction,
+    Message,
+    StringSelectMenuBuilder
+} from 'discord.js'
 
-export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>) => {
+export default async (
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'> | ButtonInteraction<'cached'>
+) => {
     const t = self.i18n.t.bind(null, server.locale)
-    const player = self.lava.nodes.getPlayer(interaction.guild.id)
+    const player = self.lava!.nodes.getPlayer(interaction.guild.id)
 
     if (!player) {
         await interaction.reply({
@@ -89,7 +99,11 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                             description: t('Commands.FilterCommand.Texts.TurnOffAllFilters'),
                             value: 'off'
                         },
-                        ...Object.keys(filters).map(v => ({ label: filters[v].label, description: filters[v].description, value: v }))
+                        ...Object.keys(filters).map(v => ({
+                            label: (filters as any)[v].label,
+                            description: (filters as any)[v].description,
+                            value: v
+                        }))
                     ])
             )
         ]
@@ -109,7 +123,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             } else {
                 await player.setFilters(
                     i.values.reduce((x, y) => {
-                        x = { ...x, ...filters[y].filter }
+                        x = { ...x, ...(filters as any)[y].filter }
                         return x
                     }, {})
                 )

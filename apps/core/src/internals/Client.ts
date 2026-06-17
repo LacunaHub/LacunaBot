@@ -1,14 +1,12 @@
 import { ActivityType, Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
-import Lacuna from './Lacuna'
-
-const { version } = require('../../package.json')
+import Lacuna from './Lacuna.js'
 
 const client = new Lacuna({
     presence: {
         status: 'online',
         activities: [
             {
-                name: `lacunabot.com (v${version})`,
+                name: `lacunabot.com`,
                 type: ActivityType.Custom
             }
         ]
@@ -17,7 +15,7 @@ const client = new Lacuna({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildModeration,
-        GatewayIntentBits.GuildEmojisAndStickers,
+        GatewayIntentBits.GuildExpressions,
         GatewayIntentBits.GuildWebhooks,
         GatewayIntentBits.GuildInvites,
         GatewayIntentBits.GuildVoiceStates,
@@ -58,7 +56,7 @@ const client = new Lacuna({
         ...Options.DefaultSweeperSettings,
         bans: {
             interval: 15 * 60,
-            filter: () => ban => true
+            filter: () => _ban => true
         },
         invites: {
             interval: 15 * 60,

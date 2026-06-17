@@ -1,12 +1,12 @@
-import { ReportDocument, ReportType, UserReportMetadataCategory } from '@/database/schemas/Reports'
-import { Context } from 'koa'
-import { FilterQuery } from 'mongoose'
-import database from '../../../../database'
+import database from '@/database/index.js'
+import { type ReportDocument, ReportType, UserReportMetadataCategory } from '@/database/schemas/Reports.js'
+import { type Context } from 'koa'
+import { type FilterQuery } from 'mongoose'
 
 export default async function getCurrentUserSubmittedReports(ctx: Context) {
     const userId = ctx.params.userId
-    let page = Math.abs(+ctx.query.page || 0),
-        limit = Math.abs(+ctx.query.limit || 100)
+    let page = Math.abs(+ctx.query.page! || 0),
+        limit = Math.abs(+ctx.query.limit! || 100)
 
     if (limit < 2) limit = 2
     else if (limit > 100) limit = 100
@@ -43,7 +43,7 @@ export default async function getCurrentUserSubmittedReports(ctx: Context) {
                 return {
                     ...value,
                     from_guild_id: v.metadata.from_guild_id,
-                    category: UserReportMetadataCategory[v.metadata.category]
+                    category: UserReportMetadataCategory[v.metadata.category!]
                 }
             }
         })

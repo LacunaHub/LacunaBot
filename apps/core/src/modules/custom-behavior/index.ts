@@ -1,47 +1,52 @@
 import {
-    ServerMessageTemplateEmbed,
-    ServerModulesCustomCommandComponent,
+    type ServerMessageTemplateEmbed,
+    type ServerModulesCustomCommandComponent,
     ServerModulesCustomCommandComponentActionReplyOptions,
     ServerModulesCustomCommandComponentConditionCompareValuesOperators,
     ServerModulesCustomCommandComponentConditionCompareValuesOptions,
     ServerModulesCustomCommandComponentConditionTypes
-} from '@/database/schemas/Servers'
+} from '@/database/schemas/Servers.js'
+import type { WalletCurrency } from '@/database/schemas/Users.js'
 import {
-    APIEmbed,
+    snakeToPascalCase,
+    transformMessageComponents,
+    transformMessageEmbeds,
+    transformModalComponents
+} from '@/internals/utility/Utils.js'
+import {
+    type APIEmbed,
     BaseGuildTextChannel,
     ChannelType,
     ChatInputCommandInteraction,
     Collection,
     EmbedBuilder,
     Guild,
-    GuildChannelCreateOptions,
+    type GuildChannelCreateOptions,
     GuildMember,
-    GuildTextBasedChannel,
-    InteractionDeferReplyOptions,
-    InteractionEditReplyOptions,
-    InteractionReplyOptions,
+    type GuildTextBasedChannel,
+    type InteractionDeferReplyOptions,
+    type InteractionEditReplyOptions,
+    type InteractionReplyOptions,
     Message,
     MessageComponentInteraction,
     MessageMentions,
-    ModalComponentData,
+    type ModalComponentData,
     ModalSubmitInteraction,
-    resolveColor,
     Role,
     Routes,
-    StartThreadOptions,
     ThreadChannel,
     User,
     VoiceState
 } from 'discord.js'
-import { Context } from 'isolated-vm'
+import IVM from 'isolated-vm'
 import safeRegex from 'safe-regex'
-import { snakeToPascalCase, transformMessageComponents, transformMessageEmbeds, transformModalComponents } from '../../internals/utility/Utils'
-import Automation from './Automation'
-import CustomCommand from './CustomCommand'
+import Automation from './Automation.js'
+import CustomCommand from './CustomCommand.js'
 
 export const errors = {
     functionCallsLimitReached: (func: string) => `[${func}] Function call limit reached.`,
-    functionNotAvailableInCurrentContext: (func: string) => `[${func}] Function is not available in the current context.`,
+    functionNotAvailableInCurrentContext: (func: string) =>
+        `[${func}] Function is not available in the current context.`,
     invalidParams: (func: string) => `[${func}] Invalid parameters`,
     argInvalid: (func: string, arg: string) => `[${func}] "${arg}" is invalid.`,
     argInvalidArray: (func: string, arg: string) => `[${func}] "${arg}" must be an array.`,
@@ -50,13 +55,14 @@ export const errors = {
     channelNotFound: (func: string, channelId: string) => `[${func}] Channel "${channelId}" not found.`
 }
 
-export function extendStorage(instance: Automation | CustomCommand, ctx: Context, guildId: string) {
+export function extendStorage(instance: Automation | CustomCommand, ctx: IVM.Context, guildId: string) {
     ctx.global.setSync('setValue', (key: string, value: any) => {
         const used = instance.useFunction('setValue')
         if (used > 5) throw new Error(errors.functionCallsLimitReached('setValue'))
 
         if (typeof key !== 'string' || !key.length) throw new TypeError(errors.argInvalidString('setValue', 'key'))
-        if (!value || typeof value === 'function' || value === null) throw new TypeError(errors.argInvalid('setValue', 'value'))
+        if (!value || typeof value === 'function' || value === null)
+            throw new TypeError(errors.argInvalid('setValue', 'value'))
 
         instance.storage.set(`${guildId}.${key}`, value)
     })
@@ -69,7 +75,8 @@ export function extendStorage(instance: Automation | CustomCommand, ctx: Context
         `,
         [
             (key: string) => {
-                if (typeof key !== 'string' || !key.length) throw new TypeError(errors.argInvalidString('getValue', 'key'))
+                if (typeof key !== 'string' || !key.length)
+                    throw new TypeError(errors.argInvalidString('getValue', 'key'))
 
                 return instance.storage.get(`${guildId}.${key}`)
             }
@@ -86,8 +93,12 @@ export function extendStorage(instance: Automation | CustomCommand, ctx: Context
     return ctx
 }
 
-export function extendScript(instance: Automation | CustomCommand, ctx: Context) {
-    let guild: Guild, interaction: ChatInputCommandInteraction<'cached'> | ModalSubmitInteraction<'cached'> | MessageComponentInteraction<'cached'>
+export function extendScript(instance: Automation | CustomCommand, ctx: IVM.Context) {
+    let guild: Guild,
+        interaction:
+            | ChatInputCommandInteraction<'cached'>
+            | ModalSubmitInteraction<'cached'>
+            | MessageComponentInteraction<'cached'>
 
     if (instance instanceof Automation) {
         guild = instance.guild
@@ -114,10 +125,10 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
                 parent: rawOptions.parent
             }
 
-            const channel = await guild.channels.create(options)
-            return serializeChannel(channel)
+            const channel = await guild.channels.create(options as any)
+            return serializeChannel(channel as any)
         },
-        createThread: async (channelId: string, rawOptions: Partial<StartThreadOptions>) => {
+        createThread: async (channelId: string, rawOptions: Record<string, any>) => {
             const used = instance.useFunction('createThread')
             if (used > 1) throw new Error(errors.functionCallsLimitReached('createThread'))
 
@@ -131,21 +142,21 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
                 const options = {
                     name: rawOptions?.name,
                     message: {
-                        content: rawOptions?.['message']?.content ?? null,
-                        embeds: rawOptions?.['message']?.embeds?.length
-                            ? rawOptions['message'].embeds.map(i => {
-                                  return new EmbedBuilder(i as any).toJSON()
+                        content: rawOptions?.message?.content ?? null,
+                        embeds: rawOptions?.message?.embeds?.length
+                            ? rawOptions.message.embeds.map((i: any) => {
+                                  return new EmbedBuilder(i).toJSON()
                               })
                             : [],
-                        components: transformMessageComponents(rawOptions?.['message']?.components as any)
+                        components: transformMessageComponents(rawOptions?.message?.components as any)
                     }
                 }
 
-                thread = await channel.threads.create(options)
+                thread = await channel.threads.create(options as any)
             } else {
                 thread = await channel.threads.create({
                     name: rawOptions?.name,
-                    startMessage: rawOptions?.['messageId']
+                    startMessage: rawOptions?.messageId
                 })
             }
 
@@ -164,14 +175,19 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
             const used = instance.useFunction('deleteChannel')
             if (used > 2) throw new Error(errors.functionCallsLimitReached('deleteChannel'))
 
-            if (typeof channelId !== 'string') throw new TypeError(errors.argInvalidString('deleteChannel', 'channelId'))
+            if (typeof channelId !== 'string')
+                throw new TypeError(errors.argInvalidString('deleteChannel', 'channelId'))
 
             const channel = guild.channels.cache.get(channelId)
             if (!channel) throw new Error(errors.channelNotFound('deleteChannel', channelId))
 
             await channel.delete()
         },
-        overwriteChannelPermissions: async (channelIds: string[], permissions: { [key: string]: boolean }, userOrRole: string) => {
+        overwriteChannelPermissions: async (
+            channelIds: string[],
+            permissions: { [key: string]: boolean },
+            userOrRole: string
+        ) => {
             const used = instance.useFunction('overwriteChannelPermissions')
             if (used > 1) throw new Error(errors.functionCallsLimitReached('overwriteChannelPermissions'))
 
@@ -180,11 +196,17 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
             if (typeof userOrRole !== 'string' || !userOrRole.length)
                 throw new TypeError(errors.argInvalidString('overwriteChannelPermissions', 'userOrRole'))
 
-            const channels = guild.channels.cache.filter(i => i.manageable && channelIds.includes(i.id)) as Collection<string, BaseGuildTextChannel>
-            const overwriteOptions = Object.keys(permissions).reduce((obj, k) => {
-                obj[snakeToPascalCase(k)] = permissions[k]
-                return obj
-            }, {})
+            const channels = guild.channels.cache.filter(i => i.manageable && channelIds.includes(i.id)) as Collection<
+                string,
+                BaseGuildTextChannel
+            >
+            const overwriteOptions = Object.keys(permissions).reduce(
+                (obj, k) => {
+                    obj[snakeToPascalCase(k)] = permissions[k]!
+                    return obj
+                },
+                {} as Record<string, boolean>
+            )
 
             for (const channel of channels.first(5)) {
                 const overwrites = channel.permissionOverwrites.cache.get(userOrRole)
@@ -205,7 +227,8 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
             const used = instance.useFunction('deferReply')
             if (used > 1) throw new Error(errors.functionCallsLimitReached('deferReply'))
 
-            if (!('deferReply' in interaction)) throw new Error(errors.functionNotAvailableInCurrentContext('deferReply'))
+            if (!('deferReply' in interaction))
+                throw new Error(errors.functionNotAvailableInCurrentContext('deferReply'))
 
             const options = {
                 ephemeral: Boolean(rawOptions?.ephemeral)
@@ -217,7 +240,8 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
             const used = instance.useFunction('deferUpdate')
             if (used > 3) throw new Error(errors.functionCallsLimitReached('deferUpdate'))
 
-            if (!('deferUpdate' in interaction)) throw new Error(errors.functionNotAvailableInCurrentContext('deferUpdate'))
+            if (!('deferUpdate' in interaction))
+                throw new Error(errors.functionNotAvailableInCurrentContext('deferUpdate'))
 
             await interaction.deferUpdate()
         },
@@ -225,7 +249,8 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
             const used = instance.useFunction('deleteReply')
             if (used > 1) throw new Error(errors.functionCallsLimitReached('deleteReply'))
 
-            if (!('deleteReply' in interaction)) throw new TypeError(errors.functionNotAvailableInCurrentContext('deleteReply'))
+            if (!('deleteReply' in interaction))
+                throw new TypeError(errors.functionNotAvailableInCurrentContext('deleteReply'))
 
             await interaction.deleteReply()
         },
@@ -243,13 +268,14 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
             }
 
             await interaction.deferUpdate()
-            await interaction.editReply(options)
+            await interaction.editReply(options as any)
         },
         followUpReply: async (rawOptions: InteractionReplyOptions) => {
             const used = instance.useFunction('followUpReply')
             if (used > 3) throw new Error(errors.functionCallsLimitReached('followUpReply'))
 
-            if (!('followUp' in interaction)) throw new TypeError(errors.functionNotAvailableInCurrentContext('followUpReply'))
+            if (!('followUp' in interaction))
+                throw new TypeError(errors.functionNotAvailableInCurrentContext('followUpReply'))
 
             const options = {
                 content: rawOptions?.content ?? undefined,
@@ -259,7 +285,7 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
                 ephemeral: Boolean(rawOptions?.ephemeral)
             }
 
-            await interaction.followUp(options)
+            await interaction.followUp(options as any)
         },
         reply: async (rawOptions: InteractionReplyOptions) => {
             const used = instance.useFunction('reply')
@@ -275,13 +301,14 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
                 ephemeral: Boolean(rawOptions?.ephemeral)
             }
 
-            await interaction.reply(options)
+            await interaction.reply(options as any)
         },
         showModal: async (rawOptions: ModalComponentData) => {
             const used = instance.useFunction('showModal')
             if (used > 1) throw new Error(errors.functionCallsLimitReached('showModal'))
 
-            if (!('showModal' in interaction)) throw new TypeError(errors.functionNotAvailableInCurrentContext('showModal'))
+            if (!('showModal' in interaction))
+                throw new TypeError(errors.functionNotAvailableInCurrentContext('showModal'))
 
             const options = {
                 title: rawOptions?.title,
@@ -298,8 +325,10 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
             const used = instance.useFunction('deleteMessage')
             if (used > 2) throw new Error(errors.functionCallsLimitReached('deleteMessage'))
 
-            if (typeof channelId !== 'string') throw new TypeError(errors.argInvalidString('deleteMessage', 'channelId'))
-            if (typeof messageId !== 'string') throw new TypeError(errors.argInvalidString('deleteMessage', 'messageId'))
+            if (typeof channelId !== 'string')
+                throw new TypeError(errors.argInvalidString('deleteMessage', 'channelId'))
+            if (typeof messageId !== 'string')
+                throw new TypeError(errors.argInvalidString('deleteMessage', 'messageId'))
 
             const channel = guild.channels.cache.get(channelId) as BaseGuildTextChannel
             if (!channel) throw new Error(errors.channelNotFound('deleteMessage', channelId))
@@ -323,7 +352,7 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
                 components: transformMessageComponents(rawOptions?.components as any)
             }
 
-            const newMessage = await message.edit(options)
+            const newMessage = await message.edit(options as any)
             return serializeMessage(newMessage)
         },
         sendMessage: async (channelId: string, rawOptions: InteractionReplyOptions) => {
@@ -341,7 +370,7 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
                 components: transformMessageComponents(rawOptions?.components as any)
             }
 
-            const message = await channel.send(options)
+            const message = await channel.send(options as any)
             return serializeMessage(message)
         }
     }
@@ -370,7 +399,7 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
                 wallet: userActivities?.wallet?.currencies
                     ?.reduce((x, y) => {
                         return y.id === 'DEFAULT' ? [y, ...x] : [...x, y]
-                    }, [])
+                    }, [] as WalletCurrency[])
                     ?.map(i => i.amount) ?? [0]
             }
         },
@@ -397,8 +426,10 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
             if (used > 2) throw new Error(errors.functionCallsLimitReached('modifyUserWallet'))
 
             if (typeof userId !== 'string') throw new TypeError(errors.argInvalidString('modifyUserWallet', 'userId'))
-            if (typeof amount !== 'number' || isNaN(amount)) throw new TypeError(errors.argInvalidNumber('modifyUserWallet', 'amount'))
-            if (currencyId && typeof currencyId !== 'string') throw new TypeError(errors.argInvalidString('modifyUserWallet', 'userId'))
+            if (typeof amount !== 'number' || isNaN(amount))
+                throw new TypeError(errors.argInvalidNumber('modifyUserWallet', 'amount'))
+            if (currencyId && typeof currencyId !== 'string')
+                throw new TypeError(errors.argInvalidString('modifyUserWallet', 'userId'))
             if (!instance.server.modules.economy.active) throw new Error('[modifyUserWallet] Economy is disabled')
 
             const member = await guild.members.fetch({ user: userId })
@@ -411,7 +442,8 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
             const INT32_MAX = Math.pow(2, 31) - 1
             amount = isNaN(amount) ? 0 : amount
 
-            if (amount > INT32_MAX || amount < -INT32_MAX) amount = amount > INT32_MAX ? INT32_MAX : amount < -INT32_MAX ? -INT32_MAX : 0
+            if (amount > INT32_MAX || amount < -INT32_MAX)
+                amount = amount > INT32_MAX ? INT32_MAX : amount < -INT32_MAX ? -INT32_MAX : 0
 
             const user = await instance.self.db.users.fetch(
                 { _id: member.id },
@@ -425,22 +457,23 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
                 }
             )
             const userWallet = await instance.self.db.users.fetchWallet(user, guild.id)
-            const walletCurrency = userWallet.currencies.find(i => i.id === currency.id)
+            const walletCurrency = userWallet.currencies.find(i => i.id === currency!.id)
 
-            if (amount < 0 && (walletCurrency?.amount ?? 0) - Math.abs(amount) < 0) amount = -(walletCurrency?.amount ?? 0)
+            if (amount < 0 && (walletCurrency?.amount ?? 0) - Math.abs(amount) < 0)
+                amount = -(walletCurrency?.amount ?? 0)
 
             if (walletCurrency) {
                 await instance.self.db.users.updateOne(
                     {
                         _id: member.id,
-                        'activities.wallets': { $elemMatch: { guild_id: guild.id, 'currencies.id': currency.id } }
+                        'activities.wallets': { $elemMatch: { guild_id: guild.id, 'currencies.id': currency!.id } }
                     },
                     {
                         $inc: {
                             'activities.wallets.$[guild].currencies.$[currency].amount': amount
                         }
                     },
-                    { arrayFilters: [{ 'guild.guild_id': guild.id }, { 'currency.id': currency.id }] }
+                    { arrayFilters: [{ 'guild.guild_id': guild.id }, { 'currency.id': currency!.id }] }
                 )
             } else {
                 await instance.self.db.users.updateOne(
@@ -448,7 +481,7 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
                     {
                         $push: {
                             'activities.wallets.$.currencies': {
-                                id: currency.id,
+                                id: currency!.id,
                                 amount: amount
                             }
                         }
@@ -476,7 +509,12 @@ export function extendScript(instance: Automation | CustomCommand, ctx: Context)
     return ctx
 }
 
-export async function runScript(instance: Automation | CustomCommand, ctx: Context, script: string, options: RunScriptOptions = {}) {
+export async function runScript(
+    instance: Automation | CustomCommand,
+    ctx: IVM.Context,
+    script: string,
+    options: RunScriptOptions = {}
+) {
     extendScript(instance, ctx)
     let maxScriptLength = options.maxScriptLength ?? 1000
 
@@ -487,7 +525,8 @@ export async function runScript(instance: Automation | CustomCommand, ctx: Conte
                 return safeRegex(value) === true ? value : '/unsafe/'
             })
 
-        if (script.length > maxScriptLength) throw new Error(`Script size exceeded (${script.length}/${maxScriptLength}).`)
+        if (script.length > maxScriptLength)
+            throw new Error(`Script size exceeded (${script.length}/${maxScriptLength}).`)
         if (/RegExp/gi.test(script)) throw new Error('Construction "RegExp" is not allowed.')
 
         const compiledScript = await instance.isolate.compileScript(`(async () => { ${script} })()`)
@@ -495,11 +534,12 @@ export async function runScript(instance: Automation | CustomCommand, ctx: Conte
         instance.usedPatterns.push(script)
         compiledScript.release()
     } catch (err) {
-        const error = err.toString().replace(/<isolated-vm>:?/gi, '')
+        const error = (err as any).toString().replace(/<isolated-vm>:?/gi, '')
         const embed = new EmbedBuilder().setDescription(error).setColor('Red')
 
         if (instance instanceof Automation) {
-            if ('content' in instance.eventParams.message) await instance.eventParams.message.reply({ embeds: [embed] })
+            if (instance.eventParams.message && 'content' in instance.eventParams.message)
+                await instance.eventParams.message.reply({ embeds: [embed] })
         } else if (instance instanceof CustomCommand) {
             if (instance.interaction.deferred || instance.interaction.replied) {
                 await instance.interaction.followUp({ embeds: [embed], ephemeral: true })
@@ -523,54 +563,71 @@ export function convertComponentsToScript(components: ServerModulesCustomCommand
     let script = ''
     if (!components.length) return script
     if (components.some(i => i.action?.type === 'EXECUTE_CODE')) {
-        script = components.find(i => i.action?.type === 'EXECUTE_CODE').action.execute_code.code
+        const component = components.find(i => i.action?.type === 'EXECUTE_CODE')!
+        script = component.action!.execute_code!.code
         return script
     }
 
-    const replaceWithTemplateString = (string: string) => (string ? `\`${string.replace(/{{\s*/g, '${').replace(/\s*}}/g, '}')}\`` : null)
-    const convertTemplateMessage = (template: { content: string; embed: ServerMessageTemplateEmbed; components?: any[][] }) => {
-        let content: string, embed: APIEmbed, components
+    const replaceWithTemplateString = (string: string) =>
+        string ? `\`${string.replace(/{{\s*/g, '${').replace(/\s*}}/g, '}')}\`` : null
+    const convertTemplateMessage = (template: {
+        content: string
+        embed: ServerMessageTemplateEmbed
+        components?: any[][]
+    }) => {
+        let content!: string, embed!: APIEmbed, components
 
-        if (template.content) content = replaceWithTemplateString(template.content)
+        if (template.content) content = replaceWithTemplateString(template.content)!
         if (template.embed && template.embed.active) {
             let url = template.embed.url ? replaceWithTemplateString(template.embed.url) : null,
-                footer_icon_url = template.embed.footer.icon_url ? replaceWithTemplateString(template.embed.footer.icon_url) : null,
+                footer_icon_url = template.embed.footer.icon_url
+                    ? replaceWithTemplateString(template.embed.footer.icon_url)
+                    : null,
                 image_url = template.embed.image.url ? replaceWithTemplateString(template.embed.image.url) : null,
-                thumbnail_url = template.embed.thumbnail.url ? replaceWithTemplateString(template.embed.thumbnail.url) : null,
+                thumbnail_url = template.embed.thumbnail.url
+                    ? replaceWithTemplateString(template.embed.thumbnail.url)
+                    : null,
                 author_url = template.embed.author.url ? replaceWithTemplateString(template.embed.author.url) : null,
-                author_icon_url = template.embed.author.icon_url ? replaceWithTemplateString(template.embed.author.icon_url) : null
+                author_icon_url = template.embed.author.icon_url
+                    ? replaceWithTemplateString(template.embed.author.icon_url)
+                    : null
 
-            embed = {
-                title: template.embed.title ? replaceWithTemplateString(template.embed.title) : null,
-                description: template.embed.description ? replaceWithTemplateString(template.embed.description) : null,
-                url: url,
-                timestamp: template.embed.timestamp ? replaceWithTemplateString(template.embed.timestamp) : null,
-                color: template.embed.color ? resolveColor(template.embed.color as any) : null,
-                footer: {
-                    text: template.embed.footer.text ? replaceWithTemplateString(template.embed.footer.text) : null,
-                    icon_url: footer_icon_url
-                },
-                image: image_url ? { url: image_url } : null,
-                thumbnail: thumbnail_url ? { url: thumbnail_url } : null,
-                author: {
-                    name: template.embed.author.name ? replaceWithTemplateString(template.embed.author.name) : null,
-                    url: author_url,
-                    icon_url: author_icon_url
-                },
-                fields: template.embed.fields.length
-                    ? template.embed.fields
-                          .filter(i => typeof i.name === 'string' && i.name.length && typeof i.value === 'string' && i.value.length)
-                          .map(field => {
-                              return {
-                                  name: replaceWithTemplateString(field.name),
-                                  value: replaceWithTemplateString(field.value),
-                                  inline: Boolean(field.inline)
-                              }
-                          })
-                    : []
+            if (template.embed.title) embed.title = replaceWithTemplateString(template.embed.title)!
+            if (template.embed.description) embed.description = replaceWithTemplateString(template.embed.description)!
+            if (url) embed.url = url
+            if (template.embed.timestamp) embed.timestamp = replaceWithTemplateString(template.embed.timestamp)!
+            if (template.embed.footer.text || footer_icon_url) {
+                embed.footer = {} as any
+                if (template.embed.footer.text)
+                    embed.footer!.text = replaceWithTemplateString(template.embed.footer.text)!
+                if (footer_icon_url) embed.footer!.icon_url = footer_icon_url
             }
+            if (image_url) embed.image = { url: image_url }
+            if (thumbnail_url) embed.thumbnail = { url: thumbnail_url }
+            if (template.embed.author.name || author_url || author_icon_url) {
+                embed.author = {} as any
+                if (template.embed.author.name)
+                    embed.author!.name = replaceWithTemplateString(template.embed.author.name)!
+                if (author_url) embed.author!.url = author_url
+                if (author_icon_url) embed.author!.icon_url = author_icon_url
+            }
+            if (template.embed.fields.length)
+                embed.fields = template.embed.fields
+                    .filter(
+                        i =>
+                            typeof i.name === 'string' && i.name.length && typeof i.value === 'string' && i.value.length
+                    )
+                    .map(field => {
+                        return {
+                            name: replaceWithTemplateString(field.name)!,
+                            value: replaceWithTemplateString(field.value)!,
+                            inline: Boolean(field.inline)
+                        }
+                    })
         }
-        if (Array.isArray(template.components)) components = JSON.parse(JSON.stringify(template.components).replace(/:\s*"([^"]+)"/g, ': "`$1`"'))
+
+        if (Array.isArray(template.components))
+            components = JSON.parse(JSON.stringify(template.components).replace(/:\s*"([^"]+)"/g, ': "`$1`"'))
 
         const result: Record<string, any> = {}
         if (content) result.content = content
@@ -587,7 +644,7 @@ export function convertComponentsToScript(components: ServerModulesCustomCommand
     for (const component of components) {
         if ('condition' in component) {
             if (component.condition.type === ServerModulesCustomCommandComponentConditionTypes.CompareValues) {
-                const { compare_values } = component.condition
+                const compare_values = component.condition.compare_values!
 
                 const leftVal = replaceWithTemplateString(compare_values.left),
                     rightVal = replaceWithTemplateString(compare_values.right)
@@ -623,12 +680,14 @@ export function convertComponentsToScript(components: ServerModulesCustomCommand
                 script += `if (${condition}) {\n`
 
                 if (
-                    compare_values.options.includes(ServerModulesCustomCommandComponentConditionCompareValuesOptions.FalseReply) &&
+                    compare_values.options.includes(
+                        ServerModulesCustomCommandComponentConditionCompareValuesOptions.FalseReply
+                    ) &&
                     'false_reply' in compare_values
                 ) {
                     script += `await reply(`
                     script += `${stringify({
-                        ...convertTemplateMessage(compare_values.false_reply),
+                        ...convertTemplateMessage(compare_values.false_reply as any),
                         ephemeral: compare_values.options.includes(
                             ServerModulesCustomCommandComponentConditionCompareValuesOptions.FalseReplyEphemeral
                         )
@@ -659,16 +718,16 @@ export function convertComponentsToScript(components: ServerModulesCustomCommand
 
             if (action.modify_wallet) {
                 script += `await modifyUserWallet(`
-                script += `${replaceWithTemplateString(action.modify_wallet.user_id) || 'member.user.id'},`
+                script += `${replaceWithTemplateString(action.modify_wallet.user_id!) || 'member.user.id'},`
                 script += `+${replaceWithTemplateString(action.modify_wallet.amount)},`
-                script += `${replaceWithTemplateString(action.modify_wallet.currency_id)}`
+                script += `${replaceWithTemplateString(action.modify_wallet.currency_id!)}`
                 script += ')\n\n'
             }
 
             if (action.overwrite_channel_permissions) {
                 script += `await overwriteChannelPermissions(`
                 script += `${JSON.stringify(action.overwrite_channel_permissions.channels)},`
-                script += `${stringify(action.overwrite_channel_permissions.permissions, null)},`
+                script += `${stringify(action.overwrite_channel_permissions.permissions, 0)},`
                 script += `${replaceWithTemplateString(action.overwrite_channel_permissions.user_or_role)}`
                 script += ')\n\n'
             }
@@ -676,8 +735,10 @@ export function convertComponentsToScript(components: ServerModulesCustomCommand
             if (action.reply) {
                 script += `await reply(`
                 script += `${stringify({
-                    ...convertTemplateMessage(action.reply.message),
-                    ephemeral: action.reply.options.includes(ServerModulesCustomCommandComponentActionReplyOptions.Ephemeral)
+                    ...convertTemplateMessage(action.reply.message as any),
+                    ephemeral: action.reply.options.includes(
+                        ServerModulesCustomCommandComponentActionReplyOptions.Ephemeral
+                    )
                 })}`
                 script += ')\n\n'
             }
@@ -685,7 +746,7 @@ export function convertComponentsToScript(components: ServerModulesCustomCommand
             if (action.send_message) {
                 script += `await sendMessage(`
                 script += `${action.send_message.channel_id || 'channel.id'},`
-                script += `${stringify(convertTemplateMessage(action.send_message.message))}`
+                script += `${stringify(convertTemplateMessage(action.send_message.message as any))}`
                 script += ')\n\n'
             }
 
@@ -705,7 +766,7 @@ export function serializeChannel(channel: GuildTextBasedChannel) {
         id: channel.id,
         lastMessageId: channel.lastMessageId,
         name: channel.name,
-        nsfw: !!channel['nsfw'],
+        nsfw: Boolean((channel as any).nsfw),
         parentId: channel.parentId,
         position: 'rawPosition' in channel ? channel.rawPosition : undefined,
         rateLimitPerUser: channel.rateLimitPerUser,
@@ -771,7 +832,7 @@ export function serializeMessage(message: Message) {
         return value
     }
 
-    const [lrUserId, lrEmoji] = (message?.['lastReaction'] as string)?.split('/') ?? ''
+    const [lrUserId, lrEmoji] = ((message as any)?.lastReaction as string)?.split('/') ?? ''
 
     return {
         attachments: message.attachments.map(v => {

@@ -1,7 +1,7 @@
+import { handleTelegramWebhook as handleWebhook } from '@/api/modules/social-alerts/TelegramAlerts.js'
+import APIError from '@/api/utility/APIError.js'
 import { createHmac } from 'crypto'
-import { Context } from 'koa'
-import { handleTelegramWebhook as handleWebhook } from '../../../modules/social-alerts/TelegramAlerts'
-import APIError from '../../../utility/APIError'
+import { type Context } from 'koa'
 
 export default async function handleTelegramWebhook(ctx: Context) {
     const tbSignature = ctx.request.headers['x-tb-signature'] as string,
@@ -10,7 +10,7 @@ export default async function handleTelegramWebhook(ctx: Context) {
     if (!tbSignature) ctx.throw(403, new APIError())
 
     const [sigAlgorithm, sigHmac] = tbSignature.split('=')
-    const signature = createHmac(sigAlgorithm, process.env.LCN_TELEGRAM_PUBLIC_BOT_HMAC_SECRET)
+    const signature = createHmac(sigAlgorithm!, process.env.LCN_TELEGRAM_PUBLIC_BOT_HMAC_SECRET!)
         .update(`${data.channel_id}:${data.message_id}`)
         .digest('hex')
 

@@ -1,10 +1,18 @@
-import { ServerDocument, ServerModulesEconomyStoreItem } from '@/database/schemas/Servers'
-import { BaseGuildTextChannel, BaseGuildVoiceChannel, Collection, Guild, GuildMember, Message, VoiceState } from 'discord.js'
-import Lacuna from '../internals/Lacuna'
-import TemporaryRole from '../internals/structures/TemporaryRole'
-import { hasRestrictedPermissions } from './Levels'
+import { type ServerDocument, type ServerModulesEconomyStoreItem } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import TemporaryRole from '@/internals/structures/TemporaryRole.js'
+import {
+    BaseGuildTextChannel,
+    BaseGuildVoiceChannel,
+    Collection,
+    Guild,
+    GuildMember,
+    Message,
+    VoiceState
+} from 'discord.js'
+import { hasRestrictedPermissions } from './Levels.js'
 
-export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message) {
+export async function messageCreate(self: Lacuna, server: ServerDocument, message: Message<true>) {
     if (!server.modules.economy.active || !server.modules.economy.currencies.length) return false
 
     const user = await self.db.users.fetch(
@@ -20,16 +28,16 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
     )
     const userWallet = await self.db.users.fetchWallet(user, message.guildId)
     await self.db.users.fetchServerProfile(user, server._id, {
-        accent_color: message.member.displayColor,
-        avatar: message.member.avatar,
+        accent_color: message.member!.displayColor,
+        avatar: message.member!.avatar,
         banner: null,
-        nickname: message.member.nickname
+        nickname: message.member!.nickname
     })
 
     for (const currency of server.modules.economy.currencies) {
         const hasRestrictions = hasRestrictedPermissions({
             channel: message.channel as any,
-            roles: message.member.roles.cache,
+            roles: message.member!.roles.cache,
             allowedChannels: currency.income.allowed.channels,
             allowedRoles: currency.income.allowed.roles,
             blockedChannels: currency.income.blocked.channels,
@@ -48,7 +56,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
             .filter(i => {
                 const hasRestrictions = hasRestrictedPermissions({
                     channel: message.channel as any,
-                    roles: message.member.roles.cache,
+                    roles: message.member!.roles.cache,
                     allowedChannels: i.allowed_channels,
                     allowedRoles: i.allowed_roles,
                     blockedChannels: i.blocked_channels,
@@ -61,16 +69,21 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
             })
             .slice(0, server.premium.available ? 10 : 1)
 
-        const multiplier = multipliers.reduce((x, y) => x * (y.economy_text_multiplier / 100), 100) / 100
+        const multiplier = multipliers.reduce((x, y) => x * (Number(y.economy_text_multiplier) / 100), 100) / 100
         let amount: number =
-            Math.random() * (currency.income.messages.range_per_message[1] - currency.income.messages.range_per_message[0]) +
-            currency.income.messages.range_per_message[0]
+            Math.random() *
+                (Number(currency.income.messages.range_per_message[1]) -
+                    Number(currency.income.messages.range_per_message[0])) +
+            Number(currency.income.messages.range_per_message[0])
 
         amount *= multiplier || 1
 
         if (userWallet.currencies.some(c => c.id === currency.id)) {
             await self.db.users.updateOne(
-                { _id: message.author.id, 'activities.wallets': { $elemMatch: { guild_id: message.guildId, 'currencies.id': currency.id } } },
+                {
+                    _id: message.author.id,
+                    'activities.wallets': { $elemMatch: { guild_id: message.guildId, 'currencies.id': currency.id } }
+                },
                 {
                     $inc: {
                         'activities.wallets.$[guild].currencies.$[currency].amount': amount
@@ -107,9 +120,10 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 }
 
 export async function voiceAssign(self: Lacuna, server: ServerDocument, state: VoiceState) {
-    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.premium.available) return false
+    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.premium.available)
+        return false
 
-    const members = state.channel.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
+    const members = state.channel!.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
     if (members.size < 2) return false
 
@@ -134,7 +148,10 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
             nickname: member.nickname
         })
 
-        if (!userWallet.activity.voice_connected_at || Date.now() - userWallet.activity.voice_connected_at > 36_000_000) {
+        if (
+            !userWallet.activity.voice_connected_at ||
+            Date.now() - userWallet.activity.voice_connected_at > 36_000_000
+        ) {
             await self.db.users.updateOne(
                 { _id: member.id, 'activities.wallets.guild_id': member.guild.id },
                 {
@@ -156,15 +173,32 @@ export async function voiceAssign(self: Lacuna, server: ServerDocument, state: V
     return true
 }
 
-export async function voiceUnassign(self: Lacuna, server: ServerDocument, state: VoiceState, channel: BaseGuildVoiceChannel) {
-    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.premium.available) return false
+export async function voiceUnassign(
+    self: Lacuna,
+    server: ServerDocument,
+    state: VoiceState,
+    channel: BaseGuildVoiceChannel
+) {
+    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.premium.available)
+        return false
 
     const members = channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
-    if (members) await voiceCount(self, server, members.size == 1 ? [state.member, members.first()] : [state.member], channel)
+    if (members)
+        await voiceCount(
+            self,
+            server,
+            members.size === 1 ? [state.member!, members.first()!] : [state.member!],
+            channel
+        )
 }
 
-export async function voiceCount(self: Lacuna, server: ServerDocument, members: GuildMember[], channel: BaseGuildVoiceChannel) {
+export async function voiceCount(
+    self: Lacuna,
+    server: ServerDocument,
+    members: GuildMember[],
+    channel: BaseGuildVoiceChannel
+) {
     for (const member of members) {
         const user = await self.db.users.findOne({ _id: member.user.id })
         const wallet = user?.activities?.wallets?.find(i => i.guild_id == server._id)
@@ -190,23 +224,29 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
                     if (i.blocked_channels.includes(channel.id)) return false
                     if (member.roles.cache.some(ii => i.blocked_roles.includes(ii.id))) return false
                     if (i.allowed_channels.length && !i.allowed_channels.includes(channel.id)) return false
-                    if (i.allowed_roles.length && !member.roles.cache.some(ii => i.allowed_roles.includes(ii.id))) return false
+                    if (i.allowed_roles.length && !member.roles.cache.some(ii => i.allowed_roles.includes(ii.id)))
+                        return false
 
                     return i.options.includes('ECONOMY_VOICE')
                 })
                 .slice(0, server.premium.available ? 10 : 1)
 
-            const multiplier = multipliers.reduce((x, y) => x * (y.economy_voice_multiplier / 100), 100) / 100
+            const multiplier = multipliers.reduce((x, y) => x * (Number(y.economy_voice_multiplier) / 100), 100) / 100
             let amount: number =
-                (Math.random() * (currency.income.voice_channels.range_per_minute[1] - currency.income.voice_channels.range_per_minute[0]) +
-                    currency.income.voice_channels.range_per_minute[0]) *
+                (Math.random() *
+                    (Number(currency.income.voice_channels.range_per_minute[1]) -
+                        Number(currency.income.voice_channels.range_per_minute[0])) +
+                    Number(currency.income.voice_channels.range_per_minute[0])) *
                 time
 
             amount *= multiplier || 1
 
             if (wallet.currencies.some(c => c.id == currency.id)) {
                 await self.db.users.updateOne(
-                    { _id: member.user.id, 'activities.wallets': { $elemMatch: { guild_id: server._id, 'currencies.id': currency.id } } },
+                    {
+                        _id: member.user.id,
+                        'activities.wallets': { $elemMatch: { guild_id: server._id, 'currencies.id': currency.id } }
+                    },
                     {
                         $inc: {
                             'activities.wallets.$[guild].currencies.$[currency].amount': amount
@@ -241,7 +281,12 @@ export async function voiceCount(self: Lacuna, server: ServerDocument, members: 
     }
 }
 
-export async function purchaseItem(item: ServerModulesEconomyStoreItem, self: Lacuna, guild: Guild, member: GuildMember) {
+export async function purchaseItem(
+    item: ServerModulesEconomyStoreItem,
+    self: Lacuna,
+    guild: Guild,
+    member: GuildMember
+) {
     const user = await self.db.users.fetch(
         { _id: member.id },
         {
@@ -259,29 +304,45 @@ export async function purchaseItem(item: ServerModulesEconomyStoreItem, self: La
 
     if (
         !userWallet.currencies.find(c => c.id === item.currency_id) ||
-        userWallet.currencies.find(c => c.id === item.currency_id).amount < item.purchase_price
+        userWallet.currencies.find(c => c.id === item.currency_id)!.amount < item.purchase_price
     )
         return 'INSUFFICIENT_FUNDS'
 
-    if (userWallet.transactions.some(t => t.type == 'PURCHASE' && t.details === `${item.id}:${item.references.join(',')}`)) {
+    if (
+        userWallet.transactions.some(
+            t => t.type == 'PURCHASE' && t.details === `${item.id}:${item.references.join(',')}`
+        )
+    ) {
         if (item.options.includes('TEMPORARY_REFERENCES')) {
-            const transaction = userWallet.transactions.find(t => t.type === 'PURCHASE' && t.details === `${item.id}:${item.references.join(',')}`)
+            const transaction = userWallet.transactions.find(
+                t => t.type === 'PURCHASE' && t.details === `${item.id}:${item.references.join(',')}`
+            )!
 
-            const not_yet = (Date.now() - transaction.timestamp) / 1000 < item.references_duration.value * measures[item.references_duration.measure]
+            const not_yet =
+                (Date.now() - transaction.timestamp) / 1000 <
+                item.references_duration!.value * measures[item.references_duration!.measure]
 
             if (not_yet) return 'PURCHASED'
         } else return 'PURCHASED'
     }
 
     if (item.type === 'CHANNEL') {
-        const channels = guild.channels.cache.filter(c => c.manageable && item.references.includes(c.id)) as Collection<string, BaseGuildTextChannel>
+        const channels = guild.channels.cache.filter(c => c.manageable && item.references.includes(c.id)) as Collection<
+            string,
+            BaseGuildTextChannel
+        >
 
         if (channels.size) {
             for (const [, channel] of channels) {
                 try {
                     await channel.permissionOverwrites.create(member.id, { ViewChannel: true })
                 } catch (err) {
-                    this.self.logger.error({ module: 'Economy', action: 'PurchaseItemCreateOverwrites', err, guildId: guild.id })
+                    self.logger.error({
+                        module: 'Economy',
+                        action: 'PurchaseItemCreateOverwrites',
+                        err,
+                        guildId: guild.id
+                    })
                 }
             }
         }
@@ -297,7 +358,9 @@ export async function purchaseItem(item: ServerModulesEconomyStoreItem, self: La
                         user_id: member.id,
                         guild_id: guild.id,
                         role_id: reference,
-                        expires_timestamp: Date.now() + item.references_duration.value * measures[item.references_duration.measure] * 1000,
+                        expires_timestamp:
+                            Date.now() +
+                            item.references_duration!.value * measures[item.references_duration!.measure] * 1000,
                         initial: true
                     })
                 }
@@ -305,14 +368,22 @@ export async function purchaseItem(item: ServerModulesEconomyStoreItem, self: La
                 try {
                     await member.roles.add(roles)
                 } catch (err) {
-                    this.self.logger.error({ module: 'Economy', action: 'PurchaseItemAddRoles', err, guildId: guild.id })
+                    self.logger.error({
+                        module: 'Economy',
+                        action: 'PurchaseItemAddRoles',
+                        err,
+                        guildId: guild.id
+                    })
                 }
             }
         }
     }
 
     await self.db.users.updateOne(
-        { _id: member.id, 'activities.wallets': { $elemMatch: { guild_id: guild.id, 'currencies.id': item.currency_id } } },
+        {
+            _id: member.id,
+            'activities.wallets': { $elemMatch: { guild_id: guild.id, 'currencies.id': item.currency_id } }
+        },
         {
             $inc: {
                 'activities.wallets.$[guild].currencies.$[currency].amount': -item.purchase_price

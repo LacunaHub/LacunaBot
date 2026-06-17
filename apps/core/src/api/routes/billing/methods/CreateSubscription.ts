@@ -1,12 +1,17 @@
-import database from '@/database'
-import { SubscriptionMetadataProduct } from '@/database/schemas/Subscriptions'
-import { APIGuild, APIUser } from 'discord.js'
-import { Context } from 'koa'
-import { projectTeamRoleId, serverBoosterRoleId, subscribedPatronRoleId, supportServerId } from '../../../../internals/utility/Constants'
-import { SubscriptionData } from '../../../modules/billing'
-import { DiscordRolesCheckout } from '../../../modules/billing/providers/DiscordRoles'
-import APIError from '../../../utility/APIError'
-import DiscordUtils from '../../../utility/DiscordUtils'
+import { type SubscriptionData } from '@/api/modules/billing/index.js'
+import { DiscordRolesCheckout } from '@/api/modules/billing/providers/DiscordRoles.js'
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { SubscriptionMetadataProduct } from '@/database/schemas/Subscriptions.js'
+import {
+    projectTeamRoleId,
+    serverBoosterRoleId,
+    subscribedPatronRoleId,
+    supportServerId
+} from '@/internals/utility/Constants.js'
+import { type APIGuild, type APIUser } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function createSubscription(ctx: Context) {
     const currentUser: Partial<APIUser> = ctx.state.user
@@ -19,7 +24,7 @@ export default async function createSubscription(ctx: Context) {
 
     const { rootUsers } = await database.getInternalData()
     const data: SubscriptionData = {
-        subscriberId: currentUser.id,
+        subscriberId: currentUser.id!,
         productId: SubscriptionMetadataProduct.Diamond,
         refId: guildId
     }
@@ -37,8 +42,14 @@ export default async function createSubscription(ctx: Context) {
                 ctx.throw(500, new APIError(5019))
             }
 
-            if (supportServer.premium_subscription_count >= env.maxAllowedDiamondBoosts) {
-                ctx.throw(400, new APIError(4022, `The support server has the maximum allowed number of boosts (${env.maxAllowedDiamondBoosts})`))
+            if (supportServer.premium_subscription_count! >= env.maxAllowedDiamondBoosts) {
+                ctx.throw(
+                    400,
+                    new APIError(
+                        4022,
+                        `The support server has the maximum allowed number of boosts (${env.maxAllowedDiamondBoosts})`
+                    )
+                )
             }
         }
 
@@ -51,14 +62,14 @@ export default async function createSubscription(ctx: Context) {
             roleIds = [projectTeamRoleId]
             maxActiveSubscriptions = 2
 
-            if (rootUsers.includes(currentUser.id)) {
+            if (rootUsers.includes(currentUser.id!)) {
                 maxActiveSubscriptions = 100
             }
         }
 
         const discordRolesCheckout = new DiscordRolesCheckout(data, subscriptionMethod, roleIds, maxActiveSubscriptions)
         const rolesMember = await discordRolesCheckout.create()
-        let code: number
+        let code!: number
 
         if (rolesMember === 'NoRoles') {
             code = 4019

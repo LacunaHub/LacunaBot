@@ -1,7 +1,7 @@
-import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
-import { Document, model, Schema } from 'mongoose'
+import { type Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
+import mongoose from 'mongoose'
 
-const schema = new Schema<ViolativeMessageDocument>(
+const schema = new mongoose.Schema<ViolativeMessageDocument>(
     {
         _id: { type: String, default: SnowflakeUtils.generate },
         server_id: { type: String, required: true },
@@ -14,6 +14,7 @@ const schema = new Schema<ViolativeMessageDocument>(
         created_at: {
             type: Number,
             default: function () {
+                // @ts-expect-error
                 return SnowflakeUtils.getTimestamp(this._id)
             }
         }
@@ -21,9 +22,9 @@ const schema = new Schema<ViolativeMessageDocument>(
     { versionKey: false }
 )
 
-export default model<ViolativeMessageDocument>('violative-messages', schema)
+export default mongoose.model<ViolativeMessageDocument>('violative-messages', schema)
 
-export interface ViolativeMessageDocument extends Document {
+export interface ViolativeMessageDocument extends mongoose.Document {
     _id: Snowflake
     server_id: string
     author_id: string

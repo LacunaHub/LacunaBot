@@ -1,9 +1,9 @@
-import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
-import { Document, model, Schema } from 'mongoose'
+import { type Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
+import mongoose from 'mongoose'
 
-export default model<ServerBanDocument>(
+export default mongoose.model<ServerBanDocument>(
     'server-bans',
-    new Schema<ServerBanDocument>(
+    new mongoose.Schema<ServerBanDocument>(
         {
             _id: { type: String, default: SnowflakeUtils.generate },
             guild_id: { type: String, required: true },
@@ -13,6 +13,7 @@ export default model<ServerBanDocument>(
             created_at: {
                 type: Number,
                 default: function () {
+                    // @ts-expect-error
                     return SnowflakeUtils.getTimestamp(this._id)
                 }
             }
@@ -21,7 +22,7 @@ export default model<ServerBanDocument>(
     )
 )
 
-export interface ServerBanDocument extends Document {
+export interface ServerBanDocument extends mongoose.Document {
     _id: Snowflake
     guild_id: string
     user_id: string

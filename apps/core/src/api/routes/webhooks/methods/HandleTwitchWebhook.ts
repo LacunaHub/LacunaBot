@@ -1,8 +1,8 @@
+import { eventSubUnsubscribe, handleIncomingWebhook } from '@/api/modules/social-alerts/TwitchAlerts.js'
+import APIError from '@/api/utility/APIError.js'
+import database from '@/database/index.js'
 import { createHmac } from 'crypto'
-import { Context, Next } from 'koa'
-import database from '../../../../database'
-import { eventSubUnsubscribe, handleIncomingWebhook } from '../../../modules/social-alerts/TwitchAlerts'
-import APIError from '../../../utility/APIError'
+import { type Context, type Next } from 'koa'
 
 export default async function handleTwitchWebhook(ctx: Context) {
     const messageId = ctx.request.headers['twitch-eventsub-message-id'] as string,
@@ -58,7 +58,7 @@ export function authenticateEventSub(ctx: Context, next: Next) {
         return
     }
 
-    const signature = createHmac('sha256', process.env.LCN_TWITCH_SIGNING_SECRET)
+    const signature = createHmac('sha256', process.env.LCN_TWITCH_SIGNING_SECRET!)
         .update(messageId + messageTimestamp + JSON.stringify(ctx.request.body))
         .digest('hex')
 

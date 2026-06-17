@@ -1,14 +1,23 @@
-import { ServerDocument, ServerModulesAutomationTriggers } from '@/database/schemas/Servers'
-import { SearchResult } from '@lacunahub/lavaluna.js'
+import { ServerModulesAutomationTriggers } from '@/database/schemas/Servers.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { onPressGiveawayButton } from '@/internals/structures/Giveaway.js'
+import { lavalinkSources } from '@/internals/utility/Constants.js'
+import { debounce, truncateString } from '@/internals/utility/Utils.js'
+import Automation from '@/modules/custom-behavior/Automation.js'
+import CustomCommand from '@/modules/custom-behavior/CustomCommand.js'
+import InteractiveMessages from '@/modules/InteractiveMessages.js'
+import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '@/modules/Moderation/CaseLog.js'
+import Reports from '@/modules/Moderation/Reports.js'
+import { type SearchResult } from '@lacunahub/lavaluna.js'
 import {
     ActionRow,
-    AnySelectMenuInteraction,
+    type AnySelectMenuInteraction,
     AutocompleteInteraction,
     ButtonInteraction,
     ChatInputCommandInteraction,
     Events,
     Message,
-    MessageActionRowComponent,
+    type MessageActionRowComponent,
     MessageContextMenuCommandInteraction,
     ModalSubmitInteraction,
     parseEmoji,
@@ -16,15 +25,6 @@ import {
 } from 'discord.js'
 import moment from 'moment'
 import ms from 'ms'
-import Lacuna from '../../internals/Lacuna'
-import { onPressGiveawayButton } from '../../internals/structures/Giveaway'
-import { lavalinkSources } from '../../internals/utility/Constants'
-import { debounce, truncateString } from '../../internals/utility/Utils'
-import Automation from '../../modules/custom-behavior/Automation'
-import CustomCommand from '../../modules/custom-behavior/CustomCommand'
-import InteractiveMessages from '../../modules/InteractiveMessages'
-import { onPressChangeReasonButton, onSubmitChangeReasonModal } from '../../modules/Moderation/CaseLog'
-import Reports from '../../modules/Moderation/Reports'
 
 const handler = async (
     self: Lacuna,
@@ -43,7 +43,7 @@ const handler = async (
         return await handlerAutocomplete(self, interaction)
     }
 
-    const server: ServerDocument = await self.db.servers.fetch({ _id: interaction.guildId })
+    const server = await self.db.servers.fetch({ _id: interaction.guildId })
     interaction.member = await interaction.guild.members.fetch(interaction.user.id)
 
     if (interaction.isChatInputCommand()) {
@@ -65,7 +65,7 @@ const handler = async (
         const command = self.commands.find(
             v =>
                 (v.isUserContextCommand || v.isMessageContextCommand) &&
-                self.i18n.t('en', v.prettyName) === interaction.commandName
+                self.i18n.t('en', v.prettyName!) === interaction.commandName
         )
 
         if (command) {
@@ -79,7 +79,7 @@ const handler = async (
         }
 
         if (interaction.customId.startsWith('PLAYER')) {
-            const player = self.lava.nodes.getPlayer(interaction.guild.id)
+            const player = self.lava!.nodes.getPlayer(interaction.guild.id)
             const message = player?.get<Message>('message')
 
             if (message?.id === interaction.message?.id) {
@@ -100,28 +100,28 @@ const handler = async (
 
                 const rows = message.components as ActionRow<MessageActionRowComponent>[]
 
-                const shufflePlayButton = rows[0].components[0],
-                    previousButton = rows[0].components[1],
-                    playPauseButton = rows[0].components[2],
-                    nextButton = rows[0].components[3],
-                    repeatButton = rows[0].components[4]
-                const volumeDownButton = rows[1].components[0],
-                    seekBackwardButton = rows[1].components[1],
-                    stopButton = rows[1].components[2],
-                    seekForwardButton = rows[1].components[3],
-                    volumeUpButton = rows[1].components[4]
-                const queueButton = rows[2].components[0],
-                    filtersButton = rows[2].components[1]
+                const shufflePlayButton = rows[0]!.components[0]!,
+                    previousButton = rows[0]!.components[1]!,
+                    playPauseButton = rows[0]!.components[2]!,
+                    nextButton = rows[0]!.components[3]!,
+                    repeatButton = rows[0]!.components[4]!
+                const volumeDownButton = rows[1]!.components[0]!,
+                    seekBackwardButton = rows[1]!.components[1]!,
+                    stopButton = rows[1]!.components[2]!,
+                    seekForwardButton = rows[1]!.components[3]!,
+                    volumeUpButton = rows[1]!.components[4]!
+                const queueButton = rows[2]!.components[0]!,
+                    filtersButton = rows[2]!.components[1]!
 
                 if (interaction.customId === stopButton.customId) {
-                    await self.commands.get('stop').execute(server, interaction as any)
+                    await self.commands.get('stop')!.execute(server, interaction as any)
                 }
 
                 if (interaction.customId === previousButton.customId) {
                     if (player.queue.previous && player.position < 5000) {
                         player.queue.position--
                         await player.play()
-                    } else if (player.queue.current.info.isSeekable) {
+                    } else if (player.queue.current!.info.isSeekable) {
                         await player.seek(0)
                     }
                 }
@@ -129,7 +129,7 @@ const handler = async (
                 if (interaction.customId === playPauseButton.customId) {
                     await player.pause(!player.paused)
                     ;(playPauseButton as any).data.emoji = parseEmoji(
-                        player.paused ? self.staticEmojis.Play : self.staticEmojis.Pause
+                        player.paused ? self.staticEmojis.Play! : self.staticEmojis.Pause!
                     )
                 }
 
@@ -139,41 +139,41 @@ const handler = async (
 
                 if (interaction.customId === repeatButton.customId) {
                     if (player.queueRepeat) {
-                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.RepeatOne)
+                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.RepeatOne!)
                         player.setRepeatMode('TRACK')
                     } else if (player.trackRepeat) {
-                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.ArrowRight)
+                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.ArrowRight!)
                         player.setRepeatMode('OFF')
                     } else {
-                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.Repeat)
+                        ;(repeatButton as any).data.emoji = parseEmoji(self.staticEmojis.Repeat!)
                         player.setRepeatMode('QUEUE')
                     }
                 }
 
                 if (interaction.customId === queueButton.customId) {
-                    await self.commands.get('queue').execute(server, interaction as any)
+                    await self.commands.get('queue')!.execute(server, interaction as any)
                 }
 
                 if ([volumeDownButton.customId, volumeUpButton.customId].includes(interaction.customId)) {
-                    await self.commands.get('volume').execute(server, interaction as any)
+                    await self.commands.get('volume')!.execute(server, interaction as any)
                 }
 
                 if (interaction.customId === shufflePlayButton.customId) {
                     if (player.shufflePlay) {
-                        ;(shufflePlayButton as any).data.emoji = parseEmoji(self.staticEmojis.Shuffle)
+                        ;(shufflePlayButton as any).data.emoji = parseEmoji(self.staticEmojis.Shuffle!)
                         player.setShufflePlay(false)
                     } else {
-                        ;(shufflePlayButton as any).data.emoji = parseEmoji(self.staticEmojis.ShuffleOn)
+                        ;(shufflePlayButton as any).data.emoji = parseEmoji(self.staticEmojis.ShuffleOn!)
                         player.setShufflePlay(true)
                     }
                 }
 
                 if ([seekBackwardButton.customId, seekForwardButton.customId].includes(interaction.customId)) {
-                    await self.commands.get('seek').execute(server, interaction as any)
+                    await self.commands.get('seek')!.execute(server, interaction as any)
                 }
 
                 if (interaction.customId === filtersButton.customId) {
-                    await self.commands.get('filters').execute(server, interaction as any)
+                    await self.commands.get('filters')!.execute(server, interaction as any)
                 }
 
                 if (
@@ -252,7 +252,7 @@ const handler = async (
 
         if (/REPORT\-\d+/.test(interaction.customId)) {
             const reportCommand = self.commands.get('report')
-            await reportCommand.execute(server, interaction as any)
+            await reportCommand!.execute(server, interaction as any)
         }
     }
 
@@ -260,7 +260,7 @@ const handler = async (
 }
 
 const handlerAutocomplete = debounce(async (self: Lacuna, interaction: AutocompleteInteraction) => {
-    const server: ServerDocument = await self.db.servers.fetch({ _id: interaction.guildId })
+    const server = await self.db.servers.fetch({ _id: interaction.guildId! })
     const option = interaction.options?.getFocused?.(true)
 
     if (interaction.commandName === 'help') {
@@ -286,7 +286,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
         await interaction.respond(
             items
                 .map(i => {
-                    const currency = server.modules.economy.currencies.find(ii => ii.id === i.currency_id)
+                    const currency = server.modules.economy.currencies.find(ii => ii.id === i.currency_id)!
                     const price = `${i.purchase_price} ${currency.name}`
 
                     return {
@@ -324,7 +324,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
                     .map(v => {
                         return {
                             name: truncateString(
-                                v.references.map(vv => interaction.guild.roles.cache.get(vv)?.name ?? vv).join(', ')
+                                v.references.map(vv => interaction.guild!.roles.cache.get(vv)?.name ?? vv).join(', ')
                             ),
                             value: v.id
                         }
@@ -362,11 +362,11 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
     }
 
     if (interaction.commandName === 'unban') {
-        if (interaction.guild.bans.cache.size < 100) {
-            await interaction.guild.bans.fetch({ limit: 100, cache: true })
+        if (interaction.guild!.bans.cache.size < 100) {
+            await interaction.guild!.bans.fetch({ limit: 100, cache: true })
         }
 
-        const bans = interaction.guild.bans.cache.filter(i =>
+        const bans = interaction.guild!.bans.cache.filter(i =>
             [i.user.id, i.user.tag].some(ii => ii.includes(option?.value))
         )
 
@@ -401,7 +401,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
         let search: SearchResult
 
         try {
-            search = await self.lava.search(
+            search = await self.lava!.search(
                 { query: option?.value, source: lavalinkSources[server.modules.music.default_source] },
                 { maxResults: 25 }
             )
@@ -420,7 +420,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
         if (search.loadType === 'playlist') {
             await interaction.respond([
                 {
-                    name: truncateString(search.playlist.name, 95),
+                    name: truncateString(search.playlist!.name, 95),
                     value: option?.value
                 }
             ])
@@ -433,7 +433,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
 
             return {
                 name: trackName,
-                value: i.info.uri
+                value: i.info.uri!
             }
         })
 

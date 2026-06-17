@@ -1,13 +1,13 @@
-import database, { Product } from '@/database'
-import { PaymentAmount, PaymentStatus, PaymentType } from '@/database/schemas/Payments'
-import { Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils'
-import { PaymentData, addDiamond } from '..'
+import database, { type Product } from '@/database/index.js'
+import { type PaymentAmount, PaymentStatus, PaymentType } from '@/database/schemas/Payments.js'
+import { type Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
+import { type PaymentData, addDiamond } from '../index.js'
 
 export class TokensCheckout {
     public paymentId: Snowflake
     public amount: PaymentAmount
     public payerId: string
-    public comment: string
+    public comment: string | null
     public product: Product
     public refId: string
 

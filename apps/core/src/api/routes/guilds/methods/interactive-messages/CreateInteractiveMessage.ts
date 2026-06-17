@@ -1,12 +1,16 @@
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
 import {
-    ServerDocument,
-    ServerModulesInteractiveMessage,
-    ServerModulesInteractiveMessageButtonComponent,
-    ServerModulesInteractiveMessageSelectMenuComponent
-} from '@/database/schemas/Servers'
+    type ServerDocument,
+    type ServerModulesInteractiveMessage,
+    type ServerModulesInteractiveMessageButtonComponent,
+    type ServerModulesInteractiveMessageSelectMenuComponent
+} from '@/database/schemas/Servers.js'
+import { snakeToPascalCase } from '@/internals/utility/Utils.js'
 import {
     ActionRowBuilder,
-    APIMessage,
+    type APIMessage,
     ButtonBuilder,
     ButtonStyle,
     EmbedBuilder,
@@ -14,11 +18,7 @@ import {
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder
 } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../../database'
-import { snakeToPascalCase } from '../../../../../internals/utility/Utils'
-import APIError from '../../../../utility/APIError'
-import DiscordUtils from '../../../../utility/DiscordUtils'
+import { type Context } from 'koa'
 
 export default async function createInteractiveMessage(ctx: Context) {
     const server: ServerDocument = ctx.state.server
@@ -47,17 +47,18 @@ export default async function createInteractiveMessage(ctx: Context) {
         embeds: data.message.embed.active
             ? [
                   new EmbedBuilder({
-                      title: data.message.embed.title,
-                      description: data.message.embed.description,
-                      url: data.message.embed.url,
-                      timestamp: data.message.embed.timestamp ? new Date(data.message.embed.timestamp) : null,
-                      color: data.message.embed.color ? resolveColor(data.message.embed.color as any) : null,
+                      title: data.message.embed.title ?? undefined,
+                      description: data.message.embed.description ?? undefined,
+                      url: data.message.embed.url ?? undefined,
+                      // @ts-ignore
+                      timestamp: data.message.embed.timestamp ? new Date(data.message.embed.timestamp) : undefined,
+                      color: data.message.embed.color ? resolveColor(data.message.embed.color as any) : undefined,
                       fields: data.message.embed.fields,
                       author: data.message.embed.author as any,
                       thumbnail: data.message.embed.thumbnail as any,
                       image: data.message.embed.image as any,
                       footer: data.message.embed.footer as any
-                  }).toJSON()
+                  } as any).toJSON()
               ]
             : [],
         components: resolveMessageComponents(data.components)
@@ -86,7 +87,9 @@ export default async function createInteractiveMessage(ctx: Context) {
                     DiscordUtils.restRoutes.channelMessageOwnReaction(
                         apiMessage.channel_id,
                         apiMessage.id,
-                        encodeURIComponent(reaction.emoji.id ? `${reaction.emoji.name}:${reaction.emoji.id}` : reaction.emoji.name)
+                        encodeURIComponent(
+                            reaction.emoji.id ? `${reaction.emoji.name}:${reaction.emoji.id}` : reaction.emoji.name
+                        )
                     )
                 )
             } catch (err) {
@@ -100,8 +103,8 @@ export default async function createInteractiveMessage(ctx: Context) {
         {
             $push: {
                 'modules.interactive_messages': {
-                    id: apiMessage.id,
                     ...data,
+                    id: apiMessage.id,
                     reactions
                 }
             }
@@ -110,14 +113,17 @@ export default async function createInteractiveMessage(ctx: Context) {
 
     ctx.status = 200
     ctx.body = {
-        id: apiMessage.id,
         ...data,
+        id: apiMessage.id,
         reactions
     }
 }
 
 export function resolveMessageComponents(
-    components: (ServerModulesInteractiveMessageButtonComponent | ServerModulesInteractiveMessageSelectMenuComponent)[][]
+    components: (
+        | ServerModulesInteractiveMessageButtonComponent
+        | ServerModulesInteractiveMessageSelectMenuComponent
+    )[][]
 ) {
     return components.map(row => {
         return new ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>()
@@ -127,29 +133,35 @@ export function resolveMessageComponents(
                         if (i.type == 'BUTTON')
                             return Boolean(
                                 typeof i.id === 'string' &&
-                                    i.id &&
-                                    (i.appearance.label || i.appearance.emoji?.name) &&
-                                    ((Array.isArray(i.options) && i.options.length && i.options.every(ii => typeof ii === 'string')) ||
-                                        (i.appearance.style == 'LINK' && i.appearance.url))
+                                i.id &&
+                                (i.appearance.label || i.appearance.emoji?.name) &&
+                                ((Array.isArray(i.options) &&
+                                    i.options.length &&
+                                    i.options.every(ii => typeof ii === 'string')) ||
+                                    (i.appearance.style == 'LINK' && i.appearance.url))
                             )
 
                         if (i.type == 'SELECT_MENU')
                             return Boolean(
                                 typeof i.id === 'string' &&
-                                    i.id &&
-                                    Array.isArray(i._options) &&
-                                    i._options.length &&
-                                    i._options.every(ii => ii.appearance.label && ii.appearance.value)
+                                i.id &&
+                                Array.isArray(i._options) &&
+                                i._options.length &&
+                                i._options.every(ii => ii.appearance.label && ii.appearance.value)
                             )
                     })
                     .map(i => {
                         if (i.type === 'BUTTON') {
-                            const button = new ButtonBuilder().setStyle(ButtonStyle[snakeToPascalCase(i.appearance.style)])
+                            const button = new ButtonBuilder().setStyle(
+                                // @ts-ignore
+                                ButtonStyle[snakeToPascalCase(i.appearance.style)]
+                            )
 
                             if (i.appearance.style !== 'LINK') button.setCustomId(i.id)
                             else button.setURL(i.appearance.url)
                             button.setLabel(i.appearance.label)
-                            if (i.appearance.emoji.name) button.setEmoji(i.appearance.emoji.id ? i.appearance.emoji : i.appearance.emoji.name)
+                            if (i.appearance.emoji.name)
+                                button.setEmoji(i.appearance.emoji.id ? i.appearance.emoji : i.appearance.emoji.name)
 
                             return button
                         }
@@ -160,11 +172,17 @@ export function resolveMessageComponents(
                             selectMenu.setPlaceholder(i.placeholder)
                             selectMenu.setOptions(
                                 i._options.map(ii => {
-                                    const option = new StringSelectMenuOptionBuilder().setLabel(ii.appearance.label).setValue(ii.appearance.value)
+                                    const option = new StringSelectMenuOptionBuilder()
+                                        .setLabel(ii.appearance.label)
+                                        .setValue(ii.appearance.value)
 
                                     if (ii.appearance.description) option.setDescription(ii.appearance.description)
                                     if (ii.appearance.emoji.name)
-                                        option.setEmoji((ii.appearance.emoji.id ? ii.appearance.emoji : ii.appearance.emoji.name) as any)
+                                        option.setEmoji(
+                                            (ii.appearance.emoji.id
+                                                ? ii.appearance.emoji
+                                                : ii.appearance.emoji.name) as any
+                                        )
 
                                     return option
                                 })
@@ -173,6 +191,7 @@ export function resolveMessageComponents(
                             return selectMenu
                         }
                     })
+                    .filter(v => typeof v !== 'undefined')
             )
             .toJSON()
     })

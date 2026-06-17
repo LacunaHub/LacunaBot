@@ -1,14 +1,13 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import Lacuna from '@/internals/Lacuna.js'
+import AutoMod from '@/modules/AutoMod/index.js'
+import Greeting from '@/modules/Greeting.js'
 import { Events, GuildMember } from 'discord.js'
-import Lacuna from '../../internals/Lacuna'
-import AutoMod from '../../modules/AutoMod'
-import Greeting from '../../modules/Greeting'
 
 const handler = async (self: Lacuna, before: GuildMember, member: GuildMember) => {
-    if (self.user.id === member.id) return false
+    if (self.user!.id === member.id) return false
     if (!before || !member) return false
 
-    const server: ServerDocument = await self.db.servers.fetch({ _id: member.guild.id })
+    const server = await self.db.servers.fetch({ _id: member.guild.id })
 
     if (member.guild.features.includes('MEMBER_VERIFICATION_GATE_ENABLED') && before.pending && !member.pending) {
         await Greeting.addInitialRoles(self, server, member)

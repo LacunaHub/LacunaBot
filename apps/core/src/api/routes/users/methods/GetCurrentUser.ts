@@ -1,10 +1,10 @@
-import { PermissionsBitField, RESTAPIPartialCurrentUserGuild } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../database'
-import APIError from '../../../utility/APIError'
-import { UserState } from '../../../utility/Authentication'
-import { oauth2 } from '../../../utility/DiscordOAuth2'
-import DiscordUtils from '../../../utility/DiscordUtils'
+import APIError from '@/api/utility/APIError.js'
+import { type UserState } from '@/api/utility/Authentication.js'
+import { oauth2 } from '@/api/utility/DiscordOAuth2.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { PermissionsBitField, type RESTAPIPartialCurrentUserGuild } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function getCurrentUser(ctx: Context) {
     const currentUser: UserState = ctx.state.user,
@@ -14,10 +14,10 @@ export default async function getCurrentUser(ctx: Context) {
         ctx.throw(404, new APIError(1001))
     }
 
-    let guilds: RESTAPIPartialCurrentUserGuild[]
+    let guilds: RESTAPIPartialCurrentUserGuild[] = []
 
     try {
-        guilds = await oauth2.getUserGuilds(ctx.request.headers.authorization)
+        guilds = await oauth2.getUserGuilds(ctx.request.headers.authorization!)
     } catch (err) {}
 
     if (!guilds) {
@@ -33,12 +33,16 @@ export default async function getCurrentUser(ctx: Context) {
             let me: any
 
             try {
-                me = await DiscordUtils.rest.get(DiscordUtils.restRoutes.guildMember(guild.id, process.env.LCN_DISCORD_CLIENT_ID))
+                me = await DiscordUtils.rest.get(
+                    DiscordUtils.restRoutes.guildMember(guild.id, process.env.LCN_DISCORD_CLIENT_ID)
+                )
             } catch (err) {}
 
+            // @ts-ignore
             guild['joined'] = !!me
         }
 
+        // @ts-ignore
         guild['permitted'] = permitted
     }
 

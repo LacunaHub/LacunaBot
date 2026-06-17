@@ -1,6 +1,6 @@
-import { Context, Next } from 'koa'
-import database from '../../database'
-import APIError from './APIError'
+import database from '@/database/index.js'
+import { type Context, type Next } from 'koa'
+import APIError from './APIError.js'
 
 export async function findServer(ctx: Context, next: Next) {
     const guildId: string = ctx.params.guildId

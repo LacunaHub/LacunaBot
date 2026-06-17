@@ -1,5 +1,5 @@
 import Router from '@koa/router'
-import getState from '../common/methods/GetState'
+import getState from '../common/methods/GetState.js'
 
 const router = new Router({ prefix: '/state', methods: ['GET'] })
 

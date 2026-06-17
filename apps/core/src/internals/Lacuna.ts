@@ -1,21 +1,22 @@
-import database, { EnvData } from '@/database'
-import { ServerDocument, ServerModulesCustomCommand } from '@/database/schemas/Servers'
-import Logger from '@/utility/Logger'
+import database, { type EnvData } from '@/database/index.js'
+import { type ServerDocument, type ServerModulesCustomCommand } from '@/database/schemas/Servers.js'
+import i18n from '@/i18n/index.js'
+import Logger from '@/utility/Logger.js'
 import { Lavaluna } from '@lacunahub/lavaluna.js'
 import { ClusterClient } from '@lacunahub/letsfrag'
-import { ClientOptions, Collection, Guild, PermissionsBitField } from 'discord.js'
+import { type ClientOptions, Collection, Guild, PermissionsBitField } from 'discord.js'
 import { readdirSync, readFileSync } from 'fs'
-import { Isolate } from 'isolated-vm'
-import { os } from 'node-os-utils'
-import i18n from '../i18n'
-import { Command, CommandOptions } from './structures/Command'
-import Event, { EventOptions } from './structures/Event'
-import Giveaway, { handleEntries as handleGiveawayEntries } from './structures/Giveaway'
-import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './structures/TemporaryBan'
-import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole'
+import IVM from 'isolated-vm'
+import { createRequire } from 'module'
+import { Command, type CommandOptions } from './structures/Command.js'
+import Event, { type EventOptions } from './structures/Event.js'
+import Giveaway, { handleEntries as handleGiveawayEntries } from './structures/Giveaway.js'
+import TemporaryBan, { handleEntries as handleTemporaryBanEntries } from './structures/TemporaryBan.js'
+import TemporaryRole, { handleEntries as handleTemporaryRoleEntries } from './structures/TemporaryRole.js'
+
+const require = createRequire(import.meta.url)
 
 export default class Lacuna extends ClusterClient {
-    public hostname: string
     public logger: typeof Logger
     public db: typeof database
     public cache = new Map<string, any>()
@@ -32,7 +33,7 @@ export default class Lacuna extends ClusterClient {
     public get staticEmojis(): Record<string, string> {
         return Object.assign(
             {},
-            ...this.application.emojis.cache.map(v => {
+            ...this.application!.emojis.cache.map(v => {
                 return {
                     [v.name]: v.toString()
                 }
@@ -40,10 +41,8 @@ export default class Lacuna extends ClusterClient {
         )
     }
 
-    constructor(options?: ClientOptions) {
-        super(options)
-
-        this.hostname = os.hostname()
+    constructor(options: ClientOptions) {
+        super(options as any)
 
         this.logger = Logger.child({ app: 'bot', clusterId: this.cluster.id })
 
@@ -92,7 +91,7 @@ export default class Lacuna extends ClusterClient {
         this.loadEvents(true)
         this.loadCommands()
 
-        this.application = await this.application.fetch()
+        this.application = await this.application!.fetch()
         this.logger.info('discord application fetched')
         await this.application.emojis.fetch()
         this.logger.info('discord application emojis fetched')
@@ -117,7 +116,7 @@ export default class Lacuna extends ClusterClient {
     }
 
     public async updateApplicationCommands(server: ServerDocument) {
-        const commands = await this.application.commands.set(
+        const commands = await this.application!.commands.set(
             server.modules.custom_commands.map(i => i.command),
             server._id
         )
@@ -128,7 +127,7 @@ export default class Lacuna extends ClusterClient {
                 $set: {
                     'modules.custom_commands': commands.map(i => {
                         const custom = server.modules.custom_commands.find(ii => ii.command.name === i.name),
-                            data: ServerModulesCustomCommand = { ...custom }
+                            data: ServerModulesCustomCommand = { ...custom! }
 
                         data.id = i.id
                         return data
@@ -233,6 +232,6 @@ export default class Lacuna extends ClusterClient {
 }
 
 export interface IsolateState {
-    value: Isolate
+    value: IVM.Isolate
     lastUsed: number
 }

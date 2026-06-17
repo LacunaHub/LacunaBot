@@ -1,13 +1,15 @@
-import { APIUser, OAuth2Scopes, RESTPostOAuth2AccessTokenResult, SnowflakeUtil } from 'discord.js'
-import { Context } from 'koa'
-import database from '../../../../database'
-import { supportServerId } from '../../../../internals/utility/Constants'
-import { oauth2 } from '../../../utility/DiscordOAuth2'
-import DiscordUtils from '../../../utility/DiscordUtils'
+import { oauth2 } from '@/api/utility/DiscordOAuth2.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { supportServerId } from '@/internals/utility/Constants.js'
+import { type APIUser, OAuth2Scopes, type RESTPostOAuth2AccessTokenResult, SnowflakeUtil } from 'discord.js'
+import { type Context } from 'koa'
 
 export default async function authorize(ctx: Context) {
     if (ctx.query.error) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent(ctx.query.error as string)}`)
+        ctx.redirect(
+            `${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent(ctx.query.error as string)}`
+        )
 
         return
     }
@@ -17,7 +19,9 @@ export default async function authorize(ctx: Context) {
         savedState = ctx.cookies.get('discord_oauth_state')
 
     if (state !== savedState) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Invalid state')}`)
+        ctx.redirect(
+            `${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Invalid state')}`
+        )
 
         return
     }
@@ -29,7 +33,9 @@ export default async function authorize(ctx: Context) {
         exchangedCode = await oauth2.exchangeCode(code)
         currentUser = await oauth2.getUser(exchangedCode.access_token)
     } catch (err) {
-        ctx.redirect(`${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Failed to exchange code')}`)
+        ctx.redirect(
+            `${process.env.LCN_WEBSITE_URL}/authorization?status=failed&message=${encodeURIComponent('Failed to exchange code')}`
+        )
 
         return
     }
@@ -48,12 +54,12 @@ export default async function authorize(ctx: Context) {
     ctx.cookies
         .set('user_id', currentUser.id, cookieOptions)
         .set('user_username', currentUser.username, cookieOptions)
-        .set('user_global_name', encodeURIComponent(currentUser.global_name), cookieOptions)
+        .set('user_global_name', encodeURIComponent(currentUser.global_name!), cookieOptions)
 
     if (currentUser.avatar) ctx.cookies.set('user_avatar', currentUser.avatar, cookieOptions)
 
     if (userEntry) {
-        const updateData = {}
+        const updateData: Record<string, any> = {}
 
         if (userEntry.user.username !== currentUser.username) {
             updateData['user.username'] = currentUser.username
@@ -119,6 +125,8 @@ export default async function authorize(ctx: Context) {
     }
 
     ctx.redirect(
-        ctx.query.guild_id ? `${process.env.LCN_WEBSITE_URL}/guilds/${ctx.query.guild_id}/settings` : `${process.env.LCN_WEBSITE_URL}/@me/guilds`
+        ctx.query.guild_id
+            ? `${process.env.LCN_WEBSITE_URL}/guilds/${ctx.query.guild_id}/settings`
+            : `${process.env.LCN_WEBSITE_URL}/@me/guilds`
     )
 }

@@ -1,7 +1,7 @@
-import { Context } from 'koa'
-import database from '../../../../database'
-import APIError from '../../../utility/APIError'
-import { UserState } from '../../../utility/Authentication'
+import APIError from '@/api/utility/APIError.js'
+import { type UserState } from '@/api/utility/Authentication.js'
+import database from '@/database/index.js'
+import { type Context } from 'koa'
 
 export default async function getCurrentUserActivities(ctx: Context) {
     const currentUser: UserState = ctx.state.user,

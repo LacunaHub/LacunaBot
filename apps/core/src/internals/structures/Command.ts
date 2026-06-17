@@ -1,13 +1,16 @@
-import { ServerDocument } from '@/database/schemas/Servers'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import i18n from '@/i18n/index.js'
+import Lacuna from '@/internals/Lacuna.js'
+import { normalizeCommandOption, truncateString } from '@/internals/utility/Utils.js'
 import {
-    ApplicationCommandOptionAllowedChannelTypes,
+    type ApplicationCommandOptionAllowedChannelTypes,
     ApplicationCommandOptionType,
     ApplicationCommandType,
     ChatInputCommandInteraction,
     ContextMenuCommandBuilder,
     MessageContextMenuCommandInteraction,
     PermissionsBitField,
-    PermissionsString,
+    type PermissionsString,
     SlashCommandAttachmentOption,
     SlashCommandBooleanOption,
     SlashCommandBuilder,
@@ -23,9 +26,6 @@ import {
     User,
     UserContextMenuCommandInteraction
 } from 'discord.js'
-import i18n from '../../i18n'
-import Lacuna from '../Lacuna'
-import { normalizeCommandOption, truncateString } from '../utility/Utils'
 
 export class Command {
     public self: Lacuna
@@ -43,21 +43,21 @@ export class Command {
     public private: boolean
     public uses: number
 
-    private slashFn: CommandSlashFn
-    private userFn: CommandUserFn
-    private messageFn: CommandMessageFn
+    private slashFn: CommandSlashFn | null
+    private userFn: CommandUserFn | null
+    private messageFn: CommandMessageFn | null
     private subcommandFns: Record<string, CommandSlashFn> | null
 
     public get isSlashCommand() {
-        return typeof this.slashFn !== 'undefined' || !!this.subcommandFns
+        return Boolean(this.slashFn) || !!this.subcommandFns
     }
 
     public get isUserContextCommand() {
-        return typeof this.userFn !== 'undefined'
+        return Boolean(this.userFn)
     }
 
     public get isMessageContextCommand() {
-        return typeof this.messageFn !== 'undefined'
+        return Boolean(this.messageFn)
     }
 
     constructor(self: Lacuna, name: string, options: CommandOptions) {
@@ -75,7 +75,9 @@ export class Command {
         this.defaultMemberPermissions = options.defaultMemberPermissions
             ? new PermissionsBitField(options.defaultMemberPermissions).bitfield.toString()
             : null
-        this.selfPermissions = options.selfPermissions ? new PermissionsBitField(options.selfPermissions).bitfield.toString() : null
+        this.selfPermissions = options.selfPermissions
+            ? new PermissionsBitField(options.selfPermissions).bitfield.toString()
+            : null
 
         this.nsfw = !!options.nsfw
 
@@ -87,12 +89,12 @@ export class Command {
 
         this.uses = 0
 
-        this.slashFn = options.slashFn
-        this.userFn = options.userFn
-        this.messageFn = options.messageFn
+        this.slashFn = options.slashFn ?? null
+        this.userFn = options.userFn ?? null
+        this.messageFn = options.messageFn ?? null
         this.subcommandFns = options.subcommandFns ?? null
 
-        if ((typeof this.userFn !== 'undefined' || typeof this.messageFn !== 'undefined') && !this.prettyName)
+        if ((this.userFn || this.messageFn) && !this.prettyName)
             throw new RangeError('[Command#constructor] Property "prettyName" required for context commands')
     }
 
@@ -139,13 +141,16 @@ export class Command {
 
         if (interaction.isChatInputCommand() || interaction.isButton() || interaction.isModalSubmit()) {
             const subcommandName = this.subcommandFns ? interaction.options?.getSubcommand() : null,
-                subcommandFn = this.subcommandFns?.[subcommandName]
+                subcommandFn = this.subcommandFns?.[subcommandName!]
 
-            if (subcommandFn) await subcommandFn(this.self, server, interaction)
-            else await this.slashFn(this.self, server, interaction)
-        } else if (interaction.isUserContextMenuCommand()) {
+            if (subcommandFn) {
+                await subcommandFn(this.self, server, interaction)
+            } else {
+                if (this.slashFn) await this.slashFn(this.self, server, interaction)
+            }
+        } else if (interaction.isUserContextMenuCommand() && this.userFn) {
             await this.userFn(this.self, server, interaction)
-        } else if (interaction.isMessageContextMenuCommand()) {
+        } else if (interaction.isMessageContextMenuCommand() && this.messageFn) {
             await this.messageFn(this.self, server, interaction)
         }
 
@@ -164,7 +169,7 @@ export class Command {
                             name: v.name,
                             type: v.type,
                             value: v.value ?? null,
-                            options: v.options.map(vv => ({ name: vv.name, type: vv.type, value: vv.value ?? null }))
+                            options: v.options!.map(vv => ({ name: vv.name, type: vv.type, value: vv.value ?? null }))
                         }
 
                     return { name: v.name, type: v.type, value: v.value ?? null }
@@ -175,14 +180,21 @@ export class Command {
     }
 
     private executable(server: ServerDocument, interaction: CommandInteraction): string | null {
-        if (this.self.application.owner instanceof User && this.self.application.owner.id === interaction.user.id) return null
-        if (this.self.application.owner instanceof Team && this.self.application.owner.members.some(v => v.id === interaction.user.id)) return null
+        if (this.self.application!.owner instanceof User && this.self.application!.owner.id === interaction.user.id)
+            return null
+        if (
+            this.self.application!.owner instanceof Team &&
+            this.self.application!.owner.members.some(v => v.id === interaction.user.id)
+        )
+            return null
 
         if (this.private) {
             const ownerIds = []
 
-            if (this.self.application.owner instanceof User) ownerIds.push(this.self.application.owner.id)
-            else if (this.self.application.owner instanceof Team) ownerIds.push(...this.self.application.owner.members.map(v => v.id))
+            if (this.self.application!.owner instanceof User) ownerIds.push(this.self.application!.owner.id)
+            else if (this.self.application!.owner instanceof Team)
+                // @ts-ignore
+                ownerIds.push(...this.self.application!.owner.members.map(v => v.id))
 
             return ownerIds.includes(interaction.user.id) ? null : 'No'
         }
@@ -234,8 +246,13 @@ export class Command {
     private async throttle(server: ServerDocument, interaction: CommandInteraction) {
         const config = server.commands.configuration.find(v => v.name === this.name)
 
-        if (this.self.application.owner instanceof User && this.self.application.owner.id === interaction.user.id) return null
-        if (this.self.application.owner instanceof Team && this.self.application.owner.members.some(v => v.id === interaction.user.id)) return null
+        if (this.self.application!.owner instanceof User && this.self.application!.owner.id === interaction.user.id)
+            return null
+        if (
+            this.self.application!.owner instanceof Team &&
+            this.self.application!.owner.members.some(v => v.id === interaction.user.id)
+        )
+            return null
 
         if (config?.options?.includes('THROTTLING')) {
             let path = `${interaction.guildId}.users.${interaction.user.id}`
@@ -252,7 +269,7 @@ export class Command {
             if (!throttled) {
                 await this.self.db.qdb.set(`throttling.commands.${this.name}.${path}`, {
                     retry_after: Date.now(),
-                    remaining: config.throttling.max_uses
+                    remaining: config.throttling!.max_uses
                 })
 
                 throttled = (await this.self.db.qdb.get(`throttling.commands.${this.name}.${path}`)) as any
@@ -262,7 +279,10 @@ export class Command {
             throttled.remaining--
 
             if (throttled.remaining <= 0) {
-                await this.self.db.qdb.set(`throttling.commands.${this.name}.${path}.retry_after`, Date.now() + config.throttling.timeout * 1000)
+                await this.self.db.qdb.set(
+                    `throttling.commands.${this.name}.${path}.retry_after`,
+                    Date.now() + config.throttling!.timeout * 1000
+                )
                 await this.self.db.qdb.set(`throttling.commands.${this.name}.${path}.remaining`, -1)
             }
         } else {
@@ -429,7 +449,7 @@ export class Command {
                                 .setNameLocalizations(localizedNames)
                                 .setDescription(description)
                                 .setDescriptionLocalizations(localizedDescriptions)
-                                .setRequired(opt.required) as any
+                                .setRequired(opt.required!) as any
                         )
                     }
                 }
@@ -460,18 +480,26 @@ export class Command {
             return { ...slashCommand.toJSON(), integration_types: command.integrationTypes, contexts: command.contexts }
         } else if (type === CommandBuildJSONType.UserContextMenu || type === CommandBuildJSONType.MessageContextMenu) {
             const contextMenuCommand = new ContextMenuCommandBuilder()
-                .setType(type === CommandBuildJSONType.UserContextMenu ? ApplicationCommandType.User : ApplicationCommandType.Message)
-                .setName(truncateString(tEn(command.prettyName), 32))
+                .setType(
+                    type === CommandBuildJSONType.UserContextMenu
+                        ? ApplicationCommandType.User
+                        : ApplicationCommandType.Message
+                )
+                .setName(truncateString(tEn(command.prettyName!), 32))
                 .setNameLocalizations({
-                    ru: truncateString(tRu(command.prettyName), 32),
-                    uk: truncateString(tUk(command.prettyName), 32),
-                    fr: truncateString(tFr(command.prettyName), 32),
-                    de: truncateString(tDe(command.prettyName), 32),
-                    pl: truncateString(tPl(command.prettyName), 32)
+                    ru: truncateString(tRu(command.prettyName!), 32),
+                    uk: truncateString(tUk(command.prettyName!), 32),
+                    fr: truncateString(tFr(command.prettyName!), 32),
+                    de: truncateString(tDe(command.prettyName!), 32),
+                    pl: truncateString(tPl(command.prettyName!), 32)
                 })
                 .setDefaultMemberPermissions(command.defaultMemberPermissions)
 
-            return { ...contextMenuCommand.toJSON(), integration_types: command.integrationTypes, contexts: command.contexts }
+            return {
+                ...contextMenuCommand.toJSON(),
+                integration_types: command.integrationTypes,
+                contexts: command.contexts
+            }
         }
     }
 }
@@ -494,9 +522,21 @@ export enum CommandContexts {
     PrivateChannel
 }
 
-export type CommandSlashFn = (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => Promise<boolean>
-export type CommandUserFn = (self: Lacuna, server: ServerDocument, interaction: UserContextMenuCommandInteraction<'cached'>) => Promise<boolean>
-export type CommandMessageFn = (self: Lacuna, server: ServerDocument, interaction: MessageContextMenuCommandInteraction<'cached'>) => Promise<boolean>
+export type CommandSlashFn = (
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: ChatInputCommandInteraction<'cached'>
+) => Promise<boolean>
+export type CommandUserFn = (
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: UserContextMenuCommandInteraction<'cached'>
+) => Promise<boolean>
+export type CommandMessageFn = (
+    self: Lacuna,
+    server: ServerDocument,
+    interaction: MessageContextMenuCommandInteraction<'cached'>
+) => Promise<boolean>
 
 export interface CommandOptions {
     prettyName?: string
