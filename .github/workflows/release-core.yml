@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "{
             \"sha\": \"${{ github.sha }}\",
-            \"shortSha\": \"$(echo ${{ github.sha }} | cut -c1-7)\",
+            \"shaShort\": \"$(echo ${{ github.sha }} | cut -c1-7)\",
             \"ref\": \"${{ github.ref_name }}\",
             \"refType\": \"${{ github.ref_type }}\"
           }" > buildinfo.json

@@ -3,7 +3,7 @@ import { parseJSON } from './Utils.js'
 
 export interface BuildInfo {
     sha: string
-    shortSHA: string
+    shaShort: string
     ref: string
     refType: 'branch' | 'tag'
 }
