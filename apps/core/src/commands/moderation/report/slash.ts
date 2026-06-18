@@ -176,7 +176,7 @@ export default async (
                         label:
                             i === 'indefinitely'
                                 ? t('Common.Indefinitely').toLowerCase()
-                                : moment(Date.now() + ms(i))
+                                : moment(Date.now() + ms(i as any))
                                       .locale(server.locale)
                                       .fromNow(true),
                         value: i

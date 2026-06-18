@@ -336,7 +336,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
 
     if (['ban', 'mute', 'giveaway', 'temprole'].includes(interaction.commandName) && option?.name === 'duration') {
         const timeouts = ['1m', '5m', '10m', '30m', '1h', '2h', '5h', '12h', '24h', '2d', '1w', '2w', '4w']
-        let duration = option?.value && ms(option.value) ? ms(option.value) : null
+        let duration = option?.value && ms(option.value as any) ? ms(option.value as any) : null
 
         if (duration) {
             await interaction.respond([
@@ -344,14 +344,14 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
                     name: moment(Date.now() + duration)
                         .locale(server.locale)
                         .fromNow(true),
-                    value: ms(duration)
+                    value: ms(duration as any)
                 }
             ])
         } else {
             await interaction.respond(
                 timeouts.map(v => {
                     return {
-                        name: moment(Date.now() + ms(v))
+                        name: moment(Date.now() + ms(v as any))
                             .locale(server.locale)
                             .fromNow(true),
                         value: v

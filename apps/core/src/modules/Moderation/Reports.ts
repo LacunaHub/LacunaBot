@@ -14,7 +14,7 @@ import {
     GuildMember,
     StringSelectMenuInteraction
 } from 'discord.js'
-import ms from 'ms'
+import ms, { type StringValue } from 'ms'
 import Moderation from './index.js'
 
 const QuickActionLocales = {
@@ -307,7 +307,7 @@ async function handleOptionSelect(
             target: member,
             executor: interaction.user,
             reason,
-            durationSeconds: duration === 'indefinitely' ? null : ms(duration) / 1000
+            durationSeconds: duration === 'indefinitely' ? null : ms(duration as StringValue) / 1000
         })
     }
 
@@ -338,7 +338,7 @@ async function handleOptionSelect(
             target: member,
             executor: interaction.user,
             reason,
-            durationSeconds: ms(duration) / 1000
+            durationSeconds: ms(duration as StringValue) / 1000
         })
     }
 
