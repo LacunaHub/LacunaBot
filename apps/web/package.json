@@ -1,0 +1,51 @@
+{
+  "name": "website",
+  "version": "0.4.4",
+  "description": "Web Dashboard for Lacuna Discord bot",
+  "productName": "Lacuna",
+  "author": "Daniyar Kurmangaliyev",
+  "private": true,
+  "scripts": {
+    "lint": "eslint ./",
+    "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "dependencies": {
+    "@guolao/vue-monaco-editor": "^1.6.0",
+    "@lacunahub/lacuna-locale": "^1.1.4",
+    "@lordicon/element": "^2.0.1",
+    "@odiffey/discord-markdown": "^3.3.0",
+    "@quasar/extras": "^1.17.0",
+    "@vueuse/core": "^11.2.0",
+    "axios": "^0.21.1",
+    "chart.js": "3.8.0",
+    "emoji-mart-vue-fast": "10.2.2",
+    "lottie-web": "^5.13.0",
+    "luxon": "2.4.0",
+    "marked": "^5.0.3",
+    "numbro": "2.5.0",
+    "pinia": "^3.0.4",
+    "quasar": "^2.18.6",
+    "vue": "^3.5.26",
+    "vue-chartjs": "4.1.0",
+    "vue-drag-resize": "^1.5.4",
+    "vue-gtag": "^3.6.3",
+    "vue-i18n": "^11.2.7",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@quasar/app-vite": "^2.4.0",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.6.2",
+    "globals": "^16.5.0",
+    "prettier": "^3.7.4"
+  },
+  "engines": {
+    "node": "^24 || ^22 || ^20",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  }
+}
