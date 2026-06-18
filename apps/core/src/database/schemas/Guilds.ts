@@ -15,9 +15,9 @@ const schema = new mongoose.Schema<GuildDocument>(
             default_message_notifications: { type: Number, default: 0 },
             description: { type: String, default: null },
             discovery_splash: { type: String, default: null },
-            emojis: { type: Array, default: [] },
+            emojis: { type: [], default: [] },
             explicit_content_filter: { type: Number, default: 0 },
-            features: { type: Array, default: [] },
+            features: { type: [], default: [] },
             hub_type: { type: Number, default: null },
             icon: { type: String, default: null },
             id: { type: String, required: true },
@@ -34,11 +34,11 @@ const schema = new mongoose.Schema<GuildDocument>(
             premium_subscription_count: { type: Number, default: 0 },
             premium_tier: { type: Number, default: 0 },
             public_updates_channel_id: { type: String, default: null },
-            roles: { type: Array, default: [] },
+            roles: { type: [], default: [] },
             rules_channel_id: { type: String, default: null },
             safety_alerts_channel_id: { type: String, default: null },
             splash: { type: String, default: null },
-            stickers: { type: Array, default: [] },
+            stickers: { type: [], default: [] },
             system_channel_flags: { type: Number, default: 0 },
             system_channel_id: { type: String, default: null },
             vanity_url_code: { type: String, default: null },
@@ -49,7 +49,6 @@ const schema = new mongoose.Schema<GuildDocument>(
         created_at: {
             type: Number,
             default: function () {
-                // @ts-expect-error
                 return SnowflakeUtils.getTimestamp(this._id)
             }
         },

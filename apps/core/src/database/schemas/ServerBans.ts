@@ -13,7 +13,6 @@ export default mongoose.model<ServerBanDocument>(
             created_at: {
                 type: Number,
                 default: function () {
-                    // @ts-expect-error
                     return SnowflakeUtils.getTimestamp(this._id)
                 }
             }

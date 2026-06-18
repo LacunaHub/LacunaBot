@@ -18,12 +18,12 @@ const schema = new mongoose.Schema<UserDocument, UserModel>(
             for_how_long: { type: Number, default: 0 }
         },
         activities: {
-            levels: { type: Array, default: [] },
-            wallets: { type: Array, default: [] }
+            levels: { type: [], default: [] },
+            wallets: { type: [], default: [] }
         },
-        restoring_data: { type: Array, default: [] },
+        restoring_data: { type: [], default: [] },
         tokens: { type: Number, default: 0 },
-        server_profiles: { type: Array, default: [] },
+        server_profiles: { type: [], default: [] },
         created_at: { type: Number, default: () => Date.now() }
     },
     { versionKey: false }

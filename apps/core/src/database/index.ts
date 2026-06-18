@@ -217,9 +217,7 @@ class Database {
 export default new Database({
     uri: process.env.LCN_DB_URI!,
     options: {
-        dbName: 'lacuna',
-        useNewUrlParser: true,
-        useUnifiedTopology: true
+        dbName: 'lacuna'
     },
     qdb: {
         uri: process.env.LCN_DB_URI!,

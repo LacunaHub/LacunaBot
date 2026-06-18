@@ -10,9 +10,9 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
             charged_via: { type: String, default: null }
         },
         blocked: { type: Boolean, default: false },
-        bot_experts: { type: Array, default: [] },
+        bot_experts: { type: [String], default: [] },
         commands: {
-            configuration: { type: Array, default: [] }
+            configuration: { type: [], default: [] }
         },
         moderation: {
             case_log: {
@@ -48,7 +48,7 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                     icon_url: { type: String, default: 'https://i.imgur.com/qI02Ivf.png' }
                                 },
                                 fields: {
-                                    type: Array,
+                                    type: [],
                                     default: [
                                         { name: 'Guild', value: '{ guild.name }', inline: true },
                                         { name: 'Reason', value: '{ penalty.reason }', inline: true }
@@ -90,7 +90,7 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                     icon_url: { type: String, default: 'https://i.imgur.com/RYVLGuy.png' }
                                 },
                                 fields: {
-                                    type: Array,
+                                    type: [],
                                     default: [
                                         { name: 'Guild', value: '{ guild.name }', inline: true },
                                         { name: 'Reason', value: '{ penalty.reason }', inline: true }
@@ -128,7 +128,7 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                     icon_url: { type: String, default: 'https://i.imgur.com/t5FJ6Gw.png' }
                                 },
                                 fields: {
-                                    type: Array,
+                                    type: [],
                                     default: [
                                         { name: 'Guild', value: '{ guild.name }', inline: true },
                                         { name: 'Reason', value: '{ penalty.reason }', inline: true }
@@ -174,7 +174,7 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                     icon_url: { type: String, default: 'https://i.imgur.com/R03G3G5.png' }
                                 },
                                 fields: {
-                                    type: Array,
+                                    type: [],
                                     default: [
                                         { name: 'Guild', value: '{ guild.name }', inline: true },
                                         { name: 'Reason', value: '{ penalty.reason }', inline: true }
@@ -190,7 +190,7 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                 }
             },
             logs: {
-                webhooks: { type: Array, default: [] },
+                webhooks: { type: [], default: [] },
                 types: {
                     channel_create: {
                         active: { type: Boolean, default: false },
@@ -343,12 +343,12 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                     active: { type: Boolean, default: false },
                     percentage_of_caps: { type: Number, default: 70 },
                     minimum_content_length: { type: Number, default: 10 },
-                    options: { type: Array, default: ['ACTION_DELETE_MESSAGE'] },
+                    options: { type: [String], default: ['ACTION_DELETE_MESSAGE'] },
                     ban_timeout: { type: Number },
                     mute_timeout: { type: Number },
                     modify_roles: {
-                        add: { type: Array, default: [] },
-                        remove: { type: Array, default: [] }
+                        add: { type: [String], default: [] },
+                        remove: { type: [String], default: [] }
                     },
                     send_message: {
                         content: { type: String, default: '' },
@@ -374,25 +374,25 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                 url: { type: String, default: null },
                                 icon_url: { type: String, default: null }
                             },
-                            fields: { type: Array, default: [] }
+                            fields: { type: [], default: [] }
                         }
                     },
                     ignored: {
-                        channels: { type: Array, default: [] },
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Array, default: [8] }
+                        channels: { type: [String], default: [] },
+                        roles: { type: [String], default: [] },
+                        permissions: { type: [Number], default: [8] }
                     }
                 },
                 links_filter: {
                     active: { type: Boolean, default: false },
-                    allowed_registry: { type: Array, default: [] },
-                    blocked_registry: { type: Array, default: [] },
-                    options: { type: Array, default: ['ACTION_DELETE_MESSAGE'] },
+                    allowed_registry: { type: [String], default: [] },
+                    blocked_registry: { type: [String], default: [] },
+                    options: { type: [String], default: ['ACTION_DELETE_MESSAGE'] },
                     ban_timeout: { type: Number },
                     mute_timeout: { type: Number },
                     modify_roles: {
-                        add: { type: Array, default: [] },
-                        remove: { type: Array, default: [] }
+                        add: { type: [String], default: [] },
+                        remove: { type: [String], default: [] }
                     },
                     send_message: {
                         content: { type: String, default: '' },
@@ -418,22 +418,22 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                 url: { type: String, default: null },
                                 icon_url: { type: String, default: null }
                             },
-                            fields: { type: Array, default: [] }
+                            fields: { type: [], default: [] }
                         }
                     },
                     ignored: {
-                        channels: { type: Array, default: [] },
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Array, default: [8] }
+                        channels: { type: [String], default: [] },
+                        roles: { type: [String], default: [] },
+                        permissions: { type: [Number], default: [8] }
                     }
                 },
                 nicknames: {
                     active: { type: Boolean, default: false },
-                    options: { type: Array, default: [] },
-                    contains: { type: Array, default: [] },
+                    options: { type: [String], default: [] },
+                    contains: { type: [String], default: [] },
                     ignored: {
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Array, default: [8] },
+                        roles: { type: [String], default: [] },
+                        permissions: { type: [Number], default: [8] },
                         bots: { type: Boolean, default: false }
                     }
                 },
@@ -443,23 +443,23 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                         value: { type: Number, default: 12 },
                         measure: { type: String, default: 'HOURS' }
                     },
-                    options: { type: Array, default: [] },
+                    options: { type: [String], default: [] },
                     ban_timeout: { type: Number },
                     mute_timeout: { type: Number },
                     modify_roles: {
-                        add: { type: Array, default: [] },
-                        remove: { type: Array, default: [] }
+                        add: { type: [String], default: [] },
+                        remove: { type: [String], default: [] }
                     }
                 },
                 swear_filter: {
                     active: { type: Boolean, default: false },
-                    registry: { type: Array, default: [] },
-                    options: { type: Array, default: ['ACTION_DELETE_MESSAGE'] },
+                    registry: { type: [String], default: [] },
+                    options: { type: [String], default: ['ACTION_DELETE_MESSAGE'] },
                     ban_timeout: { type: Number },
                     mute_timeout: { type: Number },
                     modify_roles: {
-                        add: { type: Array, default: [] },
-                        remove: { type: Array, default: [] }
+                        add: { type: [String], default: [] },
+                        remove: { type: [String], default: [] }
                     },
                     send_message: {
                         content: { type: String, default: '' },
@@ -485,24 +485,24 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                 url: { type: String, default: null },
                                 icon_url: { type: String, default: null }
                             },
-                            fields: { type: Array, default: [] }
+                            fields: { type: [], default: [] }
                         }
                     },
                     ignored: {
-                        channels: { type: Array, default: [] },
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Array, default: [8] }
+                        channels: { type: [String], default: [] },
+                        roles: { type: [String], default: [] },
+                        permissions: { type: [Number], default: [8] }
                     }
                 },
                 users_slowdown: {
                     active: { type: Boolean, default: false },
                     messages_limit: { type: Number, default: 3 },
-                    options: { type: Array, default: ['ACTION_DELETE_MESSAGE'] },
+                    options: { type: [String], default: ['ACTION_DELETE_MESSAGE'] },
                     ban_timeout: { type: Number },
                     mute_timeout: { type: Number },
                     modify_roles: {
-                        add: { type: Array, default: [] },
-                        remove: { type: Array, default: [] }
+                        add: { type: [String], default: [] },
+                        remove: { type: [String], default: [] }
                     },
                     send_message: {
                         content: { type: String, default: '' },
@@ -528,39 +528,39 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                 url: { type: String, default: null },
                                 icon_url: { type: String, default: null }
                             },
-                            fields: { type: Array, default: [] }
+                            fields: { type: [], default: [] }
                         }
                     },
                     ignored: {
-                        channels: { type: Array, default: [] },
-                        roles: { type: Array, default: [] },
-                        permissions: { type: Array, default: [8] }
+                        channels: { type: [String], default: [] },
+                        roles: { type: [String], default: [] },
+                        permissions: { type: [Number], default: [8] }
                     }
                 }
             },
             warnings: {
-                penalties: { type: Array, default: [] },
-                violators: { type: Array, default: [] }
+                penalties: { type: [], default: [] },
+                violators: { type: [], default: [] }
             },
             roles: {
-                temporary: { type: Array, default: [] }
+                temporary: { type: [], default: [] }
             },
-            tempbans: { type: Array, default: [] },
+            tempbans: { type: [], default: [] },
             respect_hierarchy: { type: Boolean, default: true },
             deny_moderate_users_with_mp: { type: Boolean, default: true },
-            unmoderated_roles: { type: Array, default: [] },
+            unmoderated_roles: { type: [String], default: [] },
             mutes: {
                 rar: { type: Boolean, default: false },
-                rar_strict: { type: Array, default: [] },
-                rar_data: { type: Array, default: [] }
+                rar_strict: { type: [String], default: [] },
+                rar_data: { type: [], default: [] }
             },
             ai_mod: {
                 active: { type: Boolean, default: false },
                 log_channel_id: { type: String, default: null },
-                ignored_channels: { type: Array, default: [] },
-                ignored_roles: { type: Array, default: [] }
+                ignored_channels: { type: [String], default: [] },
+                ignored_roles: { type: [String], default: [] }
             },
-            dame_rules: { type: Array, default: [] }
+            dame_rules: { type: [], default: [] }
         },
         modules: {
             welcome: {
@@ -591,7 +591,7 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                             url: { type: String, default: null },
                             icon_url: { type: String, default: null }
                         },
-                        fields: { type: Array, default: [] }
+                        fields: { type: [], default: [] }
                     },
                     image: {
                         active: { type: Boolean, default: false },
@@ -601,12 +601,12 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                             color: { type: String, default: null },
                             url: { type: String, default: null }
                         },
-                        elements: { type: Array, default: [] }
+                        elements: { type: [], default: [] }
                     }
                 },
                 initial_roles: {
                     active: { type: Boolean, default: false },
-                    roles: { type: Array, default: [] }
+                    roles: { type: [String], default: [] }
                 }
             },
             farewell: {
@@ -637,7 +637,7 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                             url: { type: String, default: null },
                             icon_url: { type: String, default: null }
                         },
-                        fields: { type: Array, default: [] }
+                        fields: { type: [], default: [] }
                     },
                     image: {
                         active: { type: Boolean, default: false },
@@ -647,23 +647,23 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                             color: { type: String, default: null },
                             url: { type: String, default: null }
                         },
-                        elements: { type: Array, default: [] }
+                        elements: { type: [], default: [] }
                     }
                 }
             },
-            reactions: { type: Array, default: [] },
+            reactions: { type: [], default: [] },
             levels: {
                 active: { type: Boolean, default: false },
                 voice: { type: Boolean, default: false },
                 single_roles: { type: Boolean },
                 reset_on_leave: { type: Boolean, default: false },
                 blocked: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
+                    channels: { type: [String], default: [] },
+                    roles: { type: [String], default: [] }
                 },
                 allowed: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
+                    channels: { type: [String], default: [] },
+                    roles: { type: [String], default: [] }
                 },
                 level_up_alerts: {
                     active: { type: Boolean, default: false },
@@ -693,7 +693,7 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                 url: { type: String, default: null },
                                 icon_url: { type: String, default: null }
                             },
-                            fields: { type: Array, default: [] }
+                            fields: { type: [], default: [] }
                         },
                         image: {
                             active: { type: Boolean, default: false },
@@ -703,29 +703,29 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                                 color: { type: String, default: null },
                                 url: { type: String, default: null }
                             },
-                            elements: { type: Array, default: [] }
+                            elements: { type: [], default: [] }
                         }
                     }
                 },
-                awards: { type: Array, default: [] }
+                awards: { type: [], default: [] }
             },
             voice_manager: {
-                voice_roles: { type: Array, default: [] },
-                autovoices: { type: Array, default: [] }
+                voice_roles: { type: [], default: [] },
+                autovoices: { type: [], default: [] }
             },
             restoring: {
                 restore_roles: { type: Boolean, default: false },
                 restore_nicknames: { type: Boolean, default: false },
-                strict_roles: { type: Array, default: [] }
+                strict_roles: { type: [String], default: [] }
             },
             music: {
                 allowed: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
+                    channels: { type: [String], default: [] },
+                    roles: { type: [String], default: [] }
                 },
                 blocked: {
-                    channels: { type: Array, default: [] },
-                    roles: { type: Array, default: [] }
+                    channels: { type: [String], default: [] },
+                    roles: { type: [String], default: [] }
                 },
                 queue_max_length: { type: Number, default: 15 },
                 track_max_duration: { type: Number, default: 0 },
@@ -738,19 +738,19 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                     force_set: { type: Boolean, default: false }
                 }
             },
-            statistics: { type: Array, default: [] },
+            statistics: { type: [], default: [] },
             reports: {
                 active: { type: Boolean, default: false },
                 channel_id: { type: String, default: null },
                 notify_about_unwanted_users: { type: Boolean, default: true }
             },
-            autothreads: { type: Array, default: [] },
-            autoreactions: { type: Array, default: [] },
+            autothreads: { type: [], default: [] },
+            autoreactions: { type: [], default: [] },
             economy: {
                 active: { type: Boolean, default: false },
                 reset_wallet_on_leave: { type: Boolean, default: false },
                 currencies: {
-                    type: Array,
+                    type: [],
                     default: [
                         {
                             id: 'DEFAULT',
@@ -778,24 +778,24 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                     ]
                 },
                 store: {
-                    items: { type: Array, default: [] }
+                    items: { type: [], default: [] }
                 },
                 transfer: {
-                    allowed_roles: { type: Array, default: [] },
-                    blocked_roles: { type: Array, default: [] }
+                    allowed_roles: { type: [String], default: [] },
+                    blocked_roles: { type: [String], default: [] }
                 }
             },
             subscriptions: {
-                twitch: { type: Array, default: [] },
-                youtube: { type: Array, default: [] },
-                telegram: { type: Array, default: [] }
+                twitch: { type: [], default: [] },
+                youtube: { type: [], default: [] },
+                telegram: { type: [], default: [] }
             },
-            interactive_messages: { type: Array, default: [] },
-            custom_commands: { type: Array, default: [] },
+            interactive_messages: { type: [], default: [] },
+            custom_commands: { type: [], default: [] },
             activities: {
-                multipliers: { type: Array, default: [] }
+                multipliers: { type: [], default: [] }
             },
-            automation: { type: Array, default: [] },
+            automation: { type: [], default: [] },
             guild_image_rotation: {
                 banner: {
                     active: { type: Boolean, default: false },
@@ -808,27 +808,27 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
                             color: { type: String, default: null },
                             url: { type: String, default: '{guild.banner}' }
                         },
-                        elements: { type: Array, default: [] }
+                        elements: { type: [], default: [] }
                     }
                 }
             }
         },
         utility: {
-            giveaways: { type: Array, default: [] },
-            polls: { type: Array, default: [] }
+            giveaways: { type: [], default: [] },
+            polls: { type: [], default: [] }
         },
         web_page: {
             active: { type: Boolean, default: false },
-            categories: { type: Array, default: [] },
+            categories: { type: [Number], default: [] },
             summary: { type: String, default: null },
             description: { type: String, default: null },
-            social_links: { type: Array, default: [] },
+            social_links: { type: [], default: [] },
             invite_code: { type: String, default: null },
             public_leaderboard: { type: Boolean, default: true }
         },
         created_at: { type: Number, default: () => Date.now() },
-        change_log: { type: Array, default: [] },
-        logs: { type: Array, default: [] }
+        change_log: { type: [], default: [] },
+        logs: { type: [], default: [] }
     },
     {
         versionKey: false
