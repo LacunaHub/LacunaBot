@@ -3,7 +3,7 @@ services:
     image: ghcr.io/lacunahub/lacunabot:latest
     container_name: lacuna-broker
     restart: always
-    command: ['npm', 'run', 'start']
+    command: ['node', 'dist/cluster-broker']
     env_file:
       - ../.env
     environment:
@@ -15,16 +15,16 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 256M
         reservations:
-          memory: 512M
+          memory: 128M
     stop_grace_period: 30s
 
   bot:
     image: ghcr.io/lacunahub/lacunabot:latest
     container_name: lacuna-bot
     restart: always
-    command: ['npm', 'run', 'start:bot']
+    command: ['node', 'dist/cluster-manager']
     env_file:
       - ../.env
     environment:
@@ -36,16 +36,16 @@ services:
     deploy:
       resources:
         limits:
-          memory: 4G
-        reservations:
           memory: 2G
+        reservations:
+          memory: 1G
     stop_grace_period: 30s
 
   api:
     image: ghcr.io/lacunahub/lacunabot:latest
     container_name: lacuna-api
     restart: always
-    command: ['npm', 'run', 'start:api']
+    command: ['node', 'dist/api']
     expose:
       - '5810'
     env_file:
@@ -59,9 +59,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
-        reservations:
           memory: 512M
+        reservations:
+          memory: 256M
     stop_grace_period: 30s
 
   nginx:
