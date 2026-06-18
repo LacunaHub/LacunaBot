@@ -10,3 +10,5 @@ onlyBuiltDependencies:
 
 overrides:
   vite: '^7.3.5'
+  dompurify: '^3.4.11'
+  esbuild: '^0.28.1'
