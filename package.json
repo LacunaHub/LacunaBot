@@ -5,6 +5,7 @@
     "build": "pnpm -r build",
     "build:apps": "pnpm -F \"./apps/**\" -r build",
     "start": "pnpm -F \"./apps/**\" --parallel run \"/^(start|start:api|start:bot)$/\"",
+    "dev": "pnpm -F \"./apps/**\" --parallel run \"/^dev*/\"",
     "format": "prettier . --write --config .prettierrc",
     "format:check": "prettier . --check --config .prettierrc",
     "type-check": "pnpm -F @lacunabot/core run type-check"

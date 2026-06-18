@@ -1,21 +1,7 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
-  "cSpell.language": "en,ru",
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit"
-  },
-  "cSpell.words": [
-    "bannable",
-    "kickable",
-    "lavalink",
-    "loggable",
-    "moderatable",
-    "tempbans",
-    "temprole",
-    "temproles",
-    "unban",
-    "unmoderated"
-  ],
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "editor.codeActionsOnSave": ["source.fixAll.eslint", "source.organizeImports"],
+  "files.eol": "\n",
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"]
 }

@@ -166,69 +166,6 @@
           </q-card-section>
         </q-card>
       </div>
-
-      <div class="col-12 col-md-6">
-        <q-card class="bg-dark-1" flat>
-          <q-card-section>
-            <LineChart
-              v-if="isReady"
-              :chart-data="guildsChartData"
-              :chart-options="{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  title: { display: true, text: $t('Commands.AboutCommand.Texts.TotalGuilds') },
-                  legend: { display: false },
-                  tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                      label: value => numbro(value?.parsed?.y || 0).format({ thousandSeparated: true })
-                    }
-                  }
-                },
-                scales: {
-                  x: { ticks: { display: false } }
-                }
-              }"
-            ></LineChart>
-
-            <q-skeleton v-else type="rect" width="100%" height="400px"></q-skeleton>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col-12 col-md-6">
-        <q-card class="bg-dark-1" flat>
-          <q-card-section>
-            <LineChart
-              v-if="isReady"
-              :chart-data="avgLatencyChartData"
-              :chart-options="{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  title: { display: true, text: $t('Pages.StatePage.AvgLatency') },
-                  legend: { display: false },
-                  tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                      label: value =>
-                        `${numbro(value?.parsed?.y || 0).format({ thousandSeparated: true, mantissa: 1 })} ms`
-                    }
-                  }
-                },
-                scales: {
-                  x: { ticks: { display: false } }
-                }
-              }"
-            ></LineChart>
-
-            <q-skeleton v-else type="rect" width="100%" height="400px"></q-skeleton>
-          </q-card-section>
-        </q-card>
-      </div>
     </div>
   </q-page>
 </template>
@@ -236,9 +173,7 @@
 <script setup>
 import { useMeta, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
-import { DateTime } from 'src/boot/luxon'
 import { numbro } from 'src/boot/numbro'
-import LineChart from 'src/components/LineChart.vue'
 import { parseMarkdown } from 'src/utils/Markdown'
 import { handleAxiosError } from 'src/utils/Utils'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
@@ -252,7 +187,7 @@ const state = ref({}),
   stateUpdateInterval = ref(null)
 
 const stateIsEmpty = computed(() => {
-  return !Boolean(Object.keys(state.value).length)
+  return !Object.keys(state.value).length
 })
 
 const isReady = computed(() => {
@@ -293,37 +228,6 @@ const tiledStats = computed(() => {
       icon: 'r_network_ping'
     }
   ]
-})
-
-const guildsChartData = computed(() => {
-  return {
-    labels: state.value.charts.guilds.map(v => DateTime.fromMillis(v[0]).toFormat('ccc HH:mm')),
-    datasets: [
-      {
-        data: state.value.charts.guilds.map(v => v[1]),
-        backgroundColor: 'rgba(218, 112, 214, 0.1)',
-        borderColor: 'rgba(218, 112, 214, 0.6)',
-        borderWidth: 1,
-        pointRadius: 0,
-        fill: 'start'
-      }
-    ]
-  }
-})
-const avgLatencyChartData = computed(() => {
-  return {
-    labels: state.value.charts.avgLatency.map(v => DateTime.fromMillis(v[0]).toFormat('ccc HH:mm')),
-    datasets: [
-      {
-        data: state.value.charts.avgLatency.map(v => v[1]),
-        backgroundColor: 'rgba(255, 193, 7, 0.1)',
-        borderColor: 'rgba(255, 193, 7, 0.6)',
-        borderWidth: 1,
-        pointRadius: 0,
-        fill: 'start'
-      }
-    ]
-  }
 })
 
 useMeta({

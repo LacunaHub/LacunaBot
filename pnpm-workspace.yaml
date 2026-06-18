@@ -3,3 +3,10 @@ packages:
 
 ignoredBuiltDependencies:
   - esbuild
+
+onlyBuiltDependencies:
+  - core-js
+  - vue-demi
+
+overrides:
+  vite: '^7.3.5'

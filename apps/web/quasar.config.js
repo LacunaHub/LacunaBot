@@ -79,7 +79,6 @@ export default configure(function (ctx) {
             // publicPath: '/',
             // analyze: true,
             env: {
-                API: ctx.dev ? 'http://localhost:5810' : 'https://api.lacunabot.com',
                 GTAG: 'G-881ZHWECYQ',
                 MEDITOR_LIB_LACUNA_CB: readFileSync(
                     path.join(__dirname, 'src/utils/monaco-libs/lib.lacuna-cb.d.ts'),
@@ -88,8 +87,8 @@ export default configure(function (ctx) {
             },
             // rawDefine: {}
             // ignorePublicFolder: true,
-            minify: 'terser',
-            sourcemap: 'hidden',
+            minify: ctx.prod ? 'oxc' : false,
+            sourcemap: ctx.prod ? false : 'inline',
             // polyfillModulePreload: true,
             // distDir
 
@@ -109,7 +108,14 @@ export default configure(function (ctx) {
         devServer: {
             // https: true
             open: false, // opens browser window automatically
-            port: 5820
+            port: 5820,
+            proxy: {
+                '/api': {
+                    target: 'http://localhost:5810',
+                    changeOrigin: true,
+                    rewrite: path => path.replace(/^\/api/, '')
+                }
+            }
         },
 
         // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
