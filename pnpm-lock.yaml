@@ -186,6 +186,9 @@ importers:
       axios:
         specifier: ^0.33.0
         version: 0.33.0
+      dompurify:
+        specifier: ^3.4.11
+        version: 3.4.11
       emoji-mart-vue-fast:
         specifier: ^15.0.5
         version: 15.0.5(vue@3.5.38(typescript@5.9.3))
@@ -196,8 +199,8 @@ importers:
         specifier: ^2.5.0
         version: 2.5.2
       marked:
-        specifier: ^5.1.2
-        version: 5.1.2
+        specifier: ^18.0.5
+        version: 18.0.5
       monaco-editor:
         specifier: ^0.55.1
         version: 0.55.1
@@ -2306,6 +2309,9 @@ packages:
   dompurify@3.2.7:
     resolution: {integrity: sha512-WhL/YuveyGXJaerVlMYGWhvQswa7myDG17P7Vu65EWC05o8vfeNbvNf4d/BOvH99+ZW+LlQsc1GDKMa1vNK6dw==}
 
+  dompurify@3.4.11:
+    resolution: {integrity: sha512-zhlUV12GsaRzMsf9q5M254YhA4+VuF0fG+QFqu6aYpoGlKtz+w8//jBcGVYBgQkR5GHjUomejY84AV+/uPbWdw==}
+
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
 
@@ -3072,9 +3078,9 @@ packages:
     engines: {node: '>= 18'}
     hasBin: true
 
-  marked@5.1.2:
-    resolution: {integrity: sha512-ahRPGXJpjMjwSOlBoTMZAK7ATXkli5qCPxZ21TG44rx1KEo44bii4ekgTDQPNRQ4Kh7JMb9Ub1PVk1NxRSsorg==}
-    engines: {node: '>= 16'}
+  marked@18.0.5:
+    resolution: {integrity: sha512-S6GcvALHg6K4ohtu4E7x0a1AqhAjp6cV8KhLSyN9qVapnzJkusVBxZRcIU9AeYsbe6P1hKDusSbEOzGyyuce6w==}
+    engines: {node: '>= 20'}
     hasBin: true
 
   math-intrinsics@1.1.0:
@@ -6373,6 +6379,10 @@ snapshots:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
+  dompurify@3.4.11:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
+
   dot-case@3.0.4:
     dependencies:
       no-case: 3.0.4
@@ -7195,7 +7205,7 @@ snapshots:
 
   marked@14.0.0: {}
 
-  marked@5.1.2: {}
+  marked@18.0.5: {}
 
   math-intrinsics@1.1.0: {}
 
