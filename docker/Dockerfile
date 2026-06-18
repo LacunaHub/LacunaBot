@@ -20,7 +20,7 @@ COPY tsconfig.json tsconfig.base.json ./
 COPY apps/core/tsconfig.json apps/core/tsdown.config.ts ./apps/core/
 COPY apps/core/src ./apps/core/src
 
-RUN pnpm build
+RUN pnpm -F @lacunabot/core run build
 RUN pnpm -F @lacunabot/core deploy --prod --legacy /prod
 
 # Production stage
