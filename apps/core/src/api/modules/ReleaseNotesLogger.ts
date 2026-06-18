@@ -1,6 +1,5 @@
 import Logger from '@/api/utility/Logger.js'
 import database from '@/database/index.js'
-import fetch from 'node-fetch'
 import { Job, Range, RecurrenceRule, scheduleJob } from 'node-schedule'
 
 export async function getReleaseNotes() {

@@ -6,7 +6,6 @@ import { type ServerDocument } from '@/database/schemas/Servers.js'
 import { bufferToDataURL } from '@/internals/utility/Utils.js'
 import { type APIWebhook } from 'discord.js'
 import { type Context } from 'koa'
-import fetch from 'node-fetch'
 
 export default async function createTelegramSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server

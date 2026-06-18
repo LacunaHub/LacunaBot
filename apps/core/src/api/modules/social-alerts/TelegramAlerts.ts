@@ -3,7 +3,6 @@ import Logger from '@/api/utility/Logger.js'
 import database from '@/database/index.js'
 import { truncateString } from '@/internals/utility/Utils.js'
 import { MessagePayload, makeURLSearchParams } from 'discord.js'
-import fetch from 'node-fetch'
 
 const telegramBaseApiUrl = `https://api.telegram.org/bot${process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN}`
 const [telegramBotId] = process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN!.split(':')

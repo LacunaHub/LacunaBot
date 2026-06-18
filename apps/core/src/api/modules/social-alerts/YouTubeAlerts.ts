@@ -4,7 +4,6 @@ import database from '@/database/index.js'
 import { truncateString } from '@/internals/utility/Utils.js'
 import Replacer from '@/modules/Replacer.js'
 import { makeURLSearchParams } from 'discord.js'
-import fetch from 'node-fetch'
 import { scheduleJob } from 'node-schedule'
 
 export async function searchChannels(term: string) {

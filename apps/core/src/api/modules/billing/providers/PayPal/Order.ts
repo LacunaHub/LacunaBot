@@ -1,7 +1,6 @@
 import database, { type Product } from '@/database/index.js'
 import { type PaymentAmount, PaymentStatus, PaymentType } from '@/database/schemas/Payments.js'
 import { type Snowflake, SnowflakeUtils } from '@/utility/SnowflakeUtils.js'
-import fetch from 'node-fetch'
 import { type PaymentData } from '../../index.js'
 import { type HATEOASLink, PayPalAPI } from './index.js'
 
