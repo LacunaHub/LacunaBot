@@ -1,15 +1,15 @@
 import Lacuna from '@/internals/Lacuna.js'
 import { Command, CommandBuildJSONType } from '@/internals/structures/Command.js'
+import { buildInfo } from '@/internals/utility/BuildInfo.js'
 import RoleConnectionMetadata from '@/internals/utility/RoleConnectionMetadata.js'
 import { Events } from 'discord.js'
 
-const { version } = require('../../../package.json')
-
 const handler = async (self: Lacuna, id: number, unavailableGuilds: Set<string>) => {
     if (self.cluster.id === 0) {
+        const version = buildInfo?.ref ?? 'dev'
         const storedVersion = await self.db.qdb.get('version')
 
-        if (storedVersion !== version) {
+        if (version !== storedVersion) {
             await self.db.qdb.set('version', version)
 
             const tEn = self.i18n.t.bind(null, 'en'),

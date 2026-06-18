@@ -1,12 +1,13 @@
 import { ActivityType, Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
 import Lacuna from './Lacuna.js'
+import { buildInfo } from './utility/BuildInfo.js'
 
 const client = new Lacuna({
     presence: {
         status: 'online',
         activities: [
             {
-                name: `lacunabot.com`,
+                name: `lacunabot.com (${buildInfo?.ref ?? 'dev'})`,
                 type: ActivityType.Custom
             }
         ]

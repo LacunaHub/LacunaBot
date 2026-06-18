@@ -1,9 +1,9 @@
-name: Build and Push Docker Image
+name: Release Core
 
 on:
   push:
-    branches: [prod]
-  workflow_dispatch:
+    tags:
+      - 'v*.*.*'
 
 env:
   REGISTRY: ghcr.io
@@ -17,8 +17,7 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
@@ -33,8 +32,19 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix=
             type=raw,value=latest
+
+      - name: Generate build info
+        run: |
+          echo "{
+            \"sha\": \"${{ github.sha }}\",
+            \"shortSha\": \"$(echo ${{ github.sha }} | cut -c1-7)\",
+            \"ref\": \"${{ github.ref_name }}\",
+            \"refType\": \"${{ github.ref_type }}\"
+          }" > buildinfo.json
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -45,4 +55,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            GH_PKG_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}

@@ -16,6 +16,9 @@ dist
 bin
 build
 
+# CI-generated build metadata
+buildinfo.json
+
 # TypeScript cache
 *.tsbuildinfo
 
