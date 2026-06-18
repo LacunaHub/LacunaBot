@@ -5,7 +5,6 @@
 # Lacuna
 
 [![Community](https://discord.com/api/guilds/740586549145763960/widget.png)](https://discord.gg/srfhGjbKce)
-[![Status](https://top.gg/api/widget/status/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
 [![Servers](https://top.gg/api/widget/servers/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
 [![Votes](https://top.gg/api/widget/upvotes/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
 [![Crowdin](https://badges.crowdin.net/lacuna/localized.svg)](https://crowdin.com/project/lacuna)
@@ -15,20 +14,23 @@
 ## Requirements
 
 - Node.js 22+
+- pnpm 10+
 - MongoDB 7+
 - Redis 7+
 - Docker & Docker Compose (for containerized development)
 
 ## Quick start
 
-1. Configure environment
+### Local development (with Docker services)
+
+1. **Configure environment:**
 
     ```bash
-    cp .env.example .env
+    cp apps/core/.env.example apps/core/.env
     # Edit .env with your configuration
     ```
 
-2. Start infrastructure services
+2. **Start infrastructure services:**
 
     ```bash
     # Setup MongoDB and Redis
@@ -42,7 +44,7 @@
     docker compose up -d
     ```
 
-3. Install dependencies and run
+3. **Install dependencies and run:**
 
     1. Install [`node-gyp`](https://github.com/nodejs/node-gyp?tab=readme-ov-file#installation)
 
@@ -50,15 +52,24 @@
     3. Save your token as an environment variable
 
     ```bash
-    export GH_PKG_TOKEN=your_gh_pat
+    export GITHUB_TOKEN=your_gh_pat
     ```
 
     4. Then run
 
     ```bash
-    npm ci
-    npm run dev
+    # Install packages and build
+    pnpm install --frozen-lockfile
+    pnpm build
+    # Start core app
+    pnpm start
+    # Start web app dev server
+    pnpm dev
     ```
+
+### Environment variables
+
+See [`apps/core/.env.example`](apps/core/.env.example):
 
 # Links
 
