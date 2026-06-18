@@ -1,0 +1,104 @@
+<template>
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDismiss"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+    backdrop-filter="blur(8px)"
+    :maximized="$q.screen.lt.sm"
+  >
+    <q-card class="q-dialog-card bg-dark-1" flat>
+      <q-card-section class="q-dialog-card-content">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <div class="col-12">
+              <div>
+                {{ $t('Pages.GuildPage.GeneralSettings.MessageTemplate') }}
+              </div>
+
+              <MessageEditor
+                :message="component.action.reply.message"
+                hide-replacers
+                hide-code-snippets
+                :disable-components="false"
+                class="q-pt-sm"
+              />
+            </div>
+          </div>
+        </q-card-section>
+
+        <div class="q-pa-md">
+          <q-list class="bg-dark-2 overflow-hidden rounded-borders">
+            <q-item v-for="option in ['EPHEMERAL']" :key="option" tag="label">
+              <q-item-section side>
+                <q-checkbox v-model="component.action.reply.options" :val="option" dense></q-checkbox>
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  {{ $t('CaseLog.Actions.EphemeralReply') }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+      </q-card-section>
+
+      <q-card-section class="q-dialog-card-actions row reverse q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Done')" unelevated no-caps color="primary" @click="onConfirm" />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <q-btn class="full-width" :label="$t('Common.Close')" unelevated no-caps color="dark-2" @click="onCancel" />
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+</template>
+
+<script>
+import { useDialogPluginComponent } from 'quasar'
+import { defineComponent, ref } from 'vue'
+import MessageEditor from '../MessageEditor.vue'
+
+export default defineComponent({
+  name: 'ComponentActionReply',
+
+  emits: [...useDialogPluginComponent.emits],
+
+  props: {
+    componentProp: {
+      type: Object,
+      required: true
+    }
+  },
+
+  components: {
+    MessageEditor
+  },
+
+  setup(props) {
+    const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } = useDialogPluginComponent()
+
+    const component = ref(JSON.parse(JSON.stringify(props.componentProp)))
+
+    return {
+      dialogRef,
+      component,
+
+      onConfirm() {
+        onDialogOK({ component: component.value })
+      },
+
+      onCancel() {
+        onDialogCancel()
+      },
+
+      onDismiss() {
+        onDialogHide()
+      }
+    }
+  }
+})
+</script>

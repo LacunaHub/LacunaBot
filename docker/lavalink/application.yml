@@ -10,16 +10,8 @@ plugins:
     # - "dzisrc:%ISRC%" # Deezer ISRC provider
     # - "scsearch:%QUERY%" you can add multiple other fallback sources here
     sources:
-      spotify: true
+      spotify: false
       yandexmusic: true
-    spotify:
-      clientId: '${SPOTIFY_CLIENT_ID:}'
-      clientSecret: '${SPOTIFY_CLIENT_SECRET:}'
-      countryCode: 'US' # the country code you want to use for filtering the artists top tracks. See https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-      playlistLoadLimit: 6 # The number of pages at 100 tracks each
-      albumLoadLimit: 6 # The number of pages at 50 tracks each
-      resolveArtistsInSearch: true # Whether to resolve artists in track search results (can be slow)
-      localFiles: false # Enable local files support with Spotify playlists. Please note `uri` & `isrc` will be `null` & `identifier` will be `"local"`
     yandexmusic:
       accessToken: '${YANDEX_MUSIC_TOKEN:}' # the token used for accessing the yandex music api. See https://github.com/topi314/LavaSrc#yandex-music
       playlistLoadLimit: 1 # The number of pages at 100 tracks each

@@ -1,67 +1,43 @@
-FROM node:22-alpine AS builder
+ARG GITHUB_TOKEN
 
-# Build argument for GitHub Packages authentication
-ARG GH_PKG_TOKEN
-ENV GH_PKG_TOKEN=${GH_PKG_TOKEN}
+FROM node:22-alpine AS base
+RUN apk add --no-cache python3 make g++
+RUN corepack enable
 
+FROM base AS builder
+ARG GITHUB_TOKEN
 WORKDIR /app
 
-# Install dependencies for native modules
-RUN apk add --no-cache python3 make g++
+# Copy manifest files
+# separate layer for dependency caching
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY apps/core/package.json ./apps/core/
 
-# Copy package files
-COPY package*.json ./
-COPY .npmrc ./
+RUN GITHUB_TOKEN=${GITHUB_TOKEN} pnpm install --frozen-lockfile
 
-# Install all dependencies (including devDependencies for build)
-RUN npm ci
+# Copy source and config
+COPY tsconfig.json tsconfig.base.json ./
+COPY apps/core/tsconfig.json apps/core/tsdown.config.ts ./apps/core/
+COPY apps/core/src ./apps/core/src
 
-# Copy source code and config files
-COPY tsconfig.json ./
-COPY clean.dist.js ./
-COPY config.env.js ./
-COPY src ./src
-COPY assets ./assets
-
-# Build TypeScript
-RUN npm run build
+RUN pnpm -F @lacunabot/core run build
+RUN pnpm -F @lacunabot/core deploy --prod --legacy /prod
 
 # Production stage
 FROM node:22-alpine AS production
 
-# Build argument for GitHub Packages authentication
-ARG GH_PKG_TOKEN
-ENV GH_PKG_TOKEN=${GH_PKG_TOKEN}
-
 WORKDIR /app
 
-# Install dependencies for native modules
-RUN apk add --no-cache python3 make g++
+COPY --from=builder /prod/node_modules ./node_modules
+COPY --from=builder /prod/package.json ./package.json
+COPY --from=builder /app/apps/core/dist ./dist
+COPY --from=builder /app/apps/core/assets ./assets
+COPY buildinfo.json ./
 
-# Copy package files
-COPY package*.json ./
-COPY .npmrc ./
-COPY config.env.js ./
-
-# Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
-
-# Remove .npmrc to avoid leaking token in final image
-RUN rm -f .npmrc
-
-# Copy built files from builder
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/assets ./assets
-
-# Create logs directory
 RUN mkdir -p logs
 
-# Set environment
 ENV NODE_ENV=prod
 
-# Expose API port
 EXPOSE 5810
 
-# Default command (can be overridden in docker-compose or docker run)
-# Defaults to cluster-broker as it's the primary coordinator
-CMD ["npm", "run", "start"]
+CMD ["node", "dist/cluster-broker"]

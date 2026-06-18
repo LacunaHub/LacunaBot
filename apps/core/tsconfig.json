@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "quickmongo": ["./node_modules/quickmongo/dist/index.d.ts"],
+      "@favware/zalgo": ["./node_modules/@favware/zalgo/dist/index.d.ts"]
+    },
+    "isolatedDeclarations": false
+  }
+}

@@ -1,24 +1,4 @@
 {
-  "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ES2021",
-    "noImplicitAny": false,
-    "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"]
-    },
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": ["ES2021"],
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true
-  },
-  "exclude": ["node_modules"]
+  "files": [],
+  "references": [{ "path": "./apps/core" }]
 }

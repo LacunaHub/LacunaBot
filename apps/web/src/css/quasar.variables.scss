@@ -1,0 +1,53 @@
+// Quasar SCSS (& Sass) Variables
+// --------------------------------------------------
+// To customize the look and feel of this app, you can override
+// the Sass/SCSS variables found in Quasar's source Sass/SCSS files.
+
+// Check documentation for full list of Quasar variables
+
+// Your own variables (that are declared here) and Quasar's own
+// ones will be available out of the box in your .vue/.scss/.sass files
+
+// It's highly recommended to change the default colors
+// to match your app's branding.
+// Tip: Use the "Theme Builder" on Quasar's documentation website.
+@use 'sass:color';
+
+$primary: #b86eab;
+$secondary: #291c2b;
+$accent: #00bcd4;
+
+$positive: #2fdf84;
+$negative: #d67642;
+$info: #31ccec;
+$warning: #ffa726;
+
+$dark-1: #0f0f12;
+$dark-2: #16151a;
+$dark-3: color.adjust($dark-2, $lightness: 4%);
+
+$almost-white-1: #f4f4f4;
+$almost-white-2: color.adjust($almost-white-1, $lightness: -10%);
+$almost-white-3: color.adjust($almost-white-1, $lightness: -25%);
+
+$border-radius-sm: 2px;
+$border-radius-md: $border-radius-sm * 2;
+$border-radius-lg: $border-radius-md * 2;
+$border-radius-xl: $border-radius-lg * 3;
+$border-radius-max: 9999px;
+$border-radius-circle: 50%;
+
+$dimmed-background: rgba(0, 0, 0, 0.5) !important;
+
+$input-text-color: $almost-white-1 !important;
+$input-label-color: $almost-white-1 !important;
+
+$generic-border-radius: $border-radius-lg !important;
+
+$separator-dark-color: $dark-3 !important;
+
+$button-border-radius: $border-radius-lg;
+
+$menu-background: $dark-2 !important;
+
+$item-base-color: $secondary !important;

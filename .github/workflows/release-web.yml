@@ -1,0 +1,51 @@
+name: Release Web
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@lacunahub'
+
+      - run: |
+          echo "@lacunahub:registry=https://npm.pkg.github.com/" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -F @lacunabot/web build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Upload release assets
+        run: |
+          zip -r $FILE_NAME apps/web/dist/spa
+          gh release upload ${{ github.ref_name }} $FILE_NAME --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILE_NAME: lacunabot-web-spa-${{ github.ref_name }}.zip
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: lacunabot
+          directory: apps/web/dist/spa
+          branch: main

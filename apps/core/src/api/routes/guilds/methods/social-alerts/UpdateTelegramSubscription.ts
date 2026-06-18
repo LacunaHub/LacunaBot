@@ -1,0 +1,45 @@
+import APIError from '@/api/utility/APIError.js'
+import DiscordUtils from '@/api/utility/DiscordUtils.js'
+import database from '@/database/index.js'
+import { type ServerDocument } from '@/database/schemas/Servers.js'
+import { type Context } from 'koa'
+
+export default async function updateTelegramSubscription(ctx: Context) {
+    const server: ServerDocument = ctx.state.server
+    const channelId: number = +ctx.params.channelId,
+        data = ctx.request.body
+
+    const tgSubscription = server.modules.subscriptions.telegram.find(v => v.channel_id === channelId)
+    if (!tgSubscription) ctx.throw(404, new APIError(1014))
+
+    await database.servers.updateOne(
+        { _id: server._id, 'modules.subscriptions.telegram.channel_id': data.channel_id },
+        {
+            $set: {
+                'modules.subscriptions.telegram.$.notification_channel_id': data.notification_channel_id,
+                'modules.subscriptions.telegram.$.options': data.options,
+                'modules.subscriptions.telegram.$.role_mentions': data.role_mentions ?? null
+            }
+        }
+    )
+
+    if (tgSubscription.notification_channel_id !== data.notification_channel_id) {
+        try {
+            await DiscordUtils.rest.patch(DiscordUtils.restRoutes.webhook(tgSubscription.webhook_id), {
+                body: {
+                    channel_id: data.notification_channel_id
+                }
+            })
+        } catch (err) {
+            ctx.log.error({
+                module: 'TelegramSubs',
+                action: 'UpdateWebhook',
+                err,
+                guildId: server._id
+            })
+        }
+    }
+
+    ctx.status = 200
+    ctx.body = data
+}

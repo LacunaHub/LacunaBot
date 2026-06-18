@@ -1,2 +1,4 @@
-package.json
-package-lock.json
+dist
+node_modules
+.quasar
+pnpm-lock.yaml
