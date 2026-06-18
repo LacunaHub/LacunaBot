@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@favware/zalgo": "^3.1.3",
     "@google/generative-ai": "^0.17.2",
     "@koa/cors": "^5.0.0",
     "@koa/router": "^12.0.2",
@@ -43,7 +44,6 @@
     "raw-body": "^3.0.2",
     "safe-regex": "^2.1.1",
     "unicode-default-word-boundary": "^16.0.0",
-    "unzalgo": "^3.0.0",
     "xml2js": "^0.6.2",
     "zlib-sync": "^0.1.10"
   },
@@ -62,7 +62,6 @@
     "@types/node-os-utils": "^1.3.4",
     "@types/node-schedule": "^2.1.8",
     "@types/safe-regex": "^1.1.6",
-    "@types/unzalgo": "^3.0.2",
     "@types/xml2js": "^0.4.14",
     "tsdown": "^0.22.2",
     "tsx": "^4.22.4",

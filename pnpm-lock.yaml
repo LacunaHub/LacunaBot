@@ -17,6 +17,9 @@ importers:
 
   apps/core:
     dependencies:
+      '@favware/zalgo':
+        specifier: ^3.1.3
+        version: 3.1.3
       '@google/generative-ai':
         specifier: ^0.17.2
         version: 0.17.2
@@ -116,9 +119,6 @@ importers:
       unicode-default-word-boundary:
         specifier: ^16.0.0
         version: 16.0.0
-      unzalgo:
-        specifier: ^3.0.0
-        version: 3.0.0
       xml2js:
         specifier: ^0.6.2
         version: 0.6.2
@@ -168,9 +168,6 @@ importers:
       '@types/safe-regex':
         specifier: ^1.1.6
         version: 1.1.6
-      '@types/unzalgo':
-        specifier: ^3.0.2
-        version: 3.0.2
       '@types/xml2js':
         specifier: ^0.4.14
         version: 0.4.14
@@ -499,6 +496,10 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@favware/zalgo@3.1.3':
+    resolution: {integrity: sha512-5QzLu1d6kYLfQknQh+pJNSwjm5o2YfGOBIJmShWTm4y8tKawr4CD4mUXXbF9JafMEZqrmFM+oA82b2IrRwENdw==}
+    engines: {node: '>=14', npm: '>=6'}
 
   '@google/generative-ai@0.17.2':
     resolution: {integrity: sha512-TRKwCCqFe8JawNpvwk5FNcE9CQGUUjROiUxpH+uUR46sjLkgsR2v4+clu2axxnzEd9rnMpUNAJriUXeEu0zFBw==}
@@ -925,9 +926,6 @@ packages:
   '@types/serve-static@2.2.0':
     resolution: {integrity: sha512-8mam4H1NHLtu7nmtalF7eyBH14QyOASmcxHhSfEoRyr0nP/YdoesEtU+uSRvMe96TW/HPTtkoKqQLl53N7UXMQ==}
 
-  '@types/unzalgo@3.0.2':
-    resolution: {integrity: sha512-l1ONuz8R+p/7b552HVohwcSZ5XeMbb+sUIsc0tN7QjNC1rTHkcmnoA+QA9iA6hYDL3vNCbC0nKw5rwlJ7P7GlA==}
-
   '@types/webidl-conversions@7.0.3':
     resolution: {integrity: sha512-CiJJvcRtIgzadHCYXw7dqEnMNRjhGZlYK05Mj9OyktqV8uVT8fD2BFOB7S1uwBE3Kj2Z+4UyPmFw/Ixgw/LAlA==}
 
@@ -1344,9 +1342,6 @@ packages:
 
   isarray@1.0.0:
     resolution: {integrity: sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ==}
-
-  isnumber@1.0.0:
-    resolution: {integrity: sha512-JLiSz/zsZcGFXPrB4I/AGBvtStkt+8QmksyZBZnVXnnK9XdTEyz0tX8CRYljtwYDuIuZzih6DpHQdi+3Q6zHPw==}
 
   isolated-vm@6.1.2:
     resolution: {integrity: sha512-GGfsHqtlZiiurZaxB/3kY7LLAXR3sgzDul0fom4cSyBjx6ZbjpTrFWiH3z/nUfLJGJ8PIq9LQmQFiAxu24+I7A==}
@@ -1830,10 +1825,6 @@ packages:
   standard-as-callback@2.1.0:
     resolution: {integrity: sha512-qoRRSyROncaz1z0mvYqIE4lCd9p2R90i6GxW3uZv5ucSu8tU7B5HXUP1gG8pVZsYNVaXjk8ClXHPttLyxAL48A==}
 
-  stats-lite@2.2.0:
-    resolution: {integrity: sha512-/Kz55rgUIv2KP2MKphwYT/NCuSfAlbbMRv2ZWw7wyXayu230zdtzhxxuXXcvsc6EmmhS8bSJl3uS1wmMHFumbA==}
-    engines: {node: '>=2.0.0'}
-
   statuses@1.5.0:
     resolution: {integrity: sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==}
     engines: {node: '>= 0.6'}
@@ -1973,10 +1964,6 @@ packages:
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
     engines: {node: '>= 0.8'}
-
-  unzalgo@3.0.0:
-    resolution: {integrity: sha512-yRSDlFaYpFJK2VO0iI4I2E3l1CF8puFNL00nh7beZ/q4XSxd9XPNIlsTvfOz/fF2P6tMBLWNVLWpLBvJ9/11ZQ==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   utf-8-validate@6.0.6:
     resolution: {integrity: sha512-q3l3P9UtEEiAHcsgsqTgf9PPjctrDWoIXW3NpOHFdRDbLvu4DLIcxHangJ4RLrWkBcKjmcs/6NkerI8T/rE4LA==}
@@ -2449,6 +2436,8 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
+  '@favware/zalgo@3.1.3': {}
+
   '@google/generative-ai@0.17.2': {}
 
   '@hapi/bourne@3.0.0': {}
@@ -2871,8 +2860,6 @@ snapshots:
       '@types/http-errors': 2.0.5
       '@types/node': 20.19.43
 
-  '@types/unzalgo@3.0.2': {}
-
   '@types/webidl-conversions@7.0.3': {}
 
   '@types/whatwg-url@8.2.2':
@@ -3292,8 +3279,6 @@ snapshots:
       hasown: 2.0.4
 
   isarray@1.0.0: {}
-
-  isnumber@1.0.0: {}
 
   isolated-vm@6.1.2:
     dependencies:
@@ -3832,10 +3817,6 @@ snapshots:
 
   standard-as-callback@2.1.0: {}
 
-  stats-lite@2.2.0:
-    dependencies:
-      isnumber: 1.0.0
-
   statuses@1.5.0: {}
 
   statuses@2.0.2: {}
@@ -3946,10 +3927,6 @@ snapshots:
   unicode-default-word-boundary@16.0.0: {}
 
   unpipe@1.0.0: {}
-
-  unzalgo@3.0.0:
-    dependencies:
-      stats-lite: 2.2.0
 
   utf-8-validate@6.0.6:
     dependencies:

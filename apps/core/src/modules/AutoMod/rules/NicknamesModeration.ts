@@ -1,7 +1,7 @@
 import { type ServerDocument, type ServerModerationAutoModNicknames } from '@/database/schemas/Servers.js'
 import Lacuna from '@/internals/Lacuna.js'
+import { banish, chars } from '@favware/zalgo'
 import { GuildMember } from 'discord.js'
-import { clean, isZalgo } from 'unzalgo'
 
 const predefinedNicknames = [
     'Foggy',
@@ -63,7 +63,7 @@ function adjustNickname(config: ServerModerationAutoModNicknames, name: string):
 
     if (regexps.special_characters.test(name) && config.options.includes('SPECIAL_CHARACTERS'))
         name = name.replace(regexps.special_characters, '')
-    if (isZalgo(name) && config.options.includes('ZALGO')) name = clean(name)
+    if (chars.pattern!.test(name) && config.options.includes('ZALGO')) name = banish(name)
     if (config.options.includes('DIACRITICS')) name = name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
     if (regexps.emojis.test(name) && config.options.includes('EMOJIS')) name = name.replace(regexps.emojis, '')
 
