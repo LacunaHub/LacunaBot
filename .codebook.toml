@@ -1,0 +1,2 @@
+dictionaries = ["en_us", "ru"]
+words = ["lacunabot", "pinia", "vueuse", "axios"]
