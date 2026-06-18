@@ -16,7 +16,6 @@ export const commandOptionTypes = createEnum([
 ])
 
 export const lavalinkSources = {
-    Spotify: 'spsearch',
     YandexMusic: 'ymsearch',
     SoundCloud: 'scsearch'
 }

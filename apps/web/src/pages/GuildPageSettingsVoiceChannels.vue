@@ -20,7 +20,6 @@
               <q-btn-toggle
                 v-model="guild.modules.music.default_source"
                 :options="[
-                  { value: 'Spotify', slot: 'sp' },
                   { value: 'YandexMusic', slot: 'ym' },
                   { value: 'SoundCloud', slot: 'sc' }
                 ]"
@@ -30,16 +29,6 @@
                 no-caps
                 spread
               >
-                <template #sp>
-                  <div class="row justify-center q-col-gutter-xs">
-                    <q-avatar class="col-shrink" square size="24px">
-                      <img src="~assets/spotify-logo.svg" />
-                    </q-avatar>
-
-                    <div class="col-shrink">{{ $t('Pages.GuildPage.VoiceChannels.MusicProviders.Spotify') }}</div>
-                  </div>
-                </template>
-
                 <template #ym>
                   <div class="row justify-center q-col-gutter-xs">
                     <q-avatar class="col-shrink" square size="24px">

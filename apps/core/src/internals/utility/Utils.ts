@@ -222,7 +222,6 @@ export function capitalizeFirstLetter(string: string) {
 }
 
 export function getTrackSourceByUrl(url: string) {
-    if (url.includes('open.spotify.com')) return 'Spotify'
     if (url.includes('music.yandex')) return 'YandexMusic'
     if (url.includes('soundcloud.com')) return 'SoundCloud'
 

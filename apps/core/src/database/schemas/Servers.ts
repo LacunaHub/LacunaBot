@@ -1536,7 +1536,7 @@ export interface ServerModulesMusic {
     }
 }
 
-export type ServerModulesMusicSource = 'Spotify' | 'YandexMusic' | 'SoundCloud'
+export type ServerModulesMusicSource = 'YandexMusic' | 'SoundCloud'
 
 export interface ServerModulesReports {
     active: boolean
