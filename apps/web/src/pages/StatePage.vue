@@ -74,12 +74,12 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 16px">
               <q-skeleton v-for="n in isReady ? 0 : 8" :key="n" type="rect" width="48px" height="48px" />
 
-              <div v-for="shard in state.shards" :key="shard.cluster_id" class="cursor-help">
+              <div v-for="shard in state.shards" :key="shard.id" class="cursor-help">
                 <q-avatar :class="`${getShardColor(shard.latency)}`" rounded>
-                  <span class="text-body1">#{{ shard.cluster_id }}</span>
+                  <span class="text-body1">{{ shard.host }}{{ shard.id }}</span>
 
                   <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">
-                    <div class="text-h6">{{ shard.host }}#{{ shard.cluster_id }}</div>
+                    <div class="text-h6">{{ shard.host }}{{ shard.id }}</div>
                     <div>
                       {{ $t('Commands.AboutCommand.Texts.Latency') }}:
                       {{ numbro(shard.latency).format({ thousandSeparated: true, mantissa: 1 }) }} ms
