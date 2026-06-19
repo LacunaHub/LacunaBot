@@ -118,6 +118,8 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             })}`
         })
 
+        self.logger.error({ module: 'PlayCommand', action: 'Search', err, guildId: interaction.guildId })
+
         return false
     }
 

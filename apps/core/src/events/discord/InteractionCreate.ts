@@ -407,6 +407,12 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
             )
         } catch (err) {
             await interaction.respond([])
+            self.logger.error({
+                module: 'PlayCommand',
+                action: 'SearchAutocomplete',
+                err,
+                guildId: interaction.guildId
+            })
 
             return false
         }

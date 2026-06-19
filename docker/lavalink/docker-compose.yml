@@ -1,13 +1,13 @@
 services:
   lavalink:
-    image: ghcr.io/lavalink-devs/lavalink:4-alpine
+    image: ghcr.io/lavalink-devs/lavalink:4
     container_name: lavalink
     restart: unless-stopped
     env_file:
       - .env
     environment:
-      # Java heap size (4GB)
-      - _JAVA_OPTIONS=-Xmx4G
+      # Java heap size (1GB)
+      - _JAVA_OPTIONS=-Xmx1G
     volumes:
       # Mount application.yml template (uses environment variables)
       - ./application.yml:/opt/Lavalink/application.yml:ro
@@ -24,9 +24,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 5G
+          memory: 1500M
         reservations:
-          memory: 4G
+          memory: 1G
     stop_grace_period: 30s
 
 networks:
