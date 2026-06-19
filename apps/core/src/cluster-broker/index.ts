@@ -5,8 +5,7 @@ const logger = Logger.child({ app: 'cluster-broker' })
 
 const clusterBroker = new ClusterBroker({
     redisURI: process.env.LCN_REDIS_URI!,
-    botToken: process.env.LCN_DISCORD_CLIENT_TOKEN!,
-    shardsRebalancingCron: '*/30 * * * * *'
+    botToken: process.env.LCN_DISCORD_CLIENT_TOKEN!
 })
 
 clusterBroker.on('error', err => logger.error({ err }, 'cluster broker error'))
