@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  packages: read
 
 jobs:
   build-and-deploy:
@@ -24,11 +25,9 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@lacunahub'
 
-      - run: |
-          echo "@lacunahub:registry=https://npm.pkg.github.com/" >> .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
-
       - run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: pnpm -F @lacunabot/web build
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
