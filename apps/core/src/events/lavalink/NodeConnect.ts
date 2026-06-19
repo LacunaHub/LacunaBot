@@ -46,7 +46,7 @@ async function handler(self: Lacuna, node: Node) {
             volume: guildPlayer.volume
         })
 
-        if (player.queue.length + 1 === 0) {
+        if (player.queue.length === 0) {
             player.queue.add(guildPlayer.queue)
         }
 
