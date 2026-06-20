@@ -24,7 +24,6 @@ import {
 import IVM from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'
 import {
-    convertComponentsToScript,
     extendStorage,
     runScript,
     serializeChannel,
@@ -112,6 +111,8 @@ export default class Automation {
     }
 
     async execute() {
+        if ('components' in this.automation) return false
+
         const ctx = this.isolate.createContextSync()
         ctx.global.setSync('global', ctx.global.derefInto())
 
@@ -124,10 +125,6 @@ export default class Automation {
         extendStorage(this, ctx, this.server._id)
 
         if ('scripts' in this.automation) await this.executeScripts(ctx, this.automation.scripts)
-        else if ('components' in this.automation) {
-            const script = convertComponentsToScript(this.automation.components)
-            await this.executeScripts(ctx, [{ name: null, language: 1, code: script }])
-        }
 
         this.self.logger.info(
             { guildId: this.guild.id, userId: globalValues.member?.user?.id, usedPatterns: this.usedPatterns },

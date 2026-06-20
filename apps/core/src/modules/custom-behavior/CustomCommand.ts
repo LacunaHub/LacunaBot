@@ -11,7 +11,6 @@ import { ApplicationCommandOptionType, BaseGuildTextChannel, ChatInputCommandInt
 import IVM from 'isolated-vm'
 import { Database as QDatabase } from 'quickmongo'
 import {
-    convertComponentsToScript,
     extendStorage,
     runScript,
     serializeChannel,
@@ -97,6 +96,8 @@ export default class CustomCommand {
     }
 
     public async execute() {
+        if ('components' in this.command) return false
+
         const t = this.self.i18n.t.bind(null, this.server.locale)
         const throttled = await this.throttled()
 
@@ -124,10 +125,6 @@ export default class CustomCommand {
         extendStorage(this, ctx, this.server._id)
 
         if ('scripts' in this.command) await this.executeScripts(ctx, this.command.scripts)
-        else if ('components' in this.command) {
-            const script = convertComponentsToScript(this.command.components)
-            await this.executeScripts(ctx, [{ name: null, language: 1, code: script }])
-        }
 
         await this.throttle()
 
