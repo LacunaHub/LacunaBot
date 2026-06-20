@@ -4,7 +4,7 @@ import { Events, VoiceState } from 'discord.js'
 const handler = async (self: Lacuna, before: VoiceState, state: VoiceState) => {
     if (!before.channelId && state.channelId) {
         self.emit('voiceConnect', state)
-    } else if (!state.channelId) {
+    } else if (!state.channelId && before.channel) {
         self.emit('voiceDisconnect', state, before.channel)
     } else if (before.channelId && state.channelId) {
         if (before.channelId !== state.channelId) {
