@@ -1,11 +1,8 @@
-ARG GITHUB_TOKEN
-
 FROM node:22-alpine AS base
 RUN apk add --no-cache python3 make g++
 RUN corepack enable
 
 FROM base AS builder
-ARG GITHUB_TOKEN
 WORKDIR /app
 
 # Copy manifest files
@@ -13,7 +10,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY apps/core/package.json ./apps/core/
 
-RUN GITHUB_TOKEN=${GITHUB_TOKEN} pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 # Copy source and config
 COPY tsconfig.json tsconfig.base.json ./
