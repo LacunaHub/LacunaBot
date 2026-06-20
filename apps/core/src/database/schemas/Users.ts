@@ -1,5 +1,70 @@
 import mongoose, { type FilterQuery } from 'mongoose'
 
+const levelSchema = new mongoose.Schema(
+    {
+        guild_id: { type: String },
+        experience: {
+            total: { type: Number, default: 0 },
+            current: { type: Number, default: 0 },
+            level: { type: Number, default: 0 }
+        },
+        activity: {
+            total_messages: { type: Number, default: 0 },
+            last_message_at: { type: Number, default: null },
+            total_voice_time: { type: Number, default: 0 },
+            voice_connected_at: { type: Number, default: null }
+        },
+        received_awards: { type: [String], default: [] }
+    },
+    { _id: false }
+)
+
+const serverProfileSchema = new mongoose.Schema(
+    {
+        guild_id: { type: String },
+        accent_color: { type: Number, default: 0 },
+        avatar: { type: String, default: null },
+        banner: { type: String, default: null },
+        nickname: { type: String, default: null }
+    },
+    { _id: false }
+)
+
+const restoringDataSchema = new mongoose.Schema(
+    {
+        guild_id: { type: String },
+        timestamp: { type: Number },
+        roles: { type: [String], default: [] },
+        nickname: { type: String, default: null }
+    },
+    { _id: false }
+)
+
+const walletCurrencySchema = new mongoose.Schema({ id: { type: String }, amount: { type: Number } }, { _id: false })
+
+const walletTransactionSchema = new mongoose.Schema(
+    {
+        type: { type: String },
+        amount: { type: Number },
+        details: { type: String },
+        timestamp: { type: Number }
+    },
+    { _id: false }
+)
+
+const walletSchema = new mongoose.Schema(
+    {
+        guild_id: { type: String },
+        currencies: { type: [walletCurrencySchema], default: [] },
+        transactions: { type: [walletTransactionSchema], default: [] },
+        activity: {
+            last_message_at: { type: Number, default: 0 },
+            voice_connected_at: { type: Number, default: 0 }
+        }
+    },
+    { _id: false }
+)
+
 const schema = new mongoose.Schema<UserDocument, UserModel>(
     {
         _id: { type: String },
@@ -18,12 +83,12 @@ const schema = new mongoose.Schema<UserDocument, UserModel>(
             for_how_long: { type: Number, default: 0 }
         },
         activities: {
-            levels: { type: [], default: [] },
-            wallets: { type: [], default: [] }
+            levels: { type: [levelSchema], default: [] },
+            wallets: { type: [walletSchema], default: [] }
         },
-        restoring_data: { type: [], default: [] },
+        restoring_data: { type: [restoringDataSchema], default: [] },
         tokens: { type: Number, default: 0 },
-        server_profiles: { type: [], default: [] },
+        server_profiles: { type: [serverProfileSchema], default: [] },
         created_at: { type: Number, default: () => Date.now() }
     },
     { versionKey: false }
