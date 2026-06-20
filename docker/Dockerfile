@@ -16,6 +16,7 @@ RUN pnpm install --frozen-lockfile
 COPY tsconfig.json tsconfig.base.json ./
 COPY apps/core/tsconfig.json apps/core/tsdown.config.ts ./apps/core/
 COPY apps/core/src ./apps/core/src
+COPY apps/core/assets ./apps/core/assets
 
 RUN pnpm -F @lacunabot/core run build
 RUN pnpm -F @lacunabot/core deploy --prod --legacy /prod
