@@ -35,11 +35,9 @@ export async function generateImage(image: ServerMessageTemplateImage) {
     const canvas = createCanvas(image.width, image.height),
         ctx = canvas.getContext('2d')
 
-    ctx.save()
-
     ctx.fillStyle = String(image.background.color)
     ctx.strokeStyle = String(image.background.color)
-    ctx.fillRect(image.width, image.height, image.width, image.height)
+    ctx.fillRect(0, 0, image.width, image.height)
     ctx.lineJoin = 'round'
     ctx.lineWidth = borderRadiuses.lg
     ctx.strokeRect(
@@ -59,8 +57,9 @@ export async function generateImage(image: ServerMessageTemplateImage) {
 
     if (image.background.url) {
         try {
-            const url = new URL(image.background.url)
+            ctx.save()
 
+            const url = new URL(image.background.url)
             if (!allowedImageHosts.includes(url.host)) {
                 throw new Error(`Host ${url.host} is not in the list of allowed hosts`)
             }
@@ -80,9 +79,10 @@ export async function generateImage(image: ServerMessageTemplateImage) {
                 backgroundImage.width * ratio,
                 backgroundImage.height * ratio
             )
-            ctx.restore()
         } catch (err) {
             Logger.error({ err }, 'image generator')
+        } finally {
+            ctx.restore()
         }
     }
 
@@ -92,7 +92,6 @@ export async function generateImage(image: ServerMessageTemplateImage) {
 
             try {
                 const url = new URL(element.url)
-
                 if (!allowedImageHosts.includes(url.host)) {
                     throw new Error(`Host ${url.host} is not in the list of allowed hosts`)
                 }
@@ -104,6 +103,8 @@ export async function generateImage(image: ServerMessageTemplateImage) {
             }
 
             if (elementImage) {
+                ctx.save()
+
                 if (element.border_radius === 'circle') {
                     const radius = Math.min(element.height, element.width)
 
@@ -127,6 +128,8 @@ export async function generateImage(image: ServerMessageTemplateImage) {
                 ctx.restore()
             }
         } else if (element.type === 'TEXT') {
+            ctx.save()
+
             const fontSize = canvas.width * (textSizes[element.size] / canvas.width)
             ctx.font = `${element.style} ${fontSize}px Inter`
             ctx.fillStyle = element.color
