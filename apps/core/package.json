@@ -14,7 +14,7 @@
     "@google/generative-ai": "^0.17.2",
     "@koa/cors": "^5.0.0",
     "@koa/router": "^15.6.0",
-    "@lacunahub/lacuna-locale": "^1.1.4",
+    "@lacunahub/lacuna-locale": "^1.1.5",
     "@lacunahub/lavaluna.js": "^1.1.1",
     "@lacunahub/letsfrag": "^2.1.0",
     "@napi-rs/canvas": "^1.0.0",

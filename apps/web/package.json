@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@guolao/vue-monaco-editor": "^1.6.0",
-    "@lacunahub/lacuna-locale": "^1.1.4",
+    "@lacunahub/lacuna-locale": "^1.1.5",
     "@lordicon/element": "^2.3.1",
     "@odiffey/discord-markdown": "^3.3.0",
     "@quasar/extras": "^1.18.0",

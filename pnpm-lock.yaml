@@ -35,8 +35,8 @@ importers:
         specifier: ^15.6.0
         version: 15.6.0(koa@2.16.4)
       '@lacunahub/lacuna-locale':
-        specifier: ^1.1.4
-        version: 1.1.4
+        specifier: ^1.1.5
+        version: 1.1.5
       '@lacunahub/lavaluna.js':
         specifier: ^1.1.1
         version: 1.1.1(bufferutil@4.1.0)(utf-8-validate@6.0.6)
@@ -171,8 +171,8 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(monaco-editor@0.55.1)(vue@3.5.38(typescript@5.9.3))
       '@lacunahub/lacuna-locale':
-        specifier: ^1.1.4
-        version: 1.1.4
+        specifier: ^1.1.5
+        version: 1.1.5
       '@lordicon/element':
         specifier: ^2.3.1
         version: 2.3.1
@@ -860,8 +860,8 @@ packages:
     peerDependencies:
       koa: ^2.0.0 || ^3.0.0
 
-  '@lacunahub/lacuna-locale@1.1.4':
-    resolution: {integrity: sha512-Pb+SrMP9+J5Xm/UQv8uxPcTRLSTzJm5E2yzqGTx/7jYTuXvXnU1cYOTFizBXSMHvw58u8W+Y0WEnulc4hyypTg==, tarball: https://npm.pkg.github.com/download/@lacunahub/lacuna-locale/1.1.4/24d19cc38dba22210087c20336735a9124e7b72b}
+  '@lacunahub/lacuna-locale@1.1.5':
+    resolution: {integrity: sha512-WBU154DGUJorUmklmH1TbKc9/vSCzAwsGtyfLLFTAnJiAQnn9DhK1ORIJ5u5gkKvx1c3KLGBU91HAMj5V1cfjg==, tarball: https://npm.pkg.github.com/download/@lacunahub/lacuna-locale/1.1.5/3a29eee64c40e74708396a924da0b8291c552b4c}
 
   '@lacunahub/lavaluna.js@1.1.1':
     resolution: {integrity: sha512-x7f72e0VzoXzP9DrOXRCb80qXfkzRpQHQDWt6hdRYdhrM7KOKhn3JbgFsfDaOH7nBGpT+SDGK897hbxR4pF/tw==, tarball: https://npm.pkg.github.com/download/@lacunahub/lavaluna.js/1.1.1/474783018de85d0c34b9363fc4e3b6fd8aa18d91}
@@ -3583,6 +3583,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.5:
+    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   send@0.19.2:
     resolution: {integrity: sha512-VMbMxbDeehAxpOtWJXlcUS5E8iXh6QmN+BkRX1GARS3wRaXEEgzCcB10gTQazO42tpNIya8xIyNx8fll1OFPrg==}
     engines: {node: '>= 0.8.0'}
@@ -4829,7 +4834,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@lacunahub/lacuna-locale@1.1.4': {}
+  '@lacunahub/lacuna-locale@1.1.5': {}
 
   '@lacunahub/lavaluna.js@1.1.1(bufferutil@4.1.0)(utf-8-validate@6.0.6)':
     dependencies:
@@ -7613,6 +7618,8 @@ snapshots:
 
   semver@7.8.4: {}
 
+  semver@7.8.5: {}
+
   send@0.19.2:
     dependencies:
       debug: 2.6.9
@@ -8009,7 +8016,7 @@ snapshots:
       eslint-visitor-keys: 5.0.1
       espree: 11.2.0
       esquery: 1.7.0
-      semver: 7.8.4
+      semver: 7.8.5
     transitivePeerDependencies:
       - supports-color
 
