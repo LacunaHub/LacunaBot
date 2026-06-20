@@ -47,12 +47,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        const activities = (await self.db.users.find({ 'activities.levels.guild_id': interaction.guildId })).map(i => ({
+        const activities = await self.db.users.find({ 'activities.levels.guild_id': interaction.guildId }).lean()
+        const mapped = activities.map(i => ({
             user: { id: i._id, ...i.user },
             ...i.activities.levels.find(i => i.guild_id === interaction.guildId)
         }))
 
-        if (!activities?.length) {
+        if (!mapped?.length) {
             await interaction.editReply({
                 content: `${self.staticEmojis.Cross} | ${t('Commands.LeadersCommand.Texts.NoLevelsYet', {
                     username: `**${interaction.member.displayName}**`
@@ -62,7 +63,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        const sorted = activities.sort((a, b) => Number(b.experience?.total) - Number(a.experience?.total))
+        const sorted = mapped.sort((a, b) => Number(b.experience?.total) - Number(a.experience?.total))
         chunks = chunkArray(sorted, 9)
 
         for (const chunk of chunks) {
@@ -112,14 +113,13 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        const activities = (await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId })).map(
-            i => ({
-                user: { id: i._id, ...i.user },
-                ...i.activities.wallets.find(i => i.guild_id === interaction.guildId)
-            })
-        )
+        const activities = await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId }).lean()
+        const mapped = activities.map(i => ({
+            user: { id: i._id, ...i.user },
+            ...i.activities.wallets.find(i => i.guild_id === interaction.guildId)
+        }))
 
-        if (!activities?.length) {
+        if (!mapped?.length) {
             await interaction.editReply({
                 content: `${self.staticEmojis.Cross} | ${t('Commands.LeadersCommand.Texts.NoWalletsYet', {
                     username: `**${interaction.member.displayName}**`
@@ -129,7 +129,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             return false
         }
 
-        const sorted = activities.sort(
+        const sorted = mapped.sort(
             (a, b) =>
                 Number(b.currencies?.reduce((x, y) => x + y.amount, 0)) -
                 Number(a.currencies?.reduce((x, y) => x + y.amount, 0))

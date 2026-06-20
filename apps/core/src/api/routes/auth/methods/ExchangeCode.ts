@@ -17,7 +17,7 @@ export default async function exchangeCode(ctx: Context) {
         ctx.throw(500, new APIError(5020))
     }
 
-    const userEntry = await database.users.findOne({ _id: currentUser.id })
+    const userEntry = await database.users.findOne({ _id: currentUser.id }).lean()
 
     if (userEntry) {
         const updateData: Record<string, any> = {}

@@ -21,7 +21,7 @@ export async function balanceSlash(
     }
 
     const mention = (interaction.options?.getMember('user') ?? interaction.member) as GuildMember
-    const user = await self.db.users.findOne({ _id: mention.id })
+    const user = await self.db.users.findOne({ _id: mention.id }).lean()
     let wallet = user?.activities?.wallets?.find(i => i.guild_id == interaction.guildId)
 
     if (!wallet) {
@@ -126,7 +126,7 @@ export async function transferSlash(
         return false
     }
 
-    const user = await self.db.users.findOne({ _id: interaction.user.id })
+    const user = await self.db.users.findOne({ _id: interaction.user.id }).lean()
     let wallet = user?.activities?.wallets?.find(i => i.guild_id == interaction.guildId)
 
     if (!wallet) {

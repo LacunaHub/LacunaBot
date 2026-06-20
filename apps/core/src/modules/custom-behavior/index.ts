@@ -382,10 +382,10 @@ export function extendScript(instance: Automation | CustomCommand, ctx: IVM.Cont
 
             if (typeof userId !== 'string') throw new TypeError(errors.argInvalidString('getUserActivity', 'userId'))
 
-            const user = await instance.self.db.users.findOne({ _id: userId })
+            const user = await instance.self.db.users.findOne({ _id: userId }).lean()
             const userActivities = {
-                level: user?.activities?.levels?.find?.(i => i.guild_id === guild.id),
-                wallet: user?.activities?.wallets?.find?.(i => i.guild_id === guild.id)
+                level: user?.activities?.levels?.find(i => i.guild_id === guild.id),
+                wallet: user?.activities?.wallets?.find(i => i.guild_id === guild.id)
             }
 
             return {

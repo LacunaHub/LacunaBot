@@ -59,7 +59,7 @@ export default async function createPayment(ctx: Context) {
         if (!price) ctx.throw(400, new APIError(4021))
 
         data.amount.value = price.sale_amount ? price.sale_amount : price.amount
-        const user = await database.users.findOne({ _id: currentUser.id! })
+        const user = await database.users.findOne({ _id: currentUser.id! }).lean()
 
         if (!user) ctx.throw(404, new APIError(1001))
         if (user.tokens! <= data.amount.value) ctx.throw(400, new APIError(4023))

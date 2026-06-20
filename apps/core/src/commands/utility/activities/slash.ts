@@ -269,7 +269,7 @@ export async function resetWalletSlash(
     const t = self.i18n.t.bind(null, server.locale)
 
     await interaction.deferReply({ ephemeral: true })
-    const activities = await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId })
+    const activities = await self.db.users.find({ 'activities.wallets.guild_id': interaction.guildId }).lean()
 
     if (!activities.length) {
         await interaction.editReply({
@@ -358,7 +358,7 @@ export async function resetLevelSlash(
     const t = self.i18n.t.bind(null, server.locale)
 
     await interaction.deferReply({ ephemeral: true })
-    const activities = await self.db.users.find({ 'activities.levels.guild_id': interaction.guildId })
+    const activities = await self.db.users.find({ 'activities.levels.guild_id': interaction.guildId }).lean()
 
     if (!activities.length) {
         await interaction.editReply({

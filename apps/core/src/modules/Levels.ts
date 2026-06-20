@@ -255,7 +255,7 @@ export async function onVoiceDisconnect(
         for (const member of targetMembers) {
             if (!member) continue
 
-            const user = await self.db.users.findOne({ _id: member.user.id }),
+            const user = await self.db.users.findOne({ _id: member.user.id }).lean(),
                 userLevel = user?.activities?.levels?.find(i => i.guild_id === server._id)
 
             if (
@@ -500,12 +500,13 @@ export async function generateRankCard(
     if (signal.isChatInputCommand()) mention = (signal.options?.getMember('user') || signal.member) as GuildMember
     if (signal.isContextMenuCommand()) mention = await signal.guild!.members.fetch(signal.targetId)
 
-    const activities = (await self.db.users.find({ 'activities.levels.guild_id': signal.guildId })).map(i => ({
+    const activities = await self.db.users.find({ 'activities.levels.guild_id': signal.guildId }).lean()
+
+    const mapped = activities.map(i => ({
         user_id: i._id,
         ...i.activities.levels.find(i => i.guild_id === signal.guildId)
     }))
-
-    const sorted = activities.sort((a, b) => Number(b.experience?.total) - Number(a.experience?.total))
+    const sorted = mapped.sort((a, b) => Number(b.experience?.total) - Number(a.experience?.total))
     let level = sorted.find(i => i.user_id === mention.id)!
 
     if (!level) {

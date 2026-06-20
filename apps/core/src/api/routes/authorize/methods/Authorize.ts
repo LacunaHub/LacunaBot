@@ -40,7 +40,7 @@ export default async function authorize(ctx: Context) {
         return
     }
 
-    const userEntry = await database.users.findOne({ _id: currentUser.id })
+    const userEntry = await database.users.findOne({ _id: currentUser.id }).lean()
     const cookieOptions = {
         maxAge: exchangedCode.expires_in * 1000,
         domain: process.env.LCN_ROOT_DOMAIN,

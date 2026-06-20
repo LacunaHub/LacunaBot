@@ -70,7 +70,7 @@ async function restoreNicknameAndRoles(self: Lacuna, server: ServerDocument, mem
     if (member.user.bot) return false
 
     if (server.modules.restoring.restore_nicknames || server.modules.restoring.restore_roles) {
-        const user = await self.db.users.findOne({ _id: member.id }),
+        const user = await self.db.users.findOne({ _id: member.id }).lean(),
             data = user?.restoring_data?.find?.(i => i.guild_id === member.guild.id)
 
         if (data) {

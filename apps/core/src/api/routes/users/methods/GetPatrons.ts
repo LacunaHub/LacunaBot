@@ -2,7 +2,7 @@ import database from '@/database/index.js'
 import { type Context } from 'koa'
 
 export default async function getPatrons(ctx: Context) {
-    const patrons = await database.users.find({ 'premium.last_charge_timestamp': { $ne: null } })
+    const patrons = await database.users.find({ 'premium.last_charge_timestamp': { $ne: null } }).lean()
     const yearInSeconds = 60 * 60 * 24 * 365
 
     ctx.status = 200

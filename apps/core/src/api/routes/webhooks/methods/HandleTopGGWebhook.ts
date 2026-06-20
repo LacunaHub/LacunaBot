@@ -15,7 +15,7 @@ export default async function handleTopGGWebhook(ctx: Context) {
         ctx.throw(400, new APIError())
     }
 
-    const user = await database.users.findOne({ _id: data.user })
+    const user = await database.users.findOne({ _id: data.user }).lean()
 
     if (!user) {
         ctx.throw(404, new APIError(1001))

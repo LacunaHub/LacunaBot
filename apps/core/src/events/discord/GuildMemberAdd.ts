@@ -28,7 +28,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     await Logs.GuildMemberAdd(self, server, member)
 
     if (member.guild.id === supportServerId) {
-        const user = await self.db.users.findOne({ _id: member.id })
+        const user = await self.db.users.findOne({ _id: member.id }).lean()
 
         if (user?.premium?.available) {
             await member.roles.add(activePatronRoleId)

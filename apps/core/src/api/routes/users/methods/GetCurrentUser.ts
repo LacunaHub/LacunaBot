@@ -8,7 +8,7 @@ import { type Context } from 'koa'
 
 export default async function getCurrentUser(ctx: Context) {
     const currentUser: UserState = ctx.state.user,
-        user = await database.users.findOne({ _id: currentUser.id })
+        user = await database.users.findOne({ _id: currentUser.id }).lean()
 
     if (!user) {
         ctx.throw(404, new APIError(1001))

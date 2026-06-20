@@ -198,10 +198,10 @@ export default class Replacer {
         let memberActivity!: { level: UserLevel | null; wallet: UserWallet | null }, guildOwner!: GuildMember
 
         if (member) {
-            const userDoc = await db.users.findOne({ _id: member.id })
+            const userDoc = await db.users.findOne({ _id: member.id }).lean()
             memberActivity = {
-                level: userDoc?.activities?.levels?.find?.(i => i.guild_id === guild?.id) ?? null,
-                wallet: userDoc?.activities?.wallets?.find?.(i => i.guild_id === guild?.id) ?? null
+                level: userDoc?.activities?.levels?.find(i => i.guild_id === guild?.id) ?? null,
+                wallet: userDoc?.activities?.wallets?.find(i => i.guild_id === guild?.id) ?? null
             }
         }
 

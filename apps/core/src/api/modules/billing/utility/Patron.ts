@@ -50,7 +50,7 @@ export class Patron {
 }
 
 export async function handlePatrons() {
-    const users = await database.users.find({ 'premium.available': true })
+    const users = await database.users.find({ 'premium.available': true }).lean()
 
     for (const user of users) {
         new Patron(user._id, user.premium.expiration_timestamp)

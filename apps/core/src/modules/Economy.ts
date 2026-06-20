@@ -200,7 +200,7 @@ export async function voiceCount(
     channel: BaseGuildVoiceChannel
 ) {
     for (const member of members) {
-        const user = await self.db.users.findOne({ _id: member.user.id })
+        const user = await self.db.users.findOne({ _id: member.user.id }).lean()
         const wallet = user?.activities?.wallets?.find(i => i.guild_id == server._id)
 
         if (!wallet?.activity?.voice_connected_at) continue

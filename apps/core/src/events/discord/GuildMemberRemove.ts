@@ -17,7 +17,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     await Automation.handleEvent(ServerModulesAutomationTriggers.GuildMemberRemove, self, server, member)
 
     if (server.modules.levels.reset_on_leave) {
-        const user = await self.db.users.findOne({ _id: member.id })
+        const user = await self.db.users.findOne({ _id: member.id }).lean()
 
         if (user?.activities?.levels?.some(i => i.guild_id == member.guild.id)) {
             await self.db.users.updateOne(
@@ -32,7 +32,7 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     }
 
     if (server.modules.economy.reset_wallet_on_leave) {
-        const user = await self.db.users.findOne({ _id: member.id })
+        const user = await self.db.users.findOne({ _id: member.id }).lean()
 
         if (user?.activities?.wallets?.some(i => i.guild_id == member.guild.id)) {
             await self.db.users.updateOne(

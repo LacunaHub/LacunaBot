@@ -139,7 +139,7 @@ export async function addPremium(bill: PaymentDocument | SubscriptionDocument, u
         }
     )
 
-    const user = await database.users.findOne({ _id: userId }).orFail()
+    const user = await database.users.findOne({ _id: userId }).orFail().lean()
     const rolesToAdd = [activePatronRoleId]
 
     if (user.premium.for_how_long >= 60 * 60 * 24 * 365) rolesToAdd.push(longTermPatronRoleId)
