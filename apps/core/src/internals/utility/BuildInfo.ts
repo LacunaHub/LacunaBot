@@ -9,7 +9,7 @@ export interface BuildInfo {
 }
 
 const readBuildInfo = () => {
-    const path = '../../buildinfo.json'
+    const path = './buildinfo.json'
     if (!existsSync(path)) return null
 
     const file = readFileSync(path, 'utf-8')
