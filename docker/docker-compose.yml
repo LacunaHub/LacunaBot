@@ -5,11 +5,11 @@ services:
     restart: always
     command: ['node', 'dist/cluster-broker']
     env_file:
-      - ../.env
+      - .env
     environment:
       - NODE_ENV=prod
     volumes:
-      - ../logs:/app/logs
+      - ./logs:/app/logs
     networks:
       - lacuna
     deploy:
@@ -26,11 +26,11 @@ services:
     restart: always
     command: ['node', 'dist/cluster-manager']
     env_file:
-      - ../.env
+      - .env
     environment:
       - NODE_ENV=prod
     volumes:
-      - ../logs:/app/logs
+      - ./logs:/app/logs
     networks:
       - lacuna
     deploy:
@@ -49,11 +49,11 @@ services:
     expose:
       - '5810'
     env_file:
-      - ../.env
+      - .env
     environment:
       - NODE_ENV=prod
     volumes:
-      - ../logs:/app/logs
+      - ./logs:/app/logs
     networks:
       - lacuna
     deploy:
