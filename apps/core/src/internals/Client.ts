@@ -1,6 +1,12 @@
+import { GlobalFonts } from '@napi-rs/canvas'
 import { ActivityType, Collection, GatewayIntentBits, LimitedCollection, Options, Partials } from 'discord.js'
 import Lacuna from './Lacuna.js'
 import { buildInfo } from './utility/BuildInfo.js'
+
+GlobalFonts.registerFromPath('./assets/fonts/Inter_18pt-Bold.ttf', 'Inter')
+GlobalFonts.registerFromPath('./assets/fonts/Inter_18pt-Italic.ttf', 'Inter')
+GlobalFonts.registerFromPath('./assets/fonts/Inter_18pt-Regular.ttf', 'Inter')
+GlobalFonts.registerFromPath('./assets/fonts/Inter_18pt-Medium.ttf', 'Inter')
 
 const client = new Lacuna({
     presence: {

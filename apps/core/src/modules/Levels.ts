@@ -527,8 +527,6 @@ export async function generateRankCard(
     const canvas = createCanvas(720, 256)
     const ctx = canvas.getContext('2d')
 
-    ctx.save()
-
     let banner!: Image | null
 
     try {
@@ -543,7 +541,7 @@ export async function generateRankCard(
 
     ctx.fillStyle = '#16151A'
     ctx.strokeStyle = '#16151A'
-    ctx.fillRect(rectX, rectY, rectX, rectY)
+    ctx.fillRect(0, 0, rectX, rectY)
     ctx.lineJoin = 'round'
     ctx.lineWidth = borderRadius
 
@@ -572,6 +570,7 @@ export async function generateRankCard(
 
     const avatar = await loadImage(mention.user.displayAvatarURL({ extension: 'png' }))
 
+    ctx.save()
     ctx.beginPath()
     ctx.arc(85, 85, 60, 0, Math.PI * 2, true)
     ctx.closePath()
@@ -582,6 +581,7 @@ export async function generateRankCard(
 
     const color = mention.user?.hexAccentColor ?? '#b86eab'
 
+    ctx.save()
     ctx.globalAlpha = 0.5
     ctx.strokeStyle = color
     ctx.beginPath()
@@ -605,7 +605,7 @@ export async function generateRankCard(
     ctx.lineTo(35 + progress, 185)
     ctx.stroke()
 
-    ctx.font = '25px Gotham Pro Medium'
+    ctx.font = '24px Inter'
     ctx.fillStyle = '#ffffff'
     const username = mention.displayName
     const measure = ctx.measureText(username)
@@ -625,14 +625,14 @@ export async function generateRankCard(
     const messages = await loadImage('./assets/messages.png')
     const microphone = await loadImage('./assets/microphone.png')
 
-    ctx.font = '25px Gotham Pro Medium'
+    ctx.font = '24px Inter'
     ctx.fillStyle = '#ffffff'
 
     ctx.textAlign = 'end'
     const index = sorted.indexOf(level)
     const m2 = ctx.measureText(`#${index == -1 ? '-' : index + 1}`)
     ctx.fillText(`#${index == -1 ? '-' : index + 1}`, 695, 70)
-    ctx.font = '20px Gotham Pro Medium'
+    ctx.font = '20px Inter'
     ctx.fillStyle = '#545B5F'
     ctx.fillText('TOP', 690 - m2.width, 70)
     //ctx.drawImage(place, (690 - 25) - m2.width, 48, 25, 25)
@@ -640,12 +640,12 @@ export async function generateRankCard(
     ctx.textAlign = 'start'
     const m4 = ctx.measureText('LV.')
     ctx.fillText('LV.', 160, 117)
-    ctx.font = '25px Gotham Pro Medium'
+    ctx.font = '24px Inter'
     ctx.fillStyle = '#ffffff'
     ctx.fillText(`${Number(level.experience?.level)}`, 165 + m4.width, 117)
     //ctx.drawImage(lvl, 160, 95, 25, 25)
 
-    ctx.font = '22px Gotham Pro Medium'
+    ctx.font = '22px Inter'
     ctx.fillStyle = '#545B5F'
     ctx.textAlign = 'end'
     const m3 = ctx.measureText(`${Number(level.activity?.total_messages)}`)
@@ -670,7 +670,7 @@ export async function generateRankCard(
         formula >= 1000 ? numbro(formula).format({ average: true, mantissa: 2 }).toUpperCase() : formula
 
     ctx.textBaseline = 'top'
-    ctx.font = '20px Gotham Pro Medium'
+    ctx.font = '20px Inter'
     ctx.fillStyle = '#ffffff'
     ctx.textAlign = 'start'
     ctx.fillText(`${current_xp_format}`, 25, 205)
