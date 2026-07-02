@@ -135,6 +135,12 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             }
 
             if (command.options.length) {
+                const hasSubcommands = command.options.some(
+                    v =>
+                        v.type === ApplicationCommandOptionType.Subcommand ||
+                        v.type === ApplicationCommandOptionType.SubcommandGroup
+                )
+
                 const usage = command.options
                     .map(v => {
                         if (v.type === ApplicationCommandOptionType.Subcommand) {
@@ -150,7 +156,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                             return `${v.required ? '<' : '['}${t(v.name)}${v.required ? '>' : ']'}`
                         }
                     })
-                    .join('\n\n')
+                    .join(hasSubcommands ? '\n\n' : ' ')
 
                 if (command.options.every(v => v.type === ApplicationCommandOptionType.Subcommand)) {
                     const subcommands = (command.options as CommandSubcommandOption[]).map(v => {
@@ -205,7 +211,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                         .join('\n')
 
                     embed.addFields([
-                        { name: t('Commands.HelpCommand.Texts.CommandUsage'), value: `\`${usage}\`` },
+                        { name: t('Commands.HelpCommand.Texts.CommandUsage'), value: `\`/${command.name} ${usage}\`` },
                         { name: t('Commands.HelpCommand.Texts.CommandArguments'), value: args }
                     ])
                 }
