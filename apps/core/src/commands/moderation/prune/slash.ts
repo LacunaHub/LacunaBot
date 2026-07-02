@@ -6,9 +6,9 @@ import { BaseGuildTextChannel, ChatInputCommandInteraction } from 'discord.js'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const amount = interaction.options?.getInteger('amount')
-    const mention = interaction.options?.getUser('user')
-    const reason = interaction.options?.getString('reason') ?? '-'
+    const amount = interaction.options.getInteger('amount', true)
+    const mention = interaction.options.getUser('user')
+    const reason = interaction.options.getString('reason') ?? '-'
 
     await interaction.deferReply({ ephemeral: true })
 
