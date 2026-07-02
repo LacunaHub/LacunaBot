@@ -6,31 +6,9 @@ import { BaseGuildTextChannel, ChatInputCommandInteraction } from 'discord.js'
 export default async (self: Lacuna, server: ServerDocument, interaction: ChatInputCommandInteraction<'cached'>) => {
     const t = self.i18n.t.bind(null, server.locale)
 
-    const amount = interaction.options?.getInteger('amount')
-    const mention = interaction.options?.getUser('user')
-    const reason = interaction.options?.getString('reason') ?? '-'
-
-    if (!amount) {
-        await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.PruneCommand.Texts.InvalidAmount', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
-            ephemeral: true
-        })
-
-        return false
-    }
-
-    if (Math.sign(amount) != 1 || amount < 2 || amount > 100) {
-        await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.PruneCommand.Texts.InvalidAmountDiapason', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
-            ephemeral: true
-        })
-
-        return false
-    }
+    const amount = interaction.options.getInteger('amount', true)
+    const mention = interaction.options.getUser('user')
+    const reason = interaction.options.getString('reason') ?? '-'
 
     await interaction.deferReply({ ephemeral: true })
 
