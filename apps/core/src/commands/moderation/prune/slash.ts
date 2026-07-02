@@ -10,28 +10,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const mention = interaction.options?.getUser('user')
     const reason = interaction.options?.getString('reason') ?? '-'
 
-    if (!amount) {
-        await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.PruneCommand.Texts.InvalidAmount', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
-            ephemeral: true
-        })
-
-        return false
-    }
-
-    if (Math.sign(amount) != 1 || amount < 2 || amount > 100) {
-        await interaction.reply({
-            content: `${self.staticEmojis.Cross} | ${t('Commands.PruneCommand.Texts.InvalidAmountDiapason', {
-                username: `**${interaction.member.displayName}**`
-            })}`,
-            ephemeral: true
-        })
-
-        return false
-    }
-
     await interaction.deferReply({ ephemeral: true })
 
     if (mention) {
