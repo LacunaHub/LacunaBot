@@ -11,7 +11,7 @@ const options: CommandOptions = {
             name: 'Commands.Options.Amount',
             description: 'Commands.PruneCommand.Options.Amount.Description',
             required: true,
-            minValue: 1,
+            minValue: 2,
             maxValue: 100
         },
         {
