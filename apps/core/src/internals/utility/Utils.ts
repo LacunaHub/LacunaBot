@@ -557,5 +557,5 @@ export async function fetchFile(url: string) {
     const res = await fetch(url),
         buffer = Buffer.from(await res.arrayBuffer())
 
-    return { data: buffer, mimeType: res.headers.get('content-type') }
+    return { res: res, data: buffer, mimeType: res.headers.get('content-type') }
 }

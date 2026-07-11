@@ -8,7 +8,7 @@ import APIError from '@/api/utility/APIError.js'
 import DiscordUtils from '@/api/utility/DiscordUtils.js'
 import database from '@/database/index.js'
 import { type ServerDocument } from '@/database/schemas/Servers.js'
-import { bufferToDataURL } from '@/internals/utility/Utils.js'
+import { bufferToDataURL, fetchFile } from '@/internals/utility/Utils.js'
 import { type APIWebhook } from 'discord.js'
 import { type Context } from 'koa'
 
@@ -23,10 +23,12 @@ export default async function createTwitchSubscription(ctx: Context) {
 
     let webhook: APIWebhook
     try {
+        const avatar = await fetchFile(data.broadcaster.thumbnail)
+
         webhook = (await DiscordUtils.rest.post(DiscordUtils.restRoutes.channelWebhooks(data.notification_channel_id), {
             body: {
                 name: data.broadcaster.name,
-                avatar: bufferToDataURL(data.broadcaster.thumbnail)
+                avatar: bufferToDataURL(Buffer.from(avatar.data.buffer))
             }
         })) as any
     } catch (err) {
