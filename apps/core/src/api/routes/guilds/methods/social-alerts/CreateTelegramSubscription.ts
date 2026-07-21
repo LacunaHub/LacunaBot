@@ -3,7 +3,7 @@ import APIError from '@/api/utility/APIError.js'
 import DiscordUtils from '@/api/utility/DiscordUtils.js'
 import database from '@/database/index.js'
 import { type ServerDocument } from '@/database/schemas/Servers.js'
-import { bufferToDataURL } from '@/internals/utility/Utils.js'
+import { bufferToDataURL, fetchFile } from '@/internals/utility/Utils.js'
 import { type APIWebhook } from 'discord.js'
 import { type Context } from 'koa'
 
@@ -33,13 +33,12 @@ export default async function createTelegramSubscription(ctx: Context) {
 
             if (getFileResponse.ok) {
                 const file: TelegramFile = (await getFileResponse.json()).result
-                const downloadFileResponse = await fetch(
+                const downloadFileResponse = await fetchFile(
                     `https://api.telegram.org/file/bot${process.env.LCN_TELEGRAM_PUBLIC_BOT_TOKEN}/${file.file_path}`
                 )
 
-                if (downloadFileResponse.ok) {
-                    const arrayBuffer = await downloadFileResponse.arrayBuffer()
-                    channelPhoto = Buffer.from(arrayBuffer)
+                if (downloadFileResponse.res.ok) {
+                    channelPhoto = Buffer.from(downloadFileResponse.data.buffer)
                 }
             }
         }
