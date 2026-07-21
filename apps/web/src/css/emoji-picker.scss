@@ -49,22 +49,22 @@
 }
 
 .emoji-type-image {
-  /* Emoji sheet has 56 columns, see also utils/emoji-data.js, SHEET_COLUMNS variable */
-  /* Here we use (56+1) * 100% to avoid visible edges of nearby icons when scaling for different
+  /* Emoji sheet has 61 columns, see also utils/emoji-data.js, SHEET_COLUMNS variable */
+  /* Here we use (61+1) * 100% to avoid visible edges of nearby icons when scaling for different
    * screen sizes */
-  background-size: 5700%;
+  background-size: 6200%;
 }
 .emoji-type-image.emoji-set-apple {
-  background-image: url('https://unpkg.com/emoji-datasource-apple@6.0.1/img/apple/sheets-256/64.png');
+  background-image: url('https://unpkg.com/emoji-datasource-apple@15.0.0/img/apple/sheets-256/64.png');
 }
 .emoji-type-image.emoji-set-facebook {
-  background-image: url('https://unpkg.com/emoji-datasource-facebook@6.0.1/img/facebook/sheets-256/64.png');
+  background-image: url('https://unpkg.com/emoji-datasource-facebook@15.0.0/img/facebook/sheets-256/64.png');
 }
 .emoji-type-image.emoji-set-google {
-  background-image: url('https://unpkg.com/emoji-datasource-google@6.0.1/img/google/sheets-256/64.png');
+  background-image: url('https://unpkg.com/emoji-datasource-google@15.0.0/img/google/sheets-256/64.png');
 }
 .emoji-type-image.emoji-set-twitter {
-  background-image: url('https://unpkg.com/emoji-datasource-twitter@6.0.1/img/twitter/sheets-256/64.png');
+  background-image: url('https://unpkg.com/emoji-datasource-twitter@15.0.0/img/twitter/sheets-256/64.png');
 }
 
 .emoji-mart-bar {
