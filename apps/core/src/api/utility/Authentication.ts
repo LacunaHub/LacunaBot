@@ -2,8 +2,10 @@ import database from '@/database/index.js'
 import {
     type APIGuildMember,
     type APIUser,
+    OAuth2Scopes,
     PermissionsBitField,
     type RESTAPIPartialCurrentUserGuild,
+    type RESTGetAPIOAuth2CurrentAuthorizationResult,
     UserFlags
 } from 'discord.js'
 import { type Context, type Next } from 'koa'
@@ -18,22 +20,21 @@ export async function authenticate(ctx: Context, next: Next): Promise<void> {
         ctx.throw(401, new APIError(4001))
     }
 
-    let currentUser!: APIUser
+    let currentAuth!: RESTGetAPIOAuth2CurrentAuthorizationResult
 
     try {
-        currentUser = await oauth2.getUser(accessToken)
+        currentAuth = await oauth2.getUserAuthorization(accessToken)
     } catch (err) {}
 
-    if (!currentUser) {
-        ctx.throw(403, new APIError(1001))
-    }
+    if (!currentAuth || !currentAuth.scopes.includes(OAuth2Scopes.Identify)) ctx.throw(403, new APIError(1001))
+    if (currentAuth.application.id !== process.env.LCN_DISCORD_CLIENT_ID) ctx.throw(403, new APIError(1001))
 
     ctx.state.user = {
-        id: currentUser.id,
-        username: currentUser.username,
-        global_name: currentUser.global_name,
-        avatar: currentUser.avatar,
-        flags: currentUser.flags
+        id: currentAuth.user!.id,
+        username: currentAuth.user!.username,
+        global_name: currentAuth.user!.global_name,
+        avatar: currentAuth.user!.avatar,
+        flags: currentAuth.user!.flags
     }
 
     await next()
