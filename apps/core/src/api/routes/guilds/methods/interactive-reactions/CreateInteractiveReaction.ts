@@ -3,7 +3,7 @@ import DiscordUtils from '@/api/utility/DiscordUtils.js'
 import database from '@/database/index.js'
 import { type ServerDocument, type ServerModulesInteractiveReaction } from '@/database/schemas/Servers.js'
 import { generateSimpleId } from '@/internals/utility/Utils.js'
-import { parseEmoji } from 'discord.js'
+import { parseEmoji, type APIGuildChannel } from 'discord.js'
 import { type Context } from 'koa'
 
 export default async function createInteractiveReaction(ctx: Context) {
@@ -26,6 +26,11 @@ export default async function createInteractiveReaction(ctx: Context) {
         )
     )
         ctx.throw(400, new APIError(4008))
+
+    const apiChannel = (await DiscordUtils.rest.get(
+        DiscordUtils.restRoutes.channel(data.message!.channel_id)
+    )) as APIGuildChannel
+    if (apiChannel.guild_id !== server._id) ctx.throw(400, new APIError(5008))
 
     try {
         await DiscordUtils.rest.get(DiscordUtils.restRoutes.channelMessage(data.message!.channel_id, data.message!.id))
