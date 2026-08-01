@@ -10,6 +10,7 @@ import {
 import { snakeToPascalCase } from '@/internals/utility/Utils.js'
 import {
     ActionRowBuilder,
+    type APIGuildChannel,
     type APIMessage,
     ButtonBuilder,
     ButtonStyle,
@@ -41,6 +42,11 @@ export default async function createInteractiveMessage(ctx: Context) {
         ?.slice(0, 10) ?? []
 
     if (!data.components?.length && !reactions.length) ctx.throw(400, new APIError(4006))
+
+    const apiChannel = (await DiscordUtils.rest.get(
+        DiscordUtils.restRoutes.channel(data.channel_id)
+    )) as APIGuildChannel
+    if (apiChannel.guild_id !== server._id) ctx.throw(400, new APIError(5005))
 
     const message = {
         content: data.message?.content ?? null,
