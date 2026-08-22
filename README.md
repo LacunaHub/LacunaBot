@@ -5,8 +5,6 @@
 # Lacuna
 
 [![Community](https://discord.com/api/guilds/740586549145763960/widget.png)](https://discord.gg/srfhGjbKce)
-[![Servers](https://top.gg/api/widget/servers/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
-[![Votes](https://top.gg/api/widget/upvotes/740585412560420914.svg?noavatar=true)](https://top.gg/bot/740585412560420914)
 [![Crowdin](https://badges.crowdin.net/lacuna/localized.svg)](https://crowdin.com/project/lacuna)
 
 </div>
@@ -19,57 +17,118 @@
 - Redis 7+
 - Docker & Docker Compose (for containerized development)
 
-## Quick start
+## Quick start - Local development
 
-### Local development (with Docker services)
+### Configure environment
 
-1. **Configure environment:**
+See [`apps/core/.env.example`](apps/core/.env.example)
 
-    ```bash
-    cp apps/core/.env.example apps/core/.env
-    # Edit .env with your configuration
-    ```
+```bash
+cp apps/core/.env.example apps/core/.env
+# Edit .env with your configuration
+```
 
-2. **Start infrastructure services:**
+### Start infrastructure services
 
-    ```bash
-    # Setup MongoDB and Redis
-    cd docker
-    docker compose -f docker-compose.dev.yml up -d
+```bash
+# Setup MongoDB and Redis
+cd docker
+docker compose -f docker-compose.dev.yml up -d
 
-    # Setup Lavalink
-    cd lavalink
-    cp .env.example .env
-    # Edit .env with your configuration
-    docker compose up -d
-    ```
+# Setup Lavalink
+cd lavalink
+cp .env.example .env
+# Edit .env with your configuration
+docker compose up -d
+```
 
-3. **Install dependencies and run:**
+### Install dependencies and run
 
-    1. Install [`node-gyp`](https://github.com/nodejs/node-gyp?tab=readme-ov-file#installation)
+1. Install [`node-gyp`](https://github.com/nodejs/node-gyp?tab=readme-ov-file#installation)
+2. Create a [GitHub Personal Access Token](https://github.com/settings/tokens/new) with `read:packages` scope
+3. Save your token as an environment variable
 
-    2. Create a [GitHub Personal Access Token](https://github.com/settings/tokens/new) with `read:packages` scope
-    3. Save your token as an environment variable
+```bash
+export GITHUB_TOKEN=your_gh_pat
+```
 
-    ```bash
-    export GITHUB_TOKEN=your_gh_pat
-    ```
+4. Then run
 
-    4. Then run
+```bash
+# Install packages and build
+pnpm install --frozen-lockfile
+pnpm build
+# Start core app
+pnpm start
+# Start web app dev server
+pnpm start:web
+```
 
-    ```bash
-    # Install packages and build
-    pnpm install --frozen-lockfile
-    pnpm build
-    # Start core app
-    pnpm start
-    # Start web app dev server
-    pnpm dev
-    ```
+## Deployment
+
+### Prerequisites
+
+- Docker & Docker Compose
+- MongoDB and Redis already running and reachable. They can be:
+    - Running on the host machine
+    - Running on a separate server/VPS
+    - Running in another Docker network (in which case add them to the `lacuna` network or expose ports)
+- A domain pointed at the server, with a valid SSL certificate/key pair
+- Sufficient RAM: at least ~3GB free to cover the configured memory limits (can be edited)
+
+### Directory layout
+
+Set up the project folder on the server like this:
+
+```
+lacuna/
+├── docker-compose.yml
+├── .env
+└── nginx/
+    ├── nginx.conf
+    ├── conf.d/
+    │   └── upstreams.conf
+    └── sites-available/
+        └── api.lacunabot.com.conf
+```
+
+See [`docker`](docker) for more info.
 
 ### Environment variables
 
-See [`apps/core/.env.example`](apps/core/.env.example):
+1. Create a [`.env`](apps/core/.env.example) file next to `docker-compose.yml` and fill it
+2. Verify MongoDB and Redis are reachable from the Docker host before continuing
+
+### Nginx and SSL
+
+Make sure the SSL certificate files referenced in `docker-compose.yml` actually exist on the host at these exact paths:
+
+```
+/etc/ssl/lacunabot.com.pem
+/etc/ssl/lacunabot.com.key
+```
+
+The `api` service only exposes port `5810` internally, so nginx must proxy to it by service name.
+
+### Pull the images and start
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Start order matters slightly: `nginx` depends on `api`, but `broker`, `bot`, and `api` have no explicit dependency on each other in the compose file.
+
+#### Verify it's running
+
+```bash
+docker compose ps
+docker compose logs -f bot
+docker compose logs -f api
+
+# Confirm the API responds behind nginx
+curl -I https://your-domain.com
+```
 
 # Links
 
