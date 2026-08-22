@@ -14,37 +14,10 @@
           align="left"
         >
           <q-tab v-for="(script, i) in scripts" :key="i" :label="script.name || ('00' + (i + 1)).slice(-3)" :name="i">
-            <q-badge v-if="i > 0 && !guild.premium.available" floating color="warning">
-              <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">
-                {{ i18n.t('Components.ScriptEditor.MaxNumberOfScriptsReached') }}
-              </q-tooltip>
-            </q-badge>
           </q-tab>
         </q-tabs>
 
         <q-space></q-space>
-
-        <!-- <q-btn-toggle
-          v-model="scripts[scriptEditorIndex].language"
-          class="bordered-block"
-          toggle-color="primary"
-          :options="[
-            { icon: 'r_javascript', value: 1, slot: 'js' },
-            { icon: 'r_bolt', value: 2, slot: 'lig' }
-          ]"
-          unelevated
-          dense
-        >
-          <template v-slot:js>
-            <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">JavaScript</q-tooltip>
-          </template>
-
-          <template v-slot:lig>
-            <q-tooltip class="bg-black text-body2" transition-show="" transition-hide="">Lighthon</q-tooltip>
-          </template>
-        </q-btn-toggle>
-
-        <q-separator class="q-mx-sm" vertical inset></q-separator> -->
 
         <q-btn
           v-if="scripts.length < MAX_SCRIPTS_PREMIUM"
@@ -116,10 +89,8 @@
 <script setup>
 import { useQuasar } from 'quasar'
 import { numbro } from 'src/boot/numbro'
-import { useGuildStore } from 'src/stores/guild'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import LacunaDiamond from '../dialogs/LacunaDiamond.vue'
 
 const props = defineProps({
   scriptsProp: {
@@ -131,13 +102,10 @@ const emit = defineEmits(['change'])
 
 const $q = useQuasar(),
   i18n = useI18n()
-const guild = useGuildStore()
 const scripts = ref([...props.scriptsProp])
 
-const MAX_SCRIPTS = 1,
-  MAX_SCRIPTS_PREMIUM = 10
-const MAX_SCRIPT_SIZE = 2000,
-  MAX_SCRIPT_SIZE_PREMIUM = 20_000
+const MAX_SCRIPTS_PREMIUM = 10
+const MAX_SCRIPT_SIZE_PREMIUM = 20_000
 
 const scriptEditorIndex = ref(0),
   scriptEditorFullscreen = ref(false),
@@ -148,10 +116,10 @@ const scriptEditorIndex = ref(0),
     return 'javascript'
   }),
   scriptEditorMaxScripts = computed(() => {
-    return guild.premium.available ? MAX_SCRIPTS_PREMIUM : MAX_SCRIPTS
+    return MAX_SCRIPTS_PREMIUM
   }),
   scriptEditorMaxScriptSize = computed(() => {
-    return guild.premium.available ? MAX_SCRIPT_SIZE_PREMIUM : MAX_SCRIPT_SIZE
+    return MAX_SCRIPT_SIZE_PREMIUM
   }),
   scriptEditorScriptSizeExceeded = computed(() => {
     const scriptSize = scripts.value[scriptEditorIndex.value].code.length
@@ -159,7 +127,6 @@ const scriptEditorIndex = ref(0),
   })
 
 const addScript = () => {
-    if (scripts.value.length >= MAX_SCRIPTS && !guild.premium.available) return lacunaDiamondDialog()
     if (scripts.value.length >= scriptEditorMaxScripts.value) return null
 
     return $q
@@ -220,12 +187,6 @@ const addScript = () => {
         scriptEditorIndex.value = scripts.value.length - 1
       })
   }
-
-const lacunaDiamondDialog = () => {
-  return $q.dialog({
-    component: LacunaDiamond
-  })
-}
 
 watch(
   () => scripts.value,

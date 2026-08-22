@@ -11,7 +11,7 @@ export async function handleReactionAdd(
     if (server.modules.reactions.length) {
         const message = reaction.message
         const interactiveReaction = server.modules.reactions
-            .slice(0, server.premium.available ? 200 : 50)
+            .slice(0, 200)
             .find(
                 v =>
                     v.message.id === message.id &&
@@ -119,7 +119,7 @@ export async function handleReactionRemove(
     if (server.modules.reactions.length) {
         const message = reaction.message
         const interactiveReaction = server.modules.reactions
-            .slice(0, server.premium.available ? 200 : 50)
+            .slice(0, 200)
             .find(
                 v =>
                     v.message.id === message.id &&

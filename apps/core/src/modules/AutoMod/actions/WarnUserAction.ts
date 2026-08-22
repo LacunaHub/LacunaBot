@@ -84,7 +84,7 @@ export default async function warnUserAction(
 
         if (optSendMessage) {
             try {
-                const replacer = new Replacer(server.premium.available, {
+                const replacer = new Replacer({
                         message: signal instanceof Message ? signal : null,
                         guild: guild,
                         member: target
@@ -120,7 +120,7 @@ export default async function warnUserAction(
     }
 
     if (server.moderation.case_log.types.WARN_ADD.active) {
-        const replacer = new Replacer(server.premium.available, {
+        const replacer = new Replacer({
                 guild: guild,
                 member: target,
                 message: signal instanceof Message ? signal : null

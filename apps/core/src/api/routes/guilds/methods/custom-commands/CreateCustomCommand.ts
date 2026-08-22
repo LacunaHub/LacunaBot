@@ -10,7 +10,6 @@ export default async function createCustomCommand(ctx: Context) {
     const data = validateCustomCommand(ctx.request.body)
 
     if (!data) ctx.throw(400, new APIError(4011))
-    if (server.modules.custom_commands.length >= 25 && !server.premium.available) ctx.throw(402, new APIError(3001))
     if (server.modules.custom_commands.length >= 100) ctx.throw(406, new APIError(3002))
 
     const commandsCache = (await database.qdb.get('commands')) as any[],

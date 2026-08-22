@@ -6,13 +6,13 @@ import Replacer from './Replacer.js'
 async function rotateBanner(self: Lacuna, server: ServerDocument, guild: Guild, member?: GuildMember) {
     if (!server.modules.guild_image_rotation.banner.active) return false
 
-    const rotationThrottle = server.premium.available ? 1000 * 60 * 2 : 1000 * 60 * 60
+    const rotationThrottle = 1000 * 60 * 2
 
     if (rotationThrottle > Date.now() - Number(server.modules.guild_image_rotation.banner.last_updated_timestamp))
         return false
 
     try {
-        const replacer = new Replacer(server.premium.available, { guild, member } as any),
+        const replacer = new Replacer({ guild, member } as any),
             { files } = await replacer.replaceTemplateMessage({
                 content: '',
                 image: server.modules.guild_image_rotation.banner.image

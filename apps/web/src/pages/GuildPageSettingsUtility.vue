@@ -70,7 +70,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.autothreads.length }}/{{ guild.premium.available ? '20' : '2' }}</div>
+            <div>{{ guild.modules.autothreads.length }}/20</div>
           </q-item-section>
         </q-item>
 
@@ -89,16 +89,7 @@
             </div>
 
             <div v-if="guild.modules.autothreads.length < 20" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.autothreads.length >= 2
-                    ? lacunaDiamondDialog()
-                    : autoThreadDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="autoThreadDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -118,7 +109,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.autoreactions.length }}/{{ guild.premium.available ? '20' : '2' }}</div>
+            <div>{{ guild.modules.autoreactions.length }}/20</div>
           </q-item-section>
         </q-item>
 
@@ -139,16 +130,7 @@
             </div>
 
             <div v-if="guild.modules.autoreactions.length < 20" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.autoreactions.length >= 2
-                    ? lacunaDiamondDialog()
-                    : autoReactionDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="autoReactionDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -165,7 +147,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.interactive_messages.length }}/{{ guild.premium.available ? '50' : '5' }}</div>
+            <div>{{ guild.modules.interactive_messages.length }}/50</div>
           </q-item-section>
         </q-item>
 
@@ -184,16 +166,7 @@
             </div>
 
             <div v-if="guild.modules.interactive_messages.length < 50" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.interactive_messages.length >= 5
-                    ? lacunaDiamondDialog()
-                    : imDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="imDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -213,7 +186,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.reactions.length }}/{{ guild.premium.available ? '200' : '50' }}</div>
+            <div>{{ guild.modules.reactions.length }}/200</div>
           </q-item-section>
         </q-item>
 
@@ -234,14 +207,7 @@
             </div>
 
             <div v-if="guild.modules.reactions.length < 200" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.reactions.length >= 50 ? lacunaDiamondDialog() : irDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="irDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -255,7 +221,6 @@ import UtilityAutoThread from 'components/dialogs/UtilityAutoThread.vue'
 import { debounce } from 'quasar'
 import { DateTime } from 'src/boot/luxon'
 import ImageEditor from 'src/components/ImageEditor.vue'
-import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import UtilityAutoReaction from 'src/components/dialogs/UtilityAutoReaction.vue'
 import UtilityInteractiveMessage from 'src/components/dialogs/UtilityInteractiveMessage.vue'
 import UtilityInteractiveReaction from 'src/components/dialogs/UtilityInteractiveReaction.vue'
@@ -272,7 +237,7 @@ export default defineComponent({
     const guild = useGuildStore()
 
     const bannerRotationIn = computed(() => {
-      const rotationThrottle = guild.premium.available ? 1000 * 60 * 2 : 1000 * 60 * 60
+      const rotationThrottle = 1000 * 60 * 2
       const lastUpdated = guild.modules.guild_image_rotation.banner.last_updated_timestamp ?? 0,
         elapsedTime = Date.now() - lastUpdated
 
@@ -294,11 +259,6 @@ export default defineComponent({
   },
 
   methods: {
-    lacunaDiamondDialog() {
-      this.$q.dialog({
-        component: LacunaDiamond
-      })
-    },
     autoThreadDialog(config) {
       this.$q
         .dialog({

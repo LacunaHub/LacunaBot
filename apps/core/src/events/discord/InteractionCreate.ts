@@ -280,7 +280,7 @@ const handlerAutocomplete = debounce(async (self: Lacuna, interaction: Autocompl
 
     if (interaction.commandName === 'store') {
         const items = server.modules.economy.store.items
-            .slice(0, server.premium.available ? 200 : 50)
+            .slice(0, 200)
             .filter(i => [i.id, i.name, i.description].some(ii => ii.includes(option?.value)))
 
         await interaction.respond(

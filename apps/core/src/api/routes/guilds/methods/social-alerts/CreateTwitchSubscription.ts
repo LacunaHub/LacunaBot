@@ -16,7 +16,6 @@ export default async function createTwitchSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server
     const data = ctx.request.body
 
-    if (server.modules.subscriptions.twitch.length >= 1 && !server.premium.available) ctx.throw(402, new APIError(3007))
     if (server.modules.subscriptions.twitch.length >= 10) ctx.throw(406, new APIError(3008))
     if (server.modules.subscriptions.twitch.some(v => v.broadcaster_id === data.broadcaster.id))
         ctx.throw(409, new APIError(2005))

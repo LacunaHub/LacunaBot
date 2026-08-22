@@ -4,9 +4,7 @@ import Router from '@koa/router'
 import { authenticate, checkPermissions, identify } from '../../utility/Authentication.js'
 import getGuild from './methods/GetGuild.js'
 import getLeaders from './methods/GetLeaders.js'
-import getLogs from './methods/GetLogs.js'
 import getSettings from './methods/GetSettings.js'
-import transferDiamond from './methods/TransferDiamond.js'
 import updateSettings from './methods/UpdateSettings.js'
 import createAutoVoice from './methods/auto-voices/CreateAutoVoice.js'
 import deleteAutoVoice from './methods/auto-voices/DeleteAutoVoice.js'
@@ -37,7 +35,6 @@ const router = new Router({ prefix: '/guilds' })
 
 router.get('/:guildId', createRateLimit(5), findServer, getGuild)
 router.get('/:guildId/leaders', createRateLimit(10), identify, findServer, getLeaders)
-router.get('/:guildId/logs', createRateLimit(5), authenticate, checkPermissions, findServer, getLogs)
 router.get('/:guildId/settings', createRateLimit(10), authenticate, checkPermissions, findServer, getSettings)
 router.post('/:guildId/settings', createRateLimit(10), authenticate, checkPermissions, findServer, updateSettings)
 
@@ -237,14 +234,6 @@ router.patch(
     checkPermissions,
     findServer,
     updateYouTubeSubscription
-)
-
-router.post(
-    '/:guildId/transfer-diamond/:targetGuildId',
-    createRateLimit(1, 1000 * 60 * 5),
-    authenticate,
-    findServer,
-    transferDiamond
 )
 
 export default router

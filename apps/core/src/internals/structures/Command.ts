@@ -114,17 +114,6 @@ export class Command {
             return false
         }
 
-        if (this.premium && !server.premium.available) {
-            await interaction.reply({
-                content: `${this.self.staticEmojis.Cross} | ${t('Commands.CommandExecutionOnlyWithPremium', {
-                    username: `**${interaction.user.username}**`
-                })}`,
-                ephemeral: true
-            })
-
-            return false
-        }
-
         const throttled = await this.throttled(server, interaction)
 
         if (throttled.status) {

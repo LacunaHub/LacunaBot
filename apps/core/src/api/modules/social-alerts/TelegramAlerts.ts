@@ -68,7 +68,7 @@ export async function handleTelegramWebhook(data: TelegramWebhookData) {
 
     for (const guild of subscribedGuilds) {
         const guildSubscription = guild.modules.subscriptions.telegram
-            .slice(0, guild.premium.available ? 10 : 1)
+            .slice(0, 10)
             .find(i => i.channel_id === data.channel_id)
 
         if (!guildSubscription) continue

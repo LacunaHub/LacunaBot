@@ -1,9 +1,7 @@
 import { authenticate } from '@/api/utility/Authentication.js'
 import { createRateLimit } from '@/api/utility/Utils.js'
 import Router from '@koa/router'
-import handleGitHubWebhook, { verifyGitHubSignature } from './methods/HandleGitHubWebhook.js'
 import handleTelegramWebhook from './methods/HandleTelegramWebhook.js'
-import handleTopGGWebhook from './methods/HandleTopGGWebhook.js'
 import handleTwitchWebhook, { authenticateEventSub } from './methods/HandleTwitchWebhook.js'
 import handleYouTubeWebhook from './methods/HandleYouTubeWebhook.js'
 import handleYouTubeWebhookChallenge from './methods/HandleYouTubeWebhookChallenge.js'
@@ -20,7 +18,5 @@ router.post('/subscriptions/twitch/eventsub-webhook', authenticateEventSub, hand
 router.get('/subscriptions/youtube/hubbub-webhook', handleYouTubeWebhookChallenge)
 router.post('/subscriptions/youtube/hubbub-webhook', handleYouTubeWebhook)
 router.post('/subscriptions/telegram/webhook', handleTelegramWebhook)
-router.post('/webhooks/github', verifyGitHubSignature, handleGitHubWebhook)
-router.post('/webhooks/top-gg', handleTopGGWebhook)
 
 export default router

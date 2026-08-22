@@ -1,6 +1,5 @@
 import APIError from '@/api/utility/APIError.js'
 import { type SearchRepositoriesResponse, searchRepositories } from '@/api/utility/GitHubAPI.js'
-import database from '@/database/index.js'
 import { type Context } from 'vm'
 
 export default async function getPlugins(ctx: Context) {
@@ -12,16 +11,13 @@ export default async function getPlugins(ctx: Context) {
         ctx.throw(500, new APIError(1, (err as any).message))
     }
 
-    const verifiedRepos = await database.getVerifiedPluginRepositories()
-
     ctx.status = 200
     ctx.body = {
         total: repoSearch.total_count,
         data: repoSearch.items
             .filter(v => {
                 if (v.archived) return false
-                if (verifiedRepos.some(vv => vv.fullName === v.full_name)) return true
-                return false
+                return true
             })
             .map(v => {
                 return {

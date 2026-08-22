@@ -222,7 +222,7 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
 
         if (hasSendMessageAction) {
             try {
-                const replacer = new Replacer(server.premium.available, { guild, member: target }),
+                const replacer = new Replacer({ guild, member: target }),
                     messagePayload = await replacer.replaceTemplateMessage(warningPenalty.send_message!)
 
                 if (channel?.isSendable()) await channel.send(messagePayload)
@@ -253,7 +253,7 @@ async function warnUser(self: Lacuna, server: ServerDocument, guild: Guild, opti
     }
 
     if (server.moderation.case_log.types.WARN_ADD.active) {
-        const replacer = new Replacer(server.premium.available, { guild, member: target }),
+        const replacer = new Replacer({ guild, member: target }),
             messagePayload = await replacer.replaceTemplateMessage(
                 server.moderation.case_log.types.WARN_ADD.dm_message,
                 {

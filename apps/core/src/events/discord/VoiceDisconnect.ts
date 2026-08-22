@@ -39,7 +39,7 @@ const handler = async (self: Lacuna, state: VoiceState, channel: VoiceChannel) =
     await economyVoiceUnassign(self, server, state, channel)
 
     const voiceRolesBound = server.modules.voice_manager.voice_roles
-        .slice(0, server.premium.available ? 20 : 2)
+        .slice(0, 20)
         .filter(r => !r.bound_channels_id.length || r.bound_channels_id.includes(channel.id))
 
     if (voiceRolesBound.length) {

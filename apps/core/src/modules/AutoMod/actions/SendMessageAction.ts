@@ -1,5 +1,4 @@
 import {
-    type ServerDocument,
     type ServerModerationAutoModAntiCaps,
     type ServerModerationAutoModLinksFilter,
     type ServerModerationAutoModSwearFilter,
@@ -10,15 +9,11 @@ import Replacer from '@/modules/Replacer.js'
 import { type GuildTextBasedChannel, Message } from 'discord.js'
 import { type ActionOptions } from './BanAction.js'
 
-export default async function sendMessageAction(
-    self: Lacuna,
-    server: ServerDocument,
-    options: SendMessageActionOptions
-) {
+export default async function sendMessageAction(self: Lacuna, options: SendMessageActionOptions) {
     const { config, message } = options
 
     try {
-        const replacer = new Replacer(server.premium.available, {
+        const replacer = new Replacer({
                 message: message,
                 guild: message.guild,
                 member: message.member!

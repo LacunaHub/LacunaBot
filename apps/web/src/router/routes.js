@@ -9,8 +9,7 @@ const routes = [
                 component: () => import('src/pages/DashboardPage.vue'),
                 children: [
                     { path: '', component: () => import('src/pages/DashboardPageProfile.vue') },
-                    { path: 'guilds', component: () => import('src/pages/DashboardPageGuilds.vue') },
-                    { path: 'bills', component: () => import('src/pages/DashboardPageBills.vue') }
+                    { path: 'guilds', component: () => import('src/pages/DashboardPageGuilds.vue') }
                 ]
             },
             {
@@ -26,10 +25,6 @@ const routes = [
                 component: () => import('src/pages/GuildPageSettings.vue'),
                 children: [
                     { path: '', component: () => import('src/pages/GuildPageSettingsGeneral.vue') },
-                    {
-                        path: 'diamond',
-                        component: () => import('src/pages/GuildPageSettingsLacunaDiamond.vue')
-                    },
                     { path: 'commands', component: () => import('src/pages/GuildPageSettingsCommands.vue') },
                     { path: 'moderation', component: () => import('src/pages/GuildPageSettingsModeration.vue') },
                     { path: 'activities', component: () => import('src/pages/GuildPageSettingsActivities.vue') },
@@ -46,10 +41,6 @@ const routes = [
             {
                 path: 'state',
                 component: () => import('src/pages/StatePage.vue')
-            },
-            {
-                path: 'diamond',
-                component: () => import('src/pages/DiamondPage.vue')
             }
         ],
         beforeEnter: to => {

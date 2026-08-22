@@ -61,23 +61,6 @@
             </div>
 
             <div v-if="$q.screen.gt.sm" class="col-12">
-              <!-- <q-list class="bg-dark-1 overflow-hidden rounded-borders q-my-md">
-                <q-item
-                  clickable
-                  :to="`/guilds/${guildId}/settings/web-page`"
-                  active-class="nav-item--active"
-                  style="display: none"
-                >
-                  <q-item-section class="text-subtitle1">Web page</q-item-section>
-
-                  <q-item-section avatar side>
-                    <q-avatar square size="24px">
-                      <img src="~assets/lacuna-sphere.svg" />
-                    </q-avatar>
-                  </q-item-section>
-                </q-item>
-              </q-list> -->
-
               <q-list v-for="(group, i) in navItems" :key="i" class="bg-dark-1 overflow-hidden rounded-borders q-mb-md">
                 <q-item
                   v-for="item in group"
@@ -132,11 +115,8 @@
 <script setup>
 import { useMeta, useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
-import ChangeLog from 'src/components/dialogs/ChangeLog.vue'
-import UserSurvey from 'src/components/dialogs/UserSurvey.vue'
 import RollFailSound from 'src/sounds/bg3-roll-fail.mp3'
 import RollPassSound from 'src/sounds/bg3-roll-pass.mp3'
-import { useReleaseNotesCache } from 'src/stores/ReleaseNotesCache'
 import { useGuildStore } from 'src/stores/guild'
 import { decimalToHex, handleAxiosError, objectDifferences, sleep } from 'src/utils/Utils'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -150,8 +130,7 @@ const $q = useQuasar(),
   { t } = useI18n()
 
 const pageLoading = ref(true)
-const guild = useGuildStore(),
-  releaseNoteCache = useReleaseNotesCache()
+const guild = useGuildStore()
 const guildId = route.params.guild_id,
   documentTitle = ref(null)
 const freezedGuild = ref({}),
@@ -161,56 +140,21 @@ const freezedGuild = ref({}),
   updateSettingsAnimated = ref(false)
 
 const guildClone = computed(() => {
-    return JSON.parse(
-      JSON.stringify({
-        _id: guild._id,
-        prefix: guild.prefix,
-        locale: guild.locale,
-        bot_experts: guild.bot_experts,
-        commands: guild.commands,
-        moderation: guild.moderation,
-        modules: guild.modules,
-        web_page: guild.web_page
-      })
-    )
-  }),
-  hasDiamondDiscount = ref(false)
-
-const downloadLogs = async () => {
-  try {
-    const { data } = await interfaces.guilds.getLogs(guild._id)
-    const href = URL.createObjectURL(new Blob([data.data])),
-      link = document.createElement('a')
-
-    link.href = href
-    link.setAttribute('download', data.file_name)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(href)
-    event('guild_download_logs', { event_category: 'utility' })
-  } catch (err) {
-    const error = handleAxiosError(err)
-
-    $q.notify({
-      message: error.message,
-      classes: 'q-notification-custom',
-      color: 'black',
-      icon: 'error',
-      iconColor: 'negative',
-      timeout: 5000
+  return JSON.parse(
+    JSON.stringify({
+      _id: guild._id,
+      prefix: guild.prefix,
+      locale: guild.locale,
+      bot_experts: guild.bot_experts,
+      commands: guild.commands,
+      moderation: guild.moderation,
+      modules: guild.modules,
+      web_page: guild.web_page
     })
-  }
-}
+  )
+})
 
 const navItems = [
-  [
-    {
-      name: 'Lacuna Diamond',
-      path: 'settings/diamond',
-      icon: 'r_diamond'
-    }
-  ],
   [
     { name: t('Pages.GuildPage.NavNames.General'), path: 'settings', icon: 'r_category' },
     {
@@ -241,10 +185,7 @@ const navItems = [
     },
     { name: t('Pages.GuildPage.NavNames.Utility'), path: 'settings/utility', icon: 'r_layers' }
   ],
-  [
-    { name: t('Pages.GuildPage.NavNames.ChangeLog'), path: 'settings/audit-log', icon: 'r_history' },
-    { name: t('Pages.GuildPage.NavNames.DownloadLogs'), action: downloadLogs, icon: 'r_text_snippet' }
-  ]
+  [{ name: t('Pages.GuildPage.NavNames.ChangeLog'), path: 'settings/audit-log', icon: 'r_history' }]
 ]
 
 const rollPass = new Audio(RollPassSound),
@@ -421,41 +362,6 @@ onMounted(async () => {
   )
 
   pageLoading.value = !getSettingsSuccess
-
-  const changeLogViewedVersion = $q.localStorage.getItem('change-log-viewed-version')
-
-  if (changeLogViewedVersion !== releaseNoteCache.current.version) {
-    $q.dialog({
-      component: ChangeLog
-    })
-  }
-
-  if (guild.change_log.length >= 10) {
-    const userSurveyRemindAfter = $q.localStorage.getItem('user-survey-remind-after')
-
-    if (!userSurveyRemindAfter || (typeof userSurveyRemindAfter === 'number' && Date.now() > userSurveyRemindAfter)) {
-      $q.dialog({
-        component: UserSurvey
-      })
-        .onOk(() => {
-          const now = new Date()
-
-          $q.notify({
-            message: t('Components.UserSurvey.SurveySubmitted'),
-            classes: 'q-notification-custom',
-            color: 'black',
-            icon: 'done',
-            iconColor: 'positive',
-            timeout: 5000
-          })
-          $q.localStorage.set('user-survey-remind-after', now.setMonth(now.getMonth() + 6))
-        })
-        .onCancel(() => {
-          event('user_survey_remind_later', { event_category: 'utility' })
-          $q.localStorage.set('user-survey-remind-after', Date.now() + 1000 * 60 * 60 * 24 * 7)
-        })
-    }
-  }
 })
 
 onBeforeRouteLeave((to, from, next) => {

@@ -31,13 +31,10 @@
             {{ $t('Components.Header.Guilds') }}
           </span>
         </router-link>
-        <router-link to="/state" class="header-link text-uppercase q-mr-lg" active-class="header-link--active">
+        <router-link to="/state" class="header-link text-uppercase" active-class="header-link--active">
           <span>
             {{ $t('Components.Header.State') }}
           </span>
-        </router-link>
-        <router-link to="/diamond" class="header-link text-uppercase text-primary" active-class="header-link--active">
-          <span>Diamond</span>
         </router-link>
       </div>
 
@@ -162,13 +159,6 @@
             {{ $t('Pages.DashboardPage.MyGuilds') }}
           </q-item-section>
         </q-item>
-        <q-item clickable active-class="nav-item--active" exact to="/@me/bills">
-          <q-item-section>
-            {{ $t('Pages.DashboardPage.Bills') }}
-          </q-item-section>
-        </q-item>
-
-        <q-separator class="q-my-sm" inset></q-separator>
 
         <q-expansion-item :label="$t('Pages.GuildPage.GeneralSettings.Locale')">
           <q-list class="q-ml-md border-left">
@@ -200,12 +190,6 @@
             </q-item>
           </q-list>
         </q-expansion-item>
-
-        <q-item clickable @click="changeLogDialog">
-          <q-item-section>
-            {{ $t('Components.Header.ReleaseNotes') }}
-          </q-item-section>
-        </q-item>
 
         <q-separator class="q-my-sm" inset></q-separator>
 
@@ -252,12 +236,6 @@
             <q-item-label>
               {{ $t('Components.Header.State') }}
             </q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-item clickable to="/diamond" active-class="nav-item--active">
-          <q-item-section>
-            <q-item-label>Diamond</q-item-label>
           </q-item-section>
         </q-item>
 
@@ -317,7 +295,6 @@ import { languages } from '@lacunahub/lacuna-locale'
 import { useUserStore } from 'src/stores/user'
 import { getLocale } from 'src/utils/Utils'
 import { defineComponent } from 'vue'
-import ChangeLog from './dialogs/ChangeLog.vue'
 
 export default defineComponent({
   name: 'MainHeader',
@@ -351,11 +328,6 @@ export default defineComponent({
       this.$numbro.setLanguage(locale, 'en')
       this.currentLocale = locale
       localStorage.setItem('locale', locale)
-    },
-    changeLogDialog() {
-      this.$q.dialog({
-        component: ChangeLog
-      })
     }
   }
 })

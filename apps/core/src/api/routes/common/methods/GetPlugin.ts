@@ -33,18 +33,11 @@ export default async function getPlugin(ctx: Context) {
         repoTreeFiles: TreeFile[] = [],
         repoFileContents: FileContent[] = []
 
-    const verifiedRepos = await database.getVerifiedPluginRepositories(),
-        verifiedRepo = verifiedRepos.find(v => v.fullName === repoFullName)
-
-    if (!verifiedRepo) {
-        ctx.throw(404, new APIError(1009))
-    }
-
     try {
         repo = await getRepository(repoFullName)
         const repoTree = await getRepositoryTree({
             fullName: repo.full_name,
-            treeSHA: verifiedRepo.sha || repo.default_branch,
+            treeSHA: repo.default_branch,
             recursive: true
         })
         repoTreeFiles = repoTree.tree.filter(v => v.type === 'blob' && ['.json', '.md'].some(vv => v.path.endsWith(vv)))

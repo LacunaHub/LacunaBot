@@ -1,6 +1,5 @@
 import auth from './auth/index.js'
 import authorize from './authorize/index.js'
-import billing from './billing/index.js'
 import common from './common/index.js'
 import guilds from './guilds/index.js'
 import state from './state/index.js'
@@ -12,7 +11,6 @@ export default {
     authorize,
     common,
     guilds,
-    billing,
     state,
     users,
     webhooks

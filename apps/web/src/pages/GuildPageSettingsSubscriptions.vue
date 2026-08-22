@@ -8,7 +8,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.subscriptions.telegram.length }}/{{ guild.premium.available ? '10' : '1' }}</div>
+            <div>{{ guild.modules.subscriptions.telegram.length }}/10</div>
           </q-item-section>
         </q-item>
 
@@ -29,16 +29,7 @@
             </div>
 
             <div v-if="guild.modules.subscriptions.telegram.length < 10" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.subscriptions.telegram.length >= 1
-                    ? lacunaDiamondDialog()
-                    : telegramDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="telegramDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -53,7 +44,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.subscriptions.twitch.length }}/{{ guild.premium.available ? '10' : '1' }}</div>
+            <div>{{ guild.modules.subscriptions.twitch.length }}/10</div>
           </q-item-section>
         </q-item>
 
@@ -82,16 +73,7 @@
             </div>
 
             <div v-if="guild.modules.subscriptions.twitch.length < 10" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.subscriptions.twitch.length >= 1
-                    ? lacunaDiamondDialog()
-                    : twitchDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="twitchDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -106,7 +88,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.subscriptions.youtube.length }}/{{ guild.premium.available ? '10' : '1' }}</div>
+            <div>{{ guild.modules.subscriptions.youtube.length }}/10</div>
           </q-item-section>
         </q-item>
 
@@ -135,16 +117,7 @@
             </div>
 
             <div v-if="guild.modules.subscriptions.youtube.length < 10" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.subscriptions.youtube.length >= 1
-                    ? lacunaDiamondDialog()
-                    : youtubeDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="youtubeDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -154,7 +127,6 @@
 </template>
 
 <script>
-import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import SubscriptionsTelegram from 'src/components/dialogs/SubscriptionsTelegram.vue'
 import SubscriptionsTwitch from 'src/components/dialogs/SubscriptionsTwitch.vue'
 import SubscriptionsYouTube from 'src/components/dialogs/SubscriptionsYouTube.vue'
@@ -173,11 +145,6 @@ export default defineComponent({
   },
 
   methods: {
-    lacunaDiamondDialog() {
-      this.$q.dialog({
-        component: LacunaDiamond
-      })
-    },
     telegramDialog(config) {
       this.$q
         .dialog({

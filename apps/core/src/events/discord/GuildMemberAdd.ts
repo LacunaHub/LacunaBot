@@ -1,6 +1,5 @@
 import { ServerModulesAutomationTriggers } from '@/database/schemas/Servers.js'
 import Lacuna from '@/internals/Lacuna.js'
-import { activePatronRoleId, supportServerId } from '@/internals/utility/Constants.js'
 import AutoMod from '@/modules/AutoMod/index.js'
 import Automation from '@/modules/custom-behavior/Automation.js'
 import Greeting from '@/modules/Greeting.js'
@@ -26,14 +25,6 @@ const handler = async (self: Lacuna, member: GuildMember) => {
     await AutoMod.moderateNewbies(self, server, member)
     await GuildImageRotation.rotateBanner(self, server, member.guild, member)
     await Logs.GuildMemberAdd(self, server, member)
-
-    if (member.guild.id === supportServerId) {
-        const user = await self.db.users.findOne({ _id: member.id }).lean()
-
-        if (user?.premium?.available) {
-            await member.roles.add(activePatronRoleId)
-        }
-    }
 
     return true
 }

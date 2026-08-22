@@ -11,7 +11,7 @@ export default async function (
     user: User
 ): Promise<boolean> {
     if (server.moderation.logs.types.user_update.active) {
-        if (isRateLimited(server._id, server.premium.available)) return false
+        if (isRateLimited(server._id)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 

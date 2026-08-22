@@ -138,7 +138,7 @@ export async function sendLog(
     return null
 }
 
-export function isRateLimited(guildId: string, premium: boolean) {
+export function isRateLimited(guildId: string) {
     let rateLimit: { resetAfter: number; remaining: number } | undefined = rateLimitCache.get(guildId)
 
     if (rateLimit && Date.now() > rateLimit.resetAfter) {
@@ -147,9 +147,7 @@ export function isRateLimited(guildId: string, premium: boolean) {
     }
 
     if (!rateLimit) {
-        rateLimit = rateLimitCache
-            .set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: premium ? 19 : 4 })
-            .get(guildId)
+        rateLimit = rateLimitCache.set(guildId, { resetAfter: Date.now() + 1000 * 60, remaining: 19 }).get(guildId)
 
         return false
     }

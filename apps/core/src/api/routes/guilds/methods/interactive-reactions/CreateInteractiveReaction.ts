@@ -13,7 +13,6 @@ export default async function createInteractiveReaction(ctx: Context) {
     const elementId = data.id ?? `L${generateSimpleId(9)}`,
         emoji = parseEmoji(data.emoji as any)!
 
-    if (server.modules.reactions.length >= 50 && !server.premium.available) ctx.throw(402, new APIError(3005))
     if (server.modules.reactions.length >= 200) ctx.throw(406, new APIError(3006))
     if (server.modules.reactions.some(v => v.message.id === data.message!.id && v.emoji.name === emoji.name))
         ctx.throw(409, new APIError(4007))

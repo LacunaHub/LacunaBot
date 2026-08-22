@@ -11,8 +11,6 @@ export default async function createTelegramSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server
     const data = ctx.request.body
 
-    if (server.modules.subscriptions.telegram.length >= 1 && !server.premium.available)
-        ctx.throw(402, new APIError(3007))
     if (server.modules.subscriptions.telegram.length >= 10) ctx.throw(406, new APIError(3008))
     if (server.modules.subscriptions.telegram.some(v => v.channel_id === data.channel.id))
         ctx.throw(409, new APIError(2005))
