@@ -138,3 +138,11 @@ curl -I https://your-domain.com
 - [Telegram](https://t.me/roviusistaken)
 - [GitHub Discussions](https://github.com/orgs/LacunaHub/discussions)
 - [Crowdin](https://crowdin.com/project/lacuna)
+
+# License
+
+Copyright (C) 2020 Daniyar Kurmangaliyev
+
+This project is licensed under the GNU Affero General Public License v3.0 or later - see the [LICENSE](LICENSE) file for details.
+
+This license applies to this software and its entire commit history, including versions predating the addition of the LICENSE file, effective as of August 22, 2026.
