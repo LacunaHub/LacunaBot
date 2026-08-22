@@ -18,7 +18,7 @@ import Replacer from './Replacer.js'
 
 async function handleButtonClick(self: Lacuna, server: ServerDocument, interaction: ButtonInteraction<'cached'>) {
     const interactiveMessage = server.modules.interactive_messages
-        .slice(0, server.premium.available ? 50 : 5)
+        .slice(0, 50)
         .find(i => i.id === interaction.message.id)
 
     if (interactiveMessage && interaction.member instanceof GuildMember) {
@@ -34,7 +34,7 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
         }
 
         if (button?.options?.includes('EPHEMERAL_REPLY') && button?.ephemeral_reply) {
-            const replacer = new Replacer(server.premium.available, {
+            const replacer = new Replacer({
                     guild: interaction.guild,
                     member: interaction.member
                 }),
@@ -150,7 +150,7 @@ async function handleButtonClick(self: Lacuna, server: ServerDocument, interacti
 
 async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, interaction: AnySelectMenuInteraction) {
     const interactiveMessage = server.modules.interactive_messages
-        .slice(0, server.premium.available ? 50 : 5)
+        .slice(0, 50)
         .find(i => i.id === interaction.message.id)
 
     if (interactiveMessage && interaction.member instanceof GuildMember) {
@@ -169,7 +169,7 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
         }
 
         if (option?.options?.includes('EPHEMERAL_REPLY') && option.ephemeral_reply) {
-            const replacer = new Replacer(server.premium.available, {
+            const replacer = new Replacer({
                     guild: interaction.guild!,
                     member: interaction.member
                 }),
@@ -285,9 +285,7 @@ async function handleSelectMenuSelection(self: Lacuna, server: ServerDocument, i
 
 async function handleReactionAdd(self: Lacuna, server: ServerDocument, reaction: MessageReaction, user: User) {
     const message = reaction.message
-    const interactiveMessage = server.modules.interactive_messages
-        .slice(0, server.premium.available ? 50 : 5)
-        .find(i => i.id === message.id)
+    const interactiveMessage = server.modules.interactive_messages.slice(0, 50).find(i => i.id === message.id)
 
     if (interactiveMessage) {
         const member = await message.guild!.members.fetch(user.id)
@@ -377,9 +375,7 @@ async function handleReactionAdd(self: Lacuna, server: ServerDocument, reaction:
 
 async function handleReactionRemove(self: Lacuna, server: ServerDocument, reaction: MessageReaction, user: User) {
     const message = reaction.message
-    const interactiveMessage = server.modules.interactive_messages
-        .slice(0, server.premium.available ? 50 : 5)
-        .find(i => i.id === message.id)
+    const interactiveMessage = server.modules.interactive_messages.slice(0, 50).find(i => i.id === message.id)
 
     if (interactiveMessage) {
         const member = await message.guild!.members.fetch(user.id)

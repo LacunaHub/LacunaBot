@@ -30,7 +30,6 @@
           <q-tabs class="bg-dark-1 rounded-b-lg" no-caps align="left">
             <q-route-tab to="/@me" :label="$t('Pages.DashboardPage.Profile')"></q-route-tab>
             <q-route-tab to="/@me/guilds" :label="$t('Pages.DashboardPage.MyGuilds')"></q-route-tab>
-            <q-route-tab to="/@me/bills" :label="$t('Pages.DashboardPage.Bills')"></q-route-tab>
           </q-tabs>
         </div>
       </div>

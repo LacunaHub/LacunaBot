@@ -48,7 +48,7 @@ export default async function moderateCaps(self: Lacuna, server: ServerDocument,
                 executor: message.guild.members.me!,
                 reason
             })
-        if (optSendMessage) await sendMessageAction(self, server, { config, message })
+        if (optSendMessage) await sendMessageAction(self, { config, message })
         if (optDeleteMessage) await deleteMessageAction(self, { message })
 
         self.emit('moduleExecution', {

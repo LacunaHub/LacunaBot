@@ -49,7 +49,6 @@ export default async function updateSettings(ctx: Context) {
     ctx.body = {
         _id: server._id,
         locale: server.locale,
-        premium: server.premium,
         bot_experts: server.bot_experts,
         commands: server.commands,
         moderation: {
@@ -1238,7 +1237,7 @@ export async function setSettings(
                                         ? oldImage.background?.url
                                         : newImage.background?.url
                             },
-                            elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
+                            elements: elements.slice(0, 50).map(v => {
                                 const element: Record<string, any> = {
                                     type: v.type,
                                     posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
@@ -1403,7 +1402,7 @@ export async function setSettings(
                                         ? oldImage.background?.url
                                         : newImage.background?.url
                             },
-                            elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
+                            elements: elements.slice(0, 50).map(v => {
                                 const element: Record<string, any> = {
                                     type: v.type,
                                     posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,
@@ -1614,7 +1613,7 @@ export async function setSettings(
                                             ? oldImage.background?.url
                                             : newImage.background?.url
                                 },
-                                elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
+                                elements: elements.slice(0, 50).map(v => {
                                     const element: Record<string, any> = {
                                         type: v.type,
                                         posX:
@@ -1713,24 +1712,21 @@ export async function setSettings(
 
             if (
                 typeof data.modules.music.allow_radio_playback === 'boolean' &&
-                data.modules.music.allow_radio_playback !== guild.modules.music.allow_radio_playback &&
-                guild.premium.available
+                data.modules.music.allow_radio_playback !== guild.modules.music.allow_radio_playback
             ) {
                 updateData['modules.music.allow_radio_playback'] = data.modules.music.allow_radio_playback
             }
 
             if (
                 typeof data.modules.music.queue_max_length === 'number' &&
-                data.modules.music.queue_max_length !== guild.modules.music.queue_max_length &&
-                guild.premium.available
+                data.modules.music.queue_max_length !== guild.modules.music.queue_max_length
             ) {
                 updateData['modules.music.queue_max_length'] = data.modules.music.queue_max_length
             }
 
             if (
                 typeof data.modules.music.default_volume === 'number' &&
-                data.modules.music.default_volume !== guild.modules.music.default_volume &&
-                guild.premium.available
+                data.modules.music.default_volume !== guild.modules.music.default_volume
             ) {
                 updateData['modules.music.default_volume'] = data.modules.music.default_volume
             }
@@ -1808,7 +1804,7 @@ export async function setSettings(
             Array.isArray(data.modules.autoreactions) &&
             JSON.stringify(data.modules.autoreactions) !== JSON.stringify(guild.modules.autoreactions)
         ) {
-            for (const reaction of data.modules.autoreactions.slice(0, guild.premium.available ? 20 : 2)) {
+            for (const reaction of data.modules.autoreactions.slice(0, 20)) {
                 reaction.reactions
                     .filter(emoji => !emoji.name)
                     .forEach(emoji => {
@@ -1927,7 +1923,7 @@ export async function setSettings(
                                         ? oldImage.background?.url
                                         : newImage.background?.url
                             },
-                            elements: elements.slice(0, guild.premium.available ? 50 : 5).map(v => {
+                            elements: elements.slice(0, 50).map(v => {
                                 const element: Record<string, any> = {
                                     type: v.type,
                                     posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,

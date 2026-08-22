@@ -145,8 +145,8 @@ export default class Automation {
     private async executeScripts(ctx: IVM.Context, scripts: ServerModulesCustomCommandScript[]) {
         scripts = scripts
             .filter(v => v.language === ServerModulesCustomCommandScriptLanguages.JavaScript && v.code.length > 0)
-            .slice(0, this.server.premium.available ? 10 : 1)
-        const maxScriptLength = this.server.premium.available ? 20_000 : 2000
+            .slice(0, 20)
+        const maxScriptLength = 20_000
 
         for (const script of scripts) {
             try {
@@ -170,7 +170,7 @@ export default class Automation {
         options: AutomationOptions = {}
     ) {
         const ams = server.modules.automation
-            .slice(0, server.premium.available ? 20 : 2)
+            .slice(0, 20)
             .filter(i => i.trigger === event && !i.options.includes(ServerModulesAutomationOptions.Disabled))
 
         if (ams.length) {

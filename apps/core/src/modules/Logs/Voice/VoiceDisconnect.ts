@@ -10,9 +10,7 @@ export default async function (
     channel: VoiceChannel
 ): Promise<boolean> {
     if (server.moderation.logs.types.voice_disconnect.active) {
-        const rateLimited = isRateLimited(server._id, server.premium.available)
-
-        if (rateLimited) return false
+        if (isRateLimited(server._id)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 

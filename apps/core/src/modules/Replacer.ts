@@ -149,11 +149,9 @@ const availableCodeSnippets = {
 }
 
 export default class Replacer {
-    public premium: boolean
     public shapers: IReplacerShapers
 
-    constructor(premium: boolean, shapers: IReplacerShapers = {}) {
-        this.premium = premium
+    constructor(shapers: IReplacerShapers = {}) {
         this.shapers = shapers
     }
 
@@ -538,7 +536,7 @@ export default class Replacer {
                 },
                 elements: tImage?.elements?.length
                     ? await Promise.all(
-                          tImage.elements.slice(0, this.premium ? 50 : 5).map(async v => {
+                          tImage.elements.slice(0, 50).map(async v => {
                               const element = {
                                   type: v.type,
                                   posX: typeof v.posX === 'number' && v.posX <= 9999 && v.posX >= -9999 ? v.posX : 0,

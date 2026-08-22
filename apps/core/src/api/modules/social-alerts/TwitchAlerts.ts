@@ -195,7 +195,7 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
 
         for (const guild of subscribedGuilds) {
             const guildSubscription = guild.modules.subscriptions.twitch
-                .slice(0, guild.premium.available ? 10 : 1)
+                .slice(0, 10)
                 .find(i => i.broadcaster_id === data.event.broadcaster_user_id)
 
             if (!guildSubscription) continue
@@ -253,7 +253,7 @@ export async function handleIncomingWebhook(messageId: string, data: TwitchIncom
             let notificationText = guildSubscription.notification_message.content || null
 
             if (notificationText) {
-                const replacer = new Replacer(guild.premium.available)
+                const replacer = new Replacer()
                 notificationText = await replacer.replace(notificationText, {
                     subs: { name: stream.user_name, title: stream.title, link: stream.url }
                 })

@@ -9,7 +9,7 @@ async function sendMessage(self: Lacuna, server: ServerDocument, member: GuildMe
 
     if (server.modules.farewell.active) {
         try {
-            const replacer = new Replacer(server.premium.available, { guild: member.guild, member: member }),
+            const replacer = new Replacer({ guild: member.guild, member: member }),
                 messagePayload = await replacer.replaceTemplateMessage(server.modules.farewell.message)
 
             if (server.modules.farewell.format === 'CHANNEL') {

@@ -7,8 +7,6 @@ export default async function createAutoVoice(ctx: Context) {
     const server: ServerDocument = ctx.state.server
     const data: ServerModulesVoiceManagerAutoVoice = ctx.request.body
 
-    if (server.modules.voice_manager.autovoices.length >= 2 && !server.premium.available)
-        ctx.throw(402, new APIError(3013))
     if (server.modules.voice_manager.autovoices.length >= 20) ctx.throw(406, new APIError(3014))
     if (server.modules.voice_manager.autovoices.some(v => v.channel_id === data.channel_id))
         ctx.throw(409, new APIError(2008))

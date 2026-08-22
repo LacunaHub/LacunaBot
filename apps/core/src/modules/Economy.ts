@@ -67,7 +67,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 
                 return i.options.includes('ECONOMY_TEXT')
             })
-            .slice(0, server.premium.available ? 10 : 1)
+            .slice(0, 10)
 
         const multiplier = multipliers.reduce((x, y) => x * (Number(y.economy_text_multiplier) / 100), 100) / 100
         let amount: number =
@@ -120,8 +120,7 @@ export async function messageCreate(self: Lacuna, server: ServerDocument, messag
 }
 
 export async function voiceAssign(self: Lacuna, server: ServerDocument, state: VoiceState) {
-    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.premium.available)
-        return false
+    if (!server.modules.economy.active || !server.modules.economy.currencies.length) return false
 
     const members = state.channel!.members.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
@@ -179,8 +178,7 @@ export async function voiceUnassign(
     state: VoiceState,
     channel: BaseGuildVoiceChannel
 ) {
-    if (!server.modules.economy.active || !server.modules.economy.currencies.length || !server.premium.available)
-        return false
+    if (!server.modules.economy.active || !server.modules.economy.currencies.length) return false
 
     const members = channel?.members?.filter(m => !m.user.bot && !m.voice.serverMute && !m.voice.serverDeaf)
 
@@ -229,7 +227,7 @@ export async function voiceCount(
 
                     return i.options.includes('ECONOMY_VOICE')
                 })
-                .slice(0, server.premium.available ? 10 : 1)
+                .slice(0, 10)
 
             const multiplier = multipliers.reduce((x, y) => x * (Number(y.economy_voice_multiplier) / 100), 100) / 100
             let amount: number =

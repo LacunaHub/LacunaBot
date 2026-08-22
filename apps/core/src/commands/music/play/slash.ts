@@ -150,7 +150,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
             selfDeafen: true,
             volume: server.modules.music.default_volume
         }),
-        queueMaxLength = server.premium.available ? server.modules.music.queue_max_length : 15
+        queueMaxLength = server.modules.music.queue_max_length
 
     let message!: Message
 
@@ -212,19 +212,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     ]
 
     if (search.loadType === 'playlist') {
-        if (!server.premium.available) {
-            await interaction.editReply({
-                content: `${self.staticEmojis.Cross} | ${t(
-                    'Commands.PlayCommand.Texts.PlaylistsAvailableOnlyForPremium',
-                    {
-                        username: `**${interaction.member.displayName}**`
-                    }
-                )}`
-            })
-
-            return false
-        }
-
         if (player.queue.length >= queueMaxLength && queueMaxLength) {
             await interaction.editReply({
                 content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.QueueLimitReached', {
@@ -291,19 +278,6 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
                 content: `${self.staticEmojis.Cross} | ${t('Commands.PlayCommand.Texts.QueueLimitReached', {
                     username: `**${interaction.member.displayName}**`
                 })}`
-            })
-
-            return false
-        }
-
-        if (track.info.isStream && !server.premium.available) {
-            await interaction.editReply({
-                content: `${self.staticEmojis.Cross} | ${t(
-                    'Commands.PlayCommand.Texts.StreamPlaybackAvailableOnlyForPremium',
-                    {
-                        username: `**${interaction.member.displayName}**`
-                    }
-                )}`
             })
 
             return false

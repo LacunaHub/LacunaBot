@@ -5,10 +5,7 @@ export async function searchRepositories(options: SearchRepositoriesOptions): Pr
 
     try {
         const response = await fetch(`https://api.github.com/search/repositories?${searchParams}`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
-            }
+            method: 'GET'
         })
 
         if (response.ok) {
@@ -28,10 +25,7 @@ export async function getRepository(fullName: string): Promise<Repository> {
 
     try {
         const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
-            }
+            method: 'GET'
         })
 
         if (response.ok) {
@@ -54,10 +48,7 @@ export async function getRepositoryTree(options: GetRepositoryTreeOptions): Prom
         const response = await fetch(
             `https://api.github.com/repos/${owner}/${repo}/git/trees/${options.treeSHA}?recursive=${!!options.recursive}`,
             {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
-                }
+                method: 'GET'
             }
         )
 
@@ -76,10 +67,7 @@ export async function getFileContent(file: TreeFile): Promise<FileContent> {
 
     try {
         const response = await fetch(file.url, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${process.env.LCN_GITHUB_PERSONAL_ACCESS_TOKEN}`
-            }
+            method: 'GET'
         })
 
         if (response.ok) {

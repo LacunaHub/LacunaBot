@@ -15,15 +15,7 @@ import {
 import Replacer from './Replacer.js'
 
 export async function createTemporaryVoice(self: Lacuna, server: ServerDocument, state: VoiceState) {
-    const autoVoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === state.channelId),
-        autoVoiceIndex = server.modules.voice_manager.autovoices.findIndex(i => i.channel_id === state.channelId)
-
-    if (autoVoiceIndex >= 2 && !server.premium.available) {
-        await state.disconnect('TempVoices: No premium')
-
-        return false
-    }
-
+    const autoVoice = server.modules.voice_manager.autovoices.find(i => i.channel_id === state.channelId)
     const hasPermissions = state.guild.members.me!.permissions.has(self.PermissionFlags.ManageChannels)
 
     if (autoVoice && hasPermissions) {
@@ -65,7 +57,7 @@ export async function createTemporaryVoice(self: Lacuna, server: ServerDocument,
             return false
         }
 
-        const replacer = new Replacer(server.premium.available, {
+        const replacer = new Replacer({
             guild: state.guild,
             member: state.member!
         })

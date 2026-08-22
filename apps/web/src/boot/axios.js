@@ -44,12 +44,6 @@ const interfaces = {
         getPlugin(pluginId, guildId) {
             return api.get(`/common/plugins/${pluginId}?guildId=${guildId}`, configureRequest())
         },
-        getProducts() {
-            return api.get('/common/products')
-        },
-        getReleaseNotes() {
-            return api.get('/common/release-notes')
-        },
         getState() {
             return api.get('/common/state')
         },
@@ -63,9 +57,6 @@ const interfaces = {
         },
         getLeaders(gid, query) {
             return api.get(`/guilds/${gid}/leaders?${query}`, configureRequest())
-        },
-        getLogs(guildId) {
-            return api.get(`/guilds/${guildId}/logs`, configureRequest())
         },
         getSettings(gid) {
             return api.get(`/guilds/${gid}/settings`, configureRequest())
@@ -148,18 +139,6 @@ const interfaces = {
         },
         updateYouTubeSubscription(guildId, channelId, data) {
             return api.patch(`/guilds/${guildId}/settings/social-alerts/youtube/${channelId}`, data, configureRequest())
-        },
-        transferDiamond(guildId, toGuildId) {
-            return api.post(`/guilds/${guildId}/transfer-diamond/${toGuildId}`, null, configureRequest())
-        }
-    },
-
-    billing: {
-        createPayment(options) {
-            return api.post(`/billing/payments`, options.data, configureRequest())
-        },
-        createSubscription(options) {
-            return api.post(`/billing/subscriptions`, options.data, configureRequest())
         }
     },
 
@@ -182,17 +161,8 @@ const interfaces = {
         getMe() {
             return api.get('/users/@me', configureRequest())
         },
-        getBills() {
-            return api.get('/users/@me/bills', configureRequest())
-        },
         getActivities() {
             return api.get('/users/@me/activities', configureRequest())
-        },
-        getDiamondGuilds() {
-            return api.get('/users/@me/diamond-guilds', configureRequest())
-        },
-        getPatrons() {
-            return api.get('/users/patrons', configureRequest())
         }
     }
 }

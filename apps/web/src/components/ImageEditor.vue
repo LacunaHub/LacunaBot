@@ -663,15 +663,7 @@
               <div class="col-12">
                 <q-btn-dropdown class="full-width dashed-border" icon="add" flat :disable="disable">
                   <q-list>
-                    <q-item
-                      clickable
-                      v-close-popup
-                      @click="
-                        !guild.premium.available && image.elements.length >= 5
-                          ? lacunaDiamondDialog()
-                          : addElement('IMAGE')
-                      "
-                    >
+                    <q-item clickable v-close-popup @click="addElement('IMAGE')">
                       <q-item-section>
                         <q-item-label>
                           {{ $t('Components.ImageEditor.Image') }}
@@ -679,15 +671,7 @@
                       </q-item-section>
                     </q-item>
 
-                    <q-item
-                      clickable
-                      v-close-popup
-                      @click="
-                        !guild.premium.available && image.elements.length >= 5
-                          ? lacunaDiamondDialog()
-                          : addElement('TEXT')
-                      "
-                    >
+                    <q-item clickable v-close-popup @click="addElement('TEXT')">
                       <q-item-section>
                         <q-item-label>
                           {{ $t('Components.ImageEditor.Text') }}
@@ -716,13 +700,11 @@
 <script setup>
 import { useElementSize } from '@vueuse/core'
 import { useQuasar } from 'quasar'
-import { useGuildStore } from 'src/stores/guild'
 import { allowedImageHosts, localeStringsMap } from 'src/utils/Constants'
 import { suid } from 'src/utils/Utils'
 import { computed, ref, watch } from 'vue'
 import VueDragResize from 'vue-drag-resize/src/components/vue-drag-resize.vue'
 import { useI18n } from 'vue-i18n'
-import LacunaDiamond from './dialogs/LacunaDiamond.vue'
 
 const props = defineProps({
   image: {
@@ -754,7 +736,6 @@ const emit = defineEmits(['change'])
 
 const $q = useQuasar()
 const { t } = useI18n()
-const guild = useGuildStore()
 
 const imageCanvasParent = ref(null),
   { width: icpWidth } = useElementSize(imageCanvasParent)
@@ -878,7 +859,6 @@ const setElementPosition = (from, upward = true) => {
 }
 
 const addElement = type => {
-    if (image.value.elements.length >= 5 && !guild.premium.available) return null
     if (image.value.elements.length >= 50) return null
 
     const element = {
@@ -974,12 +954,6 @@ const addElement = type => {
 
 const removeElement = index => {
   image.value.elements.splice(index, 1)
-}
-
-const lacunaDiamondDialog = () => {
-  return $q.dialog({
-    component: LacunaDiamond
-  })
 }
 
 watch(

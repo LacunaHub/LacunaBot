@@ -1,6 +1,5 @@
 import { type Snowflake } from '@/utility/SnowflakeUtils.js'
 import mongoose from 'mongoose'
-import { DiamondProductTier } from '../index.js'
 
 export default mongoose.model<PaymentDocument>(
     'payments',
@@ -60,7 +59,7 @@ export type PaymentAmountCurrencyCode = 'USD' | 'RUB' | 'KZT' | 'TKN'
 export interface PaymentMetadata {
     provider_external_id: string | null
     comment: string | null
-    tier: DiamondProductTier
+    tier: number
     product_id: PaymentMetadataProduct
     ref_id: string
 }

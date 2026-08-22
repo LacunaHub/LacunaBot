@@ -4,11 +4,6 @@ const schema = new mongoose.Schema<ServerDocument, ServerModel>(
     {
         _id: { type: String },
         locale: { type: String, default: 'en' },
-        premium: {
-            available: { type: Boolean, default: false },
-            expires_at: { type: Number, default: null },
-            charged_via: { type: String, default: null }
-        },
         blocked: { type: Boolean, default: false },
         bot_experts: { type: [String], default: [] },
         commands: {
@@ -857,7 +852,6 @@ export default mongoose.model<ServerDocument, ServerModel>('servers', schema)
 export interface ServerDocument extends mongoose.Document {
     _id: string
     locale: ServerLocale
-    premium: ServerPremium
     blocked: boolean
     bot_experts: string[]
     commands: ServerCommands
@@ -878,12 +872,6 @@ export interface ServerModel extends mongoose.Model<ServerDocument> {
 }
 
 export type ServerLocale = 'en' | 'ru'
-
-export interface ServerPremium {
-    available: boolean
-    expires_at: number | null
-    charged_via: string | null
-}
 
 export interface ServerCommands {
     configuration: ServerCommandsCommandConfig[]

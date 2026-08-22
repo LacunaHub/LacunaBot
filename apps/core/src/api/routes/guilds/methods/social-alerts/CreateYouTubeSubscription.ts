@@ -11,8 +11,6 @@ export default async function createYouTubeSubscription(ctx: Context) {
     const server: ServerDocument = ctx.state.server
     const data = ctx.request.body
 
-    if (server.modules.subscriptions.youtube.length >= 1 && !server.premium.available)
-        ctx.throw(402, new APIError(3007))
     if (server.modules.subscriptions.youtube.length >= 10) ctx.throw(406, new APIError(3008))
     if (server.modules.subscriptions.youtube.some(v => v.channel_id === data.channel.id))
         ctx.throw(409, new APIError(2005))

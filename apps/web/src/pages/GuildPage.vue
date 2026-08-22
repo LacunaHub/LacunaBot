@@ -67,28 +67,6 @@
               </div>
             </div>
           </div>
-
-          <div class="col-2 q-pr-lg">
-            <!-- <div class="row">
-              <div class="col-12">
-                <q-btn class="full-width" color="primary" push no-caps>Join</q-btn>
-              </div>
-
-              <div class="col-12 text-center cursor-help q-mt-md">
-                <q-rating :model-value="4.7" size="sm" :max="5" readonly color="primary" icon-half="star_half">
-                </q-rating>
-                <q-tooltip
-                  class="bg-black text-body2"
-                  anchor="top middle"
-                  self="bottom middle"
-                  transition-show=""
-                  transition-hide=""
-                >
-                  4.7 из 5
-                </q-tooltip>
-              </div>
-            </div> -->
-          </div>
         </div>
       </div>
 

@@ -16,9 +16,4 @@
 
 <script setup>
 import MainHeader from 'src/components/MainHeader.vue'
-import { useReleaseNotesCache } from 'src/stores/ReleaseNotesCache'
-
-const releaseNotes = useReleaseNotesCache()
-
-releaseNotes.getReleaseNotes()
 </script>

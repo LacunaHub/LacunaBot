@@ -6,7 +6,7 @@ import { isRateLimited, type LogEventData, sendLog } from '../index.js'
 
 export default async function (self: Lacuna, server: ServerDocument, data: GuildBanAddLogEventData): Promise<boolean> {
     if (!server.moderation.logs.types.guild_ban_add.active) return false
-    if (isRateLimited(server._id, server.premium.available)) return false
+    if (isRateLimited(server._id)) return false
 
     const t = self.i18n.t.bind(null, server.locale)
     const { guild, auditLogEntry } = data,

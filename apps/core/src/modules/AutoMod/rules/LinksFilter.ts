@@ -117,7 +117,7 @@ async function doActions(self: Lacuna, server: ServerDocument, message: Message<
             executor: message.guild.members.me!,
             reason
         })
-    if (optSendMessage) await sendMessageAction(self, server, { config, message })
+    if (optSendMessage) await sendMessageAction(self, { config, message })
     if (optDeleteMessage) await deleteMessageAction(self, { message })
 
     self.emit('moduleExecution', {

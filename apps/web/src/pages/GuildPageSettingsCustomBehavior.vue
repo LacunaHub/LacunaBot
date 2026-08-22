@@ -10,7 +10,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.custom_commands.length }}/{{ guild.premium.available ? '100' : '25' }}</div>
+            <div>{{ guild.modules.custom_commands.length }}/100</div>
           </q-item-section>
         </q-item>
 
@@ -29,16 +29,7 @@
             </div>
 
             <div v-if="guild.modules.custom_commands.length < 100" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.custom_commands.length >= 25
-                    ? lacunaDiamondDialog()
-                    : customCommandDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="customCommandDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -55,7 +46,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.automation.length }}/{{ guild.premium.available ? '20' : '2' }}</div>
+            <div>{{ guild.modules.automation.length }}/20</div>
           </q-item-section>
         </q-item>
 
@@ -74,16 +65,7 @@
             </div>
 
             <div v-if="guild.modules.automation.length < 20" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.automation.length >= 5
-                    ? lacunaDiamondDialog()
-                    : automationDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="automationDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -203,7 +185,6 @@ import { useQuasar } from 'quasar'
 import { interfaces } from 'src/boot/axios'
 import AutomationTask from 'src/components/dialogs/AutomationTask.vue'
 import CustomCommand from 'src/components/dialogs/CustomCommand.vue'
-import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import LacunaPlugin from 'src/components/dialogs/LacunaPlugin.vue'
 import { usePluginCacheStore } from 'src/stores/PluginCache'
 import { useGuildStore } from 'src/stores/guild'
@@ -224,12 +205,6 @@ const pluginCache = usePluginCacheStore(),
           [v.full_name, v.description].some(vv => vv.toLowerCase().includes(searchText.value.toLowerCase()))
         )
   })
-
-const lacunaDiamondDialog = () => {
-  return $q.dialog({
-    component: LacunaDiamond
-  })
-}
 
 const customCommandDialog = componentProps => {
   return $q
@@ -288,10 +263,6 @@ const automationDialog = componentProps => {
 const resolvePluginPuzzle = puzzle => {
   const isAutomation = puzzle.type === 'AUTOMATION'
   const data = isAutomation ? validateAutomation(puzzle.data, true) : validateCustomCommand(puzzle.data, true)
-
-  if (!guild.premium.available) {
-    data.scripts = [{ name: null, language: 1, code: data.scripts.map(v => v.code).join('\n') }]
-  }
 
   const component = isAutomation ? AutomationTask : CustomCommand,
     componentProps = {

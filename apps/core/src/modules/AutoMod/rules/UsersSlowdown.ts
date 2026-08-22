@@ -55,7 +55,7 @@ export default async function slowdownUsers(self: Lacuna, server: ServerDocument
             await muteAction(self, server, { config, guild: message.guild, target, reason })
         if (optWarn)
             await warnUserAction(self, server, message, { target, executor: message.guild.members.me!, reason })
-        if (optSendMessage) await sendMessageAction(self, server, { config, message })
+        if (optSendMessage) await sendMessageAction(self, { config, message })
         if (optDeleteMessage) await deleteMessageAction(self, { message })
 
         clearTimeout(slowed.timeout)

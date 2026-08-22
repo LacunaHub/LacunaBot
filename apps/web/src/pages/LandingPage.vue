@@ -247,12 +247,6 @@
 
         <template #control>
           <q-carousel-control position="top-right" :offset="[18, 18]" class="text-white rounded-borders">
-            <q-btn flat to="/diamond" style="background: rgba(0, 0, 0, 0.3)">
-              <q-avatar square size="24px">
-                <img src="~assets/lacuna-diamond.svg" />
-              </q-avatar>
-            </q-btn>
-
             <q-btn
               v-if="user.access_token"
               class="q-ml-sm"

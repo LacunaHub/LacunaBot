@@ -418,7 +418,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.levels.awards.length }}/{{ guild.premium.available ? '200' : '50' }}</div>
+            <div>{{ guild.modules.levels.awards.length }}/200</div>
           </q-item-section>
         </q-item>
 
@@ -442,11 +442,7 @@
 
             <div v-if="guild.modules.levels.awards.length < 200" class="col-12">
               <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.levels.awards.length >= 50
-                    ? lacunaDiamondDialog()
-                    : awardDialog()
-                "
+                @click="awardDialog()"
                 :disable="!guild.modules.levels.active && !guild.modules.levels.voice"
                 class="full-width dashed-border"
                 icon="add"
@@ -540,7 +536,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.economy.store.items.length }}/{{ guild.premium.available ? '200' : '50' }}</div>
+            <div>{{ guild.modules.economy.store.items.length }}/200</div>
           </q-item-section>
         </q-item>
 
@@ -558,11 +554,7 @@
 
             <div v-if="guild.modules.economy.store.items.length < 200" class="col-12">
               <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.economy.store.items.length >= 50
-                    ? lacunaDiamondDialog()
-                    : storeItemDialog()
-                "
+                @click="storeItemDialog()"
                 :disable="!guild.modules.economy.active"
                 class="full-width dashed-border"
                 icon="add"
@@ -678,7 +670,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.activities.multipliers.length }}/{{ guild.premium.available ? '10' : '1' }}</div>
+            <div>{{ guild.modules.activities.multipliers.length }}/10</div>
           </q-item-section>
         </q-item>
 
@@ -699,16 +691,7 @@
             </div>
 
             <div v-if="guild.modules.activities.multipliers.length < 10" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.activities.multipliers.length >= 1
-                    ? lacunaDiamondDialog()
-                    : multiplierDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="multiplierDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -723,7 +706,6 @@ import ActivitiesEconomyCurrency from 'src/components/dialogs/ActivitiesEconomyC
 import ActivitiesEconomyStoreItem from 'src/components/dialogs/ActivitiesEconomyStoreItem.vue'
 import ActivitiesLevelAward from 'src/components/dialogs/ActivitiesLevelAward.vue'
 import ActivitiesMultiplier from 'src/components/dialogs/ActivitiesMultiplier.vue'
-import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import { useGuildStore } from 'src/stores/guild'
 import { localeStringsMap } from 'src/utils/Constants'
 import { defineComponent } from 'vue'
@@ -742,11 +724,6 @@ export default defineComponent({
   },
 
   methods: {
-    lacunaDiamondDialog() {
-      this.$q.dialog({
-        component: LacunaDiamond
-      })
-    },
     awardDialog(config) {
       this.$q
         .dialog({

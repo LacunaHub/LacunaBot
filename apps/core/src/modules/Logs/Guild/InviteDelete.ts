@@ -5,7 +5,7 @@ import { isRateLimited, sendLog } from '../index.js'
 
 export default async function (self: Lacuna, server: ServerDocument, invite: Invite): Promise<boolean> {
     if (server.moderation.logs.types.invite_delete.active) {
-        if (isRateLimited(server._id, server.premium.available)) return false
+        if (isRateLimited(server._id)) return false
 
         const t = self.i18n.t.bind(null, server.locale)
 

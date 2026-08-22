@@ -144,7 +144,6 @@
 
               <q-input
                 v-model.number="currency.income.voice_channels.range_per_minute[0]"
-                :disable="!guild.premium.available"
                 class="q-pt-sm"
                 type="number"
                 filled
@@ -158,7 +157,6 @@
             <div class="col-12 col-md-6 self-end">
               <q-input
                 v-model.number="currency.income.voice_channels.range_per_minute[1]"
-                :disable="!guild.premium.available"
                 class="q-pt-sm"
                 type="number"
                 filled

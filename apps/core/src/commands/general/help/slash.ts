@@ -23,7 +23,7 @@ export default async (self: Lacuna, server: ServerDocument, interaction: ChatInp
     const commandName: string = interaction.options?.getString('command')!
 
     if (!commandName) {
-        const commands = self.commands.filter(c => !c.private && !(c.premium && !server.premium.available))
+        const commands = self.commands.filter(c => !c.private)
         const customCommand = server.modules.custom_commands.map(i => i.command)
 
         const categories = {

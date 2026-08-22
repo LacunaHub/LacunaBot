@@ -55,13 +55,9 @@
 
         <div class="q-pa-md">
           <q-list class="bg-dark-2 overflow-hidden rounded-borders">
-            <q-item tag="label" :disable="!guild.premium.available">
+            <q-item tag="label">
               <q-item-section side>
-                <q-checkbox
-                  v-model="guild.modules.music.allow_radio_playback"
-                  :disable="!guild.premium.available"
-                  dense
-                ></q-checkbox>
+                <q-checkbox v-model="guild.modules.music.allow_radio_playback" dense></q-checkbox>
               </q-item-section>
 
               <q-item-section>
@@ -100,7 +96,6 @@
 
               <q-slider
                 v-model.number="guild.modules.music.queue_max_length"
-                :disable="!guild.premium.available"
                 class="q-pt-sm q-px-sm"
                 :min="0"
                 :max="250"
@@ -115,7 +110,6 @@
 
               <q-slider
                 v-model.number="guild.modules.music.default_volume"
-                :disable="!guild.premium.available"
                 class="q-pt-sm q-px-sm"
                 :min="1"
                 :max="100"
@@ -244,7 +238,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.voice_manager.voice_roles.length }}/{{ guild.premium.available ? '20' : '2' }}</div>
+            <div>{{ guild.modules.voice_manager.voice_roles.length }}/20</div>
           </q-item-section>
         </q-item>
 
@@ -267,16 +261,7 @@
             </div>
 
             <div v-if="guild.modules.voice_manager.voice_roles.length < 20" class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.voice_manager.voice_roles.length >= 2
-                    ? lacunaDiamondDialog()
-                    : voiceRoleDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="voiceRoleDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -296,7 +281,7 @@
           </q-item-section>
 
           <q-item-section side top>
-            <div>{{ guild.modules.voice_manager.autovoices.length }}/{{ guild.premium.available ? '20' : '2' }}</div>
+            <div>{{ guild.modules.voice_manager.autovoices.length }}/20</div>
           </q-item-section>
         </q-item>
 
@@ -319,16 +304,7 @@
             </div>
 
             <div class="col-12">
-              <q-btn
-                @click="
-                  !guild.premium.available && guild.modules.voice_manager.autovoices.length >= 2
-                    ? lacunaDiamondDialog()
-                    : autoVoiceDialog()
-                "
-                class="full-width dashed-border"
-                icon="add"
-                flat
-              ></q-btn>
+              <q-btn @click="autoVoiceDialog()" class="full-width dashed-border" icon="add" flat></q-btn>
             </div>
           </div>
         </q-card-section>
@@ -338,7 +314,6 @@
 </template>
 
 <script>
-import LacunaDiamond from 'src/components/dialogs/LacunaDiamond.vue'
 import VoiceChannelsAutoVoice from 'src/components/dialogs/VoiceChannelsAutoVoice.vue'
 import VoiceChannelsVoiceRole from 'src/components/dialogs/VoiceChannelsVoiceRole.vue'
 import { useGuildStore } from 'src/stores/guild'
@@ -375,11 +350,6 @@ export default defineComponent({
   },
 
   methods: {
-    lacunaDiamondDialog() {
-      this.$q.dialog({
-        component: LacunaDiamond
-      })
-    },
     voiceRoleDialog(config) {
       this.$q
         .dialog({

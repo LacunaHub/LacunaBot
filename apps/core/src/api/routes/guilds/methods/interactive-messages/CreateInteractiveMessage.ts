@@ -25,7 +25,6 @@ export default async function createInteractiveMessage(ctx: Context) {
     const server: ServerDocument = ctx.state.server
     const data: ServerModulesInteractiveMessage = ctx.request.body
 
-    if (server.modules.interactive_messages.length >= 5 && !server.premium.available) ctx.throw(402, new APIError(3003))
     if (server.modules.interactive_messages.length >= 50) ctx.throw(406, new APIError(3004))
     if (!data.message?.content && !data.message?.embed?.active) ctx.throw(400, new APIError(4005))
 

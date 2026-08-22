@@ -5,9 +5,7 @@ import { split } from 'unicode-default-word-boundary'
 import Replacer from './Replacer.js'
 
 export async function addAutoReactions(self: Lacuna, server: ServerDocument, message: Message) {
-    const autoReaction = server.modules.autoreactions
-        .slice(0, server.premium.available ? 20 : 2)
-        .find(i => i.channel_id === message.channel.id)
+    const autoReaction = server.modules.autoreactions.slice(0, 20).find(i => i.channel_id === message.channel.id)
 
     if (!autoReaction) return false
 
@@ -49,9 +47,7 @@ export async function addAutoReactions(self: Lacuna, server: ServerDocument, mes
 }
 
 export async function createAutoThread(self: Lacuna, server: ServerDocument, message: Message<true>) {
-    const autoThread = server.modules.autothreads
-        .slice(0, server.premium.available ? 20 : 2)
-        .find(i => i.channel_id === message.channel.id)
+    const autoThread = server.modules.autothreads.slice(0, 20).find(i => i.channel_id === message.channel.id)
 
     if (!autoThread) return false
 
@@ -68,7 +64,7 @@ export async function createAutoThread(self: Lacuna, server: ServerDocument, mes
         if (match) return false
     }
 
-    const replacer = new Replacer(server.premium.available, {
+    const replacer = new Replacer({
             guild: message.guild,
             member: message.member!,
             message: message

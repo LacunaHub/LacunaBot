@@ -59,7 +59,7 @@ export async function buySlash(
         return false
     }
 
-    const item = server.modules.economy.store.items.slice(0, server.premium.available ? 200 : 50).find(i => i.id == sku)
+    const item = server.modules.economy.store.items.slice(0, 200).find(i => i.id == sku)
 
     if (!item) {
         await interaction.reply({
@@ -97,7 +97,7 @@ export async function buySlash(
     if (result == 'SUCCESS') {
         if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
             try {
-                const replacer = new Replacer(server.premium.available, {
+                const replacer = new Replacer({
                         guild: interaction.guild,
                         member: interaction.member
                     }),
@@ -159,7 +159,7 @@ export async function itemsSlash(
     let page: number = interaction.options?.getInteger('page') ? interaction.options.getInteger('page')! - 1 : 0
     const chunks: Array<ServerModulesEconomyStoreItem[]> = chunkArray(
         server.modules.economy.store.items
-            .slice(0, server.premium.available ? 200 : 50)
+            .slice(0, 200)
             .filter(i => !i.options.includes('LIMITED_QUANTITY') || i.quantity! > 0),
         8
     )
@@ -275,9 +275,7 @@ export async function itemsSlash(
         } else {
             await i.deferUpdate()
 
-            const item = server.modules.economy.store.items
-                .slice(0, server.premium.available ? 200 : 50)
-                .find(i => i.id == value)!
+            const item = server.modules.economy.store.items.slice(0, 200).find(i => i.id == value)!
             const result = await purchaseItem(item, self, interaction.guild, interaction.member)
 
             if (result == 'INSUFFICIENT_FUNDS') {
@@ -303,7 +301,7 @@ export async function itemsSlash(
 
             if (result == 'SUCCESS') {
                 if (item.options.includes('CUSTOM_PURCHASE_REPLY')) {
-                    const replacer = new Replacer(server.premium.available, {
+                    const replacer = new Replacer({
                             guild: interaction.guild,
                             member: interaction.member
                         }),

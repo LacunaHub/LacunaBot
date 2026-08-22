@@ -75,7 +75,7 @@ async function handleAutoModTrigger(
 
         if (action.type === ServerModerationDAMERuleActionType.SendMessage) {
             try {
-                const replacer = new Replacer(server.premium.available, { guild, member: targetMember }),
+                const replacer = new Replacer({ guild, member: targetMember }),
                     messagePayload = await replacer.replaceTemplateMessage(action.metadata.message!)
 
                 if (channel.isSendable()) await channel.send(messagePayload)
